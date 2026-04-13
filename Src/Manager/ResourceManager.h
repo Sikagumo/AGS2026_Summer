@@ -13,36 +13,16 @@ public:
 	enum class SRC
 	{
 		// 画像
-		IMG_TITLE,
-		IMG_SHADOW,
-		IMG_PUSH_SPACE,
-		IMG_CONGRATULATIONS,
+		
 
 		// モデル
-		MODEL_PLAYER,
-		MODEL_RAT,
-		MODEL_ROBOT,
-		MODEL_VIEW_RANGE,
-		MODEL_GOAL_STER,
-		MODEL_PLANET_PITFALL,
-		MODEL_PLANET_SPHERE,
-		MODEL_STAGE_MAIN,
-		MODEL_SKYDOME,
+		
 
 		// 外部アニメーション
-		ANIM_PLAYER_IDLE,
-		ANIM_PLAYER_RUN,
-		ANIM_PLAYER_RUN_FAST,
-		ANIM_PLAYER_ATTACK2,
-		ANIM_PLAYER_ATTACK3,
-		ANIM_PLAYER_FALLING,
-		ANIM_PLAYER_JUMPING,
-		ANIM_PLAYER_JUMP_ATTACK,
-		ANIM_PLAYER_JUMP_HOVER,
-		ANIM_PLAYER_JUMP_RESING,
-		ANIM_PLAYER_SHOT,
-		ANIM_PLAYER_VICTORY,
-		ANIM_PLAYER_WARP,
+		
+		// エフェクト
+
+		//サウンド
 	};
 
 	// 明示的にインステンスを生成する
@@ -101,5 +81,11 @@ private:
 
 	// アニメーション読み込み
 	void SetResourceAnim(void);
+
+	// エフェクト読み込み
+	void SetResourceEffect(void);
+
+	// サウンド読み込み
+	void SetResourceSound(void);
 
 };

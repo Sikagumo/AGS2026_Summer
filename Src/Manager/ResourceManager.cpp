@@ -40,62 +40,35 @@ void ResourceManager::SetResourceImage(void)
 	Resource* res;
 	const std::string PATH_IMG = Application::PATH_IMAGE;
 
-	res = new Resource(RES_TYPE::IMG, PATH_IMG + "Title.png");
-	resourcesMap_.emplace(SRC::IMG_TITLE, res);
-
-	res = new Resource(RES_TYPE::IMG, PATH_IMG + "PushSpace.png");
-	resourcesMap_.emplace(SRC::IMG_PUSH_SPACE, res);
-
-	res = new Resource(RES_TYPE::IMG, PATH_IMG + "Shadow.png");
-	resourcesMap_.emplace(SRC::IMG_SHADOW, res);
+	
 }
 void ResourceManager::SetResourceModel(void)
 {
 	Resource* res;
 	const std::string PATH_MDL = Application::PATH_MODEL;
 
-	res = new Resource(RES_TYPE::MODEL, PATH_MDL + "Stage/MainStage/MainStage.mv1");
-	resourcesMap_.emplace(SRC::MODEL_STAGE_MAIN, res);
-
-	res = new Resource(RES_TYPE::MODEL, PATH_MDL + "Enemy/Rat/Rat.mv1");
-	resourcesMap_.emplace(SRC::MODEL_RAT, res);
-
-	res = new Resource(RES_TYPE::MODEL, PATH_MDL + "Enemy/Robot/Robot.mv1");
-	resourcesMap_.emplace(SRC::MODEL_ROBOT, res);
-
-	res = new Resource(RES_TYPE::MODEL, PATH_MDL + "Enemy/Robot/Cone.mv1");
-	resourcesMap_.emplace(SRC::MODEL_VIEW_RANGE, res);
-
-
-
-	res = new Resource(RES_TYPE::MODEL, PATH_MDL + "Player/Player.mv1");
-	resourcesMap_.emplace(SRC::MODEL_PLAYER, res);
-
-	res = new Resource(RES_TYPE::MODEL, PATH_MDL + "Stage/PitfallPlanet/PitfallPlanet.mv1");
-	resourcesMap_.emplace(SRC::MODEL_PLANET_PITFALL, res);
-
-	res = new Resource(RES_TYPE::MODEL, PATH_MDL + "Stage/SpherePlanet/SpherePlanet.mv1");
-	resourcesMap_.emplace(SRC::MODEL_PLANET_SPHERE, res);
-
-	res = new Resource(RES_TYPE::MODEL, PATH_MDL + "SkyDome/SkyDome.mv1");
-	resourcesMap_.emplace(SRC::MODEL_SKYDOME, res);
+	
 }
 void ResourceManager::SetResourceAnim(void)
 {
 	Resource* res;
 	const std::string PATH_ANIM = Application::PATH_MODEL;
 
-	res = new Resource(RES_TYPE::ANIM, PATH_ANIM + "Player/Idle.mv1");
-	resourcesMap_.emplace(SRC::ANIM_PLAYER_IDLE, res);
+	
+}
+void ResourceManager::SetResourceEffect(void)
+{
+	Resource* res;
+	const std::string PATH_EFF = Application::PATH_EFFECT;
 
-	res = new Resource(RES_TYPE::ANIM, PATH_ANIM + "Player/Run.mv1");
-	resourcesMap_.emplace(SRC::ANIM_PLAYER_RUN, res);
+	
+}
+void ResourceManager::SetResourceSound(void)
+{
+	Resource* res;
+	const std::string PATH_SND = Application::PATH_SOUND;
 
-	res = new Resource(RES_TYPE::ANIM, PATH_ANIM + "Player/FastRun.mv1");
-	resourcesMap_.emplace(SRC::ANIM_PLAYER_RUN_FAST, res);
-
-	res = new Resource(RES_TYPE::ANIM, PATH_ANIM + "Player/Jumping.mv1");
-	resourcesMap_.emplace(SRC::ANIM_PLAYER_JUMPING, res);
+	
 }
 
 void ResourceManager::Release(void)

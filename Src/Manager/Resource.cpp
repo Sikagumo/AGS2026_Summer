@@ -67,7 +67,6 @@ void Resource::Load(void)
 		break;
 
 	case Resource::TYPE::MODEL:
-	case Resource::TYPE::ANIM:
 		// モデル
 		handleId_ = MV1LoadModel(path_.c_str());
 		break;
@@ -77,6 +76,10 @@ void Resource::Load(void)
 		handleId_ = LoadEffekseerEffect(path_.c_str());
 		break;
 
+	case Resource::TYPE::SOUND:
+		// サウンド
+		handleId_ = LoadSoundMem(path_.c_str());
+		break;
 	}
 
 }
@@ -102,7 +105,6 @@ void Resource::Release(void)
 		break;
 
 	case Resource::TYPE::MODEL:
-	case Resource::TYPE::ANIM:
 	{
 		MV1DeleteModel(handleId_);
 		auto ids = duplicateModelIds_;
@@ -116,6 +118,10 @@ void Resource::Release(void)
 	case Resource::TYPE::EFFEKSEER:
 
 		DeleteEffekseerEffect(handleId_);
+		break;
+
+	case Resource::TYPE::SOUND:
+		DeleteSoundMem(handleId_);
 		break;
 
 	}

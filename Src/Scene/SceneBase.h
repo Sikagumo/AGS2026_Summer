@@ -1,6 +1,8 @@
 #pragma once
 class ResourceManager;
 class SceneManager;
+class SoundManager;
+class NetManager;
 
 class SceneBase
 {
@@ -27,10 +29,16 @@ public:
 
 protected:
 
+	int bgmHandleId_;
+
 	// リソース管理
 	ResourceManager& resMng_;
 
 	// シーン管理
 	SceneManager& sceneMng_;
+	// サウンド管理
+	SoundManager& soundMng_;
+	// ネットワーク管理
+	NetManager& netMng_;
 
 };

@@ -4,7 +4,8 @@
 #include "../Common/Fader.h"
 #include "../Scene/TitleScene.h"
 #include "../Scene/GameScene.h"
-#include "../Scene/DebugScene.h"
+#include "../Scene/MatchScene.h"
+#include "../Scene/ConnectScene.h"
 #include "./InputManager.h"
 #include "Camera.h"
 #include "ResourceManager.h"
@@ -217,6 +218,22 @@ float SceneManager::GetDeltaTime(void) const
 	//return deltaTime_;
 }
 
+float SceneManager::GetTotalGameTime(void)
+{
+	return totalGameTime_;
+}
+
+void SceneManager::SetTotalGameTime(float time)
+{
+	totalGameTime_ = time;
+}
+
+void SceneManager::ForwardGameTime(void)
+{
+	totalGameTime_ += GetDeltaTime();
+}
+
+
 Camera* SceneManager::GetCamera(void) const
 {
 	return camera_;
@@ -266,12 +283,16 @@ void SceneManager::DoChangeScene(SCENE_ID sceneId)
 	case SCENE_ID::TITLE:
 		scene_ = new TitleScene();
 		break;
+	case SCENE_ID::MATCH:
+		scene_= new MatchScene();
+		break;
+	case SCENE_ID::CONNECT:
+		scene_ = new ConnectScene();
+		break;
 	case SCENE_ID::GAME:
 		scene_ = new GameScene();
 		break;
-	case SCENE_ID::DEBUG:
-		scene_ = new DebugScene();
-		break;
+	
 	}
 
 	// äeÉVÅ[ÉìÇÃèâä˙âª

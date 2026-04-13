@@ -3,15 +3,21 @@
 #include "Manager/InputManager.h"
 #include "Manager/ResourceManager.h"
 #include "Manager/SceneManager.h"
-#include "Common/FpsController.h"
+#include "Manager/SoundManager.h"
+#include "Manager/NetManager.h"
+#include "05_FPS制御/FpsController.h"
+
 #include "Application.h"
 
 Application* Application::instance_ = nullptr;
 
 const std::string Application::PATH_IMAGE = "Data/Image/";
 const std::string Application::PATH_MODEL = "Data/Model/";
+const std::string Application::PATH_ANIM = "Data/Model/";
 const std::string Application::PATH_EFFECT = "Data/Effect/";
-const std::string Application::PATH_CSV = "Data/CSV/";
+const std::string Application::PATH_SOUND = "Data/Sound/";
+const std::string Application::PATH_CSV = "Data/Csv/";
+
 
 void Application::CreateInstance(void)
 {
@@ -31,15 +37,13 @@ void Application::Init(void)
 {
 
 	// アプリケーションの初期設定
-	SetWindowText("2416026_中川原 諒");
+	SetWindowText("光体バトル");
 
 	// ウィンドウサイズ
 	SetGraphMode(SCREEN_SIZE_X, SCREEN_SIZE_Y, 32);
-	ChangeWindowMode(true);
-
+	ChangeWindowMode(false);
 	// FPS制御初期化
 	fpsController_ = new FpsController(FRAME_RATE);
-
 	// DxLibの初期化
 	SetUseDirect3DVersion(DX_DIRECT3D_11);
 	isInitFail_ = false;
@@ -66,12 +70,15 @@ void Application::Init(void)
 	SetUseDirectInputFlag(true);
 	InputManager::CreateInstance();
 
+	// ネットワーク管理初期化
+	NetManager::CreateInstance();
+
 	// リソース管理初期化
 	ResourceManager::CreateInstance();
 
 	// シーン管理初期化
 	SceneManager::CreateInstance();
-
+	SoundManager::CreateInstance();
 }
 
 void Application::Run(void)
@@ -79,39 +86,35 @@ void Application::Run(void)
 
 	InputManager& inputManager = InputManager::GetInstance();
 	SceneManager& sceneManager = SceneManager::GetInstance();
+	NetManager& netManager = NetManager::GetInstance();
 
 	// ゲームループ
 	while (ProcessMessage() == 0 && CheckHitKey(KEY_INPUT_ESCAPE) == 0)
 	{
+		netManager.Update();
 
 		inputManager.Update();
 		sceneManager.Update();
 
 		sceneManager.Draw();
-
-		if (sceneManager.GetIsDebugMode())
-		{
-			// 平均FPS描画
-			fpsController_->Draw();
-		}
+		// 平均FPS描画
+		fpsController_->Draw();
 
 		ScreenFlip();
-
 		// 理想FPS経過待ち
 		fpsController_->Wait();
-
 	}
 
 }
 
 void Application::Destroy(void)
 {
-	// FPS制御メモリ解放
-	delete fpsController_;
 
 	InputManager::GetInstance().Destroy();
 	ResourceManager::GetInstance().Destroy();
-	
+	// ネットワーク管理破棄
+	NetManager::GetInstance().Destroy();
+
 	// シーン管理解放
 	SceneManager::GetInstance().Destroy();
 
@@ -142,8 +145,7 @@ bool Application::IsReleaseFail(void) const
 Application::Application(void)
 	:
 	isInitFail_(false),
-	isReleaseFail_(false),
-	fpsController_(nullptr)
+	isReleaseFail_(false)
 {
 }
 

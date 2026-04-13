@@ -34,4 +34,4 @@ VECTOR ColliderBase::GetRotPos(const VECTOR& localPos) const
 	// 基準座標に加えることでワールド座標へ変換
 	VECTOR localRotPos = follow_->quaRot.PosAxis(localPos);
 	return VAdd(follow_->pos, localRotPos);
-}
+}

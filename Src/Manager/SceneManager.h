@@ -23,6 +23,8 @@ public:
 	{
 		NONE,
 		TITLE,
+		MATCH,
+		CONNECT,
 		GAME,
 		DEBUG
 	};
@@ -57,6 +59,10 @@ public:
 	// デルタタイムの取得
 	float GetDeltaTime(void) const;
 
+	float GetTotalGameTime(void);
+	void SetTotalGameTime(float time);
+	void ForwardGameTime(void);
+
 	// カメラの取得
 	Camera* GetCamera(void) const;
 
@@ -87,6 +93,9 @@ private:
 	// デルタタイム
 	std::chrono::system_clock::time_point preTime_;
 	float deltaTime_;
+
+	// ゲームの総時間
+	float totalGameTime_;
 
 	bool isDebugMode_;
 

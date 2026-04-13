@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+
 class FpsController;
 
 class Application
@@ -8,12 +9,9 @@ class Application
 public:
 
 	// スクリーンサイズ
-	static constexpr int SCREEN_SIZE_X = 1280;
-	static constexpr int SCREEN_SIZE_Y = 720;
-	static constexpr int SCREEN_HALF_X = (SCREEN_SIZE_X / 2);
-	static constexpr int SCREEN_HALF_Y = (SCREEN_SIZE_Y / 2);
+	static constexpr int SCREEN_SIZE_X = 1920;
+	static constexpr int SCREEN_SIZE_Y = 1080;
 
-	// 固定FPS
 	static constexpr int FRAME_RATE = 60;
 
 	// データパス関連
@@ -21,7 +19,9 @@ public:
 	static const std::string PATH_DATA;
 	static const std::string PATH_IMAGE;
 	static const std::string PATH_MODEL;
+	static const std::string PATH_ANIM;
 	static const std::string PATH_EFFECT;
+	static const std::string PATH_SOUND;
 	static const std::string PATH_CSV;
 
 	static const std::string PATH_KEY_CONFIG;
@@ -29,10 +29,9 @@ public:
 	static const std::string PATH_KEY_CONFIG_KEYBOARD;
 	//-------------------------------------------
 
-	// 重力(メートルの値をセンチメートルに変える)
+	// 重力
 	static constexpr float GRAVITY = 9.81f * 100.0f;
 	static constexpr float GRAVITY_SCALE = 0.7f;
-
 
 	// インスタンスを明示的に生成
 	static void CreateInstance(void);
@@ -58,13 +57,12 @@ public:
 	// 重力の取得
 	float GetGravityPow(void) const { return GRAVITY * GRAVITY_SCALE; }
 
-
 private:
 
 	// 静的インスタンス
 	static Application* instance_;
 
-	// FPS制御
+	// FPSコントローラー
 	FpsController* fpsController_;
 
 	// 初期化失敗
