@@ -39,3 +39,4 @@ Win32/
 Debug/
 Release/
 Log.txt
+*.sln
