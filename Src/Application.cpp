@@ -37,11 +37,11 @@ void Application::Init(void)
 {
 
 	// アプリケーションの初期設定
-	SetWindowText("光体バトル");
+	SetWindowText("蜘蛛と布団と人形と");
 
 	// ウィンドウサイズ
 	SetGraphMode(SCREEN_SIZE_X, SCREEN_SIZE_Y, 32);
-	ChangeWindowMode(false);
+	ChangeWindowMode(true);
 	// FPS制御初期化
 	fpsController_ = new FpsController(FRAME_RATE);
 	// DxLibの初期化
@@ -109,7 +109,6 @@ void Application::Run(void)
 
 void Application::Destroy(void)
 {
-
 	InputManager::GetInstance().Destroy();
 	ResourceManager::GetInstance().Destroy();
 	// ネットワーク管理破棄

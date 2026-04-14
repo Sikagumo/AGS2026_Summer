@@ -20,7 +20,7 @@ void Stage::Draw(void)
 
 void Stage::InitLoad(void)
 {
-	transform_.SetModel(resMng_.GetHandleId(ResourceManager::SRC::MODEL_STAGE_MAIN));
+	
 }
 
 void Stage::InitTransform(void)

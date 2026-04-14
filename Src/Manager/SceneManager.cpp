@@ -127,10 +127,7 @@ void SceneManager::Update(void)
 	camera_->Update();
 
 #ifdef _DEBUG
-	if (InputManager::GetInstance().KeyIsTrgDown(KEY_INPUT_DELETE))
-	{
-		//isDebugMode_ = !isDebugMode_;
-	}
+	
 #endif
 }
 

@@ -3,6 +3,7 @@ class ResourceManager;
 class SceneManager;
 class SoundManager;
 class NetManager;
+class InputManager;
 
 class SceneBase
 {
@@ -40,5 +41,8 @@ protected:
 	SoundManager& soundMng_;
 	// ネットワーク管理
 	NetManager& netMng_;
+	//入力管理
+	InputManager& inputMng_;
+
 
 };

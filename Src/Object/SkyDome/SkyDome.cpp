@@ -14,7 +14,7 @@ SkyDome::SkyDome(const Transform& _transform):
 
 void SkyDome::InitLoad(void)
 {
-	transform_.SetModel(resMng_.GetHandleId(ResourceManager::SRC::MODEL_SKYDOME));
+	
 }
 void SkyDome::InitTransform(void)
 {

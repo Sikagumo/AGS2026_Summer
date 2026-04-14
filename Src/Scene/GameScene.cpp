@@ -28,11 +28,10 @@ void GameScene::Init(void)
 	const ColliderBase* stageCollider = stage_->GetOwnCollider(static_cast<int>(Stage::COLLIDER_TYPE::MODEL));
 
 	
-	skyDome_ = new SkyDome(player_->GetTransform());
+	
 	skyDome_->Init();
 
 	Camera* camera = sceneMng_.GetCamera();
-	camera->SetFollow(&player_->GetTransform());
 	camera->Init();
 	camera->AddHitCollider(stageCollider);
 }
@@ -41,9 +40,9 @@ void GameScene::Update(void)
 {
 
 	// ƒV[ƒ“‘JˆÚ
-	InputManager& input = InputManager::GetInstance();
-	if (input.IsTrgDown(InputManager::TYPE::SELECT_DECISION, Input::JOYPAD_NO::PAD1)
-		|| input.IsTrgDown(InputManager::TYPE::SELECT_DECISION, Input::JOYPAD_NO::PAD2))
+	
+	if (inputMng_.IsTrgDown(KEY_INPUT_SPACE) || inputMng_.IsPadBtnTrgDown(InputManager::JOYPAD_NO::PAD1, InputManager::JOYPAD_BTN::RB_BOTTOM)
+		|| inputMng_.IsPadBtnTrgDown(InputManager::JOYPAD_NO::PAD2, InputManager::JOYPAD_BTN::RB_BOTTOM))
 	{
 		sceneMng_.ChangeScene(SceneManager::SCENE_ID::TITLE);
 	}
@@ -63,7 +62,7 @@ void GameScene::Draw(void)
 
 	stage_->Draw();
 
-	
+	DrawFormatString(10, 10, 0xffffff, "Game SCENE");
 }
 
 void GameScene::Release(void)

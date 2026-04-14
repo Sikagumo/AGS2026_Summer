@@ -35,9 +35,9 @@ void TitleScene::Init(void)
 void TitleScene::Update(void)
 {
 	// ƒV[ƒ“‘JˆÚ
-	InputManager& input = InputManager::GetInstance();
-	if (input.IsTrgDown(InputManager::TYPE::SELECT_DECISION,Input::JOYPAD_NO::PAD1)
-		|| input.IsTrgDown(InputManager::TYPE::SELECT_DECISION, Input::JOYPAD_NO::PAD2))
+	
+	if (inputMng_.IsTrgDown(KEY_INPUT_SPACE) || inputMng_.IsPadBtnTrgDown(InputManager::JOYPAD_NO::PAD1, InputManager::JOYPAD_BTN::RB_BOTTOM)
+		|| inputMng_.IsPadBtnTrgDown(InputManager::JOYPAD_NO::PAD2, InputManager::JOYPAD_BTN::RB_BOTTOM))
 	{
 		sceneMng_.ChangeScene(SceneManager::SCENE_ID::MATCH);
 	}
@@ -51,7 +51,7 @@ void TitleScene::Draw(void)
 {
 	skyDome_->Draw();
 
-
+	DrawFormatString(10, 10, 0xffffff, "TITLE SCENE");
 }
 
 void TitleScene::Release(void)

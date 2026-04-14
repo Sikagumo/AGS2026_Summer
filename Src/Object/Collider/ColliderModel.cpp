@@ -126,4 +126,5 @@ MV1_COLL_RESULT_POLY ColliderModel::GetNearestHitPolyLine(const VECTOR& start, c
 	MV1CollResultPolyDimTerminate(hits);
 	
 	return hitPoly;
-}
+}
+
