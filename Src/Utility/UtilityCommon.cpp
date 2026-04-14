@@ -219,29 +219,21 @@ unsigned int UtilityCommon::SetColor(UtilityCommon::Color _color)
 }
 unsigned int UtilityCommon::SetColor(COLOR_F _color)
 {
-    if (_color.r > 1.0f || _color.g > 1.0f || _color.b > 1.0f)
-    {
-        OutputDebugString("\nà¯êîÇÃílÇ™1.0à»è„Ç…Ç»Ç¡ÇƒÇ¢Ç‹Ç∑...\n");
-    }
-
     int r, g, b;
-    r = static_cast<int>(_color.r * COLOR_RATE_MAX);
-    g = static_cast<int>(_color.g * COLOR_RATE_MAX);
-    b = static_cast<int>(_color.b * COLOR_RATE_MAX);
+    r = ((_color.r <= 1.0f) ? static_cast<int>(_color.r * COLOR_RATE_MAX) : COLOR_RATE_MAX);
+    g = ((_color.g <= 1.0f) ? static_cast<int>(_color.g * COLOR_RATE_MAX) : COLOR_RATE_MAX);
+    b = ((_color.b <= 1.0f) ? static_cast<int>(_color.b * COLOR_RATE_MAX) : COLOR_RATE_MAX);
+
     return GetColor(r, g, b);
 }
 
 unsigned int UtilityCommon::SetColor(float _red, float _green, float _blue)
 {
-    if (_red > 1.0f || _green > 1.0f || _blue > 1.0f)
-    {
-        OutputDebugString("\nêFÇÃà¯êîÇÃílÇ™1.0à»è„Ç…Ç»Ç¡ÇƒÇ¢Ç‹Ç∑...\n");
-        return GetColor(_red, _green, _blue);
-    }
     int r, g, b;
-    r = static_cast<int>(_red * COLOR_RATE_MAX);
-    g = static_cast<int>(_green * COLOR_RATE_MAX);
-    b = static_cast<int>(_blue * COLOR_RATE_MAX);
+    r = ((_red <= 1.0f)   ? static_cast<int>(_red * COLOR_RATE_MAX)   : COLOR_RATE_MAX);
+    g = ((_green <= 1.0f) ? static_cast<int>(_green * COLOR_RATE_MAX) : COLOR_RATE_MAX);
+    b = ((_blue <= 1.0f)  ? static_cast<int>(_blue * COLOR_RATE_MAX)  : COLOR_RATE_MAX);
+
     return GetColor(r, g, b);
 }
 

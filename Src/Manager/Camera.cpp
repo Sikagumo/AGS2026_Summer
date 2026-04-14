@@ -199,15 +199,15 @@ void Camera::ProcessMove(void)
 
 	if (GetJoypadNum() == 0)
 	{
-		if (ins.KeyIsNew(KEY_INPUT_W)) { moveDir = AsoUtility::DIR_F; }
-		if (ins.KeyIsNew(KEY_INPUT_S)) { moveDir = AsoUtility::DIR_B; }
-		if (ins.KeyIsNew(KEY_INPUT_A)) { moveDir = AsoUtility::DIR_L; }
-		if (ins.KeyIsNew(KEY_INPUT_D)) { moveDir = AsoUtility::DIR_R; }
+		if (ins.IsNew(InputManager::TYPE::CAMERA_MOVE_UP)) { moveDir = AsoUtility::DIR_F; }
+		if (ins.IsNew(InputManager::TYPE::CAMERA_MOVE_DOWN)) { moveDir = AsoUtility::DIR_B; }
+		if (ins.IsNew(InputManager::TYPE::CAMERA_MOVE_LEFT)) { moveDir = AsoUtility::DIR_L; }
+		if (ins.IsNew(InputManager::TYPE::CAMERA_MOVE_RIGHT)) { moveDir = AsoUtility::DIR_R; }
 	}
 	else
 	{
 		// ¶ƒXƒeƒBƒbƒN‚ÌŒX‚«
-		moveDir = ins.GetAlgKeyDirXZ(InputManager::PAD_NO::PAD1, InputManager::JOYPAD_ALGKEY::RIGHT);
+		moveDir = ins.GetDirXY_LStick(Input::JOYPAD_NO::PAD1);
 	}
 
 	// ˆÚ“®ˆ—
@@ -272,41 +272,42 @@ void Camera::SetBeforeDrawFollow(void)
 
 void Camera::RotKeyboard(bool isLimit)
 {
-
-	const auto& ins = InputManager::GetInstance();
+	auto& ins = InputManager::GetInstance();
 
 	// ƒJƒƒ‰‰ñ“]
-	if (ins.KeyIsNew(KEY_INPUT_RIGHT))
+	if (CheckHitKey(KEY_INPUT_LSHIFT) || CheckHitKey(KEY_INPUT_RSHIFT))
 	{
-		// ‰E‰ñ“]
-		angles_.y += ROT_POW_RAD;
-	}
-	if (ins.KeyIsNew(KEY_INPUT_LEFT))
-	{
-		// ¶‰ñ“]
-		angles_.y -= ROT_POW_RAD;
-	}
-
-	// ã‰ñ“]
-	if (ins.KeyIsNew(KEY_INPUT_UP))
-	{
-		angles_.x += ROT_POW_RAD;
-		if (isLimit && angles_.x > LIMIT_X_UP_RAD)
+		if (ins.IsNew(InputManager::TYPE::CAMERA_MOVE_RIGHT))
 		{
-			angles_.x = LIMIT_X_UP_RAD;
+			// ‰E‰ñ“]
+			angles_.y += ROT_POW_RAD;
+		}
+		if (ins.IsNew(InputManager::TYPE::CAMERA_MOVE_LEFT))
+		{
+			// ¶‰ñ“]
+			angles_.y -= ROT_POW_RAD;
+		}
+
+		// ã‰ñ“]
+		if (ins.IsNew(InputManager::TYPE::CAMERA_MOVE_UP))
+		{
+			angles_.x += ROT_POW_RAD;
+			if (isLimit && angles_.x > LIMIT_X_UP_RAD)
+			{
+				angles_.x = LIMIT_X_UP_RAD;
+			}
+		}
+
+		// ‰º‰ñ“]
+		if (ins.IsNew(InputManager::TYPE::CAMERA_MOVE_DOWN))
+		{
+			angles_.x -= ROT_POW_RAD;
+			if (isLimit && angles_.x < -LIMIT_X_DW_RAD)
+			{
+				angles_.x = -LIMIT_X_DW_RAD;
+			}
 		}
 	}
-
-	// ‰º‰ñ“]
-	if (ins.KeyIsNew(KEY_INPUT_DOWN))
-	{
-		angles_.x -= ROT_POW_RAD;
-		if (isLimit && angles_.x < -LIMIT_X_DW_RAD)
-		{
-			angles_.x = -LIMIT_X_DW_RAD;
-		}
-	}
-
 }
 
 void Camera::RotGamePad(bool isLimit)
@@ -315,7 +316,7 @@ void Camera::RotGamePad(bool isLimit)
 	auto& ins = InputManager::GetInstance();
 
 	// ‰EƒXƒeƒBƒbƒN‚ÌŒX‚«
-	VECTOR dir = ins.GetAlgKeyDirXZ(InputManager::PAD_NO::PAD1, InputManager::JOYPAD_ALGKEY::RIGHT);
+	VECTOR dir = ins.GetDirXY_RStick(Input::JOYPAD_NO::PAD1);
 
 	if (!AsoUtility::EqualsVZero(dir))
 	{
