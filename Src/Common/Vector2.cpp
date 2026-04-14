@@ -1,20 +1,55 @@
 #include "Vector2.h"
 
-// コンストラクタ
-Vector2::Vector2(void)
-	:
-	x(0),
-	y(0)
+
+
+Vector2 Vector2::operator=(const Vector2& vec)
 {
+	x = vec.x;
+	y = vec.y;
+	return Vector2{ vec.x, vec.y };
 }
 
-// コンストラクタ
-Vector2::Vector2(int vX, int vY)
+
+Vector2 Vector2::operator+(const Vector2& vec)const
 {
-	x = vX;
-	y = vY;
+	return Vector2{ (x + vec.x), (y + vec.y) };
 }
 
-Vector2::~Vector2(void)
+void Vector2::operator+=(const Vector2& vec)
 {
+	x += vec.x;
+	y += vec.y;
+}
+
+Vector2 Vector2::operator-(const Vector2& vec)const
+{
+	return Vector2{ (x - vec.x), (y - vec.y) };
+}
+
+void Vector2::operator-=(const Vector2& vec)
+{
+	x -= vec.x;
+	y -= vec.y;
+}
+
+Vector2 Vector2::operator*(const Vector2& vec)const
+{
+	return Vector2{ (x * vec.x), (y * vec.y) };
+}
+
+void Vector2::operator*=(const Vector2& vec)
+{
+	x *= vec.x;
+	y *= vec.y;
+}
+
+Vector2 Vector2::operator/(const Vector2& vec)const
+{
+	return Vector2{ (x / vec.x), (y / vec.y) };
+}
+
+void Vector2::operator/=(const Vector2& vec)
+{
+	x /= vec.x;
+	y /= vec.y;
 }

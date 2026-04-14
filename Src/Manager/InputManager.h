@@ -70,19 +70,19 @@ public:
 	/// @param _type 状況の種類
 	/// @param _padNo パッド番号(デフォルトはPAD1)
 	/// @returns true=[入力中], false=[未入力]
-	bool IsNew(const TYPE _type, const Input::JOYPAD_NO _padNo = Input::JOYPAD_NO::PAD1);
+	bool IsNew(const TYPE _type, const Input::JOYPAD_NO _padNo = Input::JOYPAD_NO::PAD_ALL);
 
 	/// @brief 指定した状況での各入力機器の押下判定(最初のみ)
 	/// @param _type 状況の種類
 	/// @param padNo パッド番号(デフォルトはPAD1)
 	/// @returns true=[入力中], false=[未入力]
-	bool IsTrgDown(const TYPE _type, const Input::JOYPAD_NO _padNo = Input::JOYPAD_NO::PAD1);
+	bool IsTrgDown(const TYPE _type, const Input::JOYPAD_NO _padNo = Input::JOYPAD_NO::PAD_ALL);
 
 	/// @brief 指定した状況での各入力機器の離した判定
 	/// @param _type 状況の種類
 	/// @param _padNo パッド番号(デフォルトはPAD1)
 	/// @returns true=[離したタイミング], false=[まだ押下中]
-	bool IsTrgUp(const TYPE _type, const Input::JOYPAD_NO _padNo = Input::JOYPAD_NO::PAD1);
+	bool IsTrgUp(const TYPE _type, const Input::JOYPAD_NO _padNo = Input::JOYPAD_NO::PAD_ALL);
 
 	/// @brief マウス位置を設定
 	void SetMousePos(const Vector2& _pos);

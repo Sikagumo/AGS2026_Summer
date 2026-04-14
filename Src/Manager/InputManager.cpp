@@ -92,6 +92,17 @@ void InputManager::Destroy(void)
 
 bool InputManager::IsNew(const TYPE type, const Input::JOYPAD_NO padNo)
 {
+	if (padNo == Input::JOYPAD_NO::PAD_ALL)
+	{
+		/* パッド全判定時、いずれかが入力時 true */
+		bool isInput = false;
+		isInput = ((!isInput) ? IsNew(type, Input::JOYPAD_NO::PAD1) : isInput);
+		isInput = ((!isInput) ? IsNew(type, Input::JOYPAD_NO::PAD2) : isInput);
+		isInput = ((!isInput) ? IsNew(type, Input::JOYPAD_NO::PAD3) : isInput);
+		isInput = ((!isInput) ? IsNew(type, Input::JOYPAD_NO::PAD4) : isInput);
+		return isInput;
+	}
+
 	for (auto& func : funcNewMap_[type])
 	{
 		if (func(type, padNo))
@@ -104,6 +115,17 @@ bool InputManager::IsNew(const TYPE type, const Input::JOYPAD_NO padNo)
 
 bool InputManager::IsTrgDown(const TYPE type, const Input::JOYPAD_NO padNo)
 {
+	if (padNo == Input::JOYPAD_NO::PAD_ALL)
+	{
+		/* パッド全判定時、いずれかが入力時 true */
+		bool isInput = false;
+		isInput = ((!isInput) ? IsTrgDown(type, Input::JOYPAD_NO::PAD1) : isInput);
+		isInput = ((!isInput) ? IsTrgDown(type, Input::JOYPAD_NO::PAD2) : isInput);
+		isInput = ((!isInput) ? IsTrgDown(type, Input::JOYPAD_NO::PAD3) : isInput);
+		isInput = ((!isInput) ? IsTrgDown(type, Input::JOYPAD_NO::PAD4) : isInput);
+		return isInput;
+	}
+
 	for (auto& func : funcTrgDownMap_[type])
 	{
 		if (func(type, padNo))
@@ -116,6 +138,16 @@ bool InputManager::IsTrgDown(const TYPE type, const Input::JOYPAD_NO padNo)
 
 bool InputManager::IsTrgUp(const TYPE type, const Input::JOYPAD_NO padNo)
 {
+	if (padNo == Input::JOYPAD_NO::PAD_ALL)
+	{
+		/* パッド全判定時、いずれかが入力時 true */
+		bool isInput = false;
+		isInput = ((!isInput) ? IsTrgUp(type, Input::JOYPAD_NO::PAD1) : isInput);
+		isInput = ((!isInput) ? IsTrgUp(type, Input::JOYPAD_NO::PAD2) : isInput);
+		isInput = ((!isInput) ? IsTrgUp(type, Input::JOYPAD_NO::PAD3) : isInput);
+		isInput = ((!isInput) ? IsTrgUp(type, Input::JOYPAD_NO::PAD4) : isInput);
+		return isInput;
+	}
 	for (auto& func : funcTrgUpMap_[type])
 	{
 		if (func(type, padNo))
@@ -147,22 +179,37 @@ Vector2 InputManager::GetMouseMove(void) const
 
 Vector2 InputManager::GetKnockLStickSize(Input::JOYPAD_NO _num) const
 {
+	Vector2 ret = Vector2();
+
+	// 指定のコントローラ未割当時かパッド全判定時、ゼロを返す
+	if (GetJoypadNum() <= static_cast<int>(_num)
+		|| _num == Input::JOYPAD_NO::PAD_ALL) { return ret; }
+
 	auto padInfo = input_->GetJPadInputState(_num);
 
-	return Vector2(padInfo.AKeyLX, padInfo.AKeyLY);
+	ret = Vector2(padInfo.AKeyLX, padInfo.AKeyLY);
+	return ret;
 }
 Vector2 InputManager::GetKnockRStickSize(Input::JOYPAD_NO _num) const
 {
+	Vector2 ret = Vector2();
+
+	// 指定のコントローラ未割当時かパッド全判定時、ゼロを返す
+	if (GetJoypadNum() <= static_cast<int>(_num)
+		|| _num == Input::JOYPAD_NO::PAD_ALL) { return ret; }
+
 	auto padInfo = input_->GetJPadInputState(_num);
-	return Vector2(padInfo.AKeyRX, padInfo.AKeyRY);
+	ret = Vector2(padInfo.AKeyRX, padInfo.AKeyRY);
+	return ret;
 }
 
 VECTOR InputManager::GetDirXY_LStick(Input::JOYPAD_NO _num, float _threshold) const
 {
 	VECTOR ret = {};
 
-	// 指定のコントローラ未割当時、ゼロを返す
-	if (GetJoypadNum() <= static_cast<int>(_num)) { return ret; }
+	// 指定のコントローラ未割当時かパッド全判定時、ゼロを返す
+	if (GetJoypadNum() <= static_cast<int>(_num)
+		|| _num == Input::JOYPAD_NO::PAD_ALL) { return ret; }
 
 
 	auto padInfo = input_->GetJPadInputState(_num);
@@ -191,8 +238,9 @@ VECTOR InputManager::GetDirXY_RStick(Input::JOYPAD_NO _num, float _threshold) co
 {
 	VECTOR ret = {};
 
-	// 指定のコントローラ未割当時、ゼロを返す
-	if (GetJoypadNum() <= static_cast<int>(_num)) { return ret; }
+	// 指定のコントローラ未割当時かパッド全判定時、ゼロを返す
+	if (GetJoypadNum() <= static_cast<int>(_num)
+		|| _num == Input::JOYPAD_NO::PAD_ALL) { return ret; }
 
 
 	auto padInfo = input_->GetJPadInputState(_num);

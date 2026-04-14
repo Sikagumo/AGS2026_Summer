@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Src\Manager\Input.cpp" />
     <ClCompile Include="Src\Scene\ConnectScene.cpp" />
     <ClCompile Include="Src\Common\InputTextArea.cpp" />
     <ClCompile Include="Src\Scene\MatchScene.cpp" />
@@ -61,8 +62,10 @@
     <ClCompile Include="Src\Scene\TitleScene.cpp" />
     <ClCompile Include="Src\Utility\AsoUtility.cpp" />
     <ClCompile Include="Src\Utility\MatrixUtility.cpp" />
+    <ClCompile Include="Src\Utility\UtilityCommon.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Src\Manager\Input.h" />
     <ClInclude Include="Src\Scene\ConnectScene.h" />
     <ClInclude Include="Src\Common\InputTextArea.h" />
     <ClInclude Include="Src\Scene\MatchScene.h" />
@@ -107,6 +110,7 @@
     <ClInclude Include="Src\Scene\TitleScene.h" />
     <ClInclude Include="Src\Utility\AsoUtility.h" />
     <ClInclude Include="Src\Utility\MatrixUtility.h" />
+    <ClInclude Include="Src\Utility\UtilityCommon.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

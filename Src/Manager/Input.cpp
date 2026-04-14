@@ -274,6 +274,8 @@ XINPUT_STATE Input::GetJPadXInputState(JOYPAD_NO no)
 
 void Input::SetJPadInState(JOYPAD_NO jpNo)
 {
+	// ‘Sƒpƒbƒh‚Í“o˜^‚µ‚È‚¢
+	if (jpNo == JOYPAD_NO::PAD_ALL) { return; };
 
 	int no = static_cast<int>(jpNo);
 	auto stateNew = GetJPadInputState(jpNo);
