@@ -36,8 +36,8 @@ void TitleScene::Update(void)
 {
 	// ÉVÅ[ÉìëJà⁄
 	InputManager& input = InputManager::GetInstance();
-	if (input.KeyIsTrgDown(KEY_INPUT_SPACE) ||
-		input.PadIsBtnTrgDown(InputManager::PAD_NO::PAD1, InputManager::PAD_BTN::START))
+	if (input.IsTrgDown(InputManager::TYPE::SELECT_DECISION,Input::JOYPAD_NO::PAD1)
+		|| input.IsTrgDown(InputManager::TYPE::SELECT_DECISION, Input::JOYPAD_NO::PAD2))
 	{
 		sceneMng_.ChangeScene(SceneManager::SCENE_ID::MATCH);
 	}

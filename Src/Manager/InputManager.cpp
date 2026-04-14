@@ -1,12 +1,7 @@
-#include "InputManager.h" 
+#include "InputManager.h"
 #include <DxLib.h>
-#include <cassert>
-#ifdef _DEBUG
-#include <string>
-#endif
 
-
-InputManager* InputManager::instance_;
+InputManager* InputManager::instance_ = nullptr;
 
 void InputManager::CreateInstance(void)
 {
@@ -14,619 +9,390 @@ void InputManager::CreateInstance(void)
 	{
 		instance_ = new InputManager();
 	}
-	instance_->Init(); // マネージャ初期化処理
+
+	instance_->Init();
 }
 
-InputManager& InputManager::GetInstance(void)
+InputManager::InputManager(void):
+	input_(nullptr)
 {
-	if (instance_ == nullptr)
-	{
-		InputManager::CreateInstance();
-#ifdef _DEBUG
-		OutputDebugString("\n入力マネージャが生成されていません。\n入力マネージャを生成しました。\n");
-#endif
-	}
-	return *instance_;
+	triggerMap_.clear();
+	funcNewMap_.clear();
+	funcTrgDownMap_.clear();
+	funcTrgUpMap_.clear();
 }
-
-InputManager::InputManager(void)
-{
-	mouseInput_ = -1;
-}
-
 
 void InputManager::Init(void)
 {
-	// キーボード割り当て時、コントローラ操作化
-	inputType_ = ((GetJoypadNum() > 0) ? INPUT_TYPE::CONTROLLER : INPUT_TYPE::KEYBOARD_MOUSE);
-	
-	SetInputKey(); // 入力キー登録
+	// 入力判定処理の生成と初期化
+	input_ = std::make_unique<Input>();
+	input_->Init();
 
-	SetInputMouse(); // マウス入力登録
+	// 入力状況に応じたトリガーの登録
+	using BTN   = Input::JOYPAD_BTN;
+	using STICK = Input::JOYPAD_STICK;
+	using MOUSE = Input::MOUSE;
+
+	// プレイヤー操作
+	RegisterTrigger(TYPE::PLAYER_MOVE_UP, { KEY_INPUT_W, KEY_INPUT_UP }, { }, { STICK::L_STICK_UP });
+	RegisterTrigger(TYPE::PLAYER_MOVE_DOWN, { KEY_INPUT_S, KEY_INPUT_DOWN }, { }, { STICK::L_STICK_DOWN });
+	RegisterTrigger(TYPE::PLAYER_MOVE_LEFT, { KEY_INPUT_A, KEY_INPUT_LEFT }, { }, { STICK::L_STICK_LEFT });
+	RegisterTrigger(TYPE::PLAYER_MOVE_RIGHT, { KEY_INPUT_D, KEY_INPUT_RIGHT }, { }, { STICK::L_STICK_RIGHT });
+	RegisterTrigger(TYPE::PLAYER_CHANGE, { KEY_INPUT_LSHIFT, KEY_INPUT_RSHIFT }, { BTN::RB_RIGHT, BTN::RB_BOTTOM }, { });
+
+	// カメラ操作
+	RegisterTrigger(TYPE::CAMERA_MOVE_LEFT,  { KEY_INPUT_J }, { }, { });
+	RegisterTrigger(TYPE::CAMERA_MOVE_RIGHT, { KEY_INPUT_L }, { }, { });
+	RegisterTrigger(TYPE::CAMERA_MOVE_UP,    { KEY_INPUT_I }, { }, { });
+	RegisterTrigger(TYPE::CAMERA_MOVE_DOWN,  { KEY_INPUT_K }, { }, { });
+
+	// メニュー操作
+	RegisterTrigger(TYPE::SELECT_LEFT,  { KEY_INPUT_A, KEY_INPUT_LEFT },  { BTN::L_BUTTON }, { STICK::L_STICK_LEFT });
+	RegisterTrigger(TYPE::SELECT_RIGHT, { KEY_INPUT_D, KEY_INPUT_RIGHT }, { BTN::R_BUTTON}, { STICK::L_STICK_RIGHT });
+	RegisterTrigger(TYPE::SELECT_UP,    { KEY_INPUT_W, KEY_INPUT_UP },    { BTN::L_BUTTON }, { STICK::L_STICK_UP });
+	RegisterTrigger(TYPE::SELECT_DOWN,  { KEY_INPUT_S, KEY_INPUT_DOWN },  { BTN::R_BUTTON }, { STICK::L_STICK_DOWN });
+	RegisterTrigger(TYPE::SELECT_DECISION, { KEY_INPUT_SPACE, KEY_INPUT_RETURN  }, { BTN::RB_RIGHT, BTN::START, BTN::RB_BOTTOM }, { STICK::MAX }, MOUSE::CLICK_LEFT);
+	RegisterTrigger(TYPE::SELECT_CANCEL,   { KEY_INPUT_BACK },                     { BTN::RB_RIGHT }, { });
+	RegisterTrigger(TYPE::PAUSE,           { KEY_INPUT_ESCAPE, KEY_INPUT_BACK },   { BTN::SELECT }, { });
+
+	// ゲーム状態遷移
+	RegisterTrigger(TYPE::GAME_STATE_CHANGE, { KEY_INPUT_SPACE }, { BTN::RB_RIGHT }, { });
+
+	// デバッグ系
+	RegisterTrigger(TYPE::DEBUG_MODE, { KEY_INPUT_TAB }, { }, { });
+	RegisterTrigger(TYPE::DEBUG_SCENE_CHANGE, { KEY_INPUT_RSHIFT }, { }, { });
+	RegisterTrigger(TYPE::DEBUG_POINT_SET, { }, { }, { }, MOUSE::CLICK_LEFT);
+	RegisterTrigger(TYPE::DEBUG_POINT_DELETE, { }, { }, { }, MOUSE::CLICK_RIGHT);
+
+
+	// カーソル非表示
+	ShowCursor(MOUSE_VISIBLE);
 }
-
-void InputManager::SetInputKey(void)
-{
-	AddKey(KEY_INPUT_RETURN);
-	AddKey(KEY_INPUT_SPACE);
-	AddKey(KEY_INPUT_X);
-
-	// プレイヤー１
-	AddKey(KEY_INPUT_W);
-	AddKey(KEY_INPUT_A);
-	AddKey(KEY_INPUT_S);
-	AddKey(KEY_INPUT_D);
-
-	// 
-	AddKey(KEY_INPUT_UP);
-	AddKey(KEY_INPUT_DOWN);
-	AddKey(KEY_INPUT_LEFT);
-	AddKey(KEY_INPUT_RIGHT);
-
-	AddKey(KEY_INPUT_ESCAPE);
-	AddKey(KEY_INPUT_LSHIFT);
-	AddKey(KEY_INPUT_RSHIFT);
-	AddKey(KEY_INPUT_LCONTROL);
-	AddKey(KEY_INPUT_RCONTROL);
-	AddKey(KEY_INPUT_TAB);
-	AddKey(KEY_INPUT_DELETE);
-}
-
-void InputManager::SetInputMouse(void)
-{
-	// 左クリック
-	AddMouse(MOUSE_INPUT_LEFT);
-
-	// 右クリック
-	AddMouse(MOUSE_INPUT_RIGHT);
-
-	// 中央クリック
-	AddMouse(MOUSE_INPUT_MIDDLE);
-}
-
 
 void InputManager::Update(void)
 {
-	// キーボード入力判定
-	for (auto& k : keys_)
-	{
-		Key& key = k.second;
-
-		key.inputOld = key.inputNew;
-		key.inputNew = CheckHitKey(key.keyType);
-		key.trgDown = ( key.inputNew && !key.inputOld);
-		key.trgUp   = (!key.inputNew && key.inputOld);
-	}
-
-
-	// マウス判定
-	mouseInput_ = GetMouseInput();
-
-	//マウス座標取得
-	GetMousePoint(&mousePos_.x, &mousePos_.y);
-
-
-	// マウス入力判定
-	for (auto& m : mouses_)
-	{
-		Mouse& mouse = m.second;
-
-		mouse.inputOld = mouse.inputNew;
-		mouse.inputNew = ((GetMouseInput() & mouse.type) != 0);
-		mouse.trgDown = ( mouse.inputNew && !mouse.inputOld);
-		mouse.trgUp   = (!mouse.inputNew && mouse.inputOld);
-	}
-
-
-	// ゲームパッド入力判定更新
-	SetPadInState(PAD_NO::PAD1);
+	input_->Update();
 }
 
+void InputManager::Release(void)
+{
+	triggerMap_.clear();
+	funcNewMap_.clear();
+	funcTrgDownMap_.clear();
+	funcTrgUpMap_.clear();
+	input_->Release();
+}
 void InputManager::Destroy(void)
 {
-	keys_.clear();	 // 入力キー配列 解放
-	mouses_.clear(); // マウス入力配列 解放
+	instance_->Release();
 
-	//delete instance_; // マネージャ 削除
-}
-
-void InputManager::InitInput(void)
-{
+	delete instance_;
 }
 
 
-#pragma region キーボード処理
-
-void InputManager::AddKey(unsigned int type)
+bool InputManager::IsNew(const TYPE type, const Input::JOYPAD_NO padNo)
 {
-	/* 判定を行うキーを追加 */
-
-	Key keyInfo = InputManager::Key();
-
-	keyInfo.keyType = type;
-	keyInfo.inputOld = false;
-	keyInfo.inputNew = false;
-	keyInfo.trgUp   = false;
-	keyInfo.trgDown = false;
-
-	// 入力キー配列に格納
-	keys_.emplace(type, keyInfo);
-}
-
-bool InputManager::KeyIsNewAll(void) const
-{
-	// いずれかのキーが入力しているか判定
-
-	bool isInput = false;
-
-	char key[256];
-	GetHitKeyStateAll(key);
-	for (int i = 0; i < 256; ++i)
+	for (auto& func : funcNewMap_[type])
 	{
-		if (key[i] == 1)
+		if (func(type, padNo))
 		{
-			isInput = true;
-			break;
+			return true;
 		}
 	}
-
-	return isInput;
+	return false;
 }
 
-const InputManager::Key& InputManager::FindKey(unsigned int _keyType)const
+bool InputManager::IsTrgDown(const TYPE type, const Input::JOYPAD_NO padNo)
 {
-	auto it = keys_.find(_keyType);
-	if (it != keys_.end())
+	for (auto& func : funcTrgDownMap_[type])
 	{
-		// キーの情報を返す
-		return it->second;
+		if (func(type, padNo))
+		{
+			return true;
+		}
 	}
-
-#ifdef _DEBUG
-	std::string text = "\nキーの情報がありません。[キーの値：";
-	text += std::to_string(_keyType).c_str();
-	text += "]";
-	OutputDebugString(text.c_str());
-
-#endif
-
-	// 空のキー情報を返す
-	return keyInfoEmpty_;
+	return false;
 }
 
-#pragma endregion
-
-#pragma region マウス処理
-
-void InputManager::AddMouse(unsigned int type)
+bool InputManager::IsTrgUp(const TYPE type, const Input::JOYPAD_NO padNo)
 {
-	Mouse mouse = InputManager::Mouse();
+	for (auto& func : funcTrgUpMap_[type])
+	{
+		if (func(type, padNo))
+		{
+			return true;
+		}
+	}
+	return false;
+}
 
-	mouse.type = type;
-	mouse.inputOld = false;
-	mouse.inputNew = false;
-	mouse.trgDown = false;
-	mouse.trgUp   = false;
-	// 配列に格納
-	mouses_.emplace(mouse.type, mouse);
+void InputManager::SetMousePos(const Vector2& pos)
+{
+	input_->SetMousePos(pos);
+}
+
+void InputManager::SetCursorMode(Input::CURSOR_MODE _mode)
+{
+	input_->SetCursorMode(_mode);
 }
 
 Vector2 InputManager::GetMousePos(void) const
 {
-	Vector2 point = {};
-	GetMousePoint(&point.x, &point.y);
-	return point;
+	return input_->GetMousePos();
 }
-
-const InputManager::Mouse& InputManager::FindMouse(unsigned int _mouseType) const
+Vector2 InputManager::GetMouseMove(void) const
 {
-	auto it = mouses_.find(_mouseType);
-	if (it != mouses_.end())
-	{
-		// マウスの情報を返す
-		return it->second;
-	}
-#ifdef _DEBUG
-
-	std::string text = "\nマウスの情報がありません。[マウスの値：";
-	text += std::to_string(_mouseType).c_str();
-	text += "]";
-	OutputDebugString(text.c_str());
-#endif
-
-	// 空のキー情報を返す
-	return mouseInfoEmpty_;
+	return input_->GetMousePosDistance();
 }
 
-#pragma endregion 
-
-
-#pragma region コントローラ処理
-
-void InputManager::SetPadInState(PAD_NO jPadNum)
+Vector2 InputManager::GetKnockLStickSize(Input::JOYPAD_NO _num) const
 {
-	/* コントローラを識別して取得 */
+	auto padInfo = input_->GetJPadInputState(_num);
 
-	int num = static_cast<int>(jPadNum);
-	auto stateNew = GetPadInputState(jPadNum);
-	auto& stateNow = padInfos_[num];
-
-	int max = static_cast<int>(PAD_BTN::MAX);
-	for (int i = 0; i < max; i++)
-	{
-		stateNow.buttonOld[i] = stateNow.buttonNew[i];
-		stateNow.buttonNew[i] = stateNew.buttonNew[i];
-
-		stateNow.isOld[i] = stateNow.isNew[i];
-		stateNow.isNew[i] = (stateNow.buttonNew[i] > 0);
-
-		stateNow.isTrgDown[i] = (stateNow.isNew[i] && !stateNow.isOld[i]);
-		stateNow.isTrgUp[i] = (!stateNow.isNew[i] && stateNow.isOld[i]);
-	}
-
-	max = static_cast<int>(JOYPAD_ALGKEY::MAX);
-	for (int i = 0; i < max; i++)
-	{
-		stateNow.algKeyX[i] = stateNew.algKeyX[i];
-		stateNow.algKeyY[i] = stateNew.algKeyY[i];
-
-		stateNow.isOldAlgKey[i] = stateNow.isNewAlgKey[i];
-		stateNow.isNewAlgKey[i] = (stateNow.algKeyX[i] != 0 || stateNow.algKeyY[i] != 0);
-
-		stateNow.isTrgDownAlgKey[i] = (stateNow.isNewAlgKey[i] && !stateNow.isOldAlgKey[i]);
-		stateNow.isTrgUpAlgKey[i] = (!stateNow.isNewAlgKey[i] && stateNow.isOldAlgKey[i]);
-	}
+	return Vector2(padInfo.AKeyLX, padInfo.AKeyLY);
 }
-
-InputManager::Joypad InputManager::GetPadInputState(PAD_NO _padNum)
+Vector2 InputManager::GetKnockRStickSize(Input::JOYPAD_NO _num) const
 {
-	/* コントローラ入力取得処理 */
-
-	Joypad ret = InputManager::Joypad();
-
-	auto type = GetPadType(_padNum);
-
-	switch (type)
-	{
-		/* XBOX入力 */
-	case InputManager::JOYPAD_TYPE::XBOX_ONE:
-	{
-		auto d = GetPadDInputState(_padNum);
-		auto x = GetPadXInputState(_padNum);
-
-		int index;
-
-		//  Y
-		// X  B
-		//  A
-
-		// A
-		index = static_cast<int>(PAD_BTN::DOWN);
-		ret.buttonNew[index] = d.Buttons[0];
-
-		// B
-		index = static_cast<int>(PAD_BTN::RIGHT);
-		ret.buttonNew[index] = d.Buttons[1];
-
-		// X
-		index = static_cast<int>(PAD_BTN::LEFT);
-		ret.buttonNew[index] = d.Buttons[2];
-
-		// Y
-		index = static_cast<int>(PAD_BTN::UP);
-		ret.buttonNew[index] = d.Buttons[3];
-
-		// L
-		index = static_cast<int>(PAD_BTN::L_BUTTON);
-		ret.buttonNew[index] = d.Buttons[4];
-
-		// R
-		index = static_cast<int>(PAD_BTN::R_BUTTON);
-		ret.buttonNew[index] = d.Buttons[5];
-
-		// BACK
-		index = static_cast<int>(PAD_BTN::BACK);
-		ret.buttonNew[index] = d.Buttons[6];
-
-		// START
-		index = static_cast<int>(PAD_BTN::START);
-		ret.buttonNew[index] = d.Buttons[7];
-
-		index = static_cast<int>(PAD_BTN::L_STICK);
-		ret.buttonNew[index] = d.Buttons[8];
-
-		index = static_cast<int>(PAD_BTN::R_STICK);
-		ret.buttonNew[index] = d.Buttons[9];
-
-		// RTrigger
-		index = static_cast<int>(PAD_BTN::L_TRIGGER);
-		ret.buttonNew[index] = x.LeftTrigger;
-
-		// RTrigger
-		index = static_cast<int>(PAD_BTN::R_TRIGGER);
-		ret.buttonNew[index] = x.RightTrigger;
-
-
-
-		// 左スティック
-		index = static_cast<int>(JOYPAD_ALGKEY::LEFT);
-		ret.algKeyX[index] = d.X;
-		ret.algKeyY[index] = d.Y;
-
-		// 右スティック
-		index = static_cast<int>(JOYPAD_ALGKEY::RIGHT);
-		ret.algKeyX[index] = d.Rx;
-		ret.algKeyY[index] = d.Ry;
-
-		// Dパッド(十字スティック)
-		index = static_cast<int>(JOYPAD_ALGKEY::D_PAD);
-		int inputX = 0;
-		int inputY = 0;
-		unsigned int left = 27000;
-		unsigned int right = 9000;
-		unsigned int up = 0;
-		unsigned int down = 18000;
-
-		if (*d.POV == left)  inputX = -1;
-		if (*d.POV == right) inputX = 1;
-		if (*d.POV == up)    inputY = -1;
-		if (*d.POV == down)  inputY = 1;
-
-		ret.algKeyX[index] = inputX;
-		ret.algKeyY[index] = inputY;
-	}
-	break;
-
-	/* PlayStationコントローラ入力 */
-	case InputManager::JOYPAD_TYPE::DUAL_SENSE:
-	{
-		/*
-		auto d = GetPadDInputState(_padNum);
-
-		int index;
-
-		// 　△
-		// □　○
-		// 　×
-
-		//// △
-		index = static_cast<int>(JOYPAD_BTN::TOP);
-		ret.ButtonNew[index] = d.Buttons[3];
-
-		//// ○
-		index = static_cast<int>(JOYPAD_BTN::RIGHT);
-		ret.ButtonNew[index] = d.Buttons[2];
-
-		//// ×
-		index = static_cast<int>(JOYPAD_BTN::DOWN);
-		ret.ButtonNew[index] = d.Buttons[1];
-
-		//// □
-		index = static_cast<int>(JOYPAD_BTN::LEFT);
-		ret.ButtonNew[index] = d.Buttons[0];
-
-
-		// 左スティック
-		index = static_cast<int>(JOYPAD_ALGKEY::LEFT);
-		ret.AlgKeyX[index] = d.X;
-		ret.AlgKeyY[index] = d.Y;
-
-		// 右スティック
-		index = static_cast<int>(JOYPAD_ALGKEY::RIGHT);
-		ret.AlgKeyX[index] = d.Rx;
-		ret.AlgKeyY[index] = d.Ry;
-		*/
-	}
-	break;
-
-
-	/* その他入力 */
-	case InputManager::JOYPAD_TYPE::XBOX_360:
-	case InputManager::JOYPAD_TYPE::DUAL_SHOCK_4:
-	case InputManager::JOYPAD_TYPE::SWITCH_JOY_CON_L:
-	case InputManager::JOYPAD_TYPE::SWITCH_JOY_CON_R:
-	case InputManager::JOYPAD_TYPE::SWITCH_PRO_CTRL:
-	case InputManager::JOYPAD_TYPE::OTHER:
-	case InputManager::JOYPAD_TYPE::MAX:
-	{
-		// 入力なし
-	}
-	break;
-	}
-
-	return ret;
+	auto padInfo = input_->GetJPadInputState(_num);
+	return Vector2(padInfo.AKeyRX, padInfo.AKeyRY);
 }
 
-InputManager::JOYPAD_TYPE InputManager::GetJPadType(PAD_NO jPadNo)
-{
-	int num = GetJoypadType(static_cast<int>(jPadNo));
-	InputManager::JOYPAD_TYPE type = static_cast<InputManager::JOYPAD_TYPE>(num);
-	return type;
-}
-
-
-DINPUT_JOYSTATE InputManager::GetPadDInputState(InputManager::PAD_NO _padNum)
-{
-	// DirectInput情報取得
-	GetJoypadDirectInputState(static_cast<int>(_padNum), &joyDInState_);
-	return joyDInState_;
-}
-
-XINPUT_STATE InputManager::GetPadXInputState(InputManager::PAD_NO _padNum)
-{
-	// ボタン入力情報取得
-	GetJoypadXInputState(static_cast<int>(_padNum), &joyXInState_);
-	return joyXInState_;
-}
-
-
-InputManager::JOYPAD_TYPE InputManager::GetPadType(PAD_NO padNo)
-{
-	return static_cast<InputManager::JOYPAD_TYPE>(GetJoypadType(static_cast<int>(padNo)));
-}
-
-int InputManager::GetMouseWheelRot(void)
-{
-	return 0;
-}
-
-bool InputManager::PadIsBtnNew(PAD_NO _padNum, PAD_BTN button) const
-{
-	int num = static_cast<int>(_padNum);
-	int btnType = static_cast<int>(button);
-
-	return PadIsBtnNew(num, btnType);
-}
-bool InputManager::PadIsBtnNew(int _padNum, int button) const
-{
-	// パッドが未割当時、false
-	if (GetJoypadNum() < _padNum) return false;
-
-	bool ret = (padInfos_[_padNum].isNew[button]);
-	return ret;
-}
-
-bool InputManager::PadIsBtnTrgDown(PAD_NO _padNum, PAD_BTN button) const
-{
-	int num = static_cast<int>(_padNum);
-	int btnType = static_cast<int>(button);
-
-	return PadIsBtnTrgDown(num, btnType);
-}
-bool InputManager::PadIsBtnTrgDown(int _padNum, int button) const
-{
-	// パッドが未割当時、false
-	if (GetJoypadNum() < _padNum) return false;
-
-	bool ret = (padInfos_[_padNum].isTrgDown[button]);
-	return ret;
-}
-
-bool InputManager::PadIsBtnTrgUp(PAD_NO _padNum, PAD_BTN button) const
-{
-	int num = static_cast<int>(_padNum);
-	int btnType = static_cast<int>(button);
-
-	return PadIsBtnTrgUp(num, btnType);
-}
-bool InputManager::PadIsBtnTrgUp(int _padNum, int button) const
-{
-	// パッドが未割当時、false
-	if (GetJoypadNum() < _padNum) return false;
-
-	bool ret = (padInfos_[_padNum].isTrgUp[button]);
-	return ret;
-}
-
-bool InputManager::PadIsAlgKeyNew(PAD_NO _padNum, JOYPAD_ALGKEY _algKey)const
-{
-	int num = static_cast<int>(_padNum);
-	int keyType = static_cast<int>(_algKey);
-
-	return PadIsAlgKeyNew(num, keyType);
-}
-bool InputManager::PadIsAlgKeyNew(int _padNum, int _algKey)const
-{
-	// パッドが未割当時、false
-	if (GetJoypadNum() < _padNum) return false;
-
-	bool ret = (padInfos_[_padNum].isNewAlgKey[_algKey]);
-	return ret;
-}
-
-bool InputManager::PadIsAlgKeyTrgDown(PAD_NO _padNum, JOYPAD_ALGKEY _algKey)const
-{
-	int num = static_cast<int>(_padNum);
-	int keyType = static_cast<int>(_algKey);
-
-	return PadIsAlgKeyTrgDown(num, keyType);
-}
-bool InputManager::PadIsAlgKeyTrgDown(int _padNum, int _algKey)const
-{
-	// パッドが未割当時、false
-	if (GetJoypadNum() < _padNum) return false;
-
-	bool ret = (padInfos_[_padNum].isTrgDownAlgKey[_algKey]);
-	return ret;
-}
-
-bool InputManager::PadIsAlgKeyTrgUp(PAD_NO _padNum, JOYPAD_ALGKEY _algKey)const
-{
-	int num = static_cast<int>(_padNum);
-	int keyType = static_cast<int>(_algKey);
-
-	return PadIsAlgKeyTrgUp(num, keyType);
-}
-bool InputManager::PadIsAlgKeyTrgUp(int _padNum, int _algKey)const
-{
-	// パッドが未割当時、false
-	if (GetJoypadNum() < _padNum) return false;
-
-	bool ret = (padInfos_[_padNum].isTrgUpAlgKey[_algKey]);
-	return ret;
-}
-
-int InputManager::PadAlgKeyX(PAD_NO _padNum, JOYPAD_ALGKEY _algKey)const
-{
-	int num = static_cast<int>(_padNum);
-	int key = static_cast<int>(_algKey);
-
-	return PadAlgKeyX(num, key);
-}
-int InputManager::PadAlgKeyX(int _padNum, int _algKey)const
-{
-	// パッドが未割当時、false
-	if (GetJoypadNum() < _padNum) return false;
-
-	return padInfos_[_padNum].algKeyX[_algKey];
-}
-
-int InputManager::PadAlgKeyY(PAD_NO _padNum, JOYPAD_ALGKEY _algKey)const
-{
-	int num = static_cast<int>(_padNum);
-	int key = static_cast<int>(_algKey);
-
-	return PadAlgKeyY(num, key);
-}
-int InputManager::PadAlgKeyY(int _padNum, int _algKey)const
-{
-	// パッドが未割当時、false
-	if (GetJoypadNum() < _padNum) return false;
-
-	return padInfos_[_padNum].algKeyY[_algKey];
-}
-
-VECTOR InputManager::GetAlgKeyDirXZ(PAD_NO _padNum, JOYPAD_ALGKEY _algKey) const
+VECTOR InputManager::GetDirXY_LStick(Input::JOYPAD_NO _num, float _threshold) const
 {
 	VECTOR ret = {};
 
-	int num = static_cast<int>(_padNum);
-	int algType = static_cast<int>(_algKey);
+	// 指定のコントローラ未割当時、ゼロを返す
+	if (GetJoypadNum() <= static_cast<int>(_num)) { return ret; }
 
-	// スティックの個々の入力値は、
-	// -1000.0f ～ 1000.0f の範囲で返ってくるが、
-	// X:1000.0f、Y:1000.0fになることは無い(1000と500くらいが最大)
-	// スティックの入力値を -1.0 ～ 1.0 に正規化
-	float dirX = (static_cast<float>(padInfos_[num].algKeyX[algType]) / ALGKEY_VAL_MAX);
-	float dirZ = (static_cast<float>(padInfos_[num].algKeyY[algType]) / ALGKEY_VAL_MAX);
+
+	auto padInfo = input_->GetJPadInputState(_num);
+
+	float dirX = static_cast<float>(padInfo.AKeyLX);
+	float dirY = static_cast<float>(padInfo.AKeyLY);
 
 	// 平方根により、おおよその最大値が1.0となる
-	float len = sqrtf((dirX * dirX) + (dirZ * dirZ));
-	if (len < ALGKEY_THRESHOLD)
+	float len = sqrtf((dirX * dirX) + (dirY * dirY));
+	if (len < _threshold)
 	{
-		// 0でベクトルを返す
 		return ret;
 	}
 
 	// デッドゾーン境界から再スケーリング(可変デッドゾーン)
-	float scale = (len - ALGKEY_THRESHOLD) / (1.0f - ALGKEY_THRESHOLD);
+	float scale = (len - _threshold) / (1.0f - _threshold);
 	dirX = (dirX / len) * scale;
-	dirZ = (dirZ / len) * scale;
+	dirY = (dirY / len) * scale;
 
-	// Zは前方向を正に反転
-	ret = VNorm({ dirX, 0.0f, -dirZ });
+	ret = VNorm(VGet(dirX, dirY, 0.0f));
 
 	return ret;
 }
 
-#pragma endregion
+VECTOR InputManager::GetDirXY_RStick(Input::JOYPAD_NO _num, float _threshold) const
+{
+	VECTOR ret = {};
+
+	// 指定のコントローラ未割当時、ゼロを返す
+	if (GetJoypadNum() <= static_cast<int>(_num)) { return ret; }
+
+
+	auto padInfo = input_->GetJPadInputState(_num);
+
+	float dirX = static_cast<float>(padInfo.AKeyRX);
+	float dirY = static_cast<float>(padInfo.AKeyRY);
+
+	// 平方根により、おおよその最大値が1.0となる
+	float len = sqrtf((dirX * dirX) + (dirY * dirY));
+	if (len < _threshold)
+	{
+		return ret;
+	}
+
+	// デッドゾーン境界から再スケーリング(可変デッドゾーン)
+	float scale = (len - _threshold) / (1.0f - _threshold);
+	dirX = (dirX / len) * scale;
+	dirY = (dirY / len) * scale;
+
+	ret = VNorm(VGet(dirX, dirY, 0.0f));
+
+	return ret;
+}
+
+void InputManager::RegisterTrigger(const TYPE type, const std::vector<int> keys,
+								   const std::vector<Input::JOYPAD_BTN> padButtons, const std::vector<Input::JOYPAD_STICK> padSticks,
+								   const Input::MOUSE mouse)
+{
+	// トリガーの情報を設定
+	TriggerInfo info = { keys, padButtons, padSticks, mouse };
+
+	// 情報の格納
+	triggerMap_[type] = info;
+
+	// 各種処理の配列
+	std::vector<std::function<bool(TYPE, Input::JOYPAD_NO)>> newFuncs;
+	std::vector<std::function<bool(TYPE, Input::JOYPAD_NO)>> isTrgDownFuncs;
+	std::vector<std::function<bool(TYPE, Input::JOYPAD_NO)>> isTrgUpFuncs;
+
+	// キーが登録されている場合
+	if (!info.keys.empty())
+	{
+		for (auto key : keys)
+		{
+			input_->Add(key);
+		}
+
+		newFuncs.push_back([this](TYPE t, Input::JOYPAD_NO) { return IsNewKey(t); });
+		isTrgDownFuncs.push_back([this](TYPE t, Input::JOYPAD_NO) { return IsTrgDownKey(t); });
+		isTrgUpFuncs.push_back([this](TYPE t, Input::JOYPAD_NO) { return IsTrgUpKey(t); });
+
+	}
+	// パッドのボタンが登録されている場合
+	if (!info.padButtons.empty())
+	{
+		newFuncs.push_back([this](TYPE t, Input::JOYPAD_NO padNo) { return IsNewPadButton(t, padNo); });
+		isTrgDownFuncs.push_back([this](TYPE t, Input::JOYPAD_NO padNo) { return IsTrgDownPadButton(t, padNo); });
+		isTrgUpFuncs.push_back([this](TYPE t, Input::JOYPAD_NO padNo) { return IsTrgUpPadButton(t, padNo); });
+	}
+	// パッドのスティックが登録されている場合
+	if (!info.padSticks.empty())
+	{
+		newFuncs.push_back([this](TYPE t, Input::JOYPAD_NO padNo) { return IsNewPadStick(t, padNo); });
+		isTrgDownFuncs.push_back([this](TYPE t, Input::JOYPAD_NO padNo) { return IsTrgDownPadStick(t, padNo); });
+		isTrgUpFuncs.push_back([this](TYPE t, Input::JOYPAD_NO padNo) { return IsTrgUpPadStick(t, padNo); });
+	}
+	// マウスの登録がされている場合
+	if (info.mouse != Input::MOUSE::MAX && info.mouse != Input::MOUSE::NONE)
+	{
+		newFuncs.push_back([this](TYPE t, Input::JOYPAD_NO padNo) { return IsNewMouse(t); });
+		isTrgDownFuncs.push_back([this](TYPE t, Input::JOYPAD_NO padNo) { return IsTrgDownMouse(t); });
+		isTrgUpFuncs.push_back([this](TYPE t, Input::JOYPAD_NO padNo) { return IsTrgUpMouse(t); });
+	}
+
+	// 処理の登録
+	RegisterTriggerFunction(type, newFuncs, isTrgDownFuncs, isTrgUpFuncs);
+}
+
+void InputManager::RegisterTriggerFunction(const TYPE type, std::vector<std::function<bool(TYPE, Input::JOYPAD_NO)>> newFuncs, std::vector<std::function<bool(TYPE, Input::JOYPAD_NO)>> trgDownFuncs, std::vector<std::function<bool(TYPE, Input::JOYPAD_NO)>> trgUpFuncs)
+{
+	funcNewMap_.emplace(type, newFuncs);
+	funcTrgDownMap_.emplace(type, trgDownFuncs);
+	funcTrgUpMap_.emplace(type, trgUpFuncs);
+}
+
+
+bool InputManager::IsNewKey(const TYPE type)
+{
+	for (int key : triggerMap_[type].keys)
+	{
+		if (input_->IsNew(key))
+		{
+			return true;
+		}
+	}
+	return false;
+}
+bool InputManager::IsTrgDownKey(const TYPE type)
+{
+	for (int key : triggerMap_[type].keys)
+	{
+		if (input_->IsTrgDown(key))
+		{
+			return true;
+		}
+	}
+	return false;
+}
+bool InputManager::IsTrgUpKey(const TYPE type)
+{
+	for (int key : triggerMap_[type].keys)
+	{
+		if (input_->IsTrgUp(key))
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+
+bool InputManager::IsNewPadButton(const TYPE type, const Input::JOYPAD_NO padNo)
+{
+	for (auto button : triggerMap_[type].padButtons)
+	{
+		if (input_->IsPadBtnNew(padNo, button))
+		{
+			return true;
+		}
+	}
+	return false;
+}
+bool InputManager::IsTrgDownPadButton(const TYPE type, const Input::JOYPAD_NO padNo)
+{
+	for (auto button : triggerMap_[type].padButtons)
+	{
+		if (input_->IsPadBtnTrgDown(padNo, button))
+		{
+			return true;
+		}
+	}
+	return false;
+}
+bool InputManager::IsTrgUpPadButton(const TYPE type, const Input::JOYPAD_NO padNo)
+{
+	for (auto button : triggerMap_[type].padButtons)
+	{
+		if (input_->IsPadBtnTrgUp(padNo, button))
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+
+bool InputManager::IsNewPadStick(const TYPE type, const Input::JOYPAD_NO padNo)
+{
+	for (auto stick : triggerMap_[type].padSticks)
+	{
+		if (input_->IsStickNew(padNo, stick))
+		{
+			return true;
+		}
+	}
+	return false;
+}
+bool InputManager::IsTrgDownPadStick(const TYPE type, const Input::JOYPAD_NO padNo)
+{
+	for (auto stick : triggerMap_[type].padSticks)
+	{
+		if (input_->IsStickDown(padNo, stick))
+		{
+			return true;
+		}
+	}
+	return false;
+}
+bool InputManager::IsTrgUpPadStick(const TYPE type, const Input::JOYPAD_NO padNo)
+{
+	for (auto stick : triggerMap_[type].padSticks)
+	{
+		if (input_->IsStickUp(padNo, stick))
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+
+bool InputManager::IsNewMouse(const TYPE type)
+{
+	return input_->IsMouseNew(triggerMap_[type].mouse);
+}
+bool InputManager::IsTrgDownMouse(const TYPE type)
+{
+	return input_->IsMouseTrgDown(triggerMap_[type].mouse);
+}
+bool InputManager::IsTrgUpMouse(const TYPE type)
+{
+	return input_->IsMouseTrgUp(triggerMap_[type].mouse);
+}

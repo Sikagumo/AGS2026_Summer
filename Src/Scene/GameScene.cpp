@@ -42,7 +42,8 @@ void GameScene::Update(void)
 
 	// ÉVÅ[ÉìëJà⁄
 	InputManager& input = InputManager::GetInstance();
-	if (input.KeyIsTrgDown(KEY_INPUT_RETURN))
+	if (input.IsTrgDown(InputManager::TYPE::SELECT_DECISION, Input::JOYPAD_NO::PAD1)
+		|| input.IsTrgDown(InputManager::TYPE::SELECT_DECISION, Input::JOYPAD_NO::PAD2))
 	{
 		sceneMng_.ChangeScene(SceneManager::SCENE_ID::TITLE);
 	}

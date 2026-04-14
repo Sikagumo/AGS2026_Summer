@@ -51,6 +51,7 @@ void Resource::Load(void)
 	switch (type_)
 	{
 	case Resource::TYPE::IMG:
+	case Resource::TYPE::MOVIE:
 		// ‰æ‘œ
 		handleId_ = LoadGraph(path_.c_str());
 		break;
@@ -67,6 +68,7 @@ void Resource::Load(void)
 		break;
 
 	case Resource::TYPE::MODEL:
+	case Resource::TYPE::ANIM:
 		// ƒ‚ƒfƒ‹
 		handleId_ = MV1LoadModel(path_.c_str());
 		break;
@@ -90,6 +92,7 @@ void Resource::Release(void)
 	switch (type_)
 	{
 	case Resource::TYPE::IMG:
+	case Resource::TYPE::MOVIE:
 		DeleteGraph(handleId_);
 		break;
 
@@ -105,6 +108,7 @@ void Resource::Release(void)
 		break;
 
 	case Resource::TYPE::MODEL:
+	case Resource::TYPE::ANIM:
 	{
 		MV1DeleteModel(handleId_);
 		auto ids = duplicateModelIds_;

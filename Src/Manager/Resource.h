@@ -14,6 +14,8 @@ public:
 		IMG,
 		IMGS,
 		MODEL,
+		ANIM,
+		MOVIE,
 		EFFEKSEER,
 		SOUND,
 	};
