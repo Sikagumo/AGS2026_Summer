@@ -3,6 +3,7 @@
 #include "Manager/InputManager.h"
 #include "Manager/ResourceManager.h"
 #include "Manager/SceneManager.h"
+#include "Manager/InputTextManager.h"
 #include "Manager/SoundManager.h"
 #include "Manager/NetManager.h"
 #include "05_FPS制御/FpsController.h"
@@ -69,6 +70,7 @@ void Application::Init(void)
 	// 入力制御初期化
 	SetUseDirectInputFlag(true);
 	InputManager::CreateInstance();
+	InputTextManager::CreateInstance();
 
 	// ネットワーク管理初期化
 	NetManager::CreateInstance();
@@ -86,13 +88,14 @@ void Application::Run(void)
 
 	InputManager& inputManager = InputManager::GetInstance();
 	SceneManager& sceneManager = SceneManager::GetInstance();
+	InputTextManager& inputTextManager = InputTextManager::GetInstance();
 	NetManager& netManager = NetManager::GetInstance();
 
 	// ゲームループ
 	while (ProcessMessage() == 0 && CheckHitKey(KEY_INPUT_ESCAPE) == 0)
 	{
 		netManager.Update();
-
+		inputTextManager.Update();
 		inputManager.Update();
 		sceneManager.Update();
 
@@ -100,11 +103,14 @@ void Application::Run(void)
 		// 平均FPS描画
 		fpsController_->Draw();
 
+		// ネットワーク管理更新(フレームの最後)
+		netManager.UpdateEndOfFrame();
+
 		ScreenFlip();
 		// 理想FPS経過待ち
 		fpsController_->Wait();
 	}
-
+	netManager.Destroy();
 }
 
 void Application::Destroy(void)
