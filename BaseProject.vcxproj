@@ -22,6 +22,7 @@
     <ClCompile Include="Src\05_FPS制御\FpsController.cpp" />
     <ClCompile Include="Src\Manager\Input.cpp" />
     <ClCompile Include="Src\Manager\InputTextManager.cpp" />
+    <ClCompile Include="Src\Object\Actor\CharaBase.cpp" />
     <ClCompile Include="Src\Scene\ConnectScene.cpp" />
     <ClCompile Include="Src\Common\InputTextArea.cpp" />
     <ClCompile Include="Src\Scene\MatchScene.cpp" />
@@ -43,8 +44,6 @@
     <ClCompile Include="Src\Manager\Resource.cpp" />
     <ClCompile Include="Src\Manager\ResourceManager.cpp" />
     <ClCompile Include="Src\Manager\SceneManager.cpp" />
-    <ClCompile Include="Src\Object\Actor\CharaBase.cpp" />
-    <ClCompile Include="Src\Object\Actor\CharaBase.cpp" />
     <ClCompile Include="Src\Object\Collider\ColliderBase.cpp" />
     <ClCompile Include="Src\Object\Collider\ColliderCapsule.cpp" />
     <ClCompile Include="Src\Object\Collider\ColliderLine.cpp" />
@@ -70,6 +69,7 @@
     <ClInclude Include="Src\05_FPS制御\FpsController.h" />
     <ClInclude Include="Src\Manager\Input.h" />
     <ClInclude Include="Src\Manager\InputTextManager.h" />
+    <ClInclude Include="Src\Object\Actor\CharaBase.h" />
     <ClInclude Include="Src\Scene\ConnectScene.h" />
     <ClInclude Include="Src\Common\InputTextArea.h" />
     <ClInclude Include="Src\Scene\MatchScene.h" />
@@ -93,8 +93,6 @@
     <ClInclude Include="Src\Manager\Resource.h" />
     <ClInclude Include="Src\Manager\ResourceManager.h" />
     <ClInclude Include="Src\Manager\SceneManager.h" />
-    <ClInclude Include="Src\Object\Actor\CharaBase.h" />
-    <ClInclude Include="Src\Object\Actor\CharaBase.h" />
     <ClInclude Include="Src\Object\Collider\ColliderBase.h" />
     <ClInclude Include="Src\Object\Collider\ColliderCapsule.h" />
     <ClInclude Include="Src\Object\Collider\ColliderLine.h" />
