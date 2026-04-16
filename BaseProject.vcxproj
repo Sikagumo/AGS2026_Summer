@@ -19,7 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Src\05_FPS制御\FpsController.cpp" />
+    <ClCompile Include="Src\FPS\FpsController.cpp" />
     <ClCompile Include="Src\Manager\Input.cpp" />
     <ClCompile Include="Src\Manager\InputTextManager.cpp" />
     <ClCompile Include="Src\Object\Actor\CharaBase.cpp" />
@@ -31,7 +31,6 @@
     <ClCompile Include="Src\Net\NetClient.cpp" />
     <ClCompile Include="Src\Manager\NetManager.cpp" />
     <ClCompile Include="Src\Net\NetBase.cpp" />
-    <ClCompile Include="Src\Common\FpsController.cpp" />
     <ClCompile Include="Src\Manager\SoundManager.cpp" />
     <ClCompile Include="Src\Object\Actor\ActorBase.cpp" />
     <ClCompile Include="Src\Application.cpp" />
@@ -66,7 +65,7 @@
     <ClCompile Include="Src\Utility\UtilityCommon.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Src\05_FPS制御\FpsController.h" />
+    <ClInclude Include="Src\FPS\FpsController.h" />
     <ClInclude Include="Src\Manager\Input.h" />
     <ClInclude Include="Src\Manager\InputTextManager.h" />
     <ClInclude Include="Src\Object\Actor\CharaBase.h" />
@@ -79,7 +78,6 @@
     <ClInclude Include="Src\Common\CRC.h" />
     <ClInclude Include="Src\Manager\NetManager.h" />
     <ClInclude Include="Src\Net\NetBase.h" />
-    <ClInclude Include="Src\Common\FpsController.h" />
     <ClInclude Include="Src\Manager\SoundManager.h" />
     <ClInclude Include="Src\Net\NetStructures.h" />
     <ClInclude Include="Src\Object\Actor\ActorBase.h" />
