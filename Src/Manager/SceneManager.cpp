@@ -7,7 +7,7 @@
 #include "../Scene/MatchScene.h"
 #include "../Scene/ConnectScene.h"
 #include "./InputManager.h"
-#include "Camera.h"
+#include "../Camera/Camera.h"
 #include "ResourceManager.h"
 #include "SceneManager.h"
 
@@ -19,7 +19,7 @@ void SceneManager::CreateInstance()
 	{
 		instance_ = new SceneManager();
 	}
-	instance_->Init();
+	instance_->Initialize();
 }
 
 SceneManager& SceneManager::GetInstance(void)
@@ -27,7 +27,7 @@ SceneManager& SceneManager::GetInstance(void)
 	return *instance_;
 }
 
-void SceneManager::Init(void)
+void SceneManager::Initialize(void)
 {
 
 	sceneId_ = SCENE_ID::TITLE;
@@ -35,11 +35,11 @@ void SceneManager::Init(void)
 
 	// フェード機能の初期化
 	fader_ = new Fader();
-	fader_->Init();
+	fader_->Initialize();
 
 	// カメラ
 	camera_ = new Camera();
-	camera_->Init();
+	camera_->Initialize();
 
 	// 画面遷移中判定
 	isSceneChanging_ = false;
@@ -293,7 +293,7 @@ void SceneManager::DoChangeScene(SCENE_ID sceneId)
 	}
 
 	// 各シーンの初期化
-	scene_->Init();
+	scene_->Initialize();
 
 	ResetDeltaTime();
 

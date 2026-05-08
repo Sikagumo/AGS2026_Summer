@@ -17,7 +17,7 @@ ConnectScene::~ConnectScene(void)
 {
 }
 
-void ConnectScene::Init(void)
+void ConnectScene::Initialize(void)
 {
 	//NetManager::GetInstance().TryConnect();
 	netMng_.ChangeGameState(GAME_STATE::CONNECTING);

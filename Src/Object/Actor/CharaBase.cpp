@@ -1,3 +1,4 @@
+#include "CharaBase.h"
 #include "../Common/AnimationController.h"
 #include "../../Utility/AsoUtility.h"
 #include "../../Manager/SceneManager.h"
@@ -9,28 +10,22 @@
 #include "../../Application.h"
 
 
-#include "CharaBase.h"
-
-CharaBase::CharaBase(void) :
-	ActorBase::ActorBase(),
-	isJump_(false),
-	jumpPow_(AsoUtility::VECTOR_ZERO),
-	moveSpeed_(0.0f),
-	stepJump_(0.0f),
-	shadowHandle_(-1),
-	prevPos_(AsoUtility::VECTOR_ZERO),
-	moveDir_(AsoUtility::VECTOR_ZERO),
-	movePow_(AsoUtility::VECTOR_ZERO),
-	animation_(nullptr)
+CharaBase::CharaBase(void)
+	: ActorBase::ActorBase()
+	, isJump_(false)
+	, jumpPow_(AsoUtility::VECTOR_ZERO)
+	, moveSpeed_(0.0f)
+	, stepJump_(0.0f)
+	, shadowHandle_(-1)
+	, prevPos_(AsoUtility::VECTOR_ZERO)
+	, moveDir_(AsoUtility::VECTOR_ZERO)
+	, movePow_(AsoUtility::VECTOR_ZERO)
 {
 }
 
 
 void CharaBase::InitLoad(void)
 {
-	// 丸影画像
-	//shadowHandle_ = resMng_.GetHandleId(ResourceManager::SRC::IMG_SHADOW);
-
 	// 各読み込み処理
 	InitLoadPost();
 }
@@ -39,7 +34,7 @@ void CharaBase::InitAnimation(void)
 {
 	if (transform_.modelId != -1)
 	{
-		animation_ = new AnimationController(transform_.modelId);
+		animation_ = std::make_unique<AnimationController>(transform_.modelId);
 	}
 
 	// 各アニメーション初期化
@@ -82,7 +77,6 @@ void CharaBase::Release(void)
 	if (animation_)
 	{
 		animation_->Release();
-		delete animation_;
 	}
 }
 

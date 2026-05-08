@@ -17,7 +17,7 @@ public:
 	virtual ~SceneBase(void) = 0;
 
 	// ‰Šú‰»
-	virtual void Init(void) = 0;
+	virtual void Initialize(void) = 0;
 
 	// XV
 	virtual void Update(void) = 0;

@@ -18,7 +18,7 @@ public:
     static void CreateInstance(void);  
     static SoundManager& GetInstance(void); 
 
-    void Init(void); // 内部変数の初期化
+    void Initialize(void); // 内部変数の初期化
 
     // --- 定数定義 ---
     static constexpr int MaxVolumeValue = 100;   // ユーザーが指定する最大音量

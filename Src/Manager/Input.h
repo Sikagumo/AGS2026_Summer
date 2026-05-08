@@ -122,7 +122,7 @@ public:
 	~Input(void) = default;
 
 
-	void Init(void);
+	void Initialize(void);
 	void Update(void);
 
 	// ƒŠƒ\[ƒX‚Ì”jŠü

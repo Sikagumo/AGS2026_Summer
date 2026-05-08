@@ -4,18 +4,14 @@
 #include "../Collider/ColliderBase.h"
 
 ActorBase::ActorBase(void)
-	: 
-	resMng_(ResourceManager::GetInstance()),
-	sceneMng_(SceneManager::GetInstance()),
-	transform_(Transform())
+	: resMng_(ResourceManager::GetInstance())
+	, sceneMng_(SceneManager::GetInstance())
+	, transform_(Transform())
 {
 }
 
-ActorBase::~ActorBase(void)
-{
-}
 
-void ActorBase::Init(void)
+void ActorBase::Initialize(void)
 {
 	// リソースロード
 	InitLoad();

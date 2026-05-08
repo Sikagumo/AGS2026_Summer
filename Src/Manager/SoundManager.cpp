@@ -8,7 +8,7 @@ void SoundManager::CreateInstance(void)
     if (instance_ == nullptr)
     {
         instance_ = new SoundManager();
-        instance_->Init();
+        instance_->Initialize();
     }
 }
 
@@ -22,7 +22,7 @@ SoundManager& SoundManager::GetInstance(void)
     return *instance_;
 }
 
-void SoundManager::Init(void)
+void SoundManager::Initialize(void)
 {
     bgm_ = -1;
     currentBgmVol_ = DxLibMaxVolume;

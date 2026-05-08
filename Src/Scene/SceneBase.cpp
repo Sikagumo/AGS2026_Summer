@@ -19,7 +19,7 @@ SceneBase::~SceneBase(void)
 {
 }
 
-void SceneBase::Init(void)
+void SceneBase::Initialize(void)
 {
 }
 

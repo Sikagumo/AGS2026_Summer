@@ -1,5 +1,6 @@
 #pragma once
 #include "ActorBase.h"
+#include <memory>
 class AnimationController;
 
 class CharaBase : public ActorBase
@@ -37,7 +38,7 @@ protected:
 	static constexpr float COLLISION_BACK_DIS = 1.0f;
 
 
-	AnimationController* animation_;
+	std::unique_ptr<AnimationController> animation_;
 
 	int shadowHandle_;
 
@@ -67,7 +68,12 @@ protected:
 	virtual void UpdateProcess(void) = 0;
 	virtual void UpdateProcessPost(void) = 0;
 
+	/// @brief ‘O•`‰æˆ—
 	virtual void DrawPre(void)override;
+
+	/// @brief Œã•`‰æˆ—
+	void DrawLate(void)override;
+
 
 	// ˆÚ“®•ûŒü‚É‰‚¶‚½’x‰„‰ñ“]
 	void DelayRotate(void);
@@ -79,9 +85,6 @@ protected:
 	void CollisionGravity(void);
 	void CollisionCapsule(void);
 	virtual void CollisionReserve(void) {};
-
-	
-	void DrawLate(void)override;
 
 	// ‰e•`‰æ
 	void DrawShadowRound(void);

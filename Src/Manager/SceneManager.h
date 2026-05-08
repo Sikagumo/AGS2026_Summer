@@ -36,7 +36,7 @@ public:
 	static SceneManager& GetInstance(void);
 
 	// ‰Šú‰»
-	void Init(void);
+	void Initialize(void);
 	
 	// 3D‚Ì‰Šú‰»
 	void Init3D(void);

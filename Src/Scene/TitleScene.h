@@ -17,7 +17,7 @@ public:
 	~TitleScene(void) override;
 
 	// ‰Šú‰»
-	void Init(void) override;
+	void Initialize(void) override;
 
 	// XV
 	void Update(void) override;

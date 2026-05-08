@@ -11,7 +11,7 @@ void ResourceManager::CreateInstance(void)
 	{
 		instance_ = new ResourceManager();
 	}
-	instance_->Init();
+	instance_->Initialize();
 }
 
 ResourceManager& ResourceManager::GetInstance(void)
@@ -19,7 +19,7 @@ ResourceManager& ResourceManager::GetInstance(void)
 	return *instance_;
 }
 
-void ResourceManager::Init(void)
+void ResourceManager::Initialize(void)
 {
 	//static std::string PATH_EFF = Application::PATH_EFFECT;
 

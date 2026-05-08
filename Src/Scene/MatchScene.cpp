@@ -19,7 +19,7 @@ MatchScene::~MatchScene(void)
 {
 }
 
-void MatchScene::Init(void)
+void MatchScene::Initialize(void)
 {
 	// “ü—ÍƒGƒŠƒA
 	inputTextArea1_ = new InputTextArea(

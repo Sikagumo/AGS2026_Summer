@@ -3,7 +3,7 @@
 #include "../Utility/AsoUtility.h"
 #include "../Manager/InputManager.h"
 #include "../Manager/SceneManager.h"
-#include "../Manager/Camera.h"
+#include "../Camera/Camera.h"
 #include "../Manager/ResourceManager.h"
 #include "../Object/Common/AnimationController.h"
 #include "../Object/SkyDome/SkyDome.h"
@@ -20,12 +20,12 @@ TitleScene::~TitleScene(void)
 {
 }
 
-void TitleScene::Init(void)
+void TitleScene::Initialize(void)
 {
 	
 	// スカイドーム
 	skyDome_ = new SkyDome(empty_);
-	skyDome_->Init();
+	skyDome_->Initialize();
 
 	// 定点カメラ
 	sceneMng_.GetCamera()->ChangeMode(Camera::MODE::FIXED_POINT);

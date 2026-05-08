@@ -7,7 +7,7 @@
 #include "../Object/SkyDome/SkyDome.h"
 
 #include "../Object/Collider/ColliderBase.h"
-#include "../Manager/Camera.h"
+#include "../Camera/Camera.h"
 
 
 GameScene::GameScene(void)
@@ -21,18 +21,18 @@ GameScene::~GameScene(void)
 {
 }
 
-void GameScene::Init(void)
+void GameScene::Initialize(void)
 {
 	stage_ = new Stage();
-	stage_->Init();
+	stage_->Initialize();
 	const ColliderBase* stageCollider = stage_->GetOwnCollider(static_cast<int>(Stage::COLLIDER_TYPE::MODEL));
 
 	
 	
-	skyDome_->Init();
+	skyDome_->Initialize();
 
 	Camera* camera = sceneMng_.GetCamera();
-	camera->Init();
+	camera->Initialize();
 	camera->AddHitCollider(stageCollider);
 }
 
