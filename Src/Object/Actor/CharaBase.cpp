@@ -1,7 +1,8 @@
+#include "CharaBase.h"
 #include "../Common/AnimationController.h"
 #include "../../Utility/AsoUtility.h"
-#include "../../Manager/SceneManager.h"
-#include "../../Manager/ResourceManager.h"
+#include "../../Manager/Generic/SceneManager.h"
+#include "../../Manager/Generic/ResourceManager.h"
 #include "../Collider/ColliderBase.h"
 #include "../Collider/ColliderLine.h"
 #include "../Collider/ColliderModel.h"
@@ -9,28 +10,22 @@
 #include "../../Application.h"
 
 
-#include "CharaBase.h"
-
-CharaBase::CharaBase(void) :
-	ActorBase::ActorBase(),
-	isJump_(false),
-	jumpPow_(AsoUtility::VECTOR_ZERO),
-	moveSpeed_(0.0f),
-	stepJump_(0.0f),
-	shadowHandle_(-1),
-	prevPos_(AsoUtility::VECTOR_ZERO),
-	moveDir_(AsoUtility::VECTOR_ZERO),
-	movePow_(AsoUtility::VECTOR_ZERO),
-	animation_(nullptr)
+CharaBase::CharaBase(void)
+	: ActorBase::ActorBase()
+	, isJump_(false)
+	, jumpPow_(AsoUtility::VECTOR_ZERO)
+	, moveSpeed_(0.0f)
+	, stepJump_(0.0f)
+	, shadowHandle_(-1)
+	, prevPos_(AsoUtility::VECTOR_ZERO)
+	, moveDir_(AsoUtility::VECTOR_ZERO)
+	, movePow_(AsoUtility::VECTOR_ZERO)
 {
 }
 
 
 void CharaBase::InitLoad(void)
 {
-	// 丸影画像
-	//shadowHandle_ = resMng_.GetHandleId(ResourceManager::SRC::IMG_SHADOW);
-
 	// 各読み込み処理
 	InitLoadPost();
 }
@@ -39,7 +34,7 @@ void CharaBase::InitAnimation(void)
 {
 	if (transform_.modelId != -1)
 	{
-		animation_ = new AnimationController(transform_.modelId);
+		animation_ = std::make_unique<AnimationController>(transform_.modelId);
 	}
 
 	// 各アニメーション初期化
@@ -82,7 +77,6 @@ void CharaBase::Release(void)
 	if (animation_)
 	{
 		animation_->Release();
-		delete animation_;
 	}
 }
 
@@ -363,11 +357,10 @@ void CharaBase::DrawShadowRound(void)
 
 void CharaBase::DrawPre(void)
 {
-	if (sceneMng_.GetIsDebugMode())
-	{
-		// モデル向き描画
-		transform_.DrawModelDir();
-	}
+#ifdef _DEBUG
+	// モデル向き描画
+	transform_.DrawModelDir();
+#endif
 }
 
 void CharaBase::DelayRotate(void)

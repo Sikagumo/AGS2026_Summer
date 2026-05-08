@@ -32,7 +32,7 @@ public:
 	static ResourceManager& GetInstance(void);
 
 	// ‰Šú‰»
-	void Init(void);
+	void Initialize(void);
 
 	// ‰ğ•ú(ƒV[ƒ“Ø‘Ö‚Éˆê’U‰ğ•ú)
 	void Release(void);
