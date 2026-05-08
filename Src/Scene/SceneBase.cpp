@@ -1,32 +1,46 @@
-#include "../Manager/ResourceManager.h"
-#include "../Manager/SceneManager.h"
-#include "../Manager/SoundManager.h"
-#include "../Manager/NetManager.h"
-#include "../Manager/InputManager.h"
-#include "SceneBase.h"
+#include"SceneBase.h"
 
-SceneBase::SceneBase(void) 
-	: 
-	resMng_(ResourceManager::GetInstance()),
-	sceneMng_(SceneManager::GetInstance()),
-	soundMng_(SoundManager::GetInstance()),
-	netMng_(NetManager::GetInstance()),
-	inputMng_(InputManager::GetInstance())
-{
-}
-
+//デストラクタ
 SceneBase::~SceneBase(void)
 {
+	isLoading_ = false;
 }
 
-void SceneBase::Init(void)
+//初期化
+void SceneBase::Initialize(void)
 {
+	isLoading_ = false;
 }
 
+//更新処理
 void SceneBase::Update(void)
 {
 }
 
+//描画処理
 void SceneBase::Draw(void)
 {
+}
+
+//解放処理
+void SceneBase::Release(void)
+{
+}
+
+// ロード開始
+void SceneBase::Load(void)
+{
+	isLoading_ = true;
+}
+
+// ロード完了
+void SceneBase::EndLoad(void)
+{
+	isLoading_ = false;
+}
+
+// ロード中か
+bool SceneBase::IsLoading(void) const
+{
+	return isLoading_;
 }

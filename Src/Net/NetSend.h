@@ -1,40 +1,38 @@
 #pragma once
+
 #include "NetStructures.h"
+
+class NetManager;
 
 class NetSend
 {
-
 public:
+	NetSend(NetManager& netManager, int& sendSocketId);
 
-	NetSend(NetManager& manager, int& sendSocketId);
-	~NetSend(void);
+	~NetSend(void) = default;
 
-	// 送信処理
 	void Send(NET_DATA_TYPE type);
 
 private:
 
-	NetManager& manager_;
+	void SendUser(void);
 
-	// 送信用ソケットハンドル
-	int& sendSocketId_;
+	void SendUsers(void);
 
-	// 送信情報
-	NET_DATA_TYPE type_;
-
-	// 送受信用の基本データを作成する
-	NET_BASIC_DATA MakeBasicData(NET_DATA_TYPE type, std::uint32_t crc);
-
-	// ホストへ送信
-	void SendUDP_Host(const char* bufPtr, int bufSize);
-
-	// クライアントへ送信
-	void SendUDP_Clients(const char* bufPtr, int bufSize);
-
-	// 各種送信処理
-	void SendJoinPlayer(const NET_JOIN_USER& entity);
-	void SendSelfJoinPlayer(void);
-	void SendJoinPlayers(void);
 	void SendActionHisAll(void);
 
+	void SendBossAction(void);
+
+	void SendAction(void);
+
+	NET_BASIC_DATA MakeBasicData(NET_DATA_TYPE type, std::uint32_t crc);
+
+	void SendUDP_Host(const void* bufptr, int size);
+
+	void SendUDP_Client(const void* bufptr, int size);
+
+	NetManager& netManager_;
+
+	int& sendSocketId_;
 };
+

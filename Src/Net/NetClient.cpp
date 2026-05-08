@@ -1,58 +1,29 @@
-#include <iostream>
-#include <thread>
-#include <DxLib.h>
-#include "../Manager/NetManager.h"
-#include "../Manager/SceneManager.h"
 #include "NetClient.h"
-
-NetClient::NetClient(NetManager& manager) : NetBase(manager)
-{
-}
-
-NetClient::~NetClient(void)
-{
-}
+#include "../Manager/System/NetManager.h"
 
 void NetClient::UpdateConnecting(void)
 {
-	step_ += SceneManager::GetInstance().GetDeltaTime();
-	if (step_ >= TIME_SEND_USER)
+	timerUser_ += SEND_INTERVAL_ACTION;
+
+	if (timerUser_ >= SEND_TIMERVAL_USER)
 	{
-		step_ = 0.0f;
-		manager_.Send(NET_DATA_TYPE::USER);
+		timerUser_ = 0.0f;
+
+		netManager_.Send(NET_DATA_TYPE::USER);
 	}
 }
 
 void NetClient::UpdateGotoGame(void)
 {
-	step_ += SceneManager::GetInstance().GetDeltaTime();
-	if (step_ >= TIME_SEND_USER)
-	{
-		step_ = 0.0f;
-		manager_.Send(NET_DATA_TYPE::USER);
-	}
+	UpdateConnecting();
 }
 
 void NetClient::UpdateGamePlaying(void)
 {
-	// 毎フレーム送信
-	manager_.Send(NET_DATA_TYPE::ACTION_HIS_ALL);
+	netManager_.Send(NET_DATA_TYPE::USER);
 }
 
-void NetClient::UdpReceiveThreadConnecting(void)
+void NetClient::OnReceiveBossAction(const NET_BOSS_ACTION& boss)
 {
-	// ホストがゲーム画面へ遷移したら、
-	// クライアントも一斉に遷移する
-	if (manager_.GetGameStateHost() >= GAME_STATE::GOTO_GAME)
-	{
-		manager_.ChangeGameState(GAME_STATE::GOTO_GAME);
-	}
-}
 
-void NetClient::UdpReceiveThreadGamePlaying(void)
-{
-}
-
-void NetClient::UdpReceiveThreadGotoGame(void)
-{
 }

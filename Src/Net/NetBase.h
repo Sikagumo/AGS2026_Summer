@@ -1,42 +1,42 @@
 #pragma once
-#include <map>
+
 #include <vector>
-#include <mutex>
-#include "../Manager/NetManager.h"
+
 #include "NetStructures.h"
+
+class NetManager;
 
 class NetBase
 {
-
 public:
+	NetBase(NetManager& Manager);
 
-	static constexpr float TIME_SEND_USER = 1.0f;
-	static constexpr float TIME_SEND_USERS = 10.0f / 60.0f;
-	static constexpr float TIME_SEND_ACTIONS = 1.0f / 60.0f;
+	virtual ~NetBase(void) = default;
 
-	// コンストラクタ
-	NetBase(NetManager& manager);
-
-	// デストラクタ
-	virtual ~NetBase(void);
-
-	// 更新
 	virtual void UpdateConnecting(void) = 0;
+
 	virtual void UpdateGotoGame(void) = 0;
+
 	virtual void UpdateGamePlaying(void) = 0;
 
-	// 受信処理
-	virtual void UdpReceiveThreadConnecting(void) = 0;
-	virtual void UdpReceiveThreadGotoGame(void) = 0;
-	virtual void UdpReceiveThreadGamePlaying(void) = 0;
+	virtual void OnReceiveUser(void) {};
+
+	virtual void OnReceiveUsers(const std::vector<NET_JOINT_USER>& users) {};
+
+	virtual void OnReceiveAction(const NET_ACTION_HIS& actionHis) {};
+
+	virtual void OnReceiveBossAction(const NET_BOSS_ACTION& bossAction) {};
 
 protected:
 
-	// 管理クラスの参照
-	NetManager& manager_;
+	NetManager& netManager_;
 
-	// 更新ステップ
-	float step_;
-	float stepAction_;
+	static constexpr float SEND_TIMERVAL_USER = 1.0f;
 
+	static constexpr float SEND_INTERVAL_ACTION = 0.1f / 60.0f;
+
+	float timerUser_;
+
+	float timerAction_;
 };
+

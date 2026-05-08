@@ -1,6 +1,6 @@
 #include "ActorBase.h"
-#include "../../Manager/ResourceManager.h"
-#include "../../Manager/SceneManager.h"
+#include "../../Manager/Generic/ResourceManager.h"
+#include "../../Manager/Generic/SceneManager.h"
 #include "../Collider/ColliderBase.h"
 
 ActorBase::ActorBase(void)
@@ -47,14 +47,14 @@ void ActorBase::Draw(void)
 	// 後描画
 	DrawLate();
 
-	if (sceneMng_.GetIsDebugMode())
-	{
-		// 所有しているコライダの描画
-		for (const auto& [type, collider] : ownColliders_)
-		{
-			collider->Draw();
-		}
-	}
+	//if (sceneMng_.GetIsDebugMode())
+	//{
+	//	// 所有しているコライダの描画
+	//	for (const auto& [type, collider] : ownColliders_)
+	//	{
+	//		collider->Draw();
+	//	}
+	//}
 }
 
 void ActorBase::Release(void)

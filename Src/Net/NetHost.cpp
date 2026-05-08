@@ -1,52 +1,32 @@
-#include <iostream>
-#include <thread>
-#include <DxLib.h>
-#include "../Manager/NetManager.h"
-#include "../Manager/SceneManager.h"
 #include "NetHost.h"
-
-NetHost::NetHost(NetManager& manager) : NetBase(manager)
-{
-}
-
-NetHost::~NetHost(void)
-{
-}
+#include "../Manager/System/NetManager.h"
+#include "../Manager/System/TimeManager.h"
 
 void NetHost::UpdateConnecting(void)
 {
-	step_ += SceneManager::GetInstance().GetDeltaTime();
-	if (step_ >= TIME_SEND_USERS)
+	timerUser_ += SEND_INTERVAL_ACTION;
+
+	if (timerUser_ >= SEND_TIMERVAL_USER)
 	{
-		step_ = 0.0f;
-		manager_.Send(NET_DATA_TYPE::USERS);
+		timerUser_ = 0.0f;
+
+		netManager_.Send(NET_DATA_TYPE::USERS);
 	}
 }
 
 void NetHost::UpdateGotoGame(void)
 {
-	step_ += SceneManager::GetInstance().GetDeltaTime();
-	if (step_ >= TIME_SEND_USERS)
-	{
-		step_ = 0.0f;
-		manager_.Send(NET_DATA_TYPE::USERS);
-	}
+	UpdateConnecting();
 }
 
 void NetHost::UpdateGamePlaying(void)
 {
-	// ñàÉtÉåÅ[ÉÄëóêM
-	manager_.Send(NET_DATA_TYPE::ACTION_HIS_ALL);
+	netManager_.Send(NET_DATA_TYPE::BOSS_ACTOION);
+
+	netManager_.Send(NET_DATA_TYPE::ACTION_HIST_ALL);
 }
 
-void NetHost::UdpReceiveThreadConnecting(void)
+void NetHost::OnReceiveAction(const NET_ACTION_HIS& actionHis)
 {
-}
 
-void NetHost::UdpReceiveThreadGotoGame(void)
-{
-}
-
-void NetHost::UdpReceiveThreadGamePlaying(void)
-{
 }

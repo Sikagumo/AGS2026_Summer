@@ -1,8 +1,8 @@
 #include "SkyDome.h"
 #include <Dxlib.h>
 #include "../Actor/ActorBase.h"
-#include "../../Manager/ResourceManager.h"
-#include "../../Manager/SceneManager.h"
+#include "../../Manager/Generic/ResourceManager.h"
+#include "../../Manager/Generic/SceneManager.h"
 #include "../../Utility/AsoUtility.h"
 
 SkyDome::SkyDome(const Transform& _transform):
@@ -34,7 +34,7 @@ void SkyDome::InitPost(void)
 	MV1SetUseZBuffer(transform_.modelId, false);
 	MV1SetWriteZBuffer(transform_.modelId, false);
 
-	SceneManager::SCENE_ID sceneId = sceneMng_.GetSceneID();
+	/*SceneManager::SCENE_ID sceneId = sceneMng_.GetSceneID();
 	if (sceneId == SceneManager::SCENE_ID::GAME)
 	{
 		ChangeStateFollow();
@@ -42,7 +42,7 @@ void SkyDome::InitPost(void)
 	else
 	{
 		ChangeStateStay();
-	}
+	}*/
 }
 
 void SkyDome::Update(void)

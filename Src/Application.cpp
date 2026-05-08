@@ -1,14 +1,17 @@
+#include "Application.h"
+
 #include <DxLib.h>
 #include <EffekseerForDXLib.h>
-#include "Manager/InputManager.h"
-#include "Manager/ResourceManager.h"
-#include "Manager/SceneManager.h"
+
+#include "Manager/Generic/InputManager.h"
+#include "Manager/Generic/ResourceManager.h"
+#include "Manager/Generic/SceneManager.h"
 #include "Manager/InputTextManager.h"
-#include "Manager/SoundManager.h"
-#include "Manager/NetManager.h"
+#include "Manager/Decoration/SoundManager.h"
+#include "Manager/System/NetManager.h"
 #include "FPS/FpsController.h"
 
-#include "Application.h"
+
 
 Application* Application::instance_ = nullptr;
 
@@ -91,9 +94,12 @@ void Application::Run(void)
 	InputTextManager& inputTextManager = InputTextManager::GetInstance();
 	NetManager& netManager = NetManager::GetInstance();
 
+
 	// ゲームループ
 	while (ProcessMessage() == 0 && CheckHitKey(KEY_INPUT_ESCAPE) == 0)
 	{
+		ClearDrawScreen();
+
 		netManager.Update();
 		inputTextManager.Update();
 		inputManager.Update();
@@ -104,7 +110,7 @@ void Application::Run(void)
 		fpsController_->Draw();
 
 		// ネットワーク管理更新(フレームの最後)
-		netManager.UpdateEndOfFrame();
+		//netManager.UpdateEndOfFrame();
 
 		ScreenFlip();
 		// 理想FPS経過待ち
@@ -121,7 +127,7 @@ void Application::Destroy(void)
 	NetManager::GetInstance().Destroy();
 
 	// シーン管理解放
-	SceneManager::GetInstance().Destroy();
+	SceneManager::GetInstance().DestroyInstance();
 
 	// Effekseerを終了する。
 	Effkseer_End();

@@ -1,48 +1,37 @@
 #pragma once
-class ResourceManager;
-class SceneManager;
-class SoundManager;
-class NetManager;
-class InputManager;
 
 class SceneBase
 {
-
 public:
 
-	// コンストラクタ
-	SceneBase(void);
+	//コンストラクタ
+	SceneBase(void) = default;
 
-	// デストラクタ
+	//デストラクタ
 	virtual ~SceneBase(void) = 0;
 
-	// 初期化
-	virtual void Init(void) = 0;
+	//初期化
+	virtual void Initialize(void) = 0;
 
-	// 更新
+	//更新処理
 	virtual void Update(void) = 0;
 
-	// 描画
+	//描画処理
 	virtual void Draw(void) = 0;
 
-	// 解放
+	//解放処理
 	virtual void Release(void) = 0;
 
-protected:
+	//リソースロード開始
+	virtual void Load(void) = 0;
 
-	int bgmHandleId_;
+	//ロード完了
+	virtual void EndLoad(void) = 0;
 
-	// リソース管理
-	ResourceManager& resMng_;
+	//ロード中か
+	bool IsLoading(void) const;
 
-	// シーン管理
-	SceneManager& sceneMng_;
-	// サウンド管理
-	SoundManager& soundMng_;
-	// ネットワーク管理
-	NetManager& netMng_;
-	//入力管理
-	InputManager& inputMng_;
-
-
+private:
+	//ロード中かどうか
+	bool isLoading_;
 };

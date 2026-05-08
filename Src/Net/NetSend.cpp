@@ -1,274 +1,114 @@
-#include <queue>
-#include "../Common/CRC.h"
-#include "../Manager/SceneManager.h"
-#include "../Manager/NetManager.h"
 #include "NetSend.h"
+#include "../Manager/System/NetManager.h"
 
-NetSend::NetSend(NetManager& manager, int& sendSocketId)
-	: manager_(manager), sendSocketId_(sendSocketId)
+std::uint32_t CalculateCRC(const void* data, size_t size)
 {
-	type_ = NET_DATA_TYPE::NONE;
+	return 0;
 }
 
-NetSend::~NetSend(void)
+NetSend::NetSend(NetManager& netManager, int& sendSocketId)
+	: netManager_(netManager)
+	, sendSocketId_(sendSocketId)
 {
+
 }
 
 void NetSend::Send(NET_DATA_TYPE type)
 {
-
-	type_ = type;
-
-	switch (type_)
+	switch (type)
 	{
 	case NET_DATA_TYPE::USER:
-		SendSelfJoinPlayer();
+
+		SendUser();
+
 		break;
+
 	case NET_DATA_TYPE::USERS:
-		SendJoinPlayers();
+
+		SendUsers();
+
 		break;
-	case NET_DATA_TYPE::ACTION_HIS_ALL:
+
+	case NET_DATA_TYPE::ACTION_HIST_ALL:
+
 		SendActionHisAll();
+
+		break;
+
+	case NET_DATA_TYPE::BOSS_ACTOION:
+
+		SendBossAction();
+
 		break;
 	}
-
 }
 
 NET_BASIC_DATA NetSend::MakeBasicData(NET_DATA_TYPE type, std::uint32_t crc)
 {
-	NET_BASIC_DATA ret;
-	ret.type = type;
-	ret.key = manager_.GetSelf().key;
-	ret.gameTime = SceneManager::GetInstance().GetTotalGameTime();
-	ret.crc = crc;
-	return ret;
+	NET_BASIC_DATA data;
+
+	data.type = type;
+
+	data.key = 0;
+
+	data.gameTime = 0.0f;
+
+	data.crc = crc;
+
+	return data;
 }
 
-void NetSend::SendUDP_Host(const char* bufPtr, int bufSize)
+void NetSend::SendUser(void)
 {
-	// ホストへ送信
-	NetWorkSendUDP(sendSocketId_, manager_.GetHostIp(), manager_.GetHostPort(), bufPtr, bufSize);
 }
 
-void NetSend::SendUDP_Clients(const char* bufPtr, int bufSize)
+void NetSend::SendUsers(void)
 {
+	NET_JOINT_USER myInfo = {};
 
-	// 自分以外へ送信
-	NET_JOIN_USER user;
+	NET_BASIC_DATA basicData = MakeBasicData(NET_DATA_TYPE::USER, 0);
+	char buffer[sizeof(NET_BASIC_DATA) + sizeof(NET_JOINT_USER)];
 
-	auto& users = manager_.GetNetUsers();
-	for (const auto& userPair : users)
-	{
+	memcpy(buffer, &basicData, sizeof(basicData));
+	memcpy(buffer + sizeof(basicData), &myInfo, sizeof(myInfo));
 
-		user = userPair.second;
-		if (user.key == manager_.GetSelf().key)
-		{
-			// 自分宛てには送信しない
-			continue;
-		}
-
-		// 自分以外へ送信
-		NetWorkSendUDP(sendSocketId_, user.ip, user.port, bufPtr, bufSize);
-
-	}
-
-}
-
-void NetSend::SendJoinPlayer(const NET_JOIN_USER& entity)
-{
-
-	const size_t SIZE_BASIC = sizeof(NET_BASIC_DATA);
-	const size_t SIZE_ENTITY = sizeof(NET_JOIN_USER);
-	const size_t SIZE_ALL = SIZE_BASIC + SIZE_ENTITY;
-
-	// 送信データのCRC
-	std::uint32_t crc = CRC::Calculate(&entity, SIZE_ENTITY, CRC::CRC_32());
-
-	// バッファ確保
-	char buf[SIZE_ALL] = { 0 };
-	char* bufPtr = buf;
-
-	// 基本データを頭に付けるため作成
-	NET_BASIC_DATA basicData = MakeBasicData(type_, crc);
-
-	// 基本データをメモリコピー
-	memcpy(bufPtr, &basicData, SIZE_BASIC);
-	bufPtr += SIZE_BASIC;
-
-	// 送信データをメモリコピー
-	memcpy(bufPtr, &entity, SIZE_ENTITY);
-
-#pragma region 送信データをバラバラに設定する場合
-
-	//// 送信データ
-	//memcpy(bufPtr, &entity.mode, sizeof(NET_MODE));
-	//bufPtr += sizeof(NET_MODE);
-
-	//memcpy(bufPtr, &entity.key, sizeof(int));
-	//bufPtr += sizeof(int);
-
-	//memcpy(bufPtr, &entity.ip, sizeof(IPDATA));
-	//bufPtr += sizeof(IPDATA);
-
-	//memcpy(bufPtr, &entity.port, sizeof(int));
-	//bufPtr += sizeof(int);
-
-	//memcpy(bufPtr, &entity.playerType, sizeof(PLAYER_TYPE));
-	//bufPtr += sizeof(PLAYER_TYPE);
-
-	//memcpy(bufPtr, &entity.gameState, sizeof(GAME_STATE));
-	//bufPtr += sizeof(GAME_STATE);
-
-#pragma endregion
-
-	// 送信
-	SendUDP_Host(buf, SIZE_ALL);
-
-}
-
-void NetSend::SendSelfJoinPlayer(void)
-{
-	SendJoinPlayer(manager_.GetSelf());
-}
-
-void NetSend::SendJoinPlayers(void)
-{
-
-	const size_t SIZE_BASIC = sizeof(NET_BASIC_DATA);
-	const size_t SIZE_ENTITY = sizeof(NET_JOIN_USERS);
-	const size_t SIZE_ALL = SIZE_BASIC + SIZE_ENTITY;
-
-	// 送信データの作成
-	NET_JOIN_USERS entity;
-	auto& users = manager_.GetNetUsers();
-	int cnt = 0;
-	for (const auto& userPair : users)
-	{
-		entity.users[cnt] = userPair.second;
-		cnt++;
-	}
-
-	// 送信データのCRC
-	std::uint32_t crc = CRC::Calculate(&entity, SIZE_ENTITY, CRC::CRC_32());
-
-	// バッファ確保
-	char buf[SIZE_ALL] = { 0 };
-	char* bufPtr = buf;
-
-	// 基本データを頭に付けるため作成
-	NET_BASIC_DATA basicData = MakeBasicData(type_, crc);
-
-	// 基本データをメモリコピー
-	memcpy(bufPtr, &basicData, SIZE_BASIC);
-	bufPtr += SIZE_BASIC;
-
-	// 送信データをメモリコピー
-	memcpy(bufPtr, &entity, SIZE_ENTITY);
-
-	// 送信
-	SendUDP_Clients(buf, SIZE_ALL);
-
-
-
-	//// 基本データを頭に付ける
-	//const int size = sizeof(NET_BASIC_DATA) + sizeof(NET_JOIN_USERS);
-	//char buf[size];
-	//char* bufPtr = buf;
-
-	//// 基本データを作成する
-	//NET_BASIC_DATA basicData = MakeBasicData(type_);
-	//memcpy(bufPtr, &basicData, sizeof(NET_BASIC_DATA));
-	//bufPtr += sizeof(NET_BASIC_DATA);
-
-	//// 送信データ
-	//auto& users = manager_.GetNetUsers();
-	//for (const auto& userPair : users)
-	//{
-	//	memcpy(bufPtr, &userPair.second, sizeof(NET_JOIN_USER));
-	//	bufPtr += sizeof(NET_JOIN_USER);
-	//}
-
-	//// 送信
-	//SendUDP_Clients(buf, size);
-
+	SendUDP_Client(buffer, sizeof(buffer));
 }
 
 void NetSend::SendActionHisAll(void)
 {
 
-	const size_t SIZE_BASIC = sizeof(NET_BASIC_DATA);
-	const size_t SIZE_ENTITY = sizeof(NET_ACTION_HIS);
-	const size_t SIZE_ALL = SIZE_BASIC + SIZE_ENTITY;
+}
 
-	// 送信データの作成
-	auto self = manager_.GetSelfAction();
-	manager_.MakeActionHis(self);
-	NET_ACTION_HIS entity = manager_.GetSelfActionHis();
+void NetSend::SendBossAction(void)
+{
+	NET_BOSS_ACTION BossAction = {};
 
-	// 送信データのCRC
-	std::uint32_t crc = CRC::Calculate(&entity, SIZE_ENTITY, CRC::CRC_32());
+	std::uint32_t crc = CalculateCRC(&BossAction, sizeof(BossAction));
 
-	// バッファ確保
-	char buf[SIZE_ALL] = { 0 };
-	char* bufPtr = buf;
+	NET_BASIC_DATA basicData = MakeBasicData(NET_DATA_TYPE::BOSS_ACTOION, 0);
 
-	// 基本データを頭に付けるため作成
-	NET_BASIC_DATA basicData = MakeBasicData(type_, crc);
+	char buffer[sizeof(NET_BASIC_DATA) + sizeof(NET_BOSS_ACTION)];
 
-	// 基本データをメモリコピー
-	memcpy(bufPtr, &basicData, SIZE_BASIC);
-	bufPtr += SIZE_BASIC;
+	memcpy(buffer, &basicData, sizeof(basicData));
 
-	// 送信データをメモリコピー
-	memcpy(bufPtr, &entity, SIZE_ENTITY);
+	memcpy(buffer + sizeof(basicData), &BossAction, sizeof(BossAction));
 
-	// 送信
-	SendUDP_Clients(buf, SIZE_ALL);
+	SendUDP_Host(buffer, sizeof(buffer));
+}
 
+void NetSend::SendAction(void)
+{
+}
 
+void NetSend::SendUDP_Host(const void* bufptr, int size)
+{
 
+}
 
+void NetSend::SendUDP_Client(const void* bufptr, int size)
+{
+	IPDATA targetIp = netManager_.GetHostIp();
 
-
-	//// 基本データを頭に付ける
-	//const int size = sizeof(NET_BASIC_DATA) + sizeof(NET_ACTION_HIS);
-	//char buf[size];
-	//char* bufPtr = buf;
-
-	//// 基本データを作成する
-	//NET_BASIC_DATA basicData = MakeBasicData(type_);
-	//memcpy(bufPtr, &basicData, sizeof(NET_BASIC_DATA));
-	//bufPtr += sizeof(NET_BASIC_DATA);
-
-	//// 送信データ
-	//memcpy(bufPtr, &entity, sizeof(NET_ACTION_HIS));
-
-	//// 送信
-	//SendUDP_Clients(buf, size);
-
-
-
-
-
-
-	//auto entity = manager_.GetSelfAction();
-	//manager_.MakeActionHis(entity);
-	//auto his = manager_.GetSelfActionHis();
-
-	//// 基本データを頭に付ける
-	//const int size = sizeof(NET_BASIC_DATA) + sizeof(NET_ACTION_HIS);
-	//char buf[size];
-	//char* bufPtr = buf;
-
-	//// 基本データを作成する
-	//NET_BASIC_DATA basicData = MakeBasicData(type_);
-	//memcpy(bufPtr, &basicData, sizeof(NET_BASIC_DATA));
-	//bufPtr += sizeof(NET_BASIC_DATA);
-
-	//// 送信データ
-	//memcpy(bufPtr, &his, sizeof(NET_ACTION_HIS));
-
-	//// 送信
-	//SendUDP_Clients(buf, size);
-
+	NetWorkSendUDP(sendSocketId_, targetIp, 65000, bufptr, size);
 }
