@@ -12,33 +12,24 @@ static constexpr int NUM_FRAME = 10;
 enum class NET_MODE
 {
 	NONE,
-
 	HOST,
-
 	CLIENT
 };
 
 enum class NET_DATA_TYPE
 {
 	NONE,
-
 	USER,
-
 	USERS,
-
 	ACTION_HIST_ALL,
-
 	BOSS_ACTOION
 };
 
 enum class GAME_STATE
 {
 	NONE,
-
 	CONNECTING,
-
 	GOTO_GAME,
-
 	GAME_PLAYING,
 };
 
