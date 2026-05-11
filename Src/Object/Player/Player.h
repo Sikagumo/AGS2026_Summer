@@ -21,7 +21,7 @@ public:
 
 protected:
 
-	void InitLoadPost(void)override;
+	void InitLoad(void)override;
 	void InitAnimationPost(void)override;
 	void InitTransform(void)override;
 	void InitCollider(void)override;

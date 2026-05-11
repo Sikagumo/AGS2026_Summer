@@ -32,7 +32,6 @@ void CharaBase::InitLoad(void)
 	//shadowHandle_ = resMng_.GetHandleId(ResourceManager::SRC::IMG_SHADOW);
 
 	// 各読み込み処理
-	InitLoadPost();
 }
 
 void CharaBase::InitAnimation(void)
@@ -70,7 +69,7 @@ void CharaBase::Update(void)
 	transform_.Update();
 
 	// アニメーション再生
-	animation_->Update();
+	//animation_->Update();
 
 	// 各キャラクターごとの更新後処理
 	UpdateProcessPost();

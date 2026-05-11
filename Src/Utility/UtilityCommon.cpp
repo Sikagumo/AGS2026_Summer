@@ -3,7 +3,7 @@
 #include <cassert>
 #include <algorithm>
 #include <math.h>
-#include "./AsoUtility.h"
+#include "./UtilityMath.h"
 
 
 void UtilityCommon::ChangeString(const std::string& _text, int& target, int minNum)

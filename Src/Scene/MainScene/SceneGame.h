@@ -1,5 +1,10 @@
 #pragma once
+
+#include <memory>
+
 #include "../SceneBase.h"
+
+class Boss;
 
 /// @brief ゲーム本編のメインロジックを管理するシーンクラス
 class SceneGame : public SceneBase
@@ -10,7 +15,7 @@ public:
     SceneGame(void);
 
     /// @brief デストラクタ
-    ~SceneGame(void) = default;
+    ~SceneGame(void);
 
     /// @brief リソースの読み込み開始
     void Load(void) override;
@@ -31,6 +36,8 @@ public:
     void Release(void) override;
 
 private:
+
+    std::unique_ptr<Boss> boss_;  /// ボスキャラクターの
 
     /// @brief デバッグ情報の描画
     void DrawDebug(void);
