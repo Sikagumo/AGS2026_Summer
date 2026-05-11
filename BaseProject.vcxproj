@@ -22,7 +22,6 @@
     <ClCompile Include="Src\Scene\MainScene\SceneLobby.cpp" />
     <ClCompile Include="Src\Object\Bullet\Player\PBulletBase.cpp" />
     <ClCompile Include="Src\Object\Bullet\Player\PBulletBig.cpp" />
-    <ClCompile Include="Src\Manager\Generic\StageManager.cpp" />
     <ClCompile Include="Src\Scene\MainScene\SceneGame.cpp" />
     <ClCompile Include="Src\Scene\MainScene\SceneTitle.cpp" />
     <ClCompile Include="Src\Scene\SceneBase.cpp" />
@@ -62,15 +61,14 @@
     <ClCompile Include="Src\Object\Player\Player.cpp" />
     <ClCompile Include="Src\Object\SkyDome\SkyDome.cpp" />
     <ClCompile Include="Src\Object\Stage\Stage.cpp" />
-    <ClCompile Include="Src\Utility\AsoUtility.cpp" />
+    <ClCompile Include="Src\Utility\UtilityMath.cpp" />
     <ClCompile Include="Src\Utility\MatrixUtility.cpp" />
     <ClCompile Include="Src\Utility\UtilityCommon.cpp" />
     <ClCompile Include="Src\Manager\System\TimeManager.cpp" />
   </ItemGroup>
-    <ItemGroup>
+  <ItemGroup>
     <ClInclude Include="Src\Scene\MainScene\SceneLobby.h" />
     <ClInclude Include="Src\Object\Bullet\Player\PBulletBig.h" />
-    <ClInclude Include="Src\Manager\Generic\StageManager.h" />
     <ClInclude Include="Src\Object\Bullet\Player\PBulletBase.h" />
     <ClInclude Include="Src\Scene\MainScene\SceneGame.h" />
     <ClInclude Include="Src\Scene\MainScene\SceneTitle.h" />
@@ -113,7 +111,7 @@
     <ClInclude Include="Src\Object\Player\Player.h" />
     <ClInclude Include="Src\Object\SkyDome\SkyDome.h" />
     <ClInclude Include="Src\Object\Stage\Stage.h" />
-    <ClInclude Include="Src\Utility\AsoUtility.h" />
+    <ClInclude Include="Src\Utility\UtilityMath.h" />
     <ClInclude Include="Src\Utility\MatrixUtility.h" />
     <ClInclude Include="Src\Utility\UtilityCommon.h" />
     <ClInclude Include="Src\Manager\System\TimeManager.h" />

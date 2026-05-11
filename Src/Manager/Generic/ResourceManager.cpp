@@ -4,7 +4,7 @@
 #include <string>
 #include <unordered_map>
 #include "../../Application.h"
-#include "../../Utility/AsoUtility.h"
+#include "../../Utility/UtilityMath.h"
 
 ResourceManager* ResourceManager::instance_ = nullptr;
 
