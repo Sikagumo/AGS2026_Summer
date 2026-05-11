@@ -49,10 +49,15 @@ void SceneTitle::Initialize(void)
 
 void SceneTitle::Update(void)
 {
+    auto& sceneManager = SceneManager::GetInstance();
+    auto& input = InputManager::GetInstance();
 
     if (Loading::GetInstance()->IsLoading()) { return; }
 
-    auto& input = InputManager::GetInstance();
+    if (input.IsTrgDown(KEY_INPUT_RETURN))
+    {
+        sceneManager.ChangeScene(std::make_shared<SceneGame>());
+    }
 }
 
 void SceneTitle::Draw(void)

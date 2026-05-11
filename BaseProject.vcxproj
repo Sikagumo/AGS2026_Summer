@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Src\Scene\MainScene\SceneLobby.cpp" />
     <ClCompile Include="Src\Scene\MainScene\SceneGame.cpp" />
     <ClCompile Include="Src\Scene\MainScene\SceneTitle.cpp" />
     <ClCompile Include="Src\Scene\SceneBase.cpp" />
@@ -64,6 +65,7 @@
     <ClCompile Include="Src\Manager\System\TimeManager.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Src\Scene\MainScene\SceneLobby.h" />
     <ClInclude Include="Src\Scene\MainScene\SceneGame.h" />
     <ClInclude Include="Src\Scene\MainScene\SceneTitle.h" />
     <ClInclude Include="Src\Scene\SceneBase.h" />
