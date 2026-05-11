@@ -1,72 +1,74 @@
 #pragma once
-#include <DxLib.h>
-#include "ColliderBase.h"
-class Transform;
-class ColliderModel;
 
+#include <DxLib.h>
+
+#include "ColliderBase.h"
+
+class Transform;
+
+/// @brief カプセル形状のコライダクラス
 class ColliderCapsule : public ColliderBase
 {
 public:
 
-	// コンストラクタ
-	ColliderCapsule(TAG tag, const Transform* follow,
-					const VECTOR& localPosTop, const VECTOR& localPosDown, float radius);
+    /// @brief コンストラクタ
+    /// @param collisionTag 衝突種別（プレイヤー・敵など）
+    /// @param followTarget 追従対象のTransform
+    /// @param localStartPos ローカル空間での開始位置
+    /// @param localEndPos ローカル空間での終了位置
+    /// @param radius カプセルの半径
+    ColliderCapsule(TAG collisionTag, const Transform* followTarget, const VECTOR& localStartPos, const VECTOR& localEndPos, float radius);
 
-	// デストラクタ
-	~ColliderCapsule(void) = default;
+    /// @brief デストラクタ
+    ~ColliderCapsule(void) override = default;
 
+    /// @brief ローカル開始位置の設定
+    /// @param pos ローカル空間での開始位置
+    void SetLocalStartPos(const VECTOR& position);
 
-	// 親Transformからの相対位置を取得
-	const VECTOR& GetLocalPosTop(void) const { return localPosTop_; };
-	const VECTOR& GetLocalPosDown(void) const { return localPosDown_; };
+    /// @brief ローカル終了位置の設定
+    /// @param pos ローカル空間での終了位置
+    void SetLocalEndPos(const VECTOR& position);
 
-	// 親Transformからの相対位置をセット
-	void SetLocalPosTop(const VECTOR& pos) { localPosTop_ = pos; };
-	void SetLocalPosDown(const VECTOR& pos) { localPosDown_ = pos; };
+    /// @brief 半径の設定
+    /// @param radius カプセルの半径
+    void SetRadius(float radius);
 
-	// ワールド座標を取得
-	VECTOR GetPosTop(void) const;
-	VECTOR GetPosDown(void) const;
+    /// @brief ローカル開始位置の取得
+    /// @return ローカル空間での開始位置
+    const VECTOR& GetLocalStartPos(void) const;
 
-	// 半径
-	float GetRadius(void) const { return radius_; };
-	void SetRadius(float _radius) { radius_ = _radius; };
+    /// @brief ローカル終了位置の取得
+    /// @return ローカル空間での終了位置
+    const VECTOR& GetLocalEndPos(void) const;
 
-	// 高さ
-	float GetHeight(void) const { return localPosTop_.y; };
+    /// @brief ワールド開始位置の取得
+    /// @return ワールド空間での開始位置
+    VECTOR GetWorldStartPos(void) const;
 
-	// カプセルの中心座標
-	VECTOR GetCenter(void) const;
+    /// @brief ワールド開始位置の取得
+    /// @return ワールド空間での開始位置
+    VECTOR GetWorldEndPos(void) const;
 
-	// 指定された回数と距離で三角形の法線方向に押し戻した座標を取得
-	VECTOR GetPosPushBackAlongNormal(
-		const MV1_COLL_RESULT_POLY& hitColPoly,
-		int maxTryCnt,
-		float pushDistance) const;
-
-	// 指定された回数と距離で三角形の法線方向に押し戻す
-	void PushBackAlongNormal(
-		const ColliderModel* _colliderModel, Transform* _transform,
-		int _maxTryCnt, float _pushDistance,
-		bool isExclude = false, bool isTarget = false) const;
-	
-	// モデルと衝突しているか否か
-	bool IsHit(const ColliderModel* colliderModel,
-				bool isExcude = false, bool isTarget = false) const;
+    /// @brief 半径の取得
+   /// @return カプセルの半径
+    float GetRadius(void) const;
 
 protected:
-
-	// デバッグ用描画
-	void DrawDebug(int color) override;
+    /// @brief デバッグ描画
+    /// @param debugColor 描画色
+    void DrawDebug(int debugColor) const override;
 
 private:
+    // デバッグ表示の球体・カプセルポリゴン分割数
+    static constexpr int DEBUG_SEGMENT_COUNT = 8;
 
-	// 親Transformからの相対位置(上側)
-	VECTOR localPosTop_;
+    // カプセルの開始座標(ローカル)
+    VECTOR localStartPos_;
 
-	// 親Transformからの相対位置(下側)
-	VECTOR localPosDown_;
+    // カプセルの終了座標(ローカル)
+    VECTOR localEndPos_;
 
-	// 半径
-	float radius_;
+    // カプセルの半径
+    float radius_;
 };

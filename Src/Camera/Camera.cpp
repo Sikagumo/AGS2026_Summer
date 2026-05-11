@@ -1,7 +1,7 @@
 #include "Camera.h"
 #include <DxLib.h>
 #include <EffekseerForDXLib.h>
-#include "../Utility/AsoUtility.h"
+#include "../Utility/UtilityMath.h"
 #include "../Manager/Generic/InputManager.h"
 #include "../Object/Common/Transform.h"
 #include "../Object/Collider/ColliderBase.h"
@@ -13,9 +13,9 @@ Camera::Camera(void)
 	: ActorBase::ActorBase(),
 	followTransform_(nullptr),
 	mode_(MODE::NONE),
-	angles_(AsoUtility::VECTOR_ZERO),
+	angles_(UtilityMath::VECTOR_ZERO),
 	rotY_(Quaternion::Identity()),
-	targetPos_(AsoUtility::VECTOR_ZERO)
+	targetPos_(UtilityMath::VECTOR_ZERO)
 {
 	// DxLibの初期設定では、
 	// カメラの位置が x = 320.0f, y = 240.0f, z = (画面のサイズによって変化)、
@@ -29,7 +29,7 @@ void Camera::InitCollider(void)
 	// 主に地面との衝突で使用する球体コライダ
 	ColliderSphere* colliderSphere = new ColliderSphere(ColliderBase::TAG::CAMERA,
 														&transform_,
-														AsoUtility::VECTOR_ZERO,
+														UtilityMath::VECTOR_ZERO,
 														COL_CAPSULE_SPHERE
 														);
 	ownColliders_.emplace(
@@ -148,7 +148,7 @@ void Camera::SetDefault(void)
 	transform_.quaRot = Quaternion::Identity();
 
 	// 注視点
-	targetPos_ = AsoUtility::VECTOR_ZERO;
+	targetPos_ = UtilityMath::VECTOR_ZERO;
 }
 
 void Camera::SyncFollow(void)
@@ -158,10 +158,10 @@ void Camera::SyncFollow(void)
 	VECTOR pos = followTransform_->pos;
 
 	// Y軸
-	rotY_ = Quaternion::AngleAxis(angles_.y, AsoUtility::AXIS_Y);
+	rotY_ = Quaternion::AngleAxis(angles_.y, UtilityMath::AXIS_Y);
 
 	// Y軸 + X軸
-	transform_.quaRot = rotY_.Mult(Quaternion::AngleAxis(angles_.x, AsoUtility::AXIS_X));
+	transform_.quaRot = rotY_.Mult(Quaternion::AngleAxis(angles_.x, UtilityMath::AXIS_X));
 
 	VECTOR localPos;
 
@@ -195,14 +195,14 @@ void Camera::ProcessMove(void)
 
 	auto& ins = InputManager::GetInstance();
 
-	VECTOR moveDir = AsoUtility::VECTOR_ZERO;
+	VECTOR moveDir = UtilityMath::VECTOR_ZERO;
 
 	if (GetJoypadNum() == 0)
 	{
-		if (ins.IsNew(KEY_INPUT_UP)) { moveDir = AsoUtility::DIR_F; }
-		if (ins.IsNew(KEY_INPUT_DOWN)) { moveDir = AsoUtility::DIR_B; }
-		if (ins.IsNew(KEY_INPUT_LEFT)) { moveDir = AsoUtility::DIR_L; }
-		if (ins.IsNew(KEY_INPUT_RIGHT)) { moveDir = AsoUtility::DIR_R; }
+		if (ins.IsNew(KEY_INPUT_UP)) { moveDir = UtilityMath::DIR_F; }
+		if (ins.IsNew(KEY_INPUT_DOWN)) { moveDir = UtilityMath::DIR_B; }
+		if (ins.IsNew(KEY_INPUT_LEFT)) { moveDir = UtilityMath::DIR_L; }
+		if (ins.IsNew(KEY_INPUT_RIGHT)) { moveDir = UtilityMath::DIR_R; }
 	}
 	else
 	{
@@ -216,7 +216,7 @@ void Camera::ProcessMove(void)
 	}
 
 	// 移動処理
-	if (!AsoUtility::EqualsVZero(moveDir))
+	if (!UtilityMath::EqualsVZero(moveDir))
 	{
 
 		// 移動させたい方向(ベクトル)に変換
@@ -250,10 +250,10 @@ void Camera::SetBeforeDrawFree(void)
 	ProcessMove();
 
 	// Y軸
-	rotY_ = Quaternion::AngleAxis(angles_.y, AsoUtility::AXIS_Y);
+	rotY_ = Quaternion::AngleAxis(angles_.y, UtilityMath::AXIS_Y);
 
 	// Y軸 + X軸
-	transform_.quaRot = rotY_.Mult(Quaternion::AngleAxis(angles_.x, AsoUtility::AXIS_X));
+	transform_.quaRot = rotY_.Mult(Quaternion::AngleAxis(angles_.x, UtilityMath::AXIS_X));
 
 	// 注視点更新
 	targetPos_ = VAdd(transform_.pos, transform_.quaRot.PosAxis(FOLLOW_TARGET_LOCAL_POS));
@@ -262,7 +262,7 @@ void Camera::SetBeforeDrawFree(void)
 void Camera::SetBeforeDrawFollow(void)
 {
 	// カメラ位置の補間
-	transform_.pos = AsoUtility::Lerp(prePos_,
+	transform_.pos = UtilityMath::Lerp(prePos_,
 									  transform_.pos, LERP_RATE_MOVE);
 
 	// カメラ操作(回転)
@@ -327,7 +327,7 @@ void Camera::RotGamePad(bool isLimit)
 	// 右スティックの傾き
 	VECTOR dir = ins.GetDirectionXZAKey(padState.AKeyRX, padState.AKeyRY);
 
-	if (!AsoUtility::EqualsVZero(dir))
+	if (!UtilityMath::EqualsVZero(dir))
 	{
 		// 右スティック左右の傾き
 		angles_.y += dir.x * ROT_POW_RAD;
@@ -355,7 +355,7 @@ void Camera::Collision(void)
 	for (const auto& hitCol : hitColliders_)
 	{
 		// モデル以外は処理を飛ばす
-		if (hitCol->GetShape() != ColliderBase::SHAPE::MODEL) continue;
+		if (hitCol->GetShapeType() != ColliderBase::SHAPE::MODEL) continue;
 
 		// 派生クラスへキャスト
 		const ColliderModel* colliderModel = dynamic_cast<const ColliderModel*>(hitCol);
@@ -366,7 +366,7 @@ void Camera::Collision(void)
 		//auto hitPoly = colliderModel->GetNearestHitPolyLine(transform_.pos, start, true);
 		
 		auto hits = MV1CollCheck_LineDim(
-			colliderModel->GetFollow()->modelId,
+			colliderModel->GetFollowTarget()->modelId,
 			-1,
 			transform_.pos,
 			start
@@ -383,10 +383,10 @@ void Camera::Collision(void)
 
 
 			// 除外フレームは無視する
-			if (colliderModel->IsExcludeFrame(hit.FrameIndex)) { continue; }
+			if (colliderModel->IsExcludedFrame(hit.FrameIndex)) { continue; }
 			// 
 			// 対象フレームは無視する
-			if (!colliderModel->IsTargetFrame(hit.FrameIndex)) { continue; }
+			if (!colliderModel->IsExcludedFrame(hit.FrameIndex)) { continue; }
 
 
 			// 衝突判定
@@ -413,7 +413,7 @@ void Camera::Collision(void)
 			return;
 		}
 		// カメラ位置から注視点への方向
-		VECTOR dirToTarget = AsoUtility::VNormalize(VSub(targetPos_, transform_.pos));
+		VECTOR dirToTarget = UtilityMath::VNormalize(VSub(targetPos_, transform_.pos));
 
 		// 衝突点の少し手前にカメラを置く
 		transform_.pos =
@@ -433,6 +433,6 @@ void Camera::Collision(void)
 		if (colliderSphere == nullptr) { return; }
 
 		// 反発処理
-		transform_.pos = colliderSphere->GetPosPushBackAlongNormal(hitPoly, CNT_TRY_COLLISION_CAMERA, COLLISION_BACK_DIS);
+		//transform_.pos = colliderSphere->GetPosPushBackAlongNormal(hitPoly, CNT_TRY_COLLISION_CAMERA, COLLISION_BACK_DIS);
 	}
 }

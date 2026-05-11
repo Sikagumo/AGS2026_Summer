@@ -1,50 +1,68 @@
 #pragma once
+
 #include <DxLib.h>
-#include "./ColliderBase.h"
+
+#include "ColliderBase.h"
+
 class Transform;
 
+/// @brief 線分コライダクラス
 class ColliderLine : public ColliderBase
 {
 public:
 
-	// コンストラクタ
-	ColliderLine(TAG tag, const Transform* follow,
-				 const VECTOR& localPosStart, const VECTOR& localPosEnd);
+	/// @brief コンストラクタ
+	/// @param collisionTag 衝突種別
+	/// @param followTarget 追従対象のTransform
+	/// @param localStartPos ローカル空間での開始位置
+	/// @param localEndPos ローカル空間での終了位置
+	ColliderLine(TAG  collisionTag, const Transform* followTarget, const VECTOR& localStartPos, const VECTOR& localEndPos);
 
-	// デストラクタ
+	/// @brief デストラクタ
 	~ColliderLine(void) override = default;
 
+	/// @brief ローカル開始位置の設定
+	/// @param position ローカル空間での開始位置
+	void SetLocalStartPos(const VECTOR& position);
 
-	// ローカル座標での設定
-	void SetLocalPosStart(const VECTOR& pos);
-	void SetLocalPosEnd(const VECTOR& pos);
+	/// @brief ローカル終了位置の設定
+	/// @param position ローカル空間での終了位置
+	void SetLocalEndPos(const VECTOR& position);
 
-	// ローカル座標の取得
-	const VECTOR& GetLocalPosStart(void) const { return localPosStart_;  };
-	const VECTOR& GetLocalPosEnd(void) const { return localPosEnd_;  };
+	/// @brief ローカル開始位置の取得
+	/// @return ローカル空間での開始位置
+	const VECTOR& GetLocalStartPos(void) const;
 
-	// ワールド座標の取得
-	VECTOR GetPosStart(void) const;
-	VECTOR GetPosEnd(void) const;
+	/// @brief ローカル終了位置の取得
+	/// @return ローカル空間での終了位置
+	const VECTOR& GetLocalEndPos(void) const;
 
+	/// @brief ワールド開始位置の取得
+	/// @return ワールド空間での開始位置
+	VECTOR GetWorldStartPos(void) const;
+
+	/// @brief ワールド終了位置の取得
+	/// @return ワールド空間での終了位置
+	VECTOR GetWorldEndPos(void) const;
 
 protected:
 
-	// デバッグ用描画
-	void DrawDebug(int color) override;
-
+	/// @brief デバッグ描画
+	/// @param debugColor 描画色
+	void DrawDebug(int debugColor) const override;
 
 private:
 
-	// デバッグ表示の球体半径
-	static constexpr float RADIUS = 5.0f;
+	// デバック表示の球体半径
+	static constexpr float DEBUG_POINT_RADIUS = 5.0f;
 
-	// デバッグ表示の球体ポリゴン分割数
-	static constexpr int DIV_NUM = 6;
+	// デバック表示の球体ポリゴン分割数
+	static constexpr int DEBUG_SEGMENT_COUNT = 6;
 
-	// 線分の開始座標(ローカル)
-	VECTOR localPosStart_;
+	// 線分の開始地点座標(ローカル)
+	VECTOR localStartPos_;
 
 	// 線分の終了座標(ローカル)
-	VECTOR localPosEnd_;
+	VECTOR localEndPos_;
+
 };

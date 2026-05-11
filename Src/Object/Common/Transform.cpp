@@ -1,16 +1,16 @@
 #include <DxLib.h>
-#include "../../Utility/AsoUtility.h"
+#include "../../Utility/UtilityMath.h"
 #include "../../Utility/MatrixUtility.h"
 #include "Transform.h"
 
 Transform::Transform(void)
 	:
 	modelId(-1),
-	scl(AsoUtility::VECTOR_ONE),
-	rot(AsoUtility::VECTOR_ZERO),
-	pos(AsoUtility::VECTOR_ZERO),
-	localPos(AsoUtility::VECTOR_ZERO),
-	prePos(AsoUtility::VECTOR_ZERO),
+	scl(UtilityMath::VECTOR_ONE),
+	rot(UtilityMath::VECTOR_ZERO),
+	pos(UtilityMath::VECTOR_ZERO),
+	localPos(UtilityMath::VECTOR_ZERO),
+	prePos(UtilityMath::VECTOR_ZERO),
 	matScl(MGetIdent()),
 	matRot(MGetIdent()),
 	matPos(MGetIdent()),
@@ -116,9 +116,9 @@ void Transform::InitTransform(float _scl, const Quaternion& _rot, const Quaterni
 }
 void Transform::InitTransform(void)
 {
-	InitTransform(AsoUtility::VECTOR_ONE,
+	InitTransform(UtilityMath::VECTOR_ONE,
 				  Quaternion::Identity(), Quaternion::Identity(),
-				  AsoUtility::VECTOR_ZERO);
+				  UtilityMath::VECTOR_ZERO);
 }
 
 
@@ -131,7 +131,7 @@ void Transform::Translate(const VECTOR& _movePow)
 void Transform::Translate(const VECTOR& _dir, float _movePow)
 {
 	// ê≥ãKâªÇµÇƒà⁄ìÆ
-	VECTOR dir = AsoUtility::VNormalize(_dir);
+	VECTOR dir = UtilityMath::VNormalize(_dir);
 	VECTOR moveVec = VScale(dir, _movePow);
 	Translate(moveVec);
 }
@@ -149,32 +149,32 @@ void Transform::Rotate(const VECTOR& _axis, float _pow)
 
 VECTOR Transform::GetForward(void) const
 {
-	return GetDir(AsoUtility::DIR_F);
+	return GetDir(UtilityMath::DIR_F);
 }
 
 VECTOR Transform::GetBack(void) const
 {
-	return GetDir(AsoUtility::DIR_B);
+	return GetDir(UtilityMath::DIR_B);
 }
 
 VECTOR Transform::GetRight(void) const
 {
-	return GetDir(AsoUtility::DIR_R);
+	return GetDir(UtilityMath::DIR_R);
 }
 
 VECTOR Transform::GetLeft(void) const
 {
-	return GetDir(AsoUtility::DIR_L);
+	return GetDir(UtilityMath::DIR_L);
 }
 
 VECTOR Transform::GetUp(void) const
 {
-	return GetDir(AsoUtility::DIR_UP);
+	return GetDir(UtilityMath::DIR_UP);
 }
 
 VECTOR Transform::GetDown(void) const
 {
-	return GetDir(AsoUtility::DIR_DOWN);
+	return GetDir(UtilityMath::DIR_DOWN);
 }
 
 VECTOR Transform::GetDir(const VECTOR& dir) const

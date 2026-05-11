@@ -1,54 +1,40 @@
 #pragma once
-#include "./ColliderBase.h"
-#include <vector>
+
+#include <unordered_set>
 #include <string>
 
+#include "ColliderBase.h"
+
+/// @brief モデルベースのコライダクラス（フレーム単位で当たり判定を制御）
 class ColliderModel : public ColliderBase
 {
 public:
 
-	// コンストラクタ
-	ColliderModel(TAG _tag, const Transform * _follow);
+    /// @brief コンストラクタ
+    /// @param collisionTag 衝突種別
+    /// @param followTarget 追従対象のTransform
+    ColliderModel(TAG collisionTag, const Transform* followTarget);
 
-	// デストラクタ
-	~ColliderModel(void) override = default;
+    /// @brief デストラクタ
+    ~ColliderModel(void) override = default;
 
+    /// @brief 指定文字列を含むフレームを当たり判定から除外
+    /// @param exclusionName 除外対象フレーム名に含まれる文字列
+    void AddExcludeFrameIds(const std::string& exclusionName);
 
-	// 指定された文字を含むフレームを衝突判定から除外
-	void AddExcludeFrameIds(const std::string& _name);
+    /// @brief 除外フレームのクリア
+    void ClearExcludedFrames(void);
 
-	// 衝突判定から除外するフレームをクリアする
-	void ClearExcludeFrame(void);
-
-	// 除外フレーム判定
-	bool IsExcludeFrame(int _frameIdx) const;
-
-	// 指定された文字を含むフレームを衝突判定対象とする
-	void AddTargetFrameIds(const std::string& _name);
-
-	// 衝突判定の対象するフレームをクリアする
-	void ClearTargetFrame(void);
-
-	// 対象フレーム判定
-	bool IsTargetFrame(int _frameIdx) const;
-
-	// 線分とモデルの最近接(startに近い)衝突ポリゴンを取得
-	MV1_COLL_RESULT_POLY GetNearestHitPolyLine(
-		const VECTOR& start,
-		const VECTOR& end,
-		bool isExclude = false, bool isTarget = false) const;
+    /// @brief フレームが除外対象か判定
+    /// @param frameIndex フレーム番号
+    /// @return 除外対象ならtrue
+    bool IsExcludedFrame(int frameIndex) const;
 
 protected:
+    /// @brief デバッグ描画（モデルコライダは描画しない）
+    void DrawDebug(int debugColor) const override {};
 
-	// 衝突判定から除外するフレーム番号
-	std::vector<int> excludeFrameIds_;
-
-	// 衝突判定の対象とするフレーム番号
-	std::vector<int> targetFrameIds_;
-
-
-	// デバッグ用描画
-	void DrawDebug(int color) override {}
-
-
+private:
+    // 衝突判定から除外するフレーム番号
+    std::unordered_set<int> excludedFrameIndices_;
 };

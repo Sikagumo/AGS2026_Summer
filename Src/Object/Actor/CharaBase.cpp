@@ -1,5 +1,5 @@
 #include "../Common/AnimationController.h"
-#include "../../Utility/AsoUtility.h"
+#include "../../Utility/UtilityMath.h"
 #include "../../Manager/Generic/SceneManager.h"
 #include "../../Manager/Generic/ResourceManager.h"
 #include "../Collider/ColliderBase.h"
@@ -14,13 +14,13 @@
 CharaBase::CharaBase(void) :
 	ActorBase::ActorBase(),
 	isJump_(false),
-	jumpPow_(AsoUtility::VECTOR_ZERO),
+	jumpPow_(UtilityMath::VECTOR_ZERO),
 	moveSpeed_(0.0f),
 	stepJump_(0.0f),
 	shadowHandle_(-1),
-	prevPos_(AsoUtility::VECTOR_ZERO),
-	moveDir_(AsoUtility::VECTOR_ZERO),
-	movePow_(AsoUtility::VECTOR_ZERO),
+	prevPos_(UtilityMath::VECTOR_ZERO),
+	moveDir_(UtilityMath::VECTOR_ZERO),
+	movePow_(UtilityMath::VECTOR_ZERO),
 	animation_(nullptr)
 {
 }
@@ -88,7 +88,7 @@ void CharaBase::Release(void)
 void CharaBase::CalcGravityPow(void)
 {
 	// 重力方向
-	VECTOR dirGravity = AsoUtility::DIR_DOWN;
+	VECTOR dirGravity = UtilityMath::DIR_DOWN;
 
 	// 重力の強さ
 	float gravityPow = Application::GetInstance().GetGravityPow() * sceneMng_.GetDeltaTime();
@@ -119,7 +119,7 @@ void CharaBase::Collision(void)
 void CharaBase::CollisionGravity(void)
 {
 	// 落下中しか判定しない
-	if (!(VDot(AsoUtility::DIR_DOWN, jumpPow_) > 0.9f)) { return; }
+	if (!(VDot(UtilityMath::DIR_DOWN, jumpPow_) > 0.9f)) { return; }
 
 	// 線分コライダ
 	int lineType = static_cast<int>(COLLIDER_TYPE::LINE);
@@ -134,14 +134,14 @@ void CharaBase::CollisionGravity(void)
 	if (colliderLine_ == nullptr) { return; }
 
 	// 線分の始点と終点を取得
-	VECTOR s = colliderLine_->GetPosStart();
-	VECTOR e = colliderLine_->GetPosEnd();
+	VECTOR s = colliderLine_->GetWorldStartPos();
+	VECTOR e = colliderLine_->GetWorldEndPos();
 
 	// 登録されている衝突物を全てチェック
 	for (const auto& hitCol : hitColliders_)
 	{
 		// ステージ以外は処理を飛ばす
-		if (hitCol->GetTag() != ColliderBase::TAG::STAGE) { continue; }
+		if (hitCol->GetCollisionTag() != ColliderBase::TAG::STAGE) { continue; }
 
 		// 派生クラスへキャスト
 		const ColliderModel* colliderModel =
@@ -151,21 +151,21 @@ void CharaBase::CollisionGravity(void)
 
 		// ステージモデル(地面)との衝突
 		auto hits = MV1CollCheck_LineDim(
-			colliderModel->GetFollow()->modelId, -1, s, e);
+			colliderModel->GetFollowTarget()->modelId, -1, s, e);
 
 		for (int i = 0; i < hits.HitNum; i++)
 		{
 			auto hit = hits.Dim[i];
 
 			// 除外フレームは無視する
-			if (colliderModel->IsExcludeFrame(hit.FrameIndex)) { continue; }
+			if (colliderModel->IsExcludedFrame(hit.FrameIndex)) { continue; }
 
 			// 衝突地点から、少し上に移動
 			if (transform_.pos.y < hit.HitPosition.y)
 			{
 				// 衝突物より、下側にいる場合のみ、位置を修正する
 				transform_.pos =
-					VAdd(hit.HitPosition, VScale(AsoUtility::DIR_UP, 2.0f));
+					VAdd(hit.HitPosition, VScale(UtilityMath::DIR_UP, 2.0f));
 			}
 
 			// ジャンプ判定
@@ -178,7 +178,7 @@ void CharaBase::CollisionGravity(void)
 	if (!isJump_)
 	{
 		// ジャンプリセット
-		jumpPow_ = AsoUtility::VECTOR_ZERO;
+		jumpPow_ = UtilityMath::VECTOR_ZERO;
 
 		// ジャンプの入力受付時間をリセット
 		stepJump_ = 0.0f;
@@ -188,73 +188,73 @@ void CharaBase::CollisionGravity(void)
 
 void CharaBase::CollisionCapsule(void)
 {
-	// カプセルコライダ
-	int capsuleType = static_cast<int>(COLLIDER_TYPE::CAPSULE);
+	//// カプセルコライダ
+	//int capsuleType = static_cast<int>(COLLIDER_TYPE::CAPSULE);
 
-	// カプセルコライダが無ければ処理を抜ける
-	if (ownColliders_.count(capsuleType) == 0) { return; }
+	//// カプセルコライダが無ければ処理を抜ける
+	//if (ownColliders_.count(capsuleType) == 0) { return; }
 
-	// カプセルコライダ情報
-	ColliderCapsule * colliderCapsule = dynamic_cast<ColliderCapsule*>(ownColliders_.at(capsuleType));
+	//// カプセルコライダ情報
+	//ColliderCapsule * colliderCapsule = dynamic_cast<ColliderCapsule*>(ownColliders_.at(capsuleType));
 
-	if (colliderCapsule == nullptr) { return; }
+	//if (colliderCapsule == nullptr) { return; }
 
-	// 登録されている衝突物を全てチェック
-	for (const auto& hitCol : hitColliders_)
-	{
-		// モデル以外はスキップ
-		if (hitCol->GetShape() != ColliderBase::SHAPE::MODEL) { continue; }
+	//// 登録されている衝突物を全てチェック
+	//for (const auto& hitCol : hitColliders_)
+	//{
+	//	// モデル以外はスキップ
+	//	if (hitCol->GetShapeType() != ColliderBase::SHAPE::MODEL) { continue; }
 
-		// 派生クラスへキャスト
-		const ColliderModel* colliderModel = dynamic_cast<const ColliderModel*>(hitCol);
+	//	// 派生クラスへキャスト
+	//	const ColliderModel* colliderModel = dynamic_cast<const ColliderModel*>(hitCol);
 
-		if (colliderModel == nullptr) { continue; }
+	//	if (colliderModel == nullptr) { continue; }
 
-		
-		// 衝突するオブジェクトの全てのポリゴンを判定
-		auto hits = MV1CollCheck_Capsule(colliderModel->GetFollow()->modelId, -1,
-										 colliderCapsule->GetPosTop(), colliderCapsule->GetPosDown(),
-										 colliderCapsule->GetRadius());
-		
-		// 衝突した複数のポリゴンと衝突回避するまで、
-		// プレイヤーの位置を移動させる
-		for (int i = 0; i < hits.HitNum; i++)
-		{
-			auto hit = hits.Dim[i];
+	//	
+	//	// 衝突するオブジェクトの全てのポリゴンを判定
+	//	auto hits = MV1CollCheck_Capsule(colliderModel->GetFollowTarget()->modelId, -1,
+	//									 colliderCapsule->GetPosTop(), colliderCapsule->GetPosDown(),
+	//									 colliderCapsule->GetRadius());
+	//	
+	//	// 衝突した複数のポリゴンと衝突回避するまで、
+	//	// プレイヤーの位置を移動させる
+	//	for (int i = 0; i < hits.HitNum; i++)
+	//	{
+	//		auto hit = hits.Dim[i];
 
-			// 衝突したフレームが除外対象時、スキップ
-			if (colliderModel->IsExcludeFrame(hit.FrameIndex)) { continue; }
+	//		// 衝突したフレームが除外対象時、スキップ
+	//		if (colliderModel->IsExcludeFrame(hit.FrameIndex)) { continue; }
 
 
-			// 指定された回数と距離で三角形の法線方向に押し戻す
-			transform_.pos = colliderCapsule->GetPosPushBackAlongNormal(hit, CNT_TRY_COLLISION, COLLISION_BACK_DIS);
+	//		// 指定された回数と距離で三角形の法線方向に押し戻す
+	//		transform_.pos = colliderCapsule->GetPosPushBackAlongNormal(hit, CNT_TRY_COLLISION, COLLISION_BACK_DIS);
 
-			/*
-			// 地面と異なり、衝突回避位置が不明なため、何度か移動させる
-			// この時、移動させる方向は、移動前座標に向いた方向であったり、
-			// 衝突したポリゴンの法線方向だったりする
-			for (int tryCnt = 0; tryCnt < CNT_TRY_COLLISION; tryCnt++)
-			{
-				// 再度、モデル全体と衝突検出するには、効率が悪過ぎるので、
-				// 最初の衝突判定で検出した衝突ポリゴン1枚と衝突判定を取る
-				int pHit = HitCheck_Capsule_Triangle(colliderCapsule->GetPosTop(), colliderCapsule->GetPosDown(),
-													 colliderCapsule->GetRadius(),
-													 hit.Position[0], hit.Position[1], hit.Position[2]);
+	//		/*
+	//		// 地面と異なり、衝突回避位置が不明なため、何度か移動させる
+	//		// この時、移動させる方向は、移動前座標に向いた方向であったり、
+	//		// 衝突したポリゴンの法線方向だったりする
+	//		for (int tryCnt = 0; tryCnt < CNT_TRY_COLLISION; tryCnt++)
+	//		{
+	//			// 再度、モデル全体と衝突検出するには、効率が悪過ぎるので、
+	//			// 最初の衝突判定で検出した衝突ポリゴン1枚と衝突判定を取る
+	//			int pHit = HitCheck_Capsule_Triangle(colliderCapsule->GetPosTop(), colliderCapsule->GetPosDown(),
+	//												 colliderCapsule->GetRadius(),
+	//												 hit.Position[0], hit.Position[1], hit.Position[2]);
 
-				if (pHit)
-				{
-					// 法線の方向にちょっとだけ移動させる
-					transform_.pos = VAdd(transform_.pos, VScale(hit.Normal, COLLISION_BACK_DIS));
+	//			if (pHit)
+	//			{
+	//				// 法線の方向にちょっとだけ移動させる
+	//				transform_.pos = VAdd(transform_.pos, VScale(hit.Normal, COLLISION_BACK_DIS));
 
-					continue;
-				}
-				break;
-			}*/
-		}
+	//				continue;
+	//			}
+	//			break;
+	//		}*/
+	//	}
 
-		// 検出した地面ポリゴン情報の後始末
-		MV1CollResultPolyDimTerminate(hits);
-	}
+	//	// 検出した地面ポリゴン情報の後始末
+	//	MV1CollResultPolyDimTerminate(hits);
+	//}
 }
 
 void CharaBase::DrawLate(void)
@@ -297,7 +297,7 @@ void CharaBase::DrawShadowRound(void)
 		}*/
 
 		// プレイヤーの直下に存在する地面のポリゴンを取得
-		HitResDim = MV1CollCheck_Capsule(col->GetFollow()->modelId, -1, transform_.pos,
+		HitResDim = MV1CollCheck_Capsule(col->GetFollowTarget()->modelId, -1, transform_.pos,
 										 VAdd(transform_.pos, VGet(0.0f, -PLAYER_SHADOW_HEIGHT, 0.0f)),
 										 PLAYER_SHADOW_SIZE);
 

@@ -4,7 +4,7 @@
 #include<math.h>
 #include<DxLib.h>
 
-#include"../Utility/AsoUtility.h"
+#include"../Utility/UtilityMath.h"
 
 Quaternion::Quaternion(void)
 {
@@ -39,9 +39,9 @@ Quaternion Quaternion::Euler(double radX, double radY, double radZ)
 	Quaternion ret = Quaternion();
 
 	// 角度を0〜2π範囲に正規化
-	radX = AsoUtility::RadIn2PI(radX);
-	radY = AsoUtility::RadIn2PI(radY);
-	radZ = AsoUtility::RadIn2PI(radZ);
+	radX = UtilityMath::RadIn2PI(radX);
+	radY = UtilityMath::RadIn2PI(radY);
+	radZ = UtilityMath::RadIn2PI(radZ);
 
 	// オイラー角からクォータニオンへの変換式
 	double cosZ = cos(radZ / 2.0f);
@@ -218,9 +218,9 @@ Quaternion Quaternion::LookRotation(VECTOR dir)
 Quaternion Quaternion::LookRotation(VECTOR dir, VECTOR up)
 {
 	// 方向ベクトルを正規化
-	dir = AsoUtility::VNormalize(dir);
+	dir = UtilityMath::VNormalize(dir);
 	// 右方向ベクトルを計算し正規化（アップベクトルと方向ベクトルの外積）
-	VECTOR right = AsoUtility::VNormalize(VCross(up, dir));
+	VECTOR right = UtilityMath::VNormalize(VCross(up, dir));
 	// 正確なアップベクトルを再計算（直交性を保証）
 	up = VCross(dir, right);
 
@@ -352,32 +352,32 @@ VECTOR Quaternion::GetDir(VECTOR dir) const
 
 VECTOR Quaternion::GetForward(void) const
 {
-	return GetDir(AsoUtility::DIR_F);
+	return GetDir(UtilityMath::DIR_F);
 }
 
 VECTOR Quaternion::GetBack(void) const
 {
-	return GetDir(AsoUtility::DIR_B);
+	return GetDir(UtilityMath::DIR_B);
 }
 
 VECTOR Quaternion::GetRight(void) const
 {
-	return GetDir(AsoUtility::DIR_R);
+	return GetDir(UtilityMath::DIR_R);
 }
 
 VECTOR Quaternion::GetLeft(void) const
 {
-	return GetDir(AsoUtility::DIR_L);
+	return GetDir(UtilityMath::DIR_L);
 }
 
 VECTOR Quaternion::GetUp(void) const
 {
-	return GetDir(AsoUtility::DIR_UP);
+	return GetDir(UtilityMath::DIR_UP);
 }
 
 VECTOR Quaternion::GetDown(void) const
 {
-	return GetDir(AsoUtility::DIR_DOWN);
+	return GetDir(UtilityMath::DIR_DOWN);
 }
 
 double Quaternion::Dot(const Quaternion& q1, const Quaternion& q2)
@@ -442,23 +442,23 @@ Quaternion Quaternion::FromToRotation(VECTOR fromDir, VECTOR toDir)
 {
 	// 回転軸を計算（fromDirとtoDirの外積）
 	VECTOR axis = VCross(fromDir, toDir);
-	double angle = AsoUtility::AngleDeg(fromDir, toDir);
+	double angle = UtilityMath::AngleDeg(fromDir, toDir);
 
 	// 180度近くの回転の場合、別の方法で軸を決定
 	if (angle >= 179.9196)
 	{
-		auto r = VCross(fromDir, AsoUtility::DIR_R);
+		auto r = VCross(fromDir, UtilityMath::DIR_R);
 		axis = VCross(r, fromDir);
 		float len = axis.x * axis.x + axis.y * axis.y + axis.z * axis.z;
 		if (len < 0.000001f)
 		{
-			axis = AsoUtility::DIR_UP; // 軸が小さすぎる場合はY軸を使用
+			axis = UtilityMath::DIR_UP; // 軸が小さすぎる場合はY軸を使用
 		}
 	}
 
 	// 軸を正規化し、angle-axis表現からクォータニオンを生成
-	axis = AsoUtility::VNormalize(axis);
-	return Quaternion::AngleAxis(AsoUtility::Deg2RadD(angle), axis);
+	axis = UtilityMath::VNormalize(axis);
+	return Quaternion::AngleAxis(UtilityMath::Deg2RadD(angle), axis);
 }
 
 Quaternion Quaternion::RotateTowards(const Quaternion& from, const Quaternion& to, float maxDegreesDelta)
