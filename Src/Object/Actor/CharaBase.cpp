@@ -69,7 +69,7 @@ void CharaBase::Update(void)
 	transform_.Update();
 
 	// アニメーション再生
-	animation_->Update();
+	//animation_->Update();
 
 	// 各キャラクターごとの更新後処理
 	UpdateProcessPost();

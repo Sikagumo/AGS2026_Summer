@@ -1,4 +1,3 @@
-#include "SceneGame.h"
 #include "../../Manager/Generic/SceneManager.h"
 #include "../../Manager/Generic/InputManager.h"
 #include "../../Manager/Generic/ResourceManager.h"
@@ -6,11 +5,18 @@
 #include "../../Manager/System/TimeManager.h"
 #include "../../Manager/System/Loading.h"
 #include "../../Object/Actor/Chara/Boss/Boss.h"
+
+#include "SceneGame.h"
+
 //#include "SceneScore.h"
 
 SceneGame::SceneGame(void)
 {
 
+}
+
+SceneGame::~SceneGame(void)
+{
 }
 
 void SceneGame::Load(void)

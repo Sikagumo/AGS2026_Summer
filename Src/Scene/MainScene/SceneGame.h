@@ -15,7 +15,7 @@ public:
     SceneGame(void);
 
     /// @brief デストラクタ
-    ~SceneGame(void) = default;
+    ~SceneGame(void);
 
     /// @brief リソースの読み込み開始
     void Load(void) override;
