@@ -47,7 +47,7 @@ public:
 	void Run(void);
 
 	// ƒŠƒ\[ƒX‚Ì”jŠü
-	void Destroy(void);
+	void DestroyInstance(void);
 
 	// ‰Šú‰»¬Œ÷^¸”s‚Ì”»’è
 	bool IsInitFail(void) const;

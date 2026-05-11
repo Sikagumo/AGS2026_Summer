@@ -1,91 +1,137 @@
 #pragma once
-#include <map>
+
+#include <unordered_map>
 #include <string>
-#include "Resource.h"
+#include "./Resource.h"
 
 class ResourceManager
 {
-	using RES_TYPE = Resource::TYPE;
-
 public:
 
-	// リソース名
+	/// @brief リソース識別列挙
 	enum class SRC
 	{
-		// 画像
-		
+		NONE = -1,
 
-		// モデル
-		
+		/* 単一画像 */
+		IMG_TITLE,
 
-		// 外部アニメーション
-		
-		// エフェクト
+		/* 複数画像 */
+		IMGS_TEXTS,
 
-		//サウンド
+		/* モデル */
+		MODEL_SKYDOME,
+		MODEL_PLAYER,
+
+		/* 外部アニメーション */
+
+		/* エフェクト */
+
+		/* 映像 */
+
+		/* BGM */
+		BGM_TITLE,
+		BGM_GAME,
+
+		/* 効果音 */
+		SE_CLICK,
+		SE_SELECT,
+		SE_DAMAGE,
 	};
 
-	// 明示的にインステンスを生成する
+
+	/*　各ハンドルパス　*/
+
+	// エフェクトファイルパス
+	static const std::string PATH_EFFECT;
+
+	// 画像ファイルパス
+	static const std::string PATH_IMAGE;
+
+	// 3Dモデルファイルパス
+	static const std::string PATH_MODEL;
+
+	// アニメーションファイルパス
+	static const std::string PATH_ANIM;
+
+	// BGMファイルパス
+	static const std::string PATH_BGM;
+
+	// 効果音ファイルパス
+	static const std::string PATH_SE;
+
+	// 動画ファイルパス
+	static const std::string PATH_MOVIE;
+
+
 	static void CreateInstance(void);
+	static ResourceManager& GetInstance(void) { return *instance_; };
+	void DestroyInstance(void);
 
-	// 静的インスタンスの取得
-	static ResourceManager& GetInstance(void);
+	void Initialize(void);
 
-	// 初期化
-	void Init(void);
 
-	// 解放(シーン切替時に一旦解放)
-	void Release(void);
+	/// @brief リソースのロード
+	/// @param _src 読み込み対象
+	Resource Load(SRC _src);
 
-	// リソースの完全破棄
-	void Destroy(void);
+	/// @brief リソースのハンドルを取得
+	/// @param _src 読み込み対象
+	const int LoadHandleId(SRC _src);
+	const int LoadHandleId(int _src) { return LoadHandleId(static_cast<SRC>(_src)); };
 
-	
+	/// @brief 複数画像のハンドルを画像ハンドルに割り当て
+	/// @param _src 読み込み対象
+	/// @param _target 複数画像配列の先頭パス
+	void LoadHandleIds(SRC _src, int* _target);
 
-	int GetHandleId(SRC src) { return Load(src).handleId_; };
-	int& GetHandleIds(SRC src) { return *Load(src).handleIds_; };
+	/// @brief 3Dモデル重複利用時の読み込み
+	/// @param _src 読み込み対象
+	int LoadModelDuplicate(SRC _src);
 
-	// リソースの複製ロード(モデル用)
-	int LoadModelDuplicate(SRC src);
+	/// @brief リソースのハンドルを取得
+	/// @param _src 読み込み対象
+	std::string GetHandlePath(SRC _src);
+	std::string GetHandlePath(int _src) { return GetHandlePath(static_cast<SRC>(_src)); };
+
 
 private:
 
-	// 静的インスタンス
+	//静的インスタンス
 	static ResourceManager* instance_;
 
-	// リソース管理の対象
-	std::map<SRC, Resource*> resourcesMap_;
+	// リソース管理対象
+	std::unordered_map<SRC, Resource> resourcesMap_;
 
 	// 読み込み済みリソース
-	std::map<SRC, Resource&> loadedMap_;
+	std::unordered_map<SRC, Resource*> loadedMap_;
 
-	Resource dummy_;
 
-	// デフォルトコンストラクタをprivateにして、
-	// 外部から生成できない様にする
+	/// @brief 解放処理
+	void Release(void);
+
+
 	ResourceManager(void);
-	ResourceManager(const ResourceManager& manager) = default;
 	~ResourceManager(void) = default;
 
-	// リソースのロード
-	const Resource& Load(SRC src);
+	/* コピーコンストラクタ対策 */
+	ResourceManager(const ResourceManager&)			   = delete;
+	ResourceManager& operator=(const ResourceManager&) = delete;
+	ResourceManager(ResourceManager&&)			  = delete;
+	ResourceManager& operator=(ResourceManager&&) = delete;
+	
 
-	// 内部ロード
-	Resource& _Load(SRC src);
+	/// @brief リソース取得処理(複数画像)
+	/// @param _loadType 読み込み方法
+	/// @param _src リソース対象
+	/// @param _path パス
+	/// @param _allNum 画像の数
+	/// @param _numX 最大横画像数
+	/// @param _numY 最大縦画像数
+	void _SetResource(Resource::LOAD_TYPE _loadType, SRC _src, std::string _path
+					  , int _allNum = -1, int _numX = -1, int _numY = -1);
 
-	// 画像読み込み
-	void SetResourceImage(void);
-
-	// モデル読み込み
-	void SetResourceModel(void);
-
-	// アニメーション読み込み
-	void SetResourceAnim(void);
-
-	// エフェクト読み込み
-	void SetResourceEffect(void);
-
-	// サウンド読み込み
-	void SetResourceSound(void);
-
+	/// @brief 内部ロード処理
+	/// @param _source 読み込み対象
+	Resource* _Load(SRC _source);
 };

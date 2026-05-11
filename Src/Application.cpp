@@ -116,15 +116,15 @@ void Application::Run(void)
 		// 理想FPS経過待ち
 		fpsController_->Wait();
 	}
-	netManager.Destroy();
+	netManager.DestroyInstance();
 }
 
-void Application::Destroy(void)
+void Application::DestroyInstance(void)
 {
-	InputManager::GetInstance().Destroy();
-	ResourceManager::GetInstance().Destroy();
+	InputManager::GetInstance().DestroyInstance();
+	ResourceManager::GetInstance().DestroyInstance();
 	// ネットワーク管理破棄
-	NetManager::GetInstance().Destroy();
+	NetManager::GetInstance().DestroyInstance();
 
 	// シーン管理解放
 	SceneManager::GetInstance().DestroyInstance();
