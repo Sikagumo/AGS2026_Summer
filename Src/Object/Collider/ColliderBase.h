@@ -1,8 +1,13 @@
 #pragma once
-#pragma once
-#include <DxLib.h>
-class Transform;
 
+#include <DxLib.h>
+
+#include "../Common/Transform.h"
+
+
+/// @brief コライダーの基底クラス
+/// @details
+/// 各種コライダーの共通インターフェースを定義する
 class ColliderBase
 {
 public:
@@ -10,68 +15,84 @@ public:
 	// 形状
 	enum class SHAPE
 	{
-		NONE,
-		LINE,
-		SPHERE,
-		CAPSULE,
-		MODEL,
+		NONE,        //　無効
+		LINE,        //  線分
+		SPHERE,      //  球
+		CAPSULE,     //  カプセル
+		MODEL,       //  モデル
 	};
 
 	// 衝突種別
 	enum class TAG
 	{
-		STAGE,
-		PLAYER,
-		CAMERA,
-		ENEMY,
-		VIEW_RANGE,
+		STAGE,       // ステージ
+		PLAYER,      // プレイヤー
+		ENEMY,       // 敵
+		CAMERA,      // カメラ
+		WALL,        // 壁
 	};
 
+	/// @brief コンストラクタ
+	/// @param shape コライダー形状
+	/// @param tag 衝突種別
+	/// @param follow 追従対象Transform
+	ColliderBase(SHAPE shapeType, TAG collisionTag, const Transform* followTarget);
 
-	// コンストラクタ
-	ColliderBase(SHAPE shape, TAG tag, const Transform* follow);
-
-	// デストラクタ
+	/// @brief デストラクタ
 	virtual ~ColliderBase(void) = default;
 
-	// 描画
+	/// @brief デバッグ描画を行う
 	void Draw(void);
 
-	// 追従先の取得
-	const Transform * GetFollow(void) const { return follow_; };
+	/// @brief 追従先を取得する
+	/// @return Transformポインタ
+	const Transform* GetFollowTarget(void) const;
 
-	// 追従先の再設定
-	void SetFollow(Transform* follow);
+	/// @brief 追従先を設定する
+	/// @param followTarget 新しいTransform
+	void SetFollowTarget(Transform* followTarget);
 
-	// 形状
-	SHAPE GetShape(void) const { return shape_; }
+	/// @brief コライダー形状を取得する
+	/// @return 形状種別
+	SHAPE GetShapeType(void) const;
 
-	// 衝突種別
-	TAG GetTag(void) const { return tag_; }
+	/// @brief 衝突タグを取得する
+	/// @return タグ種別
+	TAG GetCollisionTag(void) const;
 
+	/// @brief 有効状態を取得する
+	/// @return true: 有効 / false: 無効
+	bool IsActive(void) const;
+
+	/// @brief 有効状態を設定する
+	/// @param isActive trueで有効化
+	void SetActive(bool isActive);
 
 protected:
 
-	// デバッグ表示の色
-	static constexpr int COLOR_VALID = 0xff0000;
-	static constexpr int COLOR_INVALID = 0xaaaaaa;
+	// デバック表示の色
+	static constexpr int DEBUG_COLOR_ACTIVE = 0xff0000;      // 有効なコライダーは赤色
+	static constexpr int DEBUG_COLOR_INACTIVE = 0xaaaaaa;    // 無効なコライダーは灰色
 
 	// 形状
-	SHAPE shape_;
+	SHAPE shapeType_;
 
 	// 衝突種別
-	TAG tag_;
+	TAG collisionTag_;
 
 	// 追従先
-	const Transform* follow_;
+	const Transform* followTarget_;
 
 	// 有効フラグ
-	bool isValid_;
+	bool isActive_;
 
+	/// @brief ローカル座標をワールド座標に変換する
+	/// @param localPos ローカル座標
+	/// @return ワールド座標
+	VECTOR TransformLocalToWorld(const VECTOR& localPos) const;
 
-	// ローカル座標をワールド座標に変換
-	VECTOR GetRotPos(const VECTOR& localPos) const;
-
-	// デバッグ用描画
-	virtual void DrawDebug(int color) = 0;
+	/// @brief デバッグ描画（派生クラスで実装）
+	/// @param color 描画色
+	virtual void DrawDebug(int color) const = 0;
 };
+

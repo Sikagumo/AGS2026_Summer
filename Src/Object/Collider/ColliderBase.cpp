@@ -1,37 +1,61 @@
-#include "../Common/Transform.h"
 #include "ColliderBase.h"
 
-
-ColliderBase::ColliderBase(SHAPE shape, TAG tag, const Transform* follow)
-	:
-	shape_(shape),
-	tag_(tag),
-	follow_(follow),
-	isValid_(true)
+ColliderBase::ColliderBase(SHAPE shapeType, TAG collisionTag, const Transform* followTarget)
+	: shapeType_(shapeType)
+	, collisionTag_(collisionTag)
+	, followTarget_(followTarget)
+	, isActive_(true)
 {
 }
-
 
 void ColliderBase::Draw(void)
 {
-	int color = COLOR_INVALID;
-	if (isValid_)
+	int color = DEBUG_COLOR_INACTIVE;
+
+	// 有効なコライダなら色を変更
+	if (isActive_)
 	{
-		color = COLOR_VALID;
+		color = DEBUG_COLOR_ACTIVE;
 	}
+
 	DrawDebug(color);
 }
 
-
-void ColliderBase::SetFollow(Transform* follow)
+VECTOR ColliderBase::TransformLocalToWorld(const VECTOR& localPos) const
 {
-	follow_ = follow;
+	// ローカル座標を回転させてワールド座標へ変換
+	VECTOR localRotPos = followTarget_->quaRot.PosAxis(localPos);
+
+	// 位置を加算して最終的なワールド座標にする
+	return VAdd(followTarget_->pos, localRotPos);
 }
 
-VECTOR ColliderBase::GetRotPos(const VECTOR& localPos) const
+const Transform* ColliderBase::GetFollowTarget(void) const
 {
-	// 追従相手の回転に合わせて指定ローカル座標を回転し、
-	// 基準座標に加えることでワールド座標へ変換
-	VECTOR localRotPos = follow_->quaRot.PosAxis(localPos);
-	return VAdd(follow_->pos, localRotPos);
+	return followTarget_;
+}
+
+void ColliderBase::SetFollowTarget(Transform* followTarget)
+{
+	followTarget_ = followTarget;
+}
+
+ColliderBase::SHAPE ColliderBase::GetShapeType(void) const
+{
+	return shapeType_;
+}
+
+ColliderBase::TAG ColliderBase::GetCollisionTag(void) const
+{
+	return collisionTag_;
+}
+
+bool ColliderBase::IsActive(void) const
+{
+	return isActive_;
+}
+
+void ColliderBase::SetActive(bool isActive)
+{
+	isActive_ = isActive;
 }

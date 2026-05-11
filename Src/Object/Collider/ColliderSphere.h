@@ -1,52 +1,60 @@
 #pragma once
+
 #include <DxLib.h>
+
 #include "ColliderBase.h"
+
 class Transform;
 
-
+// @brief 球体コライダクラス
 class ColliderSphere : public ColliderBase
 {
 public:
 
-	// コンストラクタ
-	ColliderSphere(TAG tag, const Transform* follow, const VECTOR& localPos, float radius);
+    // @brief コンストラクタ
+    // @param collisionTag 衝突種別
+    // @param followTarget 追従対象のTransform
+    // @param localPosition ローカル空間での中心位置
+    // @param radius 球体の半径
+    ColliderSphere(TAG collisionTag, const Transform* followTarget, const VECTOR& localPosition, float radius);
 
-	// デストラクタ
-	~ColliderSphere(void)override = default;
+    // @brief デストラクタ
+    ~ColliderSphere(void) override = default;
 
+    // @brief ローカル座標の設定
+    // @param position ローカル空間での中心位置
+    void SetLocalPosition(const VECTOR& position);
 
-	// 親Transformからの相対位置を取得
-	const VECTOR& GetLocalPos(void) const;
+    // @brief 半径の設定
+    // @param radius 球体の半径
+    void SetRadius(float radius);
 
-	// 親Transformからの相対位置をセット
-	void SetLocalPos(const VECTOR& localPos) { localPos_ = localPos; };
+    // @brief ローカル座標の取得
+    // @return ローカル空間での中心位置
+    const VECTOR& GetLocalPosition(void) const;
 
-	// ワールド座標を取得
-	VECTOR GetPos(void) const;
+    // @brief ワールド座標の取得
+    // @return ワールド空間での中心位置
+    VECTOR GetWorldPosition(void) const;
 
-	// 半径
-	float GetRadius(void) const { return radius_; };
-
-	void SetRadius(float radius) { radius_ = radius; };
-
-	// 指定された回数と距離で三角形の法線方向に押し戻した座標を取得
-	VECTOR GetPosPushBackAlongNormal(
-		const MV1_COLL_RESULT_POLY& hitColPoly,
-		int maxTryCnt,
-		float pushDistance) const;
-
+    // @brief 半径の取得
+    // @return 球体の半径
+    float GetRadius(void) const;
 
 protected:
 
-	// デバッグ用描画
-	void DrawDebug(int color) override;
-
+    // @brief デバッグ描画
+    // @param color 描画色
+    void DrawDebug(int color) const override;
 
 private:
 
-	// 親Transformからの相対位置(下側)
-	VECTOR localPos_;
+    // デバッグ表示の球体ポリゴン分割数
+    static constexpr int DEBUG_SEGMENT_COUNT = 16;
 
-	// 半径
-	float radius_;
+    // 球体の中心座標(ローカル)
+    VECTOR localPosition_;
+
+    // 球体の半径
+    float radius_;
 };
