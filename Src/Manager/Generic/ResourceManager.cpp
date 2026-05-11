@@ -205,6 +205,11 @@ Resource* ResourceManager::_Load(SRC src)
 }
 
 
+const int ResourceManager::LoadHandleIdsOnce(SRC _src, int _imageNum)
+{
+	return Load(_src).GetHandleImagesId(_imageNum);
+}
+
 int ResourceManager::LoadModelDuplicate(SRC src)
 {
 	/* 3Dƒ‚ƒfƒ‹d•¡—˜—p‚Ì“Ç‚İ‚İ */

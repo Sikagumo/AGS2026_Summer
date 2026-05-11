@@ -1,4 +1,5 @@
-﻿#include "UtilityMath.h"
+<<<<<<< HEAD
+#include "UtilityMath.h"
 
 #include<DxLib.h>
 #include<string>
@@ -10,13 +11,13 @@
 
 
 
-// 小数値を四捨五入して整数に変換する
+// 小数値を四捨五�Eして整数に変換する
 int UtilityMath::Round(float v)
 {
 	return static_cast<int>(roundf(v));
 }
 
-// 文字列を指定された区切り文字で分割する
+// 斁E���Eを指定された区刁E��斁E��で刁E��する
 std::vector<std::string> UtilityMath::Split(std::string& line, char delimiter)
 {
 	std::istringstream stream(line);
@@ -31,13 +32,13 @@ std::vector<std::string> UtilityMath::Split(std::string& line, char delimiter)
 	return result;
 }
 
-// ラジアンを度に変換する（double）
+// ラジアンを度に変換する�E�Eouble�E�E
 double UtilityMath::Rad2DegD(double rad)
 {
 	return rad * (180.0 / DX_PI);
 }
 
-// ラジアンを度に変換する（float）
+// ラジアンを度に変換する�E�Eloat�E�E
 float UtilityMath::Rad2DegF(float rad)
 {
 	return rad * (180.0f / DX_PI_F);
@@ -49,13 +50,13 @@ int UtilityMath::Rad2DegI(int rad)
 	return rad * Round(180.0f / DX_PI_F);
 }
 
-// 度をラジアンに変換する（double）
+// 度をラジアンに変換する�E�Eouble�E�E
 double UtilityMath::Deg2RadD(double deg)
 {
 	return deg * (DX_PI / 180.0);
 }
 
-// 度をラジアンに変換する（float）
+// 度をラジアンに変換する�E�Eloat�E�E
 float UtilityMath::Deg2RadF(float deg)
 {
 	return deg * (DX_PI_F / 180.0f);
@@ -67,7 +68,7 @@ int UtilityMath::Deg2RadI(int deg)
 	return deg * Round(DX_PI_F / 180.0f);
 }
 
-// 角度を0〜360度の範囲に正規化する
+// 角度めE、E60度の篁E��に正規化する
 double UtilityMath::DegIn360(double deg)
 {
 	deg = fmod(deg, 360.0);
@@ -79,7 +80,7 @@ double UtilityMath::DegIn360(double deg)
 	return deg;
 }
 
-// ラジアンを0〜2πの範囲に正規化する
+// ラジアンめE、Eπの篁E��に正規化する
 double UtilityMath::RadIn2PI(double rad)
 {
 	rad = fmod(rad, DX_TWO_PI);
@@ -91,7 +92,7 @@ double UtilityMath::RadIn2PI(double rad)
 	return rad;
 }
 
-// ラジアン単位でどちら回りが近いかを判定する（-1=反時計回り、1=時計回り）
+// ラジアン単位でどちら回りが近いかを判定する！E1=反時計回り、E=時計回り！E
 int UtilityMath::DirNearAroundRad(float from, float to)
 {
 	float ret = 1.0f;
@@ -101,17 +102,17 @@ int UtilityMath::DirNearAroundRad(float from, float to)
 	if (diff >= 0.0f)
 	{
 
-		//比較元よりも時計回りに位置する
+		//比輁E�Eよりも時計回りに位置する
 
 		if (diff > DX_PI_F)
 		{
 
-			//でも、180度以上離れているので、反時計回りの方が近い
+			//でも、E80度以上離れてぁE��ので、反時計回り�E方が近い
 			ret = -1.0f;
 		}
 		else
 		{
-			//時計回り
+			//時計回めE
 			ret = 1.0f;
 		}
 
@@ -119,18 +120,18 @@ int UtilityMath::DirNearAroundRad(float from, float to)
 	else
 	{
 
-		//比較元よりも反時計回りに位置する
+		//比輁E�Eよりも反時計回りに位置する
 
 		if (diff < -DX_PI_F)
 		{
 
-			//でも、180度以上離れているので、時計回りの方が近い
+			//でも、E80度以上離れてぁE��ので、時計回り�E方が近い
 			ret = 1.0f;
 		}
 		else
 		{
 
-			//反時計回り
+			//反時計回めE
 			ret = -1.0f;
 		}
 	}
@@ -138,7 +139,7 @@ int UtilityMath::DirNearAroundRad(float from, float to)
 	return static_cast<int>(ret);
 }
 
-// 度単位でどちら回りが近いかを判定する（-1=反時計回り、1=時計回り）
+// 度単位でどちら回りが近いかを判定する！E1=反時計回り、E=時計回り！E
 int UtilityMath::DirNearAroundDeg(float from, float to)
 {
 	float ret = 1.0f;
@@ -149,33 +150,33 @@ int UtilityMath::DirNearAroundDeg(float from, float to)
 	{
 
 
-		//比較元よりも時計回りに位置する
+		//比輁E�Eよりも時計回りに位置する
 
 		if (diff > 180.0f)
 		{
 
-			//でも、180度以上離れているので、反時計回りの方が近い
+			//でも、E80度以上離れてぁE��ので、反時計回り�E方が近い
 			ret = -1.0f;
 		}
 		else
 		{
-			//時計回り
+			//時計回めE
 			ret = 1.0f;
 		}
 	}
 	else
 	{
 
-		//比較元よりも反時計回りに位置する
+		//比輁E�Eよりも反時計回りに位置する
 
 		if (diff < -180.0f)
 		{
-			//でも、180度以上離れているので。時計回りの方が近い
+			//でも、E80度以上離れてぁE��ので。時計回り�E方が近い
 			ret = 1.0f;
 		}
 		else
 		{
-			//時計回り
+			//時計回めE
 			ret = -1.0f;
 		}
 	}
@@ -266,7 +267,7 @@ VECTOR UtilityMath::Lerp(const VECTOR& start, const VECTOR& end, float t)
 	return ret;
 }
 
-// 度単位で角度を線形補間し、360度を考慮する
+// 度単位で角度を線形補間し、E60度を老E�Eする
 double UtilityMath::LerpDeg(double start, double end, double t)
 {
 	double ret;
@@ -303,7 +304,7 @@ double UtilityMath::LerpDeg(double start, double end, double t)
 	return ret;
 }
 
-// 色（COLOR_F）を線形補間する
+// 色�E�EOLOR_F�E�を線形補間する
 COLOR_F UtilityMath::Lerp(const COLOR_F& start, const COLOR_F& end, float t)
 {
 	//線形補間
@@ -340,7 +341,7 @@ VECTOR UtilityMath::Bezier(const VECTOR& p1, const VECTOR& p2, const VECTOR& p3,
 	return Lerp(a, b, t);
 }
 
-// XZ平面上で中心点を軸に回転後の座標を求める
+// XZ平面上で中忁E��を軸に回転後�E座標を求めめE
 VECTOR UtilityMath::RotXZPos(const VECTOR& centerPos, const VECTOR& radiusPos, float rad)
 {
 	float x = ((radiusPos.x - centerPos.x) * cosf(rad)) - ((radiusPos.z - centerPos.z) * sinf(rad));
@@ -349,61 +350,61 @@ VECTOR UtilityMath::RotXZPos(const VECTOR& centerPos, const VECTOR& radiusPos, f
 	return VGet(centerPos.x + x, radiusPos.y, centerPos.z + z);
 }
 
-// 2Dベクトルの長さを求める
+// 2Dベクトルの長さを求めめE
 double UtilityMath::Magnitude(const Vector2& v)
 {
 	return sqrt((v.x * v.x) + (v.y * v.y));
 }
 
-// 3Dベクトルの長さを求める
+// 3Dベクトルの長さを求めめE
 double UtilityMath::Magnitude(const VECTOR& v)
 {
 	return sqrt((v.x * v.x) + (v.y * v.y) + (v.z * v.z));
 }
 
-// 3Dベクトルの長さをfloatで求める
+// 3Dベクトルの長さをfloatで求めめE
 float UtilityMath::MagnitudeF(const VECTOR& v)
 {
 	return sqrtf((v.x * v.x) + (v.y * v.y) + (v.z * v.z));
 }
 
-// 2Dベクトルの長さの2乗を求める
+// 2Dベクトルの長さ�E2乗を求めめE
 int UtilityMath::SqrMagnitude(const Vector2& v)
 {
 	return v.x * v.x + v.y * v.y;
 }
 
-// 3Dベクトルの長さの2乗をfloatで求める
+// 3Dベクトルの長さ�E2乗をfloatで求めめE
 float UtilityMath::SqrMagnitudeF(const VECTOR& v)
 {
 	return v.x * v.x + v.y * v.y + v.z * v.z;
 }
 
-// 3Dベクトルの長さの2乗を求める
+// 3Dベクトルの長さ�E2乗を求めめE
 double UtilityMath::SqrMagnitude(const VECTOR& v)
 {
 	return v.x * v.x + v.y * v.y + v.z * v.z;
 }
 
-// 2つの3Dベクトル間の距離の2乗を求める
+// 2つの3Dベクトル間�E距離の2乗を求めめE
 double UtilityMath::SqrMagnitude(const VECTOR& v1, const VECTOR& v2)
 {
 	return pow(v2.x - v1.x, 2) + pow(v2.y - v1.y, 2) + pow(v2.z - v1.z, 2);
 }
 
-// 2つの2Dベクトル間の距離を求める
+// 2つの2Dベクトル間�E距離を求めめE
 double UtilityMath::Distance(const Vector2& v1, const Vector2& v2)
 {
 	return sqrt(pow(v2.x - v1.x, 2) + pow(v2.y - v1.y, 2));
 }
 
-// 2つの3Dベクトル間の距離を求める
+// 2つの3Dベクトル間�E距離を求めめE
 double UtilityMath::Distance(const VECTOR& v1, const VECTOR& v2)
 {
 	return sqrt(pow(v2.x - v1.x, 2) + pow(v2.y - v1.y, 2) + pow(v2.z - v1.z, 2));
 }
 
-// 2つの3Dベクトルが等しいかどうかを判定する
+// 2つの3Dベクトルが等しぁE��どぁE��を判定すめE
 bool UtilityMath::Equals(const VECTOR& v1, const VECTOR& v2)
 {
 	if (v1.x == v2.x && v1.y == v2.y && v1.z == v2.z)
@@ -414,7 +415,7 @@ bool UtilityMath::Equals(const VECTOR& v1, const VECTOR& v2)
 	return false;
 }
 
-// ベクトルがゼロベクトルかどうかを判定する
+// ベクトルがゼロベクトルかどぁE��を判定すめE
 bool UtilityMath::EqualsVZero(const VECTOR& v1)
 {
 	const VECTOR& v2 = VECTOR_ZERO;
@@ -444,19 +445,19 @@ VECTOR UtilityMath::Normalize(const Vector2& v)
 	return ret;
 }
 
-// 3Dベクトルを正規化する（ゼロベクトルのときはそのまま返す）
+// 3Dベクトルを正規化する�E�ゼロベクトルのとき�Eそ�Eまま返す�E�E
 VECTOR UtilityMath::VNormalize(const VECTOR& v)
 {
 	if (UtilityMath::EqualsVZero(v))
 	{
-		//Quaternion計算でゼロを渡して、
-		//エラー(-1, -1, -1)が返ってくると困る
+		//Quaternion計算でゼロを渡して、E
+		//エラー(-1, -1, -1)が返ってくると困めE
 		return v;
 	}
 	return VNorm(v);
 }
 
-// 2つの3Dベクトルのなす角（度）を求める
+// 2つの3Dベクトルのなす角（度�E�を求めめE
 double UtilityMath::AngleDeg(const VECTOR& from, const VECTOR& to)
 {
 	auto fLen = SqrMagnitude(from);
@@ -482,7 +483,7 @@ double UtilityMath::AngleDeg(const VECTOR& from, const VECTOR& to)
 
 }
 
-// 指定方向に線と終点に球体を描画する
+// 持E��方向に線と終点に琁E��を描画する
 void UtilityMath::DrawLineDir(const VECTOR& pos, const VECTOR& dir, int color, float len)
 {
 	auto nDir = UtilityMath::VNormalize(dir);
@@ -493,7 +494,7 @@ void UtilityMath::DrawLineDir(const VECTOR& pos, const VECTOR& dir, int color, f
 	DrawSphere3D(ePos, 5.0f, 5, color, color, true);
 }
 
-// 回転行列を基にXYZ軸方向の線を描画する
+// 回転行�Eを基にXYZ軸方向�E線を描画する
 void UtilityMath::DrawLineXYZ(const VECTOR& pos, const MATRIX& rot, float len)
 {
 	VECTOR dir;
@@ -511,7 +512,7 @@ void UtilityMath::DrawLineXYZ(const VECTOR& pos, const MATRIX& rot, float len)
 	DrawLineDir(pos, dir, 0x0000ff, len);
 }
 
-// クォータニオンを基にXYZ軸方向の線を描画する
+// クォータニオンを基にXYZ軸方向�E線を描画する
 void UtilityMath::DrawLineXYZ(const VECTOR& pos, const Quaternion& rot, float len)
 {
 	VECTOR dir;
@@ -531,11 +532,11 @@ void UtilityMath::DrawLineXYZ(const VECTOR& pos, const Quaternion& rot, float le
 
 //bool UtilityMath::IsTimeOver(float& totalTime, const float& waitTime)
 //{
-//	//デルタタイム
+//	//チE��タタイム
 //	auto delta = SceneManager::GetInstance().GetDeltaTime();
 //	totalTime += delta;
 //
-//	//待機時間を超過しているか判断
+//	//征E��時間を趁E��してぁE��か判断
 //	if (totalTime >= waitTime)
 //	{
 //		return true;

@@ -10,12 +10,13 @@
 
 
 Camera::Camera(void)
-	: ActorBase::ActorBase(),
-	followTransform_(nullptr),
-	mode_(MODE::NONE),
-	angles_(UtilityMath::VECTOR_ZERO),
-	rotY_(Quaternion::Identity()),
-	targetPos_(UtilityMath::VECTOR_ZERO)
+	: ActorBase::ActorBase()
+	, followTransform_(nullptr)
+	, mode_(MODE::NONE)
+	, angles_(UtilityMath::VECTOR_ZERO)
+	, rotY_(Quaternion::Identity())
+	, targetPos_(UtilityMath::VECTOR_ZERO)
+	, prePos_(UtilityMath::VECTOR_ZERO)
 {
 	// DxLibの初期設定では、
 	// カメラの位置が x = 320.0f, y = 240.0f, z = (画面のサイズによって変化)、

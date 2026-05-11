@@ -1,6 +1,7 @@
 #include "SceneManager.h"
 #include "../../Scene/SceneBase.h"
 #include "../../Scene/MainScene/SceneTitle.h"
+#include "../../Scene/MainScene/SceneGame_Player.h"
 #include "../Decoration/SoundManager.h"
 #include "../System/TimeManager.h"
 #include "../../Camera/Camera.h"

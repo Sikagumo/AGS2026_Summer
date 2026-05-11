@@ -17,32 +17,20 @@ CharaBase::CharaBase(void) :
 	jumpPow_(UtilityMath::VECTOR_ZERO),
 	moveSpeed_(0.0f),
 	stepJump_(0.0f),
-	shadowHandle_(-1),
 	prevPos_(UtilityMath::VECTOR_ZERO),
 	moveDir_(UtilityMath::VECTOR_ZERO),
-	movePow_(UtilityMath::VECTOR_ZERO),
-	animation_(nullptr)
+	movePow_(UtilityMath::VECTOR_ZERO)
+	//animation_(nullptr)
 {
 }
 
-
-void CharaBase::InitLoad(void)
-{
-	// 丸影画像
-	//shadowHandle_ = resMng_.GetHandleId(ResourceManager::SRC::IMG_SHADOW);
-
-	// 各読み込み処理
-}
 
 void CharaBase::InitAnimation(void)
 {
 	if (transform_.modelId != -1)
 	{
-		animation_ = new AnimationController(transform_.modelId);
+		//animation_ = new AnimationController(transform_.modelId);
 	}
-
-	// 各アニメーション初期化
-	InitAnimationPost();
 }
 
 void CharaBase::Update(void)
@@ -78,11 +66,12 @@ void CharaBase::Update(void)
 
 void CharaBase::Release(void)
 {
+	/*
 	if (animation_)
 	{
 		animation_->Release();
 		delete animation_;
-	}
+	}*/
 }
 
 void CharaBase::CalcGravityPow(void)
@@ -267,6 +256,7 @@ void CharaBase::DrawLate(void)
 void CharaBase::DrawShadowRound(void)
 {
 	/* 丸影 */
+	/*
 	const float PLAYER_SHADOW_HEIGHT = 700.0f;
 	const float PLAYER_SHADOW_SIZE = 50.0f;
 	MV1_COLL_RESULT_POLY_DIM HitResDim;
@@ -287,14 +277,14 @@ void CharaBase::DrawShadowRound(void)
 	for (auto& col : hitColliders_)
 	{
 		// チェックするモデルは、jが0の時はステージモデル、1以上の場合はコリジョンモデル
-		/*if (j == 0)
+		if (j == 0)
 		{
 			ModelHandle = stg.ModelHandle;
 		}
 		else
 		{
 			ModelHandle = stg.CollObjModelHandle[j - 1];
-		}*/
+		}
 
 		// プレイヤーの直下に存在する地面のポリゴンを取得
 		HitResDim = MV1CollCheck_Capsule(col->GetFollowTarget()->modelId, -1, transform_.pos,
@@ -358,6 +348,7 @@ void CharaBase::DrawShadowRound(void)
 
 	// Ｚバッファを無効にする
 	SetUseZBuffer3D(FALSE);
+	*/
 }
 
 void CharaBase::DrawPre(void)
