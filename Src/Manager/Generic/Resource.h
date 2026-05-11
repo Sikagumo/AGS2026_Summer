@@ -52,6 +52,10 @@ public:
 	/// @brief リソースのIDを取得
 	int GetHandleId(void)const { return handleId_; };
 
+	/// @brief 複数画像の個別取得
+	/// @param 取得する画像番号
+	int GetHandleImagesId(int _imageNum)const;
+
 	/// @brief リソースのハンドルパスを取得 
 	std::string GetHandlePath(void)const { return path_; };
 

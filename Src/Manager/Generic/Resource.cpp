@@ -186,3 +186,17 @@ void Resource::SetDuplicateModelId(int _id)
 	// ID‚ðƒŠƒXƒg‚Ì––”ö‚É’Ç‰Á
 	duplicationModelIds_.push_back(_id);
 }
+
+int Resource::GetHandleImagesId(int _imageNum) const
+{
+	int handle = -1;
+	if (_imageNum >= handleIds_.size() ||
+		_imageNum < 0)
+	{
+		return handle;
+	}
+
+	handle = handleIds_[_imageNum];
+
+	return handle;
+}

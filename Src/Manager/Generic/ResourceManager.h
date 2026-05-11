@@ -85,6 +85,11 @@ public:
 	/// @param _target 複数画像配列の先頭パス
 	void LoadHandleIds(SRC _src, int* _target);
 
+	/// @brief 複数画像のハンドルを画像ハンドルの部分割り当て
+	/// @param _src 複数画像の読み込み対象
+	/// @param _imageNum 画像対象
+	const int LoadHandleIdsOnce(SRC _src, int _imageNum);
+
 	/// @brief 3Dモデル重複利用時の読み込み
 	/// @param _src 読み込み対象
 	int LoadModelDuplicate(SRC _src);

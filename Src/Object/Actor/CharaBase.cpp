@@ -1,5 +1,5 @@
 #include "../Common/AnimationController.h"
-#include "../../Utility/AsoUtility.h"
+#include "../../Utility/UtilityMath.h"
 #include "../../Manager/Generic/SceneManager.h"
 #include "../../Manager/Generic/ResourceManager.h"
 #include "../Collider/ColliderBase.h"
@@ -14,36 +14,23 @@
 CharaBase::CharaBase(void) :
 	ActorBase::ActorBase(),
 	isJump_(false),
-	jumpPow_(AsoUtility::VECTOR_ZERO),
+	jumpPow_(UtilityMath::VECTOR_ZERO),
 	moveSpeed_(0.0f),
 	stepJump_(0.0f),
-	shadowHandle_(-1),
-	prevPos_(AsoUtility::VECTOR_ZERO),
-	moveDir_(AsoUtility::VECTOR_ZERO),
-	movePow_(AsoUtility::VECTOR_ZERO),
-	animation_(nullptr)
+	prevPos_(UtilityMath::VECTOR_ZERO),
+	moveDir_(UtilityMath::VECTOR_ZERO),
+	movePow_(UtilityMath::VECTOR_ZERO)
+	//animation_(nullptr)
 {
 }
 
-
-void CharaBase::InitLoad(void)
-{
-	// 丸影画像
-	//shadowHandle_ = resMng_.GetHandleId(ResourceManager::SRC::IMG_SHADOW);
-
-	// 各読み込み処理
-	InitLoadPost();
-}
 
 void CharaBase::InitAnimation(void)
 {
 	if (transform_.modelId != -1)
 	{
-		animation_ = new AnimationController(transform_.modelId);
+		//animation_ = new AnimationController(transform_.modelId);
 	}
-
-	// 各アニメーション初期化
-	InitAnimationPost();
 }
 
 void CharaBase::Update(void)
@@ -70,7 +57,7 @@ void CharaBase::Update(void)
 	transform_.Update();
 
 	// アニメーション再生
-	animation_->Update();
+	//animation_->Update();
 
 	// 各キャラクターごとの更新後処理
 	UpdateProcessPost();
@@ -79,17 +66,18 @@ void CharaBase::Update(void)
 
 void CharaBase::Release(void)
 {
+	/*
 	if (animation_)
 	{
 		animation_->Release();
 		delete animation_;
-	}
+	}*/
 }
 
 void CharaBase::CalcGravityPow(void)
 {
 	// 重力方向
-	VECTOR dirGravity = AsoUtility::DIR_DOWN;
+	VECTOR dirGravity = UtilityMath::DIR_DOWN;
 
 	// 重力の強さ
 	float gravityPow = Application::GetInstance().GetGravityPow() * sceneMng_.GetDeltaTime();
@@ -120,7 +108,7 @@ void CharaBase::Collision(void)
 void CharaBase::CollisionGravity(void)
 {
 	// 落下中しか判定しない
-	if (!(VDot(AsoUtility::DIR_DOWN, jumpPow_) > 0.9f)) { return; }
+	if (!(VDot(UtilityMath::DIR_DOWN, jumpPow_) > 0.9f)) { return; }
 
 	// 線分コライダ
 	int lineType = static_cast<int>(COLLIDER_TYPE::LINE);
@@ -166,7 +154,7 @@ void CharaBase::CollisionGravity(void)
 			{
 				// 衝突物より、下側にいる場合のみ、位置を修正する
 				transform_.pos =
-					VAdd(hit.HitPosition, VScale(AsoUtility::DIR_UP, 2.0f));
+					VAdd(hit.HitPosition, VScale(UtilityMath::DIR_UP, 2.0f));
 			}
 
 			// ジャンプ判定
@@ -179,7 +167,7 @@ void CharaBase::CollisionGravity(void)
 	if (!isJump_)
 	{
 		// ジャンプリセット
-		jumpPow_ = AsoUtility::VECTOR_ZERO;
+		jumpPow_ = UtilityMath::VECTOR_ZERO;
 
 		// ジャンプの入力受付時間をリセット
 		stepJump_ = 0.0f;
@@ -268,6 +256,7 @@ void CharaBase::DrawLate(void)
 void CharaBase::DrawShadowRound(void)
 {
 	/* 丸影 */
+	/*
 	const float PLAYER_SHADOW_HEIGHT = 700.0f;
 	const float PLAYER_SHADOW_SIZE = 50.0f;
 	MV1_COLL_RESULT_POLY_DIM HitResDim;
@@ -288,14 +277,14 @@ void CharaBase::DrawShadowRound(void)
 	for (auto& col : hitColliders_)
 	{
 		// チェックするモデルは、jが0の時はステージモデル、1以上の場合はコリジョンモデル
-		/*if (j == 0)
+		if (j == 0)
 		{
 			ModelHandle = stg.ModelHandle;
 		}
 		else
 		{
 			ModelHandle = stg.CollObjModelHandle[j - 1];
-		}*/
+		}
 
 		// プレイヤーの直下に存在する地面のポリゴンを取得
 		HitResDim = MV1CollCheck_Capsule(col->GetFollow()->modelId, -1, transform_.pos,
@@ -359,6 +348,7 @@ void CharaBase::DrawShadowRound(void)
 
 	// Ｚバッファを無効にする
 	SetUseZBuffer3D(FALSE);
+	*/
 }
 
 void CharaBase::DrawPre(void)

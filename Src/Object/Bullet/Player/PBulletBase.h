@@ -6,6 +6,7 @@ class PBulletBase : public ActorBase
 public:
 
 	PBulletBase(void);
+
 	virtual ~PBulletBase(void)override = default;
 
 

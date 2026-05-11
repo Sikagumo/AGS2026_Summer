@@ -4,7 +4,7 @@
 #include <string>
 #include <unordered_map>
 #include "../../Application.h"
-#include "../../Utility/AsoUtility.h"
+#include "../../Utility/UtilityMath.h"
 
 ResourceManager* ResourceManager::instance_ = nullptr;
 
@@ -198,6 +198,11 @@ Resource* ResourceManager::_Load(SRC src)
 	return ret;
 }
 
+
+const int ResourceManager::LoadHandleIdsOnce(SRC _src, int _imageNum)
+{
+	return Load(_src).GetHandleImagesId(_imageNum);
+}
 
 int ResourceManager::LoadModelDuplicate(SRC src)
 {

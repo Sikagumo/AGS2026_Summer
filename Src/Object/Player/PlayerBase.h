@@ -23,6 +23,9 @@ protected:
 	// プレイヤー番号
 	const int playerNo_;
 
+	// 移動速度(通常)
+	static constexpr float SPEED_MOVE = 5.0f;
+
 	std::vector<std::unique_ptr<PBulletBase>> bullet_;
 };
 

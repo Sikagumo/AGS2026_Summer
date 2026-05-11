@@ -1,8 +1,10 @@
 #pragma once
 #include "./PlayerBase.h"
+#include "../Actor/CharaBase.h"
+class InputManager;
 
 
-class Player : public PlayerBase
+class Player : public CharaBase
 {
 public:
 
@@ -24,14 +26,15 @@ public:
 
 protected:
 
-	void InitLoadPost(void)override;
-	void InitAnimationPost(void)override;
+	void InitLoad(void)override;
+	void InitAnimation(void)override {};
 	void InitTransform(void)override;
 	void InitCollider(void)override;
 	void InitPost(void)override;
 
 
 	void UpdateProcess(void);
+	void UpdateProcessPost(void);
 
 private:
 
@@ -74,13 +77,11 @@ private:
 	// ジャンプ受付時間
 	static constexpr float TIME_JUMP_INPUT = 0.6f;
 
-	// 移動速度(通常)
-	static constexpr float SPEED_MOVE = 5.0f;
 
-	// 移動速度(ダッシュ)
-	static constexpr float SPEED_DASH = 10.0f;
+	InputManager& inputManager_;
+	SceneManager& sceneManager_;
 
-	bool isDash_;
+	int shadowHandle_;
 
 
 	// 操作
@@ -89,5 +90,5 @@ private:
 	// ジャンプ
 	void ProcessJump(void);
 
-	void PlayAnim(ANIM_TYPE type, bool _isLoop = true);
+	//void PlayAnim(ANIM_TYPE type, bool _isLoop = true);
 };

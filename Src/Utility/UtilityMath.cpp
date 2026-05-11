@@ -4,9 +4,9 @@
 #include <vector>
 #include <math.h>
 #include <DxLib.h>
-#include "AsoUtility.h"
+#include "UtilityMath.h"
 
-float AsoUtility::Clamp(float v, float min, float max)
+float UtilityMath::Clamp(float v, float min, float max)
 {
 
     if (v > max)
@@ -22,42 +22,42 @@ float AsoUtility::Clamp(float v, float min, float max)
 
 }
 
-int AsoUtility::Round(float v)
+int UtilityMath::Round(float v)
 {
     return static_cast<int>(roundf(v));
 }
 
-double AsoUtility::Rad2DegD(double rad)
+double UtilityMath::Rad2DegD(double rad)
 {
     return rad * (180.0 / DX_PI);
 }
 
-float AsoUtility::Rad2DegF(float rad)
+float UtilityMath::Rad2DegF(float rad)
 {
     return rad * (180.0f / DX_PI_F);
 }
 
-int AsoUtility::Rad2DegI(int rad)
+int UtilityMath::Rad2DegI(int rad)
 {
     return rad * Round(180.0f / DX_PI_F);
 }
 
-double AsoUtility::Deg2RadD(double deg)
+double UtilityMath::Deg2RadD(double deg)
 {
     return deg * (DX_PI / 180.0);
 }
 
-float AsoUtility::Deg2RadF(float deg)
+float UtilityMath::Deg2RadF(float deg)
 {
     return deg * (DX_PI_F / 180.0f);
 }
 
-int AsoUtility::Deg2RadI(int deg)
+int UtilityMath::Deg2RadI(int deg)
 {
     return deg * Round(DX_PI_F / 180.0f);
 }
 
-double AsoUtility::DegIn360(double deg)
+double UtilityMath::DegIn360(double deg)
 {
     deg = fmod(deg, 360.0);
     if (deg < 0.0f)
@@ -67,7 +67,7 @@ double AsoUtility::DegIn360(double deg)
     return deg;
 }
 
-double AsoUtility::RadIn2PI(double rad)
+double UtilityMath::RadIn2PI(double rad)
 {
     rad = fmod(rad, DX_TWO_PI);
     if (rad < 0.0)
@@ -77,7 +77,7 @@ double AsoUtility::RadIn2PI(double rad)
     return rad;
 }
 
-int AsoUtility::DirNearAroundRad(float from, float to)
+int UtilityMath::DirNearAroundRad(float from, float to)
 {
 
     float ret = 1.0f;
@@ -123,7 +123,7 @@ int AsoUtility::DirNearAroundRad(float from, float to)
 
 }
 
-int AsoUtility::DirNearAroundDeg(float from, float to)
+int UtilityMath::DirNearAroundDeg(float from, float to)
 {
 
     float ret = 1.0f;
@@ -169,7 +169,7 @@ int AsoUtility::DirNearAroundDeg(float from, float to)
 
 }
 
-int AsoUtility::Lerp(int start, int end, float t)
+int UtilityMath::Lerp(int start, int end, float t)
 {
     // 線形補間
     if (t >= 1.0f)
@@ -182,7 +182,7 @@ int AsoUtility::Lerp(int start, int end, float t)
     return ret;
 }
 
-float AsoUtility::Lerp(float start, float end, float t)
+float UtilityMath::Lerp(float start, float end, float t)
 {
     // 線形補間
     if (t >= 1.0f)
@@ -195,7 +195,7 @@ float AsoUtility::Lerp(float start, float end, float t)
     return ret;
 }
 
-double AsoUtility::Lerp(double start, double end, double t)
+double UtilityMath::Lerp(double start, double end, double t)
 {
     // 線形補間
     if (t >= 1.0)
@@ -208,7 +208,7 @@ double AsoUtility::Lerp(double start, double end, double t)
     return ret;
 }
 
-Vector2 AsoUtility::Lerp(const Vector2& start, const Vector2& end, float t)
+Vector2 UtilityMath::Lerp(const Vector2& start, const Vector2& end, float t)
 {
     // 線形補間
     if (t >= 1.0f)
@@ -222,7 +222,7 @@ Vector2 AsoUtility::Lerp(const Vector2& start, const Vector2& end, float t)
     return ret;
 }
 
-VECTOR AsoUtility::Lerp(const VECTOR& start, const VECTOR& end, float t)
+VECTOR UtilityMath::Lerp(const VECTOR& start, const VECTOR& end, float t)
 {
     // 線形補間
     if (t >= 1.0f)
@@ -238,7 +238,7 @@ VECTOR AsoUtility::Lerp(const VECTOR& start, const VECTOR& end, float t)
     return ret;
 }
 
-double AsoUtility::LerpDeg(double start, double end, double t)
+double UtilityMath::LerpDeg(double start, double end, double t)
 {
 
     double ret;
@@ -271,7 +271,7 @@ double AsoUtility::LerpDeg(double start, double end, double t)
 
 }
 
-COLOR_F AsoUtility::Lerp(const COLOR_F& start, const COLOR_F& end, float t)
+COLOR_F UtilityMath::Lerp(const COLOR_F& start, const COLOR_F& end, float t)
 {
     // 線形補間
     if (t >= 1.0f)
@@ -287,73 +287,73 @@ COLOR_F AsoUtility::Lerp(const COLOR_F& start, const COLOR_F& end, float t)
     return ret;
 }
 
-Vector2 AsoUtility::Bezier(const Vector2& p1, const Vector2& p2, const Vector2& p3, float t)
+Vector2 UtilityMath::Bezier(const Vector2& p1, const Vector2& p2, const Vector2& p3, float t)
 {
     Vector2 a = Lerp(p1, p2, t);
     Vector2 b = Lerp(p2, p3, t);
     return Lerp(a, b, t);
 }
 
-VECTOR AsoUtility::Bezier(const VECTOR& p1, const VECTOR& p2, const VECTOR& p3, float t)
+VECTOR UtilityMath::Bezier(const VECTOR& p1, const VECTOR& p2, const VECTOR& p3, float t)
 {
     VECTOR a = Lerp(p1, p2, t);
     VECTOR b = Lerp(p2, p3, t);
     return Lerp(a, b, t);
 }
 
-VECTOR AsoUtility::RotXZPos(const VECTOR& centerPos, const VECTOR& radiusPos, float rad)
+VECTOR UtilityMath::RotXZPos(const VECTOR& centerPos, const VECTOR& radiusPos, float rad)
 {
     float x = ((radiusPos.x - centerPos.x) * cosf(rad)) - ((radiusPos.z - centerPos.z) * sinf(rad));
     float z = ((radiusPos.x - centerPos.x) * sinf(rad)) + ((radiusPos.z - centerPos.z) * cosf(rad));
     return VGet(centerPos.x + x, radiusPos.y, centerPos.z + z);
 }
 
-double AsoUtility::Magnitude(const Vector2& v)
+double UtilityMath::Magnitude(const Vector2& v)
 {
     return sqrt((v.x * v.x) + (v.y * v.y));
 }
 
-double AsoUtility::Magnitude(const VECTOR& v)
+double UtilityMath::Magnitude(const VECTOR& v)
 {
     return sqrt((v.x * v.x) + (v.y * v.y) + (v.z * v.z));
 }
 
-float AsoUtility::MagnitudeF(const VECTOR& v)
+float UtilityMath::MagnitudeF(const VECTOR& v)
 {
     return sqrtf((v.x * v.x) + (v.y * v.y) + (v.z * v.z));
 }
 
-int AsoUtility::SqrMagnitude(const Vector2& v)
+int UtilityMath::SqrMagnitude(const Vector2& v)
 {
     return v.x * v.x + v.y * v.y;
 }
 
-float AsoUtility::SqrMagnitudeF(const VECTOR& v)
+float UtilityMath::SqrMagnitudeF(const VECTOR& v)
 {
     return v.x * v.x + v.y * v.y + v.z * v.z;
 }
 
-double AsoUtility::SqrMagnitude(const VECTOR& v)
+double UtilityMath::SqrMagnitude(const VECTOR& v)
 {
     return v.x * v.x + v.y * v.y + v.z * v.z;
 }
 
-double AsoUtility::SqrMagnitude(const VECTOR& v1, const VECTOR& v2)
+double UtilityMath::SqrMagnitude(const VECTOR& v1, const VECTOR& v2)
 {
     return pow(v2.x - v1.x, 2) + pow(v2.y - v1.y, 2) + pow(v2.z - v1.z, 2);
 }
 
-double AsoUtility::Distance(const Vector2& v1, const Vector2& v2)
+double UtilityMath::Distance(const Vector2& v1, const Vector2& v2)
 {
     return sqrt(pow(v2.x - v1.x, 2) + pow(v2.y - v1.y, 2));
 }
 
-double AsoUtility::Distance(const VECTOR& v1, const VECTOR& v2)
+double UtilityMath::Distance(const VECTOR& v1, const VECTOR& v2)
 {
     return sqrt(pow(v2.x - v1.x, 2) + pow(v2.y - v1.y, 2) + pow(v2.z - v1.z, 2));
 }
 
-bool AsoUtility::IsHitPointSphere(const VECTOR& pos1, const VECTOR& pos2, float radius)
+bool UtilityMath::IsHitPointSphere(const VECTOR& pos1, const VECTOR& pos2, float radius)
 {
     // 球体同士の衝突判定
     bool ret = false;
@@ -371,7 +371,7 @@ bool AsoUtility::IsHitPointSphere(const VECTOR& pos1, const VECTOR& pos2, float 
     return ret;
 }
 
-bool AsoUtility::IsHitSpheres(const VECTOR& pos1, float radius1, const VECTOR& pos2, float radius2)
+bool UtilityMath::IsHitSpheres(const VECTOR& pos1, float radius1, const VECTOR& pos2, float radius2)
 {
     // 球体同士の衝突判定
     bool ret = false;
@@ -392,7 +392,7 @@ bool AsoUtility::IsHitSpheres(const VECTOR& pos1, float radius1, const VECTOR& p
     return ret;
 }
 
-bool AsoUtility::IsHitSphereCapsule(
+bool UtilityMath::IsHitSphereCapsule(
     const VECTOR& sphPos, float sphRadius, 
     const VECTOR& capPos1, const VECTOR& capPos2, float capRadius)
 {
@@ -413,7 +413,7 @@ bool AsoUtility::IsHitSphereCapsule(
     VECTOR capRidePos = VAdd(capPos1, VScale(cap1to2ENor, dot));
 
     // カプセル繋ぎのベクトルの長さを取る
-    float len = AsoUtility::MagnitudeF(cap1to2);
+    float len = UtilityMath::MagnitudeF(cap1to2);
 
     // 球体がカプセル繋ぎ上にいるか判別するため、比率を取る
     float rate = dot / len;
@@ -442,7 +442,7 @@ bool AsoUtility::IsHitSphereCapsule(
     }
 
     // 球体同士の当たり判定
-    if (AsoUtility::IsHitSpheres(centerPos, capRadius, sphPos, sphRadius))
+    if (UtilityMath::IsHitSpheres(centerPos, capRadius, sphPos, sphRadius))
     {
         ret = true;
     }
@@ -455,7 +455,7 @@ bool AsoUtility::IsHitSphereCapsule(
 
 }
 
-bool AsoUtility::Equals(const VECTOR& v1, const VECTOR& v2)
+bool UtilityMath::Equals(const VECTOR& v1, const VECTOR& v2)
 {
     if (v1.x == v2.x && v1.y == v2.y && v1.z == v2.z)
     {
@@ -464,7 +464,7 @@ bool AsoUtility::Equals(const VECTOR& v1, const VECTOR& v2)
     return false;
 }
 
-bool AsoUtility::EqualsVZero(const VECTOR& v1)
+bool UtilityMath::EqualsVZero(const VECTOR& v1)
 {
     const VECTOR& v2 = VECTOR_ZERO;
     if (v1.x == v2.x && v1.y == v2.y && v1.z == v2.z)
@@ -474,7 +474,7 @@ bool AsoUtility::EqualsVZero(const VECTOR& v1)
     return false;
 }
 
-VECTOR AsoUtility::Normalize(const Vector2& v)
+VECTOR UtilityMath::Normalize(const Vector2& v)
 {
     VECTOR ret = VGet(
         static_cast<float>(v.x),
@@ -488,9 +488,9 @@ VECTOR AsoUtility::Normalize(const Vector2& v)
     return ret;
 }
 
-VECTOR AsoUtility::VNormalize(const VECTOR& v)
+VECTOR UtilityMath::VNormalize(const VECTOR& v)
 {
-    if (AsoUtility::EqualsVZero(v))
+    if (UtilityMath::EqualsVZero(v))
     {
         // Quaternion計算でゼロを渡して、
         // エラー(-1, -1, -1)が返ってくると困る
@@ -499,7 +499,7 @@ VECTOR AsoUtility::VNormalize(const VECTOR& v)
     return VNorm(v);
 }
 
-double AsoUtility::AngleDeg(const VECTOR& from, const VECTOR& to)
+double UtilityMath::AngleDeg(const VECTOR& from, const VECTOR& to)
 {
     // sqrt(a) * sqrt(b) = sqrt(a * b) -- valid for real numbers
     auto fLen = SqrMagnitude(from);
@@ -525,35 +525,35 @@ double AsoUtility::AngleDeg(const VECTOR& from, const VECTOR& to)
     return acos(dot) * (180.0 / DX_PI);
 }
 
-void AsoUtility::DrawLineDir(const VECTOR& pos, const VECTOR& dir, int color, float len)
+void UtilityMath::DrawLineDir(const VECTOR& pos, const VECTOR& dir, int color, float len)
 {
-    auto nDir = AsoUtility::VNormalize(dir);
+    auto nDir = UtilityMath::VNormalize(dir);
     auto sPos = VAdd(pos, VScale(nDir, -len));
     auto ePos = VAdd(pos, VScale(nDir, len));
     DrawLine3D(sPos, ePos, color);
     DrawSphere3D(ePos, 5.0f, 5, color, color, true);
 }
 
-void AsoUtility::DrawLineXYZ(const VECTOR& pos, const MATRIX& rot, float len)
+void UtilityMath::DrawLineXYZ(const VECTOR& pos, const MATRIX& rot, float len)
 {
 
     VECTOR dir;
 
     // X
-    dir = VTransform(AsoUtility::DIR_R, rot);
+    dir = VTransform(UtilityMath::DIR_R, rot);
     DrawLineDir(pos, dir, 0xff0000, len);
 
     // Y
-    dir = VTransform(AsoUtility::DIR_UP, rot);
+    dir = VTransform(UtilityMath::DIR_UP, rot);
     DrawLineDir(pos, dir, 0x00ff00, len);
 
     // Z
-    dir = VTransform(AsoUtility::DIR_F, rot);
+    dir = VTransform(UtilityMath::DIR_F, rot);
     DrawLineDir(pos, dir, 0x0000ff, len);
 
 }
 
-void AsoUtility::DrawLineXYZ(const VECTOR& pos, const Quaternion& rot, float len)
+void UtilityMath::DrawLineXYZ(const VECTOR& pos, const Quaternion& rot, float len)
 {
 
     VECTOR dir;
@@ -572,7 +572,7 @@ void AsoUtility::DrawLineXYZ(const VECTOR& pos, const Quaternion& rot, float len
 
 }
 
-std::vector<std::string> AsoUtility::Split(std::string& line, char delimiter)
+std::vector<std::string> UtilityMath::Split(std::string& line, char delimiter)
 {
     std::istringstream stream(line);
     std::string field;
