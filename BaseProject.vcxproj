@@ -19,6 +19,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Src\Object\Bullet\Player\PBulletBase.cpp" />
+    <ClCompile Include="Src\Object\Bullet\Player\PBulletBig.cpp" />
+    <ClCompile Include="Src\Manager\Generic\StageManager.cpp" />
     <ClCompile Include="Src\Scene\MainScene\SceneGame.cpp" />
     <ClCompile Include="Src\Scene\MainScene\SceneTitle.cpp" />
     <ClCompile Include="Src\Scene\SceneBase.cpp" />
@@ -39,7 +42,7 @@
     <ClCompile Include="Src\Common\Quaternion.cpp" />
     <ClCompile Include="Src\Common\Vector2.cpp" />
     <ClCompile Include="Src\main.cpp" />
-    <ClCompile Include="Src\Manager\Camera.cpp" />
+    <ClCompile Include="Src\Camera\Camera.cpp" />
     <ClCompile Include="Src\Manager\Generic\InputManager.cpp" />
     <ClCompile Include="Src\Manager\Generic\Resource.cpp" />
     <ClCompile Include="Src\Manager\Generic\ResourceManager.cpp" />
@@ -64,6 +67,9 @@
     <ClCompile Include="Src\Manager\System\TimeManager.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Src\Object\Bullet\Player\PBulletBig.h" />
+    <ClInclude Include="Src\Manager\Generic\StageManager.h" />
+    <ClInclude Include="Src\Object\Bullet\Player\PBulletBase.h" />
     <ClInclude Include="Src\Scene\MainScene\SceneGame.h" />
     <ClInclude Include="Src\Scene\MainScene\SceneTitle.h" />
     <ClInclude Include="Src\Scene\SceneBase.h" />
@@ -86,7 +92,7 @@
     <ClInclude Include="Src\Common\Quaternion.h" />
     <ClInclude Include="Src\Common\Vector2.h" />
     <ClInclude Include="Src\main.h" />
-    <ClInclude Include="Src\Manager\Camera.h" />
+    <ClInclude Include="Src\Camera\Camera.h" />
     <ClInclude Include="Src\Manager\Generic\InputManager.h" />
     <ClInclude Include="Src\Manager\Generic\Resource.h" />
     <ClInclude Include="Src\Manager\Generic\ResourceManager.h" />

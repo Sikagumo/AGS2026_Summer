@@ -16,7 +16,7 @@ public:
 
 	static NetManager& GetInstance(void);
 
-	static void Destroy(void);
+	static void DestroyInstance(void);
 
 	void Run(NET_MODE mode);
 

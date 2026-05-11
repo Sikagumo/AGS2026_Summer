@@ -9,8 +9,9 @@ class Application
 public:
 
 	// スクリーンサイズ
-	static constexpr int SCREEN_SIZE_X = 1920;
-	static constexpr int SCREEN_SIZE_Y = 1080;
+	static constexpr int SCREEN_ASPECT = 100;/*120*/
+	static constexpr int SCREEN_SIZE_X = (16 * SCREEN_ASPECT);
+	static constexpr int SCREEN_SIZE_Y = (9 * SCREEN_ASPECT);
 
 	static constexpr int FRAME_RATE = 60;
 
@@ -46,7 +47,7 @@ public:
 	void Run(void);
 
 	// リソースの破棄
-	void Destroy(void);
+	void DestroyInstance(void);
 
 	// 初期化成功／失敗の判定
 	bool IsInitFail(void) const;

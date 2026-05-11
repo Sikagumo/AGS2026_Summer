@@ -18,7 +18,7 @@ NetManager& NetManager::GetInstance(void)
 	return *instance_;
 }
 
-void NetManager::Destroy(void)
+void NetManager::DestroyInstance(void)
 {
 	if (instance_)
 	{

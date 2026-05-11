@@ -1,6 +1,6 @@
 #include "Stage.h"
 #include "../Actor/ActorBase.h"
-#include "../../Manager/ResourceManager.h"
+#include "../../Manager/Generic/ResourceManager.h"
 #include "../../Utility/AsoUtility.h"
 #include "../Collider/ColliderModel.h"
 

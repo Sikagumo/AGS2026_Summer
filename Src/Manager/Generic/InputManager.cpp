@@ -101,7 +101,7 @@ void InputManager::Update(void)
 
 }
 
-void InputManager::Destroy(void)
+void InputManager::DestroyInstance(void)
 {
 	// キー情報のクリア
 	keyInfos_.clear();

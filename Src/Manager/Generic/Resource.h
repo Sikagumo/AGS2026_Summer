@@ -4,58 +4,101 @@
 
 class Resource
 {
-
 public:
-	
-	// リソースタイプ
-	enum class TYPE
+
+	enum class LOAD_TYPE
 	{
-		NONE,
-		IMG,
-		IMGS,
-		MODEL,
-		ANIM,
-		MOVIE,
-		EFFEKSEER,
-		SOUND,
+		NONE = -1,
+
+		IMAGE,  // 単一画像
+		IMAGES, // 複数画像
+		MODEL,  // 3Dモデル
+		MOVIE,  // 映像ファイル
+		ANIM,   // アニメーションファイル
+		EFFECT, // エフェクト
+		SOUND,  // 音声
 	};
 
-	// コンストラクタ
+
 	Resource(void);
-	// コンストラクタ
-	Resource(TYPE type, const std::string& path);
-	// コンストラクタ(IMGS用)
-	Resource(TYPE type, const std::string& path, int numX, int numY, int sizeX, int sizeY);
 
-	// デストラクタ
-	~Resource(void);
+	/// @brief コンストラクタ
+	/// @param _type 読み込むファイルの種類
+	/// @param _path ファイルパス
+	Resource(LOAD_TYPE _type, const std::string &_path);
 
-	// 読み込み
+	/// @brief 複数画像時のコンストラクタ
+	/// @param _type 読み込むファイルの種類
+	/// @param _path ファイルパス
+	/// @param _allNum 画像数
+	/// @param _numX 横画像数
+	/// @param _numY 縦画像数
+	Resource(LOAD_TYPE _type, const std::string& _path
+			 , int _allNum, int _numX, int _numY);
+
+	~Resource(void) = default;
+
+
 	void Load(void);
-
-	// 解放
 	void Release(void);
 
-	// 複数画像ハンドルを別配列にコピー
-	void CopyHandle(int* imgs) const;
+	/// @brief ハンドルコピー処理
+	/// @param _images 画像ハンドル
+	void CopyHandle(int* _images);
 
-	// リソースタイプ
-	TYPE type_;
+	/// @brief 重複させる3DモデルID割り当て処理
+	void SetDuplicateModelId(int _id);
 
-	// リソースの読み込み先
+	/// @brief リソースのIDを取得
+	int GetHandleId(void)const { return handleId_; };
+
+	/// @brief リソースのハンドルパスを取得 
+	std::string GetHandlePath(void)const { return path_; };
+
+	/// @brief 読み込むファイルの対象の種類の取得処理 
+	LOAD_TYPE GetLoadType(void) { return resType_; };
+
+
+private:
+
+	// 読み込むファイルの種類
+	LOAD_TYPE resType_;
+
+	// 読み込み先
 	std::string path_;
-
-	// 画像とモデルのハンドルID
+	
+	// 単一読み込みハンドルID
 	int handleId_;
 
-	// IMGS::LoadDivGraph用
-	int* handleIds_;
-	int numX_;
-	int numY_;
-	int sizeX_;
-	int sizeY_;
 
-	// モデル複製用
-	std::vector<int> duplicateModelIds_;
+	/* 複数画像読み込み用 */
 
+	// 画像数
+	const int allNum_;
+
+	// 軸別の最大画像数
+	const int numX_;
+	const int numY_;
+
+
+	// 複数画像のハンドルID
+	std::vector<int> handleIds_;
+
+	// モデル複製用リスト
+	std::vector<int> duplicationModelIds_;
+
+
+	/* 読み込み処理 */
+	void Load_ImageAndMovie(void);
+	void Load_Images(void);
+	void Load_ModelAndAnim(void);
+	void Load_Effect(void);
+	void Load_Sound(void);
+
+	/* 解放処理 */
+	void Release_ImageAndMovie(void);
+	void Release_Images(void);
+	void Release_ModelAndAnim(void);
+	void Release_Effect(void);
+	void Release_Sound(void);
 };

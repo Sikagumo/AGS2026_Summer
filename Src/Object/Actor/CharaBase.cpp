@@ -1,7 +1,7 @@
 #include "../Common/AnimationController.h"
 #include "../../Utility/AsoUtility.h"
-#include "../../Manager/SceneManager.h"
-#include "../../Manager/ResourceManager.h"
+#include "../../Manager/Generic/SceneManager.h"
+#include "../../Manager/Generic/ResourceManager.h"
 #include "../Collider/ColliderBase.h"
 #include "../Collider/ColliderLine.h"
 #include "../Collider/ColliderModel.h"
@@ -363,11 +363,10 @@ void CharaBase::DrawShadowRound(void)
 
 void CharaBase::DrawPre(void)
 {
-	if (sceneMng_.GetIsDebugMode())
-	{
+#ifdef _DEBUG
 		// ƒ‚ƒfƒ‹Œü‚«•`‰æ
 		transform_.DrawModelDir();
-	}
+#endif
 }
 
 void CharaBase::DelayRotate(void)
