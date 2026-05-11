@@ -355,7 +355,7 @@ void Camera::Collision(void)
 	for (const auto& hitCol : hitColliders_)
 	{
 		// モデル以外は処理を飛ばす
-		if (hitCol->GetShape() != ColliderBase::SHAPE::MODEL) continue;
+		if (hitCol->GetShapeType() != ColliderBase::SHAPE::MODEL) continue;
 
 		// 派生クラスへキャスト
 		const ColliderModel* colliderModel = dynamic_cast<const ColliderModel*>(hitCol);
@@ -366,7 +366,7 @@ void Camera::Collision(void)
 		//auto hitPoly = colliderModel->GetNearestHitPolyLine(transform_.pos, start, true);
 		
 		auto hits = MV1CollCheck_LineDim(
-			colliderModel->GetFollow()->modelId,
+			colliderModel->GetFollowTarget()->modelId,
 			-1,
 			transform_.pos,
 			start
@@ -383,10 +383,10 @@ void Camera::Collision(void)
 
 
 			// 除外フレームは無視する
-			if (colliderModel->IsExcludeFrame(hit.FrameIndex)) { continue; }
+			if (colliderModel->IsExcludedFrame(hit.FrameIndex)) { continue; }
 			// 
 			// 対象フレームは無視する
-			if (!colliderModel->IsTargetFrame(hit.FrameIndex)) { continue; }
+			if (!colliderModel->IsExcludedFrame(hit.FrameIndex)) { continue; }
 
 
 			// 衝突判定
@@ -433,6 +433,6 @@ void Camera::Collision(void)
 		if (colliderSphere == nullptr) { return; }
 
 		// 反発処理
-		transform_.pos = colliderSphere->GetPosPushBackAlongNormal(hitPoly, CNT_TRY_COLLISION_CAMERA, COLLISION_BACK_DIS);
+		//transform_.pos = colliderSphere->GetPosPushBackAlongNormal(hitPoly, CNT_TRY_COLLISION_CAMERA, COLLISION_BACK_DIS);
 	}
 }

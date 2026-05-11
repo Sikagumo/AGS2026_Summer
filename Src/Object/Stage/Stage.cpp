@@ -1,7 +1,7 @@
 #include "Stage.h"
 #include "../Actor/ActorBase.h"
 #include "../../Manager/Generic/ResourceManager.h"
-#include "../../Utility/AsoUtility.h"
+#include "../../Utility/UtilityMath.h"
 #include "../Collider/ColliderModel.h"
 
 
@@ -43,7 +43,7 @@ void Stage::InitCollider(void)
 	}
 	for (const std::string& name : TARGET_FRAME_NAMES)
 	{
-		colModel->AddTargetFrameIds(name);
+		colModel->AddExcludeFrameIds(name);
 	}
 	ownColliders_.emplace(static_cast<int>(COLLIDER_TYPE::MODEL), colModel);
 }

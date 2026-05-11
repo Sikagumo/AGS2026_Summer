@@ -1,53 +1,45 @@
+#define NOMINMAX
 #include "ColliderSphere.h"
-#include "./ColliderBase.h"
 #include "../Common/Transform.h"
 
-ColliderSphere::ColliderSphere(TAG tag, const Transform* follow, const VECTOR& localPos, float radius):
-	ColliderBase::ColliderBase(SHAPE::SPHERE, tag, follow),
-	localPos_(localPos),radius_(radius)
+ColliderSphere::ColliderSphere(TAG collisionTag, const Transform* followTarget, const VECTOR& localPosition, float radius)
+    : ColliderBase(SHAPE::SPHERE, collisionTag, followTarget)
+    , localPosition_(localPosition)
+    , radius_(radius)
 {
-
 }
 
-const VECTOR& ColliderSphere::GetLocalPos(void) const
+void ColliderSphere::SetLocalPosition(const VECTOR& position)
 {
-	return localPos_;
+    localPosition_ = position;
 }
 
-VECTOR ColliderSphere::GetPos(void) const
+void ColliderSphere::SetRadius(float radius)
 {
-	return GetRotPos(localPos_);
+    // 半径が負にならないように制限
+    radius_ = std::max(radius, 0.0f);
 }
 
-void ColliderSphere::DrawDebug(int color)
+const VECTOR& ColliderSphere::GetLocalPosition(void) const
 {
-	DrawSphere3D(GetPos(), radius_, 10, color, color, true);
+    return localPosition_;
 }
 
-VECTOR ColliderSphere::GetPosPushBackAlongNormal(const MV1_COLL_RESULT_POLY& hitColPoly,
-	int maxTryCnt, float pushDistance) const
+VECTOR ColliderSphere::GetWorldPosition(void) const
 {
-	// コピー生成
-	Transform tempTransform = *follow_;
-	ColliderSphere tmpSphere = *this;
-	tmpSphere.SetFollow(&tempTransform);
+    // ローカル座標をワールド座標へ変換
+    return TransformLocalToWorld(localPosition_);
+}
 
-	// 衝突補正処理
-	int tryCnt = 0;
-	while (tryCnt < maxTryCnt)
-	{
-		// カプセルと三角形の当たり判定
-		if (!HitCheck_Sphere_Triangle(
-			tmpSphere.GetPos(),
-			tmpSphere.GetRadius(),
-			hitColPoly.Position[0], hitColPoly.Position[1],
-			hitColPoly.Position[2]))
-		{
-			break;
-		}
-		// 衝突していたら法線方向に押し戻し
-		tempTransform.pos = VAdd(tempTransform.pos, VScale(hitColPoly.Normal, pushDistance));
-		tryCnt++;
-	}
-	return tempTransform.pos;
+float ColliderSphere::GetRadius(void) const
+{
+    return radius_;
+}
+
+void ColliderSphere::DrawDebug(int debugColor) const
+{
+    const VECTOR worldPosition = GetWorldPosition();
+
+    // デバッグ用に球体を描画
+    DrawSphere3D(worldPosition, radius_, DEBUG_SEGMENT_COUNT, debugColor, debugColor, false);
 }
