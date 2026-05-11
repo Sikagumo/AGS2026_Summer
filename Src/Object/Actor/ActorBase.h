@@ -16,10 +16,10 @@ public:
 	ActorBase(void);
 
 	// デストラクタ
-	virtual ~ActorBase(void) = default;
+	virtual ~ActorBase(void);
 
 	// 初期化
-	void Initialize(void);
+	void Init(void);
 
 	// 更新
 	virtual void Update(void) = 0;

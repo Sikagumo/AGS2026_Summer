@@ -9,7 +9,7 @@ void InputManager::CreateInstance(void)
 	{
 		instance_ = new InputManager();
 	}
-	instance_->Initialize();
+	instance_->Init();
 }
 
 InputManager& InputManager::GetInstance(void)
@@ -21,7 +21,7 @@ InputManager& InputManager::GetInstance(void)
 	return *instance_;
 }
 
-void InputManager::Initialize(void)
+void InputManager::Init(void)
 {
 
 	// ゲームで使用したいキーを、

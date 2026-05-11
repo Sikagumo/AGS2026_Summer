@@ -35,7 +35,7 @@ void Fader::SetFade(STATE state)
 	}
 }
 
-void Fader::Initialize(void)
+void Fader::Init(void)
 {
 }
 

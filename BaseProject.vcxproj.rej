@@ -1,0 +1,10 @@
+diff a/BaseProject.vcxproj b/BaseProject.vcxproj	(rejected hunks)
+@@ -109,8 +109,6 @@
+     <ClInclude Include="Src\Utility\MatrixUtility.h" />
+     <ClInclude Include="Src\Utility\UtilityCommon.h" />
+     <ClInclude Include="Src\Manager\System\TimeManager.h" />
+-    <ClInclude Include="Src\Manager\Generic\StageManager.h" />
+-    <ClInclude Include="Src\Stage\StageBase.h" />
+   </ItemGroup>
+   <PropertyGroup Label="Globals">
+     <VCProjectVersion>16.0</VCProjectVersion>

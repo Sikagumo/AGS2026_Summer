@@ -32,7 +32,7 @@ public:
 	void SetFade(STATE state);
 
 	// ‰Šú‰»
-	void Initialize(void);
+	void Init(void);
 
 	// XV
 	void Update(void);

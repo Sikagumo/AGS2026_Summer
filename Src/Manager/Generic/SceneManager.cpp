@@ -3,7 +3,7 @@
 #include "../../Scene/MainScene/SceneTitle.h"
 #include "../Decoration/SoundManager.h"
 #include "../System/TimeManager.h"
-#include "../../Camera/Camera.h"
+#include "../Camera.h"
 #include "../System/Loading.h"
 
 SceneManager* SceneManager::instance_ = nullptr;

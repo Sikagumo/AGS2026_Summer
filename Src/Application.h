@@ -9,8 +9,8 @@ class Application
 public:
 
 	// スクリーンサイズ
-	static constexpr int SCREEN_SIZE_X = (16 * 100);
-	static constexpr int SCREEN_SIZE_Y = (9 * 100);
+	static constexpr int SCREEN_SIZE_X = 1920;
+	static constexpr int SCREEN_SIZE_Y = 1080;
 
 	static constexpr int FRAME_RATE = 60;
 
@@ -40,7 +40,7 @@ public:
 	static Application& GetInstance(void);
 
 	// 初期化
-	void Initialize(void);
+	void Init(void);
 
 	// ゲームループの開始
 	void Run(void);

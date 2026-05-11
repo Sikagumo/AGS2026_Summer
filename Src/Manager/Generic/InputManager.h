@@ -87,7 +87,7 @@ public:
 	// インスタンスの取得
 	static InputManager& GetInstance(void);
 
-	void Initialize(void);
+	void Init(void);
 	void Update(void);
 	// リソースの破棄
 	void Destroy(void);

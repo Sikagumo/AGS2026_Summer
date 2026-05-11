@@ -19,13 +19,10 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Src\Manager\Generic\StageManager.cpp" />
-    <ClCompile Include="Src\Object\Bullet\Player\PBulletBase.cpp" />
     <ClCompile Include="Src\Scene\MainScene\SceneGame.cpp" />
     <ClCompile Include="Src\Scene\MainScene\SceneTitle.cpp" />
     <ClCompile Include="Src\Scene\SceneBase.cpp" />
     <ClCompile Include="Src\Manager\System\Loading.cpp" />
-    <ClCompile Include="Src\Object\Player\PlayerAction.cpp" />
     <ClCompile Include="Src\FPS\FpsController.cpp" />
     <ClCompile Include="Src\Manager\InputTextManager.cpp" />
     <ClCompile Include="Src\Object\Actor\CharaBase.cpp" />
@@ -42,7 +39,7 @@
     <ClCompile Include="Src\Common\Quaternion.cpp" />
     <ClCompile Include="Src\Common\Vector2.cpp" />
     <ClCompile Include="Src\main.cpp" />
-    <ClCompile Include="Src\Camera\Camera.cpp" />
+    <ClCompile Include="Src\Manager\Camera.cpp" />
     <ClCompile Include="Src\Manager\Generic\InputManager.cpp" />
     <ClCompile Include="Src\Manager\Generic\Resource.cpp" />
     <ClCompile Include="Src\Manager\Generic\ResourceManager.cpp" />
@@ -61,20 +58,16 @@
     <ClCompile Include="Src\Object\Player\Player.cpp" />
     <ClCompile Include="Src\Object\SkyDome\SkyDome.cpp" />
     <ClCompile Include="Src\Object\Stage\Stage.cpp" />
-    <ClCompile Include="Src\Stage\StageBase.cpp" />
     <ClCompile Include="Src\Utility\AsoUtility.cpp" />
     <ClCompile Include="Src\Utility\MatrixUtility.cpp" />
     <ClCompile Include="Src\Utility\UtilityCommon.cpp" />
     <ClCompile Include="Src\Manager\System\TimeManager.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Src\Manager\Generic\StageManager.h" />
-    <ClInclude Include="Src\Object\Bullet\Player\PBulletBase.h" />
     <ClInclude Include="Src\Scene\MainScene\SceneGame.h" />
     <ClInclude Include="Src\Scene\MainScene\SceneTitle.h" />
     <ClInclude Include="Src\Scene\SceneBase.h" />
     <ClInclude Include="Src\Manager\System\Loading.h" />
-    <ClInclude Include="Src\Object\Player\PlayerAction.h" />
     <ClInclude Include="Src\FPS\FpsController.h" />
     <ClInclude Include="Src\Manager\InputTextManager.h" />
     <ClInclude Include="Src\Object\Actor\CharaBase.h" />
@@ -93,7 +86,7 @@
     <ClInclude Include="Src\Common\Quaternion.h" />
     <ClInclude Include="Src\Common\Vector2.h" />
     <ClInclude Include="Src\main.h" />
-    <ClInclude Include="Src\Camera\Camera.h" />
+    <ClInclude Include="Src\Manager\Camera.h" />
     <ClInclude Include="Src\Manager\Generic\InputManager.h" />
     <ClInclude Include="Src\Manager\Generic\Resource.h" />
     <ClInclude Include="Src\Manager\Generic\ResourceManager.h" />
@@ -112,7 +105,6 @@
     <ClInclude Include="Src\Object\Player\Player.h" />
     <ClInclude Include="Src\Object\SkyDome\SkyDome.h" />
     <ClInclude Include="Src\Object\Stage\Stage.h" />
-    <ClInclude Include="Src\Stage\StageBase.h" />
     <ClInclude Include="Src\Utility\AsoUtility.h" />
     <ClInclude Include="Src\Utility\MatrixUtility.h" />
     <ClInclude Include="Src\Utility\UtilityCommon.h" />

@@ -5,10 +5,6 @@
 #include "../../Manager/Generic/SceneManager.h"
 #include "../../Utility/AsoUtility.h"
 
-constexpr float SKYDOME_SCALE = 100.0f;
-constexpr float SKYDOME_ROT_SPEED = 0.005f;
-
-
 SkyDome::SkyDome(const Transform& _transform):
 	followTransform_(_transform),
 	state_(STATE::NONE),
@@ -22,7 +18,7 @@ void SkyDome::InitLoad(void)
 }
 void SkyDome::InitTransform(void)
 {
-	transform_.InitTransform(SKYDOME_SCALE,
+	transform_.InitTransform(SCALE,
 							 Quaternion::Identity(), Quaternion::AngleAxis(180.0f, AsoUtility::AXIS_Y),
 							 AsoUtility::VECTOR_ZERO);
 }
@@ -71,12 +67,12 @@ void SkyDome::UpdateNone(void)
 }
 void SkyDome::UpdateStay(void)
 {
-	transform_.Rotate(AsoUtility::AXIS_Y, SKYDOME_ROT_SPEED);
+	transform_.Rotate(AsoUtility::AXIS_Y, ROT_SPEED);
 }
 void SkyDome::UpdateFollow(void)
 {
 	// ‰ñ“]
-	transform_.Rotate(AsoUtility::AXIS_Y, SKYDOME_ROT_SPEED);
+	transform_.Rotate(AsoUtility::AXIS_Y, ROT_SPEED);
 
 	transform_.pos = followTransform_.pos;
 

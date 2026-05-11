@@ -45,6 +45,10 @@ protected:
 
 private:
 
+	static constexpr float SCALE = 100.0f;
+
+	static constexpr float ROT_SPEED = 0.005f;
+
 	void ChangeState(STATE _state);
 	void ChangeStateNone(void);
 	void ChangeStateStay(void);

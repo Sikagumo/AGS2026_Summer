@@ -29,7 +29,7 @@ void Application::CreateInstance(void)
 	{
 		instance_ = new Application();
 	}
-	instance_->Initialize();
+	instance_->Init();
 }
 
 Application& Application::GetInstance(void)
@@ -37,16 +37,15 @@ Application& Application::GetInstance(void)
 	return *instance_;
 }
 
-void Application::Initialize(void)
+void Application::Init(void)
 {
-	constexpr bool IS_WINDOW = true;
+
 	// アプリケーションの初期設定
-	SetWindowText("MOMOTARO伝説");
+	SetWindowText("蜘蛛と布団と人形と");
 
 	// ウィンドウサイズ
 	SetGraphMode(SCREEN_SIZE_X, SCREEN_SIZE_Y, 32);
-	ChangeWindowMode(IS_WINDOW);
-
+	ChangeWindowMode(true);
 	// FPS制御初期化
 	fpsController_ = new FpsController(FRAME_RATE);
 	// DxLibの初期化
