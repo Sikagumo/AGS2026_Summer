@@ -3,8 +3,8 @@
 #include "../Common/AnimationController.h"
 
 Player::Player(int _playerNo)
-	: CharaBase::CharaBase()
-	, playerNo_(_playerNo)
+	: PlayerBase::PlayerBase(_playerNo)
+	
 {
 }
 
