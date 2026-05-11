@@ -55,20 +55,11 @@ void SceneGame::Update(void)
 {
 
 	if (Loading::GetInstance()->IsLoading()) { return; }
-
-	auto& sound = SoundManager::GetInstance();
-	auto& input = InputManager::GetInstance();
-	auto& time = TimeManager::GetInstance();
-	auto camera = SceneManager::GetInstance().GetCamera();
-	auto loader = Loading::GetInstance();
-
-	// ŽžŠÔ‚ðŽæ“¾
-	float times = time.GetGameTime();
 }
 
 void SceneGame::Draw(void)
 {
-	auto camera = SceneManager::GetInstance().GetCamera();
+	DrawString(0, 0, "Game Scene Now!", GetColor(255, 255, 255));
 
 #ifdef _DEBUG
 	DrawDebug();

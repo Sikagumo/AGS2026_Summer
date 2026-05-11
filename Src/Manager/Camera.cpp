@@ -2,7 +2,7 @@
 #include <DxLib.h>
 #include <EffekseerForDXLib.h>
 #include "../Utility/AsoUtility.h"
-#include "../Manager/InputManager.h"
+#include "../Manager/Generic/InputManager.h"
 #include "../Object/Common/Transform.h"
 #include "../Object/Collider/ColliderBase.h"
 #include "../Object/Collider/ColliderModel.h"
