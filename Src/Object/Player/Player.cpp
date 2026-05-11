@@ -9,7 +9,7 @@ Player::Player(int _playerNo)
 }
 
 
-void Player::InitLoadPost(void)
+void Player::InitLoad(void)
 {
 	transform_.modelId = resMng_.LoadHandleId(ResourceManager::SRC::MODEL_PLAYER);
 }

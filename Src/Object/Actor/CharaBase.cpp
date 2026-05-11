@@ -32,7 +32,6 @@ void CharaBase::InitLoad(void)
 	//shadowHandle_ = resMng_.GetHandleId(ResourceManager::SRC::IMG_SHADOW);
 
 	// Še“Ç‚İ‚İˆ—
-	InitLoadPost();
 }
 
 void CharaBase::InitAnimation(void)

@@ -19,10 +19,10 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Src\Object\Actor\Chara\Boss\Boss.cpp" />
     <ClCompile Include="Src\Scene\MainScene\SceneLobby.cpp" />
     <ClCompile Include="Src\Object\Bullet\Player\PBulletBase.cpp" />
     <ClCompile Include="Src\Object\Bullet\Player\PBulletBig.cpp" />
-    <ClCompile Include="Src\Manager\Generic\StageManager.cpp" />
     <ClCompile Include="Src\Scene\MainScene\SceneGame.cpp" />
     <ClCompile Include="Src\Scene\MainScene\SceneTitle.cpp" />
     <ClCompile Include="Src\Scene\SceneBase.cpp" />
@@ -66,8 +66,10 @@
     <ClCompile Include="Src\Utility\MatrixUtility.cpp" />
     <ClCompile Include="Src\Utility\UtilityCommon.cpp" />
     <ClCompile Include="Src\Manager\System\TimeManager.cpp" />
+    <ClCompile Include="Src\Object\Actor\Chara\Boss\Weapon\WeaponBase.cpp" />
   </ItemGroup>
-    <ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Src\Object\Actor\Chara\Boss\Boss.h" />
     <ClInclude Include="Src\Scene\MainScene\SceneLobby.h" />
     <ClInclude Include="Src\Object\Bullet\Player\PBulletBig.h" />
     <ClInclude Include="Src\Manager\Generic\StageManager.h" />
@@ -117,6 +119,7 @@
     <ClInclude Include="Src\Utility\MatrixUtility.h" />
     <ClInclude Include="Src\Utility\UtilityCommon.h" />
     <ClInclude Include="Src\Manager\System\TimeManager.h" />
+    <ClInclude Include="Src\Object\Actor\Chara\Boss\Weapon\WeaponBase.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

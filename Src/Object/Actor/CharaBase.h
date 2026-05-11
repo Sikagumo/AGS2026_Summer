@@ -59,8 +59,7 @@ protected:
 	bool isJump_;
 
 	
-	virtual void InitLoad(void)override final;
-	virtual void InitLoadPost(void) = 0;
+	virtual void InitLoad(void)override;
 	virtual void InitAnimation(void)override final;
 	virtual void InitAnimationPost(void) = 0;
 

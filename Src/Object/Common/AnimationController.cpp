@@ -3,7 +3,7 @@
 #include <string>
 #include <cassert>
 #include <algorithm>
-#include "../../Manager/SceneManager.h"
+#include "../../Manager/Generic/SceneManager.h"
 
 AnimationController::AnimationController(int _modelId)
 {
