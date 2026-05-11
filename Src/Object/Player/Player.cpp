@@ -11,7 +11,7 @@ Player::Player(int _playerNo)
 
 void Player::InitLoadPost(void)
 {
-	//transform_.modelId = resMng_.GetHandleId(ResourceManager::SRC::
+	transform_.modelId = resMng_.LoadHandleId(ResourceManager::SRC::MODEL_PLAYER);
 }
 void Player::InitAnimationPost(void)
 {

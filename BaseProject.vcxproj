@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Src\Object\Bullet\Player\PBulletBig.cpp" />
     <ClCompile Include="Src\Manager\Generic\StageManager.cpp" />
     <ClCompile Include="Src\Object\Bullet\Player\PBulletBase.cpp" />
     <ClCompile Include="Src\Scene\MainScene\SceneGame.cpp" />
@@ -68,6 +69,7 @@
     <ClCompile Include="Src\Manager\System\TimeManager.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Src\Object\Bullet\Player\PBulletBig.h" />
     <ClInclude Include="Src\Manager\Generic\StageManager.h" />
     <ClInclude Include="Src\Object\Bullet\Player\PBulletBase.h" />
     <ClInclude Include="Src\Scene\MainScene\SceneGame.h" />

@@ -27,5 +27,8 @@ protected:
 	void InitAnimation(void)final {};
 
 	void InitPost(void)override;
+
+private:
+
 };
 
