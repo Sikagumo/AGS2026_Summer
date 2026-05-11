@@ -1,5 +1,5 @@
 #include "../Common/AnimationController.h"
-#include "../../Utility/AsoUtility.h"
+#include "../../Utility/UtilityMath.h"
 #include "../../Manager/Generic/SceneManager.h"
 #include "../../Manager/Generic/ResourceManager.h"
 #include "../Collider/ColliderBase.h"
@@ -14,13 +14,13 @@
 CharaBase::CharaBase(void) :
 	ActorBase::ActorBase(),
 	isJump_(false),
-	jumpPow_(AsoUtility::VECTOR_ZERO),
+	jumpPow_(UtilityMath::VECTOR_ZERO),
 	moveSpeed_(0.0f),
 	stepJump_(0.0f),
 	shadowHandle_(-1),
-	prevPos_(AsoUtility::VECTOR_ZERO),
-	moveDir_(AsoUtility::VECTOR_ZERO),
-	movePow_(AsoUtility::VECTOR_ZERO),
+	prevPos_(UtilityMath::VECTOR_ZERO),
+	moveDir_(UtilityMath::VECTOR_ZERO),
+	movePow_(UtilityMath::VECTOR_ZERO),
 	animation_(nullptr)
 {
 }
@@ -89,7 +89,7 @@ void CharaBase::Release(void)
 void CharaBase::CalcGravityPow(void)
 {
 	// 重力方向
-	VECTOR dirGravity = AsoUtility::DIR_DOWN;
+	VECTOR dirGravity = UtilityMath::DIR_DOWN;
 
 	// 重力の強さ
 	float gravityPow = Application::GetInstance().GetGravityPow() * sceneMng_.GetDeltaTime();
@@ -120,7 +120,7 @@ void CharaBase::Collision(void)
 void CharaBase::CollisionGravity(void)
 {
 	// 落下中しか判定しない
-	if (!(VDot(AsoUtility::DIR_DOWN, jumpPow_) > 0.9f)) { return; }
+	if (!(VDot(UtilityMath::DIR_DOWN, jumpPow_) > 0.9f)) { return; }
 
 	// 線分コライダ
 	int lineType = static_cast<int>(COLLIDER_TYPE::LINE);
@@ -166,7 +166,7 @@ void CharaBase::CollisionGravity(void)
 			{
 				// 衝突物より、下側にいる場合のみ、位置を修正する
 				transform_.pos =
-					VAdd(hit.HitPosition, VScale(AsoUtility::DIR_UP, 2.0f));
+					VAdd(hit.HitPosition, VScale(UtilityMath::DIR_UP, 2.0f));
 			}
 
 			// ジャンプ判定
@@ -179,7 +179,7 @@ void CharaBase::CollisionGravity(void)
 	if (!isJump_)
 	{
 		// ジャンプリセット
-		jumpPow_ = AsoUtility::VECTOR_ZERO;
+		jumpPow_ = UtilityMath::VECTOR_ZERO;
 
 		// ジャンプの入力受付時間をリセット
 		stepJump_ = 0.0f;

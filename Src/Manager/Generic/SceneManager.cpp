@@ -38,7 +38,7 @@ SceneManager::SceneManager(void)
     deltaTime_ = 1.0f / 60.0f;
     preTime_ = std::chrono::system_clock::now();
 
-    camera_ = std::make_shared<Camera>();
+    camera_ = std::make_unique<Camera>();
 }
 
 SceneManager::~SceneManager(void)
@@ -113,8 +113,11 @@ void SceneManager::ChangeScene(std::shared_ptr<SceneBase> scene)
 {
     // 古いシーンを解放
     for (auto& s : scenes_)
+    {
         s->Release();
+    }
     scenes_.clear();
+   
 
     // CollisionControllerをクリア
     //CollisionController::GetInstance().Clear();
@@ -127,7 +130,8 @@ void SceneManager::ChangeScene(std::shared_ptr<SceneBase> scene)
     isSceneChanging_ = true;
 
     // 非同期ロード開始（ロード画面付き）
-    Loading::GetInstance()->StartAsyncLoad([scene]() {
+    Loading::GetInstance()->StartAsyncLoad([scene]()
+        {
         scene->Load();
         });
 }
@@ -170,21 +174,22 @@ void SceneManager::JumpScene(std::shared_ptr<SceneBase> scene)
     scenes_.push_back(scene);
 
     // 非同期ロードを開始する
-    Loading::GetInstance()->StartAsyncLoad([scene]() {
+    Loading::GetInstance()->StartAsyncLoad([scene]()
+        {
         scene->Load();
         });
 }
 
 void SceneManager::Update(void)
 {
-    if (scenes_.empty()) return;
+    if (scenes_.empty()) { return; }
 
     TimeManager::GetInstance().Update();
     auto nowTime = std::chrono::system_clock::now();
     deltaTime_ = std::chrono::duration<float>(nowTime - preTime_).count();
     preTime_ = nowTime;
 
-    if (isGameEnd_) return;
+    if (isGameEnd_) { return; }
 
     const float LoadCompleteThreshold = 100.0f;
 
@@ -213,12 +218,12 @@ void SceneManager::Update(void)
     // カメラや衝突判定
     //if (camera_) camera_->UpdateBeforeCollision();
     //CollisionController::GetInstance().Update();
-    //if (camera_) camera_->Update();
+    if (camera_) camera_->Update();
 }
 
 void SceneManager::Draw(void)
 {
-    if (scenes_.empty()) return;
+    if (scenes_.empty()) { return; }
 
     // 非同期ロード中の描画
     if (isSceneChanging_ || Loading::GetInstance()->IsLoading())
@@ -281,7 +286,7 @@ float SceneManager::GetDeltaTime(void) const
     return deltaTime_;
 }
 
-std::shared_ptr<Camera> SceneManager::GetCamera(void) const
+const std::unique_ptr<Camera>& SceneManager::GetCamera(void) const
 {
     return camera_;
 }

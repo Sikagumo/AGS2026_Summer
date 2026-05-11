@@ -7,6 +7,7 @@
 #include "../../Application.h"
 #include "../../Manager/System/TimeManager.h"
 #include "../../Manager/System/Loading.h"
+#include "../../Utility/UtilityMath.h"
 
 
 
@@ -14,6 +15,7 @@ void SceneTitle::Load(void)
 {
     // isLoading_ を true に
     SceneBase::Load();
+    auto& resourceManager = ResourceManager::GetInstance();
 
     // BGM・SEロード
     Loading::GetInstance()->SetProgress(25.0f);
@@ -23,6 +25,8 @@ void SceneTitle::Load(void)
 
     // ロゴ・操作説明・再生用画像ロード
     Loading::GetInstance()->SetProgress(60.0f);
+
+    imageTitle_ = resourceManager.LoadHandleId(ResourceManager::SRC::IMG_TITLE);
 
     // その他画像
     Loading::GetInstance()->SetProgress(80.0f);
@@ -39,7 +43,7 @@ void SceneTitle::EndLoad(void)
 }
 
 SceneTitle::SceneTitle(void)
-: exitRequested_(false)
+    : imageTitle_(-1)
 {
 }
 
@@ -52,25 +56,30 @@ void SceneTitle::Update(void)
 
     if (Loading::GetInstance()->IsLoading()) { return; }
 
+    auto& sceneManager = SceneManager::GetInstance();
     auto& input = InputManager::GetInstance();
+
+    if (input.IsTrgDown(KEY_INPUT_SPACE))
+    {
+        sceneManager.ChangeScene(std::make_shared<SceneGame>());
+    }
 }
 
 void SceneTitle::Draw(void)
 {
+    if (Loading::GetInstance()->IsLoading()) { return; }
 
     DrawString(0, 0, "Title Scene Now!", GetColor(255, 255, 255));
+    
+    const int IMAGET_TITLE_Y = Application::SCREEN_SIZE_Y / 3;
+
+    DrawRotaGraph(Application::SCREEN_HALF_X, IMAGET_TITLE_Y, 1.0f, UtilityMath::DEG2RAD, imageTitle_, true);
 }
 
 void SceneTitle::Release(void)
 {
 
 }
-
-bool SceneTitle::IsExitRequested(void) const
-{
-    return exitRequested_;
-}
-
 
 void SceneTitle::DrawDebug(void)
 {

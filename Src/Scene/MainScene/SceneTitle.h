@@ -24,10 +24,6 @@ public:
     /// @brief 解放処理
     void Release(void) override;
 
-    /// @brief ゲーム終了が要求されているか取得
-   /// @return 終了するならtrue
-    bool IsExitRequested(void) const;
-
     /// @brief リソースの読み込み開始
     void Load(void) override;
 
@@ -37,8 +33,7 @@ public:
 
 private:
 
-    // アプリケーション終了フラグ
-    bool exitRequested_;                
+    int imageTitle_;
 
     void DrawDebug(void);
 

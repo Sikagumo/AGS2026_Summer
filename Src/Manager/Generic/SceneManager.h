@@ -59,7 +59,7 @@ public:
 
     /// @brief 現在管理しているカメラを取得する
     /// @return カメラオブジェクトの共有ポインタ
-    std::shared_ptr<Camera> GetCamera(void) const;
+    const std::unique_ptr<Camera>& GetCamera(void) const;
 
     /// @brief ゲーム終了フラグを立てる
     void GameEnd(void);
@@ -79,7 +79,7 @@ private:
     float deltaTime_;                               // デルタタイム
 
     // カメラ
-    std::shared_ptr<Camera> camera_;
+    std::unique_ptr<Camera> camera_;
 
     /// @brief 3D描画に関する初期設定
     void Init3D(void);

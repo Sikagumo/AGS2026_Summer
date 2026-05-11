@@ -13,6 +13,10 @@ public:
 	static constexpr int SCREEN_SIZE_X = (16 * SCREEN_ASPECT);
 	static constexpr int SCREEN_SIZE_Y = (9 * SCREEN_ASPECT);
 
+	// スクリーンサイズの半分
+	static constexpr int SCREEN_HALF_X = SCREEN_SIZE_X / 2;
+	static constexpr int SCREEN_HALF_Y = SCREEN_SIZE_Y / 2;
+
 	static constexpr int FRAME_RATE = 60;
 
 	// データパス関連
