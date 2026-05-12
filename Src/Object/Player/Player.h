@@ -1,10 +1,10 @@
 #pragma once
 #include "./PlayerBase.h"
-#include "../Actor/CharaBase.h"
+#include "../Player/PlayerBase.h"
 class InputManager;
 
 
-class Player : public CharaBase
+class Player : public PlayerBase
 {
 public:
 
@@ -36,6 +36,8 @@ protected:
 	void UpdateProcess(void);
 	void UpdateProcessPost(void);
 
+
+	void DrawLate(void)override;
 private:
 
 	// 衝突判定用線分開始
@@ -90,5 +92,7 @@ private:
 	// ジャンプ
 	void ProcessJump(void);
 
+
+	void DrawShadowRound(void);
 	//void PlayAnim(ANIM_TYPE type, bool _isLoop = true);
 };

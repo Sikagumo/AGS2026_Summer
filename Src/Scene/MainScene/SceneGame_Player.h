@@ -38,8 +38,7 @@ public:
 private:
 
     SceneManager& sceneManager_;
-    //std::unique_ptr<Player> player_;
-    Player* player_;
+    std::unique_ptr<Player> player_;
 
     /// @brief デバッグ情報の描画
     void DrawDebug(void);
