@@ -6,15 +6,18 @@
 #include "../../Manager/Generic/SceneManager.h"
 #include "../../Camera/Camera.h"
 #include "../../Common/Quaternion.h"
+#include "../Collider/ColliderBase.h"
 
 
 Player::Player(int _playerNo)
-	: CharaBase::CharaBase()
-	//: PlayerBase::PlayerBase(_playerNo)
+	: PlayerBase::PlayerBase(_playerNo)
 	, inputManager_(InputManager::GetInstance())
 	, sceneManager_(SceneManager::GetInstance())
+	, shadowHandle_(-1)
 	
 {
+	constexpr float speed = 5.0f;
+	moveSpeed_ = speed;
 }
 
 
@@ -24,9 +27,10 @@ void Player::InitLoad(void)
 }
 void Player::InitTransform(void)
 {
-	transform_.InitTransform(1.0f,
-		Quaternion::Identity(), Quaternion::AngleAxis(180.0f, UtilityMath::AXIS_Y),
-		UtilityMath::VECTOR_ZERO);
+	transform_.InitTransform(1.0f
+		, Quaternion::Identity()
+		, Quaternion::AngleAxis(UtilityMath::Deg2RadF(180.0f), UtilityMath::AXIS_Y)
+		, UtilityMath::VECTOR_ZERO);
 }
 void Player::InitCollider(void)
 {
@@ -47,6 +51,16 @@ void Player::UpdateProcess(void)
 
 void Player::UpdateProcessPost(void)
 {
+}
+
+void Player::DrawLate(void)
+{
+#ifdef _DEBUG
+	DrawFormatString(0, 0, 0xffffff, "player:(%.f,%.f,%.f)(%.2f°,%.2f°,%.2f°)(%.2f°,%.2f°,%.2f°)"
+		, transform_.pos.x, transform_.pos.y, transform_.pos.z
+		, UtilityMath::Rad2DegF(transform_.quaRot.x), UtilityMath::Rad2DegF(transform_.quaRot.y), UtilityMath::Rad2DegF(transform_.quaRot.z)
+		, UtilityMath::Rad2DegF(transform_.quaRotLocal.x), UtilityMath::Rad2DegF(transform_.quaRotLocal.y), UtilityMath::Rad2DegF(transform_.quaRotLocal.z));
+#endif
 }
 
 void Player::Release(void)
@@ -72,6 +86,7 @@ void Player::ProcessMove(void)
 
 	if (!UtilityMath::EqualsVZero(dir))
 	{
+		dir = UtilityMath::VNormalize(dir);
 		//movePow_ = UtilityMath::VECTOR_ZERO;
 
 		if (!isJump_)
@@ -144,4 +159,102 @@ void Player::ProcessJump(void)
 	{
 		transform_.pos.y = -(LIMIT_POS_Y);
 	}
+}
+
+void Player::DrawShadowRound(void)
+{
+	/* 丸影 */
+	/*
+	const float PLAYER_SHADOW_HEIGHT = 700.0f;
+	const float PLAYER_SHADOW_SIZE = 50.0f;
+	MV1_COLL_RESULT_POLY_DIM HitResDim;
+	MV1_COLL_RESULT_POLY* HitRes;
+	VERTEX3D Vertex[3];
+	VECTOR SlideVec;
+
+	// ライティングを無効にする
+	SetUseLighting(FALSE);
+
+	// Ｚバッファを有効にする
+	SetUseZBuffer3D(TRUE);
+
+	// テクスチャアドレスモードを CLAMP にする( テクスチャの端より先は端のドットが延々続く )
+	SetTextureAddressMode(DX_TEXADDRESS_CLAMP);
+
+	// 影を落とすモデルの数だけ繰り返し
+	for (auto& col : hitColliders_)
+	{
+		// チェックするモデルは、jが0の時はステージモデル、1以上の場合はコリジョンモデル
+		if (j == 0)
+		{
+			ModelHandle = stg.ModelHandle;
+		}
+		else
+		{
+			ModelHandle = stg.CollObjModelHandle[j - 1];
+		}
+
+		// プレイヤーの直下に存在する地面のポリゴンを取得
+		HitResDim = MV1CollCheck_Capsule(col->GetFollow()->modelId, -1, transform_.pos,
+										 VAdd(transform_.pos, VGet(0.0f, -PLAYER_SHADOW_HEIGHT, 0.0f)),
+										 PLAYER_SHADOW_SIZE);
+
+		// 頂点データで変化が無い部分をセット
+		Vertex[0].dif = GetColorU8(255, 255, 255, 255);
+		Vertex[0].spc = GetColorU8(0, 0, 0, 0);
+		Vertex[0].su = 0.0f;
+		Vertex[0].sv = 0.0f;
+		Vertex[1] = Vertex[0];
+		Vertex[2] = Vertex[0];
+
+		// 球の直下に存在するポリゴンの数だけ繰り返し
+		HitRes = HitResDim.Dim;
+		for (int i = 0; i < HitResDim.HitNum; i++, HitRes++)
+		{
+			// ポリゴンの座標は地面ポリゴンの座標
+			Vertex[0].pos = HitRes->Position[0];
+			Vertex[1].pos = HitRes->Position[1];
+			Vertex[2].pos = HitRes->Position[2];
+
+			// ちょっと持ち上げて重ならないようにする
+			SlideVec = VScale(HitRes->Normal, 0.5f);
+			Vertex[0].pos = VAdd(Vertex[0].pos, SlideVec);
+			Vertex[1].pos = VAdd(Vertex[1].pos, SlideVec);
+			Vertex[2].pos = VAdd(Vertex[2].pos, SlideVec);
+
+			// ポリゴンの不透明度を設定する
+			Vertex[0].dif.a = 0;
+			Vertex[1].dif.a = 0;
+			Vertex[2].dif.a = 0;
+			if (HitRes->Position[0].y > transform_.pos.y - PLAYER_SHADOW_HEIGHT)
+				Vertex[0].dif.a = static_cast<BYTE>(128 * (1.0f - fabs(HitRes->Position[0].y - transform_.pos.y) / PLAYER_SHADOW_HEIGHT));
+
+			if (HitRes->Position[1].y > transform_.pos.y - PLAYER_SHADOW_HEIGHT)
+				Vertex[1].dif.a = static_cast<BYTE>(128 * (1.0f - fabs(HitRes->Position[1].y - transform_.pos.y) / PLAYER_SHADOW_HEIGHT));
+
+			if (HitRes->Position[2].y > transform_.pos.y - PLAYER_SHADOW_HEIGHT)
+				Vertex[2].dif.a = static_cast<BYTE>(128 * (1.0f - fabs(HitRes->Position[2].y - transform_.pos.y) / PLAYER_SHADOW_HEIGHT));
+
+			// ＵＶ値は地面ポリゴンとプレイヤーの相対座標から割り出す
+			Vertex[0].u = (HitRes->Position[0].x - transform_.pos.x) / (PLAYER_SHADOW_SIZE * 2.0f) + 0.5f;
+			Vertex[0].v = (HitRes->Position[0].z - transform_.pos.z) / (PLAYER_SHADOW_SIZE * 2.0f) + 0.5f;
+			Vertex[1].u = (HitRes->Position[1].x - transform_.pos.x) / (PLAYER_SHADOW_SIZE * 2.0f) + 0.5f;
+			Vertex[1].v = (HitRes->Position[1].z - transform_.pos.z) / (PLAYER_SHADOW_SIZE * 2.0f) + 0.5f;
+			Vertex[2].u = (HitRes->Position[2].x - transform_.pos.x) / (PLAYER_SHADOW_SIZE * 2.0f) + 0.5f;
+			Vertex[2].v = (HitRes->Position[2].z - transform_.pos.z) / (PLAYER_SHADOW_SIZE * 2.0f) + 0.5f;
+
+			// 影ポリゴンを描画
+			DrawPolygon3D(Vertex, 1, shadowHandle_, TRUE);
+		}
+
+		// 検出した地面ポリゴン情報の後始末
+		MV1CollResultPolyDimTerminate(HitResDim);
+	}
+
+	// ライティングを有効にする
+	SetUseLighting(TRUE);
+
+	// Ｚバッファを無効にする
+	SetUseZBuffer3D(FALSE);
+	*/
 }

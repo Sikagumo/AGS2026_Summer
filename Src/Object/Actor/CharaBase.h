@@ -74,10 +74,4 @@ protected:
 	void CollisionGravity(void);
 	void CollisionCapsule(void);
 	virtual void CollisionReserve(void) {};
-
-	
-	void DrawLate(void)override;
-
-	// ‰e•`‰æ
-	void DrawShadowRound(void);
 };

@@ -12,8 +12,7 @@
 SceneGame_Player::SceneGame_Player(void)
 	: sceneManager_(SceneManager::GetInstance())
 {
-	//player_ = std::make_unique<Player>();
-	player_ = new Player(0);
+	player_ = std::make_unique<Player>(0);
 }
 
 void SceneGame_Player::Load(void)
@@ -51,8 +50,8 @@ void SceneGame_Player::EndLoad(void)
 
 void SceneGame_Player::Initialize(void)
 {
-	sceneManager_.GetCamera()->ChangeMode(Camera::MODE::FIXED_POINT);
-	//sceneManager_.GetCamera()->SetFollow(&player_->GetTransform());
+	sceneManager_.GetCamera()->ChangeMode(Camera::MODE::FOLLOW);
+	sceneManager_.GetCamera()->SetFollow(&player_->GetTransform());
 
 	if (Loading::GetInstance()->IsLoading()) { return; }
 
@@ -78,7 +77,6 @@ void SceneGame_Player::Draw(void)
 {
 	auto camera = SceneManager::GetInstance().GetCamera();
 
-
 	player_->Draw();
 
 #ifdef _DEBUG
@@ -90,7 +88,6 @@ void SceneGame_Player::Draw(void)
 void SceneGame_Player::Release(void)
 {
 	player_->Release();
-	delete player_;
 }
 
 void SceneGame_Player::DrawDebug(void)
