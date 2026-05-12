@@ -1,4 +1,4 @@
-#include "SceneGame_Player.h"
+#include "SceneGamePlayer.h"
 #include "../../Manager/Generic/SceneManager.h"
 #include "../../Manager/Generic/InputManager.h"
 #include "../../Manager/Generic/ResourceManager.h"
@@ -9,13 +9,13 @@
 #include "../../Camera/Camera.h"
 
 
-SceneGame_Player::SceneGame_Player(void)
+SceneGamePlayer::SceneGamePlayer(void)
 	: sceneManager_(SceneManager::GetInstance())
 {
 	player_ = std::make_unique<Player>(0);
 }
 
-void SceneGame_Player::Load(void)
+void SceneGamePlayer::Load(void)
 {
 	Loading::GetInstance()->SetProgress(10.0f);
 
@@ -43,12 +43,12 @@ void SceneGame_Player::Load(void)
 	Loading::GetInstance()->SetProgress(100.0f);
 }
 
-void SceneGame_Player::EndLoad(void)
+void SceneGamePlayer::EndLoad(void)
 {
 	SceneBase::EndLoad();
 }
 
-void SceneGame_Player::Initialize(void)
+void SceneGamePlayer::Initialize(void)
 {
 	sceneManager_.GetCamera()->ChangeMode(Camera::MODE::FOLLOW);
 	sceneManager_.GetCamera()->SetFollow(&player_->GetTransform());
@@ -57,14 +57,14 @@ void SceneGame_Player::Initialize(void)
 
 }
 
-void SceneGame_Player::Update(void)
+void SceneGamePlayer::Update(void)
 {
 	if (Loading::GetInstance()->IsLoading()) { return; }
 
 	auto& sound = SoundManager::GetInstance();
 	auto& input = InputManager::GetInstance();
 	auto& time = TimeManager::GetInstance();
-	auto camera = SceneManager::GetInstance().GetCamera();
+	auto& camera = sceneManager_.GetCamera();
 	auto loader = Loading::GetInstance();
 
 	// ŽžŠÔ‚ðŽæ“¾
@@ -73,9 +73,9 @@ void SceneGame_Player::Update(void)
 	player_->Update();
 }
 
-void SceneGame_Player::Draw(void)
+void SceneGamePlayer::Draw(void)
 {
-	auto camera = SceneManager::GetInstance().GetCamera();
+	auto& camera = sceneManager_.GetCamera();
 
 	player_->Draw();
 
@@ -85,12 +85,12 @@ void SceneGame_Player::Draw(void)
 
 }
 
-void SceneGame_Player::Release(void)
+void SceneGamePlayer::Release(void)
 {
 	player_->Release();
 }
 
-void SceneGame_Player::DrawDebug(void)
+void SceneGamePlayer::DrawDebug(void)
 {
 
 }

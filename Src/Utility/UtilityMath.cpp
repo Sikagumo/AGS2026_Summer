@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 #include "UtilityMath.h"
 
 #include<DxLib.h>

@@ -1,7 +1,8 @@
 #include "SceneManager.h"
 #include "../../Scene/SceneBase.h"
 #include "../../Scene/MainScene/SceneTitle.h"
-#include "../../Scene/MainScene/SceneGame_Player.h"
+#include "../../Scene/MainScene/SceneGamePlayer.h"
+#include "../../Scene/MainScene/SceneGameBoss.h"
 #include "../Decoration/SoundManager.h"
 #include "../System/TimeManager.h"
 #include "../../Camera/Camera.h"
@@ -61,7 +62,7 @@ void SceneManager::Initialize(void)
     // 3D•`‰æİ’è‚ğ‰Šú‰»‚·‚é
     Init3D();
 
-    ChangeScene(std::make_shared<SceneTitle>());
+    ChangeScene(std::make_shared<SceneGameBoss>());
 }
 
 void SceneManager::Init3D(void)

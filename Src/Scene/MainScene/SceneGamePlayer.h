@@ -7,15 +7,15 @@ class SceneManager;
 
 
 /// @brief ゲーム本編のメインロジックを管理するシーンクラス
-class SceneGame_Player : public SceneBase
+class SceneGamePlayer : public SceneBase
 {
 public:
 
     /// @brief コンストラクタ
-    SceneGame_Player(void);
+    SceneGamePlayer(void);
 
     /// @brief デストラクタ
-    ~SceneGame_Player(void) = default;
+    ~SceneGamePlayer(void) = default;
 
     /// @brief リソースの読み込み開始
     void Load(void) override;

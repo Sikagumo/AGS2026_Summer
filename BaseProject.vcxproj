@@ -20,12 +20,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\Object\Actor\Chara\Boss\Boss.cpp" />
+    <ClCompile Include="Src\Scene\MainScene\SceneGameBoss.cpp" />
     <ClCompile Include="Src\Scene\MainScene\SceneLobby.cpp" />
     <ClCompile Include="Src\Object\Player\PlayerBase.cpp" />
     <ClCompile Include="Src\Object\Bullet\Player\PBulletBase.cpp" />
     <ClCompile Include="Src\Object\Bullet\Player\PBulletBig.cpp" />
     <ClCompile Include="Src\Scene\MainScene\SceneGame.cpp" />
-    <ClCompile Include="Src\Scene\MainScene\SceneGame_Player.cpp" />
+    <ClCompile Include="Src\Scene\MainScene\SceneGamePlayer.cpp" />
     <ClCompile Include="Src\Scene\MainScene\SceneTitle.cpp" />
     <ClCompile Include="Src\Scene\SceneBase.cpp" />
     <ClCompile Include="Src\Manager\System\Loading.cpp" />
@@ -68,12 +69,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\Object\Actor\Chara\Boss\Boss.h" />
+    <ClInclude Include="Src\Scene\MainScene\SceneGameBoss.h" />
     <ClInclude Include="Src\Scene\MainScene\SceneLobby.h" />
     <ClInclude Include="Src\Object\Player\PlayerBase.h" />
     <ClInclude Include="Src\Object\Bullet\Player\PBulletBig.h" />
     <ClInclude Include="Src\Object\Bullet\Player\PBulletBase.h" />
     <ClInclude Include="Src\Scene\MainScene\SceneGame.h" />
-    <ClInclude Include="Src\Scene\MainScene\SceneGame_Player.h" />
+    <ClInclude Include="Src\Scene\MainScene\SceneGamePlayer.h" />
     <ClInclude Include="Src\Scene\MainScene\SceneTitle.h" />
     <ClInclude Include="Src\Scene\SceneBase.h" />
     <ClInclude Include="Src\Manager\System\Loading.h" />
