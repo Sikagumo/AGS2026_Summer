@@ -1,6 +1,6 @@
 #pragma once
 #include <DxLib.h>
-#include "../../CharaBase.h"
+#include "../CharaBase.h"
 #include "../../../Common/Transform.h";
 
 class Boss : public CharaBase

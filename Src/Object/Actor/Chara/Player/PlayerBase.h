@@ -1,8 +1,8 @@
 #pragma once
-#include "../Actor/CharaBase.h"
+#include "../CharaBase.h"
 #include <memory>
 #include <vector>
-#include "../Bullet/Player/PBulletBase.h"
+#include "../Weapon/Player/PBulletBase.h"
 
 class PlayerBase : public CharaBase
 {

@@ -1,8 +1,7 @@
 #pragma once
 #include "../SceneBase.h"
 #include <memory>
-#include "../../Object/Player/Player.h"
-class Player;
+#include "../../Object/Actor/Chara/Player/Player.h"
 class SceneManager;
 
 

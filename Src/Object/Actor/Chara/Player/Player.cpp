@@ -1,12 +1,12 @@
 #include "Player.h"
-#include "../../Manager/Generic/ResourceManager.h"
-#include "../Common/AnimationController.h"
-#include "../../Utility/UtilityMath.h"
-#include "../../Manager/Generic/InputManager.h"
-#include "../../Manager/Generic/SceneManager.h"
-#include "../../Camera/Camera.h"
-#include "../../Common/Quaternion.h"
-#include "../Collider/ColliderBase.h"
+#include "../../../../Manager/Generic/ResourceManager.h"
+#include "../../../Common/AnimationController.h"
+#include "../../../../Utility/UtilityMath.h"
+#include "../../../../Manager/Generic/InputManager.h"
+#include "../../../../Manager/Generic/SceneManager.h"
+#include "../../../../Camera/Camera.h"
+#include "../../../../Common/Quaternion.h"
+#include "../../../Collider/ColliderBase.h"
 
 
 Player::Player(int _playerNo)
@@ -43,6 +43,8 @@ void Player::InitPost(void)
 
 void Player::UpdateProcess(void)
 {
+	ProcessAttack();
+
 	ProcessJump();
 
 	// à⁄ìÆëÄçÏ
@@ -158,6 +160,14 @@ void Player::ProcessJump(void)
 	if (transform_.pos.y < LIMIT_POS_Y)
 	{
 		transform_.pos.y = -(LIMIT_POS_Y);
+	}
+}
+
+void Player::ProcessAttack(void)
+{
+	if (inputManager_.IsTrgMouseLeft())
+	{
+
 	}
 }
 

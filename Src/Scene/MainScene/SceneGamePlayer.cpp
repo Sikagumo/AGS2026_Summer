@@ -5,7 +5,6 @@
 #include "../../Manager/Decoration/SoundManager.h"
 #include "../../Manager/System/TimeManager.h"
 #include "../../Manager/System/Loading.h"
-#include "../../Object/Player/Player.h"
 #include "../../Camera/Camera.h"
 
 
