@@ -92,6 +92,8 @@ private:
 	// ƒWƒƒƒ“ƒv
 	void ProcessJump(void);
 
+	void ProcessAttack(void);
+
 
 	void DrawShadowRound(void);
 	//void PlayAnim(ANIM_TYPE type, bool _isLoop = true);
