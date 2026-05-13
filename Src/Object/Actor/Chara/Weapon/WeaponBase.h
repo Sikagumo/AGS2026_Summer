@@ -6,51 +6,37 @@ class WeaponBase :
 {
 public:
 	WeaponBase(void);
-	~WeaponBase(void);
+	virtual ~WeaponBase(void)override = default;
 
 
-	// 更新
-	virtual void Update(void) ;
+	void Update(void)override final;
 
-	// 描画
-	virtual void Draw(void);
-
-	// 解放
-	virtual void Release(void);
+	void Release(void)override;
 
 private:
 
 
 protected:
 
+	static constexpr VECTOR WEAPON_SIZE = { 3.0f,3.0f,3.0f };
+	static constexpr float WEAPON_ROT = 180.0f;
+
+
+
 	float hp_;
-	float attackDamage_;
+	float attackDamage_;	
+	int modelId_;
+	int jointNo_;
 
-	
+	virtual void DrawPre(void)override;
 
-
-	// リソースロード
-	virtual void InitLoad(void) override = 0;
-
-	// 大きさ、回転、座標の初期化
-	virtual void InitTransform(void) override = 0;
-
-	// 衝突判定の初期化
-	virtual void InitCollider(void) override = 0;
-
-	// アニメーションの初期化
-	virtual void InitAnimation(void) override = 0;
-
-	// 初期化後の個別処理
-	virtual void InitPost(void) override=0;
-
-	// 前描画
-	virtual void DrawPre(void) override  {};
-
-
+	virtual void UpdateProcess(void) = 0;
+	virtual void UpdateProcessPost(void) = 0;
 
 	//受けたダメージをボスに伝えるための関数
-	virtual float Damage(void);
+	virtual float Damage(void)=0;
 
+
+	virtual void CollisionReserve(void) {};
 };
 

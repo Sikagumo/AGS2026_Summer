@@ -4,7 +4,6 @@
 
 #include "../SceneBase.h"
 
-class Boss;
 
 /// @brief ゲーム本編のメインロジックを管理するシーンクラス
 class SceneGame : public SceneBase
@@ -37,7 +36,6 @@ public:
 
 private:
 
-    std::unique_ptr<Boss> boss_;  /// ボスキャラクターの
 
     /// @brief デバッグ情報の描画
     void DrawDebug(void);

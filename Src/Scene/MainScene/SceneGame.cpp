@@ -4,7 +4,6 @@
 #include "../../Manager/Decoration/SoundManager.h"
 #include "../../Manager/System/TimeManager.h"
 #include "../../Manager/System/Loading.h"
-#include "../../Object/Actor/Chara/Boss/Boss.h"
 
 #include "SceneGame.h"
 
@@ -56,8 +55,7 @@ void SceneGame::Initialize(void)
 
 	if (Loading::GetInstance()->IsLoading()) { return; }
 
-	boss_ = std::make_unique<Boss>();
-	boss_->Init();
+	
 }
 
 void SceneGame::Update(void)
@@ -65,14 +63,14 @@ void SceneGame::Update(void)
 
 	if (Loading::GetInstance()->IsLoading()) { return; }
 
-	boss_->Update();
+	
 }
 
 void SceneGame::Draw(void)
 {
 	DrawString(0, 0, "Game Scene Now!", GetColor(255, 255, 255));
 
-	boss_->Draw();
+	
 
 #ifdef _DEBUG
 	DrawDebug();

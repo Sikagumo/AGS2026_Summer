@@ -1,5 +1,5 @@
 #pragma once
-#include "../Actor/ActorBase.h"
+#include "../ActorBase.h"
 #include <string>
 #include <vector>
 

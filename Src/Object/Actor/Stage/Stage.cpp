@@ -1,8 +1,8 @@
 #include "Stage.h"
-#include "../Actor/ActorBase.h"
-#include "../../Manager/Generic/ResourceManager.h"
-#include "../../Utility/UtilityMath.h"
-#include "../Collider/ColliderModel.h"
+#include "../ActorBase.h"
+#include "../../../Manager/Generic/ResourceManager.h"
+#include "../../../Utility/UtilityMath.h"
+#include "../../Collider/ColliderModel.h"
 
 
 Stage::Stage(void)

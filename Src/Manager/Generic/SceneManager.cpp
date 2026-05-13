@@ -62,7 +62,7 @@ void SceneManager::Initialize(void)
     // 3D描画設定を初期化する
     Init3D();
 
-    ChangeScene(std::make_shared<SceneGamePlayer>());
+    ChangeScene(std::make_shared<SceneGameBoss>());
 }
 
 void SceneManager::Init3D(void)
@@ -83,7 +83,7 @@ void SceneManager::Init3D(void)
     const float FogEnd = 20000.0f;
 
     // 背景色を設定する
-    SetBackgroundColor(0, 0, 0);
+    SetBackgroundColor(255/2, 255 / 2, 255 / 2);
 
     // Zバッファを有効にする
     SetUseZBuffer3D(true);

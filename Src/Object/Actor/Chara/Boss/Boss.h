@@ -4,7 +4,12 @@
 #include "../CharaBase.h"
 #include "../../../Common/Transform.h";
 
-class WeponBase;
+
+class WeaponMGL;
+class WeaponMGR;
+class WeaponCannon;
+class WeaponMP;
+class WeaponRG;
 
 
 class Boss : public CharaBase
@@ -34,6 +39,13 @@ private:
 	float hp_;
 	float attackDelay_;
 
+	std::unique_ptr<WeaponMGL> weaponMGL_;
+	std::unique_ptr<WeaponMGR> weaponMGR_;
+	std::unique_ptr<WeaponCannon> weaponCannonL_;
+	std::unique_ptr<WeaponCannon> weaponCannonR_;
+	std::unique_ptr<WeaponMP> weaponMPL_;
+	std::unique_ptr<WeaponMP> weaponMPR_;
+	std::unique_ptr<WeaponRG> weaponRG_;
 
 
 
@@ -63,5 +75,7 @@ protected:
 	void DrawPre(void) override;
 
 	void CollisionReserve(void) override  {};
+
+
 };
 
