@@ -1,15 +1,21 @@
 #pragma once
 #include <DxLib.h>
-#include "../../CharaBase.h"
+#include <memory>
+#include "../CharaBase.h"
 #include "../../../Common/Transform.h";
+
+class WeponBase;
+
 
 class Boss : public CharaBase
 {
 public:
-	Boss();
-	~Boss() override;
+	Boss(void);
+	~Boss(void) override;
 
-	void Release() override;
+	void Release(void) override;
+
+
 
 private:
 	//bossの大きさ
@@ -24,30 +30,38 @@ private:
 	Transform transformFeet_;
 	Transform transformBody_;
 
+
+	float hp_;
+	float attackDelay_;
+
+
+
+
+
 protected:
 	// リソースロード
-	void InitLoad(void);
+	void InitLoad(void) override;
 
 	// 大きさ、回転、座標の初期化
-	void InitTransform(void);
+	void InitTransform(void) override;
 
 	// 衝突判定の初期化
-	void InitCollider(void);
+	void InitCollider(void) override;
 
 	// アニメーションの初期化
-	void InitAnimationPost(void);
+	void InitAnimation(void) override;
 
 	// 初期化後の個別処理
-	void InitPost(void);
+	void InitPost(void) override;
 
-	virtual void UpdateProcess(void);
-	virtual void UpdateProcessPost(void);
+	void UpdateProcess(void) override;
+	void UpdateProcessPost(void) override;
 
 	
 
 	// 前描画
-	void DrawPre(void);
+	void DrawPre(void) override;
 
-	void CollisionReserve(void) {};
+	void CollisionReserve(void) override  {};
 };
 

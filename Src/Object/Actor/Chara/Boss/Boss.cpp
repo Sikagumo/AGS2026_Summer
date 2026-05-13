@@ -2,9 +2,10 @@
 #include "../../../../Utility/UtilityMath.h"
 #include "../../../../Utility/MatrixUtility.h"
 #include "../../../Common/Transform.h"
+#include "Weapon/WeaponBase.h"
 #include "Boss.h"
 
-Boss::Boss():
+Boss::Boss(void):
 	transformFeet_(),
 	transformBody_(),
 
@@ -12,11 +13,11 @@ Boss::Boss():
 {
 }
 
-Boss::~Boss()
+Boss::~Boss(void)
 {
 }
 
-void Boss::Release()
+void Boss::Release(void)
 {
 }
 
@@ -33,12 +34,12 @@ void Boss::InitLoad(void)
 	transformBody_.quaRot = Quaternion::Identity();
 	transformBody_.quaRotLocal =
 		Quaternion::Mult(transformBody_.quaRotLocal,
-			Quaternion::AngleAxis(UtilityMath::Deg2RadF(INIT_ROT), UtilityMath::AXIS_Y));
+			Quaternion::AngleAxis(UtilityMath::Deg2RadF(0.0f), UtilityMath::AXIS_Y));
 
 	transformFeet_.pos= BOSS_INIT_POS;
-	transformBody_.pos = MV1GetFramePosition(transformFeet_.modelId,JOINT_NO);
-
 	transformFeet_.Update();
+	transformBody_.pos = MV1GetFramePosition(transformFeet_.modelId,JOINT_NO);
+	
 	transformBody_.Update();
 
 }
@@ -51,7 +52,7 @@ void Boss::InitCollider(void)
 {
 }
 
-void Boss::InitAnimationPost(void)
+void Boss::InitAnimation(void)
 {
 }
 

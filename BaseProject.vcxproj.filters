@@ -46,8 +46,11 @@
     <ClCompile Include="Src\Utility\MatrixUtility.cpp" />
     <ClCompile Include="Src\Utility\UtilityCommon.cpp" />
     <ClCompile Include="Src\Manager\System\TimeManager.cpp" />
-    <ClCompile Include="Src\Object\Actor\Chara\Boss\Weapon\WeaponBase.cpp" />
+    <ClCompile Include="Src\Object\Actor\Chara\Weapon\WeaponBase.cpp" />
     <ClCompile Include="Src\Scene\MainScene\SceneGameBoss.cpp" />
+    <ClCompile Include="Src\Object\Actor\Chara\CharaBase.cpp" />
+    <ClCompile Include="Src\Common\ParametersIO.cpp" />
+    <ClCompile Include="Src\Object\Actor\Chara\Weapon\WeaponManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\Object\Actor\Chara\Boss\Boss.h" />
@@ -97,7 +100,10 @@
     <ClInclude Include="Src\Utility\MatrixUtility.h" />
     <ClInclude Include="Src\Utility\UtilityCommon.h" />
     <ClInclude Include="Src\Manager\System\TimeManager.h" />
-    <ClInclude Include="Src\Object\Actor\Chara\Boss\Weapon\WeaponBase.h" />
+    <ClInclude Include="Src\Object\Actor\Chara\Weapon\WeaponBase.h" />
     <ClInclude Include="Src\Scene\MainScene\SceneGameBoss.h" />
+    <ClInclude Include="Src\Object\Actor\Chara\CharaBase.h" />
+    <ClInclude Include="Src\Common\ParametersIO.h" />
+    <ClInclude Include="Src\Object\Actor\Chara\Weapon\WeaponManager.h" />
   </ItemGroup>
 </Project>

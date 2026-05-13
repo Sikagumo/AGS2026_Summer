@@ -1,4 +1,4 @@
-#include "SceneGameBoss.h"
+
 #include "../../Manager/Generic/SceneManager.h"
 #include "../../Manager/Generic/InputManager.h"
 #include "../../Manager/Generic/ResourceManager.h"
@@ -6,10 +6,16 @@
 #include "../../Manager/System/TimeManager.h"
 #include "../../Manager/System/Loading.h"
 #include "../../Camera/Camera.h"
+#include "../../Object/Actor/Chara/Boss/Boss.h"
 
+#include "SceneGameBoss.h"
 
 SceneGameBoss::SceneGameBoss(void)
 	: sceneManager_(SceneManager::GetInstance())
+{
+}
+
+SceneGameBoss::~SceneGameBoss(void)
 {
 }
 
@@ -37,6 +43,8 @@ void SceneGameBoss::Load(void)
 
 
 	Loading::GetInstance()->SetProgress(100.0f);
+
+
 }
 
 void SceneGameBoss::EndLoad(void)
@@ -48,7 +56,13 @@ void SceneGameBoss::Initialize(void)
 {
 	sceneManager_.GetCamera()->ChangeMode(Camera::MODE::FIXED_POINT);
 
+
+
 	if (Loading::GetInstance()->IsLoading()) { return; }
+
+	boss_ = std::make_unique<Boss>();
+	boss_->Init();
+
 
 }
 
@@ -64,11 +78,15 @@ void SceneGameBoss::Update(void)
 
 	// ŽžŠÔ‚ðŽæ“¾
 	float times = time.GetGameTime();
+
+	boss_->Update();
 }
 
 void SceneGameBoss::Draw(void)
 {
 	auto& camera = sceneManager_.GetCamera();
+
+	boss_->Draw();
 
 #ifdef _DEBUG
 	DrawDebug();
