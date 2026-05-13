@@ -34,7 +34,6 @@
     <ClCompile Include="Src\Manager\System\Loading.cpp" />
     <ClCompile Include="Src\FPS\FpsController.cpp" />
     <ClCompile Include="Src\Manager\InputTextManager.cpp" />
-    <ClCompile Include="Src\Object\Actor\Chara\CharaBase.cpp" />
     <ClCompile Include="Src\Common\InputTextArea.cpp" />
     <ClCompile Include="Src\Net\NetSend.cpp" />
     <ClCompile Include="Src\Net\NetHost.cpp" />
@@ -73,7 +72,6 @@
   <ItemGroup>
     <ClInclude Include="Src\Common\ParametersIO.h" />
     <ClInclude Include="Src\Object\Actor\Chara\Boss\Boss.h" />
-    <ClInclude Include="Src\Object\Actor\Chara\CharaBase.h" />
     <ClInclude Include="Src\Scene\MainScene\SceneGameBoss.h" />
     <ClInclude Include="Src\Scene\MainScene\SceneLobby.h" />
     <ClInclude Include="Src\Object\Actor\Chara\Player\PlayerBase.h" />
