@@ -28,6 +28,11 @@ void Boss::Release(void)
 {
 }
 
+Boss::Bone Boss::GetBone(BONE_NAME _boneName)
+{
+	return boneId_[static_cast<int>(_boneName)];
+}
+
 void Boss::InitLoad(void)
 {
 	transformFeet_.SetModel(resMng_.LoadModelDuplicate(ResourceManager::SRC::MODEL_BOSS_FEET));
