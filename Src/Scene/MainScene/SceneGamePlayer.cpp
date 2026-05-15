@@ -6,6 +6,7 @@
 #include "../../Manager/System/TimeManager.h"
 #include "../../Manager/System/Loading.h"
 #include "../../Camera/Camera.h"
+#include "../../Utility/UtilityMath.h"
 
 
 SceneGamePlayer::SceneGamePlayer(void)
@@ -77,6 +78,8 @@ void SceneGamePlayer::Draw(void)
 	auto& camera = sceneManager_.GetCamera();
 
 	player_->Draw();
+
+	DrawSphere3D(UtilityMath::VECTOR_ZERO, 10.0f, 16, 0xff00ff, 0xffffff, true);
 
 #ifdef _DEBUG
 	DrawDebug();

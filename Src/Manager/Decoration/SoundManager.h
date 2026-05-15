@@ -122,6 +122,12 @@ private:
 	/// @param void 
 	~SoundManager(void) = default;
 
+	// コピーコンストラクタ対策
+	SoundManager(const SoundManager&)			 = delete;
+	SoundManager& operator=(const SoundManager&) = delete;
+	SoundManager(SoundManager&&)			= delete;
+	SoundManager& operator=(SoundManager&&) = delete;
+
 	/// @brief 音量パーセントをDxLib用の値(0-255)に変換するヘルパー
 	/// @param percent 変換前のパーセント値
 	/// @return DxLib形式の音量値

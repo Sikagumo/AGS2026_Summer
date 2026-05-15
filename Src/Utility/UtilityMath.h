@@ -14,17 +14,21 @@ class UtilityMath
 {
 public:
 
-	/// <summary>ラジアンから度への変換定数（float）</summary>
+	// ラジアンから度への変換定数（float
 	static constexpr float RAD2DEG = (180 / DX_PI_F);
 
-	/// <summary>度からラジアンへの変換定数（float）</summary>
+	// 度からラジアンへの変換定数（float)
 	static constexpr float DEG2RAD = (DX_PI_F / 180.0f);
 
-	/// <summary>ゼロベクトル (0,0,0)</summary>
+	/// @brief ゼロベクトル(0, 0, 0)
 	static constexpr VECTOR VECTOR_ZERO = { 0.0f, 0.0f, 0.0f };
+	static constexpr Vector2 VECTOR2_ZERO = { 0, 0 };
+	static constexpr Vector2F VECTOR2F_ZERO = { 0.0f, 0.0f };
 
-	/// <summary>単位ベクトル (1,1,1)</summary>
+	/// @brief 単位ベクトル(1, 1, 1)
 	static constexpr VECTOR VECTOR_ONE = { 1.0f, 1.0f, 1.0f };
+	static constexpr Vector2 VECTOR2_ONE = { 1, 1 };
+	static constexpr Vector2 VECTOR2F_ONE = { 1.0f, 1.0f };
 
 	//回転軸
 

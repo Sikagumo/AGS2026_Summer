@@ -80,11 +80,14 @@ private:
 	// 外部から生成できない様にする
 	Application(void);
 
-	// コピーコンストラクタも同様
-	Application(const Application& instance) = default;
-
 	// デストラクタも同様
 	~Application(void) = default;
+
+	// コピーコンストラクタ対策
+	Application(const Application&)			   = delete;
+	Application& operator=(const Application&) = delete;
+	Application(Application&&)			  = delete;
+	Application& operator=(Application&&) = delete;
 
 	// エフェクシアの初期化
 	void InitEffekseer(void);

@@ -30,11 +30,14 @@ private:
 	// コンストラクタ
 	InputTextManager(void);
 
-	// コピーコンストラクタ
-	InputTextManager(const InputTextManager& ins);
-
 	// デストラクタ
-	~InputTextManager(void);
+	~InputTextManager(void) = default;
+
+	// コピーコンストラクタ対策
+	InputTextManager(const InputTextManager&)			 = delete;
+	InputTextManager& operator=(const InputTextManager&) = delete;
+	InputTextManager(InputTextManager&&)			= delete;
+	InputTextManager& operator=(InputTextManager&&) = delete;
 
 	// 有効なキー入力ハンドルを持つInputTextArea
 	InputTextArea* inputTextArea_;

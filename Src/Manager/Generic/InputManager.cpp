@@ -1,7 +1,16 @@
 #include <DxLib.h>
 #include "InputManager.h"
+#include "../../Utility/UtilityMath.h"
 
 InputManager* InputManager::instance_ = nullptr;
+
+InputManager::InputManager(void)
+	: mouseInput_(-1)
+	, infoEmpty_(Info::Info())
+	, mousePos_(UtilityMath::VECTOR2_ZERO)
+{
+	
+}
 
 void InputManager::CreateInstance(void)
 {
@@ -29,19 +38,25 @@ void InputManager::Init(void)
 	InputManager::GetInstance().Add(KEY_INPUT_SPACE);
 	InputManager::GetInstance().Add(KEY_INPUT_Z);
 
-	// 1P
-	InputManager::GetInstance().Add(KEY_INPUT_UP);
-	InputManager::GetInstance().Add(KEY_INPUT_DOWN);
-	InputManager::GetInstance().Add(KEY_INPUT_LEFT);
-	InputManager::GetInstance().Add(KEY_INPUT_RIGHT);
-	InputManager::GetInstance().Add(KEY_INPUT_N);
-	InputManager::GetInstance().Add(KEY_INPUT_M);
-
-	// 2P
 	InputManager::GetInstance().Add(KEY_INPUT_W);
 	InputManager::GetInstance().Add(KEY_INPUT_S);
 	InputManager::GetInstance().Add(KEY_INPUT_A);
 	InputManager::GetInstance().Add(KEY_INPUT_D);
+
+	InputManager::GetInstance().Add(KEY_INPUT_E);
+
+
+	InputManager::GetInstance().Add(KEY_INPUT_UP);
+	InputManager::GetInstance().Add(KEY_INPUT_DOWN);
+	InputManager::GetInstance().Add(KEY_INPUT_LEFT);
+	InputManager::GetInstance().Add(KEY_INPUT_RIGHT);
+	InputManager::GetInstance().Add(KEY_INPUT_I);
+	InputManager::GetInstance().Add(KEY_INPUT_J);
+	InputManager::GetInstance().Add(KEY_INPUT_K);
+	InputManager::GetInstance().Add(KEY_INPUT_L);
+
+	InputManager::GetInstance().Add(KEY_INPUT_M);
+
 	InputManager::GetInstance().Add(KEY_INPUT_LCONTROL);
 	InputManager::GetInstance().Add(KEY_INPUT_LSHIFT);
 
@@ -51,19 +66,11 @@ void InputManager::Init(void)
 	// 左クリック
 	info = InputManager::MouseInfo();
 	info.key = MOUSE_INPUT_LEFT;
-	info.keyOld = false;
-	info.keyNew = false;
-	info.keyTrgDown = false;
-	info.keyTrgUp = false;
 	mouseInfos_.emplace(info.key, info);
 
 	// 右クリック
 	info = InputManager::MouseInfo();
 	info.key = MOUSE_INPUT_RIGHT;
-	info.keyOld = false;
-	info.keyNew = false;
-	info.keyTrgDown = false;
-	info.keyTrgUp = false;
 	mouseInfos_.emplace(info.key, info);
 
 }
@@ -72,24 +79,24 @@ void InputManager::Update(void)
 {
 
 	// キーボード検知
-	for (auto& p : keyInfos_)
+	for (auto& key : keyInfos_)
 	{
-		p.second.keyOld = p.second.keyNew;
-		p.second.keyNew = CheckHitKey(p.second.key);
-		p.second.keyTrgDown = p.second.keyNew && !p.second.keyOld;
-		p.second.keyTrgUp = !p.second.keyNew && p.second.keyOld;
+		key.second.keyOld = key.second.keyNew;
+		key.second.keyNew = CheckHitKey(key.second.key);
+		key.second.keyTrgDown = (key.second.keyNew && !key.second.keyOld);
+		key.second.keyTrgUp = (!key.second.keyNew && key.second.keyOld);
 	}
 
 	// マウス検知
 	mouseInput_ = GetMouseInput();
 	GetMousePoint(&mousePos_.x, &mousePos_.y);
 
-	for (auto& p : mouseInfos_)
+	for (auto& mouse : mouseInfos_)
 	{
-		p.second.keyOld = p.second.keyNew;
-		p.second.keyNew = mouseInput_ == p.second.key;
-		p.second.keyTrgDown = p.second.keyNew && !p.second.keyOld;
-		p.second.keyTrgUp = !p.second.keyNew && p.second.keyOld;
+		mouse.second.keyOld = mouse.second.keyNew;
+		mouse.second.keyNew = (mouseInput_ == mouse.second.key);
+		mouse.second.keyTrgDown = (mouse.second.keyNew && !mouse.second.keyOld);
+		mouse.second.keyTrgUp = (!mouse.second.keyNew && mouse.second.keyOld);
 	}
 
 	// パッド情報
@@ -115,10 +122,6 @@ void InputManager::Add(int key)
 {
 	InputManager::Info info = InputManager::Info();
 	info.key = key;
-	info.keyOld = false;
-	info.keyNew = false;
-	info.keyTrgDown = false;
-	info.keyTrgUp = false;
 	keyInfos_.emplace(key, info);
 }
 
@@ -172,19 +175,6 @@ bool InputManager::IsTrgMouseRight(void) const
 	return FindMouse(MOUSE_INPUT_RIGHT).keyTrgDown;
 }
 
-InputManager::InputManager(void)
-{
-	mouseInput_ = -1;
-}
-
-InputManager::InputManager(const InputManager& manager)
-{
-}
-
-InputManager::~InputManager(void)
-{
-	
-}
 
 const InputManager::Info& InputManager::Find(int key) const
 {

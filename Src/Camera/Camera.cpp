@@ -1,5 +1,6 @@
 #include "Camera.h"
 #include <DxLib.h>
+#include <algorithm>
 #include <EffekseerForDXLib.h>
 #include "../Utility/UtilityMath.h"
 #include "../Manager/Generic/InputManager.h"
@@ -17,6 +18,7 @@ Camera::Camera(void)
 	, rotY_(Quaternion::Identity())
 	, targetPos_(UtilityMath::VECTOR_ZERO)
 	, prePos_(UtilityMath::VECTOR_ZERO)
+	, isLockOn_(false)
 {
 	// DxLibの初期設定では、
 	// カメラの位置が x = 320.0f, y = 240.0f, z = (画面のサイズによって変化)、
@@ -151,25 +153,27 @@ void Camera::SyncFollow(void)
 	localPos = transform_.quaRot.PosAxis(FOLLOW_TARGET_LOCAL_POS);
 	targetPos_ = VAdd(pos, localPos);
 
+	if (InputManager::GetInstance().IsTrgDown(KEY_INPUT_E))
+	{
+		isLockOn_ = !isLockOn_;
+	}
 	// カメラ位置
-	localPos = transform_.quaRot.PosAxis(FOLLOW_CAMERA_LOCAL_POS);
+	const VECTOR LOCAL_POS = ((isLockOn_) ? FOLLOW_LOCAL_POS_LOCKON : FOLLOW_LOCAL_POS);
+	localPos = transform_.quaRot.PosAxis(LOCAL_POS);
 	transform_.pos = VAdd(pos, localPos);
 }
 
-void Camera::ProcessRot(bool isLimit)
+void Camera::ProcessRot(bool _isLimit)
 {
 
-	if (GetJoypadNum() == 0)
-	{
-		// 方向回転によるXYZの移動(キーボード)
-		RotKeyboard(isLimit);
-	}
-	else
-	{
-		// 方向回転によるXYZの移動(ゲームパッド)
-		RotGamePad(isLimit);
-	}
+#ifdef _DEBUG
+	// 方向回転によるXYZの移動(キーボード)
+	RotationKeyboard(_isLimit);
+#endif
 
+
+	// 方向回転によるXYZの移動(ゲームパッド)
+	RotationGamePad(_isLimit);
 }
 
 
@@ -258,48 +262,87 @@ void Camera::ProcessMove(void)
 
 }
 
-void Camera::RotKeyboard(bool isLimit)
+void Camera::RotationKeyboard(bool _isLimit)
 {
 	auto& ins = InputManager::GetInstance();
 
 	// カメラ回転
-	if (CheckHitKey(KEY_INPUT_LSHIFT) || CheckHitKey(KEY_INPUT_RSHIFT))
+	if (ins.IsNew(KEY_INPUT_RIGHT))
 	{
-		// カメラ回転
-		if (ins.IsNew(KEY_INPUT_RIGHT))
-		{
-			// 右回転
-			angles_.y += ROT_POW_RAD;
-		}
-		if (ins.IsNew(KEY_INPUT_LEFT))
-		{
-			// 左回転
-			angles_.y -= ROT_POW_RAD;
-		}
+		// 右回転
+		angles_.y += ROT_POW_RAD;
+	}
+	if (ins.IsNew(KEY_INPUT_LEFT))
+	{
+		// 左回転
+		angles_.y -= ROT_POW_RAD;
+	}
 
-		// 上回転
-		if (ins.IsNew(KEY_INPUT_UP))
+	// 上回転
+	if (ins.IsNew(KEY_INPUT_UP))
+	{
+		angles_.x += ROT_POW_RAD;
+		if (_isLimit && angles_.x > LIMIT_X_UP_RAD)
 		{
-			angles_.x += ROT_POW_RAD;
-			if (isLimit && angles_.x > LIMIT_X_UP_RAD)
-			{
-				angles_.x = LIMIT_X_UP_RAD;
-			}
+			angles_.x = LIMIT_X_UP_RAD;
 		}
+	}
 
-		// 下回転
-		if (ins.IsNew(KEY_INPUT_DOWN))
+	// 下回転
+	if (ins.IsNew(KEY_INPUT_DOWN))
+	{
+		angles_.x -= ROT_POW_RAD;
+		if (_isLimit && angles_.x < -LIMIT_X_DW_RAD)
 		{
-			angles_.x -= ROT_POW_RAD;
-			if (isLimit && angles_.x < -LIMIT_X_DW_RAD)
-			{
-				angles_.x = -LIMIT_X_DW_RAD;
-			}
+			angles_.x = -LIMIT_X_DW_RAD;
 		}
 	}
 }
 
-void Camera::RotGamePad(bool isLimit)
+void Camera::RotationMouse(bool _isLimit)
+{
+	/*
+	const float ROT_PAD_MOUSE = (UtilityMath::Deg2RadF(2.5f));
+	const float ROT_POW_PAD = (UtilityMath::Deg2RadF(0.005f));
+	VECTOR rotInput = UtilityMath::VECTOR_ZERO;
+
+	// マウス感度倍率
+	constexpr float ROT_SENS = (1.0 - 0.0f);
+
+
+	// マウス移動量
+	int mouseMoveY = InputManager::GetInstance().GetMouseMove().x;
+
+	// マウス速度の感度割り当て(ゼロ除算対策付き)
+	int mouseSens = 0.0f;
+	mouseSens = ((mouseMoveY != 0.0f) ? ((mouseMoveY * ROT_SENS) / mouseMoveY) : 0.0f);
+
+	// マウス回転
+	if (mouseMoveY != 0)
+	{
+		// 反転時、マイナスにする
+		int revert = ((mouseMoveY < 0) ? -1.0f : 1.0f);
+
+		// 回転
+		rotInput.y += (ROT_PAD_MOUSE * mouseSens * revert);
+	}
+
+	// コントローラ回転
+	int dirY = input_.GetKnockRStickSize().x;
+	if (dirY != 0)
+	{
+		rotInput.y += (dirY * ROT_POW_PAD);
+	}
+
+
+	if (!UtilityMath::EqualsVZero(rotInput))
+	{
+		// 相対的な回転を適用
+		Quaternion deltaRot = Quaternion::Euler(rotInput);
+		rot_.target = rot_.target.Mult(deltaRot);
+	}*/
+}
+void Camera::RotationGamePad(bool _isLimit)
 {
 
 	auto& ins = InputManager::GetInstance();
@@ -318,14 +361,10 @@ void Camera::RotGamePad(bool isLimit)
 		// 右スティック上下の傾き
 		angles_.x += dir.z * ROT_POW_RAD;
 
-		// 角度制限
-		if (isLimit && angles_.x < -LIMIT_X_DW_RAD)
+		if (_isLimit)
 		{
-			angles_.x = -LIMIT_X_DW_RAD;
-		}
-		if (isLimit && angles_.x > LIMIT_X_UP_RAD)
-		{
-			angles_.x = LIMIT_X_UP_RAD;
+			// 角度制限
+			angles_.x = std::clamp(angles_.x, -LIMIT_X_DW_RAD, LIMIT_X_UP_RAD);
 		}
 	}
 }

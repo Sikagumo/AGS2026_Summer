@@ -141,21 +141,21 @@ private:
 	// キー情報
 	struct Info
 	{
-		int key;			// キーID
-		bool keyOld;		// 1フレーム前の押下状態
-		bool keyNew;		// 現フレームの押下状態
-		bool keyTrgDown;	// 現フレームでボタンが押されたか
-		bool keyTrgUp;		// 現フレームでボタンが離されたか
+		int key	= -1; // キーID
+		bool keyOld		= false; // 1フレーム前の押下状態
+		bool keyNew		= false; // 現フレームの押下状態
+		bool keyTrgDown = false; // 現フレームでボタンが押されたか
+		bool keyTrgUp	= false; // 現フレームでボタンが離されたか
 	};
 
 	// マウス
 	struct MouseInfo
 	{
-		int key;			// キーID
-		bool keyOld;		// 1フレーム前の押下状態
-		bool keyNew;		// 現フレームの押下状態
-		bool keyTrgDown;	// 現フレームでボタンが押されたか
-		bool keyTrgUp;		// 現フレームでボタンが離されたか
+		int key = -1; // キーID
+		bool keyOld		= false; // 1フレーム前の押下状態
+		bool keyNew		= false; // 現フレームの押下状態
+		bool keyTrgDown = false; // 現フレームでボタンが押されたか
+		bool keyTrgUp	= false; // 現フレームでボタンが離されたか
 	};
 
 	// コントローラ情報
@@ -187,8 +187,13 @@ private:
 	// デフォルトコンストラクタをprivateにして、
 	// 外部から生成できない様にする
 	InputManager(void);
-	InputManager(const InputManager& manager);
-	~InputManager(void);
+	~InputManager(void) = default;
+
+	// コピーコンストラクタ対策
+	InputManager(const InputManager&)			 = delete;
+	InputManager& operator=(const InputManager&) = delete;
+	InputManager(InputManager&&)			= delete;
+	InputManager& operator=(InputManager&&) = delete;
 
 	// 配列の中からキー情報を取得する
 	const InputManager::Info& Find(int key) const;

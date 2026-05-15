@@ -29,10 +29,11 @@ public:
 	static constexpr float VIEW_FAR = 20000.0f;
 
 	// 追従位置からカメラ位置までの相対座標
-	static constexpr VECTOR FOLLOW_CAMERA_LOCAL_POS = { 0.0f, 250.0f, -400.0f };
+	static constexpr VECTOR FOLLOW_LOCAL_POS = { 65.0f, 190.0f, -225.0f };
+	static constexpr VECTOR FOLLOW_LOCAL_POS_LOCKON = { 100.0f, 157.5f, -125.0f };
 
 	// 追従位置から注視点までの相対座標
-	static constexpr VECTOR FOLLOW_TARGET_LOCAL_POS = { 0.0f, 0.0f, 500.0f };
+	static constexpr VECTOR FOLLOW_TARGET_LOCAL_POS = { 0.0f, 0.0f, 510.0f };
 
 	// カメラのX回転上限度角
 	static constexpr float LIMIT_X_UP_RAD = 40.0f * (DX_PI_F / 180.0f);
@@ -144,6 +145,10 @@ private:
 	// 注視点
 	VECTOR targetPos_;
 
+	// ターゲット
+	bool isLockOn_;
+
+
 	
 	// カメラを初期位置に戻す
 	void SetDefault(void);
@@ -152,14 +157,13 @@ private:
 	void SyncFollow(void);
 
 	// カメラ操作
-	void ProcessRot(bool isLimit);
+	void ProcessRot(bool _isLimit);
 	void ProcessMove(void);
 
-	// カメラ回転(キーボード)
-	void RotKeyboard(bool isLimit);
-
-	// カメラ回転(ゲームパッド)
-	void RotGamePad(bool isLimit);
+	// カメラ回転
+	void RotationKeyboard(bool _isLimit);
+	void RotationMouse(bool _isLimit);
+	void RotationGamePad(bool _isLimit);
 
 	// モード別更新ステップ
 	void SetBeforeDrawFixedPoint(void);
