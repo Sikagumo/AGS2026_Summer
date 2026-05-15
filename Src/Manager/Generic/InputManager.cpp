@@ -453,3 +453,8 @@ VECTOR InputManager::GetDirectionXZAKey(int aKeyX, int aKeyY) const
 	return ret;
 
 }
+
+Vector2 InputManager::GetMouseVelocityAndFixCenter(void)
+{
+	return Vector2();
+}
