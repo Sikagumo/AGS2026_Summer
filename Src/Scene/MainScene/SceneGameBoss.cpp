@@ -54,7 +54,7 @@ void SceneGameBoss::EndLoad(void)
 
 void SceneGameBoss::Initialize(void)
 {
-	sceneManager_.GetCamera()->ChangeMode(Camera::MODE::FIXED_POINT);
+	sceneManager_.GetCamera()->ChangeMode(Camera::MODE::FREE);
 
 
 

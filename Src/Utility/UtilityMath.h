@@ -28,7 +28,7 @@ public:
 	/// @brief 単位ベクトル(1, 1, 1)
 	static constexpr VECTOR VECTOR_ONE = { 1.0f, 1.0f, 1.0f };
 	static constexpr Vector2 VECTOR2_ONE = { 1, 1 };
-	static constexpr Vector2 VECTOR2F_ONE = { 1.0f, 1.0f };
+	static constexpr Vector2F VECTOR2F_ONE = { 1.0f, 1.0f };
 
 	//回転軸
 

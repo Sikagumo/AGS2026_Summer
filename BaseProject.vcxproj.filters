@@ -52,6 +52,11 @@
     <ClCompile Include="Src\Object\Actor\Chara\Weapon\WeaponManager.cpp" />
     <ClCompile Include="Src\Object\Actor\Chara\Weapon\Bullet\Player\PBulletRapidFire.cpp" />
     <ClCompile Include="Src\Object\Actor\Chara\Weapon\Bullet\Player\PActionController.cpp" />
+    <ClCompile Include="Src\Object\Actor\Chara\Weapon\BossWeapon\WeaponMP.cpp" />
+    <ClCompile Include="Src\Object\Actor\Chara\Weapon\BossWeapon\WeaponRG.cpp" />
+    <ClCompile Include="Src\Object\Actor\Chara\Weapon\BossWeapon\WeaponCannon.cpp" />
+    <ClCompile Include="Src\Object\Actor\Chara\Weapon\BossWeapon\WeaponMGR.cpp" />
+    <ClCompile Include="Src\Object\Actor\Chara\Weapon\BossWeapon\WeaponMGL.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\Object\Actor\Chara\Boss\Boss.h" />
@@ -107,5 +112,10 @@
     <ClInclude Include="Src\Object\Actor\Chara\Weapon\WeaponManager.h" />
     <ClInclude Include="Src\Object\Actor\Chara\Weapon\Bullet\Player\PBulletRapidFire.h" />
     <ClInclude Include="Src\Object\Actor\Chara\Weapon\Bullet\Player\PActionController.h" />
+    <ClInclude Include="Src\Object\Actor\Chara\Weapon\BossWeapon\WeaponMP.h" />
+    <ClInclude Include="Src\Object\Actor\Chara\Weapon\BossWeapon\WeaponRG.h" />
+    <ClInclude Include="Src\Object\Actor\Chara\Weapon\BossWeapon\WeaponCannon.h" />
+    <ClInclude Include="Src\Object\Actor\Chara\Weapon\BossWeapon\WeaponMGR.h" />
+    <ClInclude Include="Src\Object\Actor\Chara\Weapon\BossWeapon\WeaponMGL.h" />
   </ItemGroup>
 </Project>

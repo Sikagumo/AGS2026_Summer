@@ -56,7 +56,7 @@ public:
 
 	// æZˆ—
 	Vector2F operator*(const Vector2F& _vec)const;
-	void operator*=(const Vector2& _vec);
+	void operator*=(const Vector2F& _vec);
 
 	// œZˆ—
 	Vector2F operator/(const Vector2F& _vec)const;

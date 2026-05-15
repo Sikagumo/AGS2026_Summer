@@ -18,11 +18,11 @@ public:
 	};
 
 	// カメラの回転量
-	const float ROT_POW_DEG = 25.0f;
+	const float ROT_POW_DEG = 1.0f;
 	const float ROT_POW_RAD = ROT_POW_DEG * (DX_PI_F / 180.0f);
 
 	// カメラの移動スピード
-	static constexpr float ROT_SPEED = 50.0f;
+	static constexpr float ROT_SPEED = 10.0f;
 
 	// カメラのクリップ範囲
 	static constexpr float VIEW_NEAR = 10.0f;

@@ -69,7 +69,11 @@
     <ClCompile Include="Src\Utility\UtilityCommon.cpp" />
     <ClCompile Include="Src\Manager\System\TimeManager.cpp" />
     <ClCompile Include="Src\Object\Actor\Chara\Weapon\WeaponBase.cpp" />
-    <ClCompile Include="Src\Object\Actor\Chara\Weapon\WeaponManager.cpp" />
+    <ClCompile Include="Src\Object\Actor\Chara\Weapon\BossWeapon\WeaponMP.cpp" />
+    <ClCompile Include="Src\Object\Actor\Chara\Weapon\BossWeapon\WeaponRG.cpp" />
+    <ClCompile Include="Src\Object\Actor\Chara\Weapon\BossWeapon\WeaponCannon.cpp" />
+    <ClCompile Include="Src\Object\Actor\Chara\Weapon\BossWeapon\WeaponMGL.cpp" />
+    <ClCompile Include="Src\Object\Actor\Chara\Weapon\BossWeapon\WeaponMGR.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\Object\Actor\Chara\Weapon\Bullet\Player\PActionController.h" />
@@ -124,7 +128,11 @@
     <ClInclude Include="Src\Utility\UtilityCommon.h" />
     <ClInclude Include="Src\Manager\System\TimeManager.h" />
     <ClInclude Include="Src\Object\Actor\Chara\Weapon\WeaponBase.h" />
-    <ClInclude Include="Src\Object\Actor\Chara\Weapon\WeaponManager.h" />
+    <ClInclude Include="Src\Object\Actor\Chara\Weapon\BossWeapon\WeaponMP.h" />
+    <ClInclude Include="Src\Object\Actor\Chara\Weapon\BossWeapon\WeaponRG.h" />
+    <ClInclude Include="Src\Object\Actor\Chara\Weapon\BossWeapon\WeaponCannon.h" />
+    <ClInclude Include="Src\Object\Actor\Chara\Weapon\BossWeapon\WeaponMGL.h" />
+    <ClInclude Include="Src\Object\Actor\Chara\Weapon\BossWeapon\WeaponMGR.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

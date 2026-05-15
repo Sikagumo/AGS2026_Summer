@@ -1,21 +1,51 @@
 #pragma once
 #include <DxLib.h>
 #include <memory>
+#include <array>
 #include "../CharaBase.h"
 #include "../../../Common/Transform.h";
 
-class WeponBase;
+
+class WeaponMGL;
+class WeaponMGR;
+class WeaponCannon;
+class WeaponMP;
+class WeaponRG;
 
 
 class Boss : public CharaBase
 {
 public:
+	enum class BONE_NAME 
+	{
+		BODY_JOINT_FEET=0,
+		BODY_JOINT_CAR,
+		WHEEL_JOINT_FRONT_L,
+		WHEEL_JOINT_FRONT_R,
+		WHEEL_JOINT_BACK_FRONT_L,
+		WHEEL_JOINT_BACK_FRONT_R,
+		WHEEL_JOINT_BACK_L,
+		WHEEL_JOINT_BACK_R,
+		WEAPON_JOINT_MGL_L,
+		WEAPON_JOINT_MGL_R,
+		WEAPON_JOINT_CANNON_L,
+		WEAPON_JOINT_CANNON_R,
+		WEAPON_JOINT_MP_L,
+		WEAPON_JOINT_MP_R,
+		WEAPON_JOINT_RG,
+	};
+	struct Bone {
+		int id;
+		Transform transform;
+
+	};
+
 	Boss(void);
 	~Boss(void) override;
 
 	void Release(void) override;
 
-
+	Bone GetBone(BONE_NAME _boneName);
 
 private:
 	//boss‚Ì‘å‚«‚³
@@ -29,11 +59,23 @@ private:
 
 	Transform transformFeet_;
 	Transform transformBody_;
+	Transform transformFeetCar_;
+	Transform transformWheelBack_;
+	Transform transformWheelFront_;
 
 
 	float hp_;
 	float attackDelay_;
+	std::array<Bone,15> boneId_;
+	BONE_NAME boneName_;
 
+	std::unique_ptr<WeaponMGL> weaponMGL_;
+	std::unique_ptr<WeaponMGR> weaponMGR_;
+	std::unique_ptr<WeaponCannon> weaponCannonL_;
+	std::unique_ptr<WeaponCannon> weaponCannonR_;
+	std::unique_ptr<WeaponMP> weaponMPL_;
+	std::unique_ptr<WeaponMP> weaponMPR_;
+	std::unique_ptr<WeaponRG> weaponRG_;
 
 
 
@@ -63,5 +105,7 @@ protected:
 	void DrawPre(void) override;
 
 	void CollisionReserve(void) override  {};
+
+
 };
 

@@ -62,6 +62,7 @@ void PBulletBase::Draw(void)
 
 void PBulletBase::Release(void)
 {
+	
 }
 
 void PBulletBase::CreateShot(const VECTOR& _pos, const VECTOR& _shotDir, const Quaternion& _rot)
