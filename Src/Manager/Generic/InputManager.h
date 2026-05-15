@@ -136,6 +136,11 @@ public:
 	// アナログキーの入力値から方向(正規化済み)を取得
 	VECTOR GetDirectionXZAKey(int aKeyX, int aKeyY) const;
 
+	/// @brief マウスの移動量を取得し、カーソルを中央に固定・非表示にする
+    /// @param void
+    /// @return マウスの移動量
+	Vector2 GetMouseVelocityAndFixCenter(void);
+
 private:
 
 	// キー情報
