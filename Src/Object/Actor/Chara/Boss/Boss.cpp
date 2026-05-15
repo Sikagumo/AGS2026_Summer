@@ -2,7 +2,7 @@
 #include "../../../../Utility/UtilityMath.h"
 #include "../../../../Utility/MatrixUtility.h"
 #include "../../../Common/Transform.h"
-#include "Weapon/WeaponBase.h"
+#include "../Weapon/WeaponBase.h"
 #include "Boss.h"
 
 Boss::Boss(void):

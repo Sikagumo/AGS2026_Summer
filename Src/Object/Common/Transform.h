@@ -71,6 +71,9 @@ public:
 	void Rotate(const VECTOR& _axis, float _pow);
 	void Rotate(const Quaternion& _rot);
 
+	void SetScale(float _scale);
+	void SetScale(float _scaleX, float _scaleY, float _scaleZ);
+
 
 	// ‘O•û•ûŒü‚ðŽæ“¾
 	VECTOR GetForward(void) const;

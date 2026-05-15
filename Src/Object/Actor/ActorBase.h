@@ -16,7 +16,7 @@ public:
 	ActorBase(void);
 
 	// デストラクタ
-	virtual ~ActorBase(void);
+	virtual ~ActorBase(void) = default;
 
 	// 初期化
 	void Init(void);
@@ -52,7 +52,7 @@ protected:
 
 	// シングルトン参照
 	ResourceManager& resMng_;
-	SceneManager& sceneMng_;
+	SceneManager& sceneManager_;
 
 	// モデル制御の基本情報
 	Transform transform_;
@@ -62,6 +62,7 @@ protected:
 
 	// 衝突相手の情報
 	std::vector<const ColliderBase*> hitColliders_;
+
 
 	// リソースロード
 	virtual void InitLoad(void) = 0;

@@ -80,7 +80,7 @@ void CharaBase::CalcGravityPow(void)
 	VECTOR dirGravity = UtilityMath::DIR_DOWN;
 
 	// èdóÕÇÃã≠Ç≥
-	float gravityPow = Application::GetInstance().GetGravityPow() * sceneMng_.GetDeltaTime();
+	float gravityPow = Application::GetInstance().GetGravityPow() * sceneManager_.GetDeltaTime();
 
 	// èdóÕ
 	VECTOR gravity = VScale(dirGravity, gravityPow);

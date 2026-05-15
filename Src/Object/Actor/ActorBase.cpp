@@ -6,14 +6,11 @@
 ActorBase::ActorBase(void)
 	: 
 	resMng_(ResourceManager::GetInstance()),
-	sceneMng_(SceneManager::GetInstance()),
+	sceneManager_(SceneManager::GetInstance()),
 	transform_(Transform())
 {
 }
 
-ActorBase::~ActorBase(void)
-{
-}
 
 void ActorBase::Init(void)
 {

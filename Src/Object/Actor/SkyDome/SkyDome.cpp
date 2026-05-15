@@ -1,9 +1,9 @@
 #include "SkyDome.h"
 #include <Dxlib.h>
-#include "../Actor/ActorBase.h"
-#include "../../Manager/Generic/ResourceManager.h"
-#include "../../Manager/Generic/SceneManager.h"
-#include "../../Utility/UtilityMath.h"
+#include "../../Actor/ActorBase.h"
+#include "../../../Manager/Generic/ResourceManager.h"
+#include "../../../Manager/Generic/SceneManager.h"
+#include "../../../Utility/UtilityMath.h"
 
 SkyDome::SkyDome(const Transform& _transform):
 	followTransform_(_transform),

@@ -1,5 +1,5 @@
 #pragma once
-#include "../Actor/ActorBase.h"
+#include "../../Actor/ActorBase.h"
 
 class SkyDome : public ActorBase
 {

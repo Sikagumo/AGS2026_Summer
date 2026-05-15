@@ -35,7 +35,7 @@ public:
 	//-------------------------------------------
 
 	// 重力
-	static constexpr float GRAVITY = 9.81f * 100.0f;
+	static constexpr float GRAVITY = 9.81f;
 	static constexpr float GRAVITY_SCALE = 0.7f;
 
 	// インスタンスを明示的に生成

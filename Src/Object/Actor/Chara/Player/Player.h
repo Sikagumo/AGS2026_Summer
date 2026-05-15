@@ -2,7 +2,7 @@
 #include "./PlayerBase.h"
 #include "../Player/PlayerBase.h"
 class InputManager;
-
+class PBulletBig;
 
 class Player : public PlayerBase
 {
@@ -17,7 +17,7 @@ public:
 		MAX,
 	};
 
-	Player(int _no);
+	Player(int _playerNo, PLAYER_TYPE _playerType);
 
 	~Player(void)override = default;
 
@@ -37,6 +37,7 @@ protected:
 	void UpdateProcessPost(void);
 
 
+	void DrawPre(void)override;
 	void DrawLate(void)override;
 private:
 

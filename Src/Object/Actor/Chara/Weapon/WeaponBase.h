@@ -50,7 +50,7 @@ protected:
 
 
 	//受けたダメージをボスに伝えるための関数
-	virtual float Damage(void);
+	//virtual float Damage(void);
 
 };
 

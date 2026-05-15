@@ -1,4 +1,6 @@
 #include "Player.h"
+#include <memory>
+#include <cassert>
 #include "../../../../Manager/Generic/ResourceManager.h"
 #include "../../../Common/AnimationController.h"
 #include "../../../../Utility/UtilityMath.h"
@@ -7,10 +9,12 @@
 #include "../../../../Camera/Camera.h"
 #include "../../../../Common/Quaternion.h"
 #include "../../../Collider/ColliderBase.h"
+#include "../Weapon/Bullet/Player/PBulletBig.h"
+#include "../Weapon/Bullet/Player/PBulletRapidFire.h"
 
 
-Player::Player(int _playerNo)
-	: PlayerBase::PlayerBase(_playerNo)
+Player::Player(int _playerNo, PLAYER_TYPE _playerType)
+	: PlayerBase::PlayerBase(_playerNo, _playerType)
 	, inputManager_(InputManager::GetInstance())
 	, sceneManager_(SceneManager::GetInstance())
 	, shadowHandle_(-1)
@@ -53,6 +57,14 @@ void Player::UpdateProcess(void)
 
 void Player::UpdateProcessPost(void)
 {
+}
+
+void Player::DrawPre(void)
+{
+	for (auto& bullet : bullets_)
+	{
+		bullet->Draw();
+	}
 }
 
 void Player::DrawLate(void)
@@ -126,11 +138,11 @@ void Player::ProcessJump(void)
 	if (isHitKeyNew)
 	{
 		// ジャンプの入力受付時間を減少
-		stepJump_ += sceneMng_.GetDeltaTime();
+		stepJump_ += sceneManager_.GetDeltaTime();
 		if (stepJump_ <= TIME_JUMP_INPUT)
 		{
 			// ジャンプ量の計算
-			float jumpSpeed = POW_JUMP_KEEP * sceneMng_.GetDeltaTime();
+			float jumpSpeed = POW_JUMP_KEEP * sceneManager_.GetDeltaTime();
 			jumpPow_ = VAdd(jumpPow_, VScale(UtilityMath::DIR_UP, jumpSpeed));
 		}
 	}
@@ -146,7 +158,7 @@ void Player::ProcessJump(void)
 	if (isHitKey && !isJump_)
 	{
 		// ジャンプ量の計算
-		float jumpSpeed = (POW_JUMP_INIT * sceneMng_.GetDeltaTime());
+		float jumpSpeed = (POW_JUMP_INIT * sceneManager_.GetDeltaTime());
 		jumpPow_ = VScale(UtilityMath::DIR_UP, jumpSpeed);
 
 		isJump_ = true;
@@ -167,7 +179,30 @@ void Player::ProcessAttack(void)
 {
 	if (inputManager_.IsTrgMouseLeft())
 	{
+		std::unique_ptr<PBulletBase> bullet;
 
+		switch (playerType_)
+		{
+			case PLAYER_TYPE::BIG:
+				bullet =  std::make_unique<PBulletBig>();
+				assert(false + "a");
+			break;
+
+			default:
+				assert(false + "\n弾が未割当です\n");
+			break;
+
+		}
+		bullet->Init();
+
+		bullet->CreateShot(transform_.pos, transform_.GetForward(), Quaternion::Identity());
+
+		bullets_.emplace_back(std::move(bullet));
+	}
+
+	for (auto& bullet : bullets_)
+	{
+		bullet->Update();
 	}
 }
 

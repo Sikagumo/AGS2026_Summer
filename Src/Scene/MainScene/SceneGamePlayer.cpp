@@ -11,7 +11,7 @@
 SceneGamePlayer::SceneGamePlayer(void)
 	: sceneManager_(SceneManager::GetInstance())
 {
-	player_ = std::make_unique<Player>(0);
+	player_ = std::make_unique<Player>(0, Player::PLAYER_TYPE::BIG);
 }
 
 void SceneGamePlayer::Load(void)

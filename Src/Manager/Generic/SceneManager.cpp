@@ -67,6 +67,9 @@ void SceneManager::Initialize(void)
 
 void SceneManager::Init3D(void)
 {
+    // 背景色
+    constexpr COLOR_F BACK_COLOR = { 125,125,125 };
+
     // 環境光の強さ
     const float AmbientVal = 0.8f;
 
@@ -74,7 +77,7 @@ void SceneManager::Init3D(void)
     const float LightMidVal = 0.5f;
 
     // フォグの色
-    const int   FogCol = 5;
+    const int FogCol = 5;
 
     // フォグ開始距離
     const float FogStart = 10000.0f;
@@ -83,7 +86,7 @@ void SceneManager::Init3D(void)
     const float FogEnd = 20000.0f;
 
     // 背景色を設定する
-    SetBackgroundColor(0, 0, 0);
+    SetBackgroundColor(BACK_COLOR.r, BACK_COLOR.g,BACK_COLOR.b);
 
     // Zバッファを有効にする
     SetUseZBuffer3D(true);

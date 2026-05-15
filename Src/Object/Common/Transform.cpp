@@ -147,6 +147,17 @@ void Transform::Rotate(const VECTOR& _axis, float _pow)
 	Rotate(qua);
 }
 
+void Transform::SetScale(float _scale)
+{
+	scl = VGet(_scale, _scale, _scale);
+	Update();
+}
+void Transform::SetScale(float _scaleX, float _scaleY, float _scaleZ)
+{
+	scl = VGet(_scaleX, _scaleY, _scaleZ);
+	Update();
+}
+
 VECTOR Transform::GetForward(void) const
 {
 	return GetDir(UtilityMath::DIR_F);

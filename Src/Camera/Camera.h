@@ -74,14 +74,12 @@ public:
 	void Release(void)override;
 
 	// 座標の取得
-	const VECTOR& GetPos(void) const;
+	const VECTOR& GetPos(void) const { return transform_.pos; };
 
 	// 角度の取得
 	const VECTOR& GetAngles(void) const { return angles_;  };
-	const Quaternion& GetQuaRot(void) const;
-	
-	// X回転を抜いたY軸のみのカメラ角度
-	const Quaternion& GetQuaRotY(void) const;
+		// X回転を抜いたY軸のみのカメラ角度
+	const Quaternion& GetQuaRotY(void) const { return rotY_; };
 	
 	// 注視点の取得
 	const VECTOR& GetTargetPos(void) const { return targetPos_;  };
@@ -90,10 +88,10 @@ public:
 	VECTOR GetForward(void) const;
 
 	// カメラモードの変更
-	void ChangeMode(MODE mode);
+	void ChangeMode(MODE _mode);
 
 	// 追従対象の設定
-	void SetFollow(const Transform* follow);
+	void SetFollow(const Transform* _follow) { followTransform_ = _follow; };
 
 
 protected:
@@ -145,6 +143,7 @@ private:
 
 	// 注視点
 	VECTOR targetPos_;
+
 	
 	// カメラを初期位置に戻す
 	void SetDefault(void);

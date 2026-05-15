@@ -1,8 +1,8 @@
 #include "Stage.h"
-#include "../Actor/ActorBase.h"
-#include "../../Manager/Generic/ResourceManager.h"
-#include "../../Utility/UtilityMath.h"
-#include "../Collider/ColliderModel.h"
+#include "../../Actor/ActorBase.h"
+#include "../../../Manager/Generic/ResourceManager.h"
+#include "../../../Utility/UtilityMath.h"
+#include "../../Collider/ColliderModel.h"
 
 
 Stage::Stage(void)
@@ -36,7 +36,7 @@ void Stage::InitCollider(void)
 	MV1SetupCollInfo(transform_.modelId);
 
 	// モデルのコライダ割り当て
-	ColliderModel* colModel = new ColliderModel(ColliderBase::TAG::STAGE, &transform_);
+	/*ColliderModel* colModel = new ColliderModel(ColliderBase::TAG::STAGE, &transform_);
 	for (const std::string& name : EXCLUDE_FRAME_NAMES)
 	{
 		colModel->AddExcludeFrameIds(name);
@@ -45,7 +45,7 @@ void Stage::InitCollider(void)
 	{
 		colModel->AddExcludeFrameIds(name);
 	}
-	ownColliders_.emplace(static_cast<int>(COLLIDER_TYPE::MODEL), colModel);
+	ownColliders_.emplace(static_cast<int>(COLLIDER_TYPE::MODEL), colModel);*/
 }
 
 

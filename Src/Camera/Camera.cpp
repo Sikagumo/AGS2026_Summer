@@ -91,39 +91,20 @@ void Camera::Release(void)
 {
 }
 
-void Camera::SetFollow(const Transform* follow)
-{
-	followTransform_ = follow;
-}
-
-const VECTOR& Camera::GetPos(void) const
-{
-	return transform_.pos;
-}
-
-const Quaternion& Camera::GetQuaRot(void) const
-{
-	return transform_.quaRot;
-}
-
-const Quaternion& Camera::GetQuaRotY(void) const
-{
-	return rotY_;
-}
 
 VECTOR Camera::GetForward(void) const
 {
 	return VNorm(VSub(targetPos_, transform_.pos));
 }
 
-void Camera::ChangeMode(MODE mode)
+void Camera::ChangeMode(MODE _mode)
 {
 
 	// カメラの初期設定
 	SetDefault();
 
 	// カメラモードの変更
-	mode_ = mode;
+	mode_ = _mode;
 
 	// 変更時の初期化処理
 	switch (mode_)
@@ -191,6 +172,47 @@ void Camera::ProcessRot(bool isLimit)
 
 }
 
+
+void Camera::SetBeforeDrawFixedPoint(void)
+{
+	// 何もしない
+}
+
+void Camera::SetBeforeDrawFree(void)
+{
+
+	// カメラ操作(回転)
+	ProcessRot(false);
+	
+	// カメラ操作(移動)
+	ProcessMove();
+
+	// Y軸
+	rotY_ = Quaternion::AngleAxis(angles_.y, UtilityMath::AXIS_Y);
+
+	// Y軸 + X軸
+	transform_.quaRot = rotY_.Mult(Quaternion::AngleAxis(angles_.x, UtilityMath::AXIS_X));
+
+	// 注視点更新
+	targetPos_ = VAdd(transform_.pos, transform_.quaRot.PosAxis(FOLLOW_TARGET_LOCAL_POS));
+}
+
+void Camera::SetBeforeDrawFollow(void)
+{
+	// カメラ位置の補間
+	transform_.pos = UtilityMath::Lerp(prePos_,
+									  transform_.pos, LERP_RATE_MOVE);
+
+	// カメラ操作(回転)
+	ProcessRot(true);
+
+	// 追従対象との相対位置を同期
+	SyncFollow();
+
+	// 衝突判定
+	Collision();
+}
+
 void Camera::ProcessMove(void)
 {
 
@@ -234,46 +256,6 @@ void Camera::ProcessMove(void)
 
 	}
 
-}
-
-void Camera::SetBeforeDrawFixedPoint(void)
-{
-	// 何もしない
-}
-
-void Camera::SetBeforeDrawFree(void)
-{
-
-	// カメラ操作(回転)
-	ProcessRot(false);
-	
-	// カメラ操作(移動)
-	ProcessMove();
-
-	// Y軸
-	rotY_ = Quaternion::AngleAxis(angles_.y, UtilityMath::AXIS_Y);
-
-	// Y軸 + X軸
-	transform_.quaRot = rotY_.Mult(Quaternion::AngleAxis(angles_.x, UtilityMath::AXIS_X));
-
-	// 注視点更新
-	targetPos_ = VAdd(transform_.pos, transform_.quaRot.PosAxis(FOLLOW_TARGET_LOCAL_POS));
-}
-
-void Camera::SetBeforeDrawFollow(void)
-{
-	// カメラ位置の補間
-	transform_.pos = UtilityMath::Lerp(prePos_,
-									  transform_.pos, LERP_RATE_MOVE);
-
-	// カメラ操作(回転)
-	ProcessRot(true);
-
-	// 追従対象との相対位置を同期
-	SyncFollow();
-
-	// 衝突判定
-	Collision();
 }
 
 void Camera::RotKeyboard(bool isLimit)

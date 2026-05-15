@@ -4,8 +4,8 @@
     <ClCompile Include="Src\Object\Actor\Chara\Boss\Boss.cpp" />
     <ClCompile Include="Src\Scene\MainScene\SceneLobby.cpp" />
     <ClCompile Include="Src\Object\Actor\Chara\Player\PlayerBase.cpp" />
-    <ClCompile Include="Src\Object\Actor\Chara\Weapon\Player\PBulletBase.cpp" />
-    <ClCompile Include="Src\Object\Actor\Chara\Weapon\Player\PBulletBig.cpp" />
+    <ClCompile Include="Src\Object\Actor\Chara\Weapon\Bullet\Player\PBulletBase.cpp" />
+    <ClCompile Include="Src\Object\Actor\Chara\Weapon\Bullet\Player\PBulletBig.cpp" />
     <ClCompile Include="Src\Scene\MainScene\SceneGame.cpp" />
     <ClCompile Include="Src\Scene\MainScene\SceneGamePlayer.cpp" />
     <ClCompile Include="Src\Scene\MainScene\SceneTitle.cpp" />
@@ -50,13 +50,15 @@
     <ClCompile Include="Src\Scene\MainScene\SceneGameBoss.cpp" />
     <ClCompile Include="Src\Common\ParametersIO.cpp" />
     <ClCompile Include="Src\Object\Actor\Chara\Weapon\WeaponManager.cpp" />
+    <ClCompile Include="Src\Object\Actor\Chara\Weapon\Bullet\Player\PBulletRapidFire.cpp" />
+    <ClCompile Include="Src\Object\Actor\Chara\Weapon\Bullet\Player\PActionController.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\Object\Actor\Chara\Boss\Boss.h" />
     <ClInclude Include="Src\Scene\MainScene\SceneLobby.h" />
     <ClInclude Include="Src\Object\Actor\Chara\Player\PlayerBase.h" />
-    <ClInclude Include="Src\Object\Actor\Chara\Weapon\Player\PBulletBig.h" />
-    <ClInclude Include="Src\Object\Actor\Chara\Weapon\Player\PBulletBase.h" />
+    <ClInclude Include="Src\Object\Actor\Chara\Weapon\Bullet\Player\PBulletBig.h" />
+    <ClInclude Include="Src\Object\Actor\Chara\Weapon\Bullet\Player\PBulletBase.h" />
     <ClInclude Include="Src\Scene\MainScene\SceneGame.h" />
     <ClInclude Include="Src\Scene\MainScene\SceneGamePlayer.h" />
     <ClInclude Include="Src\Scene\MainScene\SceneTitle.h" />
@@ -103,5 +105,7 @@
     <ClInclude Include="Src\Scene\MainScene\SceneGameBoss.h" />
     <ClInclude Include="Src\Common\ParametersIO.h" />
     <ClInclude Include="Src\Object\Actor\Chara\Weapon\WeaponManager.h" />
+    <ClInclude Include="Src\Object\Actor\Chara\Weapon\Bullet\Player\PBulletRapidFire.h" />
+    <ClInclude Include="Src\Object\Actor\Chara\Weapon\Bullet\Player\PActionController.h" />
   </ItemGroup>
 </Project>
