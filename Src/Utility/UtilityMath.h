@@ -60,6 +60,8 @@ public:
 	/// <summary>浮動小数点の誤差比較用の最小値</summary>
 	static constexpr float kEpsilonNormalSqrt = 1e-15F;
 
+	static constexpr float HALF_NUM = 0.5f;
+
 	/// <summary>
 	/// 小数を四捨五入して整数に変換する
 	/// </summary>

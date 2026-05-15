@@ -1,4 +1,4 @@
-ï»¿#include "UtilityMath.h"
+#include "UtilityMath.h"
 
 #include<DxLib.h>
 #include<string>
@@ -10,13 +10,13 @@
 
 
 
-// å°æ•°å€¤ã‚’å››æ¨äº”å…¥ã—ã¦æ•´æ•°ã«å¤‰æ›ã™ã‚‹
+// ¬”’l‚ğlÌŒÜ“ü‚µ‚Ä®”‚É•ÏŠ·‚·‚é
 int UtilityMath::Round(float v)
 {
 	return static_cast<int>(roundf(v));
 }
 
-// æ–‡å­—åˆ—ã‚’æŒ‡å®šã•ã‚ŒãŸåŒºåˆ‡ã‚Šæ–‡å­—ã§åˆ†å‰²ã™ã‚‹
+// •¶š—ñ‚ğw’è‚³‚ê‚½‹æØ‚è•¶š‚Å•ªŠ„‚·‚é
 std::vector<std::string> UtilityMath::Split(std::string& line, char delimiter)
 {
 	std::istringstream stream(line);
@@ -31,43 +31,43 @@ std::vector<std::string> UtilityMath::Split(std::string& line, char delimiter)
 	return result;
 }
 
-// ãƒ©ã‚¸ã‚¢ãƒ³ã‚’åº¦ã«å¤‰æ›ã™ã‚‹ï¼ˆdoubleï¼‰
+// ƒ‰ƒWƒAƒ“‚ğ“x‚É•ÏŠ·‚·‚éidoublej
 double UtilityMath::Rad2DegD(double rad)
 {
 	return rad * (180.0 / DX_PI);
 }
 
-// ãƒ©ã‚¸ã‚¢ãƒ³ã‚’åº¦ã«å¤‰æ›ã™ã‚‹ï¼ˆfloatï¼‰
+// ƒ‰ƒWƒAƒ“‚ğ“x‚É•ÏŠ·‚·‚éifloatj
 float UtilityMath::Rad2DegF(float rad)
 {
 	return rad * (180.0f / DX_PI_F);
 }
 
-// ãƒ©ã‚¸ã‚¢ãƒ³ã‚’åº¦ã«å¤‰æ›ã—ã¦æ•´æ•°ã«ã™ã‚‹
+// ƒ‰ƒWƒAƒ“‚ğ“x‚É•ÏŠ·‚µ‚Ä®”‚É‚·‚é
 int UtilityMath::Rad2DegI(int rad)
 {
 	return rad * Round(180.0f / DX_PI_F);
 }
 
-// åº¦ã‚’ãƒ©ã‚¸ã‚¢ãƒ³ã«å¤‰æ›ã™ã‚‹ï¼ˆdoubleï¼‰
+// “x‚ğƒ‰ƒWƒAƒ“‚É•ÏŠ·‚·‚éidoublej
 double UtilityMath::Deg2RadD(double deg)
 {
 	return deg * (DX_PI / 180.0);
 }
 
-// åº¦ã‚’ãƒ©ã‚¸ã‚¢ãƒ³ã«å¤‰æ›ã™ã‚‹ï¼ˆfloatï¼‰
+// “x‚ğƒ‰ƒWƒAƒ“‚É•ÏŠ·‚·‚éifloatj
 float UtilityMath::Deg2RadF(float deg)
 {
 	return deg * (DX_PI_F / 180.0f);
 }
 
-// åº¦ã‚’ãƒ©ã‚¸ã‚¢ãƒ³ã«å¤‰æ›ã—ã¦æ•´æ•°ã«ã™ã‚‹
+// “x‚ğƒ‰ƒWƒAƒ“‚É•ÏŠ·‚µ‚Ä®”‚É‚·‚é
 int UtilityMath::Deg2RadI(int deg)
 {
 	return deg * Round(DX_PI_F / 180.0f);
 }
 
-// è§’åº¦ã‚’0ã€œ360åº¦ã®ç¯„å›²ã«æ­£è¦åŒ–ã™ã‚‹
+// Šp“x‚ğ0?360“x‚Ì”ÍˆÍ‚É³‹K‰»‚·‚é
 double UtilityMath::DegIn360(double deg)
 {
 	deg = fmod(deg, 360.0);
@@ -79,7 +79,7 @@ double UtilityMath::DegIn360(double deg)
 	return deg;
 }
 
-// ãƒ©ã‚¸ã‚¢ãƒ³ã‚’0ã€œ2Ï€ã®ç¯„å›²ã«æ­£è¦åŒ–ã™ã‚‹
+// ƒ‰ƒWƒAƒ“‚ğ0?2ƒÎ‚Ì”ÍˆÍ‚É³‹K‰»‚·‚é
 double UtilityMath::RadIn2PI(double rad)
 {
 	rad = fmod(rad, DX_TWO_PI);
@@ -91,7 +91,7 @@ double UtilityMath::RadIn2PI(double rad)
 	return rad;
 }
 
-// ãƒ©ã‚¸ã‚¢ãƒ³å˜ä½ã§ã©ã¡ã‚‰å›ã‚ŠãŒè¿‘ã„ã‹ã‚’åˆ¤å®šã™ã‚‹ï¼ˆ-1=åæ™‚è¨ˆå›ã‚Šã€1=æ™‚è¨ˆå›ã‚Šï¼‰
+// ƒ‰ƒWƒAƒ“’PˆÊ‚Å‚Ç‚¿‚ç‰ñ‚è‚ª‹ß‚¢‚©‚ğ”»’è‚·‚éi-1=”½Œv‰ñ‚èA1=Œv‰ñ‚èj
 int UtilityMath::DirNearAroundRad(float from, float to)
 {
 	float ret = 1.0f;
@@ -101,17 +101,17 @@ int UtilityMath::DirNearAroundRad(float from, float to)
 	if (diff >= 0.0f)
 	{
 
-		//æ¯”è¼ƒå…ƒã‚ˆã‚Šã‚‚æ™‚è¨ˆå›ã‚Šã«ä½ç½®ã™ã‚‹
+		//”äŠrŒ³‚æ‚è‚àŒv‰ñ‚è‚ÉˆÊ’u‚·‚é
 
 		if (diff > DX_PI_F)
 		{
 
-			//ã§ã‚‚ã€180åº¦ä»¥ä¸Šé›¢ã‚Œã¦ã„ã‚‹ã®ã§ã€åæ™‚è¨ˆå›ã‚Šã®æ–¹ãŒè¿‘ã„
+			//‚Å‚àA180“xˆÈã—£‚ê‚Ä‚¢‚é‚Ì‚ÅA”½Œv‰ñ‚è‚Ì•û‚ª‹ß‚¢
 			ret = -1.0f;
 		}
 		else
 		{
-			//æ™‚è¨ˆå›ã‚Š
+			//Œv‰ñ‚è
 			ret = 1.0f;
 		}
 
@@ -119,18 +119,18 @@ int UtilityMath::DirNearAroundRad(float from, float to)
 	else
 	{
 
-		//æ¯”è¼ƒå…ƒã‚ˆã‚Šã‚‚åæ™‚è¨ˆå›ã‚Šã«ä½ç½®ã™ã‚‹
+		//”äŠrŒ³‚æ‚è‚à”½Œv‰ñ‚è‚ÉˆÊ’u‚·‚é
 
 		if (diff < -DX_PI_F)
 		{
 
-			//ã§ã‚‚ã€180åº¦ä»¥ä¸Šé›¢ã‚Œã¦ã„ã‚‹ã®ã§ã€æ™‚è¨ˆå›ã‚Šã®æ–¹ãŒè¿‘ã„
+			//‚Å‚àA180“xˆÈã—£‚ê‚Ä‚¢‚é‚Ì‚ÅAŒv‰ñ‚è‚Ì•û‚ª‹ß‚¢
 			ret = 1.0f;
 		}
 		else
 		{
 
-			//åæ™‚è¨ˆå›ã‚Š
+			//”½Œv‰ñ‚è
 			ret = -1.0f;
 		}
 	}
@@ -138,7 +138,7 @@ int UtilityMath::DirNearAroundRad(float from, float to)
 	return static_cast<int>(ret);
 }
 
-// åº¦å˜ä½ã§ã©ã¡ã‚‰å›ã‚ŠãŒè¿‘ã„ã‹ã‚’åˆ¤å®šã™ã‚‹ï¼ˆ-1=åæ™‚è¨ˆå›ã‚Šã€1=æ™‚è¨ˆå›ã‚Šï¼‰
+// “x’PˆÊ‚Å‚Ç‚¿‚ç‰ñ‚è‚ª‹ß‚¢‚©‚ğ”»’è‚·‚éi-1=”½Œv‰ñ‚èA1=Œv‰ñ‚èj
 int UtilityMath::DirNearAroundDeg(float from, float to)
 {
 	float ret = 1.0f;
@@ -149,33 +149,33 @@ int UtilityMath::DirNearAroundDeg(float from, float to)
 	{
 
 
-		//æ¯”è¼ƒå…ƒã‚ˆã‚Šã‚‚æ™‚è¨ˆå›ã‚Šã«ä½ç½®ã™ã‚‹
+		//”äŠrŒ³‚æ‚è‚àŒv‰ñ‚è‚ÉˆÊ’u‚·‚é
 
 		if (diff > 180.0f)
 		{
 
-			//ã§ã‚‚ã€180åº¦ä»¥ä¸Šé›¢ã‚Œã¦ã„ã‚‹ã®ã§ã€åæ™‚è¨ˆå›ã‚Šã®æ–¹ãŒè¿‘ã„
+			//‚Å‚àA180“xˆÈã—£‚ê‚Ä‚¢‚é‚Ì‚ÅA”½Œv‰ñ‚è‚Ì•û‚ª‹ß‚¢
 			ret = -1.0f;
 		}
 		else
 		{
-			//æ™‚è¨ˆå›ã‚Š
+			//Œv‰ñ‚è
 			ret = 1.0f;
 		}
 	}
 	else
 	{
 
-		//æ¯”è¼ƒå…ƒã‚ˆã‚Šã‚‚åæ™‚è¨ˆå›ã‚Šã«ä½ç½®ã™ã‚‹
+		//”äŠrŒ³‚æ‚è‚à”½Œv‰ñ‚è‚ÉˆÊ’u‚·‚é
 
 		if (diff < -180.0f)
 		{
-			//ã§ã‚‚ã€180åº¦ä»¥ä¸Šé›¢ã‚Œã¦ã„ã‚‹ã®ã§ã€‚æ™‚è¨ˆå›ã‚Šã®æ–¹ãŒè¿‘ã„
+			//‚Å‚àA180“xˆÈã—£‚ê‚Ä‚¢‚é‚Ì‚ÅBŒv‰ñ‚è‚Ì•û‚ª‹ß‚¢
 			ret = 1.0f;
 		}
 		else
 		{
-			//æ™‚è¨ˆå›ã‚Š
+			//Œv‰ñ‚è
 			ret = -1.0f;
 		}
 	}
@@ -183,10 +183,10 @@ int UtilityMath::DirNearAroundDeg(float from, float to)
 	return static_cast<int>(ret);
 }
 
-// æ•´æ•°å€¤ã‚’ç·šå½¢è£œé–“ã™ã‚‹
+// ®”’l‚ğüŒ`•âŠÔ‚·‚é
 int UtilityMath::Lerp(int start, int end, float t)
 {
-	//ç·šå½¢è£œé–“
+	//üŒ`•âŠÔ
 	if (t >= 1.0f)
 	{
 		return end;
@@ -199,10 +199,10 @@ int UtilityMath::Lerp(int start, int end, float t)
 	return ret;
 }
 
-// æµ®å‹•å°æ•°ç‚¹å€¤ã‚’ç·šå½¢è£œé–“ã™ã‚‹
+// •‚“®¬”“_’l‚ğüŒ`•âŠÔ‚·‚é
 float UtilityMath::Lerp(float start, float end, float t)
 {
-	//ç·šå½¢è£œé–“
+	//üŒ`•âŠÔ
 	if (t >= 1.0f)
 	{
 		return end;
@@ -215,10 +215,10 @@ float UtilityMath::Lerp(float start, float end, float t)
 	return ret;
 }
 
-// å€ç²¾åº¦æµ®å‹•å°æ•°ç‚¹å€¤ã‚’ç·šå½¢è£œé–“ã™ã‚‹
+// ”{¸“x•‚“®¬”“_’l‚ğüŒ`•âŠÔ‚·‚é
 double UtilityMath::Lerp(double start, double end, double t)
 {
-	//ç·šå½¢è£œé–“
+	//üŒ`•âŠÔ
 	if (t >= 1.0)
 	{
 		return end;
@@ -231,10 +231,10 @@ double UtilityMath::Lerp(double start, double end, double t)
 	return ret;
 }
 
-// 2Dãƒ™ã‚¯ãƒˆãƒ«ã‚’ç·šå½¢è£œé–“ã™ã‚‹
+// 2DƒxƒNƒgƒ‹‚ğüŒ`•âŠÔ‚·‚é
 Vector2 UtilityMath::Lerp(const Vector2& start, const Vector2& end, float t)
 {
-	//ç·šå½¢è£œé–“
+	//üŒ`•âŠÔ
 	if (t >= 1.0f)
 	{
 		return end;
@@ -248,10 +248,10 @@ Vector2 UtilityMath::Lerp(const Vector2& start, const Vector2& end, float t)
 	return end;
 }
 
-// 3Dãƒ™ã‚¯ãƒˆãƒ«ã‚’ç·šå½¢è£œé–“ã™ã‚‹
+// 3DƒxƒNƒgƒ‹‚ğüŒ`•âŠÔ‚·‚é
 VECTOR UtilityMath::Lerp(const VECTOR& start, const VECTOR& end, float t)
 {
-	//ç·šå½¢è£œé–“
+	//üŒ`•âŠÔ
 	if (t >= 1.0f)
 	{
 		return end;
@@ -266,7 +266,7 @@ VECTOR UtilityMath::Lerp(const VECTOR& start, const VECTOR& end, float t)
 	return ret;
 }
 
-// åº¦å˜ä½ã§è§’åº¦ã‚’ç·šå½¢è£œé–“ã—ã€360åº¦ã‚’è€ƒæ…®ã™ã‚‹
+// “x’PˆÊ‚ÅŠp“x‚ğüŒ`•âŠÔ‚µA360“x‚ğl—¶‚·‚é
 double UtilityMath::LerpDeg(double start, double end, double t)
 {
 	double ret;
@@ -303,10 +303,10 @@ double UtilityMath::LerpDeg(double start, double end, double t)
 	return ret;
 }
 
-// è‰²ï¼ˆCOLOR_Fï¼‰ã‚’ç·šå½¢è£œé–“ã™ã‚‹
+// FiCOLOR_Fj‚ğüŒ`•âŠÔ‚·‚é
 COLOR_F UtilityMath::Lerp(const COLOR_F& start, const COLOR_F& end, float t)
 {
-	//ç·šå½¢è£œé–“
+	//üŒ`•âŠÔ
 	if (t >= 1.0f)
 	{
 		return end;
@@ -322,7 +322,7 @@ COLOR_F UtilityMath::Lerp(const COLOR_F& start, const COLOR_F& end, float t)
 	return ret;
 }
 
-// 2Dãƒ™ã‚¯ãƒˆãƒ«ã®3ç‚¹é–“ã§ãƒ™ã‚¸ã‚¨è£œé–“ã™ã‚‹
+// 2DƒxƒNƒgƒ‹‚Ì3“_ŠÔ‚ÅƒxƒWƒG•âŠÔ‚·‚é
 Vector2 UtilityMath::Bezier(const Vector2& p1, const Vector2& p2, const Vector2& p3, float t)
 {
 	Vector2 a = Lerp(p1, p2, t);
@@ -331,7 +331,7 @@ Vector2 UtilityMath::Bezier(const Vector2& p1, const Vector2& p2, const Vector2&
 	return Lerp(a, b, t);
 }
 
-// 3Dãƒ™ã‚¯ãƒˆãƒ«ã®3ç‚¹é–“ã§ãƒ™ã‚¸ã‚¨è£œé–“ã™ã‚‹
+// 3DƒxƒNƒgƒ‹‚Ì3“_ŠÔ‚ÅƒxƒWƒG•âŠÔ‚·‚é
 VECTOR UtilityMath::Bezier(const VECTOR& p1, const VECTOR& p2, const VECTOR& p3, float t)
 {
 	VECTOR a = Lerp(p1, p2, t);
@@ -340,7 +340,7 @@ VECTOR UtilityMath::Bezier(const VECTOR& p1, const VECTOR& p2, const VECTOR& p3,
 	return Lerp(a, b, t);
 }
 
-// XZå¹³é¢ä¸Šã§ä¸­å¿ƒç‚¹ã‚’è»¸ã«å›è»¢å¾Œã®åº§æ¨™ã‚’æ±‚ã‚ã‚‹
+// XZ•½–Êã‚Å’†S“_‚ğ²‚É‰ñ“]Œã‚ÌÀ•W‚ğ‹‚ß‚é
 VECTOR UtilityMath::RotXZPos(const VECTOR& centerPos, const VECTOR& radiusPos, float rad)
 {
 	float x = ((radiusPos.x - centerPos.x) * cosf(rad)) - ((radiusPos.z - centerPos.z) * sinf(rad));
@@ -349,61 +349,61 @@ VECTOR UtilityMath::RotXZPos(const VECTOR& centerPos, const VECTOR& radiusPos, f
 	return VGet(centerPos.x + x, radiusPos.y, centerPos.z + z);
 }
 
-// 2Dãƒ™ã‚¯ãƒˆãƒ«ã®é•·ã•ã‚’æ±‚ã‚ã‚‹
+// 2DƒxƒNƒgƒ‹‚Ì’·‚³‚ğ‹‚ß‚é
 double UtilityMath::Magnitude(const Vector2& v)
 {
 	return sqrt((v.x * v.x) + (v.y * v.y));
 }
 
-// 3Dãƒ™ã‚¯ãƒˆãƒ«ã®é•·ã•ã‚’æ±‚ã‚ã‚‹
+// 3DƒxƒNƒgƒ‹‚Ì’·‚³‚ğ‹‚ß‚é
 double UtilityMath::Magnitude(const VECTOR& v)
 {
 	return sqrt((v.x * v.x) + (v.y * v.y) + (v.z * v.z));
 }
 
-// 3Dãƒ™ã‚¯ãƒˆãƒ«ã®é•·ã•ã‚’floatã§æ±‚ã‚ã‚‹
+// 3DƒxƒNƒgƒ‹‚Ì’·‚³‚ğfloat‚Å‹‚ß‚é
 float UtilityMath::MagnitudeF(const VECTOR& v)
 {
 	return sqrtf((v.x * v.x) + (v.y * v.y) + (v.z * v.z));
 }
 
-// 2Dãƒ™ã‚¯ãƒˆãƒ«ã®é•·ã•ã®2ä¹—ã‚’æ±‚ã‚ã‚‹
+// 2DƒxƒNƒgƒ‹‚Ì’·‚³‚Ì2æ‚ğ‹‚ß‚é
 int UtilityMath::SqrMagnitude(const Vector2& v)
 {
 	return v.x * v.x + v.y * v.y;
 }
 
-// 3Dãƒ™ã‚¯ãƒˆãƒ«ã®é•·ã•ã®2ä¹—ã‚’floatã§æ±‚ã‚ã‚‹
+// 3DƒxƒNƒgƒ‹‚Ì’·‚³‚Ì2æ‚ğfloat‚Å‹‚ß‚é
 float UtilityMath::SqrMagnitudeF(const VECTOR& v)
 {
 	return v.x * v.x + v.y * v.y + v.z * v.z;
 }
 
-// 3Dãƒ™ã‚¯ãƒˆãƒ«ã®é•·ã•ã®2ä¹—ã‚’æ±‚ã‚ã‚‹
+// 3DƒxƒNƒgƒ‹‚Ì’·‚³‚Ì2æ‚ğ‹‚ß‚é
 double UtilityMath::SqrMagnitude(const VECTOR& v)
 {
 	return v.x * v.x + v.y * v.y + v.z * v.z;
 }
 
-// 2ã¤ã®3Dãƒ™ã‚¯ãƒˆãƒ«é–“ã®è·é›¢ã®2ä¹—ã‚’æ±‚ã‚ã‚‹
+// 2‚Â‚Ì3DƒxƒNƒgƒ‹ŠÔ‚Ì‹——£‚Ì2æ‚ğ‹‚ß‚é
 double UtilityMath::SqrMagnitude(const VECTOR& v1, const VECTOR& v2)
 {
 	return pow(v2.x - v1.x, 2) + pow(v2.y - v1.y, 2) + pow(v2.z - v1.z, 2);
 }
 
-// 2ã¤ã®2Dãƒ™ã‚¯ãƒˆãƒ«é–“ã®è·é›¢ã‚’æ±‚ã‚ã‚‹
+// 2‚Â‚Ì2DƒxƒNƒgƒ‹ŠÔ‚Ì‹——£‚ğ‹‚ß‚é
 double UtilityMath::Distance(const Vector2& v1, const Vector2& v2)
 {
 	return sqrt(pow(v2.x - v1.x, 2) + pow(v2.y - v1.y, 2));
 }
 
-// 2ã¤ã®3Dãƒ™ã‚¯ãƒˆãƒ«é–“ã®è·é›¢ã‚’æ±‚ã‚ã‚‹
+// 2‚Â‚Ì3DƒxƒNƒgƒ‹ŠÔ‚Ì‹——£‚ğ‹‚ß‚é
 double UtilityMath::Distance(const VECTOR& v1, const VECTOR& v2)
 {
 	return sqrt(pow(v2.x - v1.x, 2) + pow(v2.y - v1.y, 2) + pow(v2.z - v1.z, 2));
 }
 
-// 2ã¤ã®3Dãƒ™ã‚¯ãƒˆãƒ«ãŒç­‰ã—ã„ã‹ã©ã†ã‹ã‚’åˆ¤å®šã™ã‚‹
+// 2‚Â‚Ì3DƒxƒNƒgƒ‹‚ª“™‚µ‚¢‚©‚Ç‚¤‚©‚ğ”»’è‚·‚é
 bool UtilityMath::Equals(const VECTOR& v1, const VECTOR& v2)
 {
 	if (v1.x == v2.x && v1.y == v2.y && v1.z == v2.z)
@@ -414,7 +414,7 @@ bool UtilityMath::Equals(const VECTOR& v1, const VECTOR& v2)
 	return false;
 }
 
-// ãƒ™ã‚¯ãƒˆãƒ«ãŒã‚¼ãƒ­ãƒ™ã‚¯ãƒˆãƒ«ã‹ã©ã†ã‹ã‚’åˆ¤å®šã™ã‚‹
+// ƒxƒNƒgƒ‹‚ªƒ[ƒƒxƒNƒgƒ‹‚©‚Ç‚¤‚©‚ğ”»’è‚·‚é
 bool UtilityMath::EqualsVZero(const VECTOR& v1)
 {
 	const VECTOR& v2 = VECTOR_ZERO;
@@ -426,7 +426,7 @@ bool UtilityMath::EqualsVZero(const VECTOR& v1)
 	return false;
 }
 
-// 2Dãƒ™ã‚¯ãƒˆãƒ«ã‚’æ­£è¦åŒ–ã—ã¦3Dãƒ™ã‚¯ãƒˆãƒ«ã§è¿”ã™
+// 2DƒxƒNƒgƒ‹‚ğ³‹K‰»‚µ‚Ä3DƒxƒNƒgƒ‹‚Å•Ô‚·
 VECTOR UtilityMath::Normalize(const Vector2& v)
 {
 	VECTOR ret = VGet(
@@ -444,19 +444,19 @@ VECTOR UtilityMath::Normalize(const Vector2& v)
 	return ret;
 }
 
-// 3Dãƒ™ã‚¯ãƒˆãƒ«ã‚’æ­£è¦åŒ–ã™ã‚‹ï¼ˆã‚¼ãƒ­ãƒ™ã‚¯ãƒˆãƒ«ã®ã¨ãã¯ãã®ã¾ã¾è¿”ã™ï¼‰
+// 3DƒxƒNƒgƒ‹‚ğ³‹K‰»‚·‚éiƒ[ƒƒxƒNƒgƒ‹‚Ì‚Æ‚«‚Í‚»‚Ì‚Ü‚Ü•Ô‚·j
 VECTOR UtilityMath::VNormalize(const VECTOR& v)
 {
 	if (UtilityMath::EqualsVZero(v))
 	{
-		//Quaternionè¨ˆç®—ã§ã‚¼ãƒ­ã‚’æ¸¡ã—ã¦ã€
-		//ã‚¨ãƒ©ãƒ¼(-1, -1, -1)ãŒè¿”ã£ã¦ãã‚‹ã¨å›°ã‚‹
+		//QuaternionŒvZ‚Åƒ[ƒ‚ğ“n‚µ‚ÄA
+		//ƒGƒ‰[(-1, -1, -1)‚ª•Ô‚Á‚Ä‚­‚é‚Æ¢‚é
 		return v;
 	}
 	return VNorm(v);
 }
 
-// 2ã¤ã®3Dãƒ™ã‚¯ãƒˆãƒ«ã®ãªã™è§’ï¼ˆåº¦ï¼‰ã‚’æ±‚ã‚ã‚‹
+// 2‚Â‚Ì3DƒxƒNƒgƒ‹‚Ì‚È‚·Špi“xj‚ğ‹‚ß‚é
 double UtilityMath::AngleDeg(const VECTOR& from, const VECTOR& to)
 {
 	auto fLen = SqrMagnitude(from);
@@ -482,7 +482,7 @@ double UtilityMath::AngleDeg(const VECTOR& from, const VECTOR& to)
 
 }
 
-// æŒ‡å®šæ–¹å‘ã«ç·šã¨çµ‚ç‚¹ã«çƒä½“ã‚’æç”»ã™ã‚‹
+// w’è•ûŒü‚Éü‚ÆI“_‚É‹…‘Ì‚ğ•`‰æ‚·‚é
 void UtilityMath::DrawLineDir(const VECTOR& pos, const VECTOR& dir, int color, float len)
 {
 	auto nDir = UtilityMath::VNormalize(dir);
@@ -493,7 +493,7 @@ void UtilityMath::DrawLineDir(const VECTOR& pos, const VECTOR& dir, int color, f
 	DrawSphere3D(ePos, 5.0f, 5, color, color, true);
 }
 
-// å›è»¢è¡Œåˆ—ã‚’åŸºã«XYZè»¸æ–¹å‘ã®ç·šã‚’æç”»ã™ã‚‹
+// ‰ñ“]s—ñ‚ğŠî‚ÉXYZ²•ûŒü‚Ìü‚ğ•`‰æ‚·‚é
 void UtilityMath::DrawLineXYZ(const VECTOR& pos, const MATRIX& rot, float len)
 {
 	VECTOR dir;
@@ -511,7 +511,7 @@ void UtilityMath::DrawLineXYZ(const VECTOR& pos, const MATRIX& rot, float len)
 	DrawLineDir(pos, dir, 0x0000ff, len);
 }
 
-// ã‚¯ã‚©ãƒ¼ã‚¿ãƒ‹ã‚ªãƒ³ã‚’åŸºã«XYZè»¸æ–¹å‘ã®ç·šã‚’æç”»ã™ã‚‹
+// ƒNƒH[ƒ^ƒjƒIƒ“‚ğŠî‚ÉXYZ²•ûŒü‚Ìü‚ğ•`‰æ‚·‚é
 void UtilityMath::DrawLineXYZ(const VECTOR& pos, const Quaternion& rot, float len)
 {
 	VECTOR dir;
@@ -531,11 +531,11 @@ void UtilityMath::DrawLineXYZ(const VECTOR& pos, const Quaternion& rot, float le
 
 //bool UtilityMath::IsTimeOver(float& totalTime, const float& waitTime)
 //{
-//	//ãƒ‡ãƒ«ã‚¿ã‚¿ã‚¤ãƒ 
+//	//ƒfƒ‹ƒ^ƒ^ƒCƒ€
 //	auto delta = SceneManager::GetInstance().GetDeltaTime();
 //	totalTime += delta;
 //
-//	//å¾…æ©Ÿæ™‚é–“ã‚’è¶…éã—ã¦ã„ã‚‹ã‹åˆ¤æ–­
+//	//‘Ò‹@ŠÔ‚ğ’´‰ß‚µ‚Ä‚¢‚é‚©”»’f
 //	if (totalTime >= waitTime)
 //	{
 //		return true;
@@ -544,7 +544,7 @@ void UtilityMath::DrawLineXYZ(const VECTOR& pos, const Quaternion& rot, float le
 //	return false;
 //}
 
-// ãƒ©ãƒ³ãƒ€ãƒ ãªæ•°å€¤ã‚’è¿”ã™(floatç”¨)
+// ƒ‰ƒ“ƒ_ƒ€‚È”’l‚ğ•Ô‚·(float—p)
 float UtilityMath::RandRangeF(float min, float max)
 {
 	return min + static_cast<float>(rand()) / static_cast<float>(RAND_MAX) * (max - min);

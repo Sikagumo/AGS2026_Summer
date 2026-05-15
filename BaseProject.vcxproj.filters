@@ -78,12 +78,6 @@
     <ClCompile Include="Src\Manager\Generic\SceneManager.cpp">
       <Filter>ソース ファイル\Manager</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Utility\AsoUtility.cpp">
-      <Filter>ソース ファイル\Utility</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Manager\Camera.cpp">
-      <Filter>ソース ファイル\Manager</Filter>
-    </ClCompile>
     <ClCompile Include="Src\Object\Common\AnimationController.cpp">
       <Filter>ソース ファイル\Object\Common</Filter>
     </ClCompile>
@@ -171,7 +165,7 @@
     <ClCompile Include="Src\Object\Actor\CharaBase.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Manager\System\Loading.cpp">
+    <ClCompile Include="Src\Common\Loading.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Src\Manager\System\TimeManager.cpp">
@@ -189,6 +183,21 @@
     <ClCompile Include="Src\Scene\MainScene\SceneLobby.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="Src\Object\Bullet\Player\PBulletBase.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Object\Bullet\Player\PBulletBig.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Camera\Camera.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Utility\UtilityMath.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Object\Manager\CollisionManager.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\Common\Fader.h">
@@ -204,12 +213,6 @@
       <Filter>ヘッダー ファイル\Manager</Filter>
     </ClInclude>
     <ClInclude Include="Src\Manager\Generic\SceneManager.h">
-      <Filter>ヘッダー ファイル\Manager</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\Utility\AsoUtility.h">
-      <Filter>ヘッダー ファイル\Utility</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\Manager\Camera.h">
       <Filter>ヘッダー ファイル\Manager</Filter>
     </ClInclude>
     <ClInclude Include="Src\Object\Common\AnimationController.h">
@@ -311,7 +314,7 @@
     <ClInclude Include="Src\Object\Actor\CharaBase.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Src\Manager\System\Loading.h">
+    <ClInclude Include="Src\Common\Loading.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Src\Manager\System\TimeManager.h">
@@ -327,6 +330,21 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Src\Scene\MainScene\SceneLobby.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Object\Bullet\Player\PBulletBig.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Object\Bullet\Player\PBulletBase.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Camera\Camera.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Utility\UtilityMath.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Object\Manager\CollisionManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

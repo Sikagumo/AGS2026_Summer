@@ -19,13 +19,14 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Src\Object\Manager\CollisionManager.cpp" />
     <ClCompile Include="Src\Scene\MainScene\SceneLobby.cpp" />
     <ClCompile Include="Src\Object\Bullet\Player\PBulletBase.cpp" />
     <ClCompile Include="Src\Object\Bullet\Player\PBulletBig.cpp" />
     <ClCompile Include="Src\Scene\MainScene\SceneGame.cpp" />
     <ClCompile Include="Src\Scene\MainScene\SceneTitle.cpp" />
     <ClCompile Include="Src\Scene\SceneBase.cpp" />
-    <ClCompile Include="Src\Manager\System\Loading.cpp" />
+    <ClCompile Include="Src\Common\Loading.cpp" />
     <ClCompile Include="Src\FPS\FpsController.cpp" />
     <ClCompile Include="Src\Manager\InputTextManager.cpp" />
     <ClCompile Include="Src\Object\Actor\CharaBase.cpp" />
@@ -67,13 +68,14 @@
     <ClCompile Include="Src\Manager\System\TimeManager.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Src\Object\Manager\CollisionManager.h" />
     <ClInclude Include="Src\Scene\MainScene\SceneLobby.h" />
     <ClInclude Include="Src\Object\Bullet\Player\PBulletBig.h" />
     <ClInclude Include="Src\Object\Bullet\Player\PBulletBase.h" />
     <ClInclude Include="Src\Scene\MainScene\SceneGame.h" />
     <ClInclude Include="Src\Scene\MainScene\SceneTitle.h" />
     <ClInclude Include="Src\Scene\SceneBase.h" />
-    <ClInclude Include="Src\Manager\System\Loading.h" />
+    <ClInclude Include="Src\Common\Loading.h" />
     <ClInclude Include="Src\FPS\FpsController.h" />
     <ClInclude Include="Src\Manager\InputTextManager.h" />
     <ClInclude Include="Src\Object\Actor\CharaBase.h" />
