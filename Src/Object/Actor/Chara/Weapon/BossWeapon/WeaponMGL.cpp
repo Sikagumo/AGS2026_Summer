@@ -15,7 +15,7 @@ void WeaponMGL::Release(void)
 
 void WeaponMGL::InitLoad(void)
 {
-	transform_.SetModel(resMng_.LoadModelDuplicate(ResourceManager::SRC::MODEL_BOSS_WEAPON_MG_L));
+	transform_.SetModel(resourceManager_.LoadModelDuplicate(ResourceManager::SRC::MODEL_BOSS_WEAPON_MG_L));
 }
 
 void WeaponMGL::InitTransform(void)

@@ -403,10 +403,10 @@ double UtilityMath::Distance(const VECTOR& v1, const VECTOR& v2)
 	return sqrt(pow(v2.x - v1.x, 2) + pow(v2.y - v1.y, 2) + pow(v2.z - v1.z, 2));
 }
 
-// 2縺､縺ｮ3D繝吶け繝医Ν縺檎ｭ峨＠縺・°縺ｩ縺・°繧貞愛螳壹☆繧・
-bool UtilityMath::Equals(const VECTOR& v1, const VECTOR& v2)
+
+bool UtilityMath::Equals(const VECTOR& _vec1, const VECTOR& _vec2)
 {
-	if (v1.x == v2.x && v1.y == v2.y && v1.z == v2.z)
+	if (_vec1.x == _vec2.x && _vec1.y == _vec2.y && _vec1.z == _vec2.z)
 	{
 		return true;
 	}
@@ -414,15 +414,34 @@ bool UtilityMath::Equals(const VECTOR& v1, const VECTOR& v2)
 	return false;
 }
 
-// 繝吶け繝医Ν縺後ぞ繝ｭ繝吶け繝医Ν縺九←縺・°繧貞愛螳壹☆繧・
-bool UtilityMath::EqualsVZero(const VECTOR& v1)
+/* ベクトルがゼロベクトルか判定 */
+bool UtilityMath::EqualsVZero(const VECTOR& _vec)
 {
-	const VECTOR& v2 = VECTOR_ZERO;
-	if (v1.x == v2.x && v1.y == v2.y && v1.z == v2.z)
+	const VECTOR& ZERO = VECTOR_ZERO;
+	if (_vec.x == ZERO.x && _vec.y == ZERO.y && _vec.z == ZERO.z)
 	{
 		return true;
 	}
 
+	return false;
+}
+bool UtilityMath::EqualsVZero(const Vector2& _vec)
+{
+	const Vector2& ZERO = VECTOR2_ZERO;
+	if (_vec.x == ZERO.x && _vec.y == ZERO.y)
+	{
+		return true;
+	}
+
+	return false;
+}
+bool UtilityMath::EqualsVZero(const Vector2F& _vec)
+{
+	const Vector2F& ZERO = VECTOR2F_ZERO;
+	if (_vec.x == ZERO.x && _vec.y == ZERO.y)
+	{
+		return true;
+	}
 	return false;
 }
 
@@ -444,17 +463,34 @@ VECTOR UtilityMath::Normalize(const Vector2& v)
 	return ret;
 }
 
-// 3D繝吶け繝医Ν繧呈ｭ｣隕丞喧縺吶ｋ・医ぞ繝ｭ繝吶け繝医Ν縺ｮ縺ｨ縺阪・縺昴・縺ｾ縺ｾ霑斐☆・・
-VECTOR UtilityMath::VNormalize(const VECTOR& v)
+/* ベクトルを正規化 */
+VECTOR UtilityMath::VNormalize(const VECTOR& _vec)
 {
-	if (UtilityMath::EqualsVZero(v))
-	{
-		//Quaternion險育ｮ励〒繧ｼ繝ｭ繧呈ｸ｡縺励※縲・
-		//繧ｨ繝ｩ繝ｼ(-1, -1, -1)縺瑚ｿ斐▲縺ｦ縺上ｋ縺ｨ蝗ｰ繧・
-		return v;
-	}
-	return VNorm(v);
+	// ゼロ除算対策で元のゼロベクトルを返す
+	if (UtilityMath::EqualsVZero(_vec)) { return _vec; }
+
+	return VNorm(_vec);
 }
+
+Vector2 UtilityMath::VNormalize(const Vector2& _vec)
+{
+	// ゼロ除算対策で元のゼロベクトルを返す
+	if (UtilityMath::EqualsVZero(_vec)) { return _vec; }
+
+	float mag = sqrtf((_vec.x * _vec.x) + (_vec.y * _vec.y));
+
+	return Vector2(_vec.x / mag, _vec.y / mag);
+}
+Vector2F UtilityMath::VNormalize(const Vector2F& _vec)
+{
+	// ゼロ除算対策で元のゼロベクトルを返す
+	if (UtilityMath::EqualsVZero(_vec)) { return _vec; }
+
+	float mag = sqrtf((_vec.x * _vec.x) + (_vec.y * _vec.y));
+
+	return Vector2F(_vec.x / mag, _vec.y / mag);
+}
+
 
 // 2縺､縺ｮ3D繝吶け繝医Ν縺ｮ縺ｪ縺呵ｧ抵ｼ亥ｺｦ・峨ｒ豎ゅａ繧・
 double UtilityMath::AngleDeg(const VECTOR& from, const VECTOR& to)
@@ -527,6 +563,12 @@ void UtilityMath::DrawLineXYZ(const VECTOR& pos, const Quaternion& rot, float le
 	// Z
 	dir = rot.GetForward();
 	DrawLineDir(pos, dir, 0x0000ff, len);
+
+	// W
+	dir = VAdd(VNormalize(rot.GetRight()), VNormalize(rot.GetUp()));
+	dir = VAdd(dir, VNormalize(rot.GetForward()));
+	dir = VNormalize(dir);
+	DrawLineDir(pos, dir, 0xffffff, len);
 }
 
 //bool UtilityMath::IsTimeOver(float& totalTime, const float& waitTime)

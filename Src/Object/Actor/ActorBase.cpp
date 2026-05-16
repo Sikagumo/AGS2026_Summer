@@ -5,7 +5,7 @@
 
 ActorBase::ActorBase(void)
 	: 
-	resMng_(ResourceManager::GetInstance()),
+	resourceManager_(ResourceManager::GetInstance()),
 	sceneManager_(SceneManager::GetInstance()),
 	transform_(Transform())
 {

@@ -1,6 +1,7 @@
 #include <DxLib.h>
 #include "InputManager.h"
 #include "../../Utility/UtilityMath.h"
+#include "../../Application.h"
 
 InputManager* InputManager::instance_ = nullptr;
 
@@ -448,13 +449,39 @@ VECTOR InputManager::GetDirectionXZAKey(int aKeyX, int aKeyY) const
 	dirZ = (dirZ / len) * scale;
 
 	// Zは前に倒すとマイナス値が返ってくるので反転
-	ret = VNorm({ dirX, 0.0f, -dirZ });
+	ret = UtilityMath::VNormalize(VGet(dirX, 0.0f, -dirZ));
 
 	return ret;
 
 }
 
-Vector2 InputManager::GetMouseVelocityAndFixCenter(void)
+ 
+Vector2F InputManager::GetMouseVelocityAndFixCenter(void)
 {
-	return Vector2();
+	/* マウスを中央に固定・非表示にする */
+
+	// マウスを表示しない設定にする
+	SetMouseDispFlag(FALSE);
+
+
+	int centerX = Application::SCREEN_HALF_X;
+	int centerY = Application::SCREEN_HALF_Y;
+
+	int currentX;
+	int currentY;
+	GetMousePoint(&currentX, &currentY);
+
+	float diffX = static_cast<float>(currentX - centerX);
+	float diffY = static_cast<float>(currentY - centerY);
+
+	if (abs(diffX) <= 1.0f) { diffX = 0.0f; }
+	if (abs(diffY) <= 1.0f) { diffY = 0.0f; }
+
+	SetMousePoint(centerX, centerY);
+
+	mousePos_ = Vector2(centerX, centerY);
+
+	return Vector2F(diffX, diffY);
 }
+ 
+ 

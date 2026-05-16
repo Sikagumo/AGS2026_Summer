@@ -21,7 +21,11 @@ public:
 
 		/* モデル */
 		MODEL_SKYDOME,
-		MODEL_PLAYER,
+		MODEL_PLAYER_HUMAN,
+		MODEL_PLAYER_DOG,
+		MODEL_PLAYER_MONKEY,
+		MODEL_PLAYER_BIRD,
+
 		MODEL_BOSS_FEET,
 		MODEL_BOSS_CAR,
 		MODEL_BOSS_WHEEL_FRONT,
@@ -34,6 +38,7 @@ public:
 		MODEL_BOSS_WEAPON_RK,
 
 		/* 外部アニメーション */
+		ANIM_IDLE,
 
 		/* エフェクト */
 

@@ -1,4 +1,4 @@
-#include "../../Common/AnimationController.h"
+#include "CharaBase.h"
 #include "../../../Utility/UtilityMath.h"
 #include "../../../Manager/Generic/SceneManager.h"
 #include "../../../Manager/Generic/ResourceManager.h"
@@ -6,21 +6,20 @@
 #include "../../Collider/ColliderLine.h"
 #include "../../Collider/ColliderModel.h"
 #include "../../Collider/ColliderCapsule.h"
+#include "../../../Camera/Camera.h"
 #include "../../../Application.h"
 
 
-#include "CharaBase.h"
 
-CharaBase::CharaBase(void) :
-	ActorBase::ActorBase(),
-	isJump_(false),
-	jumpPow_(UtilityMath::VECTOR_ZERO),
-	moveSpeed_(0.0f),
-	stepJump_(0.0f),
-	prevPos_(UtilityMath::VECTOR_ZERO),
-	moveDir_(UtilityMath::VECTOR_ZERO),
-	movePow_(UtilityMath::VECTOR_ZERO)
-	//animation_(nullptr)
+CharaBase::CharaBase(void)
+	: ActorBase::ActorBase()
+	, isJump_(false), jumpPow_(UtilityMath::VECTOR_ZERO), stepJump_(0.0f)
+	, moveSpeed_(0.0f)
+	, prevPos_(UtilityMath::VECTOR_ZERO)
+	, moveDir_(UtilityMath::VECTOR_ZERO)
+	, movePow_(UtilityMath::VECTOR_ZERO)
+	, isDirRotActive_(true)
+	, animation_(nullptr)
 {
 }
 
@@ -29,7 +28,7 @@ void CharaBase::InitAnimation(void)
 {
 	if (transform_.modelId != -1)
 	{
-		//animation_ = new AnimationController(transform_.modelId);
+		animation_ = std::make_unique<AnimationController>(transform_.modelId);
 	}
 }
 
@@ -66,12 +65,7 @@ void CharaBase::Update(void)
 
 void CharaBase::Release(void)
 {
-	/*
-	if (animation_)
-	{
-		animation_->Release();
-		delete animation_;
-	}*/
+	
 }
 
 void CharaBase::CalcGravityPow(void)
@@ -256,11 +250,25 @@ void CharaBase::DrawPre(void)
 
 void CharaBase::DelayRotate(void)
 {
+	Quaternion goalRot = Quaternion::Identity();
+	
+	if (isDirRotActive_)
+	{
+		// ˆÚ“®•ûŒü‚©‚ç‰ñ“]‚É•ÏŠ·‚·‚é
+		if (!UtilityMath::EqualsVZero(moveDir_))
+		{
+			goalRot = Quaternion::LookRotation(moveDir_);
+		}
+	}
+	else
+	{
+		// ƒJƒƒ‰‚ÌYŽ²‰ñ“]‚ð‰ñ“]‚É•ÏŠ·‚·‚é
+		goalRot = SceneManager::GetInstance().GetCamera()->GetQuaRotY();
 
-	// ˆÚ“®•ûŒü‚©‚ç‰ñ“]‚É•ÏŠ·‚·‚é
-	Quaternion goalRot = Quaternion::LookRotation(moveDir_);
-	goalRot.x = 0.0f;
+		goalRot.x = 0.0f;
+	}
+
+	constexpr float ROT_TERM = 0.2f;
 	// ‰ñ“]‚Ì•âŠÔ
-	transform_.quaRot =
-		Quaternion::Slerp(transform_.quaRot, goalRot, 0.2f);
+	transform_.quaRot = Quaternion::Slerp(transform_.quaRot, goalRot, ROT_TERM);
 }

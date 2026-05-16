@@ -15,7 +15,7 @@ void WeaponMP::Release(void)
 
 void WeaponMP::InitLoad(void)
 {
-	transform_.SetModel(resMng_.LoadModelDuplicate(ResourceManager::SRC::MODEL_BOSS_WEAPON_RK));
+	transform_.SetModel(resourceManager_.LoadModelDuplicate(ResourceManager::SRC::MODEL_BOSS_WEAPON_RK));
 }
 
 

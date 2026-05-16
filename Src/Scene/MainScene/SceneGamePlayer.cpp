@@ -11,8 +11,10 @@
 
 SceneGamePlayer::SceneGamePlayer(void)
 	: sceneManager_(SceneManager::GetInstance())
+	, tempBossWeaponPos_(VGet(0.0f, 100.0f, 500.0f))
 {
-	player_ = std::make_unique<Player>(0, Player::PLAYER_TYPE::BIG);
+	player_ = std::make_unique<Player>(0, Player::BULLET_TYPE::BIG);
+	boss_ = std::make_unique<Boss>();
 }
 
 void SceneGamePlayer::Load(void)
@@ -27,6 +29,7 @@ void SceneGamePlayer::Load(void)
 
 	Loading::GetInstance()->SetProgress(25.0f);
 
+	boss_->Init();
 
 	Loading::GetInstance()->SetProgress(45.0f);
 
@@ -70,7 +73,20 @@ void SceneGamePlayer::Update(void)
 	// ŽžŠÔ‚ðŽæ“¾
 	float times = time.GetGameTime();
 
+	if (InputManager::GetInstance().IsTrgDown(KEY_INPUT_E))
+	{
+		const std::unique_ptr<Camera>& camera = sceneManager_.GetCamera();
+		if (!camera->GetIsLockOn())
+		{
+			camera->SetLockOnPosition(tempBossWeaponPos_);
+		}
+		else
+		{
+			camera->SetIsLockOn(false);
+		}
+	}
 	player_->Update();
+	boss_->Update();
 }
 
 void SceneGamePlayer::Draw(void)
@@ -79,7 +95,14 @@ void SceneGamePlayer::Draw(void)
 
 	player_->Draw();
 
-	DrawSphere3D(UtilityMath::VECTOR_ZERO, 10.0f, 16, 0xff00ff, 0xffffff, true);
+	//boss_->Draw();
+
+	// ’Ç]ˆÊ’u
+	DrawSphere3D(tempBossWeaponPos_, 10.0f, 16, 0x0000ff, 0xffffff, true);
+
+	constexpr float GROUND_SIZE = 5000.0f;
+	DrawCube3D(VGet(GROUND_SIZE, 0.0f, GROUND_SIZE), VGet(-GROUND_SIZE, -100.0f, -GROUND_SIZE),
+		0xff00ff, 0xffffff, true);
 
 #ifdef _DEBUG
 	DrawDebug();
@@ -90,6 +113,8 @@ void SceneGamePlayer::Draw(void)
 void SceneGamePlayer::Release(void)
 {
 	player_->Release();
+
+	boss_->Release();
 }
 
 void SceneGamePlayer::DrawDebug(void)

@@ -6,17 +6,14 @@
 #include "../../Manager/Generic/SceneManager.h"
 
 AnimationController::AnimationController(int _modelId)
+	: animations_{}
+	, modelId_(_modelId)
+	, playType_(-1), prePlayType_(-1)
+	, blendTime_(0.0f), curBlendTime_(0.0f)
+	, isLoop_(false), isStop_(false)
 {
-	animations_.clear();
-
-	modelId_ = _modelId;
-
-	playType_ = prePlayType_ = -1;
-
-	blendTime_ = curBlendTime_ = 0.0f;
-
-	isLoop_	  = false;
 }
+
 
 AnimationController::~AnimationController(void)
 {
@@ -27,7 +24,7 @@ AnimationController::~AnimationController(void)
 void AnimationController::AddInternal(int _type, float _speed)
 {
 	/* 内部のアニメーションの追加 */
-	Animation anim;
+	Animation anim = Animation();
 
 	anim.animIndex = _type;
 
@@ -45,7 +42,7 @@ void AnimationController::AddInternal(int _type, float _speed)
 void AnimationController::AddExternal(int _type, float _speed, const std::string _path)
 {
 	/* 外部のアニメーションの追加 */
-	Animation anim;
+	Animation anim = Animation();
 
 	anim.modelId = MV1LoadModel(_path.c_str());
 

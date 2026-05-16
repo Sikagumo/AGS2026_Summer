@@ -51,7 +51,7 @@ public:
 protected:
 
 	// シングルトン参照
-	ResourceManager& resMng_;
+	ResourceManager& resourceManager_;
 	SceneManager& sceneManager_;
 
 	// モデル制御の基本情報

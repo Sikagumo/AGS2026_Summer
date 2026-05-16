@@ -2,6 +2,7 @@
 #include "../SceneBase.h"
 #include <memory>
 #include "../../Object/Actor/Chara/Player/Player.h"
+#include "../../Object/Actor/Chara/Boss/Boss.h"
 class SceneManager;
 
 
@@ -38,6 +39,10 @@ private:
 
     SceneManager& sceneManager_;
     std::unique_ptr<Player> player_;
+
+    std::unique_ptr<Boss> boss_;
+
+    VECTOR tempBossWeaponPos_;
 
     /// @brief デバッグ情報の描画
     void DrawDebug(void);
