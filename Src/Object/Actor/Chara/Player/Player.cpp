@@ -13,27 +13,35 @@
 #include "../Weapon/Bullet/Player/PBulletRapidFire.h"
 
 
-Player::Player(int _playerNo, PLAYER_TYPE _playerType)
+Player::Player(int _playerNo, BULLET_TYPE _playerType)
 	: PlayerBase::PlayerBase(_playerNo, _playerType)
 	, inputManager_(InputManager::GetInstance())
 	, sceneManager_(SceneManager::GetInstance())
 	, shadowHandle_(-1)
 	
 {
-	constexpr float speed = 5.0f;
-	moveSpeed_ = speed;
+	constexpr float MOVE_SPEED = 5.0f;
+	moveSpeed_ = MOVE_SPEED;
 }
 
 
 void Player::InitLoad(void)
 {
-	transform_.modelId = resMng_.LoadHandleId(ResourceManager::SRC::MODEL_PLAYER);
+	transform_.modelId = resourceManager_.LoadHandleId(ResourceManager::SRC::MODEL_PLAYER_HUMAN);
+}
+void Player::InitAnimation(void)
+{
+	animation_ = std::make_unique<AnimationController>(transform_.modelId);
+	animation_->AddExternal(0, 30.0f, resourceManager_.LoadHandleId(ResourceManager::SRC::ANIM_IDLE));
+	animation_->Play(0, true);
 }
 void Player::InitTransform(void)
 {
-	transform_.InitTransform(1.0f
+	constexpr float MODEL_SCALE = 0.75f;
+
+	transform_.InitTransform(MODEL_SCALE
 		, Quaternion::Identity()
-		, Quaternion::AngleAxis(UtilityMath::Deg2RadF(180.0f), UtilityMath::AXIS_Y)
+		, Quaternion::Identity()
 		, UtilityMath::VECTOR_ZERO);
 }
 void Player::InitCollider(void)
@@ -53,6 +61,9 @@ void Player::UpdateProcess(void)
 
 	// 移動操作
 	ProcessMove();
+
+	// ロックオン有効時、カメラ方向に回転
+	isDirRotActive_ = !sceneManager_.GetCamera()->GetIsLockOn();
 }
 
 void Player::UpdateProcessPost(void)
@@ -70,6 +81,9 @@ void Player::DrawPre(void)
 void Player::DrawLate(void)
 {
 #ifdef _DEBUG
+
+	UtilityMath::DrawLineXYZ(transform_.pos, transform_.quaRot);
+
 	DrawFormatString(0, 0, 0xffffff, "player:(%.f,%.f,%.f)(%.2f°,%.2f°,%.2f°)(%.2f°,%.2f°,%.2f°)"
 		, transform_.pos.x, transform_.pos.y, transform_.pos.z
 		, UtilityMath::Rad2DegF(transform_.quaRot.x), UtilityMath::Rad2DegF(transform_.quaRot.y), UtilityMath::Rad2DegF(transform_.quaRot.z)
@@ -113,9 +127,10 @@ void Player::ProcessMove(void)
 
 		// 移動方向を取得
 		moveDir_ = Quaternion::PosAxis(cameraRot, dir);
+		moveDir_.y = 0.0f;
 
 		// 加速度に割り当て
-		movePow_ = VScale(moveDir_, moveSpeed_);
+		movePow_ = VScale(UtilityMath::VNormalize(moveDir_), moveSpeed_);
 	}
 	else
 	{
@@ -181,15 +196,13 @@ void Player::ProcessAttack(void)
 	{
 		std::unique_ptr<PBulletBase> bullet;
 
-		switch (playerType_)
+		switch (bulletType_)
 		{
-			case PLAYER_TYPE::BIG:
-				bullet =  std::make_unique<PBulletBig>();
-				assert(false + "a");
+			case BULLET_TYPE::BIG:
+				bullet = std::make_unique<PBulletBig>();
 			break;
 
 			default:
-				assert(false + "\n弾が未割当です\n");
 			break;
 
 		}

@@ -23,8 +23,8 @@ void Boss::Release(void)
 
 void Boss::InitLoad(void)
 {
-	transformFeet_.SetModel(resMng_.LoadModelDuplicate(ResourceManager::SRC::MODEL_BOSS_FEET));
-	transformBody_.SetModel(resMng_.LoadModelDuplicate(ResourceManager::SRC::MODEL_BOSS_BODY));
+	transformFeet_.SetModel(resourceManager_.LoadModelDuplicate(ResourceManager::SRC::MODEL_BOSS_FEET));
+	transformBody_.SetModel(resourceManager_.LoadModelDuplicate(ResourceManager::SRC::MODEL_BOSS_BODY));
 	transformFeet_.scl = BOSS_SIZE;
 	transformBody_.scl = BOSS_SIZE;
 	transformFeet_.quaRot= Quaternion::Identity();

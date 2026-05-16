@@ -3,41 +3,28 @@
 #include "../Common/Quaternion.h"
 #include "../Object/Actor/ActorBase.h"
 class Transform;
+class InputManager;
 
 class Camera : public ActorBase
 {
 
 public:
 
-	// カメラの初期座標
-	static constexpr VECTOR DERFAULT_POS = { 0.0f, 200.0f, -500.0f };
-
-	// カメラの初期角度
-	static constexpr VECTOR DERFAULT_ANGLES = { 
-		0.0f, 0.0f, 0.0f
-	};
-
-	// カメラの回転量
-	const float ROT_POW_DEG = 25.0f;
-	const float ROT_POW_RAD = ROT_POW_DEG * (DX_PI_F / 180.0f);
-
-	// カメラの移動スピード
-	static constexpr float ROT_SPEED = 50.0f;
-
 	// カメラのクリップ範囲
 	static constexpr float VIEW_NEAR = 10.0f;
 	static constexpr float VIEW_FAR = 20000.0f;
 
 	// 追従位置からカメラ位置までの相対座標
-	static constexpr VECTOR FOLLOW_LOCAL_POS = { 65.0f, 190.0f, -225.0f };
-	static constexpr VECTOR FOLLOW_LOCAL_POS_LOCKON = { 100.0f, 157.5f, -125.0f };
+	static constexpr VECTOR FOLLOW_LOCAL_POS = { 25.0f, 85.0f, -150.0f };
+	static constexpr VECTOR FOLLOW_LOCAL_POS_LOCKON = { 60.0f, 75.0f, -75.0f };
 
 	// 追従位置から注視点までの相対座標
-	static constexpr VECTOR FOLLOW_TARGET_LOCAL_POS = { 0.0f, 0.0f, 510.0f };
+	static constexpr VECTOR FOLLOW_TARGET_LOCAL_POS = { 50.0f, 75.0f, 50.0f };
+
 
 	// カメラのX回転上限度角
-	static constexpr float LIMIT_X_UP_RAD = 40.0f * (DX_PI_F / 180.0f);
-	static constexpr float LIMIT_X_DW_RAD = 10.0f * (DX_PI_F / 180.0f);
+	static constexpr float LIMIT_X_UP = 40.0f * (DX_PI_F / 180.0f);
+	static constexpr float LIMIT_X_DOWN = 10.0f * (DX_PI_F / 180.0f);
 	
 	// カメラモード
 	enum class MODE
@@ -94,6 +81,12 @@ public:
 	// 追従対象の設定
 	void SetFollow(const Transform* _follow) { followTransform_ = _follow; };
 
+	void SetLockOnPosition(const VECTOR& _pos);
+
+	// ロックオンするか否かの設定
+	void SetIsLockOn(bool _isLockOn) { isLockOn_ = _isLockOn; };
+	bool GetIsLockOn(void)const { return isLockOn_; };
+
 
 protected:
 
@@ -126,6 +119,10 @@ private:
 	// カメラの補間移動率
 	static constexpr float LERP_RATE_MOVE = 0.1f;
 
+	InputManager& inputManager_;
+
+	// カメラの視野角割合
+	float fovRate_;
 
 	// カメラの更新前位置
 	VECTOR prePos_;
@@ -147,6 +144,7 @@ private:
 
 	// ターゲット
 	bool isLockOn_;
+	VECTOR lockOnPos_;
 
 
 	

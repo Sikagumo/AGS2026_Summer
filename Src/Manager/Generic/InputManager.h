@@ -137,9 +137,9 @@ public:
 	VECTOR GetDirectionXZAKey(int aKeyX, int aKeyY) const;
 
 	/// @brief マウスの移動量を取得し、カーソルを中央に固定・非表示にする
-    /// @param void
     /// @return マウスの移動量
-	Vector2 GetMouseVelocityAndFixCenter(void);
+	Vector2F GetMouseVelocityAndFixCenter(void);
+
 
 private:
 

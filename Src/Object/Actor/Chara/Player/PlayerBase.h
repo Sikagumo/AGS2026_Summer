@@ -8,7 +8,7 @@ class PlayerBase : public CharaBase
 {
 public:
 
-	enum class PLAYER_TYPE
+	enum class BULLET_TYPE
 	{
 		NONE = -1,
 		INTERFERING, // ñWäQ
@@ -19,6 +19,14 @@ public:
 		MAX,
 	};
 
+	enum class PLAYER_TYPE
+	{
+		HYMAN,
+		DOG,
+		MONKEY,
+		BIRD,
+	};
+
 	enum class PLAYER_STATE
 	{
 		NONE = -1,
@@ -27,12 +35,15 @@ public:
 		ATTACK,
 	};
 
-	PlayerBase(int _playerNo, PLAYER_TYPE _playerType);
+	PlayerBase(int _playerNo, BULLET_TYPE _bulletType, PLAYER_TYPE _playerType = PLAYER_TYPE::HYMAN);
 
 	virtual ~PlayerBase(void)override = default;
 
 	/// @brief ÉvÉåÉCÉÑÅ[î‘çÜéÊìæ
 	int GetPlayerNo(void)const { return playerNo_; };
+
+	PLAYER_TYPE GetPlayerType(void)const { return playerType_; };
+	BULLET_TYPE GetBulletType(void)const { return bulletType_; };
 
 	//std::vector<std::unique_ptr<PBulletBase>>& GetPBullet(void);
 
@@ -44,6 +55,8 @@ protected:
 
 	std::vector<std::unique_ptr<PBulletBase>> bullets_;
 	
+
+	BULLET_TYPE bulletType_;
 
 	PLAYER_TYPE playerType_;
 };

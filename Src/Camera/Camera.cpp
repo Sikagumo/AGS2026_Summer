@@ -10,8 +10,21 @@
 #include "../Object/Collider/ColliderSphere.h"
 
 
+// カメラの初期座標
+static constexpr VECTOR DERFAULT_POS = { 0.0f, 200.0f, -500.0f };
+
+// カメラの初期角度
+static constexpr VECTOR DERFAULT_ANGLES = { 0.0f, 0.0f, 0.0f };
+
+// カメラの回転量
+const float ROT_POW_KEY = UtilityMath::Deg2RadF(10.0f);
+const float ROT_POW_RAD = UtilityMath::Deg2RadF(10.0f);
+const float ROT_POW_MOUSE = UtilityMath::Deg2RadF(0.05f);
+
+
 Camera::Camera(void)
 	: ActorBase::ActorBase()
+	, inputManager_(InputManager::GetInstance())
 	, followTransform_(nullptr)
 	, mode_(MODE::NONE)
 	, angles_(UtilityMath::VECTOR_ZERO)
@@ -19,6 +32,8 @@ Camera::Camera(void)
 	, targetPos_(UtilityMath::VECTOR_ZERO)
 	, prePos_(UtilityMath::VECTOR_ZERO)
 	, isLockOn_(false)
+	, fovRate_(1.0f)
+	, lockOnPos_(UtilityMath::VECTOR_ZERO)
 {
 	// DxLibの初期設定では、
 	// カメラの位置が x = 320.0f, y = 240.0f, z = (画面のサイズによって変化)、
@@ -79,6 +94,9 @@ void Camera::SetBeforeDraw(void)
 		targetPos_, 
 		transform_.GetUp()
 	);
+#ifdef _DEBUG
+	DrawSphere3D(targetPos_, 1.0f, 16, 0xffffff, 0xffffff, true);
+#endif
 
 	// DXライブラリのカメラとEffekseerのカメラを同期する。
 	Effekseer_Sync3DSetting();
@@ -96,7 +114,7 @@ void Camera::Release(void)
 
 VECTOR Camera::GetForward(void) const
 {
-	return VNorm(VSub(targetPos_, transform_.pos));
+	return UtilityMath::VNormalize((VSub(targetPos_, transform_.pos)));
 }
 
 void Camera::ChangeMode(MODE _mode)
@@ -121,6 +139,13 @@ void Camera::ChangeMode(MODE _mode)
 
 }
 
+void Camera::SetLockOnPosition(const VECTOR& _pos)
+{
+	isLockOn_ = true;
+
+	lockOnPos_ = _pos;
+}
+
 void Camera::SetDefault(void)
 {
 
@@ -137,26 +162,32 @@ void Camera::SetDefault(void)
 
 void Camera::SyncFollow(void)
 {
-
 	// 同期先の位置
 	VECTOR pos = followTransform_->pos;
 
+	VECTOR temp;
+
 	// Y軸
 	rotY_ = Quaternion::AngleAxis(angles_.y, UtilityMath::AXIS_Y);
+	if (isLockOn_) 
+	{
+		temp = VSub(lockOnPos_, pos);
+		rotY_ = Quaternion::LookRotation(VNorm(temp));
+		rotY_.z = 0.0f;
+	}
 
 	// Y軸 + X軸
 	transform_.quaRot = rotY_.Mult(Quaternion::AngleAxis(angles_.x, UtilityMath::AXIS_X));
 
-	VECTOR localPos;
-
 	// 注視点
-	localPos = transform_.quaRot.PosAxis(FOLLOW_TARGET_LOCAL_POS);
+	VECTOR localPos = transform_.quaRot.PosAxis(FOLLOW_TARGET_LOCAL_POS);
 	targetPos_ = VAdd(pos, localPos);
 
-	if (InputManager::GetInstance().IsTrgDown(KEY_INPUT_E))
+	if (isLockOn_)
 	{
-		isLockOn_ = !isLockOn_;
+		targetPos_ = VAdd(pos, VSub(lockOnPos_, pos));
 	}
+
 	// カメラ位置
 	const VECTOR LOCAL_POS = ((isLockOn_) ? FOLLOW_LOCAL_POS_LOCKON : FOLLOW_LOCAL_POS);
 	localPos = transform_.quaRot.PosAxis(LOCAL_POS);
@@ -171,6 +202,7 @@ void Camera::ProcessRot(bool _isLimit)
 	RotationKeyboard(_isLimit);
 #endif
 
+	RotationMouse(_isLimit);
 
 	// 方向回転によるXYZの移動(ゲームパッド)
 	RotationGamePad(_isLimit);
@@ -184,7 +216,6 @@ void Camera::SetBeforeDrawFixedPoint(void)
 
 void Camera::SetBeforeDrawFree(void)
 {
-
 	// カメラ操作(回転)
 	ProcessRot(false);
 	
@@ -204,11 +235,13 @@ void Camera::SetBeforeDrawFree(void)
 void Camera::SetBeforeDrawFollow(void)
 {
 	// カメラ位置の補間
-	transform_.pos = UtilityMath::Lerp(prePos_,
-									  transform_.pos, LERP_RATE_MOVE);
+	transform_.pos = UtilityMath::Lerp(prePos_, transform_.pos, LERP_RATE_MOVE);
 
 	// カメラ操作(回転)
-	ProcessRot(true);
+	if (!isLockOn_)
+	{
+		ProcessRot(true);
+	}
 
 	// 追従対象との相対位置を同期
 	SyncFollow();
@@ -219,152 +252,123 @@ void Camera::SetBeforeDrawFollow(void)
 
 void Camera::ProcessMove(void)
 {
-
-	auto& ins = InputManager::GetInstance();
+	// カメラの移動スピード
+	constexpr float CAMERA_MOVE_SPEED = 50.0f;
 
 	VECTOR moveDir = UtilityMath::VECTOR_ZERO;
 
+
 	if (GetJoypadNum() == 0)
 	{
-		if (ins.IsNew(KEY_INPUT_UP)) { moveDir = UtilityMath::DIR_F; }
-		if (ins.IsNew(KEY_INPUT_DOWN)) { moveDir = UtilityMath::DIR_B; }
-		if (ins.IsNew(KEY_INPUT_LEFT)) { moveDir = UtilityMath::DIR_L; }
-		if (ins.IsNew(KEY_INPUT_RIGHT)) { moveDir = UtilityMath::DIR_R; }
+		if (inputManager_.IsNew(KEY_INPUT_UP)) { moveDir = UtilityMath::DIR_F; }
+		if (inputManager_.IsNew(KEY_INPUT_DOWN)) { moveDir = UtilityMath::DIR_B; }
+		if (inputManager_.IsNew(KEY_INPUT_LEFT)) { moveDir = UtilityMath::DIR_L; }
+		if (inputManager_.IsNew(KEY_INPUT_RIGHT)) { moveDir = UtilityMath::DIR_R; }
 	}
 	else
 	{
-
-		InputManager::JOYPAD_IN_STATE padState =
-			ins.GetJPadInputState(InputManager::JOYPAD_NO::PAD1);
+		InputManager::JOYPAD_IN_STATE padState = inputManager_.GetJPadInputState(InputManager::JOYPAD_NO::PAD1);
 
 		// 左スティックの傾き
-		moveDir = ins.GetDirectionXZAKey(padState.AKeyLX, padState.AKeyLY);
+		moveDir = inputManager_.GetDirectionXZAKey(padState.AKeyLX, padState.AKeyLY);
 
 	}
 
 	// 移動処理
 	if (!UtilityMath::EqualsVZero(moveDir))
 	{
-
-		// 移動させたい方向(ベクトル)に変換
-
 		// 現在の向きからの進行方向を取得
-		VECTOR direction = VNorm(transform_.quaRot.PosAxis(moveDir));
+		VECTOR direction = UtilityMath::VNormalize((transform_.quaRot.PosAxis(moveDir)));
 
 		// 移動させたい方向に移動量をかける(=移動量)
-		VECTOR movePow = VScale(direction, ROT_SPEED);
+		VECTOR movePow = VScale(direction, CAMERA_MOVE_SPEED);
 
 		// カメラ位置も注視点も移動させる
 		transform_.pos = VAdd(transform_.pos, movePow);
 		targetPos_ = VAdd(targetPos_, movePow);
-
 	}
-
 }
+
 
 void Camera::RotationKeyboard(bool _isLimit)
 {
-	auto& ins = InputManager::GetInstance();
-
 	// カメラ回転
-	if (ins.IsNew(KEY_INPUT_RIGHT))
+	if (inputManager_.IsNew(KEY_INPUT_RIGHT))
 	{
 		// 右回転
 		angles_.y += ROT_POW_RAD;
 	}
-	if (ins.IsNew(KEY_INPUT_LEFT))
+	if (inputManager_.IsNew(KEY_INPUT_LEFT))
 	{
 		// 左回転
 		angles_.y -= ROT_POW_RAD;
 	}
 
 	// 上回転
-	if (ins.IsNew(KEY_INPUT_UP))
+	if (inputManager_.IsNew(KEY_INPUT_UP))
 	{
 		angles_.x += ROT_POW_RAD;
-		if (_isLimit && angles_.x > LIMIT_X_UP_RAD)
+		if (_isLimit && angles_.x > LIMIT_X_UP)
 		{
-			angles_.x = LIMIT_X_UP_RAD;
+			angles_.x = LIMIT_X_UP;
 		}
 	}
 
 	// 下回転
-	if (ins.IsNew(KEY_INPUT_DOWN))
+	if (inputManager_.IsNew(KEY_INPUT_DOWN))
 	{
 		angles_.x -= ROT_POW_RAD;
-		if (_isLimit && angles_.x < -LIMIT_X_DW_RAD)
+		if (_isLimit && angles_.x < -LIMIT_X_DOWN)
 		{
-			angles_.x = -LIMIT_X_DW_RAD;
+			angles_.x = -LIMIT_X_DOWN;
 		}
 	}
 }
-
 void Camera::RotationMouse(bool _isLimit)
 {
-	/*
-	const float ROT_PAD_MOUSE = (UtilityMath::Deg2RadF(2.5f));
-	const float ROT_POW_PAD = (UtilityMath::Deg2RadF(0.005f));
-	VECTOR rotInput = UtilityMath::VECTOR_ZERO;
-
 	// マウス感度倍率
 	constexpr float ROT_SENS = (1.0 - 0.0f);
-
+	constexpr float MOUSE_MOVE_THRESHOLD = 0.0f;
 
 	// マウス移動量
-	int mouseMoveY = InputManager::GetInstance().GetMouseMove().x;
+	Vector2F mouseMove = inputManager_.GetMouseVelocityAndFixCenter();
 
-	// マウス速度の感度割り当て(ゼロ除算対策付き)
-	int mouseSens = 0.0f;
-	mouseSens = ((mouseMoveY != 0.0f) ? ((mouseMoveY * ROT_SENS) / mouseMoveY) : 0.0f);
+	// マウス移動量がしきい値未満の場合０にする
+	mouseMove.x = ((std::abs(mouseMove.x) > MOUSE_MOVE_THRESHOLD) ? mouseMove.x : 0.0f);
+	mouseMove.y = ((std::abs(mouseMove.y) > MOUSE_MOVE_THRESHOLD) ? mouseMove.y : 0.0f);
 
-	// マウス回転
-	if (mouseMoveY != 0)
+	// 感度倍率を掛ける
+	mouseMove *= ROT_SENS;
+
+	if (!UtilityMath::EqualsVZero(mouseMove))
 	{
-		// 反転時、マイナスにする
-		int revert = ((mouseMoveY < 0) ? -1.0f : 1.0f);
+		angles_.x += (mouseMove.y * ROT_POW_MOUSE);
+		angles_.y += (mouseMove.x * ROT_POW_MOUSE);
 
-		// 回転
-		rotInput.y += (ROT_PAD_MOUSE * mouseSens * revert);
+		angles_.x = std::clamp(angles_.x, -LIMIT_X_DOWN, LIMIT_X_UP);
 	}
-
-	// コントローラ回転
-	int dirY = input_.GetKnockRStickSize().x;
-	if (dirY != 0)
-	{
-		rotInput.y += (dirY * ROT_POW_PAD);
-	}
-
-
-	if (!UtilityMath::EqualsVZero(rotInput))
-	{
-		// 相対的な回転を適用
-		Quaternion deltaRot = Quaternion::Euler(rotInput);
-		rot_.target = rot_.target.Mult(deltaRot);
-	}*/
 }
 void Camera::RotationGamePad(bool _isLimit)
 {
-
-	auto& ins = InputManager::GetInstance();
 	// 接続されているゲームパッド１の情報を取得
-	InputManager::JOYPAD_IN_STATE padState =
-		ins.GetJPadInputState(InputManager::JOYPAD_NO::PAD1);
+	InputManager::JOYPAD_IN_STATE padState = inputManager_.GetJPadInputState(InputManager::JOYPAD_NO::PAD1);
 
 	// 右スティックの傾き
-	VECTOR dir = ins.GetDirectionXZAKey(padState.AKeyRX, padState.AKeyRY);
+	VECTOR dir = inputManager_.GetDirectionXZAKey(padState.AKeyRX, padState.AKeyRY);
+
 
 	if (!UtilityMath::EqualsVZero(dir))
 	{
 		// 右スティック左右の傾き
-		angles_.y += dir.x * ROT_POW_RAD;
+		angles_.y += (dir.x * ROT_POW_RAD);
 
 		// 右スティック上下の傾き
-		angles_.x += dir.z * ROT_POW_RAD;
+		angles_.x += (dir.z * ROT_POW_RAD);
 
 		if (_isLimit)
 		{
 			// 角度制限
-			angles_.x = std::clamp(angles_.x, -LIMIT_X_DW_RAD, LIMIT_X_UP_RAD);
+			angles_.x = std::clamp(angles_.x, -LIMIT_X_DOWN, LIMIT_X_UP);
 		}
 	}
 }

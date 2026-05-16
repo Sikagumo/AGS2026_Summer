@@ -28,7 +28,7 @@ public:
 	/// @brief 単位ベクトル(1, 1, 1)
 	static constexpr VECTOR VECTOR_ONE = { 1.0f, 1.0f, 1.0f };
 	static constexpr Vector2 VECTOR2_ONE = { 1, 1 };
-	static constexpr Vector2 VECTOR2F_ONE = { 1.0f, 1.0f };
+	static constexpr Vector2F VECTOR2F_ONE = { 1.0f, 1.0f };
 
 	//回転軸
 
@@ -311,38 +311,29 @@ public:
 	/// <returns>2点間の距離</returns>
 	static double Distance(const VECTOR& v1, const VECTOR& v2);
 
-	//比較
+	
+	/// @brief 2つのベクトルが等しいか判定
+	/// @param _vec1 比較するベクトル１
+	/// @param _vec2 比較するベクトル２
+	static bool Equals(const VECTOR& _vec1, const VECTOR& _vec2);
 
-	/// <summary>
-	/// 2つのベクトルが等しいかを比較する
-	/// </summary>
-	/// <param name="v1">比較するベクトル1</param>
-	/// <param name="v2">比較するベクトル2</param>
-	/// <returns>等しい場合はtrue、それ以外はfalse</returns>
-	static bool Equals(const VECTOR& v1, const VECTOR& v2);
+	/// @brief ベクトルがゼロベクトルか判定
+	/// @param _vec 対象のベクトル
+	static bool EqualsVZero(const VECTOR& _vec);
+	static bool EqualsVZero(const Vector2& _vec);
+	static bool EqualsVZero(const Vector2F& _vec);
 
-	/// <summary>
-	/// ベクトルがゼロベクトルかを判定する
-	/// </summary>
-	/// <param name="v1">対象のベクトル</param>
-	/// <returns>ゼロベクトルならtrue、それ以外はfalse</returns>
-	static bool EqualsVZero(const VECTOR& v1);
 
-	//正規化
+	/// @brief 2Dベクトルを正規化し3Dベクトルに変換
+	/// @param _vec 対象の2Dベクトル
+	static VECTOR Normalize(const Vector2& _vec);
 
-	/// <summary>
-	/// ベクトルを正規化（2D→3D変換含む）
-	/// </summary>
-	/// <param name="v">対象の2Dベクトル</param>
-	/// <returns>正規化された3Dベクトル</returns>
-	static VECTOR Normalize(const Vector2& v);
-
-	/// <summary>
-	/// ベクトルを正規化（3D）
-	/// </summary>
-	/// <param name="v">対象の3Dベクトル</param>
-	/// <returns>正規化された3Dベクトル</returns>
-	static VECTOR VNormalize(const VECTOR& v);
+	
+	/// @brief ベクトルを正規化
+	/// @param _vec 対象の3Dベクトル
+	static VECTOR VNormalize(const VECTOR& _vec);
+	static Vector2 VNormalize(const Vector2& _vec);
+	static Vector2F VNormalize(const Vector2F& _vec);
 
 	/// <summary>
 	/// 2つのベクトルの間の角度（度）を返す

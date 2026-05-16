@@ -25,10 +25,12 @@ public:
 	// æZˆ—
 	Vector2 operator*(const Vector2& _vec)const;
 	void operator*=(const Vector2& _vec);
+	void operator*=(int _value);
 
 	// œZˆ—
 	Vector2 operator/(const Vector2& _vec)const;
 	void operator/=(const Vector2& _vec);
+	void operator/=(int _value);
 };
 
 
@@ -56,9 +58,11 @@ public:
 
 	// æZˆ—
 	Vector2F operator*(const Vector2F& _vec)const;
-	void operator*=(const Vector2& _vec);
+	void operator*=(const Vector2F& _vec);
+	void operator*=(float _value);
 
 	// œZˆ—
 	Vector2F operator/(const Vector2F& _vec)const;
 	void operator/=(const Vector2F& _vec);
+	void operator/=(float _value);
 };
