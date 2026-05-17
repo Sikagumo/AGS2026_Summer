@@ -39,6 +39,8 @@ public:
 
 		/* 外部アニメーション */
 		ANIM_IDLE,
+		ANIM_RUN,
+		ANIM_SHOT,
 
 		/* エフェクト */
 

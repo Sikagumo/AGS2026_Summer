@@ -1,6 +1,7 @@
 #pragma once
 #include "./PlayerBase.h"
 #include "../Player/PlayerBase.h"
+#include "./PActionController.h"
 class InputManager;
 class PBulletBig;
 
@@ -12,7 +13,7 @@ public:
 	{
 		IDLE,
 		RUN,
-		FAST_RUN,
+		SHOT,
 		JUMP,
 		MAX,
 	};
@@ -86,7 +87,15 @@ private:
 	InputManager& inputManager_;
 	SceneManager& sceneManager_;
 
+	// çUåÇâÒêî
+	int attackNumMax_;
+	int curAttackNum_;
+
 	int shadowHandle_;
+
+	ANIM_TYPE animType_;
+
+	std::unique_ptr<PActionController> actionController_;
 
 
 	// ëÄçÏ
@@ -99,5 +108,7 @@ private:
 
 
 	void DrawShadowRound(void);
-	//void PlayAnim(ANIM_TYPE type, bool _isLoop = true);
+	void PlayAnim(ANIM_TYPE _type, bool _isLoop = true);
+
+	void CreateBullet(void);
 };

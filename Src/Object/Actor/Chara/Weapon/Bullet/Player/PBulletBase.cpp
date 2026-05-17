@@ -12,8 +12,10 @@ PBulletBase::PBulletBase(void)
 	, shotPow_(UtilityMath::VECTOR_ZERO)
 	, curGravityPow_(0.0f)
 	, aliveTime_(0.0f)
+	, shotCnt_(0)
 {
 }
+
 void PBulletBase::InitCollider(void)
 {
 	// ‹…‚Ì“–‚½‚è”»’è‚ð“±“ü
@@ -65,8 +67,10 @@ void PBulletBase::Release(void)
 	
 }
 
-void PBulletBase::CreateShot(const VECTOR& _pos, const VECTOR& _shotDir, const Quaternion& _rot)
+void PBulletBase::CreateShot(const VECTOR& _pos, const VECTOR& _shotDir, const Quaternion& _rot, int _shotCnt)
 {
+	shotCnt_ = _shotCnt;
+
 	SetParam();
 
 	shotPow_ = VScale(UtilityMath::VNormalize(_shotDir), shotSpeed_);
