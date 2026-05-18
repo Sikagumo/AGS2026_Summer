@@ -28,6 +28,7 @@ public:
 		STAGE,       // ステージ
 		PLAYER,      // プレイヤー
 		ENEMY,       // 敵
+		BOSS,        // ボス
 		CAMERA,      // カメラ
 		WALL,        // 壁
 	};

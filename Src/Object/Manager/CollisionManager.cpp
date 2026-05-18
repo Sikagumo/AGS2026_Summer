@@ -1,5 +1,6 @@
 #include "CollisionManager.h"
 #include "../../Manager/Generic/SceneManager.h"
+#include "../Common/Transform.h"
 #include "../Actor/ActorBase.h"
 #include "../Collider/ColliderCapsule.h"
 #include "../Collider/ColliderSphere.h"
@@ -174,10 +175,33 @@ void CollisionManager::ResolveCollision(ActorBase* _actorA, ActorBase* _actorB,
 
 	using TAG = ColliderBase::TAG;
 
-	TAG tagA = _info.myCollider->GetCollisionTag();
-	TAG tagB = _info.hitCollider->GetCollisionTag();
-
+	// 押し戻すベクトルを計算
 	VECTOR pushVector = VScale(_info.hitNormal, _info.penetration);
+
+	bool isAHaveMyCollider = false;
+	for (const auto& [id, col] : _actorA->GetOwnColliders())
+	{
+		if (col == _info.myCollider)
+		{
+			isAHaveMyCollider = true;
+			break;
+		}
+	}
+
+	if (isAHaveMyCollider)
+	{
+		if (_info.myCollider->GetCollisionTag() == TAG::PLAYER || _info.myCollider->GetCollisionTag() == TAG::BOSS)
+		{
+			_actorA->GetTransform().Translate(pushVector);;
+		}
+	}
+	else
+	{
+		if (_info.myCollider->GetCollisionTag() == TAG::PLAYER || _info.myCollider->GetCollisionTag() == TAG::BOSS)
+		{
+			_actorB->GetTransform().Translate(pushVector);;
+		}
+	}
 }
 
 void CollisionManager::UpdateCollisionPars(void)
@@ -237,7 +261,7 @@ void CollisionManager::UpdateCollisionPars(void)
 							actorA->AddHitCollider(colB);
 							actorB->AddHitCollider(colA);
 
-							if (colA->IsTrigger() || colB->IsTrigger())
+							if (!colA->IsTrigger() && !colB->IsTrigger())
 							{
 								ResolveCollision(actorA, actorB, info);
 							}
