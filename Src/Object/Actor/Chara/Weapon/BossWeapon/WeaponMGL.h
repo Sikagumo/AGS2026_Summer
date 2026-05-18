@@ -5,7 +5,7 @@ class WeaponMGL :
 {
 public:
 
-	WeaponMGL(int _modelId, int _jointNo);
+	WeaponMGL(void);
 
 	~WeaponMGL(void)override = default;
 
@@ -13,6 +13,9 @@ public:
 	void Load(void) override;
 
 	void Release(void)override;
+
+	void SetBone(int _id,Transform _trans) override;
+	int GetDamage(void) const override;
 
 
 protected:

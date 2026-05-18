@@ -1,18 +1,23 @@
 #pragma once
 #include "../WeaponBase.h"
 
+
 class WeaponCannon :
 	public WeaponBase
 {
 public:
-	WeaponCannon(int _modelId,int _jointNo);
+	WeaponCannon();
 
 	~WeaponCannon(void)override = default;
 
 	// リソースロード
-	void Load(void) override;
+	void Load(void) override;	void Release(void)override;
 
 	void Release(void)override;
+	
+	void SetBone(int _id, Transform _trans) override;
+	int GetDamage(void) const override;
+	
 
 
 protected:

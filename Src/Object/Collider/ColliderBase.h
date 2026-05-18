@@ -25,11 +25,16 @@ public:
 	// 衝突種別
 	enum class TAG
 	{
-		STAGE,       // ステージ
-		PLAYER,      // プレイヤー
-		ENEMY,       // 敵
-		CAMERA,      // カメラ
-		WALL,        // 壁
+		STAGE,			// ステージ
+		PLAYER,			// プレイヤー
+		BOSS,			// 敵
+		WEAPON_MG_L,	//マシンガン（左
+		WEAPON_MG_R,	//マシンガン（右
+		WEAPON_CANNON,	//キャノン
+		WEAPON_MP,		//ミサイルポッド
+		WEAPON_RG,		//レールガン
+		CAMERA,			// カメラ
+		WALL,			// 壁
 	};
 
 	/// @brief コンストラクタ

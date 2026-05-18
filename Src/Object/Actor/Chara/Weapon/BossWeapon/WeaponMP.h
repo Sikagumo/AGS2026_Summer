@@ -5,7 +5,7 @@ class WeaponMP :
 {
 public:
 
-	WeaponMP(int _modelId,int _jointNo);
+	WeaponMP();
 
 	~WeaponMP(void)override = default;
 
@@ -13,6 +13,9 @@ public:
 	void Load(void) override;
 
 	void Release(void)override;
+
+	void SetBone(int _id, Transform _trans) override;
+	int GetDamage(void) const override;
 
 protected:
 
