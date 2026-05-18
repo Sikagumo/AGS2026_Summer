@@ -17,8 +17,12 @@ Player::Player(int _playerNo, BULLET_TYPE _playerType)
 	: PlayerBase::PlayerBase(_playerNo, _playerType)
 	, shadowHandle_(-1)
 	, inputManager_(InputManager::GetInstance())
-	
+	, animType_(ANIM_TYPE::IDLE)	
+	,  curAttackNum_(0)
 {
+	constexpr int BULLET_MAX = 3;
+	attackNumMax_ = BULLET_MAX;
+
 	constexpr float MOVE_SPEED = 5.0f;
 	moveSpeed_ = MOVE_SPEED;
 }
@@ -31,8 +35,14 @@ void Player::InitLoad(void)
 void Player::InitAnimation(void)
 {
 	animation_ = std::make_unique<AnimationController>(transform_.modelId);
-	animation_->AddExternal(0, 30.0f, resourceManager_.LoadHandleId(ResourceManager::SRC::ANIM_IDLE));
-	animation_->Play(0, true);
+	animation_->AddExternal(static_cast<int>(ANIM_TYPE::IDLE)
+		, 30.0f, resourceManager_.LoadHandleId(ResourceManager::SRC::ANIM_IDLE));
+	animation_->AddExternal(static_cast<int>(ANIM_TYPE::RUN)
+		, 30.0f, resourceManager_.LoadHandleId(ResourceManager::SRC::ANIM_RUN));
+	animation_->AddExternal(static_cast<int>(ANIM_TYPE::SHOT)
+		, 20.0f, resourceManager_.LoadHandleId(ResourceManager::SRC::ANIM_SHOT));
+
+	PlayAnim(ANIM_TYPE::IDLE);
 }
 void Player::InitTransform(void)
 {
@@ -40,7 +50,7 @@ void Player::InitTransform(void)
 
 	transform_.InitTransform(MODEL_SCALE
 		, Quaternion::Identity()
-		, Quaternion::Identity()
+		, Quaternion::AngleAxis(UtilityMath::Deg2RadF(180.0f), UtilityMath::AXIS_Y)
 		, UtilityMath::VECTOR_ZERO);
 }
 void Player::InitCollider(void)
@@ -49,6 +59,39 @@ void Player::InitCollider(void)
 }
 void Player::InitPost(void)
 {
+	constexpr bool IS_RAPID_FIRE = false;
+	actionController_ = std::make_unique<PActionController>(IS_RAPID_FIRE);
+
+	curAttackNum_ = 0;
+
+	constexpr float SHOT_TIME_INCREMENT = 0.5f; // 行動間隔上昇値
+	constexpr float SHOT_TIME_ACTIVE = 1.5f; // 有効時間
+	constexpr float SHOT_TIME_ACTION_ACTIVE = 0.1f; // 有効時間
+	constexpr float SHOT_TIME_END = 0.5f; // 終了時間
+	constexpr float SHOT_TIME_ACTIVE_INPUT = 0.35f; // 入力可能時間
+
+	float timeActive, timeEnd, timeActionActive, timeInput;
+	timeActive = SHOT_TIME_ACTIVE;
+	timeEnd = SHOT_TIME_END;
+	timeActionActive = SHOT_TIME_ACTION_ACTIVE;
+	timeInput = SHOT_TIME_ACTIVE_INPUT;
+
+	actionController_->SetAction(0, timeActive, timeEnd, timeActionActive
+		, std::bind(&Player::CreateBullet, this), timeInput);
+
+	timeActive += SHOT_TIME_INCREMENT;
+	timeEnd += SHOT_TIME_INCREMENT;
+	timeActionActive += SHOT_TIME_INCREMENT;
+	timeInput += SHOT_TIME_INCREMENT;
+	actionController_->SetAction(1, timeActive, timeEnd, timeActionActive
+		, std::bind(&Player::CreateBullet, this), timeInput);
+
+	timeActive += SHOT_TIME_INCREMENT;
+	timeEnd += SHOT_TIME_INCREMENT;
+	timeActionActive += SHOT_TIME_INCREMENT;
+	timeInput += SHOT_TIME_INCREMENT;
+	actionController_->SetAction(2, timeActive, timeEnd, timeActionActive
+		, std::bind(&Player::CreateBullet, this), timeInput);
 }
 
 
@@ -60,6 +103,11 @@ void Player::UpdateProcess(void)
 
 	// 移動操作
 	ProcessMove();
+
+	for (auto& bullet : bullets_)
+	{
+		bullet->Update();
+	}
 
 	// ロックオン有効時、カメラ方向に回転
 	isDirRotActive_ = !sceneManager_.GetCamera()->GetIsLockOn();
@@ -87,6 +135,8 @@ void Player::DrawLate(void)
 		, transform_.pos.x, transform_.pos.y, transform_.pos.z
 		, UtilityMath::Rad2DegF(transform_.quaRot.x), UtilityMath::Rad2DegF(transform_.quaRot.y), UtilityMath::Rad2DegF(transform_.quaRot.z)
 		, UtilityMath::Rad2DegF(transform_.quaRotLocal.x), UtilityMath::Rad2DegF(transform_.quaRotLocal.y), UtilityMath::Rad2DegF(transform_.quaRotLocal.z));
+
+	actionController_->DrawDebug();
 #endif
 }
 
@@ -114,11 +164,14 @@ void Player::ProcessMove(void)
 	if (!UtilityMath::EqualsVZero(dir))
 	{
 		dir = UtilityMath::VNormalize(dir);
-		//movePow_ = UtilityMath::VECTOR_ZERO;
+		movePow_ = UtilityMath::VECTOR_ZERO;
 
 		if (!isJump_)
 		{
-			//PlayAnim(ANIM_TYPE::RUN);
+			if (animType_ != ANIM_TYPE::SHOT)
+			{
+				PlayAnim(ANIM_TYPE::RUN);
+			}
 		}
 
 		// カメラの方向で進行
@@ -135,9 +188,9 @@ void Player::ProcessMove(void)
 	{
 		movePow_ = UtilityMath::VECTOR_ZERO;
 
-		if (!isJump_)
+		if (!isJump_ && animType_ != ANIM_TYPE::SHOT)
 		{
-			//PlayAnim(ANIM_TYPE::IDLE);
+			PlayAnim(ANIM_TYPE::IDLE);
 		}
 	}
 }
@@ -178,7 +231,7 @@ void Player::ProcessJump(void)
 		isJump_ = true;
 
 		// アニメーション再生
-		//PlayAnim(ANIM_TYPE::JUMP, false);
+		PlayAnim(ANIM_TYPE::JUMP, false);
 	}
 
 	// Y軸制限
@@ -191,31 +244,67 @@ void Player::ProcessJump(void)
 
 void Player::ProcessAttack(void)
 {
+	if (animType_ == ANIM_TYPE::SHOT && animation_->IsEnd()
+		&& actionController_->GetActionState() == PActionController::PACTION_STATE::NONE)
+	{
+		PlayAnim(ANIM_TYPE::IDLE);
+	}
+
+	actionController_->Update();
+
 	if (inputManager_.IsTrgMouseLeft())
 	{
-		std::unique_ptr<PBulletBase> bullet;
-
-		switch (bulletType_)
+		if (curAttackNum_ >= attackNumMax_)
 		{
-			case BULLET_TYPE::BIG:
-				bullet = std::make_unique<PBulletBig>();
-			break;
-
-			default:
-			break;
-
+			if (actionController_->GetActionState() == PActionController::PACTION_STATE::NONE)
+			{
+				curAttackNum_ = 0;
+			}
+			return;
 		}
-		bullet->Init();
 
-		bullet->CreateShot(transform_.pos, transform_.GetForward(), Quaternion::Identity());
+		if (actionController_->GetActionState() == PActionController::PACTION_STATE::NONE
+			|| !actionController_->IsActiveInput())
+		{
+			actionController_->Active(curAttackNum_);
 
-		bullets_.emplace_back(std::move(bullet));
+			curAttackNum_++;
+
+			PlayAnim(ANIM_TYPE::SHOT, false);
+		}
 	}
+}
+
+void Player::CreateBullet(void)
+{
+	std::unique_ptr<PBulletBase> bullet;
 
 	for (auto& bullet : bullets_)
 	{
-		bullet->Update();
+		if (!bullet->IsAlive())
+		{
+			bullet->Release();
+			bullet->Init();
+			bullet->CreateShot(transform_.pos, transform_.GetForward(), Quaternion::Identity(), curAttackNum_);
+			return;
+		}
 	}
+
+	switch (bulletType_)
+	{
+		case BULLET_TYPE::BIG:
+			bullet = std::make_unique<PBulletBig>();
+		break;
+
+		default:
+		break;
+
+	}
+
+	bullet->Init();
+	bullet->CreateShot(transform_.pos, transform_.GetForward(), Quaternion::Identity(), curAttackNum_);
+
+	bullets_.emplace_back(std::move(bullet));
 }
 
 void Player::DrawShadowRound(void)
@@ -315,3 +404,10 @@ void Player::DrawShadowRound(void)
 	SetUseZBuffer3D(FALSE);
 	*/
 }
+
+void Player::PlayAnim(ANIM_TYPE _type, bool _isLoop)
+{
+	animType_ = _type;
+	animation_->Play(static_cast<int>(_type), _isLoop);
+}
+

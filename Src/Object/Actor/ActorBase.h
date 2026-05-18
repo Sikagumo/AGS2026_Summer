@@ -44,6 +44,9 @@ public:
 	// 衝突対象となるコライダを登録
 	void AddHitCollider(const ColliderBase* hitCollider);
 
+	/// @brief 自身の衝突対象となるコライダリストの取得
+	std::vector<const ColliderBase*> GetHitCollider(void)const { return hitColliders_; };
+
 	// 衝突対象となるコライダをクリア
 	void ClearHitCollider(void);
 

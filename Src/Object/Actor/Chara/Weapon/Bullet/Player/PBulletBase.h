@@ -16,6 +16,8 @@ public:
 	};
 
 
+	/// @brief コンストラクタ
+	/// @param _shotCnt 発射回数
 	PBulletBase(void);
 
 	virtual ~PBulletBase(void)override = default;
@@ -27,7 +29,7 @@ public:
 
 	void Release(void)override;
 
-	void CreateShot(const VECTOR& _pos, const VECTOR& _shotDir, const Quaternion& _rot);
+	void CreateShot(const VECTOR& _pos, const VECTOR& _shotDir, const Quaternion& _rot, int _shotCnt);
 
 	bool IsAlive(void)const;
 
@@ -49,6 +51,9 @@ protected:
 	VECTOR shotPow_;
 
 	float aliveTime_;
+
+	int shotCnt_;
+
 
 	std::function<void(void)> updateProc_;
 

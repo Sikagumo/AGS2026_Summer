@@ -86,6 +86,8 @@ void ResourceManager::Initialize(void)
 
 	/* アニメーション */
 	_SetResource(LOAD_TYPE::ANIM, SRC::ANIM_IDLE, PATH_ANIM + "Idle.mv1");
+	_SetResource(LOAD_TYPE::ANIM, SRC::ANIM_RUN, PATH_ANIM + "Run.mv1");
+	_SetResource(LOAD_TYPE::ANIM, SRC::ANIM_SHOT, PATH_ANIM + "Shot.mv1");
 
 	/* BGM */
 	_SetResource(LOAD_TYPE::SOUND, SRC::BGM_TITLE, PATH_BGM + "TitleBGM.mp3");

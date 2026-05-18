@@ -63,7 +63,7 @@ void SceneManager::Initialize(void)
     // 3D•`‰æİ’è‚ğ‰Šú‰»‚·‚é
     Init3D();
 
-    ChangeScene(std::make_shared<SceneGameBoss>());
+    ChangeScene(std::make_shared<SceneGamePlayer>());
 }
 
 void SceneManager::Init3D(void)
