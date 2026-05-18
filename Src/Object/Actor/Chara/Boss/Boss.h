@@ -47,7 +47,7 @@ private:
 	//boss‚Ì‘å‚«‚³
 	static constexpr VECTOR BOSS_SIZE = { 3.0f, 3.0f, 3.0f };
 	//boss‚Ì‰ŠúÀ•W
-	static constexpr VECTOR BOSS_INIT_POS= { 0.0f, 0.0f, 0.0f };
+	static constexpr VECTOR BOSS_INIT_POS= { 500.0f, 0.0f, 100.0f };
 	//‰ñ“]
 	static constexpr float INIT_ROT = 180.0f;
 	static constexpr int JOINT_FEET_BODY = 12;

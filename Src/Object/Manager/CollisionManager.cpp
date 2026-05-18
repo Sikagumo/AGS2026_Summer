@@ -137,11 +137,7 @@ bool CollisionManager::CheckCollision(const ColliderBase* _colliderA, const Coll
 	}
 	else if (shapeA == SHAPE::CAPSULE && shapeB == SHAPE::CAPSULE)
 	{
-<<<<<<< HEAD
-		return;
-=======
 		return CheckCapsuleVsCapsule(_colliderA, _colliderB, _outInfo);
->>>>>>> Collision
 	}
 	
 	if (shapeA == SHAPE::CAPSULE && shapeB == SHAPE::MODEL)
@@ -265,12 +261,7 @@ void CollisionManager::UpdateCollisionPars(void)
 
 						if (CheckCollision(colA, colB, info))
 						{
-<<<<<<< HEAD
-
-							// Õ“Ë‚µ‚½‘ŠŽè‚ð‘ŠŒÝ‚É“o˜^
-=======
 							// è¡çªã—ãŸç›¸æ‰‹ã‚’ç›¸äº’ã«ç™»éŒ²
->>>>>>> Collision
 							actorA->AddHitCollider(colB);
 							actorB->AddHitCollider(colA);
 

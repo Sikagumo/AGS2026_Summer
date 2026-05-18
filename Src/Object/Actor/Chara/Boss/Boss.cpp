@@ -172,7 +172,6 @@ void Boss::UpdateProcess(void)
 
 void Boss::UpdateProcessPost(void)
 {
-
 }
 
 void Boss::DrawPre(void)
