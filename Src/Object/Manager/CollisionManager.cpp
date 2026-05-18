@@ -71,29 +71,29 @@ void CollisionManager::Clear(void)
 	activeCollisions_.clear();
 }
 
-void CollisionManager::RegisterActor(ActorBase* actor)
+void CollisionManager::RegisterActor(ActorBase* _actor)
 {
 	// 重複登録防止
-	if (actor == nullptr)
+	if (_actor == nullptr)
 	{
 		return;
 	}
 
 	for (const auto& actors : actors_)
 	{
-		if (actors == actor)
+		if (actors == _actor)
 		{
 			return;
 		}
 	}
 	// リストへの追加
-	actors_.push_back(actor);
+	actors_.push_back(_actor);
 }
 
-void CollisionManager::UnregisterActor(ActorBase* actor)
+void CollisionManager::UnregisterActor(ActorBase* _actor)
 {
 
-	if (actor == nullptr)
+	if (_actor == nullptr)
 	{
 		return;
 	}
@@ -101,16 +101,16 @@ void CollisionManager::UnregisterActor(ActorBase* actor)
 	// 消去
 	actors_.erase
 	(
-		std::remove(actors_.begin(), actors_.end(), actor),
+		std::remove(actors_.begin(), actors_.end(), _actor),
 		actors_.end()
 	);
 }
 
-bool CollisionManager::CheckCollision(const ColliderBase* colliderA, const ColliderBase* colliderB,
-	CollisionInfo& outInfo)
+bool CollisionManager::CheckCollision(const ColliderBase* _colliderA, const ColliderBase* _colliderB,
+	CollisionInfo& _outInfo)
 {
 	// 有効性チェック
-	if (!colliderA || !colliderB)
+	if (!_colliderA || !_colliderB)
 	{
 		return false;
 	}
@@ -118,44 +118,44 @@ bool CollisionManager::CheckCollision(const ColliderBase* colliderA, const Colli
 	// 形状タイプ取得
 	using SHAPE = ColliderBase::SHAPE;
 
-	auto shapeA = colliderA->GetShapeType();
-	auto shapeB = colliderB->GetShapeType();
+	auto shapeA = _colliderA->GetShapeType();
+	auto shapeB = _colliderB->GetShapeType();
 
 	// 形状の組み合わせによる判定の振り分け
 	if (shapeA == SHAPE::SPHERE && shapeB == SHAPE::SPHERE)
 	{
-		return CheckSphereVsSphere(colliderA, colliderB, outInfo);
+		return CheckSphereVsSphere(_colliderA, _colliderB, _outInfo);
 	}
 	else if (shapeA == SHAPE::SPHERE && shapeB == SHAPE::CAPSULE)
 	{
-		return CheckSphereVsCapsule(colliderA, colliderB, outInfo);
+		return CheckSphereVsCapsule(_colliderA, _colliderB, _outInfo);
 	}
 	else if (shapeA == SHAPE::CAPSULE && shapeB == SHAPE::SPHERE)
 	{
-		return CheckSphereVsCapsule(colliderA, colliderB, outInfo);
+		return CheckSphereVsCapsule(_colliderA, _colliderB, _outInfo);
 	}
 	
 	if (shapeA == SHAPE::CAPSULE && shapeB == SHAPE::MODEL)
 	{
-		return CheckCapsuleVsModel(colliderA, colliderB, outInfo);
+		return CheckCapsuleVsModel(_colliderA, _colliderB, _outInfo);
 	}
 
 	return false;
 }
 
-bool CollisionManager::IsActorCollidingWithTag(const ActorBase* actor, 
-	ColliderBase::TAG targetTag) const
+bool CollisionManager::IsActorCollidingWithTag(const ActorBase* _actor,
+	ColliderBase::TAG _targetTag) const
 {
-	if (actor == nullptr)
+	if (_actor == nullptr)
 	{
 		return false;
 	}
 
-	const auto& hitColliders = actor->GetHitCollider();
+	const auto& hitColliders = _actor->GetHitCollider();
 
 	for (const auto& hitCollider : hitColliders)
 	{
-		if (hitCollider->GetCollisionTag() == targetTag)
+		if (hitCollider->GetCollisionTag() == _targetTag)
 		{
 			return true;
 		}
@@ -164,20 +164,20 @@ bool CollisionManager::IsActorCollidingWithTag(const ActorBase* actor,
 	return false;
 }
 
-void CollisionManager::ResolveCollision(ActorBase* actorA, ActorBase* actorB, 
-	const CollisionInfo& info)
+void CollisionManager::ResolveCollision(ActorBase* _actorA, ActorBase* _actorB,
+	const CollisionInfo& _info)
 {
-	if (actorA == nullptr || actorB == nullptr)
+	if (_actorA == nullptr || _actorB == nullptr)
 	{
 		return;
 	}
 
 	using TAG = ColliderBase::TAG;
 
-	TAG tagA = info.myCollider->GetCollisionTag();
-	TAG tagB = info.hitCollider->GetCollisionTag();
+	TAG tagA = _info.myCollider->GetCollisionTag();
+	TAG tagB = _info.hitCollider->GetCollisionTag();
 
-	VECTOR pushVector = VScale(info.hitNormal, info.penetration);
+	VECTOR pushVector = VScale(_info.hitNormal, _info.penetration);
 }
 
 void CollisionManager::UpdateCollisionPars(void)
@@ -239,10 +239,9 @@ void CollisionManager::UpdateCollisionPars(void)
 
 							if (colA->IsTrigger() || colB->IsTrigger())
 							{
-								continue;
+								ResolveCollision(actorA, actorB, info);
 							}
 
-							ResolveCollision(actorA, actorB, info);
 						}
 					}
 				}
@@ -251,11 +250,11 @@ void CollisionManager::UpdateCollisionPars(void)
 	}
 }
 
-bool CollisionManager::CanCollide(int tagA, int tagB) const
+bool CollisionManager::CanCollide(int _tagA, int _tagB) const
 {
 	using TAG = ColliderBase::TAG;
-	TAG tagHit = static_cast<TAG>(tagA);
-	TAG tagHurt = static_cast<TAG>(tagB);
+	TAG tagHit = static_cast<TAG>(_tagA);
+	TAG tagHurt = static_cast<TAG>(_tagB);
 
 	// 同一タグ同士の判定
 	if (tagHit == tagHurt)
@@ -278,11 +277,11 @@ bool CollisionManager::CanCollide(int tagA, int tagB) const
 	return false;
 }
 
-bool CollisionManager::CheckSphereVsSphere(const ColliderBase* colliderA, 
-	const ColliderBase* colliderB, CollisionInfo& outInfo)
+bool CollisionManager::CheckSphereVsSphere(const ColliderBase* _colliderA,
+	const ColliderBase* _colliderB, CollisionInfo& _outInfo)
 {
-	const auto* sphereA = dynamic_cast<const ColliderSphere*>(colliderA);
-	const auto* sphereB = dynamic_cast<const ColliderSphere*>(colliderB);
+	const auto* sphereA = dynamic_cast<const ColliderSphere*>(_colliderA);
+	const auto* sphereB = dynamic_cast<const ColliderSphere*>(_colliderB);
 
 	if (!sphereA || !sphereB) { return false; }
 
@@ -307,20 +306,20 @@ bool CollisionManager::CheckSphereVsSphere(const ColliderBase* colliderA,
 		float distance = sqrtf(distSquare);
 
 		// 衝突情報の設定
-		outInfo.myCollider = colliderA;
-		outInfo.hitCollider = colliderB;
-		outInfo.isActive = true;
+		_outInfo.myCollider = _colliderA;
+		_outInfo.hitCollider = _colliderB;
+		_outInfo.isActive = true;
 		// 衝突位置の計算
-		outInfo.hitPosition = VAdd(positionB, VScale(VSub(positionA, positionB), 0.5f));
+		_outInfo.hitPosition = VAdd(positionB, VScale(VSub(positionA, positionB), 0.5f));
 
 		// 法線ベクトルと押し出し量の計算
 		if (distance > 0.0f)
 		{
-			outInfo.hitNormal = VScale(VSub(positionA, positionB), 1.0f / distance);
+			_outInfo.hitNormal = VScale(VSub(positionA, positionB), 1.0f / distance);
 		}
 
 		// めり込んでいる距離を算出
-		outInfo.penetration = radiusSum - distance;
+		_outInfo.penetration = radiusSum - distance;
 
 		return true;
 	}
@@ -328,13 +327,13 @@ bool CollisionManager::CheckSphereVsSphere(const ColliderBase* colliderA,
 	return false;
 }
 
-bool CollisionManager::CheckSphereVsCapsule(const ColliderBase* sphereCol, 
-	const ColliderBase* capsuleCol, CollisionInfo& outInfo)
+bool CollisionManager::CheckSphereVsCapsule(const ColliderBase* _sphereCol,
+	const ColliderBase* _capsuleCol, CollisionInfo& _outInfo)
 {
-	const auto* sphereHit = dynamic_cast<const ColliderSphere*>(sphereCol);
-	const auto* capsuleHit = dynamic_cast<const ColliderCapsule*>(capsuleCol);
+	const auto* sphereHit = dynamic_cast<const ColliderSphere*>(_sphereCol);
+	const auto* capsuleHit = dynamic_cast<const ColliderCapsule*>(_capsuleCol);
 
-	if (!sphereCol || !capsuleCol) { return false; }
+	if (!_sphereCol || !_capsuleCol) { return false; }
 
 	// 各形状のパラメータ取得
 	VECTOR spherePos = sphereHit->GetWorldPosition();
@@ -357,19 +356,19 @@ bool CollisionManager::CheckSphereVsCapsule(const ColliderBase* sphereCol,
 		float distance = sqrtf(distSquare);
 
 		// 衝突情報の設定
-		outInfo.myCollider = sphereCol;
-		outInfo.hitCollider = capsuleCol;
-		outInfo.isActive = true;
+		_outInfo.myCollider = _sphereCol;
+		_outInfo.hitCollider = _capsuleCol;
+		_outInfo.isActive = true;
 
 		// 衝突位置の計算
-		outInfo.hitPosition = UtilityMath::Lerp(nearestPos, spherePos, UtilityMath::HALF_NUM);
+		_outInfo.hitPosition = UtilityMath::Lerp(nearestPos, spherePos, UtilityMath::HALF_NUM);
 
 		// 法線ベクトルと押し出し量の計算
 		if (distance > 0.0f)
 		{
-			outInfo.hitNormal = VScale(VSub(spherePos, nearestPos), 1.0f / distance);
+			_outInfo.hitNormal = VScale(VSub(spherePos, nearestPos), 1.0f / distance);
 		}
-		outInfo.penetration = radiusSum - distance;
+		_outInfo.penetration = radiusSum - distance;
 
 		return true;
 	}
@@ -377,11 +376,11 @@ bool CollisionManager::CheckSphereVsCapsule(const ColliderBase* sphereCol,
 	return false;
 }
 
-bool CollisionManager::CheckCapsuleVsModel(const ColliderBase* capsuleCol, 
-	const ColliderBase* modelCol, CollisionInfo& outInfo)
+bool CollisionManager::CheckCapsuleVsModel(const ColliderBase* _capsuleCol,
+	const ColliderBase* _modelCol, CollisionInfo& _outInfo)
 {
-	const auto* capsule = dynamic_cast<const ColliderCapsule*>(capsuleCol);
-	const auto* model = dynamic_cast<const ColliderModel*>(modelCol);
+	const auto* capsule = dynamic_cast<const ColliderCapsule*>(_capsuleCol);
+	const auto* model = dynamic_cast<const ColliderModel*>(_modelCol);
 
 	if (!capsule || !model) { return false; };
 
@@ -411,16 +410,16 @@ bool CollisionManager::CheckCapsuleVsModel(const ColliderBase* capsuleCol,
 		}
 
 		// 衝突情報の設定
-		outInfo.myCollider = capsuleCol;
-		outInfo.hitCollider = modelCol;
-		outInfo.hitPosition = bestHit.HitPosition;
-		outInfo.hitNormal = bestHit.Normal;
-		outInfo.isActive = true;
+		_outInfo.myCollider = _capsuleCol;
+		_outInfo.hitCollider = _modelCol;
+		_outInfo.hitPosition = bestHit.HitPosition;
+		_outInfo.hitNormal = bestHit.Normal;
+		_outInfo.isActive = true;
 
 		// カプセルの軸（線分）上の最近接点を求め、正確なめり込み量を算出
 		VECTOR nearestPos = GetNearestPointOnSegment(startPos, endPos, bestHit.HitPosition);
 		float distance = UtilityMath::MagnitudeF(VSub(bestHit.HitPosition, nearestPos));
-		outInfo.penetration = radius - distance;
+		_outInfo.penetration = radius - distance;
 
 		// メモリ解放
 		MV1CollResultPolyDimTerminate(hitResult);
@@ -434,11 +433,11 @@ bool CollisionManager::CheckCapsuleVsModel(const ColliderBase* capsuleCol,
 	return false;
 }
 
-bool CollisionManager::CheckLineVsModel(const ColliderBase* lineCol, 
-	const ColliderBase* modelCol, CollisionInfo& outInfo)
+bool CollisionManager::CheckLineVsModel(const ColliderBase* _lineCol,
+	const ColliderBase* _modelCol, CollisionInfo& _outInfo)
 {
-	const auto* line = dynamic_cast<const ColliderLine*>(lineCol);
-	const auto* model = dynamic_cast<const ColliderModel*>(modelCol);
+	const auto* line = dynamic_cast<const ColliderLine*>(_lineCol);
+	const auto* model = dynamic_cast<const ColliderModel*>(_modelCol);
 
 	if (!line || !model) { return false; }
 
@@ -458,14 +457,14 @@ bool CollisionManager::CheckLineVsModel(const ColliderBase* lineCol,
 			return false;
 		}
 
-		outInfo.myCollider = lineCol;
-		outInfo.hitCollider = modelCol;
-		outInfo.isActive = true;
+		_outInfo.myCollider = _lineCol;
+		_outInfo.hitCollider = _modelCol;
+		_outInfo.isActive = true;
 
-		outInfo.hitPosition = hitResult.HitPosition;
-		outInfo.hitNormal = hitResult.Normal;
+		_outInfo.hitPosition = hitResult.HitPosition;
+		_outInfo.hitNormal = hitResult.Normal;
 
-		outInfo.penetration = 0.0f;
+		_outInfo.penetration = 0.0f;
 
 		return true;
 	}
@@ -473,17 +472,17 @@ bool CollisionManager::CheckLineVsModel(const ColliderBase* lineCol,
 	return false;
 }
 
-VECTOR CollisionManager::GetNearestPointOnSegment(const VECTOR& startPos, 
-	const VECTOR& endPos, const VECTOR& targetPos)
+VECTOR CollisionManager::GetNearestPointOnSegment(const VECTOR& _startPos,
+	const VECTOR& _endPos, const VECTOR& _targetPos)
 {
-	VECTOR segmentVec = VSub(endPos, startPos);
-	VECTOR toTargetVec = VSub(targetPos, startPos);
+	VECTOR segmentVec = VSub(_endPos, _startPos);
+	VECTOR toTargetVec = VSub(_targetPos, _startPos);
 
 	float lenSquare = static_cast<float>(UtilityMath::SqrMagnitude(segmentVec));
 
 	if (lenSquare < 1e-6)
 	{
-		return startPos;
+		return _startPos;
 	}
 
 	float segmentRatio = VDot(toTargetVec, segmentVec) / lenSquare;
@@ -491,7 +490,7 @@ VECTOR CollisionManager::GetNearestPointOnSegment(const VECTOR& startPos,
 	if (segmentRatio < 0.0f) { segmentRatio = 0.0f; }
 	if (segmentRatio > 1.0f) { segmentRatio = 1.0f; }
 
-	VECTOR nearestPos = VAdd(startPos, VScale(segmentVec, segmentRatio));
+	VECTOR nearestPos = VAdd(_startPos, VScale(segmentVec, segmentRatio));
 
 	return nearestPos;
 }

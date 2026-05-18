@@ -51,25 +51,25 @@ public:
 
 	/// @brief 判定対象のアクターを登録
 	/// @param actor 登録するアクターへのポインタ
-	void RegisterActor(ActorBase* actor);
+	void RegisterActor(ActorBase* _actor);
 
 	/// @brief 判定対象のアクターを解除
 	/// @param actor 解除するアクターへのポインタ
-	void UnregisterActor(ActorBase* actor);
+	void UnregisterActor(ActorBase* _actor);
 
 	/// @brief 二つのコライダー間の衝突判定を実行
 	/// @param colliderA コライダーA
 	/// @param colliderB コライダーB
 	/// @param outInfo 衝突情報を格納する構造体
 	/// @return 衝突していればtrue
-	bool CheckCollision(const ColliderBase* colliderA,
-		const ColliderBase* colliderB, CollisionInfo& outInfo);
+	bool CheckCollision(const ColliderBase* _colliderA,
+		const ColliderBase* _colliderB, CollisionInfo& _outInfo);
 
 	/// @brief 指定したアクターが特定のタグを持つ相手と衝突しているか調べる
 	/// @param actor 調査対象のアクター
 	/// @param targetTag 確認したい相手の衝突タグ
 	/// @return 衝突していればtrue
-	bool IsActorCollidingWithTag(const ActorBase* actor, ColliderBase::TAG targetTag) const;
+	bool IsActorCollidingWithTag(const ActorBase* _actor, ColliderBase::TAG _targetTag) const;
 
 	/// @brief 衝突したアクター同士の押し戻し処理を行う
 	/// @param actorA 動かす対象のアクターA
@@ -117,46 +117,46 @@ private:
 	/// @param tagA 判定Aのタグ
 	/// @param tagB 判定Bのタグ
 	/// @return 衝突する組み合わせならtrue
-	bool CanCollide(int tagA, int tagB) const;
+	bool CanCollide(int _tagA, int _tagB) const;
 
 	/// @brief 球体 vs 球体の衝突判定
 	/// @param colliderA 判定対象A（球体）
     /// @param colliderB 判定対象B（球体）
     /// @param outInfo 衝突時の詳細データを格納する構造体
     /// @return 衝突している場合はtrue
-	bool CheckSphereVsSphere(const ColliderBase* colliderA, const ColliderBase* colliderB, 
-		CollisionInfo& outInfo);
+	bool CheckSphereVsSphere(const ColliderBase* _colliderA, const ColliderBase* _colliderB,
+		CollisionInfo& _outInfo);
 
 	/// @brief 球体 vs カプセルの衝突判定
     /// @param sphereCol 判定対象（球体）
     /// @param capsuleCol 判定対象（カプセル）
     /// @param outInfo 衝突時の詳細データを格納する構造体
     /// @return 衝突している場合はtrue
-	bool CheckSphereVsCapsule(const ColliderBase* sphereCol, const ColliderBase* capsuleCol,
-		CollisionInfo& outInfo);
+	bool CheckSphereVsCapsule(const ColliderBase* _sphereCol, const ColliderBase* _capsuleCol,
+		CollisionInfo& _outInfo);
 
 	/// @brief カプセル vs モデル（地形）の衝突判定
     /// @param capsuleCol 判定対象（カプセル）
     /// @param modelCol 判定対象（3Dモデル/メッシュ）
     /// @param outInfo 衝突時の詳細データを格納する構造体
     /// @return 衝突している場合はtrue
-	bool CheckCapsuleVsModel(const ColliderBase* capsuleCol, const ColliderBase* modelCol, 
-		CollisionInfo& outInfo);
+	bool CheckCapsuleVsModel(const ColliderBase* _capsuleCol, const ColliderBase* _modelCol,
+		CollisionInfo& _outInfo);
 
 	/// @brief 線分 vs モデル（地形）の衝突判定
     /// @param lineCol 判定対象（線分/レイ）
     /// @param modelCol 判定対象（3Dモデル/メッシュ）
     /// @param outInfo 衝突時の詳細データを格納する構造体
     /// @return 衝突している場合はtrue
-	bool CheckLineVsModel(const ColliderBase* lineCol, const ColliderBase* modelCol, 
-		CollisionInfo& outInfo);
+	bool CheckLineVsModel(const ColliderBase* _lineCol, const ColliderBase* _modelCol,
+		CollisionInfo& _outInfo);
 
 	/// @brief 線分上の最もターゲットに近い座標を算出
 	/// @param startPos 線分の開始点
 	/// @param endPos 線分の終了点
 	/// @param targetPos ターゲット座標
 	/// @return 線分上の最近接座標
-	VECTOR GetNearestPointOnSegment(const VECTOR& startPos, 
-		const VECTOR& endPos, const VECTOR& targetPos);
+	VECTOR GetNearestPointOnSegment(const VECTOR& _startPos,
+		const VECTOR& _endPos, const VECTOR& _targetPos);
 };
 
