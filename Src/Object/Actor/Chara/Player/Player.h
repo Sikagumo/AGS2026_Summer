@@ -1,6 +1,7 @@
 #pragma once
 #include "./PlayerBase.h"
 #include "../Player/PlayerBase.h"
+#include "./PActionController.h"
 class InputManager;
 class PBulletBig;
 
@@ -12,12 +13,12 @@ public:
 	{
 		IDLE,
 		RUN,
-		FAST_RUN,
+		SHOT,
 		JUMP,
 		MAX,
 	};
 
-	Player(int _playerNo, PLAYER_TYPE _playerType);
+	Player(int _playerNo, BULLET_TYPE _playerType);
 
 	~Player(void)override = default;
 
@@ -27,7 +28,7 @@ public:
 protected:
 
 	void InitLoad(void)override;
-	void InitAnimation(void)override {};
+	void InitAnimation(void)override;
 	void InitTransform(void)override;
 	void InitCollider(void)override;
 	void InitPost(void)override;
@@ -47,6 +48,7 @@ private:
 	// 衝突判定用線分終了
 	static constexpr VECTOR COL_LINE_END_LOCAL_POS = { 0.0f, -10.0f, 0.0f };
 
+
 	// 衝突判定用線分開始(ジャンプ時)
 	static constexpr VECTOR COL_LINE_JUMP_START_LOCAL_POS = { 0.0f, 130.0f, 0.0f };
 
@@ -59,6 +61,7 @@ private:
 
 	// 衝突判定用カプセル下部球体
 	static constexpr VECTOR COL_CAPSULE_DOWN_LOCAL_POS = { 0.0f, 30.0f, 0.0f };
+
 
 	// 衝突判定用カプセル上部球体(ジャンプ時)
 	static constexpr VECTOR COL_CAPSULE_TOP_JUMP_LOCAL_POS = { 0.0f, 160.0f, 0.0f };
@@ -82,9 +85,16 @@ private:
 
 
 	InputManager& inputManager_;
-	SceneManager& sceneManager_;
+
+	// 攻撃回数
+	int attackNumMax_;
+	int curAttackNum_;
 
 	int shadowHandle_;
+
+	ANIM_TYPE animType_;
+
+	std::unique_ptr<PActionController> actionController_;
 
 
 	// 操作
@@ -97,5 +107,7 @@ private:
 
 
 	void DrawShadowRound(void);
-	//void PlayAnim(ANIM_TYPE type, bool _isLoop = true);
+	void PlayAnim(ANIM_TYPE _type, bool _isLoop = true);
+
+	void CreateBullet(void);
 };

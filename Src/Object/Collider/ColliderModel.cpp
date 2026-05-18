@@ -5,6 +5,16 @@ ColliderModel::ColliderModel(TAG tag, const Transform* followTarget)
 {
 }
 
+int ColliderModel::GetModelHandle(void) const
+{
+    if (followTarget_ != nullptr && followTarget_->modelId != -1)
+    {
+        return followTarget_->modelId;
+    }
+
+    return -1;
+}
+
 void ColliderModel::AddExcludeFrameIds(const std::string& exclusionName)
 {
     // ƒ‚ƒfƒ‹–¢İ’è‚È‚çˆ—‚µ‚È‚¢

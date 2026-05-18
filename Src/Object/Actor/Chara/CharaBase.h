@@ -1,5 +1,6 @@
 #pragma once
 #include "../ActorBase.h"
+#include "../../Common/AnimationController.h"
 class AnimationController;
 
 class CharaBase : public ActorBase
@@ -37,7 +38,7 @@ protected:
 	static constexpr float COLLISION_BACK_DIS = 1.0f;
 
 
-	//AnimationController* animation_;
+	std::unique_ptr<AnimationController> animation_;
 
 	float moveSpeed_;
 
@@ -55,6 +56,9 @@ protected:
 
 	// ƒWƒƒƒ“ƒv”»’è
 	bool isJump_;
+
+	// ˆÚ“®—Ê‚É‰ž‚¶‚½‰ñ“]‚ð‚·‚é‚©”Û‚©
+	bool isDirRotActive_;
 
 	
 	virtual void InitAnimation(void)override;

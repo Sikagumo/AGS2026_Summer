@@ -211,7 +211,7 @@ MATRIX Quaternion::ToMatrix(void) const
 
 Quaternion Quaternion::LookRotation(VECTOR dir)
 {
-	VECTOR up = { 0.0f, 1.0f, 0.0f }; // デフォルトのアップベクトル（Y軸）
+	VECTOR up = VGet(0.0f, 1.0f, 0.0f ); // デフォルトのアップベクトル（Y軸）
 	return LookRotation(dir, up);
 }
 

@@ -44,6 +44,9 @@ public:
 	// 衝突対象となるコライダを登録
 	void AddHitCollider(const ColliderBase* hitCollider);
 
+	/// @brief 自身の衝突対象となるコライダリストの取得
+	std::vector<const ColliderBase*> GetHitCollider(void)const { return hitColliders_; };
+
 	// 衝突対象となるコライダをクリア
 	void ClearHitCollider(void);
 
@@ -51,7 +54,7 @@ public:
 protected:
 
 	// シングルトン参照
-	ResourceManager& resMng_;
+	ResourceManager& resourceManager_;
 	SceneManager& sceneManager_;
 
 	// モデル制御の基本情報

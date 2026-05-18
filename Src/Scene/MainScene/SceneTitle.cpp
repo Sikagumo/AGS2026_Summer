@@ -6,7 +6,7 @@
 #include "SceneGame.h"
 #include "../../Application.h"
 #include "../../Manager/System/TimeManager.h"
-#include "../../Manager/System/Loading.h"
+#include "../../Common/Loading.h"
 #include "../../Utility/UtilityMath.h"
 
 

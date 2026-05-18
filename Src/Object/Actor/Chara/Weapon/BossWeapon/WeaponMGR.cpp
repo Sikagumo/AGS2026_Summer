@@ -25,7 +25,7 @@ int WeaponMGR::GetDamage(void) const
 
 void WeaponMGR::InitLoad(void)
 {
-	transform_.SetModel(resMng_.LoadModelDuplicate(ResourceManager::SRC::MODEL_BOSS_WEAPON_MG_R));
+	transform_.SetModel(resourceManager_.LoadModelDuplicate(ResourceManager::SRC::MODEL_BOSS_WEAPON_MG_R));
 }
 
 void WeaponMGR::InitTransform(void)

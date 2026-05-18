@@ -18,6 +18,10 @@ public:
     /// @brief デストラクタ
     ~ColliderModel(void) override = default;
 
+    /// @brief モデルハンドルの取得
+    /// @return モデルハンドル
+    int GetModelHandle(void) const;
+
     /// @brief 指定文字列を含むフレームを当たり判定から除外
     /// @param exclusionName 除外対象フレーム名に含まれる文字列
     void AddExcludeFrameIds(const std::string& exclusionName);

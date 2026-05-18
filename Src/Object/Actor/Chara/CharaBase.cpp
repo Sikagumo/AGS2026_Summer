@@ -1,4 +1,4 @@
-#include "../../Common/AnimationController.h"
+#include "CharaBase.h"
 #include "../../../Utility/UtilityMath.h"
 #include "../../../Manager/Generic/SceneManager.h"
 #include "../../../Manager/Generic/ResourceManager.h"
@@ -6,21 +6,20 @@
 #include "../../Collider/ColliderLine.h"
 #include "../../Collider/ColliderModel.h"
 #include "../../Collider/ColliderCapsule.h"
+#include "../../../Camera/Camera.h"
 #include "../../../Application.h"
 
 
-#include "CharaBase.h"
 
-CharaBase::CharaBase(void) :
-	ActorBase::ActorBase(),
-	isJump_(false),
-	jumpPow_(UtilityMath::VECTOR_ZERO),
-	moveSpeed_(0.0f),
-	stepJump_(0.0f),
-	prevPos_(UtilityMath::VECTOR_ZERO),
-	moveDir_(UtilityMath::VECTOR_ZERO),
-	movePow_(UtilityMath::VECTOR_ZERO)
-	//animation_(nullptr)
+CharaBase::CharaBase(void)
+	: ActorBase::ActorBase()
+	, isJump_(false), jumpPow_(UtilityMath::VECTOR_ZERO), stepJump_(0.0f)
+	, moveSpeed_(0.0f)
+	, prevPos_(UtilityMath::VECTOR_ZERO)
+	, moveDir_(UtilityMath::VECTOR_ZERO)
+	, movePow_(UtilityMath::VECTOR_ZERO)
+	, isDirRotActive_(true)
+	, animation_(nullptr)
 {
 }
 
@@ -29,7 +28,7 @@ void CharaBase::InitAnimation(void)
 {
 	if (transform_.modelId != -1)
 	{
-		//animation_ = new AnimationController(transform_.modelId);
+		animation_ = std::make_unique<AnimationController>(transform_.modelId);
 	}
 }
 
@@ -57,7 +56,10 @@ void CharaBase::Update(void)
 	transform_.Update();
 
 	// アニメーション再生
-	//animation_->Update();
+	if (animation_)
+	{
+		animation_->Update();
+	}
 
 	// 各キャラクターごとの更新後処理
 	UpdateProcessPost();
@@ -66,12 +68,7 @@ void CharaBase::Update(void)
 
 void CharaBase::Release(void)
 {
-	/*
-	if (animation_)
-	{
-		animation_->Release();
-		delete animation_;
-	}*/
+	
 }
 
 void CharaBase::CalcGravityPow(void)
@@ -256,11 +253,25 @@ void CharaBase::DrawPre(void)
 
 void CharaBase::DelayRotate(void)
 {
+	Quaternion goalRot = Quaternion::Identity();
+	
+	if (isDirRotActive_)
+	{
+		// 移動方向から回転に変換する
+		if (!UtilityMath::EqualsVZero(moveDir_))
+		{
+			goalRot = Quaternion::LookRotation(moveDir_);
+		}
+	}
+	else
+	{
+		// カメラのY軸回転を回転に変換する
+		goalRot = SceneManager::GetInstance().GetCamera()->GetQuaRotY();
 
-	// 移動方向から回転に変換する
-	Quaternion goalRot = Quaternion::LookRotation(moveDir_);
-	goalRot.x = 0.0f;
+		goalRot.x = 0.0f;
+	}
+
+	constexpr float ROT_TERM = 0.2f;
 	// 回転の補間
-	transform_.quaRot =
-		Quaternion::Slerp(transform_.quaRot, goalRot, 0.2f);
+	transform_.quaRot = Quaternion::Slerp(transform_.quaRot, goalRot, ROT_TERM);
 }

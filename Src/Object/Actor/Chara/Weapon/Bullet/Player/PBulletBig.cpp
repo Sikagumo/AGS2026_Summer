@@ -1,12 +1,12 @@
 #include "PBulletBig.h"
 #include "PBulletBase.h"
 
-constexpr float RADIUS_BIG = 15.0f;
-constexpr float RADIUS_INCREMENT = 10.0f;
+constexpr float RADIUS_BIG = 5.0f;
+constexpr float RADIUS_INCREMENT = 37.5f;
 constexpr float RADIUS_BIG_BLAST = RADIUS_BIG + (RADIUS_INCREMENT * 4);
-constexpr float SCALE_BIG = 1.5f;
-constexpr float SCALE_BIG_INCREMENT = 1.5f;
-constexpr float SHOT_SPEED_BIG = 7.5f;
+constexpr float SCALE_BIG = 1.25f;
+constexpr float SCALE_BIG_INCREMENT = 2.5f;
+constexpr float SHOT_SPEED_BIG = 17.5f;
 constexpr float TIME_ALIVE_BIG = 5.0f;
 
 
@@ -45,11 +45,12 @@ void PBulletBig::ChangeBulletState(BULLET_STATE _state)
 
 void PBulletBig::SetParam(void)
 {
-	radius_ = RADIUS_BIG;
+	radius_ = RADIUS_BIG + (RADIUS_INCREMENT * shotCnt_);
 
 	shotSpeed_ = SHOT_SPEED_BIG;
 
 	aliveTime_ = TIME_ALIVE_BIG;
 
-	transform_.InitTransform(SCALE_BIG, transform_.quaRot, Quaternion::Identity());
+	float scale = SCALE_BIG + (SCALE_BIG_INCREMENT * shotCnt_);
+	transform_.InitTransform(scale, transform_.quaRot, Quaternion::Identity());
 }

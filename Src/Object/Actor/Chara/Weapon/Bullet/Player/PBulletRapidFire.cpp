@@ -1,6 +1,7 @@
 #include "PBulletRapidFire.h"
 
 PBulletRapidFire::PBulletRapidFire(void)
+	: PBulletBase::PBulletBase()
 {
 }
 
