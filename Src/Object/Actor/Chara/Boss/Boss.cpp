@@ -115,11 +115,7 @@ void Boss::InitCollider(void)
 	ColliderCapsule* colCapsule = new ColliderCapsule(
 		ColliderBase::TAG::BOSS, &transformFeet_, { 0.0f,130.0f,0.0f }, { 0.0f,80.0f,0.0f },80.0f);
 	ownColliders_.emplace(static_cast<int>(ColliderBase::SHAPE::CAPSULE), colCapsule);
-
-	for (auto& collider : ownColliders_)
-	{
-		collider.second->SetTriger(true);
-	}
+	colCapsule->SetTriger(false);
 
 	CollisionManager::GetInstance().RegisterActor(this);
 }

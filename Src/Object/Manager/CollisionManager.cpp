@@ -135,6 +135,10 @@ bool CollisionManager::CheckCollision(const ColliderBase* _colliderA, const Coll
 	{
 		return CheckSphereVsCapsule(_colliderA, _colliderB, _outInfo);
 	}
+	else if (shapeA == SHAPE::CAPSULE && shapeB == SHAPE::CAPSULE)
+	{
+		return;
+	}
 	
 	if (shapeA == SHAPE::CAPSULE && shapeB == SHAPE::MODEL)
 	{
@@ -257,6 +261,7 @@ void CollisionManager::UpdateCollisionPars(void)
 
 						if (CheckCollision(colA, colB, info))
 						{
+
 							// Õ“Ë‚µ‚½‘ŠŽè‚ð‘ŠŒÝ‚É“o˜^
 							actorA->AddHitCollider(colB);
 							actorB->AddHitCollider(colA);

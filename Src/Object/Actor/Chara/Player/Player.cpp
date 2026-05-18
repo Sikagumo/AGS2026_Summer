@@ -64,6 +64,8 @@ void Player::InitCollider(void)
 	ownColliders_.emplace(0
 		, new ColliderCapsule(ColliderBase::TAG::PLAYER, &transform_, COL_CAPSULE_TOP, COL_CAPSULE_DOWN, CAPSULE_RADIUS));
 
+	ownColliders_.at(0)->SetTriger(false);
+
 	// 衝突判定マネージャに登録
 	CollisionManager::GetInstance().RegisterActor(this);
 }

@@ -25,7 +25,6 @@ public:
 	// 衝突種別
 	enum class TAG
 	{
-<<<<<<< HEAD
 		STAGE,			// ステージ
 		PLAYER,			// プレイヤー
 		ENEMY,          // 敵
@@ -35,16 +34,8 @@ public:
 		WEAPON_CANNON,	//キャノン
 		WEAPON_MP,		//ミサイルポッド
 		WEAPON_RG,		//レールガン
-		CAMERA,			// カメラ
-		WALL,			// 壁
-=======
-		STAGE,       // ステージ
-		PLAYER,      // プレイヤー
-		ENEMY,       // 敵
-		BOSS,        // ボス
 		CAMERA,      // カメラ
 		WALL,        // 壁
->>>>>>> Collision
 	};
 
 	/// @brief コンストラクタ
