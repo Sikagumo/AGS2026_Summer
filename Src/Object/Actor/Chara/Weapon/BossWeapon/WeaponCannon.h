@@ -11,7 +11,7 @@ public:
 	~WeaponCannon(void)override = default;
 
 	// リソースロード
-	void Load(void) override;	void Release(void)override;
+	void Load(void) override;
 
 	void Release(void)override;
 	
