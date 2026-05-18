@@ -158,5 +158,13 @@ private:
 	/// @return 線分上の最近接座標
 	VECTOR GetNearestPointOnSegment(const VECTOR& _startPos,
 		const VECTOR& _endPos, const VECTOR& _targetPos);
+
+	/// @brief カプセル vs カプセルの衝突判定
+	/// @param colliderA 判定対象A（カプセル）
+	/// @param colliderB 判定対象B（カプセル）
+	/// @param outInfo 衝突時の詳細データを格納する構造体
+	/// @return 衝突している場合はtrue
+	bool CheckCapsuleVsCapsule(const ColliderBase* _colliderA, const ColliderBase* _colliderB,
+		CollisionInfo& _outInfo);
 };
 

@@ -1,4 +1,4 @@
-#include "CollisionManager.h"
+ï»¿#include "CollisionManager.h"
 #include "../../Manager/Generic/SceneManager.h"
 #include "../Common/Transform.h"
 #include "../Actor/ActorBase.h"
@@ -18,7 +18,7 @@ CollisionManager::CollisionManager(void)
 
 void CollisionManager::CreateInstance(void)
 {
-	// “ñd¶¬‚ğ–h‚®‚½‚ß‚Ìƒ`ƒFƒbƒN
+	// äºŒé‡ç”Ÿæˆã‚’é˜²ããŸã‚ã®ãƒã‚§ãƒƒã‚¯
 	if (instance_ == nullptr)
 	{
 		instance_ = new CollisionManager();
@@ -32,7 +32,7 @@ CollisionManager& CollisionManager::GetInstance(void)
 
 void CollisionManager::DestroyInstance(void)
 {
-	// ƒCƒ“ƒXƒ^ƒ“ƒX”jŠü
+	// ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹ç ´æ£„
 	if (instance_ != nullptr)
 	{
 		delete instance_;
@@ -46,7 +46,7 @@ void CollisionManager::Initialize(void)
 
 	activeCollisions_.clear();
 
-	// ƒJƒŠƒ“ƒO‹——£‚Ì–‘OŒvZ
+	// ã‚«ãƒªãƒ³ã‚°è·é›¢ã®äº‹å‰è¨ˆç®—
 	cullingDistSquare_ = DEFAULT_CULL_DIST * DEFAULT_CULL_DIST;
 
 	updateTimer_ = 0.0f;
@@ -56,7 +56,7 @@ void CollisionManager::Update(void)
 {
 	updateTimer_ += SceneManager::GetInstance().GetDeltaTime();
 
-	// ˆê’èŠÔŠu‚²‚Æ‚ÉÕ“Ë”»’è‚ğÀs
+	// ä¸€å®šé–“éš”ã”ã¨ã«è¡çªåˆ¤å®šã‚’å®Ÿè¡Œ
 	if (updateTimer_ >= UPDATE_INTERVAL)
 	{
 		updateTimer_ = 0.0f;
@@ -74,7 +74,7 @@ void CollisionManager::Clear(void)
 
 void CollisionManager::RegisterActor(ActorBase* _actor)
 {
-	// d•¡“o˜^–h~
+	// é‡è¤‡ç™»éŒ²é˜²æ­¢
 	if (_actor == nullptr)
 	{
 		return;
@@ -87,7 +87,7 @@ void CollisionManager::RegisterActor(ActorBase* _actor)
 			return;
 		}
 	}
-	// ƒŠƒXƒg‚Ö‚Ì’Ç‰Á
+	// ãƒªã‚¹ãƒˆã¸ã®è¿½åŠ 
 	actors_.push_back(_actor);
 }
 
@@ -99,7 +99,7 @@ void CollisionManager::UnregisterActor(ActorBase* _actor)
 		return;
 	}
 
-	// Á‹
+	// æ¶ˆå»
 	actors_.erase
 	(
 		std::remove(actors_.begin(), actors_.end(), _actor),
@@ -110,19 +110,19 @@ void CollisionManager::UnregisterActor(ActorBase* _actor)
 bool CollisionManager::CheckCollision(const ColliderBase* _colliderA, const ColliderBase* _colliderB,
 	CollisionInfo& _outInfo)
 {
-	// —LŒø«ƒ`ƒFƒbƒN
+	// æœ‰åŠ¹æ€§ãƒã‚§ãƒƒã‚¯
 	if (!_colliderA || !_colliderB)
 	{
 		return false;
 	}
 
-	// Œ`óƒ^ƒCƒvæ“¾
+	// å½¢çŠ¶ã‚¿ã‚¤ãƒ—å–å¾—
 	using SHAPE = ColliderBase::SHAPE;
 
 	auto shapeA = _colliderA->GetShapeType();
 	auto shapeB = _colliderB->GetShapeType();
 
-	// Œ`ó‚Ì‘g‚İ‡‚í‚¹‚É‚æ‚é”»’è‚ÌU‚è•ª‚¯
+	// å½¢çŠ¶ã®çµ„ã¿åˆã‚ã›ã«ã‚ˆã‚‹åˆ¤å®šã®æŒ¯ã‚Šåˆ†ã‘
 	if (shapeA == SHAPE::SPHERE && shapeB == SHAPE::SPHERE)
 	{
 		return CheckSphereVsSphere(_colliderA, _colliderB, _outInfo);
@@ -134,6 +134,10 @@ bool CollisionManager::CheckCollision(const ColliderBase* _colliderA, const Coll
 	else if (shapeA == SHAPE::CAPSULE && shapeB == SHAPE::SPHERE)
 	{
 		return CheckSphereVsCapsule(_colliderA, _colliderB, _outInfo);
+	}
+	else if (shapeA == SHAPE::CAPSULE && shapeB == SHAPE::CAPSULE)
+	{
+		return CheckCapsuleVsCapsule(_colliderA, _colliderB, _outInfo);
 	}
 	
 	if (shapeA == SHAPE::CAPSULE && shapeB == SHAPE::MODEL)
@@ -175,7 +179,7 @@ void CollisionManager::ResolveCollision(ActorBase* _actorA, ActorBase* _actorB,
 
 	using TAG = ColliderBase::TAG;
 
-	// ‰Ÿ‚µ–ß‚·ƒxƒNƒgƒ‹‚ğŒvZ
+	// æŠ¼ã—æˆ»ã™ãƒ™ã‚¯ãƒˆãƒ«ã‚’è¨ˆç®—
 	VECTOR pushVector = VScale(_info.hitNormal, _info.penetration);
 
 	bool isAHaveMyCollider = false;
@@ -206,7 +210,7 @@ void CollisionManager::ResolveCollision(ActorBase* _actorA, ActorBase* _actorB,
 
 void CollisionManager::UpdateCollisionPars(void)
 {
-	// ‘OƒtƒŒ[ƒ€‚ÌÕ“Ëî•ñƒŠƒZƒbƒg
+	// å‰ãƒ•ãƒ¬ãƒ¼ãƒ ã®è¡çªæƒ…å ±ãƒªã‚»ãƒƒãƒˆ
 	for (auto& actor : actors_)
 	{
 		actor->ClearHitCollider();
@@ -214,10 +218,10 @@ void CollisionManager::UpdateCollisionPars(void)
 
 	size_t actorCount = actors_.size();
 
-	// ”»’è‘ÎÛ‚ª2‚Â–¢–‚È‚çˆ—I—¹
+	// åˆ¤å®šå¯¾è±¡ãŒ2ã¤æœªæº€ãªã‚‰å‡¦ç†çµ‚äº†
 	if (actorCount < 2) { return; }
 
-	// ƒAƒNƒ^[ŠÔ‚Ì‘“–‚½‚è”»’è
+	// ã‚¢ã‚¯ã‚¿ãƒ¼é–“ã®ç·å½“ãŸã‚Šåˆ¤å®š
 	for (size_t i = 0; i < actorCount; ++i)
 	{
 		auto actorA = actors_[i];
@@ -227,7 +231,7 @@ void CollisionManager::UpdateCollisionPars(void)
 		{
 			auto actorB = actors_[j];
 
-			// ‹——£‚É‚æ‚éƒJƒŠƒ“ƒO
+			// è·é›¢ã«ã‚ˆã‚‹ã‚«ãƒªãƒ³ã‚°
 			VECTOR positionA = actorA->GetTransform().pos;
 			VECTOR positionB = actorB->GetTransform().pos;
 			float distanceX = positionB.x - positionA.x;
@@ -235,12 +239,12 @@ void CollisionManager::UpdateCollisionPars(void)
 			float distanceZ = positionB.z - positionA.z;
 			float distSquare = (distanceX * distanceX) + (distanceY * distanceY) + (distanceZ * distanceZ);
 
-			// ˆê’è‹——£ˆÈã—£‚ê‚Ä‚¢‚éê‡‚ÍAÚ×‚È”»’è‚ğƒXƒLƒbƒv
+			// ä¸€å®šè·é›¢ä»¥ä¸Šé›¢ã‚Œã¦ã„ã‚‹å ´åˆã¯ã€è©³ç´°ãªåˆ¤å®šã‚’ã‚¹ã‚­ãƒƒãƒ—
 			if (distSquare > cullingDistSquare_) { continue; }
 
 			const auto& collidersB = actorB->GetOwnColliders();
 			
-			// ƒRƒ‰ƒCƒ_[“¯m‚ÌÚ×”»’è
+			// ã‚³ãƒ©ã‚¤ãƒ€ãƒ¼åŒå£«ã®è©³ç´°åˆ¤å®š
 			for (auto& [idA, colA] : collidersA)
 			{
 				if (!colA->IsActive()) { continue; }
@@ -249,7 +253,7 @@ void CollisionManager::UpdateCollisionPars(void)
 				{
 					if (!colB->IsActive()) { continue; }
 
-					// Õ“Ëƒ^ƒO‚É‚æ‚é”»’è‰Â”Û‚ÌŠm”F
+					// è¡çªã‚¿ã‚°ã«ã‚ˆã‚‹åˆ¤å®šå¯å¦ã®ç¢ºèª
 					if (CanCollide(static_cast<int>(colA->GetCollisionTag()),
 						static_cast<int>(colB->GetCollisionTag())))
 					{
@@ -257,7 +261,7 @@ void CollisionManager::UpdateCollisionPars(void)
 
 						if (CheckCollision(colA, colB, info))
 						{
-							// Õ“Ë‚µ‚½‘Šè‚ğ‘ŠŒİ‚É“o˜^
+							// è¡çªã—ãŸç›¸æ‰‹ã‚’ç›¸äº’ã«ç™»éŒ²
 							actorA->AddHitCollider(colB);
 							actorB->AddHitCollider(colA);
 
@@ -280,16 +284,16 @@ bool CollisionManager::CanCollide(int _tagA, int _tagB) const
 	TAG tagHit = static_cast<TAG>(_tagA);
 	TAG tagHurt = static_cast<TAG>(_tagB);
 
-	// “¯ˆêƒ^ƒO“¯m‚Ì”»’è
+	// åŒä¸€ã‚¿ã‚°åŒå£«ã®åˆ¤å®š
 	if (tagHit == tagHurt)
 	{
-		// ƒGƒlƒ~[“¯m‚Ì‚İAÕ“Ë‚ğ‹–‰Â‚·‚é
+		// ã‚¨ãƒãƒŸãƒ¼åŒå£«ã®ã¿ã€è¡çªã‚’è¨±å¯ã™ã‚‹
 		if (tagHit == TAG::ENEMY) { return true; }
 
 		return false;
 	}
 
-	// ƒvƒŒƒCƒ„[‚ÌÕ“Ëƒ‹[ƒ‹
+	// ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã®è¡çªãƒ«ãƒ¼ãƒ«
 	if (tagHit == TAG::PLAYER)
 	{
 		if (tagHurt == TAG::ENEMY || tagHurt == TAG::STAGE)
@@ -309,7 +313,7 @@ bool CollisionManager::CheckSphereVsSphere(const ColliderBase* _colliderA,
 
 	if (!sphereA || !sphereB) { return false; }
 
-	// ‹——£ŒvZ
+	// è·é›¢è¨ˆç®—
 	VECTOR positionA = sphereA->GetWorldPosition();
 	VECTOR positionB = sphereB->GetWorldPosition();
 
@@ -317,32 +321,32 @@ bool CollisionManager::CheckSphereVsSphere(const ColliderBase* _colliderA,
 	float distanceY = positionA.y - positionB.y;
 	float distanceZ = positionA.z - positionB.z;
 
-	// ‹——£‚Ì“ñæ‚ğŒvZ
+	// è·é›¢ã®äºŒä¹—ã‚’è¨ˆç®—
 	float distSquare = (distanceX * distanceX) + (distanceY * distanceY) + (distanceZ * distanceZ);
 
-	// ”¼Œa‚Ì‡Œv’l‚Æ”äŠr
+	// åŠå¾„ã®åˆè¨ˆå€¤ã¨æ¯”è¼ƒ
 	float radiusSum = sphereA->GetRadius() + sphereB->GetRadius();
 	float radiusSumSq = radiusSum * radiusSum;
 
-	// Õ“Ë”»’è
+	// è¡çªåˆ¤å®š
 	if (distSquare < radiusSumSq)
 	{
 		float distance = sqrtf(distSquare);
 
-		// Õ“Ëî•ñ‚Ìİ’è
+		// è¡çªæƒ…å ±ã®è¨­å®š
 		_outInfo.myCollider = _colliderA;
 		_outInfo.hitCollider = _colliderB;
 		_outInfo.isActive = true;
-		// Õ“ËˆÊ’u‚ÌŒvZ
+		// è¡çªä½ç½®ã®è¨ˆç®—
 		_outInfo.hitPosition = VAdd(positionB, VScale(VSub(positionA, positionB), 0.5f));
 
-		// –@üƒxƒNƒgƒ‹‚Æ‰Ÿ‚µo‚µ—Ê‚ÌŒvZ
+		// æ³•ç·šãƒ™ã‚¯ãƒˆãƒ«ã¨æŠ¼ã—å‡ºã—é‡ã®è¨ˆç®—
 		if (distance > 0.0f)
 		{
 			_outInfo.hitNormal = VScale(VSub(positionA, positionB), 1.0f / distance);
 		}
 
-		// ‚ß‚è‚ñ‚Å‚¢‚é‹——£‚ğZo
+		// ã‚ã‚Šè¾¼ã‚“ã§ã„ã‚‹è·é›¢ã‚’ç®—å‡º
 		_outInfo.penetration = radiusSum - distance;
 
 		return true;
@@ -359,35 +363,35 @@ bool CollisionManager::CheckSphereVsCapsule(const ColliderBase* _sphereCol,
 
 	if (!_sphereCol || !_capsuleCol) { return false; }
 
-	// ŠeŒ`ó‚Ìƒpƒ‰ƒ[ƒ^æ“¾
+	// å„å½¢çŠ¶ã®ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿å–å¾—
 	VECTOR spherePos = sphereHit->GetWorldPosition();
 	VECTOR capStartPos = capsuleHit->GetWorldStartPos();
 	VECTOR capEndPos = capsuleHit->GetWorldEndPos();
 	float sphereRadius = sphereHit->GetRadius();
 	float capsuleRadius = capsuleHit->GetRadius();
 
-	// ƒJƒvƒZƒ‹‚Ìü•ªã‚ÅA‹…‘Ì‚ÉÅ‚à‹ß‚¢“_‚ğZo
+	// ã‚«ãƒ—ã‚»ãƒ«ã®ç·šåˆ†ä¸Šã§ã€çƒä½“ã«æœ€ã‚‚è¿‘ã„ç‚¹ã‚’ç®—å‡º
 	VECTOR nearestPos = GetNearestPointOnSegment(capStartPos, capEndPos, spherePos);
 	
-	// Å‹ßÚ“_‚Æ‹…‘Ì‚Ì’†S‹——£‚É‚æ‚é”»’è
+	// æœ€è¿‘æ¥ç‚¹ã¨çƒä½“ã®ä¸­å¿ƒè·é›¢ã«ã‚ˆã‚‹åˆ¤å®š
 	float distSquare = static_cast<float>(UtilityMath::SqrMagnitude(spherePos, nearestPos));
 	float radiusSum = sphereRadius + capsuleRadius;
 	float radiusSumSq = radiusSum * radiusSum;
 
-	// Õ“Ë”»’è
+	// è¡çªåˆ¤å®š
 	if (distSquare < radiusSumSq)
 	{
 		float distance = sqrtf(distSquare);
 
-		// Õ“Ëî•ñ‚Ìİ’è
+		// è¡çªæƒ…å ±ã®è¨­å®š
 		_outInfo.myCollider = _sphereCol;
 		_outInfo.hitCollider = _capsuleCol;
 		_outInfo.isActive = true;
 
-		// Õ“ËˆÊ’u‚ÌŒvZ
+		// è¡çªä½ç½®ã®è¨ˆç®—
 		_outInfo.hitPosition = UtilityMath::Lerp(nearestPos, spherePos, UtilityMath::HALF_NUM);
 
-		// –@üƒxƒNƒgƒ‹‚Æ‰Ÿ‚µo‚µ—Ê‚ÌŒvZ
+		// æ³•ç·šãƒ™ã‚¯ãƒˆãƒ«ã¨æŠ¼ã—å‡ºã—é‡ã®è¨ˆç®—
 		if (distance > 0.0f)
 		{
 			_outInfo.hitNormal = VScale(VSub(spherePos, nearestPos), 1.0f / distance);
@@ -408,12 +412,12 @@ bool CollisionManager::CheckCapsuleVsModel(const ColliderBase* _capsuleCol,
 
 	if (!capsule || !model) { return false; };
 
-	// ƒ‚ƒfƒ‹ƒnƒ“ƒhƒ‹æ“¾
+	// ãƒ¢ãƒ‡ãƒ«ãƒãƒ³ãƒ‰ãƒ«å–å¾—
 	int modelHandle = model->GetModelHandle();
 
 	if (modelHandle == -1) { return false; }
 
-	// ”»’è—pƒpƒ‰ƒ[ƒ^æ“¾
+	// åˆ¤å®šç”¨ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿å–å¾—
 	VECTOR startPos = capsule->GetWorldStartPos();
 	VECTOR endPos = capsule->GetWorldEndPos();
 	float radius = capsule->GetRadius();
@@ -421,37 +425,37 @@ bool CollisionManager::CheckCapsuleVsModel(const ColliderBase* _capsuleCol,
 	MV1_COLL_RESULT_POLY_DIM hitResult = MV1CollCheck_Capsule(modelHandle, -1,
 		startPos, endPos, radius);
 
-	// Õ“ËŒ‹‰Ê‚Ì‰ğÍ
+	// è¡çªçµæœã®è§£æ
 	if (hitResult.HitNum > 0)
 	{
 		const auto& bestHit = hitResult.Dim[0];
 
-		// œŠO‘ÎÛ‚ÌƒtƒŒ[ƒ€ƒ`ƒFƒbƒN
+		// é™¤å¤–å¯¾è±¡ã®ãƒ•ãƒ¬ãƒ¼ãƒ ãƒã‚§ãƒƒã‚¯
 		if (model->IsExcludedFrame(bestHit.FrameIndex))
 		{
 			MV1CollResultPolyDimTerminate(hitResult);
 			return false;
 		}
 
-		// Õ“Ëî•ñ‚Ìİ’è
+		// è¡çªæƒ…å ±ã®è¨­å®š
 		_outInfo.myCollider = _capsuleCol;
 		_outInfo.hitCollider = _modelCol;
 		_outInfo.hitPosition = bestHit.HitPosition;
 		_outInfo.hitNormal = bestHit.Normal;
 		_outInfo.isActive = true;
 
-		// ƒJƒvƒZƒ‹‚Ì²iü•ªjã‚ÌÅ‹ßÚ“_‚ğ‹‚ßA³Šm‚È‚ß‚è‚İ—Ê‚ğZo
+		// ã‚«ãƒ—ã‚»ãƒ«ã®è»¸ï¼ˆç·šåˆ†ï¼‰ä¸Šã®æœ€è¿‘æ¥ç‚¹ã‚’æ±‚ã‚ã€æ­£ç¢ºãªã‚ã‚Šè¾¼ã¿é‡ã‚’ç®—å‡º
 		VECTOR nearestPos = GetNearestPointOnSegment(startPos, endPos, bestHit.HitPosition);
 		float distance = UtilityMath::MagnitudeF(VSub(bestHit.HitPosition, nearestPos));
 		_outInfo.penetration = radius - distance;
 
-		// ƒƒ‚ƒŠ‰ğ•ú
+		// ãƒ¡ãƒ¢ãƒªè§£æ”¾
 		MV1CollResultPolyDimTerminate(hitResult);
 
 		return true;
 	}
 
-	// Õ“Ë‚µ‚È‚©‚Á‚½ê‡‚Ìƒƒ‚ƒŠ‰ğ•ú
+	// è¡çªã—ãªã‹ã£ãŸå ´åˆã®ãƒ¡ãƒ¢ãƒªè§£æ”¾
 	MV1CollResultPolyDimTerminate(hitResult);
 
 	return false;
@@ -489,6 +493,71 @@ bool CollisionManager::CheckLineVsModel(const ColliderBase* _lineCol,
 		_outInfo.hitNormal = hitResult.Normal;
 
 		_outInfo.penetration = 0.0f;
+
+		return true;
+	}
+
+	return false;
+}
+
+bool CollisionManager::CheckCapsuleVsCapsule(const ColliderBase* _colliderA,
+	const ColliderBase* _colliderB, CollisionInfo& _outInfo)
+{
+	const auto* capsuleA = dynamic_cast<const ColliderCapsule*>(_colliderA);
+	const auto* capsuleB = dynamic_cast<const ColliderCapsule*>(_colliderB);
+
+	if (!capsuleA || !capsuleB) { return false; }
+
+	// ãã‚Œãã‚Œã®ã‚«ãƒ—ã‚»ãƒ«ã®ãƒ¯ãƒ¼ãƒ«ãƒ‰åº§æ¨™ï¼ˆç·šåˆ†ï¼‰ã‚’å–å¾—
+	VECTOR startPositionA = capsuleA->GetWorldStartPos();
+	VECTOR endPositionA = capsuleA->GetWorldEndPos();
+
+	VECTOR startPositionB = capsuleB->GetWorldStartPos();
+	VECTOR endPositionB = capsuleB->GetWorldEndPos();
+
+	// 1. ã¾ãšã‚«ãƒ—ã‚»ãƒ«Aã®ä¸­ç‚¹ã‚’ä»®ã®ã‚¿ãƒ¼ã‚²ãƒƒãƒˆã«ã™ã‚‹
+	VECTOR centerA = VScale(VAdd(startPositionA, endPositionA), 0.5f);
+
+	// 2. æ—¢å­˜ã®é–¢æ•°ã‚’ä½¿ã„ã€ãŠäº’ã„ã®ç·šåˆ†ä¸Šã®æœ€è¿‘æ¥ç‚¹ã‚’äº¤äº’ã«å‰²ã‚Šå‡ºã—ã¦è¿½ã„è©°ã‚ã‚‹
+	// 2ã€œ3å›å¾€å¾©ã•ã›ã‚‹ã ã‘ã§ã€å®Ÿç”¨ä¸Šå…¨ãå•é¡Œã®ãªã„ãƒ¬ãƒ™ãƒ«ã¾ã§æ­£ç¢ºãª2ç‚¹ã«åæŸã—ã¾ã™
+	VECTOR nearestPositionB = GetNearestPointOnSegment(startPositionB, endPositionB, centerA);
+	VECTOR nearestPositionA = GetNearestPointOnSegment(startPositionA, endPositionA, 
+		nearestPositionB);
+	nearestPositionB = GetNearestPointOnSegment(startPositionB, endPositionB, nearestPositionA);
+
+	// 3. å‰²ã‚Šå‡ºã—ãŸ2ç‚¹é–“ã®è·é›¢ã®2ä¹—ã‚’è¨ˆç®—ã™ã‚‹
+	VECTOR distanceVec = VSub(nearestPositionA, nearestPositionB);
+	float distSquare = static_cast<float>(UtilityMath::SqrMagnitude(distanceVec));
+
+	// ãŠäº’ã„ã®åŠå¾„ã®åˆè¨ˆå€¤ã¨æ¯”è¼ƒ
+	float radiusSum = capsuleA->GetRadius() + capsuleB->GetRadius();
+	float radiusSumSq = radiusSum * radiusSum;
+
+	// è¡çªåˆ¤å®š
+	if (distSquare < radiusSumSq)
+	{
+		float distance = sqrtf(distSquare);
+
+		// è¡çªæƒ…å ±ã®è¨­å®š
+		_outInfo.myCollider = _colliderA;
+		_outInfo.hitCollider = _colliderB;
+		_outInfo.isActive = true;
+
+		// è¡çªä½ç½®ã¯ã€ãŠäº’ã„ã®æœ€è¿‘æ¥ç‚¹ã®ä¸­é–“åœ°ç‚¹
+		_outInfo.hitPosition = VAdd(nearestPositionA, VScale(VSub(nearestPositionB, nearestPositionA), 0.5f));
+
+		// æ³•ç·šãƒ™ã‚¯ãƒˆãƒ«ï¼ˆAã‹ã‚‰Bã¸å‘ã‹ã†æ–¹å‘ï¼‰ã®è¨ˆç®—
+		if (distance > 0.0f)
+		{
+			_outInfo.hitNormal = VScale(VSub(nearestPositionA, nearestPositionB), 1.0f / distance);
+		}
+		else
+		{
+			_outInfo.hitNormal = VGet(0.0f, 1.0f, 0.0f);
+		}
+
+		// ã‚ã‚Šè¾¼ã‚“ã§ã„ã‚‹è·é›¢ã‚’ç®—å‡º
+		_outInfo.penetration = radiusSum - distance;
 
 		return true;
 	}
