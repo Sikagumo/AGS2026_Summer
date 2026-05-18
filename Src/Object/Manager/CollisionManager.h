@@ -2,9 +2,11 @@
 #include <vector>
 #include <map>
 #include <DxLib.h>
+#include <set>
+
+#include "../Collider/ColliderBase.h"
 
 class ActorBase;
-class ColliderBase;
 
 /// @brief 衝突結果を格納する構造体
 struct CollisionInfo
@@ -63,6 +65,18 @@ public:
 	bool CheckCollision(const ColliderBase* colliderA, 
 		const ColliderBase* colliderB, CollisionInfo& outInfo);
 
+	/// @brief 指定したアクターが特定のタグを持つ相手と衝突しているか調べる
+	/// @param actor 調査対象のアクター
+	/// @param targetTag 確認したい相手の衝突タグ
+	/// @return 衝突していればtrue
+	//bool IsActorCollidingWithTag(const ActorBase* actor, ColliderBase::TAG targetTag) const;
+
+	/// @brief 衝突したアクター同士の押し戻し処理を行う
+	/// @param actorA 動かす対象のアクターA
+	/// @param actorB 動かす対象のアクターB
+	/// @param info 衝突判定の結果
+	void ResolveCollision(ActorBase* actorA, ActorBase* actorB, const CollisionInfo& info);
+
 private:
 
 	// カリングを行う距離のデフォルト値
@@ -76,6 +90,9 @@ private:
 
 	// 判定対象のアクターリスト
 	std::vector<ActorBase*> actors_;
+
+	// 現在当たっているタグの組み合わせを保存する
+	std::set<std::pair<ColliderBase::TAG, ColliderBase::TAG>> activeCollisions_;
 
 	// 内部パラメータ関連
 	float cullingDistSquare_;           // カリング距離の2乗（計算高速化用）
