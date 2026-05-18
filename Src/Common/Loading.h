@@ -1,77 +1,100 @@
-#pragma once
+ï»¿#pragma once
 
 #include <thread>
 #include <atomic>
 #include <functional>
 
-/// <summary>
-/// ƒ[ƒfƒBƒ“ƒO‰æ–Ê‚ğ§Œä‚·‚éƒNƒ‰ƒXi”ñ“¯Šúƒ[ƒh‘Î‰j
-/// </summary>
+/// @brief ãƒ­ãƒ¼ãƒ‡ã‚£ãƒ³ã‚°ç”»é¢ã‚’åˆ¶å¾¡ã™ã‚‹ã‚¯ãƒ©ã‚¹ï¼ˆéåŒæœŸãƒ­ãƒ¼ãƒ‰å¯¾å¿œï¼‰
 class Loading
 {
 public:
 
-    // ƒCƒ“ƒXƒ^ƒ“ƒX‚ğ¶¬‚·‚é
+    /// @brief ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹ã‚’ç”Ÿæˆã™ã‚‹
+    /// @param void 
+    /// @return void
     static void CreateInstance(void);
 
-    // ƒCƒ“ƒXƒ^ƒ“ƒX‚ğæ“¾‚·‚é
+    /// @brief ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹ã‚’å–å¾—ã™ã‚‹
+    /// @param void 
+    /// @return Loading* ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹ã®ãƒã‚¤ãƒ³ã‚¿
     static Loading* GetInstance(void);
 
-    // ƒCƒ“ƒXƒ^ƒ“ƒX‚ğ”jŠü‚·‚é
-    static void  DestroyInstanceInstance(void);
+    /// @brief ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹ã‚’ç ´æ£„ã™ã‚‹
+    /// @param void 
+    /// @return void
+    static void DestroyInstance(void);
 
-    // ‰Šú‰»‚·‚é
+    /// @brief åˆæœŸåŒ–ã™ã‚‹
+    /// @param void 
+    /// @return void
     void Initialize(void);
 
-    // XV‚·‚é
+    /// @brief æ›´æ–°ã™ã‚‹
+    /// @param void 
+    /// @return void
     void Update(void);
 
-    // •`‰æ‚·‚é
+    /// @brief æç”»ã™ã‚‹
+    /// @param imageHandle ç§»å‹•ã•ã›ã‚‹ç”»åƒã®ã‚°ãƒ©ãƒ•ã‚£ãƒƒã‚¯ãƒãƒ³ãƒ‰ãƒ«
+    /// @return void
     void Draw(void);
 
-    // ”ñ“¯Šúƒ[ƒh‚ğŠJn‚·‚é
+    /// @brief éåŒæœŸãƒ­ãƒ¼ãƒ‰ã‚’é–‹å§‹ã™ã‚‹
+    /// @param loadFunc ãƒ­ãƒ¼ãƒ‰ä¸­ã«å®Ÿè¡Œã™ã‚‹é–¢æ•°ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ
+    /// @return void
     void StartAsyncLoad(std::function<void()> loadFunc);
 
-    // ƒ[ƒhŠ®—¹ˆ—‚ğs‚¤
+    /// @brief ãƒ­ãƒ¼ãƒ‰å®Œäº†å‡¦ç†ã‚’è¡Œã†
+    /// @param void 
+    /// @return void
     void EndAsyncLoad(void);
 
-    // ƒ[ƒh’†‚©Šm”F‚·‚é
+    /// @brief ãƒ­ãƒ¼ãƒ‰ä¸­ã‹ç¢ºèªã™ã‚‹
+    /// @param void 
+    /// @return bool ãƒ­ãƒ¼ãƒ‰ä¸­ãªã‚‰true
     bool IsLoading(void) const;
 
-    // i’»—¦‚ğæ“¾‚·‚é
+    /// @brief é€²æ—ç‡ã‚’å–å¾—ã™ã‚‹
+    /// @param void 
+    /// @return int é€²æ—ç‡ï¼ˆ0ã€œ100ï¼‰
     int GetProgress(void) const;
 
-    // i’»—¦‚ğİ’è‚·‚é
+    /// @brief é€²æ—ç‡ã‚’è¨­å®šã™ã‚‹
+    /// @param progress è¨­å®šã™ã‚‹é€²æ—ç‡ï¼ˆ0.0fã€œ100.0fï¼‰
+    /// @return void
     void SetProgress(float progress);
 
 private:
 
+    // ã‚·ãƒ³ã‚°ãƒ«ãƒˆãƒ³ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹
+    static Loading* instance_; 
 
-    // ƒVƒ“ƒOƒ‹ƒgƒ“ƒCƒ“ƒXƒ^ƒ“ƒX
-    static Loading* instance_;
+    // éåŒæœŸãƒ­ãƒ¼ãƒ‰å‡¦ç†ã‚¹ãƒ¬ãƒƒãƒ‰
+    std::thread loadingThread_; 
 
-    // ”ñ“¯Šúƒ[ƒhˆ—ƒXƒŒƒbƒh
-    std::thread loadingThread_;
+    // ãƒ­ãƒ¼ãƒ‰ä¸­ãƒ•ãƒ©ã‚°
+    std::atomic<bool> isLoading_; 
 
-    // ƒ[ƒh’†ƒtƒ‰ƒO
-    std::atomic<bool> isLoading_{ false };
+    // é€²æ—ç‡
+    std::atomic<float> progress_; 
 
-    // i’»—¦
-    std::atomic<float> progress_{ 0 };
+    // ç”»åƒãƒãƒ³ãƒ‰ãƒ«
+    int imageHandle_;
 
-    // ƒRƒ“ƒXƒgƒ‰ƒNƒ^
-    Loading(void) = default;
+    /// @brief ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
+    Loading(void);
 
-    // ƒfƒXƒgƒ‰ƒNƒ^
+    /// @brief ãƒ‡ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
     ~Loading(void);
 
-    // ƒRƒs[‚âƒ€[ƒu‚ğ‹Ö~‚·‚é
     Loading(const Loading&) = delete;
     Loading& operator=(const Loading&) = delete;
     Loading(Loading&&) = delete;
     Loading& operator=(Loading&&) = delete;
 
-    // ”ñ“¯Šúƒ[ƒh—p‚ÌƒXƒŒƒbƒhŠÖ”‚ğÀs‚·‚é
+    /// @brief éåŒæœŸãƒ­ãƒ¼ãƒ‰ç”¨ã®ã‚¹ãƒ¬ãƒƒãƒ‰é–¢æ•°ã‚’å®Ÿè¡Œã™ã‚‹
+    /// @param loadFunc ãƒ­ãƒ¼ãƒ‰ä¸­ã«å®Ÿè¡Œã™ã‚‹é–¢æ•°ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ
+    /// @return void
     void ThreadFunc(std::function<void()> loadFunc);
 
 };

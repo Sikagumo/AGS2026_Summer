@@ -15,6 +15,7 @@ public:
 
 		/* ’Pˆê‰æ‘œ */
 		IMG_TITLE,
+		IMG_PEACH,
 
 		/* •¡”‰æ‘œ */
 		IMGS_TEXTS,

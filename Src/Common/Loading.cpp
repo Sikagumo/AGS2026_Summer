@@ -1,31 +1,27 @@
-#include "Loading.h"
+ï»¿#include "Loading.h"
 
 #include <DxLib.h>
 #include <iostream>
 
 #include "../Application.h"
+#include "../Manager/Generic/ResourceManager.h"
 
-// ƒCƒ“ƒXƒ^ƒ“ƒX‚ğ‰Šú‰»‚·‚é
 Loading* Loading::instance_ = nullptr;
 
-// ƒCƒ“ƒXƒ^ƒ“ƒX‚ğ¶¬‚·‚é
 void Loading::CreateInstance(void)
 {
     if (!instance_)
     {
         instance_ = new Loading();
-        instance_->Initialize();
     }
 }
 
-// ƒCƒ“ƒXƒ^ƒ“ƒX‚ğæ“¾‚·‚é
 Loading* Loading::GetInstance(void)
 {
     return instance_;
 }
 
-// ƒCƒ“ƒXƒ^ƒ“ƒX‚ğ”jŠü‚·‚é
-void Loading::DestroyInstanceInstance(void)
+void Loading::DestroyInstance(void)
 {
     if (instance_)
     {
@@ -34,44 +30,46 @@ void Loading::DestroyInstanceInstance(void)
     }
 }
 
-// ƒfƒXƒgƒ‰ƒNƒ^
+Loading::Loading(void)
+    : isLoading_(false)
+    , progress_(0.0f)
+    , imageHandle_(-1)
+{
+}
+
 Loading::~Loading(void)
 {
-    // ƒXƒŒƒbƒh‚ªÀs’†‚È‚ç‘Ò‹@‚·‚é
     if (loadingThread_.joinable())
     {
         loadingThread_.join();
     }
 }
 
-// ‰Šú‰»‚·‚é
 void Loading::Initialize(void)
 {
     isLoading_ = false;
     progress_ = 0.0f;
+    imageHandle_ = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::IMG_PEACH);
 }
 
-// ”ñ“¯Šúƒ[ƒh‚ğŠJn‚·‚é
 void Loading::StartAsyncLoad(std::function<void()> loadFunc)
 {
-    // Šù‚Éƒ[ƒh’†‚È‚ç–³‹‚·‚é
-    if (isLoading_) return;
+    if (isLoading_)
+    {
+        return;
+    }
 
-    // ‘O‚ÌƒXƒŒƒbƒh‚ªc‚Á‚Ä‚¢‚ê‚Î‘Ò‹@‚·‚é
     if (loadingThread_.joinable())
     {
         loadingThread_.join();
     }
 
-    // ‰Šú‰»‚µ‚Äƒ[ƒhŠJnƒtƒ‰ƒO‚ğ—§‚Ä‚é
     Initialize();
     isLoading_ = true;
 
-    // ƒXƒŒƒbƒh‚ğŠJn‚·‚éidetach‚µ‚È‚¢j
     loadingThread_ = std::thread(&Loading::ThreadFunc, this, loadFunc);
 }
 
-// ”ñ“¯Šúƒ[ƒhˆ—‚ğs‚¤
 void Loading::ThreadFunc(std::function<void()> loadFunc)
 {
     try
@@ -80,107 +78,95 @@ void Loading::ThreadFunc(std::function<void()> loadFunc)
 
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
-        // ÀÛ‚Ìƒ[ƒhˆ—‚ğs‚¤
         if (loadFunc)
         {
             loadFunc();
         }
 
-        // ÅŒã‚Ì•`‰æ‚ğ‘Ò‚Â
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
-        // ƒ[ƒhŠ®—¹
         progress_ = 100.0f;
     }
-    catch (const std::exception& e)
+    catch (const std::exception& exception)
     {
-        std::cerr << "ƒ[ƒh’†‚É—áŠO‚ª”­¶‚µ‚Ü‚µ‚½: " << e.what() << std::endl;
-        progress_ = 100.0f; // ƒGƒ‰[‚Å‚àI—¹ˆµ‚¢‚É‚·‚é
+        std::cerr << "ãƒ­ãƒ¼ãƒ‰ä¸­ã«ä¾‹å¤–ãŒç™ºç”Ÿã—ã¾ã—ãŸ: " << exception.what() << std::endl;
+        progress_ = 100.0f;
     }
     catch (...)
     {
-        std::cerr << "ƒ[ƒh’†‚É•s–¾‚È—áŠO‚ª”­¶‚µ‚Ü‚µ‚½B" << std::endl;
+        std::cerr << "ãƒ­ãƒ¼ãƒ‰ä¸­ã«ä¸æ˜ãªä¾‹å¤–ãŒç™ºç”Ÿã—ã¾ã—ãŸã€‚" << std::endl;
         progress_ = 100.0f;
     }
 
-    // ƒ[ƒhŠ®—¹ˆ—‚ğs‚¤
     EndAsyncLoad();
 }
 
-// XV‚·‚é
 void Loading::Update(void)
 {
-    // ƒ[ƒhŠ®—¹ƒ`ƒFƒbƒN
     if (!isLoading_ && progress_ >= 100.0f && loadingThread_.joinable())
     {
         loadingThread_.join();
     }
 }
 
-// •`‰æ‚·‚é
 void Loading::Draw(void)
 {
-    const int screenW = Application::SCREEN_SIZE_X;
-    const int screenH = Application::SCREEN_SIZE_Y;
+    const int screenWidth = Application::SCREEN_SIZE_X; // ç”»é¢ã®æ¨ªå¹…
+    const int screenHeight = Application::SCREEN_SIZE_Y; // ç”»é¢ã®ç¸¦å¹…
 
     ClearDrawScreen();
-    DrawBox(0, 0, screenW, screenH, GetColor(0, 0, 0), TRUE);
+    // èƒŒæ™¯ã‚’é»’ã§å¡—ã‚Šã¤ã¶ã™
+    DrawBox(0, 0, screenWidth, screenHeight, GetColor(0, 0, 0), TRUE);
 
-    const int barW = 800;
-    const int barH = 60;
-    const int centerX = screenW / 2;
-    const int centerY = screenH / 2;
+    // ç”»é¢å†…ã«ãŠã‘ã‚‹ç”»åƒç§»å‹•ã®åŸºæº–ã¨ãªã‚‹æ¨ªå¹…ï¼ˆæ—§ãƒãƒ¼ã®å¹…ç›¸å½“ï¼‰
+    const int movementRangeWidth = 800; 
+    const int centerX = screenWidth / 2; 
+    const int centerY = screenHeight / 2; 
 
-    int prevFontSize = GetFontSize(); // Œ»İ‚ÌƒTƒCƒY‚ğ•Û‘¶
-    SetFontSize(40);                 // •¶š‚ğ‘å‚«‚­İ’è
+    // ç¾åœ¨ã®é€²æ—ç‡ã‚’å–å¾—ï¼ˆ0.0f ã€œ 100.0fï¼‰
+    const float currentProgress = progress_.load(std::memory_order_acquire);
 
-    // i’»—¦‚ğæ“¾
-    float currentProgress = progress_.load(std::memory_order_acquire);
-    int progressWidth = static_cast<int>(barW * currentProgress / 100.0f);
+    // ç”»åƒã®ã‚µã‚¤ã‚ºã‚’å–å¾—
+    int imageWidth = 0; // ç”»åƒã®æ¨ªå¹…
+    int imageHeight = 0; // ç”»åƒã®ç¸¦å¹…
+    GetGraphSize(imageHandle_, &imageWidth, &imageHeight);
 
-    if (progressWidth > 0)
-    {
-        DrawBox(centerX - barW / 2, centerY - barH / 2,
-            centerX - barW / 2 + progressWidth, centerY + barH / 2,
-            GetColor(0, 255, 0), TRUE);
-    }
+    // ç”»åƒãŒç”»é¢ä¸­å¤®ã‚’åŸºæº–ã«å·¦å³ã¸ç¶ºéº—ã«ç§»å‹•ã™ã‚‹ãŸã‚ã®é–‹å§‹åœ°ç‚¹ã¨çµ‚äº†åœ°ç‚¹ã‚’è¨ˆç®—
+    const int startX = centerX - movementRangeWidth / 2 - imageWidth / 2; 
+    const int endX = centerX + movementRangeWidth / 2 - imageWidth / 2; 
 
-    DrawFormatString(centerX - 100, centerY - 15,
-        GetColor(255, 255, 255),
-        "Loading... %d%%", static_cast<int>(currentProgress));
+    // ç¾åœ¨ã®é€²æ—ç‡ã‚’åŸºã«ã€é–‹å§‹åœ°ç‚¹ã‹ã‚‰çµ‚äº†åœ°ç‚¹ã¾ã§ã®Xåº§æ¨™ã‚’ç·šå½¢è£œé–“
+    const int imageX = static_cast<int>(startX + (endX - startX) * (currentProgress / 100.0f)); 
+    const int imageY = centerY - imageHeight / 2; 
 
-    SetFontSize(prevFontSize);
-
-    DrawBox(centerX - barW / 2, centerY - barH / 2,
-        centerX + barW / 2, centerY + barH / 2,
-        GetColor(255, 255, 255), FALSE);
-
-
+    DrawRotaGraph(imageX, imageY, 0.5f, 0.0f,imageHandle_, true);
 }
 
-// ƒ[ƒhŠ®—¹ˆ—‚ğs‚¤
 void Loading::EndAsyncLoad(void)
 {
     isLoading_.store(false, std::memory_order_release);
     progress_.store(100.0f, std::memory_order_release);
 }
 
-// ƒ[ƒh’†‚©Šm”F‚·‚é
 bool Loading::IsLoading(void) const
 {
     return isLoading_.load(std::memory_order_acquire);
 }
 
-// i’»—¦‚ğæ“¾‚·‚é
 int Loading::GetProgress(void) const
 {
     return static_cast<int>(progress_.load(std::memory_order_acquire));
 }
 
-// i’»—¦‚ğİ’è‚·‚é
 void Loading::SetProgress(float progress)
 {
-    if (progress < 0.0f) { progress = 0.0f; }
-    if (progress > 100.0f) { progress = 100.0f; }
+    if (progress < 0.0f)
+    {
+        progress = 0.0f;
+    }
+    if (progress > 100.0f)
+    {
+        progress = 100.0f;
+    }
     progress_.store(progress, std::memory_order_release);
 }

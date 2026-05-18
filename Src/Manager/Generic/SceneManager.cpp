@@ -56,6 +56,7 @@ void SceneManager::Initialize(void)
     SoundManager::GetInstance().Initialize();
     TimeManager::CreateInstance();
     Loading::CreateInstance();
+    Loading::GetInstance()->Initialize();
     CollisionManager::CreateInstance();
     CollisionManager::GetInstance().Initialize();
 
@@ -275,7 +276,7 @@ void SceneManager::Release(void)
     // 各マネージャーを破棄する
     SoundManager::GetInstance().DestroyInstance();
     TimeManager::GetInstance().DestroyInstance();
-    Loading::GetInstance()->DestroyInstanceInstance();
+    Loading::GetInstance()->DestroyInstance();
     CollisionManager::DestroyInstance();
 }
 
