@@ -18,9 +18,9 @@ void Stage::Draw(void)
 	ActorBase::Draw();
 }
 
-void Stage::InitLoad(void)
+void Stage::Load(void)
 {
-	
+	transform_.modelId = resourceManager_.LoadHandleId(ResourceManager::SRC::MODEL_STAGE);
 }
 
 void Stage::InitTransform(void)

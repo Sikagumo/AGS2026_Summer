@@ -13,7 +13,7 @@ void WeaponRG::Release(void)
 {
 }
 
-void WeaponRG::InitLoad(void)
+void WeaponRG::Load(void)
 {
 	transform_.SetModel(resourceManager_.LoadModelDuplicate(ResourceManager::SRC::MODEL_BOSS_WEAPON_RG));
 }

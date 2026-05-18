@@ -2,6 +2,7 @@
 #include "./PlayerBase.h"
 #include "../Player/PlayerBase.h"
 #include "./PActionController.h"
+#include <DxLib.h>
 class InputManager;
 class PBulletBig;
 
@@ -22,12 +23,13 @@ public:
 
 	~Player(void)override = default;
 
+	void Load(void)override;
+
 	void Release(void)override;
 
 
 protected:
 
-	void InitLoad(void)override;
 	void InitAnimation(void)override;
 	void InitTransform(void)override;
 	void InitCollider(void)override;
@@ -110,4 +112,6 @@ private:
 	void PlayAnim(ANIM_TYPE _type, bool _isLoop = true);
 
 	void CreateBullet(void);
+	void ShotBullet(void);
+
 };

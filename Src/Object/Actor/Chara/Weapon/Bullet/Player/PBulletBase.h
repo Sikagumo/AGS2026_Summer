@@ -22,6 +22,7 @@ public:
 
 	virtual ~PBulletBase(void)override = default;
 
+	virtual void Load(void)override = 0;
 
 	void Update(void)override final;
 
@@ -54,11 +55,11 @@ protected:
 
 	int shotCnt_;
 
+	bool isVisible_;
+
 
 	std::function<void(void)> updateProc_;
 
-
-	virtual void InitLoad(void)override = 0;
 
 	virtual void InitTransform(void)override = 0;
 

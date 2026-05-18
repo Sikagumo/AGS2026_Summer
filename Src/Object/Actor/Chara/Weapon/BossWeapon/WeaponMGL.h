@@ -9,12 +9,13 @@ public:
 
 	~WeaponMGL(void)override = default;
 
+	// リソースロード
+	void Load(void) override;
+
 	void Release(void)override;
 
-protected:
 
-	// リソースロード
-	void InitLoad(void) override;
+protected:
 
 	// 大きさ、回転、座標の初期化
 	void InitTransform(void) override;

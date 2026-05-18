@@ -13,7 +13,7 @@ void WeaponCannon::Release(void)
 {
 }
 
-void WeaponCannon::InitLoad(void)
+void WeaponCannon::Load(void)
 {
 	transform_.SetModel(resourceManager_.LoadModelDuplicate(ResourceManager::SRC::MODEL_BOSS_WEAPON_CN));
 }

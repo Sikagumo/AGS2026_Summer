@@ -29,6 +29,8 @@ void SceneGameBoss::Load(void)
 
 	Loading::GetInstance()->SetProgress(25.0f);
 
+	boss_ = std::make_unique<Boss>();
+	boss_->Load();
 
 	Loading::GetInstance()->SetProgress(45.0f);
 
@@ -60,7 +62,6 @@ void SceneGameBoss::Initialize(void)
 
 	if (Loading::GetInstance()->IsLoading()) { return; }
 
-	boss_ = std::make_unique<Boss>();
 	boss_->Init();
 
 

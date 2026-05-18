@@ -49,6 +49,9 @@ public:
 	// デストラクタ
 	~Camera(void)override = default;
 
+	/// @brief リソースロード
+	void Load(void) override {}
+
 	// 更新
 	void Update(void)override;
 
@@ -89,9 +92,6 @@ public:
 
 
 protected:
-
-	// リソースロード
-	void InitLoad(void) override {}
 
 	// 大きさ、回転、座標の初期化
 	void InitTransform(void) override {}

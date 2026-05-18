@@ -43,6 +43,9 @@ public:
 	Boss(void);
 	~Boss(void) override;
 
+	// リソースロード
+	void Load(void) override;
+
 	void Release(void) override;
 
 	Bone GetBone(BONE_NAME _boneName);
@@ -81,8 +84,6 @@ private:
 
 
 protected:
-	// リソースロード
-	void InitLoad(void) override;
 
 	// 大きさ、回転、座標の初期化
 	void InitTransform(void) override;
