@@ -1,6 +1,5 @@
 #include "CollisionManager.h"
 #include "../../Manager/Generic/SceneManager.h"
-#include "../Collider/ColliderBase.h"
 #include "../Actor/ActorBase.h"
 #include "../Collider/ColliderCapsule.h"
 #include "../Collider/ColliderSphere.h"
@@ -42,6 +41,8 @@ void CollisionManager::Initialize(void)
 {
 	actors_.clear();
 
+	activeCollisions_.clear();
+
 	// カリング距離の事前計算
 	cullingDistSquare_ = DEFAULT_CULL_DIST * DEFAULT_CULL_DIST;
 
@@ -64,6 +65,8 @@ void CollisionManager::Update(void)
 void CollisionManager::Clear(void)
 {
 	actors_.clear();
+
+	activeCollisions_.clear();
 }
 
 void CollisionManager::RegisterActor(ActorBase* actor)
@@ -138,6 +141,35 @@ bool CollisionManager::CheckCollision(const ColliderBase* colliderA, const Colli
 	return false;
 }
 
+//bool CollisionManager::IsActorCollidingWithTag(const ActorBase* actor, 
+//	ColliderBase::TAG targetTag) const
+//{
+//	if (actor == nullptr)
+//	{
+//		return false;
+//	}
+//
+//	const auto& hitColliders = actor->
+//
+//	return false;
+//}
+
+void CollisionManager::ResolveCollision(ActorBase* actorA, ActorBase* actorB, 
+	const CollisionInfo& info)
+{
+	if (actorA == nullptr || actorB == nullptr)
+	{
+		return;
+	}
+
+	using TAG = ColliderBase::TAG;
+
+	TAG tagA = info.myCollider->GetCollisionTag();
+	TAG tagB = info.hitCollider->GetCollisionTag();
+
+	VECTOR pushVector = VScale(info.hitNormal, info.penetration);
+}
+
 void CollisionManager::UpdateCollisionPars(void)
 {
 	// 前フレームの衝突情報リセット
@@ -194,6 +226,8 @@ void CollisionManager::UpdateCollisionPars(void)
 							// 衝突した相手を相互に登録
 							actorA->AddHitCollider(colB);
 							actorB->AddHitCollider(colA);
+
+							ResolveCollision(actorA, actorB, info);
 						}
 					}
 				}
@@ -336,10 +370,12 @@ bool CollisionManager::CheckCapsuleVsModel(const ColliderBase* capsuleCol,
 
 	if (!capsule || !model) { return false; };
 
+	// モデルハンドル取得
 	int modelHandle = model->GetModelHandle();
 
 	if (modelHandle == -1) { return false; }
 
+	// 判定用パラメータ取得
 	VECTOR startPos = capsule->GetWorldStartPos();
 	VECTOR endPos = capsule->GetWorldEndPos();
 	float radius = capsule->GetRadius();
@@ -347,31 +383,37 @@ bool CollisionManager::CheckCapsuleVsModel(const ColliderBase* capsuleCol,
 	MV1_COLL_RESULT_POLY_DIM hitResult = MV1CollCheck_Capsule(modelHandle, -1,
 		startPos, endPos, radius);
 
+	// 衝突結果の解析
 	if (hitResult.HitNum > 0)
 	{
 		const auto& bestHit = hitResult.Dim[0];
 
+		// 除外対象のフレームチェック
 		if (model->IsExcludedFrame(bestHit.FrameIndex))
 		{
 			MV1CollResultPolyDimTerminate(hitResult);
 			return false;
 		}
 
+		// 衝突情報の設定
 		outInfo.myCollider = capsuleCol;
 		outInfo.hitCollider = modelCol;
 		outInfo.hitPosition = bestHit.HitPosition;
 		outInfo.hitNormal = bestHit.Normal;
 		outInfo.isActive = true;
 
+		// カプセルの軸（線分）上の最近接点を求め、正確なめり込み量を算出
 		VECTOR nearestPos = GetNearestPointOnSegment(startPos, endPos, bestHit.HitPosition);
 		float distance = UtilityMath::MagnitudeF(VSub(bestHit.HitPosition, nearestPos));
 		outInfo.penetration = radius - distance;
 
+		// メモリ解放
 		MV1CollResultPolyDimTerminate(hitResult);
 
 		return true;
 	}
 
+	// 衝突しなかった場合のメモリ解放
 	MV1CollResultPolyDimTerminate(hitResult);
 
 	return false;
