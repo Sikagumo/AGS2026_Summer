@@ -1,4 +1,5 @@
 #include "../../../../Manager/Generic/ResourceManager.h"
+#include "../../../../Manager/Generic/InputManager.h"
 #include "../../../../Utility/UtilityMath.h"
 #include "../../../../Utility/MatrixUtility.h"
 #include "../../../Common/Transform.h"
@@ -164,7 +165,14 @@ void Boss::InitPost(void)
 void Boss::UpdateProcess(void)
 {
 	
+	if (inputManager_.IsTrgDown(KEY_INPUT_U))
+	{
+		transformFeet_.pos.y += 10.0f;
+	}
 
+	transformBody_.pos = MV1GetFramePosition(transformFeet_.modelId, JOINT_FEET_BODY);
+
+	transformBody_.Update();
 	
 	
 	BossTransformUpdate();

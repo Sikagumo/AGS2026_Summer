@@ -5,6 +5,7 @@
 class ColliderBase;
 class ResourceManager;
 class SceneManager;
+class InputManager;
 
 class ActorBase
 {
@@ -61,6 +62,7 @@ protected:
 	// シングルトン参照
 	ResourceManager& resourceManager_;
 	SceneManager& sceneManager_;
+	InputManager& inputManager_;
 
 	// モデル制御の基本情報
 	Transform transform_;
