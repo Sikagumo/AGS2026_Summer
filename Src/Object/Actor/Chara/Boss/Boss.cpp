@@ -107,7 +107,7 @@ void Boss::InitCollider(void)
 	ownColliders_.emplace(static_cast<int>(COLLIDER_TYPE::LINE), colLine);
 
 	ColliderCapsule* colCapsule = new ColliderCapsule(
-		ColliderBase::TAG::PLAYER, &transformFeet_, { 0.0f,130.0f,0.0f }, { 0.0f,0.0f,0.0f },80.0f);
+		ColliderBase::TAG::BOSS, &transformFeet_, { 0.0f,130.0f,0.0f }, { 0.0f,80.0f,0.0f },80.0f);
 	ownColliders_.emplace(static_cast<int>(COLLIDER_TYPE::CAPSULE), colCapsule);
 }
 
