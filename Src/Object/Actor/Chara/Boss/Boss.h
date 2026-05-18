@@ -16,26 +16,19 @@ class WeaponRG;
 class Boss : public CharaBase
 {
 public:
-	enum class BONE_NAME 
+	enum class BONE_NAME
 	{
-		BODY_JOINT_FEET=0,
-		BODY_JOINT_CAR,
-		WHEEL_JOINT_FRONT_L,
-		WHEEL_JOINT_FRONT_R,
-		WHEEL_JOINT_BACK_FRONT_L,
-		WHEEL_JOINT_BACK_FRONT_R,
-		WHEEL_JOINT_BACK_L,
-		WHEEL_JOINT_BACK_R,
-		WEAPON_JOINT_MGL_L,
+		WEAPON_JOINT_MGL_L=0,
 		WEAPON_JOINT_MGL_R,
 		WEAPON_JOINT_CANNON_L,
 		WEAPON_JOINT_CANNON_R,
 		WEAPON_JOINT_MP_L,
 		WEAPON_JOINT_MP_R,
 		WEAPON_JOINT_RG,
+		MAX,
 	};
 	struct Bone {
-		int id;
+		int id = 0;
 		Transform transform;
 
 	};
@@ -45,7 +38,6 @@ public:
 
 	void Release(void) override;
 
-	Bone GetBone(BONE_NAME _boneName);
 
 private:
 	//bossの大きさ
@@ -54,8 +46,21 @@ private:
 	static constexpr VECTOR BOSS_INIT_POS= { 0.0f, 0.0f, 0.0f };
 	//回転
 	static constexpr float INIT_ROT = 180.0f;
-	static constexpr int JOINT_NO = 12;
-
+	static constexpr int JOINT_FEET_BODY = 12;
+	static constexpr int JOINT_CAR_BODY = 4;
+	static constexpr int JOINT_CAR_WHEEL_FRONT_L = 6;
+	static constexpr int JOINT_CAR_WHEEL_FRONT_R = 16;
+	static constexpr int JOINT_CAR_WHEEL_BACK_FRONT_L = 8;
+	static constexpr int JOINT_CAR_WHEEL_BACK_FRONT_R = JOINT_FEET_BODY;
+	static constexpr int JOINT_CAP_WHEEL_BACK_L = 10;
+	static constexpr int JOINT_CAP_WHEEL_BACK_R = 14;
+	static constexpr int JOINT_WAEAPON_MG_L = JOINT_CAR_BODY;
+	static constexpr int JOINT_WAEAPON_MG_R = 10;
+	static constexpr int JOINT_WAEAPON_CANNON_L = 6;
+	static constexpr int JOINT_WAEAPON_CANNON_R = JOINT_FEET_BODY;
+	static constexpr int JOINT_WAEAPON_MP_L = JOINT_CAR_WHEEL_BACK_FRONT_L;
+	static constexpr int JOINT_WAEAPON_MP_R = JOINT_CAP_WHEEL_BACK_R;
+	static constexpr int JOINT_WAEAPON_RG = JOINT_CAR_WHEEL_FRONT_R;
 
 	Transform transformFeet_;
 	Transform transformBody_;
@@ -66,7 +71,7 @@ private:
 
 	float hp_;
 	float attackDelay_;
-	std::array<Bone,15> boneId_;
+	std::array<Bone,7> boneId_;
 	BONE_NAME boneName_;
 
 	std::unique_ptr<WeaponMGL> weaponMGL_;
@@ -77,8 +82,8 @@ private:
 	std::unique_ptr<WeaponMP> weaponMPR_;
 	std::unique_ptr<WeaponRG> weaponRG_;
 
-
-
+	void BoneParam(void);
+	void BossTransformUpdate(void);
 
 protected:
 	// リソースロード

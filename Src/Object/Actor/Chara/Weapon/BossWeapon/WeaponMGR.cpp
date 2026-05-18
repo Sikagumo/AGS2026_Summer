@@ -3,14 +3,24 @@
 #include "../../../../../Utility/UtilityMath.h"
 #include "WeaponMGR.h"
 
-WeaponMGR::WeaponMGR(int _modelId, int _jointNo)
+WeaponMGR::WeaponMGR()
 {
-	modelId_ = _modelId;
-	jointNo_ = _jointNo;
+	
 }
 
 void WeaponMGR::Release(void)
 {
+}
+
+void WeaponMGR::SetBone(int _id, Transform _trans)
+{
+	bone_.id = _id;
+	bone_.transform = _trans;
+}
+
+int WeaponMGR::GetDamage(void) const
+{
+	return 0;
 }
 
 void WeaponMGR::InitLoad(void)
@@ -26,7 +36,7 @@ void WeaponMGR::InitTransform(void)
 		Quaternion::Mult(transform_.quaRotLocal,
 			Quaternion::AngleAxis(UtilityMath::Deg2RadF(WEAPON_ROT), UtilityMath::AXIS_Y));
 
-	transform_.pos = MV1GetFramePosition(modelId_, jointNo_);
+	transform_.pos = MV1GetFramePosition(bone_.transform.modelId, bone_.id);
 	transform_.Update();
 }
 
@@ -44,6 +54,8 @@ void WeaponMGR::InitPost(void)
 
 void WeaponMGR::UpdateProcess(void)
 {
+	transform_.pos = MV1GetFramePosition(bone_.transform.modelId, bone_.id);
+	transform_.Update();
 }
 
 void WeaponMGR::UpdateProcessPost(void)

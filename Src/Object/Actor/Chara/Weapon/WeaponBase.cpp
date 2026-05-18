@@ -1,5 +1,4 @@
 #include <DxLib.h>
-
 #include "WeaponBase.h"
 
 WeaponBase::WeaponBase(void)
@@ -9,7 +8,10 @@ WeaponBase::WeaponBase(void)
 
 void WeaponBase::Update(void)
 {
+
 }
+
+
 
 
 
@@ -19,5 +21,6 @@ void WeaponBase::Release(void)
 
 void WeaponBase::DrawPre(void)
 {
+	MV1DrawModel(transform_.modelId);
 }
 

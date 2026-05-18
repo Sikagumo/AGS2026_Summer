@@ -5,11 +5,14 @@ class WeaponRG :
 {
 public:
 
-	WeaponRG(int _modelId,int _jointNo);
+	WeaponRG();
 
 	~WeaponRG(void)override = default;
 
 	void Release(void)override;
+
+	void SetBone(int _id, Transform _trans) override;
+	int GetDamage(void) const override;
 
 protected:
 
