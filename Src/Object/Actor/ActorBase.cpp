@@ -66,6 +66,11 @@ const Transform& ActorBase::GetTransform(void) const
 	return transform_;
 }
 
+Transform& ActorBase::GetTransform(void)
+{
+	return transform_;
+}
+
 const ColliderBase* ActorBase::GetOwnCollider(int key) const
 {
 	if (ownColliders_.count(key) == 0)
