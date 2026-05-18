@@ -5,6 +5,7 @@
 #include "../../../Collider/ColliderBase.h"
 #include "../../../Collider/ColliderCapsule.h"
 #include "../../../Collider/ColliderLine.h"
+#include "../../../Manager/CollisionManager.h"
 #include "../Weapon/WeaponBase.h"
 #include "../Weapon/BossWeapon/WeaponMGL.h"
 #include "../Weapon/BossWeapon/WeaponMGR.h"
@@ -34,6 +35,11 @@ Boss::~Boss(void)
 
 void Boss::Release(void)
 {
+}
+
+VECTOR Boss::GetBossPos(void) const
+{
+	return transformBody_.pos;
 }
 
 
@@ -104,11 +110,18 @@ void Boss::InitTransform(void)
 void Boss::InitCollider(void)
 {
 	ColliderLine* colLine = new ColliderLine(ColliderBase::TAG::BOSS,&transformFeet_,{0.0f,100.0f,0.0f },{0.0f,-10.0f,0.0f});
-	ownColliders_.emplace(static_cast<int>(COLLIDER_TYPE::LINE), colLine);
+	ownColliders_.emplace(static_cast<int>(ColliderBase::SHAPE::LINE), colLine);
 
 	ColliderCapsule* colCapsule = new ColliderCapsule(
 		ColliderBase::TAG::BOSS, &transformFeet_, { 0.0f,130.0f,0.0f }, { 0.0f,80.0f,0.0f },80.0f);
-	ownColliders_.emplace(static_cast<int>(COLLIDER_TYPE::CAPSULE), colCapsule);
+	ownColliders_.emplace(static_cast<int>(ColliderBase::SHAPE::CAPSULE), colCapsule);
+
+	for (auto& collider : ownColliders_)
+	{
+		collider.second->SetTriger(true);
+	}
+
+	CollisionManager::GetInstance().RegisterActor(this);
 }
 
 void Boss::InitAnimation(void)
@@ -163,6 +176,7 @@ void Boss::UpdateProcess(void)
 
 void Boss::UpdateProcessPost(void)
 {
+
 }
 
 void Boss::DrawPre(void)

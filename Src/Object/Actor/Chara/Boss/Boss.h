@@ -41,6 +41,7 @@ public:
 
 	void Release(void) override;
 
+	VECTOR GetBossPos(void) const;
 
 private:
 	//boss‚Ì‘å‚«‚³

@@ -24,6 +24,11 @@ int WeaponCannon::GetDamage(void) const
 	return 0;
 }
 
+VECTOR WeaponCannon::GetPos(void) const
+{
+	return transform_.pos;
+}
+
 void WeaponCannon::Load(void)
 {
 	transform_.SetModel(resourceManager_.LoadModelDuplicate(ResourceManager::SRC::MODEL_BOSS_WEAPON_CN));

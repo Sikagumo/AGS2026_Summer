@@ -16,7 +16,7 @@ public:
 
 	void SetBone(int _id,Transform _trans) override;
 	int GetDamage(void) const override;
-
+	VECTOR GetPos(void) const override;
 
 protected:
 

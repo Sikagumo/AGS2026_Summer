@@ -27,6 +27,7 @@ public:
 
 	virtual void SetBone(int _id, Transform _trans)=0;
 	virtual int GetDamage(void) const = 0;
+	virtual VECTOR GetPos(void) const = 0;
 
 private:
 
