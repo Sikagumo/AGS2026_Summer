@@ -5,7 +5,7 @@ PBulletRapidFire::PBulletRapidFire(void)
 {
 }
 
-void PBulletRapidFire::InitLoad(void)
+void PBulletRapidFire::Load(void)
 {
 }
 

@@ -8,7 +8,9 @@
 #include "../../../../Manager/Generic/SceneManager.h"
 #include "../../../../Camera/Camera.h"
 #include "../../../../Common/Quaternion.h"
+#include "../../../Manager/CollisionManager.h"
 #include "../../../Collider/ColliderBase.h"
+#include "../../../Collider/ColliderCapsule.h"
 #include "../Weapon/Bullet/Player/PBulletBig.h"
 #include "../Weapon/Bullet/Player/PBulletRapidFire.h"
 
@@ -28,7 +30,7 @@ Player::Player(int _playerNo, BULLET_TYPE _playerType)
 }
 
 
-void Player::InitLoad(void)
+void Player::Load(void)
 {
 	transform_.modelId = resourceManager_.LoadHandleId(ResourceManager::SRC::MODEL_PLAYER_HUMAN);
 }
@@ -46,7 +48,7 @@ void Player::InitAnimation(void)
 }
 void Player::InitTransform(void)
 {
-	constexpr float MODEL_SCALE = 0.75f;
+	constexpr float MODEL_SCALE = 0.5f;
 
 	transform_.InitTransform(MODEL_SCALE
 		, Quaternion::Identity()
@@ -55,7 +57,15 @@ void Player::InitTransform(void)
 }
 void Player::InitCollider(void)
 {
+	const VECTOR COL_CAPSULE_TOP = VScale(COL_CAPSULE_TOP_LOCAL_POS, transform_.scl.y);
+	const VECTOR COL_CAPSULE_DOWN = VScale(COL_CAPSULE_DOWN_LOCAL_POS, transform_.scl.y);
+	const float CAPSULE_RADIUS = (COL_CAPSULE_RADIUS * transform_.scl.y);
 
+	ownColliders_.emplace(0
+		, new ColliderCapsule(ColliderBase::TAG::PLAYER, &transform_, COL_CAPSULE_TOP, COL_CAPSULE_DOWN, CAPSULE_RADIUS));
+
+	// Õ“Ë”»’èƒ}ƒl[ƒWƒƒ‚É“o˜^
+	CollisionManager::GetInstance().RegisterActor(this);
 }
 void Player::InitPost(void)
 {
@@ -86,10 +96,10 @@ void Player::InitPost(void)
 	actionController_->SetAction(1, timeActive, timeEnd, timeActionActive
 		, std::bind(&Player::CreateBullet, this), timeInput);
 
-	timeActive += SHOT_TIME_INCREMENT;
-	timeEnd += SHOT_TIME_INCREMENT;
-	timeActionActive += SHOT_TIME_INCREMENT;
-	timeInput += SHOT_TIME_INCREMENT;
+	timeActive += SHOT_TIME_INCREMENT * 2;
+	timeEnd += SHOT_TIME_INCREMENT * 2;
+	timeActionActive += SHOT_TIME_INCREMENT * 2;
+	timeInput += SHOT_TIME_INCREMENT * 2;
 	actionController_->SetAction(2, timeActive, timeEnd, timeActionActive
 		, std::bind(&Player::CreateBullet, this), timeInput);
 }
@@ -137,6 +147,11 @@ void Player::DrawLate(void)
 		, UtilityMath::Rad2DegF(transform_.quaRotLocal.x), UtilityMath::Rad2DegF(transform_.quaRotLocal.y), UtilityMath::Rad2DegF(transform_.quaRotLocal.z));
 
 	actionController_->DrawDebug();
+
+	for (auto& collider : ownColliders_)
+	{
+		collider.second->Draw();
+	}
 #endif
 }
 
@@ -252,6 +267,8 @@ void Player::ProcessAttack(void)
 
 	actionController_->Update();
 
+	if (actionController_->GetActionState() != PActionController::PACTION_STATE::NONE) { return; }
+
 	if (inputManager_.IsTrgMouseLeft())
 	{
 		if (curAttackNum_ >= attackNumMax_)
@@ -263,8 +280,7 @@ void Player::ProcessAttack(void)
 			return;
 		}
 
-		if (actionController_->GetActionState() == PActionController::PACTION_STATE::NONE
-			|| !actionController_->IsActiveInput())
+		if (!actionController_->IsActiveInput())
 		{
 			actionController_->Active(curAttackNum_);
 
@@ -285,7 +301,7 @@ void Player::CreateBullet(void)
 		{
 			bullet->Release();
 			bullet->Init();
-			bullet->CreateShot(transform_.pos, transform_.GetForward(), Quaternion::Identity(), curAttackNum_);
+			bullet->CreateShot(transform_.pos, transform_.GetForward(), transform_.quaRot, curAttackNum_);
 			return;
 		}
 	}
@@ -294,6 +310,7 @@ void Player::CreateBullet(void)
 	{
 		case BULLET_TYPE::BIG:
 			bullet = std::make_unique<PBulletBig>();
+			bullet->Load();
 		break;
 
 		default:
@@ -302,9 +319,15 @@ void Player::CreateBullet(void)
 	}
 
 	bullet->Init();
-	bullet->CreateShot(transform_.pos, transform_.GetForward(), Quaternion::Identity(), curAttackNum_);
+	bullet->CreateShot(transform_.pos, transform_.GetForward(), transform_.quaRot, curAttackNum_);
 
 	bullets_.emplace_back(std::move(bullet));
+}
+
+void Player::ShotBullet(void)
+{
+	PBulletBase& bullet = *bullets_.back();
+	bullet.CreateShot(transform_.pos, transform_.GetForward(), Quaternion::Identity(), curAttackNum_);
 }
 
 void Player::DrawShadowRound(void)

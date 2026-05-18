@@ -1,8 +1,9 @@
 #pragma once
-
-#include <memory>
-
 #include "../SceneBase.h"
+#include <memory>
+#include "../../Object/Actor/Chara/Player/Player.h"
+#include "../../Object/Actor/Chara/Boss/Boss.h"
+#include "../../Object/Actor/Stage/Stage.h"
 
 
 /// @brief ゲーム本編のメインロジックを管理するシーンクラス
@@ -36,6 +37,14 @@ public:
 
 private:
 
+    SceneManager& sceneManager_;
+    std::unique_ptr<Player> player_;
+
+    std::unique_ptr<Boss> boss_;
+
+    std::unique_ptr<Stage> stage_;
+
+    VECTOR tempBossWeaponPos_;
 
     /// @brief デバッグ情報の描画
     void DrawDebug(void);

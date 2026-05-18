@@ -73,6 +73,8 @@ void ResourceManager::Initialize(void)
 	_SetResource(LOAD_TYPE::MODEL, SRC::MODEL_SKYDOME, PATH_MODEL + "SkyDome/SkyDome.mv1");
 	_SetResource(LOAD_TYPE::MODEL, SRC::MODEL_PLAYER_HUMAN, PATH_MODEL + "Player/Player_Human.mv1");
 
+	_SetResource(LOAD_TYPE::MODEL, SRC::MODEL_STAGE, PATH_MODEL + "Stage/MainStage/MainStage.mv1");
+
 	_SetResource(LOAD_TYPE::MODEL, SRC::MODEL_BOSS_FEET, PATH_MODEL + "Boss/oni_feet.mv1");
 	_SetResource(LOAD_TYPE::MODEL, SRC::MODEL_BOSS_CAR, PATH_MODEL + "Boss/oni_feet_car.mv1");
 	_SetResource(LOAD_TYPE::MODEL, SRC::MODEL_BOSS_WHEEL_FRONT, PATH_MODEL + "Boss/oni_wheel_hedo.mv1");

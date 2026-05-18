@@ -9,10 +9,9 @@ public:
 
 	~PBulletBig(void)override = default;
 
+	void Load(void)override;
 
 protected:
-
-	void InitLoad(void)override;
 
 	void InitTransform(void)override;
 

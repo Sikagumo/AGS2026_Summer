@@ -25,11 +25,11 @@ void SceneGamePlayer::Load(void)
 
 	Loading::GetInstance()->SetProgress(15.0f);
 
-	player_->Init();
+	player_->Load();
 
 	Loading::GetInstance()->SetProgress(25.0f);
 
-	boss_->Init();
+	boss_->Load();
 
 	Loading::GetInstance()->SetProgress(45.0f);
 
@@ -58,6 +58,8 @@ void SceneGamePlayer::Initialize(void)
 
 	if (Loading::GetInstance()->IsLoading()) { return; }
 
+	player_->Init();
+	boss_->Init();
 }
 
 void SceneGamePlayer::Update(void)

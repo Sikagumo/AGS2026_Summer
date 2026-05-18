@@ -33,7 +33,7 @@ Boss::Bone Boss::GetBone(BONE_NAME _boneName)
 	return boneId_[static_cast<int>(_boneName)];
 }
 
-void Boss::InitLoad(void)
+void Boss::Load(void)
 {
 	transformFeet_.SetModel(resourceManager_.LoadModelDuplicate(ResourceManager::SRC::MODEL_BOSS_FEET));
 	transformBody_.SetModel(resourceManager_.LoadModelDuplicate(ResourceManager::SRC::MODEL_BOSS_BODY));
@@ -78,6 +78,14 @@ void Boss::InitPost(void)
 	weaponRG_=std::make_unique<WeaponRG>(transformBody_.modelId,16);
 	weaponCannonL_=std::make_unique<WeaponCannon>(transformBody_.modelId,6);
 	weaponCannonR_=std::make_unique<WeaponCannon>(transformBody_.modelId,12);
+
+	weaponMGL_->Load();
+	weaponMGR_->Load();
+	weaponMPL_->Load();
+	weaponMPR_->Load();
+	weaponRG_->Load();
+	weaponCannonL_->Load();
+	weaponCannonR_->Load();
 
 	weaponMGL_->Init();
 	weaponMGR_->Init();

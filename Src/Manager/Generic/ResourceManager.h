@@ -37,6 +37,8 @@ public:
 		MODEL_BOSS_WEAPON_RG,
 		MODEL_BOSS_WEAPON_RK,
 
+		MODEL_STAGE,
+
 		/* 外部アニメーション */
 		ANIM_IDLE,
 		ANIM_RUN,

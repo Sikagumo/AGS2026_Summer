@@ -13,6 +13,7 @@ PBulletBase::PBulletBase(void)
 	, curGravityPow_(0.0f)
 	, aliveTime_(0.0f)
 	, shotCnt_(0)
+	, isVisible_(false)
 {
 }
 
@@ -23,6 +24,7 @@ void PBulletBase::InitCollider(void)
 
 void PBulletBase::InitPost(void)
 {
+	isVisible_ = false;
 }
 
 
@@ -37,7 +39,6 @@ void PBulletBase::Update(void)
 		pos.y -= curGravityPow_;
 
 		transform_.Translate(pos);
-		auto temp = transform_.pos;
 
 		if (aliveTime_ <= 0)
 		{
@@ -77,6 +78,8 @@ void PBulletBase::CreateShot(const VECTOR& _pos, const VECTOR& _shotDir, const Q
 
 	bulletState_ = BULLET_STATE::SHOT;
 
+	isVisible_ = true;
+
 	curGravityPow_ = 0.0f;
 	transform_.pos = _pos;
 
@@ -86,5 +89,6 @@ void PBulletBase::CreateShot(const VECTOR& _pos, const VECTOR& _shotDir, const Q
 bool PBulletBase::IsAlive(void) const
 {
 	return(bulletState_ != BULLET_STATE::INACTIVE
-			|| aliveTime_ <= 0.0f);
+			|| aliveTime_ <= 0.0f
+			|| isVisible_);
 }
