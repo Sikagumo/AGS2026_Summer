@@ -5,6 +5,7 @@ ColliderBase::ColliderBase(SHAPE shapeType, TAG collisionTag, const Transform* f
 	, collisionTag_(collisionTag)
 	, followTarget_(followTarget)
 	, isActive_(true)
+	, isTrigger_(false)
 {
 }
 
@@ -58,4 +59,9 @@ bool ColliderBase::IsActive(void) const
 void ColliderBase::SetActive(bool isActive)
 {
 	isActive_ = isActive;
+}
+
+void ColliderBase::SetTriger(bool isTrigger)
+{
+	isTrigger_ = isTrigger;
 }

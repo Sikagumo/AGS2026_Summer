@@ -10,6 +10,8 @@
 CollisionManager* CollisionManager::instance_ = nullptr;
 
 CollisionManager::CollisionManager(void)
+	: cullingDistSquare_(0.0f)
+	, updateTimer_(0.0f)
 {
 }
 
@@ -141,18 +143,26 @@ bool CollisionManager::CheckCollision(const ColliderBase* colliderA, const Colli
 	return false;
 }
 
-//bool CollisionManager::IsActorCollidingWithTag(const ActorBase* actor, 
-//	ColliderBase::TAG targetTag) const
-//{
-//	if (actor == nullptr)
-//	{
-//		return false;
-//	}
-//
-//	const auto& hitColliders = actor->
-//
-//	return false;
-//}
+bool CollisionManager::IsActorCollidingWithTag(const ActorBase* actor, 
+	ColliderBase::TAG targetTag) const
+{
+	if (actor == nullptr)
+	{
+		return false;
+	}
+
+	const auto& hitColliders = actor->GetHitCollider();
+
+	for (const auto& hitCollider : hitColliders)
+	{
+		if (hitCollider->GetCollisionTag() == targetTag)
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
 
 void CollisionManager::ResolveCollision(ActorBase* actorA, ActorBase* actorB, 
 	const CollisionInfo& info)
@@ -226,6 +236,11 @@ void CollisionManager::UpdateCollisionPars(void)
 							// Õ“Ë‚µ‚½‘ŠŽè‚ð‘ŠŒÝ‚É“o˜^
 							actorA->AddHitCollider(colB);
 							actorB->AddHitCollider(colA);
+
+							if (colA->IsTrigger() || colB->IsTrigger())
+							{
+								continue;
+							}
 
 							ResolveCollision(actorA, actorB, info);
 						}

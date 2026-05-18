@@ -62,14 +62,14 @@ public:
 	/// @param colliderB コライダーB
 	/// @param outInfo 衝突情報を格納する構造体
 	/// @return 衝突していればtrue
-	bool CheckCollision(const ColliderBase* colliderA, 
+	bool CheckCollision(const ColliderBase* colliderA,
 		const ColliderBase* colliderB, CollisionInfo& outInfo);
 
 	/// @brief 指定したアクターが特定のタグを持つ相手と衝突しているか調べる
 	/// @param actor 調査対象のアクター
 	/// @param targetTag 確認したい相手の衝突タグ
 	/// @return 衝突していればtrue
-	//bool IsActorCollidingWithTag(const ActorBase* actor, ColliderBase::TAG targetTag) const;
+	bool IsActorCollidingWithTag(const ActorBase* actor, ColliderBase::TAG targetTag) const;
 
 	/// @brief 衝突したアクター同士の押し戻し処理を行う
 	/// @param actorA 動かす対象のアクターA

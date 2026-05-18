@@ -68,6 +68,14 @@ public:
 	/// @param isActive trueで有効化
 	void SetActive(bool isActive);
 
+	/// @brief 押し出し判定するかどうか
+	/// @return trueなら押し出す
+	bool IsTrigger(void) const { return isTrigger_; }
+
+	/// @brief 押し出し判定の設定
+	/// @param isTrigger trueなら押し出す、falseなら押し出さない
+	void SetTriger(bool isTrigger);
+
 protected:
 
 	// デバック表示の色
@@ -85,6 +93,9 @@ protected:
 
 	// 有効フラグ
 	bool isActive_;
+
+	// 押し出しするかどうかのフラグ
+	bool isTrigger_;
 
 	/// @brief ローカル座標をワールド座標に変換する
 	/// @param localPos ローカル座標
