@@ -1,12 +1,10 @@
+#include "SceneGame.h"
 #include "../../Manager/Generic/SceneManager.h"
 #include "../../Manager/Generic/InputManager.h"
 #include "../../Manager/Generic/ResourceManager.h"
 #include "../../Manager/Decoration/SoundManager.h"
 #include "../../Manager/System/TimeManager.h"
-#include "../../Manager/System/Loading.h"
-
-#include "SceneGame.h"
-
+#include "../../Common/Loading.h"
 //#include "SceneScore.h"
 
 SceneGame::SceneGame(void)
@@ -14,9 +12,6 @@ SceneGame::SceneGame(void)
 
 }
 
-SceneGame::~SceneGame(void)
-{
-}
 
 void SceneGame::Load(void)
 {
@@ -55,7 +50,6 @@ void SceneGame::Initialize(void)
 
 	if (Loading::GetInstance()->IsLoading()) { return; }
 
-	
 }
 
 void SceneGame::Update(void)

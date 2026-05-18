@@ -4,7 +4,7 @@
 #include "../../Manager/Generic/ResourceManager.h"
 #include "../../Manager/Decoration/SoundManager.h"
 #include "../../Manager/System/TimeManager.h"
-#include "../../Manager/System/Loading.h"
+#include "../../Common/Loading.h"
 #include "../../Camera/Camera.h"
 #include "../../Object/Actor/Chara/Boss/Boss.h"
 

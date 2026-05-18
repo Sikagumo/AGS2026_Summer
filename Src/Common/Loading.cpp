@@ -3,7 +3,7 @@
 #include <DxLib.h>
 #include <iostream>
 
-#include "../../Application.h"
+#include "../Application.h"
 
 // インスタンスを初期化する
 Loading* Loading::instance_ = nullptr;

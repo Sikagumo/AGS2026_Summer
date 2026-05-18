@@ -84,7 +84,6 @@ private:
 
 
 	InputManager& inputManager_;
-	SceneManager& sceneManager_;
 
 	int shadowHandle_;
 

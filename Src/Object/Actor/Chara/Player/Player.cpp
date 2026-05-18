@@ -15,9 +15,8 @@
 
 Player::Player(int _playerNo, BULLET_TYPE _playerType)
 	: PlayerBase::PlayerBase(_playerNo, _playerType)
-	, inputManager_(InputManager::GetInstance())
-	, sceneManager_(SceneManager::GetInstance())
 	, shadowHandle_(-1)
+	, inputManager_(InputManager::GetInstance())
 	
 {
 	constexpr float MOVE_SPEED = 5.0f;

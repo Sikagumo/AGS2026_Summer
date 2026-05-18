@@ -6,7 +6,8 @@
 #include "../Decoration/SoundManager.h"
 #include "../System/TimeManager.h"
 #include "../../Camera/Camera.h"
-#include "../System/Loading.h"
+#include "../../Common/Loading.h"
+#include "../../Object/Manager/CollisionManager.h"
 
 SceneManager* SceneManager::instance_ = nullptr;
 

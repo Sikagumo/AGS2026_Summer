@@ -4,6 +4,7 @@
 ColliderCapsule::ColliderCapsule(TAG collisionTag, const Transform* followTarget, const VECTOR& localStartPos, const VECTOR& localEndPos, float radius)
     : ColliderBase(SHAPE::CAPSULE, collisionTag, followTarget)
     , localStartPos_(localStartPos)
+    , localEndPos_(localEndPos)
     , radius_(radius)
 {
 }

@@ -25,6 +25,7 @@
     <ClCompile Include="Src\Object\Actor\Chara\CharaBase.cpp" />
     <ClCompile Include="Src\Object\Actor\Chara\Weapon\Bullet\Player\PBulletRapidFire.cpp" />
     <ClCompile Include="Src\Scene\MainScene\SceneGameBoss.cpp" />
+    <ClCompile Include="Src\Object\Manager\CollisionManager.cpp" />
     <ClCompile Include="Src\Scene\MainScene\SceneLobby.cpp" />
     <ClCompile Include="Src\Object\Actor\Chara\Player\PlayerBase.cpp" />
     <ClCompile Include="Src\Object\Actor\Chara\Weapon\Bullet\Player\PBulletBase.cpp" />
@@ -33,7 +34,7 @@
     <ClCompile Include="Src\Scene\MainScene\SceneGamePlayer.cpp" />
     <ClCompile Include="Src\Scene\MainScene\SceneTitle.cpp" />
     <ClCompile Include="Src\Scene\SceneBase.cpp" />
-    <ClCompile Include="Src\Manager\System\Loading.cpp" />
+    <ClCompile Include="Src\Common\Loading.cpp" />
     <ClCompile Include="Src\FPS\FpsController.cpp" />
     <ClCompile Include="Src\Manager\InputTextManager.cpp" />
     <ClCompile Include="Src\Common\InputTextArea.cpp" />
@@ -81,6 +82,7 @@
     <ClInclude Include="Src\Object\Actor\Chara\Boss\Boss.h" />
     <ClInclude Include="Src\Object\Actor\Chara\Weapon\Bullet\Player\PBulletRapidFire.h" />
     <ClInclude Include="Src\Scene\MainScene\SceneGameBoss.h" />
+    <ClInclude Include="Src\Object\Manager\CollisionManager.h" />
     <ClInclude Include="Src\Scene\MainScene\SceneLobby.h" />
     <ClInclude Include="Src\Object\Actor\Chara\Player\PlayerBase.h" />
     <ClInclude Include="Src\Object\Actor\Chara\Weapon\Bullet\Player\PBulletBig.h" />
@@ -89,7 +91,7 @@
     <ClInclude Include="Src\Scene\MainScene\SceneGamePlayer.h" />
     <ClInclude Include="Src\Scene\MainScene\SceneTitle.h" />
     <ClInclude Include="Src\Scene\SceneBase.h" />
-    <ClInclude Include="Src\Manager\System\Loading.h" />
+    <ClInclude Include="Src\Common\Loading.h" />
     <ClInclude Include="Src\FPS\FpsController.h" />
     <ClInclude Include="Src\Manager\InputTextManager.h" />
     <ClInclude Include="Src\Object\Actor\Chara\CharaBase.h" />
