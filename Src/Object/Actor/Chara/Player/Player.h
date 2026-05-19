@@ -14,7 +14,9 @@ public:
 	{
 		IDLE,
 		RUN,
-		SHOT,
+		THROW_LEFT,
+		THROW_RIGHT,
+		THROW_RUN,
 		JUMP,
 		MAX,
 	};
@@ -92,6 +94,7 @@ private:
 	int attackNumMax_;
 	int curAttackNum_;
 
+	int shotIndex_;
 	int shadowHandle_;
 
 	ANIM_TYPE animType_;

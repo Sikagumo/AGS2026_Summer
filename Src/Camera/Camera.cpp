@@ -17,8 +17,8 @@ static constexpr VECTOR DERFAULT_POS = { 0.0f, 200.0f, -500.0f };
 static constexpr VECTOR DERFAULT_ANGLES = { 0.0f, 0.0f, 0.0f };
 
 // ÉJÉÅÉâÇÃâÒì]ó 
-const float ROT_POW_KEY = UtilityMath::Deg2RadF(10.0f);
-const float ROT_POW_RAD = UtilityMath::Deg2RadF(10.0f);
+const float ROT_POW_KEY = UtilityMath::Deg2RadF(5.0f);
+const float ROT_POW_RAD = UtilityMath::Deg2RadF(2.5f);
 const float ROT_POW_MOUSE = UtilityMath::Deg2RadF(0.05f);
 
 
@@ -105,6 +105,11 @@ void Camera::SetBeforeDraw(void)
 
 void Camera::DrawDebug(void)
 {
+#ifdef _DEBUG
+	DrawFormatString(0, 32, 0xffffff, "\nCamera(pos(%.1f, %.1f, %.1f), rot(%.1f, %.1f, %.1f))\n"
+		, transform_.pos.x, transform_.pos.y, transform_.pos.z
+		, transform_.rot.x, transform_.rot.y, transform_.rot.z);
+#endif
 }
 
 void Camera::Release(void)
@@ -175,10 +180,10 @@ void Camera::SyncFollow(void)
 		rotY_ = Quaternion::LookRotation(VNorm(temp));
 		rotY_.z = 0.0f;
 	}
-
 	// Yé≤ + Xé≤
 	transform_.quaRot = rotY_.Mult(Quaternion::AngleAxis(angles_.x, UtilityMath::AXIS_X));
 
+	
 	// íçéãì_
 	VECTOR localPos = transform_.quaRot.PosAxis(FOLLOW_TARGET_LOCAL_POS);
 	targetPos_ = VAdd(pos, localPos);

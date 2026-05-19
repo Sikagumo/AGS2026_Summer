@@ -109,10 +109,6 @@ void SceneGame::Draw(void)
 	// í«è]à íu
 	DrawSphere3D(tempBossWeaponPos_, 10.0f, 16, 0x0000ff, 0xffffff, true);
 
-	constexpr float GROUND_SIZE = 5000.0f;
-	DrawCube3D(VGet(GROUND_SIZE, 0.0f, GROUND_SIZE), VGet(-GROUND_SIZE, -100.0f, -GROUND_SIZE),
-		0xff00ff, 0xffffff, true);
-
 
 #ifdef _DEBUG
 	DrawDebug();

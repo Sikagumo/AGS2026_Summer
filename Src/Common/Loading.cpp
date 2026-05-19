@@ -160,6 +160,12 @@ int Loading::GetProgress(void) const
 
 void Loading::SetProgress(float progress)
 {
+#ifdef _DEBUG
+    std::string curProgress = std::to_string(progress);
+    curProgress += "%ロード完了\n";
+    OutputDebugString(curProgress.c_str());
+#endif
+
     if (progress < 0.0f)
     {
         progress = 0.0f;

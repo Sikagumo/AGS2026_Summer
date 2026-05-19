@@ -24,14 +24,12 @@ void PBulletBase::InitCollider(void)
 
 void PBulletBase::InitPost(void)
 {
-	isVisible_ = false;
+	isVisible_ = true;
 }
 
 
 void PBulletBase::Update(void)
 {
-	if (!IsAlive()) { return; }
-
 	if (bulletState_ == BULLET_STATE::SHOT)
 	{
 		VECTOR pos = shotPow_;
@@ -55,7 +53,7 @@ void PBulletBase::Update(void)
 
 void PBulletBase::Draw(void)
 {
-	if (!IsAlive()) { return; }
+	if (!isVisible_) { return; }
 	if (transform_.modelId == -1)
 	{
 		constexpr int SPHERE_DIV = 16;
@@ -68,20 +66,29 @@ void PBulletBase::Release(void)
 	
 }
 
-void PBulletBase::CreateShot(const VECTOR& _pos, const VECTOR& _shotDir, const Quaternion& _rot, int _shotCnt)
+void PBulletBase::Create(const VECTOR& _pos, int _shotCnt)
 {
 	shotCnt_ = _shotCnt;
 
 	SetParam();
 
-	shotPow_ = VScale(UtilityMath::VNormalize(_shotDir), shotSpeed_);
-
-	bulletState_ = BULLET_STATE::SHOT;
+	bulletState_ = BULLET_STATE::INACTIVE;
 
 	isVisible_ = true;
 
 	curGravityPow_ = 0.0f;
 	transform_.pos = _pos;
+
+	transform_.Update();
+}
+
+void PBulletBase::Shot(const VECTOR& _shotDir, const Quaternion& _rot)
+{
+	shotPow_ = VScale(UtilityMath::VNormalize(_shotDir), shotSpeed_);
+
+	bulletState_ = BULLET_STATE::SHOT;
+
+	curGravityPow_ = 0.0f;
 
 	transform_.Update();
 }
