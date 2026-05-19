@@ -194,14 +194,16 @@ void CollisionManager::ResolveCollision(ActorBase* _actorA, ActorBase* _actorB,
 
 	if (isAHaveMyCollider)
 	{
-		if (_info.myCollider->GetCollisionTag() == TAG::PLAYER || _info.myCollider->GetCollisionTag() == TAG::BOSS)
+		if (_info.myCollider->GetCollisionTag() == TAG::PLAYER || _info.myCollider->GetCollisionTag() == TAG::BOSS
+			|| _info.myCollider->GetCollisionTag() == TAG::STAGE)
 		{
 			_actorA->GetTransform().Translate(pushVector);;
 		}
 	}
 	else
 	{
-		if (_info.myCollider->GetCollisionTag() == TAG::PLAYER || _info.myCollider->GetCollisionTag() == TAG::BOSS)
+		if (_info.myCollider->GetCollisionTag() == TAG::PLAYER || _info.myCollider->GetCollisionTag() == TAG::BOSS
+			|| _info.myCollider->GetCollisionTag() == TAG::STAGE)
 		{
 			_actorB->GetTransform().Translate(pushVector);;
 		}

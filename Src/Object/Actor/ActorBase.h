@@ -6,6 +6,7 @@ class ColliderBase;
 class ResourceManager;
 class SceneManager;
 class InputManager;
+class CollisionManager;
 
 class ActorBase
 {
@@ -63,6 +64,7 @@ protected:
 	ResourceManager& resourceManager_;
 	SceneManager& sceneManager_;
 	InputManager& inputManager_;
+	CollisionManager& collisionManager_;
 
 	// ƒ‚ƒfƒ‹§Œä‚ÌŠî–{î•ñ
 	Transform transform_;

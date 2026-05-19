@@ -83,22 +83,22 @@ void Boss::BossTransformUpdate(void)
 
 void Boss::Load(void)
 {
-	transformFeet_.SetModel(resourceManager_.LoadModelDuplicate(ResourceManager::SRC::MODEL_BOSS_FEET));
+	transform_.SetModel(resourceManager_.LoadModelDuplicate(ResourceManager::SRC::MODEL_BOSS_FEET));
 	transformBody_.SetModel(resourceManager_.LoadModelDuplicate(ResourceManager::SRC::MODEL_BOSS_BODY));
-	transformFeet_.scl = BOSS_SIZE;
+	transform_.scl = BOSS_SIZE;
 	transformBody_.scl = BOSS_SIZE;
-	transformFeet_.quaRot= Quaternion::Identity();
-	transformFeet_.quaRotLocal =
-		Quaternion::Mult(transformFeet_.quaRotLocal,
+	transform_.quaRot= Quaternion::Identity();
+	transform_.quaRotLocal =
+		Quaternion::Mult(transform_.quaRotLocal,
 			Quaternion::AngleAxis(UtilityMath::Deg2RadF(INIT_ROT), UtilityMath::AXIS_Y));
 	transformBody_.quaRot = Quaternion::Identity();
 	transformBody_.quaRotLocal =
 		Quaternion::Mult(transformBody_.quaRotLocal,
 			Quaternion::AngleAxis(UtilityMath::Deg2RadF(INIT_ROT), UtilityMath::AXIS_Y));
 
-	transformFeet_.pos= BOSS_INIT_POS;
-	transformFeet_.Update();
-	transformBody_.pos = MV1GetFramePosition(transformFeet_.modelId,JOINT_FEET_BODY);
+	transform_.pos= BOSS_INIT_POS;
+	transform_.Update();
+	transformBody_.pos = MV1GetFramePosition(transform_.modelId,JOINT_FEET_BODY);
 	
 	transformBody_.Update();
 	BoneParam();
@@ -110,11 +110,11 @@ void Boss::InitTransform(void)
 
 void Boss::InitCollider(void)
 {
-	ColliderLine* colLine = new ColliderLine(ColliderBase::TAG::BOSS,&transformFeet_,{0.0f,100.0f,0.0f },{0.0f,-10.0f,0.0f});
+	ColliderLine* colLine = new ColliderLine(ColliderBase::TAG::BOSS,&transform_,{0.0f,100.0f,0.0f },{0.0f,-10.0f,0.0f});
 	ownColliders_.emplace(static_cast<int>(ColliderBase::SHAPE::LINE), colLine);
 
 	ColliderCapsule* colCapsule = new ColliderCapsule(
-		ColliderBase::TAG::BOSS, &transformFeet_, { 0.0f,130.0f,0.0f }, { 0.0f,80.0f,0.0f },80.0f);
+		ColliderBase::TAG::BOSS, &transform_, { 0.0f,130.0f,0.0f }, { 0.0f,80.0f,0.0f },80.0f);
 	ownColliders_.emplace(static_cast<int>(ColliderBase::SHAPE::CAPSULE), colCapsule);
 	colCapsule->SetTriger(false);
 
@@ -167,10 +167,10 @@ void Boss::UpdateProcess(void)
 	
 	if (inputManager_.IsTrgDown(KEY_INPUT_U))
 	{
-		transformFeet_.pos.y += 10.0f;
+		transform_.pos.y += 10.0f;
 	}
 
-	transformBody_.pos = MV1GetFramePosition(transformFeet_.modelId, JOINT_FEET_BODY);
+	transformBody_.pos = MV1GetFramePosition(transform_.modelId, JOINT_FEET_BODY);
 
 	transformBody_.Update();
 	
@@ -184,7 +184,7 @@ void Boss::UpdateProcessPost(void)
 
 void Boss::DrawPre(void)
 {
-	MV1DrawModel(transformFeet_.modelId);
+	MV1DrawModel(transform_.modelId);
 	MV1DrawModel(transformBody_.modelId);
 	weaponMGL_->Draw();
 	weaponMGR_->Draw();
