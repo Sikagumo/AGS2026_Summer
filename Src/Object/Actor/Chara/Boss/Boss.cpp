@@ -21,9 +21,8 @@ Boss::Boss(void):
 	transformFeetCar_(),
 	transformWheelBack_(),
 	transformWheelFront_(),
-	hp_(),
-	attackDelay_(),
-	boneName_(),
+	hp_(1000),
+	attackDelay_(20),
 
 
 	CharaBase()
@@ -83,8 +82,8 @@ void Boss::BossTransformUpdate(void)
 
 void Boss::Load(void)
 {
-	transform_.SetModel(resourceManager_.LoadModelDuplicate(ResourceManager::SRC::MODEL_BOSS_FEET));
-	transformBody_.SetModel(resourceManager_.LoadModelDuplicate(ResourceManager::SRC::MODEL_BOSS_BODY));
+	transform_.modelId = resourceManager_.LoadHandleId(ResourceManager::SRC::MODEL_BOSS_FEET);
+	transformBody_.modelId = resourceManager_.LoadHandleId(ResourceManager::SRC::MODEL_BOSS_BODY);
 	transform_.scl = BOSS_SIZE;
 	transformBody_.scl = BOSS_SIZE;
 	transform_.quaRot= Quaternion::Identity();
@@ -110,9 +109,7 @@ void Boss::InitTransform(void)
 
 void Boss::InitCollider(void)
 {
-	ColliderLine* colLine = new ColliderLine(ColliderBase::TAG::BOSS,&transform_,{0.0f,100.0f,0.0f },{0.0f,-10.0f,0.0f});
-	ownColliders_.emplace(static_cast<int>(ColliderBase::SHAPE::LINE), colLine);
-
+	
 	ColliderCapsule* colCapsule = new ColliderCapsule(
 		ColliderBase::TAG::BOSS, &transform_, { 0.0f,130.0f,0.0f }, { 0.0f,80.0f,0.0f },80.0f);
 	ownColliders_.emplace(static_cast<int>(ColliderBase::SHAPE::CAPSULE), colCapsule);

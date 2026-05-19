@@ -306,7 +306,7 @@ bool CollisionManager::CanCollide(int _tagA, int _tagB) const
 
 	if (tagHit == TAG::BOSS)
 	{
-		if (tagHurt == TAG::PLAYER)
+		if (tagHurt == TAG::PLAYER|| tagHurt == TAG::STAGE)
 		{
 			return true;
 		}

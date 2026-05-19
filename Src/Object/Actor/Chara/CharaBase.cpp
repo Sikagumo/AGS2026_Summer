@@ -44,7 +44,8 @@ void CharaBase::Update(void)
 	// ˆÚ“®•ûŒü‚É‰‚¶‚½’x‰„‰ñ“]
 	DelayRotate();
 
-	
+	// d—Í‚É‚æ‚éˆÚ“®—Ê
+	CalcGravityPow();
 
 	// Õ“Ë”»’è‘O€”õ
 	CollisionReserve();
@@ -110,10 +111,7 @@ void CharaBase::CollisionGravity(void)
 	{
 		isJump_ = false;
 	}
-	else {
-		// d—Í‚É‚æ‚éˆÚ“®—Ê
-		CalcGravityPow();
-	}
+	
 
 	if (!isJump_)
 	{

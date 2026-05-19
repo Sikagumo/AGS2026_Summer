@@ -30,7 +30,7 @@ VECTOR WeaponMP::GetPos(void) const
 
 void WeaponMP::Load(void)
 {
-	transform_.SetModel(resourceManager_.LoadModelDuplicate(ResourceManager::SRC::MODEL_BOSS_WEAPON_RK));
+	transform_.SetModel(resourceManager_.LoadHandleId(ResourceManager::SRC::MODEL_BOSS_WEAPON_RK));
 }
 
 
