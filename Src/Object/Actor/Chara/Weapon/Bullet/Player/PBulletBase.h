@@ -30,7 +30,9 @@ public:
 
 	void Release(void)override;
 
-	void CreateShot(const VECTOR& _pos, const VECTOR& _shotDir, const Quaternion& _rot, int _shotCnt);
+	void Create(const VECTOR& _pos, int _shotCnt);
+
+	void Shot(const VECTOR& _shotDir, const Quaternion& _rot);
 
 	bool IsAlive(void)const;
 

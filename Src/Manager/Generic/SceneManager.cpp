@@ -67,7 +67,7 @@ void SceneManager::Initialize(void)
     // 3D•`‰æİ’è‚ğ‰Šú‰»‚·‚é
     Init3D();
 
-    ChangeScene(std::make_shared<SceneTitle>());
+    ChangeScene(std::make_shared<SceneGame>());
 }
 
 void SceneManager::Init3D(void)
@@ -250,7 +250,7 @@ void SceneManager::Draw(void)
         if (scene) scene->Draw();
     }
 
-    if (camera_) camera_->Draw();
+    if (camera_) camera_->DrawDebug();
 }
 
 void SceneManager::Release(void)

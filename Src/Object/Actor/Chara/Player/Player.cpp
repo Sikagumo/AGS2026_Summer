@@ -39,20 +39,32 @@ void Player::InitAnimation(void)
 	animation_ = std::make_unique<AnimationController>(transform_.modelId);
 	animation_->AddExternal(static_cast<int>(ANIM_TYPE::IDLE)
 		, 30.0f, resourceManager_.LoadHandleId(ResourceManager::SRC::ANIM_IDLE));
+
 	animation_->AddExternal(static_cast<int>(ANIM_TYPE::RUN)
 		, 30.0f, resourceManager_.LoadHandleId(ResourceManager::SRC::ANIM_RUN));
-	animation_->AddExternal(static_cast<int>(ANIM_TYPE::SHOT)
-		, 20.0f, resourceManager_.LoadHandleId(ResourceManager::SRC::ANIM_SHOT));
+
+	animation_->AddExternal(static_cast<int>(ANIM_TYPE::THROW_LEFT)
+		, 40.0f, resourceManager_.LoadHandleId(ResourceManager::SRC::ANIM_THROW_LEFT));
+
+	animation_->AddExternal(static_cast<int>(ANIM_TYPE::THROW_RIGHT)
+		, 40.0f, resourceManager_.LoadHandleId(ResourceManager::SRC::ANIM_THROW_RIGHT));
+
+	animation_->AddExternal(static_cast<int>(ANIM_TYPE::THROW_RUN)
+		, 20.0f, resourceManager_.LoadHandleId(ResourceManager::SRC::ANIM_THROW_RUN));
+
+	animation_->AddExternal(static_cast<int>(ANIM_TYPE::JUMP)
+		, 20.0f, resourceManager_.LoadHandleId(ResourceManager::SRC::ANIM_JUMP));
 
 	PlayAnim(ANIM_TYPE::IDLE);
 }
 void Player::InitTransform(void)
 {
-	constexpr float MODEL_SCALE = 0.5f;
+	constexpr float MODEL_SCALE = 0.625f;
+	constexpr float LOCAL_ROT_Y = 180.0f;
 
 	transform_.InitTransform(MODEL_SCALE
 		, Quaternion::Identity()
-		, Quaternion::AngleAxis(UtilityMath::Deg2RadF(180.0f), UtilityMath::AXIS_Y)
+		, Quaternion::AngleAxis(UtilityMath::Deg2RadF(LOCAL_ROT_Y), UtilityMath::AXIS_Y)
 		, UtilityMath::VECTOR_ZERO);
 }
 void Player::InitCollider(void)
@@ -89,21 +101,21 @@ void Player::InitPost(void)
 	timeInput = SHOT_TIME_ACTIVE_INPUT;
 
 	actionController_->SetAction(0, timeActive, timeEnd, timeActionActive
-		, std::bind(&Player::CreateBullet, this), timeInput);
+		, std::bind(&Player::ShotBullet, this), timeInput);
 
 	timeActive += SHOT_TIME_INCREMENT;
 	timeEnd += SHOT_TIME_INCREMENT;
 	timeActionActive += SHOT_TIME_INCREMENT;
 	timeInput += SHOT_TIME_INCREMENT;
 	actionController_->SetAction(1, timeActive, timeEnd, timeActionActive
-		, std::bind(&Player::CreateBullet, this), timeInput);
+		, std::bind(&Player::ShotBullet, this), timeInput);
 
 	timeActive += SHOT_TIME_INCREMENT * 2;
 	timeEnd += SHOT_TIME_INCREMENT * 2;
 	timeActionActive += SHOT_TIME_INCREMENT * 2;
 	timeInput += SHOT_TIME_INCREMENT * 2;
 	actionController_->SetAction(2, timeActive, timeEnd, timeActionActive
-		, std::bind(&Player::CreateBullet, this), timeInput);
+		, std::bind(&Player::ShotBullet, this), timeInput);
 }
 
 
@@ -165,14 +177,12 @@ void Player::ProcessMove(void)
 {
 	VECTOR dir = UtilityMath::VECTOR_ZERO;
 
-	if (GetJoypadNum() > 0)
-	{
-		//dir = inputManager_.GetDirectionXZAKey(InputManager::JOYPAD_NO::PAD1, InputManager::JOYPAD_ALGKEY::LEFT);
-	}
-	else
-	{
-		
-	}
+	// 接続されているゲームパッド１の情報を取得
+	InputManager::JOYPAD_IN_STATE padState = inputManager_.GetJPadInputState(InputManager::JOYPAD_NO::PAD1);
+
+	// 右スティックの傾き
+	dir = inputManager_.GetDirectionXZAKey(padState.AKeyLX, padState.AKeyLY);
+
 	if (inputManager_.IsNew(KEY_INPUT_W)) { dir.z += 1.0f; }
 	if (inputManager_.IsNew(KEY_INPUT_S)) { dir.z += -1.0f; }
 	if (inputManager_.IsNew(KEY_INPUT_A)) { dir.x += -1.0f; }
@@ -185,7 +195,8 @@ void Player::ProcessMove(void)
 
 		if (!isJump_)
 		{
-			if (animType_ != ANIM_TYPE::SHOT)
+			if (animType_ != ANIM_TYPE::THROW_LEFT
+				&& animType_ != ANIM_TYPE::THROW_RIGHT)
 			{
 				PlayAnim(ANIM_TYPE::RUN);
 			}
@@ -205,9 +216,13 @@ void Player::ProcessMove(void)
 	{
 		movePow_ = UtilityMath::VECTOR_ZERO;
 
-		if (!isJump_ && animType_ != ANIM_TYPE::SHOT)
+		if (!isJump_)
 		{
-			PlayAnim(ANIM_TYPE::IDLE);
+			if (animType_ != ANIM_TYPE::THROW_LEFT &&
+				animType_ != ANIM_TYPE::THROW_RIGHT)
+			{
+				PlayAnim(ANIM_TYPE::IDLE);
+			}
 		}
 	}
 }
@@ -261,10 +276,14 @@ void Player::ProcessJump(void)
 
 void Player::ProcessAttack(void)
 {
-	if (animType_ == ANIM_TYPE::SHOT && animation_->IsEnd()
+	if (animation_->IsEnd()
 		&& actionController_->GetActionState() == PActionController::PACTION_STATE::NONE)
 	{
-		PlayAnim(ANIM_TYPE::IDLE);
+		if (animType_ != ANIM_TYPE::THROW_LEFT &&
+			animType_ != ANIM_TYPE::THROW_RIGHT)
+		{
+			PlayAnim(ANIM_TYPE::IDLE);
+		}
 	}
 
 	actionController_->Update();
@@ -278,17 +297,21 @@ void Player::ProcessAttack(void)
 			if (actionController_->GetActionState() == PActionController::PACTION_STATE::NONE)
 			{
 				curAttackNum_ = 0;
+				PlayAnim(ANIM_TYPE::IDLE);
 			}
 			return;
 		}
 
 		if (!actionController_->IsActiveInput())
 		{
+			CreateBullet();
+
 			actionController_->Active(curAttackNum_);
 
 			curAttackNum_++;
 
-			PlayAnim(ANIM_TYPE::SHOT, false);
+			ANIM_TYPE type = ((curAttackNum_ % 2 == 0) ? ANIM_TYPE::THROW_LEFT : ANIM_TYPE::THROW_RIGHT);
+			PlayAnim(type, false);
 		}
 	}
 }
@@ -297,15 +320,19 @@ void Player::CreateBullet(void)
 {
 	std::unique_ptr<PBulletBase> bullet;
 
+	shotIndex_ = 0;
+
 	for (auto& bullet : bullets_)
 	{
 		if (!bullet->IsAlive())
 		{
 			bullet->Release();
 			bullet->Init();
-			bullet->CreateShot(transform_.pos, transform_.GetForward(), transform_.quaRot, curAttackNum_);
+
+			bullet->Create(transform_.pos, curAttackNum_);
 			return;
 		}
+		shotIndex_++;
 	}
 
 	switch (bulletType_)
@@ -321,15 +348,13 @@ void Player::CreateBullet(void)
 	}
 
 	bullet->Init();
-	bullet->CreateShot(transform_.pos, transform_.GetForward(), transform_.quaRot, curAttackNum_);
 
 	bullets_.emplace_back(std::move(bullet));
 }
 
 void Player::ShotBullet(void)
 {
-	PBulletBase& bullet = *bullets_.back();
-	bullet.CreateShot(transform_.pos, transform_.GetForward(), Quaternion::Identity(), curAttackNum_);
+	bullets_[shotIndex_]->Shot(transform_.GetForward(), transform_.quaRot);
 }
 
 void Player::DrawShadowRound(void)

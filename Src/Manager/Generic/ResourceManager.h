@@ -43,7 +43,10 @@ public:
 		/* 外部アニメーション */
 		ANIM_IDLE,
 		ANIM_RUN,
-		ANIM_SHOT,
+		ANIM_THROW_RUN,
+		ANIM_THROW_LEFT,
+		ANIM_THROW_RIGHT,
+		ANIM_JUMP,
 
 		/* エフェクト */
 
