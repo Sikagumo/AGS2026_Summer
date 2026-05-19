@@ -16,6 +16,7 @@ class WeaponRG;
 class Boss : public CharaBase
 {
 public:
+	//ウェポンの接続ボーンの名前
 	enum class BONE_NAME
 	{
 		WEAPON_JOINT_MGL_L=0,
@@ -27,6 +28,8 @@ public:
 		WEAPON_JOINT_RG,
 		MAX,
 	};
+
+	//各ボーンの情報
 	struct Bone {
 		int id = 0;
 		Transform transform;
@@ -41,6 +44,7 @@ public:
 
 	void Release(void) override;
 
+	//ゲット・セット
 	VECTOR GetBossPos(void) const;
 
 private:
@@ -50,6 +54,8 @@ private:
 	static constexpr VECTOR BOSS_INIT_POS= { 500.0f, 0.0f, 100.0f };
 	//回転
 	static constexpr float INIT_ROT = 180.0f;
+
+	//ボーンの番号
 	static constexpr int JOINT_FEET_BODY = 12;
 	static constexpr int JOINT_CAR_BODY = 4;
 	static constexpr int JOINT_CAR_WHEEL_FRONT_L = 6;
@@ -66,18 +72,20 @@ private:
 	static constexpr int JOINT_WAEAPON_MP_R = JOINT_CAP_WHEEL_BACK_R;
 	static constexpr int JOINT_WAEAPON_RG = JOINT_CAR_WHEEL_FRONT_R;
 
+	//ボス本体の各トランスフォーム
 	Transform transformFeet_;
 	Transform transformBody_;
 	Transform transformFeetCar_;
 	Transform transformWheelBack_;
 	Transform transformWheelFront_;
 
+	//ステータス
+	float hp_;						//HP
+	float attackDelay_;				//攻撃力
+	std::array<Bone,7> boneId_;		//各ボーン
+	BONE_NAME boneName_;			//ボーンの名前
 
-	float hp_;
-	float attackDelay_;
-	std::array<Bone,7> boneId_;
-	BONE_NAME boneName_;
-
+	//武器のポインター宣言
 	std::unique_ptr<WeaponMGL> weaponMGL_;
 	std::unique_ptr<WeaponMGR> weaponMGR_;
 	std::unique_ptr<WeaponCannon> weaponCannonL_;
@@ -86,7 +94,9 @@ private:
 	std::unique_ptr<WeaponMP> weaponMPR_;
 	std::unique_ptr<WeaponRG> weaponRG_;
 
+	//ボーン初期化
 	void BoneParam(void);
+	//ボーンアプデ
 	void BossTransformUpdate(void);
 
 protected:
