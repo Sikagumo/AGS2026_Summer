@@ -144,7 +144,8 @@ bool CollisionManager::CheckCollision(const ColliderBase* _colliderA, const Coll
 	{
 		return CheckCapsuleVsModel(_colliderA, _colliderB, _outInfo);
 	}
-	else if (shapeA == SHAPE::LINE && shapeB == SHAPE::MODEL)
+
+	if (shapeA == SHAPE::LINE && shapeB == SHAPE::MODEL)
 	{
 		return CheckLineVsModel(_colliderA, _colliderB, _outInfo);
 	}
@@ -183,54 +184,74 @@ void CollisionManager::ResolveCollision(ActorBase* _actorA, ActorBase* _actorB,
 
 	using TAG = ColliderBase::TAG;
 
-	// 押し戻すベクトルを計算
+	// 1. 通常の押し戻しベクトルを計算
 	VECTOR pushVector = VScale(_info.hitNormal, _info.penetration);
 
-	bool isAHaveMyCollider = false;
-	ActorBase* myActor = nullptr;
+	TAG tagA = _info.myCollider->GetCollisionTag();
+	TAG tagB = _info.hitCollider->GetCollisionTag();
 
-	// actorAの所有コライダをループして探す
+	// パターン1：自分が動くアクター（PLAYER/BOSS）で、相手が STAGE（床・壁）の場合
+	if ((tagA == TAG::PLAYER || tagA == TAG::BOSS) && tagB == TAG::STAGE)
+	{
+		pushVector.x = 0.0f;
+		pushVector.z = 0.0f;
+		if (pushVector.y > 0.001f)
+		{
+			pushVector.y += 0.02f;
+		}
+		else
+		{
+			pushVector.y = 0.0f;
+		}
+		_actorA->GetTransform().Translate(pushVector);
+		return; 
+	}
+	if ((tagA == TAG::PLAYER || tagA == TAG::BOSS) && tagB == TAG::STAGE)
+	{
+		float overlap = fabsf(_info.penetration);
+
+		if (overlap < 0.01f) { overlap = 0.5f; }
+
+		VECTOR stagePush = VGet(0.0f, overlap, 0.0f);
+
+		_actorA->GetTransform().Translate(stagePush);
+		return;
+	}
+	else if (tagA == TAG::STAGE && (tagB == TAG::PLAYER || tagB == TAG::BOSS))
+	{
+		float overlap = fabsf(_info.penetration);
+		if (overlap < 0.01f) { overlap = 0.5f; }
+
+		VECTOR stagePush = VGet(0.0f, overlap, 0.0f);
+
+		// 相手（_actorB）を真上に持ち上げる
+		_actorB->GetTransform().Translate(stagePush);
+		return;
+	}
+
+	// キャラクター同士は上下に沈まないように、Y軸の押し戻しをゼロにする
+	pushVector.y = 0.0f;
+
+	// どちらの所有コライダーがベースになっているかによって押し戻す対象を決める
+	bool isAHaveMyCollider = false;
 	for (const auto& [id, col] : _actorA->GetOwnColliders())
 	{
 		if (col == _info.myCollider)
 		{
 			isAHaveMyCollider = true;
-			myActor = _actorA;
 			break;
 		}
 	}
 
 	if (isAHaveMyCollider)
-	// もしAになければ、myColliderはBのもの
-	if (myActor == nullptr)
 	{
-		if (_info.myCollider->GetCollisionTag() == TAG::PLAYER || _info.myCollider->GetCollisionTag() == TAG::BOSS
-			|| _info.myCollider->GetCollisionTag() == TAG::STAGE)
-		{
-			_actorA->GetTransform().Translate(pushVector);;
-		}
-		myActor = _actorB;
-
->>>>>>> Ado_Boos
+		// myColliderがAのものなら、Aを押し戻す
+		_actorA->GetTransform().Translate(pushVector);
 	}
-
-	TAG myTag = _info.myCollider->GetCollisionTag();
-
-	if (myTag == TAG::PLAYER || myTag == TAG::BOSS)
+	else
 	{
-<<<<<<< HEAD
-		if (_info.myCollider->GetCollisionTag() == TAG::PLAYER || _info.myCollider->GetCollisionTag() == TAG::BOSS
-			|| _info.myCollider->GetCollisionTag() == TAG::STAGE)
-=======
-		if (pushVector.y < 0.0f)
->>>>>>> Ado_Boos
-		{
-			pushVector.y = 0;
-		}
-
-		myActor->GetTransform().Translate(pushVector);
-
-		
+		// myColliderがBのものなら、Bを逆方向に押し戻す
+		_actorB->GetTransform().Translate(VScale(pushVector, -1.0f));
 	}
 }
 
@@ -257,16 +278,32 @@ void CollisionManager::UpdateCollisionPars(void)
 		{
 			auto actorB = actors_[j];
 
-			// 距離によるカリング
-			VECTOR positionA = actorA->GetTransform().pos;
-			VECTOR positionB = actorB->GetTransform().pos;
-			float distanceX = positionB.x - positionA.x;
-			float distanceY = positionB.y - positionA.y;
-			float distanceZ = positionB.z - positionA.z;
-			float distSquare = (distanceX * distanceX) + (distanceY * distanceY) + (distanceZ * distanceZ);
+			bool isStageCollision = false;
 
-			// 一定距離以上離れている場合は、詳細な判定をスキップ
-			if (distSquare > cullingDistSquare_) { continue; }
+			// アクターAのコライダーの中にSTAGEがあるかチェック
+			for (auto& [idA, colA] : actorA->GetOwnColliders())
+			{
+				if (colA->GetCollisionTag() == ColliderBase::TAG::STAGE) { isStageCollision = true; break; }
+			}
+			// アクターBのコライダーの中にSTAGEがあるかチェック
+			for (auto& [idB, colB] : actorB->GetOwnColliders())
+			{
+				if (colB->GetCollisionTag() == ColliderBase::TAG::STAGE) { isStageCollision = true; break; }
+			}
+
+			// どちらもステージではない場合のみ、距離によるカリングを行う
+			if (!isStageCollision)
+			{
+				VECTOR positionA = actorA->GetTransform().pos;
+				VECTOR positionB = actorB->GetTransform().pos;
+				float distanceX = positionB.x - positionA.x;
+				float distanceY = positionB.y - positionA.y;
+				float distanceZ = positionB.z - positionA.z;
+				float distSquare = (distanceX * distanceX) + (distanceY * distanceY) + (distanceZ * distanceZ);
+
+				// 一定距離以上離れている場合は、詳細な判定をスキップ
+				if (distSquare > cullingDistSquare_) { continue; }
+			}
 
 			const auto& collidersB = actorB->GetOwnColliders();
 			
@@ -322,7 +359,6 @@ bool CollisionManager::CanCollide(int _tagA, int _tagB) const
 	// プレイヤーの衝突ルール
 	if (tagHit == TAG::PLAYER)
 	{
-		if (tagHurt == TAG::ENEMY || tagHurt == TAG::STAGE)
 		if (tagHurt == TAG::ENEMY || tagHurt == TAG::STAGE || tagHurt == TAG::BOSS)
 		{
 			return true;
@@ -332,6 +368,14 @@ bool CollisionManager::CanCollide(int _tagA, int _tagB) const
 	if (tagHit == TAG::BOSS)
 	{
 		if (tagHurt == TAG::PLAYER|| tagHurt == TAG::STAGE)
+		{
+			return true;
+		}
+	}
+
+	if (tagHit == TAG::STAGE)
+	{
+		if (tagHurt == TAG::PLAYER || tagHurt == TAG::BOSS)
 		{
 			return true;
 		}
@@ -449,7 +493,6 @@ bool CollisionManager::CheckCapsuleVsModel(const ColliderBase* _capsuleCol,
 
 	// モデルハンドル取得
 	int modelHandle = model->GetModelHandle();
-
 	if (modelHandle == -1) { return false; }
 
 	// 判定用パラメータ取得
@@ -457,20 +500,39 @@ bool CollisionManager::CheckCapsuleVsModel(const ColliderBase* _capsuleCol,
 	VECTOR endPos = capsule->GetWorldEndPos();
 	float radius = capsule->GetRadius();
 
+	// カプセルとモデル全体の衝突判定（触れている全ポリゴンが格納される）
 	MV1_COLL_RESULT_POLY_DIM hitResult = MV1CollCheck_Capsule(modelHandle, -1,
 		startPos, endPos, radius);
 
 	// 衝突結果の解析
 	if (hitResult.HitNum > 0)
 	{
-		const auto& bestHit = hitResult.Dim[0];
+		float maxUpward = -2.0f;
+		int bestIndex = -1;
 
-		// 除外対象のフレームチェック
-		if (model->IsExcludedFrame(bestHit.FrameIndex))
+		for (int i = 0; i < hitResult.HitNum; ++i)
+		{
+			// 除外対象のフレームチェック
+			if (model->IsExcludedFrame(hitResult.Dim[i].FrameIndex)) { continue; }
+
+			// 法線の Y 成分（どれだけ真上を向いているか）を比較
+			// 坂道や壁（Yが0に近い）よりも、平らな床（Yが1に近い）を最優先する
+			if (hitResult.Dim[i].Normal.y > maxUpward)
+			{
+				maxUpward = hitResult.Dim[i].Normal.y;
+				bestIndex = i;
+			}
+		}
+
+		// 有効なポリゴンが1つも見つからなかった場合
+		if (bestIndex == -1)
 		{
 			MV1CollResultPolyDimTerminate(hitResult);
 			return false;
 		}
+
+		// 最も「床」として適切なポリゴン情報を抽出
+		const auto& bestHit = hitResult.Dim[bestIndex];
 
 		// 衝突情報の設定
 		_outInfo.myCollider = _capsuleCol;
@@ -505,7 +567,6 @@ bool CollisionManager::CheckLineVsModel(const ColliderBase* _lineCol,
 	if (!line || !model) { return false; }
 
 	int modelHandle = model->GetModelHandle();
-
 	if (modelHandle == -1) { return false; }
 
 	VECTOR startPos = line->GetWorldStartPos();
@@ -526,8 +587,7 @@ bool CollisionManager::CheckLineVsModel(const ColliderBase* _lineCol,
 
 		_outInfo.hitPosition = hitResult.HitPosition;
 		_outInfo.hitNormal = hitResult.Normal;
-
-		_outInfo.penetration = 0.0f;
+		_outInfo.penetration = UtilityMath::MagnitudeF(VSub(endPos, hitResult.HitPosition));
 
 		return true;
 	}
