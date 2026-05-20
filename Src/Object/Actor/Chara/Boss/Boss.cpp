@@ -1,10 +1,12 @@
 #include "../../../../Manager/Generic/ResourceManager.h"
+#include "../../../../Manager/Generic/InputManager.h"
 #include "../../../../Utility/UtilityMath.h"
 #include "../../../../Utility/MatrixUtility.h"
 #include "../../../Common/Transform.h"
 #include "../../../Collider/ColliderBase.h"
 #include "../../../Collider/ColliderCapsule.h"
 #include "../../../Collider/ColliderLine.h"
+#include "../../../Manager/CollisionManager.h"
 #include "../Weapon/WeaponBase.h"
 #include "../Weapon/BossWeapon/WeaponMGL.h"
 #include "../Weapon/BossWeapon/WeaponMGR.h"
@@ -19,9 +21,8 @@ Boss::Boss(void):
 	transformFeetCar_(),
 	transformWheelBack_(),
 	transformWheelFront_(),
-	hp_(),
-	attackDelay_(),
-	boneName_(),
+	hp_(1000),
+	attackDelay_(20),
 
 
 	CharaBase()
@@ -34,6 +35,11 @@ Boss::~Boss(void)
 
 void Boss::Release(void)
 {
+}
+
+VECTOR Boss::GetBossPos(void) const
+{
+	return transformBody_.pos;
 }
 
 
@@ -52,7 +58,7 @@ void Boss::BoneParam(void)
 
 void Boss::BossTransformUpdate(void)
 {
-	transformFeet_.Update();
+	transform_.Update();
 	transformFeetCar_.Update();
 	BoneParam();
 	transformBody_.Update();
@@ -74,24 +80,29 @@ void Boss::BossTransformUpdate(void)
 	weaponCannonR_->Update();
 }
 
+void Boss::UpdateCollision(void)
+{
+
+}
+
 void Boss::Load(void)
 {
-	transformFeet_.SetModel(resourceManager_.LoadModelDuplicate(ResourceManager::SRC::MODEL_BOSS_FEET));
-	transformBody_.SetModel(resourceManager_.LoadModelDuplicate(ResourceManager::SRC::MODEL_BOSS_BODY));
-	transformFeet_.scl = BOSS_SIZE;
+	transform_.modelId = resourceManager_.LoadHandleId(ResourceManager::SRC::MODEL_BOSS_FEET);
+	transformBody_.modelId = resourceManager_.LoadHandleId(ResourceManager::SRC::MODEL_BOSS_BODY);
+	transform_.scl = BOSS_SIZE;
 	transformBody_.scl = BOSS_SIZE;
-	transformFeet_.quaRot= Quaternion::Identity();
-	transformFeet_.quaRotLocal =
-		Quaternion::Mult(transformFeet_.quaRotLocal,
+	transform_.quaRot= Quaternion::Identity();
+	transform_.quaRotLocal =
+		Quaternion::Mult(transform_.quaRotLocal,
 			Quaternion::AngleAxis(UtilityMath::Deg2RadF(INIT_ROT), UtilityMath::AXIS_Y));
 	transformBody_.quaRot = Quaternion::Identity();
 	transformBody_.quaRotLocal =
 		Quaternion::Mult(transformBody_.quaRotLocal,
 			Quaternion::AngleAxis(UtilityMath::Deg2RadF(INIT_ROT), UtilityMath::AXIS_Y));
 
-	transformFeet_.pos= BOSS_INIT_POS;
-	transformFeet_.Update();
-	transformBody_.pos = MV1GetFramePosition(transformFeet_.modelId,JOINT_FEET_BODY);
+	transform_.pos= BOSS_INIT_POS;
+	transform_.Update();
+	transformBody_.pos = MV1GetFramePosition(transform_.modelId,JOINT_FEET_BODY);
 	
 	transformBody_.Update();
 	BoneParam();
@@ -103,12 +114,18 @@ void Boss::InitTransform(void)
 
 void Boss::InitCollider(void)
 {
-	ColliderLine* colLine = new ColliderLine(ColliderBase::TAG::BOSS,&transformFeet_,{0.0f,100.0f,0.0f },{0.0f,-10.0f,0.0f});
-	ownColliders_.emplace(static_cast<int>(COLLIDER_TYPE::LINE), colLine);
+
+	ColliderLine* colLine = new ColliderLine(ColliderBase::TAG::BOSS, &transform_, { 0.0f,130.0f,0.0f }, { 0.0f,-10.0f,0.0f });
+	ownColliders_.emplace(static_cast<int>(ColliderBase::SHAPE::LINE), colLine);
+	
+	colLine->SetTriger(false);
 
 	ColliderCapsule* colCapsule = new ColliderCapsule(
-		ColliderBase::TAG::BOSS, &transformFeet_, { 0.0f,130.0f,0.0f }, { 0.0f,80.0f,0.0f },80.0f);
-	ownColliders_.emplace(static_cast<int>(COLLIDER_TYPE::CAPSULE), colCapsule);
+		ColliderBase::TAG::BOSS, &transform_, { 0.0f,130.0f,0.0f }, { 0.0f,80.0f,0.0f },80.0f);
+	ownColliders_.emplace(static_cast<int>(ColliderBase::SHAPE::CAPSULE), colCapsule);
+	colCapsule->SetTriger(false);
+
+	CollisionManager::GetInstance().RegisterActor(this);
 }
 
 void Boss::InitAnimation(void)
@@ -155,10 +172,34 @@ void Boss::InitPost(void)
 void Boss::UpdateProcess(void)
 {
 	
+	if (inputManager_.IsTrgDown(KEY_INPUT_U))
+	{
+		transform_.pos.y += 10.0f;
+	}
+
+	transformBody_.pos = MV1GetFramePosition(transform_.modelId, JOINT_FEET_BODY);
 
 	
 	
 	BossTransformUpdate();
+
+	// 各武器にボーン情報を設定（ここはそのまま）
+	weaponMGL_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MGL_L)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MGL_L)].transform);
+	weaponMGR_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MGL_R)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MGL_R)].transform);
+	weaponMPL_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MP_L)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MP_L)].transform);
+	weaponMPR_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MP_R)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MP_R)].transform);
+	weaponRG_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_RG)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_RG)].transform);
+	weaponCannonL_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_CANNON_L)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_CANNON_L)].transform);
+	weaponCannonR_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_CANNON_R)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_CANNON_R)].transform);
+
+	// 武器の更新
+	weaponMGL_->Update();
+	weaponMGR_->Update();
+	weaponMPL_->Update();
+	weaponMPR_->Update();
+	weaponRG_->Update();
+	weaponCannonL_->Update();
+	weaponCannonR_->Update();
 }
 
 void Boss::UpdateProcessPost(void)
@@ -167,7 +208,7 @@ void Boss::UpdateProcessPost(void)
 
 void Boss::DrawPre(void)
 {
-	MV1DrawModel(transformFeet_.modelId);
+	MV1DrawModel(transform_.modelId);
 	MV1DrawModel(transformBody_.modelId);
 	weaponMGL_->Draw();
 	weaponMGR_->Draw();
@@ -180,4 +221,6 @@ void Boss::DrawPre(void)
 	{
 		col.second->Draw();
 	}
+	DrawFormatString(10, 100, 0xffffff, "bossの座標：%f,%f,%f", transform_.pos.x, transform_.pos.y, transform_.pos.z);
+
 }

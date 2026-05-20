@@ -11,6 +11,7 @@
 #include "../../../Manager/CollisionManager.h"
 #include "../../../Collider/ColliderBase.h"
 #include "../../../Collider/ColliderCapsule.h"
+#include "../../../Collider/ColliderLine.h"
 #include "../Weapon/Bullet/Player/PBulletBig.h"
 #include "../Weapon/Bullet/Player/PBulletRapidFire.h"
 
@@ -57,12 +58,21 @@ void Player::InitTransform(void)
 }
 void Player::InitCollider(void)
 {
+	
+
+
 	const VECTOR COL_CAPSULE_TOP = VScale(COL_CAPSULE_TOP_LOCAL_POS, transform_.scl.y);
 	const VECTOR COL_CAPSULE_DOWN = VScale(COL_CAPSULE_DOWN_LOCAL_POS, transform_.scl.y);
 	const float CAPSULE_RADIUS = (COL_CAPSULE_RADIUS * transform_.scl.y);
 
+	ColliderLine* colLine = new ColliderLine(ColliderBase::TAG::BOSS, &transform_, COL_CAPSULE_TOP, { 0.0f,-10.0f,0.0f });
+	ownColliders_.emplace(static_cast<int>(ColliderBase::SHAPE::LINE), colLine);
+	colLine->SetTriger(false);
+
 	ownColliders_.emplace(0
 		, new ColliderCapsule(ColliderBase::TAG::PLAYER, &transform_, COL_CAPSULE_TOP, COL_CAPSULE_DOWN, CAPSULE_RADIUS));
+
+	ownColliders_.at(0)->SetTriger(false);
 
 	// 衝突判定マネージャに登録
 	CollisionManager::GetInstance().RegisterActor(this);
@@ -141,7 +151,7 @@ void Player::DrawLate(void)
 
 	UtilityMath::DrawLineXYZ(transform_.pos, transform_.quaRot);
 
-	DrawFormatString(0, 0, 0xffffff, "player:(%.f,%.f,%.f)(%.2f°,%.2f°,%.2f°)(%.2f°,%.2f°,%.2f°)"
+	DrawFormatString(10, 160, 0xffffff, "player:(%.f,%.f,%.f)(%.2f°,%.2f°,%.2f°)(%.2f°,%.2f°,%.2f°)"
 		, transform_.pos.x, transform_.pos.y, transform_.pos.z
 		, UtilityMath::Rad2DegF(transform_.quaRot.x), UtilityMath::Rad2DegF(transform_.quaRot.y), UtilityMath::Rad2DegF(transform_.quaRot.z)
 		, UtilityMath::Rad2DegF(transform_.quaRotLocal.x), UtilityMath::Rad2DegF(transform_.quaRotLocal.y), UtilityMath::Rad2DegF(transform_.quaRotLocal.z));

@@ -5,6 +5,8 @@
 class ColliderBase;
 class ResourceManager;
 class SceneManager;
+class InputManager;
+class CollisionManager;
 
 class ActorBase
 {
@@ -36,6 +38,8 @@ public:
 	// 大きさ、回転、座標等の取得
 	const Transform& GetTransform(void) const;
 
+	Transform& GetTransform(void);
+
 	// 自身の衝突情報取得
 	const ColliderMap& GetOwnColliders(void) const
 	{
@@ -59,6 +63,8 @@ protected:
 	// シングルトン参照
 	ResourceManager& resourceManager_;
 	SceneManager& sceneManager_;
+	InputManager& inputManager_;
+
 
 	// モデル制御の基本情報
 	Transform transform_;

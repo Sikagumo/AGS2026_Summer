@@ -24,9 +24,14 @@ int WeaponMGR::GetDamage(void) const
 	return 0;
 }
 
+VECTOR WeaponMGR::GetPos(void) const
+{
+	return transform_.pos;
+}
+
 void WeaponMGR::Load(void)
 {
-	transform_.SetModel(resourceManager_.LoadModelDuplicate(ResourceManager::SRC::MODEL_BOSS_WEAPON_MG_R));
+	transform_.SetModel(resourceManager_.LoadHandleId(ResourceManager::SRC::MODEL_BOSS_WEAPON_MG_R));
 }
 
 void WeaponMGR::InitTransform(void)

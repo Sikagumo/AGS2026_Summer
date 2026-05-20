@@ -8,7 +8,11 @@ WeaponBase::WeaponBase(void)
 
 void WeaponBase::Update(void)
 {
+	// 各キャラクターごとの更新処理
+	UpdateProcess();
 
+
+	UpdateProcessPost();
 }
 
 

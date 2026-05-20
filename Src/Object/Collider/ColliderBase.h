@@ -34,8 +34,8 @@ public:
 		WEAPON_CANNON,	//キャノン
 		WEAPON_MP,		//ミサイルポッド
 		WEAPON_RG,		//レールガン
-		CAMERA,			// カメラ
-		WALL,			// 壁
+		CAMERA,      // カメラ
+		WALL,        // 壁
 	};
 
 	/// @brief コンストラクタ

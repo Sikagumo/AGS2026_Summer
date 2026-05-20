@@ -1,11 +1,14 @@
 #include "ActorBase.h"
 #include "../../Manager/Generic/ResourceManager.h"
 #include "../../Manager/Generic/SceneManager.h"
+#include "../../Manager/Generic/InputManager.h"
+#include "../../Object/Manager/CollisionManager.h"
 #include "../Collider/ColliderBase.h"
 
 ActorBase::ActorBase(void)
 	: 
 	resourceManager_(ResourceManager::GetInstance()),
+	inputManager_(InputManager::GetInstance()),
 	sceneManager_(SceneManager::GetInstance()),
 	transform_(Transform())
 {
@@ -62,6 +65,11 @@ void ActorBase::Release(void)
 }
 
 const Transform& ActorBase::GetTransform(void) const
+{
+	return transform_;
+}
+
+Transform& ActorBase::GetTransform(void)
 {
 	return transform_;
 }

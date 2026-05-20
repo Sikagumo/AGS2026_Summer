@@ -1,5 +1,6 @@
-#include "CollisionManager.h"
+﻿#include "CollisionManager.h"
 #include "../../Manager/Generic/SceneManager.h"
+#include "../Common/Transform.h"
 #include "../Actor/ActorBase.h"
 #include "../Collider/ColliderCapsule.h"
 #include "../Collider/ColliderSphere.h"
@@ -17,7 +18,7 @@ CollisionManager::CollisionManager(void)
 
 void CollisionManager::CreateInstance(void)
 {
-	// ��d������h�����߂̃`�F�b�N
+	// 二重生成を防ぐためのチェック
 	if (instance_ == nullptr)
 	{
 		instance_ = new CollisionManager();
@@ -31,7 +32,7 @@ CollisionManager& CollisionManager::GetInstance(void)
 
 void CollisionManager::DestroyInstance(void)
 {
-	// �C���X�^���X�j��
+	// インスタンス破棄
 	if (instance_ != nullptr)
 	{
 		delete instance_;
@@ -45,7 +46,7 @@ void CollisionManager::Initialize(void)
 
 	activeCollisions_.clear();
 
-	// �J�����O�����̎��O�v�Z
+	// カリング距離の事前計算
 	cullingDistSquare_ = DEFAULT_CULL_DIST * DEFAULT_CULL_DIST;
 
 	updateTimer_ = 0.0f;
@@ -55,7 +56,7 @@ void CollisionManager::Update(void)
 {
 	updateTimer_ += SceneManager::GetInstance().GetDeltaTime();
 
-	// ���Ԋu���ƂɏՓ˔�������s
+	// 一定間隔ごとに衝突判定を実行
 	if (updateTimer_ >= UPDATE_INTERVAL)
 	{
 		updateTimer_ = 0.0f;
@@ -73,7 +74,7 @@ void CollisionManager::Clear(void)
 
 void CollisionManager::RegisterActor(ActorBase* _actor)
 {
-	// �d���o�^�h�~
+	// 重複登録防止
 	if (_actor == nullptr)
 	{
 		return;
@@ -86,7 +87,7 @@ void CollisionManager::RegisterActor(ActorBase* _actor)
 			return;
 		}
 	}
-	// ���X�g�ւ̒ǉ�
+	// リストへの追加
 	actors_.push_back(_actor);
 }
 
@@ -98,7 +99,7 @@ void CollisionManager::UnregisterActor(ActorBase* _actor)
 		return;
 	}
 
-	// ����
+	// 消去
 	actors_.erase
 	(
 		std::remove(actors_.begin(), actors_.end(), _actor),
@@ -109,19 +110,19 @@ void CollisionManager::UnregisterActor(ActorBase* _actor)
 bool CollisionManager::CheckCollision(const ColliderBase* _colliderA, const ColliderBase* _colliderB,
 	CollisionInfo& _outInfo)
 {
-	// �L�����`�F�b�N
+	// 有効性チェック
 	if (!_colliderA || !_colliderB)
 	{
 		return false;
 	}
 
-	// �`��^�C�v�擾
+	// 形状タイプ取得
 	using SHAPE = ColliderBase::SHAPE;
 
 	auto shapeA = _colliderA->GetShapeType();
 	auto shapeB = _colliderB->GetShapeType();
 
-	// �`��̑g�ݍ��킹�ɂ�锻��̐U�蕪��
+	// 形状の組み合わせによる判定の振り分け
 	if (shapeA == SHAPE::SPHERE && shapeB == SHAPE::SPHERE)
 	{
 		return CheckSphereVsSphere(_colliderA, _colliderB, _outInfo);
@@ -134,10 +135,19 @@ bool CollisionManager::CheckCollision(const ColliderBase* _colliderA, const Coll
 	{
 		return CheckSphereVsCapsule(_colliderA, _colliderB, _outInfo);
 	}
+	else if (shapeA == SHAPE::CAPSULE && shapeB == SHAPE::CAPSULE)
+	{
+		return CheckCapsuleVsCapsule(_colliderA, _colliderB, _outInfo);
+	}
 	
 	if (shapeA == SHAPE::CAPSULE && shapeB == SHAPE::MODEL)
 	{
 		return CheckCapsuleVsModel(_colliderA, _colliderB, _outInfo);
+	}
+
+	if (shapeA == SHAPE::LINE && shapeB == SHAPE::MODEL)
+	{
+		return CheckLineVsModel(_colliderA, _colliderB, _outInfo);
 	}
 
 	return false;
@@ -174,15 +184,80 @@ void CollisionManager::ResolveCollision(ActorBase* _actorA, ActorBase* _actorB,
 
 	using TAG = ColliderBase::TAG;
 
+	// 1. 通常の押し戻しベクトルを計算
+	VECTOR pushVector = VScale(_info.hitNormal, _info.penetration);
+
 	TAG tagA = _info.myCollider->GetCollisionTag();
 	TAG tagB = _info.hitCollider->GetCollisionTag();
 
-	VECTOR pushVector = VScale(_info.hitNormal, _info.penetration);
+	// パターン1：自分が動くアクター（PLAYER/BOSS）で、相手が STAGE（床・壁）の場合
+	if ((tagA == TAG::PLAYER || tagA == TAG::BOSS) && tagB == TAG::STAGE)
+	{
+		pushVector.x = 0.0f;
+		pushVector.z = 0.0f;
+		if (pushVector.y > 0.001f)
+		{
+			pushVector.y += 0.02f;
+		}
+		else
+		{
+			pushVector.y = 0.0f;
+		}
+		_actorA->GetTransform().Translate(pushVector);
+		return; 
+	}
+	if ((tagA == TAG::PLAYER || tagA == TAG::BOSS) && tagB == TAG::STAGE)
+	{
+		float overlap = fabsf(_info.penetration);
+
+		if (overlap < 0.01f) { overlap = 0.5f; }
+
+		VECTOR stagePush = VGet(0.0f, overlap, 0.0f);
+
+		_actorA->GetTransform().Translate(stagePush);
+		return;
+	}
+	else if (tagA == TAG::STAGE && (tagB == TAG::PLAYER || tagB == TAG::BOSS))
+	{
+		float overlap = fabsf(_info.penetration);
+		if (overlap < 0.01f) { overlap = 0.5f; }
+
+		VECTOR stagePush = VGet(0.0f, overlap, 0.0f);
+
+		// 相手（_actorB）を真上に持ち上げる
+		_actorB->GetTransform().Translate(stagePush);
+		return;
+	}
+
+	// キャラクター同士は上下に沈まないように、Y軸の押し戻しをゼロにする
+	pushVector.y = 0.0f;
+
+	// どちらの所有コライダーがベースになっているかによって押し戻す対象を決める
+	bool isAHaveMyCollider = false;
+	for (const auto& [id, col] : _actorA->GetOwnColliders())
+	{
+		if (col == _info.myCollider)
+		{
+			isAHaveMyCollider = true;
+			break;
+		}
+	}
+
+	if (isAHaveMyCollider)
+	{
+		// myColliderがAのものなら、Aを押し戻す
+		_actorA->GetTransform().Translate(pushVector);
+	}
+	else
+	{
+		// myColliderがBのものなら、Bを逆方向に押し戻す
+		_actorB->GetTransform().Translate(VScale(pushVector, -1.0f));
+	}
 }
 
 void CollisionManager::UpdateCollisionPars(void)
 {
-	// �O�t���[���̏Փˏ�񃊃Z�b�g
+	// 前フレームの衝突情報リセット
 	for (auto& actor : actors_)
 	{
 		actor->ClearHitCollider();
@@ -190,10 +265,10 @@ void CollisionManager::UpdateCollisionPars(void)
 
 	size_t actorCount = actors_.size();
 
-	// ����Ώۂ�2�����Ȃ珈���I��
+	// 判定対象が2つ未満なら処理終了
 	if (actorCount < 2) { return; }
 
-	// �A�N�^�[�Ԃ̑������蔻��
+	// アクター間の総当たり判定
 	for (size_t i = 0; i < actorCount; ++i)
 	{
 		auto actorA = actors_[i];
@@ -203,20 +278,36 @@ void CollisionManager::UpdateCollisionPars(void)
 		{
 			auto actorB = actors_[j];
 
-			// �����ɂ��J�����O
-			VECTOR positionA = actorA->GetTransform().pos;
-			VECTOR positionB = actorB->GetTransform().pos;
-			float distanceX = positionB.x - positionA.x;
-			float distanceY = positionB.y - positionA.y;
-			float distanceZ = positionB.z - positionA.z;
-			float distSquare = (distanceX * distanceX) + (distanceY * distanceY) + (distanceZ * distanceZ);
+			bool isStageCollision = false;
 
-			// ��苗���ȏ㗣��Ă���ꍇ�́A�ڍׂȔ�����X�L�b�v
-			if (distSquare > cullingDistSquare_) { continue; }
+			// アクターAのコライダーの中にSTAGEがあるかチェック
+			for (auto& [idA, colA] : actorA->GetOwnColliders())
+			{
+				if (colA->GetCollisionTag() == ColliderBase::TAG::STAGE) { isStageCollision = true; break; }
+			}
+			// アクターBのコライダーの中にSTAGEがあるかチェック
+			for (auto& [idB, colB] : actorB->GetOwnColliders())
+			{
+				if (colB->GetCollisionTag() == ColliderBase::TAG::STAGE) { isStageCollision = true; break; }
+			}
+
+			// どちらもステージではない場合のみ、距離によるカリングを行う
+			if (!isStageCollision)
+			{
+				VECTOR positionA = actorA->GetTransform().pos;
+				VECTOR positionB = actorB->GetTransform().pos;
+				float distanceX = positionB.x - positionA.x;
+				float distanceY = positionB.y - positionA.y;
+				float distanceZ = positionB.z - positionA.z;
+				float distSquare = (distanceX * distanceX) + (distanceY * distanceY) + (distanceZ * distanceZ);
+
+				// 一定距離以上離れている場合は、詳細な判定をスキップ
+				if (distSquare > cullingDistSquare_) { continue; }
+			}
 
 			const auto& collidersB = actorB->GetOwnColliders();
 			
-			// �R���C�_�[���m�̏ڍה���
+			// コライダー同士の詳細判定
 			for (auto& [idA, colA] : collidersA)
 			{
 				if (!colA->IsActive()) { continue; }
@@ -225,7 +316,7 @@ void CollisionManager::UpdateCollisionPars(void)
 				{
 					if (!colB->IsActive()) { continue; }
 
-					// �Փ˃^�O�ɂ�锻��ۂ̊m�F
+					// 衝突タグによる判定可否の確認
 					if (CanCollide(static_cast<int>(colA->GetCollisionTag()),
 						static_cast<int>(colB->GetCollisionTag())))
 					{
@@ -233,11 +324,11 @@ void CollisionManager::UpdateCollisionPars(void)
 
 						if (CheckCollision(colA, colB, info))
 						{
-							// �Փ˂�������𑊌݂ɓo�^
+							// 衝突した相手を相互に登録
 							actorA->AddHitCollider(colB);
 							actorB->AddHitCollider(colA);
 
-							if (colA->IsTrigger() || colB->IsTrigger())
+							if (!colA->IsTrigger() && !colB->IsTrigger())
 							{
 								ResolveCollision(actorA, actorB, info);
 							}
@@ -256,19 +347,35 @@ bool CollisionManager::CanCollide(int _tagA, int _tagB) const
 	TAG tagHit = static_cast<TAG>(_tagA);
 	TAG tagHurt = static_cast<TAG>(_tagB);
 
-	// ����^�O���m�̔���
+	// 同一タグ同士の判定
 	if (tagHit == tagHurt)
 	{
-		// �G�l�~�[���m�̂݁A�Փ˂�������
+		// エネミー同士のみ、衝突を許可する
 		if (tagHit == TAG::ENEMY) { return true; }
 
 		return false;
 	}
 
-	// �v���C���[�̏Փ˃��[��
+	// プレイヤーの衝突ルール
 	if (tagHit == TAG::PLAYER)
 	{
-		if (tagHurt == TAG::ENEMY || tagHurt == TAG::STAGE)
+		if (tagHurt == TAG::ENEMY || tagHurt == TAG::STAGE || tagHurt == TAG::BOSS)
+		{
+			return true;
+		}
+	}
+
+	if (tagHit == TAG::BOSS)
+	{
+		if (tagHurt == TAG::PLAYER|| tagHurt == TAG::STAGE)
+		{
+			return true;
+		}
+	}
+
+	if (tagHit == TAG::STAGE)
+	{
+		if (tagHurt == TAG::PLAYER || tagHurt == TAG::BOSS)
 		{
 			return true;
 		}
@@ -285,7 +392,7 @@ bool CollisionManager::CheckSphereVsSphere(const ColliderBase* _colliderA,
 
 	if (!sphereA || !sphereB) { return false; }
 
-	// �����v�Z
+	// 距離計算
 	VECTOR positionA = sphereA->GetWorldPosition();
 	VECTOR positionB = sphereB->GetWorldPosition();
 
@@ -293,32 +400,32 @@ bool CollisionManager::CheckSphereVsSphere(const ColliderBase* _colliderA,
 	float distanceY = positionA.y - positionB.y;
 	float distanceZ = positionA.z - positionB.z;
 
-	// �����̓����v�Z
+	// 距離の二乗を計算
 	float distSquare = (distanceX * distanceX) + (distanceY * distanceY) + (distanceZ * distanceZ);
 
-	// ���a�̍��v�l�Ɣ�r
+	// 半径の合計値と比較
 	float radiusSum = sphereA->GetRadius() + sphereB->GetRadius();
 	float radiusSumSq = radiusSum * radiusSum;
 
-	// �Փ˔���
+	// 衝突判定
 	if (distSquare < radiusSumSq)
 	{
 		float distance = sqrtf(distSquare);
 
-		// �Փˏ��̐ݒ�
+		// 衝突情報の設定
 		_outInfo.myCollider = _colliderA;
 		_outInfo.hitCollider = _colliderB;
 		_outInfo.isActive = true;
-		// �Փˈʒu�̌v�Z
+		// 衝突位置の計算
 		_outInfo.hitPosition = VAdd(positionB, VScale(VSub(positionA, positionB), 0.5f));
 
-		// �@���x�N�g���Ɖ����o���ʂ̌v�Z
+		// 法線ベクトルと押し出し量の計算
 		if (distance > 0.0f)
 		{
 			_outInfo.hitNormal = VScale(VSub(positionA, positionB), 1.0f / distance);
 		}
 
-		// �߂荞��ł��鋗�����Z�o
+		// めり込んでいる距離を算出
 		_outInfo.penetration = radiusSum - distance;
 
 		return true;
@@ -335,35 +442,35 @@ bool CollisionManager::CheckSphereVsCapsule(const ColliderBase* _sphereCol,
 
 	if (!_sphereCol || !_capsuleCol) { return false; }
 
-	// �e�`��̃p�����[�^�擾
+	// 各形状のパラメータ取得
 	VECTOR spherePos = sphereHit->GetWorldPosition();
 	VECTOR capStartPos = capsuleHit->GetWorldStartPos();
 	VECTOR capEndPos = capsuleHit->GetWorldEndPos();
 	float sphereRadius = sphereHit->GetRadius();
 	float capsuleRadius = capsuleHit->GetRadius();
 
-	// �J�v�Z���̐�����ŁA���̂ɍł��߂��_���Z�o
+	// カプセルの線分上で、球体に最も近い点を算出
 	VECTOR nearestPos = GetNearestPointOnSegment(capStartPos, capEndPos, spherePos);
 	
-	// �ŋߐړ_�Ƌ��̂̒��S�����ɂ�锻��
+	// 最近接点と球体の中心距離による判定
 	float distSquare = static_cast<float>(UtilityMath::SqrMagnitude(spherePos, nearestPos));
 	float radiusSum = sphereRadius + capsuleRadius;
 	float radiusSumSq = radiusSum * radiusSum;
 
-	// �Փ˔���
+	// 衝突判定
 	if (distSquare < radiusSumSq)
 	{
 		float distance = sqrtf(distSquare);
 
-		// �Փˏ��̐ݒ�
+		// 衝突情報の設定
 		_outInfo.myCollider = _sphereCol;
 		_outInfo.hitCollider = _capsuleCol;
 		_outInfo.isActive = true;
 
-		// �Փˈʒu�̌v�Z
+		// 衝突位置の計算
 		_outInfo.hitPosition = UtilityMath::Lerp(nearestPos, spherePos, UtilityMath::HALF_NUM);
 
-		// �@���x�N�g���Ɖ����o���ʂ̌v�Z
+		// 法線ベクトルと押し出し量の計算
 		if (distance > 0.0f)
 		{
 			_outInfo.hitNormal = VScale(VSub(spherePos, nearestPos), 1.0f / distance);
@@ -384,50 +491,68 @@ bool CollisionManager::CheckCapsuleVsModel(const ColliderBase* _capsuleCol,
 
 	if (!capsule || !model) { return false; };
 
-	// ���f���n���h���擾
+	// モデルハンドル取得
 	int modelHandle = model->GetModelHandle();
-
 	if (modelHandle == -1) { return false; }
 
-	// ����p�p�����[�^�擾
+	// 判定用パラメータ取得
 	VECTOR startPos = capsule->GetWorldStartPos();
 	VECTOR endPos = capsule->GetWorldEndPos();
 	float radius = capsule->GetRadius();
 
+	// カプセルとモデル全体の衝突判定（触れている全ポリゴンが格納される）
 	MV1_COLL_RESULT_POLY_DIM hitResult = MV1CollCheck_Capsule(modelHandle, -1,
 		startPos, endPos, radius);
 
-	// �Փˌ��ʂ̉��
+	// 衝突結果の解析
 	if (hitResult.HitNum > 0)
 	{
-		const auto& bestHit = hitResult.Dim[0];
+		float maxUpward = -2.0f;
+		int bestIndex = -1;
 
-		// ���O�Ώۂ̃t���[���`�F�b�N
-		if (model->IsExcludedFrame(bestHit.FrameIndex))
+		for (int i = 0; i < hitResult.HitNum; ++i)
+		{
+			// 除外対象のフレームチェック
+			if (model->IsExcludedFrame(hitResult.Dim[i].FrameIndex)) { continue; }
+
+			// 法線の Y 成分（どれだけ真上を向いているか）を比較
+			// 坂道や壁（Yが0に近い）よりも、平らな床（Yが1に近い）を最優先する
+			if (hitResult.Dim[i].Normal.y > maxUpward)
+			{
+				maxUpward = hitResult.Dim[i].Normal.y;
+				bestIndex = i;
+			}
+		}
+
+		// 有効なポリゴンが1つも見つからなかった場合
+		if (bestIndex == -1)
 		{
 			MV1CollResultPolyDimTerminate(hitResult);
 			return false;
 		}
 
-		// �Փˏ��̐ݒ�
+		// 最も「床」として適切なポリゴン情報を抽出
+		const auto& bestHit = hitResult.Dim[bestIndex];
+
+		// 衝突情報の設定
 		_outInfo.myCollider = _capsuleCol;
 		_outInfo.hitCollider = _modelCol;
 		_outInfo.hitPosition = bestHit.HitPosition;
 		_outInfo.hitNormal = bestHit.Normal;
 		_outInfo.isActive = true;
 
-		// �J�v�Z���̎��i�����j��̍ŋߐړ_�����߁A���m�Ȃ߂荞�ݗʂ��Z�o
+		// カプセルの軸（線分）上の最近接点を求め、正確なめり込み量を算出
 		VECTOR nearestPos = GetNearestPointOnSegment(startPos, endPos, bestHit.HitPosition);
 		float distance = UtilityMath::MagnitudeF(VSub(bestHit.HitPosition, nearestPos));
 		_outInfo.penetration = radius - distance;
 
-		// ���������
+		// メモリ解放
 		MV1CollResultPolyDimTerminate(hitResult);
 
 		return true;
 	}
 
-	// �Փ˂��Ȃ������ꍇ�̃��������
+	// 衝突しなかった場合のメモリ解放
 	MV1CollResultPolyDimTerminate(hitResult);
 
 	return false;
@@ -442,7 +567,6 @@ bool CollisionManager::CheckLineVsModel(const ColliderBase* _lineCol,
 	if (!line || !model) { return false; }
 
 	int modelHandle = model->GetModelHandle();
-
 	if (modelHandle == -1) { return false; }
 
 	VECTOR startPos = line->GetWorldStartPos();
@@ -463,8 +587,72 @@ bool CollisionManager::CheckLineVsModel(const ColliderBase* _lineCol,
 
 		_outInfo.hitPosition = hitResult.HitPosition;
 		_outInfo.hitNormal = hitResult.Normal;
+		_outInfo.penetration = UtilityMath::MagnitudeF(VSub(endPos, hitResult.HitPosition));
 
-		_outInfo.penetration = 0.0f;
+		return true;
+	}
+
+	return false;
+}
+
+bool CollisionManager::CheckCapsuleVsCapsule(const ColliderBase* _colliderA,
+	const ColliderBase* _colliderB, CollisionInfo& _outInfo)
+{
+	const auto* capsuleA = dynamic_cast<const ColliderCapsule*>(_colliderA);
+	const auto* capsuleB = dynamic_cast<const ColliderCapsule*>(_colliderB);
+
+	if (!capsuleA || !capsuleB) { return false; }
+
+	// それぞれのカプセルのワールド座標（線分）を取得
+	VECTOR startPositionA = capsuleA->GetWorldStartPos();
+	VECTOR endPositionA = capsuleA->GetWorldEndPos();
+
+	VECTOR startPositionB = capsuleB->GetWorldStartPos();
+	VECTOR endPositionB = capsuleB->GetWorldEndPos();
+
+	// 1. まずカプセルAの中点を仮のターゲットにする
+	VECTOR centerA = VScale(VAdd(startPositionA, endPositionA), 0.5f);
+
+	// 2. 既存の関数を使い、お互いの線分上の最近接点を交互に割り出して追い詰める
+	// 2〜3回往復させるだけで、実用上全く問題のないレベルまで正確な2点に収束します
+	VECTOR nearestPositionB = GetNearestPointOnSegment(startPositionB, endPositionB, centerA);
+	VECTOR nearestPositionA = GetNearestPointOnSegment(startPositionA, endPositionA, 
+		nearestPositionB);
+	nearestPositionB = GetNearestPointOnSegment(startPositionB, endPositionB, nearestPositionA);
+
+	// 3. 割り出した2点間の距離の2乗を計算する
+	VECTOR distanceVec = VSub(nearestPositionA, nearestPositionB);
+	float distSquare = static_cast<float>(UtilityMath::SqrMagnitude(distanceVec));
+
+	// お互いの半径の合計値と比較
+	float radiusSum = capsuleA->GetRadius() + capsuleB->GetRadius();
+	float radiusSumSq = radiusSum * radiusSum;
+
+	// 衝突判定
+	if (distSquare < radiusSumSq)
+	{
+		float distance = sqrtf(distSquare);
+
+		// 衝突情報の設定
+		_outInfo.myCollider = _colliderA;
+		_outInfo.hitCollider = _colliderB;
+		_outInfo.isActive = true;
+
+		// 衝突位置は、お互いの最近接点の中間地点
+		_outInfo.hitPosition = VAdd(nearestPositionA, VScale(VSub(nearestPositionB, nearestPositionA), 0.5f));
+
+		// 法線ベクトル（AからBへ向かう方向）の計算
+		if (distance > 0.0f)
+		{
+			_outInfo.hitNormal = VScale(VSub(nearestPositionA, nearestPositionB), 1.0f / distance);
+		}
+		else
+		{
+			_outInfo.hitNormal = VGet(0.0f, 1.0f, 0.0f);
+		}
+
+		// めり込んでいる距離を算出
+		_outInfo.penetration = radiusSum - distance;
 
 		return true;
 	}

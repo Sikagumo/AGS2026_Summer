@@ -5,7 +5,7 @@ ColliderBase::ColliderBase(SHAPE shapeType, TAG collisionTag, const Transform* f
 	, collisionTag_(collisionTag)
 	, followTarget_(followTarget)
 	, isActive_(true)
-	, isTrigger_(false)
+	, isTrigger_(true)
 {
 }
 
