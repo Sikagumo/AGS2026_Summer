@@ -3,6 +3,8 @@
 #include "../../../../../../Utility/UtilityMath.h"
 #include "../../../../../../Manager/Generic/SceneManager.h"
 #include "../../../../../../Application.h"
+#include "../../../../../Manager/CollisionManager.h"
+#include "../../../../../Collider/ColliderSphere.h"
 
 PBulletBase::PBulletBase(void)
 	: ActorBase::ActorBase()
@@ -49,15 +51,18 @@ void PBulletBase::Update(void)
 	}
 	// 衝突時
 	//bulletState_ = BULLET_STATE::BLAST;
+
+	UpdatePost();
 }
 
 void PBulletBase::Draw(void)
 {
 	if (!isVisible_) { return; }
+
 	if (transform_.modelId == -1)
 	{
 		constexpr int SPHERE_DIV = 16;
-		DrawSphere3D(transform_.pos, radius_, SPHERE_DIV, 0xffffff, 0xffffff, true);
+		DrawSphere3D(transform_.pos, radius_, SPHERE_DIV, 0xffffff, 0xffffff, false);
 	}
 }
 
@@ -91,6 +96,11 @@ void PBulletBase::Shot(const VECTOR& _shotDir, const Quaternion& _rot)
 	curGravityPow_ = 0.0f;
 
 	transform_.Update();
+
+	// 衝突判定マネージャに登録
+	ownColliders_.emplace(0
+		, new ColliderSphere(ColliderBase::TAG::PLAYER_BULLET, &transform_, UtilityMath::VECTOR_ZERO, radius_));
+	CollisionManager::GetInstance().RegisterActor(this);
 }
 
 bool PBulletBase::IsAlive(void) const

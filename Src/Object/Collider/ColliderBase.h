@@ -27,6 +27,7 @@ public:
 	{
 		STAGE,			// ステージ
 		PLAYER,			// プレイヤー
+		PLAYER_BULLET,	// プレイヤー弾
 		ENEMY,          // 敵
 		BOSS,			// ボス
 		WEAPON_MG_L,	//マシンガン（左

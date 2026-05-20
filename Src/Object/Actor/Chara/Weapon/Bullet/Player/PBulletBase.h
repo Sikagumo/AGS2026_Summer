@@ -30,6 +30,7 @@ public:
 
 	void Release(void)override;
 
+
 	void Create(const VECTOR& _pos, int _shotCnt);
 
 	void Shot(const VECTOR& _shotDir, const Quaternion& _rot);
@@ -38,6 +39,7 @@ public:
 
 	float GetRadius(void)const { return radius_; }
 
+	void SetPosition(const VECTOR& _pos) { transform_.pos = _pos; }
 
 
 protected:
