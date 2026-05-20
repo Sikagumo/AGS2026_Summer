@@ -5,6 +5,8 @@
 class ColliderBase;
 class ResourceManager;
 class SceneManager;
+class InputManager;
+class CollisionManager;
 
 class ActorBase
 {
@@ -17,6 +19,9 @@ public:
 
 	// デストラクタ
 	virtual ~ActorBase(void) = default;
+
+	/// @brief リソースの読み込み
+	virtual void Load(void) = 0;
 
 	// 初期化
 	void Init(void);
@@ -58,6 +63,8 @@ protected:
 	// シングルトン参照
 	ResourceManager& resourceManager_;
 	SceneManager& sceneManager_;
+	InputManager& inputManager_;
+	CollisionManager& collisionManager_;
 
 	// モデル制御の基本情報
 	Transform transform_;
@@ -67,10 +74,6 @@ protected:
 
 	// 衝突相手の情報
 	std::vector<const ColliderBase*> hitColliders_;
-
-
-	// リソースロード
-	virtual void InitLoad(void) = 0;
 
 	// 大きさ、回転、座標の初期化
 	virtual void InitTransform(void) = 0;

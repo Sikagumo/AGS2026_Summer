@@ -1,6 +1,7 @@
 #include "SceneManager.h"
 #include "../../Scene/SceneBase.h"
 #include "../../Scene/MainScene/SceneTitle.h"
+#include "../../Scene/MainScene/SceneGame.h"
 #include "../../Scene/MainScene/SceneGamePlayer.h"
 #include "../../Scene/MainScene/SceneGameBoss.h"
 #include "../Decoration/SoundManager.h"
@@ -56,6 +57,7 @@ void SceneManager::Initialize(void)
     SoundManager::GetInstance().Initialize();
     TimeManager::CreateInstance();
     Loading::CreateInstance();
+    Loading::GetInstance()->Initialize();
     CollisionManager::CreateInstance();
     CollisionManager::GetInstance().Initialize();
 
@@ -65,7 +67,7 @@ void SceneManager::Initialize(void)
     // 3D描画設定を初期化する
     Init3D();
 
-    ChangeScene(std::make_shared<SceneGamePlayer>());
+    ChangeScene(std::make_shared<SceneTitle>());
 }
 
 void SceneManager::Init3D(void)
@@ -226,6 +228,12 @@ void SceneManager::Update(void)
     // カメラや衝突判定
     //if (camera_) camera_->UpdateBeforeCollision();
     CollisionManager::GetInstance().Update();
+
+    if (current)
+    {
+        current->UpdateCollision();
+    }
+
     if (camera_) camera_->Update();
 }
 
@@ -275,7 +283,7 @@ void SceneManager::Release(void)
     // 各マネージャーを破棄する
     SoundManager::GetInstance().DestroyInstance();
     TimeManager::GetInstance().DestroyInstance();
-    Loading::GetInstance()->DestroyInstanceInstance();
+    Loading::GetInstance()->DestroyInstance();
     CollisionManager::DestroyInstance();
 }
 

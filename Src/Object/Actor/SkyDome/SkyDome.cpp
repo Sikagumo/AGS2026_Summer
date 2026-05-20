@@ -12,7 +12,7 @@ SkyDome::SkyDome(const Transform& _transform):
 {
 }
 
-void SkyDome::InitLoad(void)
+void SkyDome::Load(void)
 {
 	
 }

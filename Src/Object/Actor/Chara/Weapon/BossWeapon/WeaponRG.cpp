@@ -3,19 +3,34 @@
 #include "../../../../../Utility/UtilityMath.h"
 #include "WeaponRG.h"
 
-WeaponRG::WeaponRG(int _modelId,int _jointNo)
+WeaponRG::WeaponRG(void)
 {
-		modelId_ = _modelId;
-		jointNo_ = _jointNo;
+		
 }
 
 void WeaponRG::Release(void)
 {
 }
 
-void WeaponRG::InitLoad(void)
+void WeaponRG::SetBone(int _id, Transform _trans)
 {
-	transform_.SetModel(resourceManager_.LoadModelDuplicate(ResourceManager::SRC::MODEL_BOSS_WEAPON_RG));
+	bone_.id = _id;
+	bone_.transform = _trans;
+}
+
+int WeaponRG::GetDamage(void) const
+{
+	return 0;
+}
+
+VECTOR WeaponRG::GetPos(void) const
+{
+	return transform_.pos;
+}
+
+void WeaponRG::Load(void)
+{
+	transform_.SetModel(resourceManager_.LoadHandleId(ResourceManager::SRC::MODEL_BOSS_WEAPON_RG));
 }
 
 void WeaponRG::InitTransform(void)
@@ -29,7 +44,7 @@ void WeaponRG::InitTransform(void)
 		Quaternion::Mult(transform_.quaRotLocal,
 			Quaternion::AngleAxis(UtilityMath::Deg2RadF(90.0f), UtilityMath::AXIS_X));
 
-	transform_.pos = MV1GetFramePosition(modelId_, jointNo_);
+	transform_.pos = MV1GetFramePosition(bone_.transform.modelId, bone_.id);
 	transform_.Update();
 }
 
@@ -47,6 +62,8 @@ void WeaponRG::InitPost(void)
 
 void WeaponRG::UpdateProcess(void)
 {
+	transform_.pos = MV1GetFramePosition(bone_.transform.modelId, bone_.id);
+	transform_.Update();
 }
 
 void WeaponRG::UpdateProcessPost(void)

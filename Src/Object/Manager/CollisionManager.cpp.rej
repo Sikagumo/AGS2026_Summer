@@ -1,0 +1,9 @@
+diff a/Src/Object/Manager/CollisionManager.cpp b/Src/Object/Manager/CollisionManager.cpp	(rejected hunks)
+@@ -322,7 +322,6 @@
+ 	// プレイヤーの衝突ルール
+ 	if (tagHit == TAG::PLAYER)
+ 	{
+-		if (tagHurt == TAG::ENEMY || tagHurt == TAG::STAGE)
+ 		if (tagHurt == TAG::ENEMY || tagHurt == TAG::STAGE || tagHurt == TAG::BOSS)
+ 		{
+ 			return true;

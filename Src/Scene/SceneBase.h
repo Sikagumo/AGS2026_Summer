@@ -16,6 +16,8 @@ public:
 	//XVˆ—
 	virtual void Update(void) = 0;
 
+	virtual void UpdateCollision(void) {};
+
 	//•`‰æˆ—
 	virtual void Draw(void) = 0;
 

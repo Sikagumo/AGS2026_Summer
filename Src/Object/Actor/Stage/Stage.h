@@ -18,13 +18,13 @@ public:
 
 	~Stage(void)override = default;
 
+	void Load(void)override;
+
 	void Update(void)override;
 
 	void Draw(void)override;
 
 protected:
-
-	void InitLoad(void)override;
 
 	void InitTransform(void)override;
 

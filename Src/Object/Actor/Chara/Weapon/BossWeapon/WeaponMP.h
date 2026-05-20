@@ -5,16 +5,21 @@ class WeaponMP :
 {
 public:
 
-	WeaponMP(int _modelId,int _jointNo);
+	WeaponMP();
 
 	~WeaponMP(void)override = default;
 
+	// リソースロード
+	void Load(void) override;
+
 	void Release(void)override;
 
-protected:
+	void SetBone(int _id, Transform _trans) override;
+	int GetDamage(void) const override;
 
-	// リソースロード
-	void InitLoad(void) override;
+	VECTOR GetPos(void) const override;
+
+protected:
 
 	// 大きさ、回転、座標の初期化
 	void InitTransform(void) override;

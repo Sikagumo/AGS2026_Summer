@@ -16,6 +16,9 @@ public:
 
 	~SkyDome(void)override = default;
 
+	// リソースロード
+	void Load(void)override;
+
 	void Update(void)override;
 
 	void Draw(void)override;
@@ -27,9 +30,6 @@ protected:
 
 	// 状態
 	STATE state_;
-
-	// リソースロード
-	void InitLoad(void)override;
 
 	// 大きさ、回転、座標の初期化
 	void InitTransform(void)override;

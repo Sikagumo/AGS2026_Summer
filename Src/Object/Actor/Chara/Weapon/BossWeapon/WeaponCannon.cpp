@@ -1,37 +1,55 @@
 #include <DxLib.h>
 #include "../../../../../Manager/Generic/ResourceManager.h"
 #include "../../../../../Utility/UtilityMath.h"
+#include "../../../../Collider/ColliderBase.h"
+#include "../../../../Collider/ColliderCapsule.h"
 #include "WeaponCannon.h"
 
-WeaponCannon::WeaponCannon(int _modelId,int _jointNo)
+WeaponCannon::WeaponCannon()
 {
-	modelId_ = _modelId;
-	jointNo_ = _jointNo;
+	
 }
 
 void WeaponCannon::Release(void)
 {
 }
 
-void WeaponCannon::InitLoad(void)
+void WeaponCannon::SetBone(int _id, Transform _trans)
 {
-	transform_.SetModel(resourceManager_.LoadModelDuplicate(ResourceManager::SRC::MODEL_BOSS_WEAPON_CN));
+	bone_.id = _id;
+	bone_.transform = _trans;
+}
+int WeaponCannon::GetDamage(void) const
+{
+	return 0;
+}
+
+VECTOR WeaponCannon::GetPos(void) const
+{
+	return transform_.pos;
+}
+
+void WeaponCannon::Load(void)
+{
+	transform_.SetModel(resourceManager_.LoadHandleId(ResourceManager::SRC::MODEL_BOSS_WEAPON_CN));
 }
 
 void WeaponCannon::InitTransform(void)
 {
+	
 	transform_.scl = WEAPON_SIZE;
 	transform_.quaRot = Quaternion::Identity();
 	transform_.quaRotLocal =
 		Quaternion::Mult(transform_.quaRotLocal,
 			Quaternion::AngleAxis(UtilityMath::Deg2RadF(WEAPON_ROT), UtilityMath::AXIS_Y));
 
-	transform_.pos = MV1GetFramePosition(modelId_, jointNo_);
+	transform_.pos = MV1GetFramePosition(bone_.transform.modelId, bone_.id);
 	transform_.Update();
 }
 
 void WeaponCannon::InitCollider(void)
 {
+	
 }
 
 void WeaponCannon::InitAnimation(void)
@@ -44,6 +62,8 @@ void WeaponCannon::InitPost(void)
 
 void WeaponCannon::UpdateProcess(void)
 {
+	transform_.pos = MV1GetFramePosition(bone_.transform.modelId, bone_.id);
+	transform_.Update();
 }
 
 void WeaponCannon::UpdateProcessPost(void)

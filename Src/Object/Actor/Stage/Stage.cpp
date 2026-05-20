@@ -1,6 +1,7 @@
 #include "Stage.h"
 #include "../../Actor/ActorBase.h"
 #include "../../../Manager/Generic/ResourceManager.h"
+#include "../../../Object/Manager/CollisionManager.h"
 #include "../../../Utility/UtilityMath.h"
 #include "../../Collider/ColliderModel.h"
 
@@ -16,11 +17,12 @@ void Stage::Update(void)
 void Stage::Draw(void)
 {
 	ActorBase::Draw();
+	
 }
 
-void Stage::InitLoad(void)
+void Stage::Load(void)
 {
-	
+	transform_.modelId = resourceManager_.LoadHandleId(ResourceManager::SRC::MODEL_STAGE);
 }
 
 void Stage::InitTransform(void)
@@ -36,16 +38,16 @@ void Stage::InitCollider(void)
 	MV1SetupCollInfo(transform_.modelId);
 
 	// モデルのコライダ割り当て
-	/*ColliderModel* colModel = new ColliderModel(ColliderBase::TAG::STAGE, &transform_);
+	ColliderModel* colModel = new ColliderModel(ColliderBase::TAG::STAGE, &transform_);
+	ownColliders_.emplace(static_cast<int>(ColliderBase::SHAPE::MODEL), colModel);
+	colModel->SetTriger(true);
+
 	for (const std::string& name : EXCLUDE_FRAME_NAMES)
 	{
 		colModel->AddExcludeFrameIds(name);
 	}
-	for (const std::string& name : TARGET_FRAME_NAMES)
-	{
-		colModel->AddExcludeFrameIds(name);
-	}
-	ownColliders_.emplace(static_cast<int>(COLLIDER_TYPE::MODEL), colModel);*/
+
+	CollisionManager::GetInstance().RegisterActor(this);
 }
 
 

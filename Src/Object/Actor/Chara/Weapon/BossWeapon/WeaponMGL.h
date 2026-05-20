@@ -5,16 +5,20 @@ class WeaponMGL :
 {
 public:
 
-	WeaponMGL(int _modelId, int _jointNo);
+	WeaponMGL(void);
 
 	~WeaponMGL(void)override = default;
 
+	// リソースロード
+	void Load(void) override;
+
 	void Release(void)override;
 
-protected:
+	void SetBone(int _id,Transform _trans) override;
+	int GetDamage(void) const override;
+	VECTOR GetPos(void) const override;
 
-	// リソースロード
-	void InitLoad(void) override;
+protected:
 
 	// 大きさ、回転、座標の初期化
 	void InitTransform(void) override;

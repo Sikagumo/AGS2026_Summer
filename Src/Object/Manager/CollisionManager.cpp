@@ -144,6 +144,10 @@ bool CollisionManager::CheckCollision(const ColliderBase* _colliderA, const Coll
 	{
 		return CheckCapsuleVsModel(_colliderA, _colliderB, _outInfo);
 	}
+	else if (shapeA == SHAPE::LINE && shapeB == SHAPE::MODEL)
+	{
+		return CheckLineVsModel(_colliderA, _colliderB, _outInfo);
+	}
 
 	return false;
 }
@@ -183,30 +187,50 @@ void CollisionManager::ResolveCollision(ActorBase* _actorA, ActorBase* _actorB,
 	VECTOR pushVector = VScale(_info.hitNormal, _info.penetration);
 
 	bool isAHaveMyCollider = false;
+	ActorBase* myActor = nullptr;
+
+	// actorAの所有コライダをループして探す
 	for (const auto& [id, col] : _actorA->GetOwnColliders())
 	{
 		if (col == _info.myCollider)
 		{
 			isAHaveMyCollider = true;
+			myActor = _actorA;
 			break;
 		}
 	}
 
 	if (isAHaveMyCollider)
+	// もしAになければ、myColliderはBのもの
+	if (myActor == nullptr)
 	{
 		if (_info.myCollider->GetCollisionTag() == TAG::PLAYER || _info.myCollider->GetCollisionTag() == TAG::BOSS
 			|| _info.myCollider->GetCollisionTag() == TAG::STAGE)
 		{
 			_actorA->GetTransform().Translate(pushVector);;
 		}
+		myActor = _actorB;
+
+>>>>>>> Ado_Boos
 	}
-	else
+
+	TAG myTag = _info.myCollider->GetCollisionTag();
+
+	if (myTag == TAG::PLAYER || myTag == TAG::BOSS)
 	{
+<<<<<<< HEAD
 		if (_info.myCollider->GetCollisionTag() == TAG::PLAYER || _info.myCollider->GetCollisionTag() == TAG::BOSS
 			|| _info.myCollider->GetCollisionTag() == TAG::STAGE)
+=======
+		if (pushVector.y < 0.0f)
+>>>>>>> Ado_Boos
 		{
-			_actorB->GetTransform().Translate(pushVector);;
+			pushVector.y = 0;
 		}
+
+		myActor->GetTransform().Translate(pushVector);
+
+		
 	}
 }
 
@@ -299,6 +323,15 @@ bool CollisionManager::CanCollide(int _tagA, int _tagB) const
 	if (tagHit == TAG::PLAYER)
 	{
 		if (tagHurt == TAG::ENEMY || tagHurt == TAG::STAGE)
+		if (tagHurt == TAG::ENEMY || tagHurt == TAG::STAGE || tagHurt == TAG::BOSS)
+		{
+			return true;
+		}
+	}
+
+	if (tagHit == TAG::BOSS)
+	{
+		if (tagHurt == TAG::PLAYER|| tagHurt == TAG::STAGE)
 		{
 			return true;
 		}

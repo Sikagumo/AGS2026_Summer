@@ -15,6 +15,7 @@ public:
 
 		/* 単一画像 */
 		IMG_TITLE,
+		IMG_PEACH,
 
 		/* 複数画像 */
 		IMGS_TEXTS,
@@ -36,6 +37,8 @@ public:
 		MODEL_BOSS_WEAPON_CN,
 		MODEL_BOSS_WEAPON_RG,
 		MODEL_BOSS_WEAPON_RK,
+
+		MODEL_STAGE,
 
 		/* 外部アニメーション */
 		ANIM_IDLE,

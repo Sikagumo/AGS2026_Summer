@@ -15,7 +15,7 @@ PBulletBig::PBulletBig(void)
 {
 }
 
-void PBulletBig::InitLoad(void)
+void PBulletBig::Load(void)
 {
 }
 
