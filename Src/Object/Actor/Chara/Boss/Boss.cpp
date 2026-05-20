@@ -58,7 +58,7 @@ void Boss::BoneParam(void)
 
 void Boss::BossTransformUpdate(void)
 {
-	transformFeet_.Update();
+	transform_.Update();
 	transformFeetCar_.Update();
 	BoneParam();
 	transformBody_.Update();
@@ -117,6 +117,7 @@ void Boss::InitCollider(void)
 
 	ColliderLine* colLine = new ColliderLine(ColliderBase::TAG::BOSS, &transform_, { 0.0f,130.0f,0.0f }, { 0.0f,-10.0f,0.0f });
 	ownColliders_.emplace(static_cast<int>(ColliderBase::SHAPE::LINE), colLine);
+	
 
 	ColliderCapsule* colCapsule = new ColliderCapsule(
 		ColliderBase::TAG::BOSS, &transform_, { 0.0f,130.0f,0.0f }, { 0.0f,80.0f,0.0f },80.0f);
@@ -177,7 +178,7 @@ void Boss::UpdateProcess(void)
 
 	transformBody_.pos = MV1GetFramePosition(transform_.modelId, JOINT_FEET_BODY);
 
-	transformBody_.Update();
+	
 	
 	BossTransformUpdate();
 }
@@ -201,5 +202,6 @@ void Boss::DrawPre(void)
 	{
 		col.second->Draw();
 	}
+	DrawFormatString(10, 100, 0xffffff, "bossÇÃç¿ïWÅF%f,%f,%f", transform_.pos.x, transform_.pos.y, transform_.pos.z);
 
 }
