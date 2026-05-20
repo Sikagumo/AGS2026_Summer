@@ -10,7 +10,6 @@ ActorBase::ActorBase(void)
 	resourceManager_(ResourceManager::GetInstance()),
 	inputManager_(InputManager::GetInstance()),
 	sceneManager_(SceneManager::GetInstance()),
-	collisionManager_(CollisionManager::GetInstance()),
 	transform_(Transform())
 {
 }
