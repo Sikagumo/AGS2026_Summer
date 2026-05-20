@@ -1,5 +1,7 @@
 #pragma once
 
+#include <array>
+
 #include "../SceneBase.h"
 
 class SceneTitle : public SceneBase
@@ -37,6 +39,8 @@ public:
 private:
 
     int imageTitle_;
+
+    std::array<int, 3> imageMenu_;
 
     void DrawDebug(void);
 
