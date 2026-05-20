@@ -31,7 +31,7 @@ VECTOR WeaponCannon::GetPos(void) const
 
 void WeaponCannon::Load(void)
 {
-	transform_.SetModel(resourceManager_.LoadModelDuplicate(ResourceManager::SRC::MODEL_BOSS_WEAPON_CN));
+	transform_.SetModel(resourceManager_.LoadHandleId(ResourceManager::SRC::MODEL_BOSS_WEAPON_CN));
 }
 
 void WeaponCannon::InitTransform(void)

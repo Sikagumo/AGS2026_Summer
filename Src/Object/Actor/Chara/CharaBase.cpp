@@ -35,6 +35,7 @@ void CharaBase::InitAnimation(void)
 
 void CharaBase::Update(void)
 {
+
 	// 移動前座標を更新
 	prevPos_ = transform_.pos;
 
@@ -77,12 +78,19 @@ void CharaBase::CalcGravityPow(void)
 	// 重力の強さ
 	float gravityPow = Application::GetInstance().GetGravityPow() * sceneManager_.GetDeltaTime();
 
+	
 	// 重力
 	VECTOR gravity = VScale(dirGravity, gravityPow);
+
+	
+
 	jumpPow_ = VAdd(jumpPow_, gravity);
 
 	// 重力制限	
 	jumpPow_.y = ((jumpPow_.y < MAX_FALL_SPEED) ? MAX_FALL_SPEED : jumpPow_.y);
+
+
+
 }
 
 void CharaBase::Collision(void)
@@ -102,24 +110,19 @@ void CharaBase::Collision(void)
 
 void CharaBase::CollisionGravity(void)
 {
-	bool ishit = collisionManager_.IsActorCollidingWithTag(this, ColliderBase::TAG::STAGE);
+	bool isHitStage = collisionManager_.IsActorCollidingWithTag(this, ColliderBase::TAG::STAGE);
 
-	if (ishit)
+	// 床に触れていて、かつ下方向に落下している（または静止している）なら着地
+	if (isHitStage && jumpPow_.y <= 0.0f)
 	{
 		isJump_ = false;
+		jumpPow_ = UtilityMath::VECTOR_ZERO; // 落下速度を止める
+		stepJump_ = 0.0f;                    // ジャンプ受付リセット
 	}
-	else {
-		// 重力による移動量
-		CalcGravityPow();
-	}
-
-	if (!isJump_)
+	else
 	{
-		// ジャンプリセット
-		jumpPow_ = UtilityMath::VECTOR_ZERO;
-
-		// ジャンプの入力受付時間をリセット
-		stepJump_ = 0.0f;
+		// 床に触れていない、あるいは上昇中なら空中状態
+		isJump_ = true;
 	}
 }
 

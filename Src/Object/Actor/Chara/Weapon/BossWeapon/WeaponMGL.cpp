@@ -29,7 +29,7 @@ VECTOR WeaponMGL::GetPos(void) const
 
 void WeaponMGL::Load(void)
 {
-	transform_.SetModel(resourceManager_.LoadModelDuplicate(ResourceManager::SRC::MODEL_BOSS_WEAPON_MG_L));
+	transform_.SetModel(resourceManager_.LoadHandleId(ResourceManager::SRC::MODEL_BOSS_WEAPON_MG_L));
 }
 
 void WeaponMGL::InitTransform(void)
