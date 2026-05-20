@@ -1,17 +1,21 @@
 #include "PBulletBig.h"
 #include "PBulletBase.h"
+#include <algorithm>
+#include "../../../../../../Manager/Generic/SceneManager.h"
 
-constexpr float RADIUS_BIG = 5.0f;
-constexpr float RADIUS_INCREMENT = 37.5f;
+constexpr float RADIUS_BIG = 8.5f;
+constexpr float RADIUS_INCREMENT = 25.0f;
 constexpr float RADIUS_BIG_BLAST = RADIUS_BIG + (RADIUS_INCREMENT * 4);
-constexpr float SCALE_BIG = 1.25f;
+constexpr float SCALE_BIG = 1.5f;
 constexpr float SCALE_BIG_INCREMENT = 2.5f;
-constexpr float SHOT_SPEED_BIG = 17.5f;
+constexpr float SHOT_SPEED_BIG = 10.0f;
 constexpr float TIME_ALIVE_BIG = 5.0f;
 
 
 PBulletBig::PBulletBig(void)
-	:PBulletBase::PBulletBase()
+	: PBulletBase::PBulletBase()
+	, radiusMax_(0.0f), scaleMax_(0.0f)
+	, scaleUpTime_(0.0f)
 {
 }
 
@@ -31,6 +35,17 @@ void PBulletBig::InitPost(void)
 
 void PBulletBig::UpdatePost(void)
 {
+	if (radius_ < radiusMax_)
+	{
+		constexpr float RADIUS_DURATION = 1.0f;
+		scaleUpTime_ += sceneManager_.GetDeltaTime();
+
+		float term = (scaleUpTime_ / RADIUS_DURATION);
+		term = std::clamp(term, 0.0f, 1.0f);
+
+		radius_ = (radiusMax_ * (term * term));
+		transform_.SetScale((scaleMax_ * (term * term)));
+	}
 }
 
 void PBulletBig::ChangeBulletState(BULLET_STATE _state)
@@ -45,12 +60,15 @@ void PBulletBig::ChangeBulletState(BULLET_STATE _state)
 
 void PBulletBig::SetParam(void)
 {
-	radius_ = RADIUS_BIG + (RADIUS_INCREMENT * shotCnt_);
+	radius_ = RADIUS_BIG;
+	radiusMax_ = RADIUS_BIG + (RADIUS_INCREMENT * shotCnt_);
 
 	shotSpeed_ = SHOT_SPEED_BIG;
 
 	aliveTime_ = TIME_ALIVE_BIG;
 
-	float scale = SCALE_BIG + (SCALE_BIG_INCREMENT * shotCnt_);
-	transform_.InitTransform(scale, transform_.quaRot, Quaternion::Identity());
+	scaleUpTime_ = 0.0f;
+
+	scaleMax_ = SCALE_BIG + (SCALE_BIG_INCREMENT * shotCnt_);
+	transform_.InitTransform(SCALE_BIG, transform_.quaRot, Quaternion::Identity());
 }

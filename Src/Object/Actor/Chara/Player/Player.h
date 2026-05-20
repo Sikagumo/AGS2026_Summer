@@ -99,6 +99,8 @@ private:
 
 	ANIM_TYPE animType_;
 
+	VECTOR throwPos_;
+
 	std::unique_ptr<PActionController> actionController_;
 
 
@@ -116,5 +118,6 @@ private:
 
 	void CreateBullet(void);
 	void ShotBullet(void);
+	void UpdateBullets(void);
 
 };

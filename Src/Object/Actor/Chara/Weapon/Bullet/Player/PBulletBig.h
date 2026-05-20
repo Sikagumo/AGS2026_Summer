@@ -22,5 +22,12 @@ protected:
 	void ChangeBulletState(BULLET_STATE _state)override;
 
 	void SetParam(void)override;
+
+private:
+
+	float radiusMax_;
+	float scaleMax_;
+
+	float scaleUpTime_;
 };
 

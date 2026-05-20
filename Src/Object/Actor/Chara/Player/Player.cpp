@@ -3,6 +3,7 @@
 #include <cassert>
 #include "../../../../Manager/Generic/ResourceManager.h"
 #include "../../../Common/AnimationController.h"
+
 #include "../../../../Utility/UtilityMath.h"
 #include "../../../../Manager/Generic/InputManager.h"
 #include "../../../../Manager/Generic/SceneManager.h"
@@ -21,6 +22,7 @@ Player::Player(int _playerNo, BULLET_TYPE _playerType)
 	, inputManager_(InputManager::GetInstance())
 	, animType_(ANIM_TYPE::IDLE)	
 	,  curAttackNum_(0)
+	, throwPos_(UtilityMath::VECTOR_ZERO)
 {
 	constexpr int BULLET_MAX = 3;
 	attackNumMax_ = BULLET_MAX;
@@ -44,10 +46,10 @@ void Player::InitAnimation(void)
 		, 30.0f, resourceManager_.LoadHandleId(ResourceManager::SRC::ANIM_RUN));
 
 	animation_->AddExternal(static_cast<int>(ANIM_TYPE::THROW_LEFT)
-		, 40.0f, resourceManager_.LoadHandleId(ResourceManager::SRC::ANIM_THROW_LEFT));
+		, 17.5f, resourceManager_.LoadHandleId(ResourceManager::SRC::ANIM_THROW_LEFT));
 
 	animation_->AddExternal(static_cast<int>(ANIM_TYPE::THROW_RIGHT)
-		, 40.0f, resourceManager_.LoadHandleId(ResourceManager::SRC::ANIM_THROW_RIGHT));
+		, 17.5f, resourceManager_.LoadHandleId(ResourceManager::SRC::ANIM_THROW_RIGHT));
 
 	animation_->AddExternal(static_cast<int>(ANIM_TYPE::THROW_RUN)
 		, 20.0f, resourceManager_.LoadHandleId(ResourceManager::SRC::ANIM_THROW_RUN));
@@ -88,11 +90,13 @@ void Player::InitPost(void)
 
 	curAttackNum_ = 0;
 
-	constexpr float SHOT_TIME_INCREMENT = 0.5f; // 行動間隔上昇値
-	constexpr float SHOT_TIME_ACTIVE = 1.5f; // 有効時間
-	constexpr float SHOT_TIME_ACTION_ACTIVE = 0.1f; // 有効時間
-	constexpr float SHOT_TIME_END = 0.5f; // 終了時間
-	constexpr float SHOT_TIME_ACTIVE_INPUT = 0.35f; // 入力可能時間
+	constexpr float SHOT_TIME_INCREMENT = 0.75f; // 行動間隔上昇値
+	constexpr float SHOT_TIME_INC_ACTION = 0.1875f; // 行動間隔上昇値
+
+	constexpr float SHOT_TIME_ACTIVE = 2.0f; // 有効時間
+	constexpr float SHOT_TIME_ACTION_ACTIVE = 1.35f; // 有効時間
+	constexpr float SHOT_TIME_END = 1.0f; // 終了時間
+	constexpr float SHOT_TIME_ACTIVE_INPUT = 1.75f; // 入力可能時間
 
 	float timeActive, timeEnd, timeActionActive, timeInput;
 	timeActive = SHOT_TIME_ACTIVE;
@@ -105,14 +109,14 @@ void Player::InitPost(void)
 
 	timeActive += SHOT_TIME_INCREMENT;
 	timeEnd += SHOT_TIME_INCREMENT;
-	timeActionActive += SHOT_TIME_INCREMENT;
+	timeActionActive += SHOT_TIME_INC_ACTION;
 	timeInput += SHOT_TIME_INCREMENT;
 	actionController_->SetAction(1, timeActive, timeEnd, timeActionActive
 		, std::bind(&Player::ShotBullet, this), timeInput);
 
 	timeActive += SHOT_TIME_INCREMENT * 2;
 	timeEnd += SHOT_TIME_INCREMENT * 2;
-	timeActionActive += SHOT_TIME_INCREMENT * 2;
+	timeActionActive += SHOT_TIME_INC_ACTION;
 	timeInput += SHOT_TIME_INCREMENT * 2;
 	actionController_->SetAction(2, timeActive, timeEnd, timeActionActive
 		, std::bind(&Player::ShotBullet, this), timeInput);
@@ -128,10 +132,7 @@ void Player::UpdateProcess(void)
 	// 移動操作
 	ProcessMove();
 
-	for (auto& bullet : bullets_)
-	{
-		bullet->Update();
-	}
+	UpdateBullets();
 
 	// ロックオン有効時、カメラ方向に回転
 	isDirRotActive_ = !sceneManager_.GetCamera()->GetIsLockOn();
@@ -309,10 +310,35 @@ void Player::ProcessAttack(void)
 			actionController_->Active(curAttackNum_);
 
 			curAttackNum_++;
+			animation_->Stop(1.0f);
 
 			ANIM_TYPE type = ((curAttackNum_ % 2 == 0) ? ANIM_TYPE::THROW_LEFT : ANIM_TYPE::THROW_RIGHT);
 			PlayAnim(type, false);
 		}
+	}
+}
+
+void Player::UpdateBullets(void)
+{
+	// 発射時の手のフレームに生成した弾を追従させる
+	constexpr int FRAME_THROW_LEFT = 23;
+	constexpr int FRAME_THROW_RIGHT = 47;
+	const int FRAME_NUM_THROW = ((curAttackNum_ % 2 == 0) ? FRAME_THROW_LEFT : FRAME_THROW_RIGHT);
+
+	throwPos_ = MV1GetFramePosition(transform_.modelId, FRAME_NUM_THROW);
+
+
+	for (auto& bullet : bullets_)
+	{
+		bullet->Update();
+	}
+
+	if (bullets_.empty()) { return; }
+	
+
+	if (shotIndex_ != -1)
+	{
+		bullets_[shotIndex_]->SetPosition(throwPos_);
 	}
 }
 
@@ -348,14 +374,27 @@ void Player::CreateBullet(void)
 	}
 
 	bullet->Init();
+	bullet->Create(throwPos_, curAttackNum_);
 
 	bullets_.emplace_back(std::move(bullet));
 }
 
 void Player::ShotBullet(void)
 {
-	bullets_[shotIndex_]->Shot(transform_.GetForward(), transform_.quaRot);
+	VECTOR shotDir = transform_.GetForward();
+
+	if (bulletType_ != BULLET_TYPE::RAPID_FIRE)
+	{
+		// 放物線状に投げる
+		shotDir = VAdd(shotDir, transform_.GetUp());
+		shotDir = UtilityMath::VNormalize(shotDir);
+	}
+
+	bullets_[shotIndex_]->Shot(shotDir, transform_.quaRot);
+	shotIndex_ = -1;
 }
+
+
 
 void Player::DrawShadowRound(void)
 {

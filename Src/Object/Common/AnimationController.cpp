@@ -11,6 +11,7 @@ AnimationController::AnimationController(int _modelId)
 	, playType_(-1), prePlayType_(-1)
 	, blendTime_(0.0f), curBlendTime_(0.0f)
 	, isLoop_(false), isStop_(false)
+	, timeStop_(0.0f)
 {
 }
 
@@ -152,7 +153,13 @@ void AnimationController::Update(void)
 	
 
 	// 停止時に処理終了
-	if (isStop_) return;
+	if (isStop_)
+	{
+		timeStop_ = ((timeStop_ > 0.0f) ? (timeStop_ - deltaTime) : timeStop_);
+		if (timeStop_ <= 0.0f) { isStop_ = false; }
+
+		return;
+	}
 
 	// 再生中のアニメーション
 	if (playType_ != -1)
@@ -271,6 +278,12 @@ bool AnimationController::IsEndPoint(float _pointStart, float _pointEnd)
 
 	// 再生位置が指定の割合になったときtrue
 	return (curRate >= start && curRate < end);
+}
+
+void AnimationController::Stop(float _stopTime)
+{
+	isStop_ = true;
+	timeStop_ = _stopTime;
 }
 
 void AnimationController::SetAnimStep(float step)

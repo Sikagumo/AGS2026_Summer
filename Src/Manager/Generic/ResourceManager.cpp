@@ -72,7 +72,7 @@ void ResourceManager::Initialize(void)
 
 	/* ƒ‚ƒfƒ‹ */
 	_SetResource(LOAD_TYPE::MODEL, SRC::MODEL_SKYDOME, PATH_MODEL + "SkyDome/SkyDome.mv1");
-	_SetResource(LOAD_TYPE::MODEL, SRC::MODEL_PLAYER_HUMAN, PATH_MODEL + "Player/_Player_Human.mv1");
+	_SetResource(LOAD_TYPE::MODEL, SRC::MODEL_PLAYER_HUMAN, PATH_MODEL + "Player/Player_Human.mv1");
 
 	_SetResource(LOAD_TYPE::MODEL, SRC::MODEL_STAGE, PATH_MODEL + "Stage/MainStage/MainStage.mv1");
 

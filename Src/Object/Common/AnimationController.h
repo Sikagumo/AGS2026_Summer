@@ -80,7 +80,8 @@ public:
 	int GetPlayType(void) { return playType_; };
 
 	/// @brief アニメーション停止処理
-	void Stop(bool isStop = true) { isStop_ = isStop; };
+	/// @param _stopTime 停止時間
+	void Stop(float _stopTime);
 
 	/// @brief 再生位置変更処理
 	/// @param _step 再生する位置
@@ -122,6 +123,9 @@ private:
 
 	// アニメーションを停止するか否か
 	bool isStop_;
+
+	// 停止時間
+	float timeStop_;
 	
 
 	/// @brief アニメーション追加処理
