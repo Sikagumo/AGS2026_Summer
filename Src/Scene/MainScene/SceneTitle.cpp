@@ -65,6 +65,10 @@ void SceneTitle::Update(void)
     }
 }
 
+void SceneTitle::UpdateCollision(void)
+{
+}
+
 void SceneTitle::Draw(void)
 {
     if (Loading::GetInstance()->IsLoading()) { return; }
