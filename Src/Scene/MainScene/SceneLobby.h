@@ -16,6 +16,9 @@ public:
 
 	void Update(void) override;
 
+	/// @brief Õ“Ë‚Ì‰e‹¿‚¾‚¯‚ğXV‚·‚éˆ— 
+	void UpdateCollision(void) override;
+
 
 private:
 };
