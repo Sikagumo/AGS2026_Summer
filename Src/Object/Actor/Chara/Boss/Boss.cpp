@@ -117,7 +117,11 @@ void Boss::InitCollider(void)
 
 	ColliderLine* colLine = new ColliderLine(ColliderBase::TAG::BOSS, &transform_, { 0.0f,130.0f,0.0f }, { 0.0f,-10.0f,0.0f });
 	ownColliders_.emplace(static_cast<int>(ColliderBase::SHAPE::LINE), colLine);
+<<<<<<< HEAD
 	
+=======
+	colLine->SetTriger(false);
+>>>>>>> Collision
 
 	ColliderCapsule* colCapsule = new ColliderCapsule(
 		ColliderBase::TAG::BOSS, &transform_, { 0.0f,130.0f,0.0f }, { 0.0f,80.0f,0.0f },80.0f);
@@ -181,6 +185,24 @@ void Boss::UpdateProcess(void)
 	
 	
 	BossTransformUpdate();
+
+	// 各武器にボーン情報を設定（ここはそのまま）
+	weaponMGL_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MGL_L)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MGL_L)].transform);
+	weaponMGR_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MGL_R)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MGL_R)].transform);
+	weaponMPL_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MP_L)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MP_L)].transform);
+	weaponMPR_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MP_R)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MP_R)].transform);
+	weaponRG_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_RG)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_RG)].transform);
+	weaponCannonL_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_CANNON_L)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_CANNON_L)].transform);
+	weaponCannonR_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_CANNON_R)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_CANNON_R)].transform);
+
+	// 武器の更新
+	weaponMGL_->Update();
+	weaponMGR_->Update();
+	weaponMPL_->Update();
+	weaponMPR_->Update();
+	weaponRG_->Update();
+	weaponCannonL_->Update();
+	weaponCannonR_->Update();
 }
 
 void Boss::UpdateProcessPost(void)

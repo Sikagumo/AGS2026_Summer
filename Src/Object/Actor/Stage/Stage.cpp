@@ -40,7 +40,7 @@ void Stage::InitCollider(void)
 	// モデルのコライダ割り当て
 	ColliderModel* colModel = new ColliderModel(ColliderBase::TAG::STAGE, &transform_);
 	ownColliders_.emplace(static_cast<int>(ColliderBase::SHAPE::MODEL), colModel);
-	colModel->SetTriger(true);
+	colModel->SetTriger(false);
 
 	for (const std::string& name : EXCLUDE_FRAME_NAMES)
 	{
