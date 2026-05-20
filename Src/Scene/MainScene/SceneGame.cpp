@@ -96,6 +96,11 @@ void SceneGame::Update(void)
 	stage_->Update();
 }
 
+void SceneGame::UpdateCollision(void)
+{
+
+}
+
 void SceneGame::Draw(void)
 {
 	DrawString(0, 0, "Game Scene Now!", GetColor(255, 255, 255));
