@@ -228,6 +228,12 @@ void SceneManager::Update(void)
     // ƒJƒƒ‰‚âÕ“Ë”»’è
     //if (camera_) camera_->UpdateBeforeCollision();
     CollisionManager::GetInstance().Update();
+
+    if (current)
+    {
+        current->UpdateCollision();
+    }
+
     if (camera_) camera_->Update();
 }
 

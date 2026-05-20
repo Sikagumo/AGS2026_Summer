@@ -17,6 +17,7 @@ void Stage::Update(void)
 void Stage::Draw(void)
 {
 	ActorBase::Draw();
+	
 }
 
 void Stage::Load(void)
@@ -39,7 +40,12 @@ void Stage::InitCollider(void)
 	// モデルのコライダ割り当て
 	ColliderModel* colModel = new ColliderModel(ColliderBase::TAG::STAGE, &transform_);
 	ownColliders_.emplace(static_cast<int>(ColliderBase::SHAPE::MODEL), colModel);
-	colModel->SetTriger(false);
+	colModel->SetTriger(true);
+
+	for (const std::string& name : EXCLUDE_FRAME_NAMES)
+	{
+		colModel->AddExcludeFrameIds(name);
+	}
 
 	CollisionManager::GetInstance().RegisterActor(this);
 }

@@ -47,6 +47,9 @@ public:
 	//ゲット・セット
 	VECTOR GetBossPos(void) const;
 
+
+	void UpdateCollision(void);
+
 private:
 	//bossの大きさ
 	static constexpr VECTOR BOSS_SIZE = { 3.0f, 3.0f, 3.0f };

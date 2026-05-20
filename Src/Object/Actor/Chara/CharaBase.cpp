@@ -80,12 +80,19 @@ void CharaBase::CalcGravityPow(void)
 	// èdóÕÇÃã≠Ç≥
 	float gravityPow = Application::GetInstance().GetGravityPow() * sceneManager_.GetDeltaTime();
 
+	
 	// èdóÕ
 	VECTOR gravity = VScale(dirGravity, gravityPow);
+
+	
+
 	jumpPow_ = VAdd(jumpPow_, gravity);
 
 	// èdóÕêßå¿	
 	jumpPow_.y = ((jumpPow_.y < MAX_FALL_SPEED) ? MAX_FALL_SPEED : jumpPow_.y);
+
+
+
 }
 
 void CharaBase::Collision(void)
@@ -110,6 +117,7 @@ void CharaBase::CollisionGravity(void)
 	if (ishit)
 	{
 		isJump_ = false;
+		jumpPow_ = UtilityMath::VECTOR_ZERO;
 	}
 	
 

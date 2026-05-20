@@ -98,7 +98,7 @@ void SceneGame::Update(void)
 
 void SceneGame::UpdateCollision(void)
 {
-
+	boss_->UpdateCollision();
 }
 
 void SceneGame::Draw(void)
