@@ -117,11 +117,8 @@ void Boss::InitCollider(void)
 
 	ColliderLine* colLine = new ColliderLine(ColliderBase::TAG::BOSS, &transform_, { 0.0f,130.0f,0.0f }, { 0.0f,-10.0f,0.0f });
 	ownColliders_.emplace(static_cast<int>(ColliderBase::SHAPE::LINE), colLine);
-<<<<<<< HEAD
 	
-=======
 	colLine->SetTriger(false);
->>>>>>> Collision
 
 	ColliderCapsule* colCapsule = new ColliderCapsule(
 		ColliderBase::TAG::BOSS, &transform_, { 0.0f,130.0f,0.0f }, { 0.0f,80.0f,0.0f },80.0f);

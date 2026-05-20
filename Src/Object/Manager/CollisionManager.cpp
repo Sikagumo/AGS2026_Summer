@@ -144,7 +144,6 @@ bool CollisionManager::CheckCollision(const ColliderBase* _colliderA, const Coll
 	{
 		return CheckCapsuleVsModel(_colliderA, _colliderB, _outInfo);
 	}
-	else if (shapeA == SHAPE::LINE && shapeB == SHAPE::MODEL)
 
 	if (shapeA == SHAPE::LINE && shapeB == SHAPE::MODEL)
 	{
@@ -185,26 +184,19 @@ void CollisionManager::ResolveCollision(ActorBase* _actorA, ActorBase* _actorB,
 
 	using TAG = ColliderBase::TAG;
 
-	// 押し戻すベクトルを計算
 	// 1. 通常の押し戻しベクトルを計算
 	VECTOR pushVector = VScale(_info.hitNormal, _info.penetration);
 
-	ActorBase* myActor = nullptr;
 	TAG tagA = _info.myCollider->GetCollisionTag();
 	TAG tagB = _info.hitCollider->GetCollisionTag();
 
-	// actorAの所有コライダをループして探す
-	for (const auto& [id, col] : _actorA->GetOwnColliders())
 	// パターン1：自分が動くアクター（PLAYER/BOSS）で、相手が STAGE（床・壁）の場合
 	if ((tagA == TAG::PLAYER || tagA == TAG::BOSS) && tagB == TAG::STAGE)
 	{
-		if (col == _info.myCollider)
 		pushVector.x = 0.0f;
 		pushVector.z = 0.0f;
 		if (pushVector.y > 0.001f)
 		{
-			myActor = _actorA;
-			break;
 			pushVector.y += 0.02f;
 		}
 		else
@@ -220,8 +212,6 @@ void CollisionManager::ResolveCollision(ActorBase* _actorA, ActorBase* _actorB,
 
 		if (overlap < 0.01f) { overlap = 0.5f; }
 
-	// もしAになければ、myColliderはBのもの
-	if (myActor == nullptr)
 		VECTOR stagePush = VGet(0.0f, overlap, 0.0f);
 
 		_actorA->GetTransform().Translate(stagePush);
@@ -229,7 +219,6 @@ void CollisionManager::ResolveCollision(ActorBase* _actorA, ActorBase* _actorB,
 	}
 	else if (tagA == TAG::STAGE && (tagB == TAG::PLAYER || tagB == TAG::BOSS))
 	{
-		myActor = _actorB;
 		float overlap = fabsf(_info.penetration);
 		if (overlap < 0.01f) { overlap = 0.5f; }
 
@@ -240,27 +229,20 @@ void CollisionManager::ResolveCollision(ActorBase* _actorA, ActorBase* _actorB,
 		return;
 	}
 
-	TAG myTag = _info.myCollider->GetCollisionTag();
 	// キャラクター同士は上下に沈まないように、Y軸の押し戻しをゼロにする
 	pushVector.y = 0.0f;
 
-	if (myTag == TAG::PLAYER || myTag == TAG::BOSS)
 	// どちらの所有コライダーがベースになっているかによって押し戻す対象を決める
 	bool isAHaveMyCollider = false;
 	for (const auto& [id, col] : _actorA->GetOwnColliders())
 	{
-		if (pushVector.y < 0.0f)
 		if (col == _info.myCollider)
 		{
-			pushVector.y = 0;
 			isAHaveMyCollider = true;
 			break;
 		}
 	}
 
-		myActor->GetTransform().Translate(pushVector);
-
-		
 	if (isAHaveMyCollider)
 	{
 		// myColliderがAのものなら、Aを押し戻す
@@ -296,13 +278,6 @@ void CollisionManager::UpdateCollisionPars(void)
 		{
 			auto actorB = actors_[j];
 
-			// 距離によるカリング
-			VECTOR positionA = actorA->GetTransform().pos;
-			VECTOR positionB = actorB->GetTransform().pos;
-			float distanceX = positionB.x - positionA.x;
-			float distanceY = positionB.y - positionA.y;
-			float distanceZ = positionB.z - positionA.z;
-			float distSquare = (distanceX * distanceX) + (distanceY * distanceY) + (distanceZ * distanceZ);
 			bool isStageCollision = false;
 
 			// アクターAのコライダーの中にSTAGEがあるかチェック
@@ -316,8 +291,6 @@ void CollisionManager::UpdateCollisionPars(void)
 				if (colB->GetCollisionTag() == ColliderBase::TAG::STAGE) { isStageCollision = true; break; }
 			}
 
-			// 一定距離以上離れている場合は、詳細な判定をスキップ
-			if (distSquare > cullingDistSquare_) { continue; }
 			// どちらもステージではない場合のみ、距離によるカリングを行う
 			if (!isStageCollision)
 			{
@@ -520,7 +493,6 @@ bool CollisionManager::CheckCapsuleVsModel(const ColliderBase* _capsuleCol,
 
 	// モデルハンドル取得
 	int modelHandle = model->GetModelHandle();
-
 	if (modelHandle == -1) { return false; }
 
 	// 判定用パラメータ取得
@@ -535,7 +507,6 @@ bool CollisionManager::CheckCapsuleVsModel(const ColliderBase* _capsuleCol,
 	// 衝突結果の解析
 	if (hitResult.HitNum > 0)
 	{
-		const auto& bestHit = hitResult.Dim[0];
 		float maxUpward = -2.0f;
 		int bestIndex = -1;
 
@@ -553,8 +524,6 @@ bool CollisionManager::CheckCapsuleVsModel(const ColliderBase* _capsuleCol,
 			}
 		}
 
-		// 除外対象のフレームチェック
-		if (model->IsExcludedFrame(bestHit.FrameIndex))
 		// 有効なポリゴンが1つも見つからなかった場合
 		if (bestIndex == -1)
 		{
@@ -598,7 +567,6 @@ bool CollisionManager::CheckLineVsModel(const ColliderBase* _lineCol,
 	if (!line || !model) { return false; }
 
 	int modelHandle = model->GetModelHandle();
-
 	if (modelHandle == -1) { return false; }
 
 	VECTOR startPos = line->GetWorldStartPos();
@@ -619,8 +587,6 @@ bool CollisionManager::CheckLineVsModel(const ColliderBase* _lineCol,
 
 		_outInfo.hitPosition = hitResult.HitPosition;
 		_outInfo.hitNormal = hitResult.Normal;
-
-		_outInfo.penetration = 0.0f;
 		_outInfo.penetration = UtilityMath::MagnitudeF(VSub(endPos, hitResult.HitPosition));
 
 		return true;

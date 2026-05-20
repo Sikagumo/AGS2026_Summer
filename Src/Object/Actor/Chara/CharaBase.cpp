@@ -114,23 +114,16 @@ void CharaBase::Collision(void)
 
 void CharaBase::CollisionGravity(void)
 {
-<<<<<<< HEAD
-	bool ishit = CollisionManager::GetInstance().IsActorCollidingWithTag(this, ColliderBase::TAG::STAGE);
-=======
-	bool isHitStage = collisionManager_.IsActorCollidingWithTag(this, ColliderBase::TAG::STAGE);
->>>>>>> Collision
+	bool isHitStage = CollisionManager::GetInstance().IsActorCollidingWithTag(this, ColliderBase::TAG::STAGE);
 
 	// 床に触れていて、かつ下方向に落下している（または静止している）なら着地
 	if (isHitStage && jumpPow_.y <= 0.0f)
 	{
 		isJump_ = false;
-<<<<<<< HEAD
 		jumpPow_ = UtilityMath::VECTOR_ZERO;
-		
-=======
+
 		jumpPow_ = UtilityMath::VECTOR_ZERO; // 落下速度を止める
 		stepJump_ = 0.0f;                    // ジャンプ受付リセット
->>>>>>> Collision
 	}
 	else
 	{
