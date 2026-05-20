@@ -2,24 +2,24 @@
 
 #include "../SceneBase.h"
 
-class SceneLobby : public SceneBase
-{
-public:
-
-	SceneLobby(void);
-
-	~SceneLobby(void);
-
-	void Load(void) override;
-
-	void Initialize(void) override;
-
-	void Update(void) override;
-
-	/// @brief 衝突の影響だけを更新する処理 
-	void UpdateCollision(void) override;
-
-
-private:
-};
+//class SceneLobby : public SceneBase
+//{
+//public:
+//
+//	SceneLobby(void);
+//
+//	~SceneLobby(void);
+//
+//	void Load(void) override;
+//
+//	void Initialize(void) override;
+//
+//	void Update(void) override;
+//
+//	/// @brief 衝突の影響だけを更新する処理 
+//	void UpdateCollision(void) override;
+//
+//
+//private:
+//};
 
