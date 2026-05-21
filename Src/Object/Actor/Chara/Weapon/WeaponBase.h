@@ -3,6 +3,7 @@
 
 #include <memory>
 #include "../../ActorBase.h"
+#include "../../../Collider/ColliderBase.h"
 
 class WeaponBase :
     public ActorBase
@@ -25,7 +26,7 @@ public:
 
 	void Release(void)override;
 
-	virtual void SetBone(int _id, Transform _trans)=0;
+	virtual void SetBone(int _id, Transform _trans,ColliderBase::TAG _tag)=0;
 	virtual int GetDamage(void) const = 0;
 	virtual VECTOR GetPos(void) const = 0;
 
@@ -43,9 +44,11 @@ protected:
 
 	float hp_;
 	float attackDamage_;	
-	
-
+	VECTOR localBackPos_;	//当たり判定用の後方の座標
+	VECTOR localFrontPos_;	//当たり判定用の前方の座標
+	VECTOR localPos_;		//カメラのロックオン用の中央座標
 	Bone bone_;
+	ColliderBase::TAG tag_;
 
 	virtual void DrawPre(void)override;
 

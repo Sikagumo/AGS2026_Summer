@@ -1,6 +1,10 @@
 #include <DxLib.h>
 #include "../../../../../Manager/Generic/ResourceManager.h"
 #include "../../../../../Utility/UtilityMath.h"
+#include "../../../../Collider/ColliderBase.h"
+#include "../../../../Collider/ColliderCapsule.h"
+#include "../../../../Collider/ColliderLine.h"
+#include "../../../../Manager/CollisionManager.h"
 #include "WeaponMGL.h"
 
 WeaponMGL::WeaponMGL()
@@ -12,10 +16,11 @@ void WeaponMGL::Release(void)
 {
 }
 
-void WeaponMGL::SetBone(int _id, Transform _trans)
+void WeaponMGL::SetBone(int _id, Transform _trans, ColliderBase::TAG _tag)
 {
 	bone_.id = _id;
 	bone_.transform = _trans;
+	tag_ = _tag;
 }
 int WeaponMGL::GetDamage(void) const
 {
@@ -46,6 +51,14 @@ void WeaponMGL::InitTransform(void)
 
 void WeaponMGL::InitCollider(void)
 {
+	ColliderLine* colLine = new ColliderLine(tag_, &transform_, { 0.0f,0.0f,0.0f }, { 0.0f,-50.0f,0.0f });
+	ownColliders_.emplace(static_cast<int>(ColliderBase::SHAPE::LINE), colLine);
+
+
+	ColliderCapsule* colCapsule = new ColliderCapsule(
+		tag_, &transform_, { -50.0f,0.0f,140.0f }, { -50.0f,0.0f,-40.0f }, 20.0f);
+	ownColliders_.emplace(static_cast<int>(ColliderBase::SHAPE::CAPSULE), colCapsule);
+	colCapsule->SetTriger(false);
 }
 
 void WeaponMGL::InitAnimation(void)
@@ -74,4 +87,8 @@ float WeaponMGL::Damage(void)
 void WeaponMGL::DrawPre(void)
 {
 	MV1DrawModel(transform_.modelId);
+	for (auto& col : ownColliders_)
+	{
+		col.second->Draw();
+	}
 }

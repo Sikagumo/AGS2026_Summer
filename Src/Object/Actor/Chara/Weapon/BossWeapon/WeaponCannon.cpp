@@ -3,6 +3,8 @@
 #include "../../../../../Utility/UtilityMath.h"
 #include "../../../../Collider/ColliderBase.h"
 #include "../../../../Collider/ColliderCapsule.h"
+#include "../../../../Collider/ColliderLine.h"
+#include "../../../../Manager/CollisionManager.h"
 #include "WeaponCannon.h"
 
 WeaponCannon::WeaponCannon()
@@ -14,10 +16,11 @@ void WeaponCannon::Release(void)
 {
 }
 
-void WeaponCannon::SetBone(int _id, Transform _trans)
+void WeaponCannon::SetBone(int _id, Transform _trans, ColliderBase::TAG _tag)
 {
 	bone_.id = _id;
 	bone_.transform = _trans;
+	tag_=_tag
 }
 int WeaponCannon::GetDamage(void) const
 {
@@ -32,6 +35,7 @@ VECTOR WeaponCannon::GetPos(void) const
 void WeaponCannon::Load(void)
 {
 	transform_.SetModel(resourceManager_.LoadHandleId(ResourceManager::SRC::MODEL_BOSS_WEAPON_CN));
+	transform_.SetModel(resourceManager_.LoadModelDuplicate(ResourceManager::SRC::MODEL_BOSS_WEAPON_CN));
 }
 
 void WeaponCannon::InitTransform(void)
@@ -49,7 +53,14 @@ void WeaponCannon::InitTransform(void)
 
 void WeaponCannon::InitCollider(void)
 {
+	ColliderLine* colLine = new ColliderLine(tag_, &transform_, {0.0f,0.0f,0.0f}, { 0.0f,-5.0f,0.0f });
+	ownColliders_.emplace(static_cast<int>(ColliderBase::SHAPE::LINE), colLine);
 	
+
+	ColliderCapsule* colCapsule = new ColliderCapsule(
+		tag_, &transform_, {0.0f,50.0f,160.0f}, { 0.0f,50.0f,-40.0f }, 20.0f);
+	ownColliders_.emplace(static_cast<int>(ColliderBase::SHAPE::CAPSULE), colCapsule);
+	colCapsule->SetTriger(false);
 }
 
 void WeaponCannon::InitAnimation(void)
@@ -78,4 +89,9 @@ float WeaponCannon::Damage(void)
 void WeaponCannon::DrawPre(void)
 {
 	MV1DrawModel(transform_.modelId);
+
+	for (auto& col : ownColliders_)
+	{
+		col.second->Draw();
+	}
 }
