@@ -28,6 +28,8 @@ void SceneTitle::Load(void)
 
     imageTitle_ = resourceManager.LoadHandleId(ResourceManager::SRC::IMG_TITLE);
 
+    resourceManager.LoadHandleIds(ResourceManager::SRC::IMGE_TITLE_TEXT, imageMenu_.data());
+
     // ‚»‚Ì‘¼‰æ‘œ
     Loading::GetInstance()->SetProgress(80.0f);
 
