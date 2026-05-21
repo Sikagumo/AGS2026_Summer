@@ -20,7 +20,7 @@ void WeaponCannon::SetBone(int _id, Transform _trans, ColliderBase::TAG _tag)
 {
 	bone_.id = _id;
 	bone_.transform = _trans;
-	tag_=_tag
+	tag_ = _tag;
 }
 int WeaponCannon::GetDamage(void) const
 {

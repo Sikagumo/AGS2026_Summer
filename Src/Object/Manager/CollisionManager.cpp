@@ -359,7 +359,7 @@ bool CollisionManager::CanCollide(int _tagA, int _tagB) const
 	// プレイヤーの衝突ルール
 	if (tagHit == TAG::PLAYER)
 	{
-		if (tagHurt == TAG::ENEMY || tagHurt == TAG::STAGE || tagHurt == TAG::BOSS)
+		if (tagHurt == TAG::ENEMY || tagHurt == TAG::STAGE || tagHurt == TAG::BOSS || tagHurt == TAG::WEAPON_CANNON_L || tagHurt == TAG::WEAPON_CANNON_R || tagHurt == TAG::WEAPON_MG_L || tagHurt == TAG::WEAPON_MG_R || tagHurt == TAG::WEAPON_MP_L || tagHurt == TAG::WEAPON_MP_R || tagHurt == TAG::WEAPON_RG)
 		{
 			return true;
 		}
