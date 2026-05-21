@@ -15,7 +15,7 @@ constexpr float TIME_ALIVE_BIG = 5.0f;
 PBulletBig::PBulletBig(void)
 	: PBulletBase::PBulletBase()
 	, radiusMax_(0.0f), scaleMax_(0.0f)
-	, scaleUpTime_(0.0f)
+	, scaleUpTime_(0.0f), isScaleUp_(false)
 {
 }
 
@@ -35,7 +35,7 @@ void PBulletBig::InitPost(void)
 
 void PBulletBig::UpdatePost(void)
 {
-	if (radius_ < radiusMax_)
+	if (isScaleUp_ && radius_ < radiusMax_)
 	{
 		constexpr float RADIUS_DURATION = 1.0f;
 		scaleUpTime_ += sceneManager_.GetDeltaTime();
@@ -43,7 +43,7 @@ void PBulletBig::UpdatePost(void)
 		float term = (scaleUpTime_ / RADIUS_DURATION);
 		term = std::clamp(term, 0.0f, 1.0f);
 
-		radius_ = (radiusMax_ * (term * term));
+		radius_ += ((radiusMax_ - radius_) * (term * term));
 		transform_.SetScale((scaleMax_ * (term * term)));
 	}
 }

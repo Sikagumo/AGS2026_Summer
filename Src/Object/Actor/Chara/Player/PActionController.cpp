@@ -1,17 +1,20 @@
 #include "PActionController.h"
 #include "../../../../Manager/Generic/SceneManager.h"
+#include "../../../Common/AnimationController.h"
 #include <DxLib.h>
 
-PActionController::PActionController(bool _isRapidFire)
-	: actionState_(PACTION_STATE::NONE)
-	, curTimeAction_(0.0f), curTimeInput_(0.0f)
+PActionController::PActionController(std::unique_ptr<AnimationController>& _anim, bool _isRapidFire)
+	: animation_(_anim)
+	, actionState_(PACTION_STATE::NONE)
+	, curTimeAction_(0.0f), curTimeInput_(0.0f), curTimeActionActive_(0.0f)
+	, curTimeStopActive_(0.0f)
 	, curActionNum_(-1)
 	, isRapidFire_(_isRapidFire)
 {
 }
 
 void PActionController::SetAction(int _actionNum, float _timeActive, float _timeEnd
-	, float _timeActionActive, std::function<void(void)> _actionProc, float _timeInput)
+	, float _timeActionActive, std::function<void(void)> _actionProc, float _timeStop, float _timeStopActive, float _timeInput)
 {
 	if (_actionNum < 0)
 	{
@@ -29,6 +32,8 @@ void PActionController::SetAction(int _actionNum, float _timeActive, float _time
 	param.timeActive = _timeActive;
 	param.timeEnd = _timeEnd;
 	param.timeInput = _timeInput;
+	param.timeStop = _timeStop;
+	param.timeStopActive = _timeStopActive;
 	param.timeActionActive = _timeActionActive;
 	param.actionProcess = _actionProc;
 	
@@ -56,6 +61,7 @@ void PActionController::Active(int _actionNum)
 	// 行動の情報を割り当て
 	curActionNum_ = _actionNum;
 	curTimeAction_ = actions_[_actionNum].timeActive;
+	curTimeStopActive_ = actions_[_actionNum].timeStopActive;
 	curTimeActionActive_ = actions_[_actionNum].timeActionActive;
 	curTimeInput_  = actions_[_actionNum].timeInput;
 }
@@ -65,7 +71,10 @@ void PActionController::Update(void)
 	// 行動名が未割当時、処理終了
 	if (curActionNum_ == -1 || actionState_ == PACTION_STATE::NONE) { return; }
 
-	curTimeAction_ -= SceneManager::GetInstance().GetDeltaTime();
+	if (!animation_->isStop())
+	{
+		curTimeAction_ -= SceneManager::GetInstance().GetDeltaTime();
+	}
 
 	if (actionState_ == PACTION_STATE::ACTION)
 	{
@@ -79,8 +88,20 @@ void PActionController::Update(void)
 }
 void PActionController::Update_Action(void)
 {
-	curTimeInput_ = ((curTimeInput_ > 0) ? curTimeInput_ - SceneManager::GetInstance().GetDeltaTime() : 0.0f);
+	if (curTimeStopActive_ > 0.0f)
+	{
+		curTimeStopActive_ -= SceneManager::GetInstance().GetDeltaTime();
 
+		// 一度だけ行動を実行
+		if (curTimeStopActive_ <= 0.0f)
+		{
+			animation_->Stop(actions_[curActionNum_].timeStop);
+		}
+	}
+	if (animation_->isStop()) { return; }
+	
+
+	curTimeInput_ = ((curTimeInput_ > 0) ? curTimeInput_ - SceneManager::GetInstance().GetDeltaTime() : 0.0f);
 
 	if (curTimeActionActive_ > 0.0f)
 	{
@@ -89,7 +110,6 @@ void PActionController::Update_Action(void)
 		// 一度だけ行動を実行
 		if (curTimeActionActive_ <= 0.0f)
 		{
-			curTimeAction_ = 0.0f;
 			actions_[curActionNum_].actionProcess();
 		}
 	}

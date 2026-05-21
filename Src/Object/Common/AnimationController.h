@@ -55,8 +55,9 @@ public:
 	/// @brief アニメーション再生
 	/// @param _type アニメーションの種類
 	/// @param _isLoop ループするか否か @hint default = true
+	/// @param _playSpeed 再生速度 @hint default = initSpeed
 	/// @param _blendTime アニメーション遷移時間
-	void Play(int _type, bool _isLoop = true, float _blendTime = 0.175f);
+	void Play(int _type, bool _isLoop = true, float _playSpeed = -1.0f, float _blendTime = 0.175f);
 
 	/// @brief 更新処理
 	void Update(void);
@@ -76,6 +77,10 @@ public:
 	/// @param _pointEnd 判定終了位置の割合(0.0f～1.0f)
 	bool IsEndPoint(float _pointStart, float _pointEnd = 1.0f);
 
+	/// @brief 再生中のアニメーションの再生割合を取得
+	/// @return 割合(0.0～1.0)
+	float GetPlayPointRate(void);
+
 	/// @brief 再生中のアニメーション番号取得
 	int GetPlayType(void) { return playType_; };
 
@@ -86,6 +91,9 @@ public:
 	/// @brief 再生位置変更処理
 	/// @param _step 再生する位置
 	void SetAnimStep(float _step = 0.0f);
+
+	/// @brief 停止しているか否か
+	bool isStop(void) { return isStop_; };
 
 	/// @brief 再生位置変更
 	/// @param rate 再生位置の割合(0.0f～1.0f)
@@ -114,6 +122,8 @@ private:
 
 	// ブレンド時間
 	float blendTime_;
+
+	float playSpeed_;
 
 	// ブレンドのカウンタタイマー
 	float curBlendTime_;

@@ -10,8 +10,9 @@ AnimationController::AnimationController(int _modelId)
 	, modelId_(_modelId)
 	, playType_(-1), prePlayType_(-1)
 	, blendTime_(0.0f), curBlendTime_(0.0f)
-	, isLoop_(false), isStop_(false)
-	, timeStop_(0.0f)
+	, isLoop_(false)
+	, isStop_(false), timeStop_(0.0f)
+	, playSpeed_(0.0f)
 {
 }
 
@@ -80,7 +81,7 @@ void AnimationController::AddExternal(int _type, float _speed, int _handle)
 	Add(_type, anim);
 }
 
-void AnimationController::Play(int _type, bool _isLoop, float _blendTime)
+void AnimationController::Play(int _type, bool _isLoop, float _playSpeed, float _blendTime)
 {
 	// 同じアニメーション時、処理を終了
 	if (playType_ == _type || _type == -1) { return; }
@@ -99,6 +100,11 @@ void AnimationController::Play(int _type, bool _isLoop, float _blendTime)
 		prePlayType_ = playType_;
 	}
 
+	auto& playAnim = animations_[_type];
+
+	// 初期化
+	playAnim.step = 0.0f;
+
 	// アニメーションループ
 	isLoop_ = _isLoop;
 
@@ -113,10 +119,9 @@ void AnimationController::Play(int _type, bool _isLoop, float _blendTime)
 
 	blendTime_ = _blendTime;
 
-	auto& playAnim = animations_[_type];
-
-	// 初期化
-	playAnim.step = 0.0f;
+	// 再生速度割り当て
+	playSpeed_ = ((_playSpeed >= 0.0f) ? _playSpeed : playAnim.speed);
+	
 
 	// モデルにアニメーションを付ける
 	if (playAnim.type == ANIM_TYPE::INTERNAL)
@@ -153,9 +158,9 @@ void AnimationController::Update(void)
 	
 
 	// 停止時に処理終了
-	if (isStop_)
+	if (isStop_ && timeStop_ > 0.0f)
 	{
-		timeStop_ = ((timeStop_ > 0.0f) ? (timeStop_ - deltaTime) : timeStop_);
+		timeStop_ -= deltaTime;
 		if (timeStop_ <= 0.0f) { isStop_ = false; }
 
 		return;
@@ -165,7 +170,7 @@ void AnimationController::Update(void)
 	if (playType_ != -1)
 	{
 		// アニメーション進行処理
-		curAnim.step += (deltaTime * curAnim.speed);
+		curAnim.step += (deltaTime * playSpeed_);
 		
 		if (curAnim.step >= curAnim.totalTime && isLoop_)
 		{
@@ -265,7 +270,9 @@ bool AnimationController::IsEnd(void) const
 
 bool AnimationController::IsEndPoint(float _pointStart, float _pointEnd)
 {
-	auto& anim = animations_.at(playType_);
+	if (playType_ == -1) { return false; }
+
+	Animation& anim = animations_.at(playType_);
 
 	// 再生位置
 	float start = std::clamp(_pointStart, 0.0f, 1.0f);
@@ -279,6 +286,17 @@ bool AnimationController::IsEndPoint(float _pointStart, float _pointEnd)
 	// 再生位置が指定の割合になったときtrue
 	return (curRate >= start && curRate < end);
 }
+float AnimationController::GetPlayPointRate(void)
+{
+	/* アニメーション再生割合を取得 */
+
+	if (playType_ == -1) { return 0.0f; }
+
+	Animation& anim = animations_.at(playType_);
+	float ret = (anim.step / anim.totalTime);
+
+	return ret;
+}
 
 void AnimationController::Stop(float _stopTime)
 {
@@ -286,40 +304,30 @@ void AnimationController::Stop(float _stopTime)
 	timeStop_ = _stopTime;
 }
 
-void AnimationController::SetAnimStep(float step)
+void AnimationController::SetAnimStep(float _step)
 {
+	if (playType_ == -1) { return; }
+
 	auto& anim = animations_.at(playType_);
-	// 再生位置がマイナス時、０にする
-	step = ((step < 0.0f) ? 0.0f : step);
 
-	// 再生位置が最大時間を超えたとき、最大時間にする
-	step = ((step > anim.totalTime) ? anim.totalTime : step);
+	// 再生位置の制限
+	float step = std::clamp(_step, 0.0f, anim.totalTime);
 
-	if (playType_ != -1)
-	{
-		// 再生位置割り当て
-		anim.step = step;
-	}
+	// 再生位置割り当て
+	anim.step = _step;
 }
 
 void AnimationController::SetAnimStepRate(float _rate)
 {
+	if (playType_ == -1) { return; }
+
 	auto& anim = animations_.at(playType_);
 
-	float step = _rate;
+	float step = std::clamp(_rate, 0.0f, 1.0f);
 
-	// 再生位置の上限制限
-	step = ((step < 0.0f) ? 0.0f : step);
-	step = ((step > 1.0f) ? 1.0f : step);
-
-	// 割合の値
+	// 再生位置割り当て
 	float rate = (1.0f / anim.totalTime);
-
-	if (playType_ != -1)
-	{
-		// 再生位置割り当て
-		anim.step = (rate * step);
-	}
+	anim.step = (rate * step);
 }
 
 float AnimationController::GetPlayTime(void)
