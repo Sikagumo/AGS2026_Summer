@@ -301,8 +301,6 @@ void CollisionManager::UpdateCollisionPars(void)
 				// 一定距離以上離れている場合は、詳細な判定をスキップ
 				if (distSquare > cullingDistSquare_) { continue; }
 			}
-
-			const auto& collidersB = actorB->GetOwnColliders();
 			
 			// コライダー同士の詳細判定
 			for (auto& [idA, colA] : collidersA)
@@ -363,7 +361,8 @@ bool CollisionManager::CanCollide(int _tagA, int _tagB) const
 	// プレイヤーの衝突ルール
 	if (tagHit == TAG::PLAYER)
 	{
-		if (tagHurt == TAG::ENEMY || tagHurt == TAG::STAGE || tagHurt == TAG::BOSS || tagHurt == TAG::WEAPON_CANNON_L || tagHurt == TAG::WEAPON_CANNON_R || tagHurt == TAG::WEAPON_MG_L || tagHurt == TAG::WEAPON_MG_R || tagHurt == TAG::WEAPON_MP_L || tagHurt == TAG::WEAPON_MP_R || tagHurt == TAG::WEAPON_RG)
+		if (tagHurt == TAG::ENEMY || tagHurt == TAG::STAGE || tagHurt == TAG::BOSS || tagHurt == TAG::WEAPON_CANNON_L || tagHurt == TAG::WEAPON_CANNON_R || tagHurt == TAG::WEAPON_MG_L || tagHurt == TAG::WEAPON_MG_R || tagHurt == TAG::WEAPON_MP_L ||
+			tagHurt == TAG::WEAPON_MP_R || tagHurt == TAG::WEAPON_RG)
 		{
 			return true;
 		}

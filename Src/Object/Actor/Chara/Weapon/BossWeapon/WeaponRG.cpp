@@ -58,6 +58,8 @@ void WeaponRG::InitCollider(void)
 		tag_, &transform_, {0.0f,-100.0f,-60.0f }, { 0.0f,80.0f,-60.0f }, 30.0f);
 	ownColliders_.emplace(static_cast<int>(ColliderBase::SHAPE::CAPSULE), colCapsule);
 	colCapsule->SetTriger(false);
+
+	CollisionManager::GetInstance().RegisterActor(this);
 }
 
 void WeaponRG::InitAnimation(void)
