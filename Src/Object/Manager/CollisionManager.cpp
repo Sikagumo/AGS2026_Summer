@@ -174,6 +174,19 @@ bool CollisionManager::IsActorCollidingWithTag(const ActorBase* _actor,
 	return false;
 }
 
+bool CollisionManager::IsTagCollidingWithTag(ColliderBase::TAG _tagA, 
+	ColliderBase::TAG _tagB) const
+{
+	auto pair = (_tagA < _tagB) ? std::make_pair(_tagA, _tagB) : std::make_pair(_tagB, _tagA);
+
+	if (activeCollisions_.count(pair) > 0)
+	{
+		return true;
+	}
+
+	return false;
+}
+
 void CollisionManager::ResolveCollision(ActorBase* _actorA, ActorBase* _actorB,
 	const CollisionInfo& _info)
 {
