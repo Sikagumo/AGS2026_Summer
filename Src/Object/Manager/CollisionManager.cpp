@@ -301,8 +301,6 @@ void CollisionManager::UpdateCollisionPars(void)
 				// 一定距離以上離れている場合は、詳細な判定をスキップ
 				if (distSquare > cullingDistSquare_) { continue; }
 			}
-
-			const auto& collidersB = actorB->GetOwnColliders();
 			
 			// コライダー同士の詳細判定
 			for (auto& [idA, colA] : collidersA)

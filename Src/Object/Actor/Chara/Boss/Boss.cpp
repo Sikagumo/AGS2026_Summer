@@ -205,10 +205,7 @@ void Boss::UpdateProcess(void)
 	bool a = CollisionManager::GetInstance().IsTagCollidingWithTag(ColliderBase::TAG::BOSS
 		, ColliderBase::TAG::PLAYER);
 
-	if (a)
-	{
-		transformFeet_.pos.y += 100;
-	}
+	
 }
 
 void Boss::UpdateProcessPost(void)
