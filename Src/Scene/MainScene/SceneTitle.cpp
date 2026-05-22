@@ -27,6 +27,7 @@ void SceneTitle::Load(void)
     Loading::GetInstance()->SetProgress(60.0f);
 
     imageTitle_ = resourceManager.LoadHandleId(ResourceManager::SRC::IMG_TITLE);
+    ResourceManager::GetInstance().LoadHandleIds(ResourceManager::SRC::IMGE_TITLE_TEXT, imageMenu_.data());
 
     // ‚»‚Ì‘¼‰æ‘œ
     Loading::GetInstance()->SetProgress(80.0f);
@@ -49,7 +50,6 @@ SceneTitle::SceneTitle(void)
 
 void SceneTitle::Initialize(void)
 {
-    ResourceManager::GetInstance().LoadHandleIds(ResourceManager::SRC::IMGE_TITLE_TEXT, imageMenu_.data());
 
 }
 
