@@ -69,6 +69,9 @@ void ResourceManager::Initialize(void)
 	_SetResource(LOAD_TYPE::IMAGES, SRC::IMGS_TEXTS, PATH_IMAGE + "Text.png"
 		, imagesAllNum, imagesNumX, imagesNumY);
 
+	_SetResource(LOAD_TYPE::IMAGES, SRC::IMGE_TITLE_TEXT, PATH_IMAGE + "testFont.png"
+	,2, 1, 2);
+
 
 	/* ƒ‚ƒfƒ‹ */
 	_SetResource(LOAD_TYPE::MODEL, SRC::MODEL_SKYDOME, PATH_MODEL + "SkyDome/SkyDome.mv1");

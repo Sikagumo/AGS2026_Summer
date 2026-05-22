@@ -28,8 +28,6 @@ void SceneTitle::Load(void)
 
     imageTitle_ = resourceManager.LoadHandleId(ResourceManager::SRC::IMG_TITLE);
 
-    resourceManager.LoadHandleIds(ResourceManager::SRC::IMGE_TITLE_TEXT, imageMenu_.data());
-
     // ‚»‚Ì‘¼‰æ‘œ
     Loading::GetInstance()->SetProgress(80.0f);
 
@@ -51,6 +49,8 @@ SceneTitle::SceneTitle(void)
 
 void SceneTitle::Initialize(void)
 {
+    ResourceManager::GetInstance().LoadHandleIds(ResourceManager::SRC::IMGE_TITLE_TEXT, imageMenu_.data());
+
 }
 
 void SceneTitle::Update(void)
@@ -80,6 +80,9 @@ void SceneTitle::Draw(void)
     const int IMAGET_TITLE_Y = Application::SCREEN_SIZE_Y / 3;
 
     DrawRotaGraph(Application::SCREEN_HALF_X, IMAGET_TITLE_Y, 1.0f, UtilityMath::DEG2RAD, imageTitle_, true);
+  
+    DrawRotaGraph(Application::SCREEN_HALF_X, Application::SCREEN_HALF_Y, 5.0f, 
+        UtilityMath::DEG2RAD, imageMenu_[0], true);
 }
 
 void SceneTitle::Release(void)
