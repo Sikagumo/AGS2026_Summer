@@ -23,10 +23,7 @@ void WeaponMP::SetBone(int _id, Transform _trans, ColliderBase::TAG _tag)
 	tag_ = _tag;
 }
 
-int WeaponMP::GetDamage(void) const
-{
-	return 0;
-}
+
 
 VECTOR WeaponMP::GetPos(void) const
 {

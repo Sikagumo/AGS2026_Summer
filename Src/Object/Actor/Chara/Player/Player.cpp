@@ -95,7 +95,7 @@ void Player::InitCollider(void)
 void Player::InitPost(void)
 {
 	constexpr bool IS_RAPID_FIRE = false;
-	actionController_ = std::make_unique<PActionController>(IS_RAPID_FIRE);
+	actionController_ = std::make_unique<PActionController>(animation_, IS_RAPID_FIRE);
 
 	curAttackNum_ = 0;
 
@@ -103,32 +103,44 @@ void Player::InitPost(void)
 	constexpr float SHOT_TIME_INC_ACTION = 0.1875f; // 行動間隔上昇値
 
 	constexpr float SHOT_TIME_ACTIVE = 2.0f; // 有効時間
-	constexpr float SHOT_TIME_ACTION_ACTIVE = 1.35f; // 有効時間
-	constexpr float SHOT_TIME_END = 1.0f; // 終了時間
+	constexpr float SHOT_TIME_ACTION_ACTIVE = 1.25f; // 有効時間
 	constexpr float SHOT_TIME_ACTIVE_INPUT = 1.75f; // 入力可能時間
+	constexpr float SHOT_TIME_END = 1.0f; // 終了時間
 
-	float timeActive, timeEnd, timeActionActive, timeInput;
+	constexpr float SHOT_TIME_STOP = 0.85f; // 入力可能時間
+	constexpr float SHOT_TIME_STOP_ACTIVE = 1.15f; // 入力可能時間
+
+
+
+	float timeActive, timeEnd, timeActionActive, timeInput, timeStop, timeStopActive;
 	timeActive = SHOT_TIME_ACTIVE;
 	timeEnd = SHOT_TIME_END;
 	timeActionActive = SHOT_TIME_ACTION_ACTIVE;
 	timeInput = SHOT_TIME_ACTIVE_INPUT;
+	timeStop = 0.1f;
+	timeStopActive = SHOT_TIME_STOP_ACTIVE;
 
 	actionController_->SetAction(0, timeActive, timeEnd, timeActionActive
-		, std::bind(&Player::ShotBullet, this), timeInput);
+								, std::bind(&Player::ShotBullet, this)
+								, timeStop, timeStopActive, timeInput);
 
 	timeActive += SHOT_TIME_INCREMENT;
 	timeEnd += SHOT_TIME_INCREMENT;
 	timeActionActive += SHOT_TIME_INC_ACTION;
-	timeInput += SHOT_TIME_INCREMENT;
+	timeInput += (SHOT_TIME_INCREMENT / 2);
+	timeStop = SHOT_TIME_STOP;
 	actionController_->SetAction(1, timeActive, timeEnd, timeActionActive
-		, std::bind(&Player::ShotBullet, this), timeInput);
+								, std::bind(&Player::ShotBullet, this)
+								, timeStop, timeStopActive, timeInput);
 
 	timeActive += SHOT_TIME_INCREMENT * 2;
 	timeEnd += SHOT_TIME_INCREMENT * 2;
 	timeActionActive += SHOT_TIME_INC_ACTION;
-	timeInput += SHOT_TIME_INCREMENT * 2;
+	timeInput += (SHOT_TIME_INCREMENT / 2);
+	timeStop += (SHOT_TIME_STOP / 2);
 	actionController_->SetAction(2, timeActive, timeEnd, timeActionActive
-		, std::bind(&Player::ShotBullet, this), timeInput);
+								, std::bind(&Player::ShotBullet, this)
+								, timeStop, timeStopActive, timeInput);
 }
 
 
@@ -171,6 +183,8 @@ void Player::DrawLate(void)
 		, UtilityMath::Rad2DegF(transform_.quaRotLocal.x), UtilityMath::Rad2DegF(transform_.quaRotLocal.y), UtilityMath::Rad2DegF(transform_.quaRotLocal.z));
 
 	actionController_->DrawDebug();
+
+	animation_->DrawDebug();
 
 	for (auto& collider : ownColliders_)
 	{
@@ -347,6 +361,11 @@ void Player::UpdateBullets(void)
 
 	if (shotIndex_ != -1)
 	{
+		if (bulletType_ == BULLET_TYPE::BIG && animation_->isStop())
+		{
+			bullets_[shotIndex_]->PreActiveProcess();
+		}
+
 		bullets_[shotIndex_]->SetPosition(throwPos_);
 	}
 }

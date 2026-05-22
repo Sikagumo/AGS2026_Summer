@@ -22,10 +22,7 @@ void WeaponCannon::SetBone(int _id, Transform _trans, ColliderBase::TAG _tag)
 	bone_.transform = _trans;
 	tag_ = _tag;
 }
-int WeaponCannon::GetDamage(void) const
-{
-	return 0;
-}
+
 
 VECTOR WeaponCannon::GetPos(void) const
 {
@@ -34,7 +31,7 @@ VECTOR WeaponCannon::GetPos(void) const
 
 void WeaponCannon::Load(void)
 {
-	transform_.SetModel(resourceManager_.LoadHandleId(ResourceManager::SRC::MODEL_BOSS_WEAPON_CN));
+	//transform_.SetModel(resourceManager_.LoadHandleId(ResourceManager::SRC::MODEL_BOSS_WEAPON_CN));
 	transform_.SetModel(resourceManager_.LoadModelDuplicate(ResourceManager::SRC::MODEL_BOSS_WEAPON_CN));
 }
 

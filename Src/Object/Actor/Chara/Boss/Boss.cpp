@@ -90,9 +90,14 @@ void Boss::Load(void)
 {
 	transform_.modelId = resourceManager_.LoadHandleId(ResourceManager::SRC::MODEL_BOSS_FEET);
 	transformBody_.modelId = resourceManager_.LoadHandleId(ResourceManager::SRC::MODEL_BOSS_BODY);
+	
+}
+
+void Boss::InitTransform(void)
+{
 	transform_.scl = BOSS_SIZE;
 	transformBody_.scl = BOSS_SIZE;
-	transform_.quaRot= Quaternion::Identity();
+	transform_.quaRot = Quaternion::Identity();
 	transform_.quaRotLocal =
 		Quaternion::Mult(transform_.quaRotLocal,
 			Quaternion::AngleAxis(UtilityMath::Deg2RadF(INIT_ROT), UtilityMath::AXIS_Y));
@@ -101,16 +106,12 @@ void Boss::Load(void)
 		Quaternion::Mult(transformBody_.quaRotLocal,
 			Quaternion::AngleAxis(UtilityMath::Deg2RadF(INIT_ROT), UtilityMath::AXIS_Y));
 
-	transform_.pos= BOSS_INIT_POS;
+	transform_.pos = BOSS_INIT_POS;
 	transform_.Update();
-	transformBody_.pos = MV1GetFramePosition(transform_.modelId,JOINT_FEET_BODY);
-	
+	transformBody_.pos = MV1GetFramePosition(transform_.modelId, JOINT_FEET_BODY);
+
 	transformBody_.Update();
 	BoneParam();
-}
-
-void Boss::InitTransform(void)
-{
 }
 
 void Boss::InitCollider(void)
@@ -200,6 +201,14 @@ void Boss::UpdateProcess(void)
 	weaponRG_->Update();
 	weaponCannonL_->Update();
 	weaponCannonR_->Update();
+
+	bool a = CollisionManager::GetInstance().IsTagCollidingWithTag(ColliderBase::TAG::BOSS
+		, ColliderBase::TAG::PLAYER);
+
+	if (a)
+	{
+		transformFeet_.pos.y += 100;
+	}
 }
 
 void Boss::UpdateProcessPost(void)

@@ -23,10 +23,6 @@ void WeaponRG::SetBone(int _id, Transform _trans, ColliderBase::TAG _tag)
 	tag_ = _tag;
 }
 
-int WeaponRG::GetDamage(void) const
-{
-	return 0;
-}
 
 VECTOR WeaponRG::GetPos(void) const
 {

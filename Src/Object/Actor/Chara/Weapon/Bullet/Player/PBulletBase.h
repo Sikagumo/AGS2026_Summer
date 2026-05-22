@@ -41,6 +41,8 @@ public:
 
 	void SetPosition(const VECTOR& _pos) { transform_.pos = _pos; }
 
+	virtual void PreActiveProcess(void){};
+
 
 protected:
 

@@ -174,6 +174,19 @@ bool CollisionManager::IsActorCollidingWithTag(const ActorBase* _actor,
 	return false;
 }
 
+bool CollisionManager::IsTagCollidingWithTag(ColliderBase::TAG _tagA, 
+	ColliderBase::TAG _tagB) const
+{
+	auto pair = (_tagA < _tagB) ? std::make_pair(_tagA, _tagB) : std::make_pair(_tagB, _tagA);
+
+	if (activeCollisions_.count(pair) > 0)
+	{
+		return true;
+	}
+
+	return false;
+}
+
 void CollisionManager::ResolveCollision(ActorBase* _actorA, ActorBase* _actorB,
 	const CollisionInfo& _info)
 {
@@ -190,27 +203,9 @@ void CollisionManager::ResolveCollision(ActorBase* _actorA, ActorBase* _actorB,
 	TAG tagA = _info.myCollider->GetCollisionTag();
 	TAG tagB = _info.hitCollider->GetCollisionTag();
 
-	// パターン1：自分が動くアクター（PLAYER/BOSS）で、相手が STAGE（床・壁）の場合
-	if ((tagA == TAG::PLAYER || tagA == TAG::BOSS) && tagB == TAG::STAGE)
-	{
-		pushVector.x = 0.0f;
-		pushVector.z = 0.0f;
-		if (pushVector.y > 0.001f)
-		{
-			pushVector.y += 0.02f;
-		}
-		else
-		{
-			pushVector.y = 0.0f;
-		}
-		_actorA->GetTransform().Translate(pushVector);
-		return; 
-	}
 	if ((tagA == TAG::PLAYER || tagA == TAG::BOSS) && tagB == TAG::STAGE)
 	{
 		float overlap = fabsf(_info.penetration);
-
-		if (overlap < 0.01f) { overlap = 0.5f; }
 
 		VECTOR stagePush = VGet(0.0f, overlap, 0.0f);
 
@@ -220,11 +215,9 @@ void CollisionManager::ResolveCollision(ActorBase* _actorA, ActorBase* _actorB,
 	else if (tagA == TAG::STAGE && (tagB == TAG::PLAYER || tagB == TAG::BOSS))
 	{
 		float overlap = fabsf(_info.penetration);
-		if (overlap < 0.01f) { overlap = 0.5f; }
 
 		VECTOR stagePush = VGet(0.0f, overlap, 0.0f);
 
-		// 相手（_actorB）を真上に持ち上げる
 		_actorB->GetTransform().Translate(stagePush);
 		return;
 	}
@@ -541,13 +534,30 @@ bool CollisionManager::CheckCapsuleVsModel(const ColliderBase* _capsuleCol,
 		_outInfo.hitNormal = bestHit.Normal;
 		_outInfo.isActive = true;
 
-		// カプセルの軸（線分）上の最近接点を求め、正確なめり込み量を算出
-		VECTOR nearestPos = GetNearestPointOnSegment(startPos, endPos, bestHit.HitPosition);
-		float distance = UtilityMath::MagnitudeF(VSub(bestHit.HitPosition, nearestPos));
-		_outInfo.penetration = radius - distance;
+		if (bestHit.Normal.y > 0.5f)
+		{
+			float capsuleBottomY = (startPos.y < endPos.y ? startPos.y : endPos.y) - radius;
+
+			// 床の高さ（HitPosition.y）よりも、カプセルの底がどれだけ下にあるか
+			_outInfo.penetration = bestHit.HitPosition.y - capsuleBottomY;
+		}
+		else
+		{
+			// 壁や急斜面の場合は、元の線分最短距離を使う
+			VECTOR nearestPos = GetNearestPointOnSegment(startPos, endPos, bestHit.HitPosition);
+			float distance = UtilityMath::MagnitudeF(VSub(bestHit.HitPosition, nearestPos));
+			_outInfo.penetration = radius - distance;
+		}
+
+		// めり込み量が極端にマイナスにならないように安全弁をかける
+		if (_outInfo.penetration < 0.0f)
+		{
+			_outInfo.penetration = 0.0f;
+		}
 
 		// メモリ解放
 		MV1CollResultPolyDimTerminate(hitResult);
+		return true;
 
 		return true;
 	}

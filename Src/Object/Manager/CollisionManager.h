@@ -71,6 +71,12 @@ public:
 	/// @return 衝突していればtrue
 	bool IsActorCollidingWithTag(const ActorBase* _actor, ColliderBase::TAG _targetTag) const;
 
+	/// @brief 特定のタグ同士が現在衝突しているか調べる
+	/// @param _tagA 調査対象のタグA
+	/// @param _tagB 調査対象のタグB
+	/// @return 衝突していればtrue
+	bool IsTagCollidingWithTag(ColliderBase::TAG _tagA, ColliderBase::TAG _tagB) const;
+
 	/// @brief 衝突したアクター同士の押し戻し処理を行う
 	/// @param actorA 動かす対象のアクターA
 	/// @param actorB 動かす対象のアクターB
