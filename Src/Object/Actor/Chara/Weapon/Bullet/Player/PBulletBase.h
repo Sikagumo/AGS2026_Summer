@@ -39,7 +39,7 @@ public:
 
 	float GetRadius(void)const { return radius_; }
 
-	void SetPosition(const VECTOR& _pos) { transform_.pos = _pos; }
+	void SetFollow(const VECTOR& _pos, const VECTOR& _offsetDir);
 
 	virtual void PreActiveProcess(void){};
 
@@ -62,6 +62,8 @@ protected:
 	int shotCnt_;
 
 	bool isVisible_;
+
+	int power_;
 
 
 	std::function<void(void)> updateProc_;

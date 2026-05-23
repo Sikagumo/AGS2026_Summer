@@ -23,7 +23,7 @@ Player::Player(int _playerNo, BULLET_TYPE _playerType)
 	, inputManager_(InputManager::GetInstance())
 	, animType_(ANIM_TYPE::IDLE)	
 	,  curAttackNum_(0)
-	, throwPos_(UtilityMath::VECTOR_ZERO)
+	, throwPos_(UtilityMath::VECTOR_ZERO), throwRot_(Quaternion::Identity())
 {
 	constexpr int BULLET_MAX = 3;
 	attackNumMax_ = BULLET_MAX;
@@ -72,15 +72,12 @@ void Player::InitTransform(void)
 }
 void Player::InitCollider(void)
 {
-	
-
-
 	const VECTOR COL_CAPSULE_TOP = VScale(COL_CAPSULE_TOP_LOCAL_POS, transform_.scl.y);
 	const VECTOR COL_CAPSULE_DOWN = VScale(COL_CAPSULE_DOWN_LOCAL_POS, transform_.scl.y);
 	const float CAPSULE_RADIUS = (COL_CAPSULE_RADIUS * transform_.scl.y);
 	
 	const VECTOR POS_LINE_OFFSET = VGet(0.0f,-10.0f,0.0f );
-	ColliderLine* colLine = new ColliderLine(ColliderBase::TAG::BOSS, &transform_, COL_CAPSULE_TOP, POS_LINE_OFFSET);
+	ColliderLine* colLine = new ColliderLine(ColliderBase::TAG::PLAYER, &transform_, COL_CAPSULE_TOP, POS_LINE_OFFSET);
 	ownColliders_.emplace(static_cast<int>(ColliderBase::SHAPE::LINE), colLine);
 	colLine->SetTriger(false);
 
@@ -344,12 +341,15 @@ void Player::ProcessAttack(void)
 void Player::UpdateBullets(void)
 {
 	// ”­ŽËŽž‚ÌŽè‚ÌƒtƒŒ[ƒ€‚É¶¬‚µ‚½’e‚ð’Ç]‚³‚¹‚é
-	constexpr int FRAME_THROW_LEFT = 23;
-	constexpr int FRAME_THROW_RIGHT = 47;
-	const int FRAME_NUM_THROW = ((curAttackNum_ % 2 == 0) ? FRAME_THROW_LEFT : FRAME_THROW_RIGHT);
+	constexpr int FRAME_FINGER_LEFT = 23;
+	constexpr int FRAME_FINGER_RIGHT = 47;
+	const int FRAME_FINGER = ((curAttackNum_ % 2 == 0) ? FRAME_FINGER_LEFT : FRAME_FINGER_RIGHT);
 
-	throwPos_ = MV1GetFramePosition(transform_.modelId, FRAME_NUM_THROW);
-
+	const int FRAME_HAND_PALM = (FRAME_FINGER - 1);
+	VECTOR posFinger = MV1GetFramePosition(transform_.modelId, FRAME_FINGER);
+	VECTOR posHandPalm = MV1GetFramePosition(transform_.modelId, FRAME_HAND_PALM);
+	VECTOR offsetDir = UtilityMath::VNormalize(VSub(posFinger, posHandPalm));
+	throwPos_ = posFinger;
 
 	for (auto& bullet : bullets_)
 	{
@@ -366,7 +366,7 @@ void Player::UpdateBullets(void)
 			bullets_[shotIndex_]->PreActiveProcess();
 		}
 
-		bullets_[shotIndex_]->SetPosition(throwPos_);
+		bullets_[shotIndex_]->SetFollow(throwPos_, offsetDir);
 	}
 }
 
