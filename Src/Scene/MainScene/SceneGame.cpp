@@ -16,6 +16,7 @@ SceneGame::SceneGame(void)
 	player_ = std::make_unique<Player>(0, Player::BULLET_TYPE::BIG);
 	boss_ = std::make_unique<Boss>();
 	stage_ = std::make_unique<Stage>();
+	ResourceManager::GetInstance().LoadHandleIds(ResourceManager::SRC::IMGS_TEXTS, temp);
 }
 
 
@@ -111,6 +112,8 @@ void SceneGame::Draw(void)
 
 	boss_->Draw();
 	
+	DrawGraph(750, 500, temp[0], true);
+
 	// í«è]à íu
 	DrawSphere3D(tempBossWeaponPos_, 10.0f, 16, 0x0000ff, 0xffffff, true);
 

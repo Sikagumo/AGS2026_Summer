@@ -100,6 +100,7 @@ private:
 	ANIM_TYPE animType_;
 
 	VECTOR throwPos_;
+	Quaternion throwRot_;
 
 	std::unique_ptr<PActionController> actionController_;
 

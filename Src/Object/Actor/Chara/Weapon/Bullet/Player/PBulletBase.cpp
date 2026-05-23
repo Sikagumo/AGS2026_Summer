@@ -21,7 +21,9 @@ PBulletBase::PBulletBase(void)
 
 void PBulletBase::InitCollider(void)
 {
-	// 球の当たり判定を導入
+	// 衝突判定マネージャに登録
+	ownColliders_.emplace(0
+		, new ColliderSphere(ColliderBase::TAG::PLAYER_BULLET, &transform_, UtilityMath::VECTOR_ZERO, radius_));
 }
 
 void PBulletBase::InitPost(void)
@@ -53,6 +55,24 @@ void PBulletBase::Update(void)
 	//bulletState_ = BULLET_STATE::BLAST;
 
 	UpdatePost();
+
+	CollisionManager& colMng = CollisionManager::GetInstance();
+
+	//if (colMng.IsTagCollidingWithTag(, ColliderBase::TAG::BOSS))
+	if (colMng.IsActorCollidingWithTag(this, ColliderBase::TAG::BOSS))
+	{
+		// damageController_.ダメージ登録(power_);
+		// 
+		// 衝突判定マネージャに登録
+		ownColliders_.emplace(0
+			, new ColliderSphere(ColliderBase::TAG::PLAYER_BULLET, &transform_, UtilityMath::VECTOR_ZERO, radius_));
+
+	}
+	else 
+	{
+		//if (colMng.IsActorCollidingWithTag(this, ColliderBase::TAG::WEAPON_CANNON)
+		// damageController_.ダメージ登録(power_ / 0.8f);
+	}
 }
 
 void PBulletBase::Draw(void)
@@ -97,9 +117,6 @@ void PBulletBase::Shot(const VECTOR& _shotDir, const Quaternion& _rot)
 
 	transform_.Update();
 
-	// 衝突判定マネージャに登録
-	ownColliders_.emplace(0
-		, new ColliderSphere(ColliderBase::TAG::PLAYER_BULLET, &transform_, UtilityMath::VECTOR_ZERO, radius_));
 	CollisionManager::GetInstance().RegisterActor(this);
 }
 
@@ -108,4 +125,9 @@ bool PBulletBase::IsAlive(void) const
 	return(bulletState_ != BULLET_STATE::INACTIVE
 			|| aliveTime_ <= 0.0f
 			|| isVisible_);
+}
+void PBulletBase::SetFollow(const VECTOR& _pos, const VECTOR& _offsetDir)
+{
+	// 追従位置割り当て
+	transform_.pos = VAdd(_pos, VScale(_offsetDir, radius_));
 }

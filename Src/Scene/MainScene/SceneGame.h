@@ -48,6 +48,7 @@ private:
     std::unique_ptr<Stage> stage_;
 
     VECTOR tempBossWeaponPos_;
+    int temp[10];
 
     /// @brief デバッグ情報の描画
     void DrawDebug(void);
