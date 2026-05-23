@@ -14,8 +14,8 @@ public:
 
 	void Release(void)override;
 
-	void SetBone(int _id,Transform _trans) override;
-	int GetDamage(void) const override;
+	void SetBone(int _id,Transform _trans, ColliderBase::TAG _tag) override;
+	int GetDamage(void)override;
 	VECTOR GetPos(void) const override;
 
 protected:

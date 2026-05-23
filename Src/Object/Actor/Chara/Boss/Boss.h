@@ -58,6 +58,15 @@ private:
 	//回転
 	static constexpr float INIT_ROT = 180.0f;
 
+	//当たり判定の座標
+	//ライン
+	static constexpr VECTOR COL_LINE_START_POS = { 0.0f,60.0f,0.0f };
+	static constexpr VECTOR COL_LINE_END_POS = { 0.0f,0.0f,0.0f };
+	//カプセル
+	static constexpr VECTOR COL_CAPSULE_START_POS = { 0.0f,130.0f,0.0f };
+	static constexpr VECTOR COL_CAPSULE_END_POS = { 0.0f,80.0f,0.0f };
+	static constexpr float COL_CAPSULE_END_RADIUS = 80.0f;
+
 	//ボーンの番号
 	static constexpr int JOINT_FEET_BODY = 12;
 	static constexpr int JOINT_CAR_BODY = 4;

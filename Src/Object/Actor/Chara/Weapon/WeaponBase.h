@@ -3,6 +3,7 @@
 
 #include <memory>
 #include "../../ActorBase.h"
+#include "../../../Collider/ColliderBase.h"
 
 class WeaponBase :
     public ActorBase
@@ -24,9 +25,29 @@ public:
 	
 
 	void Release(void)override;
-
-	virtual void SetBone(int _id, Transform _trans)=0;
-	virtual int GetDamage(void) const = 0;
+	/// <summary>
+	/// ボーン情報とタグの取得
+	/// </summary>
+	/// <param name="_id">ボーンのナンバー</param>
+	/// <param name="_trans">ボーンを持つ相手のトランスフォーム</param>
+	/// <param name="_tag">当たり判定用のタグ</param>
+	virtual void SetBone(int _id, Transform _trans,ColliderBase::TAG _tag)=0;
+	/// <summary>
+	/// ダメージの受け渡し
+	/// </summary>
+	/// <param name=""></param>
+	/// <returns></returns>
+	virtual int GetDamage(void) { return attackDamage_; }
+	/// <summary>
+	/// ダメージの受け取り
+	/// </summary>
+	/// <param name="_damege">ダメージの数値</param>
+	virtual void SetDamage(int _damege) { hp_ -= _damege; }
+	/// <summary>
+	/// ロックオン用の座標
+	/// </summary>
+	/// <param name=""></param>
+	/// <returns></returns>
 	virtual VECTOR GetPos(void) const = 0;
 
 private:
@@ -41,11 +62,13 @@ protected:
 
 
 
-	float hp_;
-	float attackDamage_;	
-	
-
+	int hp_;
+	int attackDamage_;	
+	VECTOR localBackPos_;	//当たり判定用の後方の座標
+	VECTOR localFrontPos_;	//当たり判定用の前方の座標
+	VECTOR localPos_;		//カメラのロックオン用の中央座標
 	Bone bone_;
+	ColliderBase::TAG tag_;
 
 	virtual void DrawPre(void)override;
 
