@@ -139,16 +139,16 @@ bool CollisionManager::CheckCollision(const ColliderBase* _colliderA, const Coll
 	{
 		return CheckCapsuleVsCapsule(_colliderA, _colliderB, _outInfo);
 	}
-	
-	if (shapeA == SHAPE::CAPSULE && shapeB == SHAPE::MODEL)
+	else if (shapeA == SHAPE::LINE && shapeB == SHAPE::MODEL)
+	{
+		return CheckLineVsModel(_colliderA, _colliderB, _outInfo);
+	}
+	else if (shapeA == SHAPE::CAPSULE && shapeB == SHAPE::MODEL)
 	{
 		return CheckCapsuleVsModel(_colliderA, _colliderB, _outInfo);
 	}
 
-	if (shapeA == SHAPE::LINE && shapeB == SHAPE::MODEL)
-	{
-		return CheckLineVsModel(_colliderA, _colliderB, _outInfo);
-	}
+	
 
 	return false;
 }

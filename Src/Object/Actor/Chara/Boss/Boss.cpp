@@ -308,7 +308,8 @@ void Boss::UpdateJump(void)
 	{
 		hitWaveRadius_ += 3.0f;
 		safeWaveRadius_ += 3.0f;
-		CollisionManager::GetInstance().
+		CollisionManager::GetInstance().SetActorColliderRadius(this, ColliderBase::TAG::HITWAVE, hitWaveRadius_);
+		CollisionManager::GetInstance().SetActorColliderRadius(this, ColliderBase::TAG::SAFEWAVE, safeWaveRadius_);
 	}
 	
 	if (transform_.pos.y >= 3500)
