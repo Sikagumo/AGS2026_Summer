@@ -174,10 +174,10 @@ bool CollisionManager::IsActorCollidingWithTag(const ActorBase* _actor,
 	return false;
 }
 
-bool CollisionManager::IsTagCollidingWithTag(ColliderBase::TAG _tagA, 
-	ColliderBase::TAG _tagB) const
+bool CollisionManager::IsTagCollidingWithTag(ColliderBase::TAG _targetTagA,
+	ColliderBase::TAG _targetTagB) const
 {
-	auto pair = (_tagA < _tagB) ? std::make_pair(_tagA, _tagB) : std::make_pair(_tagB, _tagA);
+	auto pair = (_targetTagA < _targetTagB) ? std::make_pair(_targetTagA, _targetTagB) : std::make_pair(_targetTagB, _targetTagA);
 
 	if (activeCollisions_.count(pair) > 0)
 	{
@@ -185,6 +185,50 @@ bool CollisionManager::IsTagCollidingWithTag(ColliderBase::TAG _tagA,
 	}
 
 	return false;
+}
+
+void CollisionManager::SetCollisionActive(ActorBase* _targetActor, 
+	ColliderBase::TAG _targetTag, const bool _isActive)
+{
+	if (_targetActor == nullptr)
+	{
+		return;
+	}
+
+	auto& ownColliders = _targetActor->GetOwnColliders();
+
+	// コライダーマップ(または配列)をループで回す
+	for (auto& [id, collider] : ownColliders)
+	{
+		if (collider == nullptr) { continue; }
+
+		if (collider->GetCollisionTag() == _targetTag)
+		{
+			collider->SetActive(_isActive);
+		}
+	}
+}
+
+void CollisionManager::SetActorColliderRadius(ActorBase* _targetActor,
+	ColliderBase::TAG _targetTag, float _radius)
+{
+	if (_targetActor == nullptr)
+	{
+		return;
+	}
+
+	auto& ownColliders = _targetActor->GetOwnColliders();
+
+	// コライダーマップ(または配列)をループで回す
+	for (auto& [id, collider] : ownColliders)
+	{
+		if (collider == nullptr) { continue; }
+
+		if (collider->GetCollisionTag() == _targetTag)
+		{
+			collider->SetRadius(_radius);
+		}
+	}
 }
 
 void CollisionManager::ResolveCollision(ActorBase* _actorA, ActorBase* _actorB,
