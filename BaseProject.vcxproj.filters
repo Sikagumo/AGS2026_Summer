@@ -225,7 +225,7 @@
     <ClCompile Include="Src\Object\Actor\Chara\Weapon\BossWeapon\WeaponMGR.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DamageController.cpp">
+    <ClCompile Include="Src\Object\Common\DamageController.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -404,7 +404,7 @@
     <ClInclude Include="Src\Object\Actor\Chara\Weapon\BossWeapon\WeaponMGR.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DamageController.h">
+    <ClInclude Include="Src\Object\Common\DamageController.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

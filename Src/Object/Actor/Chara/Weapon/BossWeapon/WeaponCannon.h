@@ -12,12 +12,12 @@ public:
 
 	// リソースロード
 	void Load(void) override;
-
-	void Release(void)override;
 	
 	void SetBone(int _id, Transform _trans, ColliderBase::TAG _tag) override;
 	
 	VECTOR GetPos(void) const override;
+
+	void SetDamage(int _damage)override { hp_ -= _damage; }
 
 protected:
 
@@ -40,6 +40,8 @@ protected:
 
 	// 前描画
 	void DrawPre(void) override;
+
+	void ReleasePost(void)override;
 
 	void CollisionReserve(void) override {};
 

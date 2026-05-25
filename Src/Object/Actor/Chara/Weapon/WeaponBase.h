@@ -24,7 +24,7 @@ public:
 
 	
 
-	void Release(void)override;
+	void ReleasePost(void)override;
 	/// <summary>
 	/// ボーン情報とタグの取得
 	/// </summary>
@@ -39,6 +39,9 @@ public:
 	/// <param name=""></param>
 	/// <returns></returns>
 	virtual VECTOR GetPos(void) const = 0;
+
+	
+	virtual void SetDamage(int _damage) = 0;
 
 private:
 

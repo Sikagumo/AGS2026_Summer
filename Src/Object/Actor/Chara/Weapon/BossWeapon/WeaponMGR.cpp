@@ -12,7 +12,7 @@ WeaponMGR::WeaponMGR()
 	
 }
 
-void WeaponMGR::Release(void)
+void WeaponMGR::ReleasePost(void)
 {
 }
 
@@ -23,8 +23,6 @@ void WeaponMGR::SetBone(int _id, Transform _trans, ColliderBase::TAG _tag)
 	bone_.transform = _trans;
 	tag_ = _tag;
 }
-
-
 
 VECTOR WeaponMGR::GetPos(void) const
 {
@@ -58,6 +56,8 @@ void WeaponMGR::InitCollider(void)
 		tag_, &transform_, { 50.0f,0.0f,140.0f }, { 50.0f,0.0f,-40.0f }, 20.0f);
 	ownColliders_.emplace(static_cast<int>(ColliderBase::SHAPE::CAPSULE), colCapsule);
 	colCapsule->SetTriger(false);
+
+	CollisionManager::GetInstance().RegisterActor(this);
 }
 
 void WeaponMGR::InitAnimation(void)

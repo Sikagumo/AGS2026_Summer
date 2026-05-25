@@ -28,18 +28,21 @@ public:
 
 	void Draw(void)override;
 
-	void Release(void)override;
 
+	/// @brief ê∂ê¨èàóù
+	/// @param _pos 
+	/// @param _throwDir 
+	/// @param _shotCnt 
+	/// @param isFinish ç≈èIíeÇ©î€Ç©
+	void Create(const VECTOR& _pos, const VECTOR& _throwDir, int _shotCnt, bool isFinish);
 
-	void Create(const VECTOR& _pos, int _shotCnt);
-
-	void Shot(const VECTOR& _shotDir, const Quaternion& _rot);
+	void Shot(const VECTOR& _shotDir);
 
 	bool IsAlive(void)const;
 
 	float GetRadius(void)const { return radius_; }
 
-	void SetPosition(const VECTOR& _pos) { transform_.pos = _pos; }
+	void SetFollow(const VECTOR& _pos, const VECTOR& _offsetDir);
 
 	virtual void PreActiveProcess(void){};
 
@@ -63,6 +66,10 @@ protected:
 
 	bool isVisible_;
 
+	int power_;
+
+	bool isFinish_;
+
 
 	std::function<void(void)> updateProc_;
 
@@ -78,6 +85,10 @@ protected:
 	virtual void SetParam(void) = 0;
 
 	virtual void UpdatePost(void) = 0;
+
+	void ReleasePost(void)override;
+
+	virtual void BlastAction(void);
 
 	virtual void ChangeBulletState(BULLET_STATE _state) = 0;
 };

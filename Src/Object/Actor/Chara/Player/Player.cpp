@@ -23,7 +23,7 @@ Player::Player(int _playerNo, BULLET_TYPE _playerType)
 	, inputManager_(InputManager::GetInstance())
 	, animType_(ANIM_TYPE::IDLE)	
 	,  curAttackNum_(0)
-	, throwPos_(UtilityMath::VECTOR_ZERO)
+	, throwPos_(UtilityMath::VECTOR_ZERO), throwDir_(UtilityMath::VECTOR_ZERO)
 {
 	constexpr int BULLET_MAX = 3;
 	attackNumMax_ = BULLET_MAX;
@@ -35,7 +35,13 @@ Player::Player(int _playerNo, BULLET_TYPE _playerType)
 
 void Player::Load(void)
 {
-	transform_.modelId = resourceManager_.LoadHandleId(ResourceManager::SRC::MODEL_PLAYER_HUMAN);
+	transform_.modelId = resourceManager_.LoadModelDuplicate(ResourceManager::SRC::MODEL_PLAYER_HUMAN);
+}
+void Player::DrawDebug(void)
+{
+	CharaBase::DrawDebug();
+
+
 }
 void Player::InitAnimation(void)
 {
@@ -72,15 +78,12 @@ void Player::InitTransform(void)
 }
 void Player::InitCollider(void)
 {
-	
-
-
 	const VECTOR COL_CAPSULE_TOP = VScale(COL_CAPSULE_TOP_LOCAL_POS, transform_.scl.y);
 	const VECTOR COL_CAPSULE_DOWN = VScale(COL_CAPSULE_DOWN_LOCAL_POS, transform_.scl.y);
 	const float CAPSULE_RADIUS = (COL_CAPSULE_RADIUS * transform_.scl.y);
 	
 	const VECTOR POS_LINE_OFFSET = VGet(0.0f,-10.0f,0.0f );
-	ColliderLine* colLine = new ColliderLine(ColliderBase::TAG::BOSS, &transform_, COL_CAPSULE_TOP, POS_LINE_OFFSET);
+	ColliderLine* colLine = new ColliderLine(ColliderBase::TAG::PLAYER, &transform_, COL_CAPSULE_TOP, POS_LINE_OFFSET);
 	ownColliders_.emplace(static_cast<int>(ColliderBase::SHAPE::LINE), colLine);
 	colLine->SetTriger(false);
 
@@ -99,7 +102,7 @@ void Player::InitPost(void)
 
 	curAttackNum_ = 0;
 
-	constexpr float SHOT_TIME_INCREMENT = 0.75f; // 行動間隔上昇値
+	constexpr float SHOT_TIME_INCREMENT = 0.5f; // 行動間隔上昇値
 	constexpr float SHOT_TIME_INC_ACTION = 0.1875f; // 行動間隔上昇値
 
 	constexpr float SHOT_TIME_ACTIVE = 2.0f; // 有効時間
@@ -112,33 +115,30 @@ void Player::InitPost(void)
 
 
 
-	float timeActive, timeEnd, timeActionActive, timeInput, timeStop, timeStopActive;
+	float timeActive, timeActionActive, timeInput, timeStop, timeStopActive;
 	timeActive = SHOT_TIME_ACTIVE;
-	timeEnd = SHOT_TIME_END;
 	timeActionActive = SHOT_TIME_ACTION_ACTIVE;
 	timeInput = SHOT_TIME_ACTIVE_INPUT;
 	timeStop = 0.1f;
 	timeStopActive = SHOT_TIME_STOP_ACTIVE;
 
-	actionController_->SetAction(0, timeActive, timeEnd, timeActionActive
+	actionController_->SetAction(0, timeActive, SHOT_TIME_END, timeActionActive
 								, std::bind(&Player::ShotBullet, this)
 								, timeStop, timeStopActive, timeInput);
 
 	timeActive += SHOT_TIME_INCREMENT;
-	timeEnd += SHOT_TIME_INCREMENT;
 	timeActionActive += SHOT_TIME_INC_ACTION;
 	timeInput += (SHOT_TIME_INCREMENT / 2);
 	timeStop = SHOT_TIME_STOP;
-	actionController_->SetAction(1, timeActive, timeEnd, timeActionActive
+	actionController_->SetAction(1, timeActive, SHOT_TIME_END, timeActionActive
 								, std::bind(&Player::ShotBullet, this)
 								, timeStop, timeStopActive, timeInput);
 
 	timeActive += SHOT_TIME_INCREMENT * 2;
-	timeEnd += SHOT_TIME_INCREMENT * 2;
 	timeActionActive += SHOT_TIME_INC_ACTION;
 	timeInput += (SHOT_TIME_INCREMENT / 2);
-	timeStop += (SHOT_TIME_STOP / 2);
-	actionController_->SetAction(2, timeActive, timeEnd, timeActionActive
+	timeStop = SHOT_TIME_STOP;
+	actionController_->SetAction(2, timeActive, SHOT_TIME_END, timeActionActive
 								, std::bind(&Player::ShotBullet, this)
 								, timeStop, timeStopActive, timeInput);
 }
@@ -193,7 +193,7 @@ void Player::DrawLate(void)
 #endif
 }
 
-void Player::Release(void)
+void Player::ReleasePost(void)
 {
 }
 
@@ -211,6 +211,12 @@ void Player::ProcessMove(void)
 	if (inputManager_.IsNew(KEY_INPUT_S)) { dir.z += -1.0f; }
 	if (inputManager_.IsNew(KEY_INPUT_A)) { dir.x += -1.0f; }
 	if (inputManager_.IsNew(KEY_INPUT_D)) { dir.x += 1.0f; }
+
+	if (actionController_->IsActiveAction())
+	{
+		movePow_ = UtilityMath::VECTOR_ZERO;
+		return;
+	}
 
 	if (!UtilityMath::EqualsVZero(dir))
 	{
@@ -258,7 +264,12 @@ void Player::ProcessJump(void)
 	bool isHitKeyNew = input.IsNew(KEY_INPUT_SPACE)
 		|| input.IsPadBtnNew(InputManager::JOYPAD_NO::PAD1,
 			InputManager::JOYPAD_BTN::RB_BOTTOM);
-	if (isHitKeyNew)
+
+	bool isHitTrg = input.IsTrgDown(KEY_INPUT_SPACE)
+		|| input.IsPadBtnTrgDown(InputManager::JOYPAD_NO::PAD1,
+			InputManager::JOYPAD_BTN::RB_BOTTOM);
+
+	if (isHitKeyNew && !isJump_)
 	{
 		// ジャンプの入力受付時間を減少
 		stepJump_ += sceneManager_.GetDeltaTime();
@@ -269,26 +280,18 @@ void Player::ProcessJump(void)
 			jumpPow_ = VAdd(jumpPow_, VScale(UtilityMath::DIR_UP, jumpSpeed));
 		}
 	}
-	else
-	{
-		stepJump_ = 0.0f;
-	}
+	
 
-	bool isHitKey = input.IsTrgDown(KEY_INPUT_SPACE)
-		|| input.IsPadBtnTrgDown(InputManager::JOYPAD_NO::PAD1,
-			InputManager::JOYPAD_BTN::RB_BOTTOM);
 	// ジャンプ
-	if (isHitKey && !isJump_)
+	if (isHitTrg && !isJump_)
 	{
 		// ジャンプ量の計算
 		float jumpSpeed = (POW_JUMP_INIT * sceneManager_.GetDeltaTime());
 		jumpPow_ = VScale(UtilityMath::DIR_UP, jumpSpeed);
 
 		isJump_ = true;
-
-		// アニメーション再生
-		PlayAnim(ANIM_TYPE::JUMP, false);
 	}
+	return;
 
 	// Y軸制限
 	const float LIMIT_POS_Y = -1500.0f;
@@ -300,30 +303,29 @@ void Player::ProcessJump(void)
 
 void Player::ProcessAttack(void)
 {
-	if (animation_->IsEnd()
-		&& actionController_->GetActionState() == PActionController::PACTION_STATE::NONE)
+	// 投げモーション終了時、行動が終了時
+	if (animation_->IsEnd() && !actionController_->IsActiveAction())
 	{
-		if (animType_ != ANIM_TYPE::THROW_LEFT &&
-			animType_ != ANIM_TYPE::THROW_RIGHT)
+		if (animType_ == ANIM_TYPE::THROW_LEFT
+			|| animType_ == ANIM_TYPE::THROW_RIGHT)
 		{
 			PlayAnim(ANIM_TYPE::IDLE);
 		}
 	}
 
+	// 行動の更新
 	actionController_->Update();
 
-	if (actionController_->GetActionState() != PActionController::PACTION_STATE::NONE) { return; }
+	// 行動中は処理終了
+	if (actionController_->IsActiveAction()) { return; }
+
 
 	if (inputManager_.IsTrgMouseLeft())
 	{
+		// 行動回数が最大値を超えた場合、０に戻す
 		if (curAttackNum_ >= attackNumMax_)
 		{
-			if (actionController_->GetActionState() == PActionController::PACTION_STATE::NONE)
-			{
-				curAttackNum_ = 0;
-				PlayAnim(ANIM_TYPE::IDLE);
-			}
-			return;
+			curAttackNum_ = 0;
 		}
 
 		if (!actionController_->IsActiveInput())
@@ -333,7 +335,6 @@ void Player::ProcessAttack(void)
 			actionController_->Active(curAttackNum_);
 
 			curAttackNum_++;
-			animation_->Stop(1.0f);
 
 			ANIM_TYPE type = ((curAttackNum_ % 2 == 0) ? ANIM_TYPE::THROW_LEFT : ANIM_TYPE::THROW_RIGHT);
 			PlayAnim(type, false);
@@ -344,12 +345,15 @@ void Player::ProcessAttack(void)
 void Player::UpdateBullets(void)
 {
 	// 発射時の手のフレームに生成した弾を追従させる
-	constexpr int FRAME_THROW_LEFT = 23;
-	constexpr int FRAME_THROW_RIGHT = 47;
-	const int FRAME_NUM_THROW = ((curAttackNum_ % 2 == 0) ? FRAME_THROW_LEFT : FRAME_THROW_RIGHT);
+	constexpr int FRAME_FINGER_LEFT = 23;
+	constexpr int FRAME_FINGER_RIGHT = 47;
+	const int FRAME_FINGER = ((curAttackNum_ % 2 == 0) ? FRAME_FINGER_LEFT : FRAME_FINGER_RIGHT);
 
-	throwPos_ = MV1GetFramePosition(transform_.modelId, FRAME_NUM_THROW);
-
+	const int FRAME_HAND_PALM = (FRAME_FINGER - 1);
+	VECTOR posFinger = MV1GetFramePosition(transform_.modelId, FRAME_FINGER);
+	VECTOR posHandPalm = MV1GetFramePosition(transform_.modelId, FRAME_HAND_PALM);
+	throwDir_ = UtilityMath::VNormalize(VSub(posFinger, posHandPalm));
+	throwPos_ = posFinger;
 
 	for (auto& bullet : bullets_)
 	{
@@ -366,7 +370,7 @@ void Player::UpdateBullets(void)
 			bullets_[shotIndex_]->PreActiveProcess();
 		}
 
-		bullets_[shotIndex_]->SetPosition(throwPos_);
+		bullets_[shotIndex_]->SetFollow(throwPos_, throwDir_);
 	}
 }
 
@@ -383,7 +387,7 @@ void Player::CreateBullet(void)
 			bullet->Release();
 			bullet->Init();
 
-			bullet->Create(transform_.pos, curAttackNum_);
+			bullet->Create(transform_.pos, throwDir_, curAttackNum_, (curAttackNum_ >= (attackNumMax_ - 1)));
 			return;
 		}
 		shotIndex_++;
@@ -402,7 +406,7 @@ void Player::CreateBullet(void)
 	}
 
 	bullet->Init();
-	bullet->Create(throwPos_, curAttackNum_);
+	bullet->Create(throwPos_, throwDir_, curAttackNum_, (curAttackNum_ >= (attackNumMax_ - 1)));
 
 	bullets_.emplace_back(std::move(bullet));
 }
@@ -414,11 +418,13 @@ void Player::ShotBullet(void)
 	if (bulletType_ != BULLET_TYPE::RAPID_FIRE)
 	{
 		// 放物線状に投げる
-		shotDir = VAdd(shotDir, transform_.GetUp());
+		const VECTOR UP_VEC = VScale(UtilityMath::DIR_UP, 1.0f);
+
+		shotDir = VAdd(shotDir, UP_VEC);
 		shotDir = UtilityMath::VNormalize(shotDir);
 	}
 
-	bullets_[shotIndex_]->Shot(shotDir, transform_.quaRot);
+	bullets_[shotIndex_]->Shot(shotDir);
 	shotIndex_ = -1;
 }
 

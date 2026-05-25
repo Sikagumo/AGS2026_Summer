@@ -112,11 +112,6 @@ void Camera::DrawDebug(void)
 #endif
 }
 
-void Camera::Release(void)
-{
-}
-
-
 VECTOR Camera::GetForward(void) const
 {
 	return UtilityMath::VNormalize((VSub(targetPos_, transform_.pos)));

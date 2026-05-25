@@ -28,19 +28,36 @@ Boss::Boss(void):
 
 	CharaBase()
 {
+	weaponMGL_ = std::make_unique<WeaponMGL>();
+	weaponMGR_ = std::make_unique<WeaponMGR>();
+	weaponMPL_ = std::make_unique<WeaponMP>();
+	weaponMPR_ = std::make_unique<WeaponMP>();
+	weaponRG_ = std::make_unique<WeaponRG>();
+	weaponCannonL_ = std::make_unique<WeaponCannon>();
+	weaponCannonR_ = std::make_unique<WeaponCannon>();
 }
 
 Boss::~Boss(void)
 {
 }
 
-void Boss::Release(void)
+void Boss::ReleasePost(void)
 {
 }
 
 VECTOR Boss::GetBossPos(void) const
 {
 	return transformBody_.pos;
+}
+
+void Boss::SetWeponDamege(int _damege)
+{
+}
+
+
+void Boss::SetBossDamege(int _damege)
+{
+	hp_ -= _damege;
 }
 
 
@@ -90,6 +107,14 @@ void Boss::Load(void)
 {
 	transform_.modelId = resourceManager_.LoadHandleId(ResourceManager::SRC::MODEL_BOSS_FEET);
 	transformBody_.modelId = resourceManager_.LoadHandleId(ResourceManager::SRC::MODEL_BOSS_BODY);
+
+	weaponMGL_->Load();
+	weaponMGR_->Load();
+	weaponMPL_->Load();
+	weaponMPR_->Load();
+	weaponRG_->Load();
+	weaponCannonL_->Load();
+	weaponCannonR_->Load();
 	
 }
 
@@ -127,6 +152,7 @@ void Boss::InitCollider(void)
 	colCapsule->SetTriger(false);
 
 	CollisionManager::GetInstance().RegisterActor(this);
+
 }
 
 void Boss::InitAnimation(void)
@@ -137,14 +163,6 @@ void Boss::InitPost(void)
 {
 	//make_uniqueÇ≈èâä˙âª
 
-	weaponMGL_=std::make_unique<WeaponMGL>();
-	weaponMGR_=std::make_unique<WeaponMGR>();
-	weaponMPL_=std::make_unique<WeaponMP>();
-	weaponMPR_=std::make_unique<WeaponMP>();
-	weaponRG_=std::make_unique<WeaponRG>();
-	weaponCannonL_=std::make_unique<WeaponCannon>();
-	weaponCannonR_=std::make_unique<WeaponCannon>();
-
 	weaponMGL_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MGL_L)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MGL_L)].transform, ColliderBase::TAG::WEAPON_MG_L);
 	weaponMGR_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MGL_R)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MGL_R)].transform, ColliderBase::TAG::WEAPON_MG_R);
 	weaponMPL_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MP_L)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MP_L)].transform, ColliderBase::TAG::WEAPON_MP_L);
@@ -152,14 +170,6 @@ void Boss::InitPost(void)
 	weaponRG_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_RG)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_RG)].transform, ColliderBase::TAG::WEAPON_RG);
 	weaponCannonL_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_CANNON_L)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_CANNON_L)].transform, ColliderBase::TAG::WEAPON_CANNON_L);
 	weaponCannonR_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_CANNON_R)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_CANNON_R)].transform, ColliderBase::TAG::WEAPON_CANNON_R);
-
-	weaponMGL_->Load();
-	weaponMGR_->Load();
-	weaponMPL_->Load();
-	weaponMPR_->Load();
-	weaponRG_->Load();
-	weaponCannonL_->Load();
-	weaponCannonR_->Load();
 
 	weaponMGL_->Init();
 	weaponMGR_->Init();
@@ -205,10 +215,7 @@ void Boss::UpdateProcess(void)
 	bool a = CollisionManager::GetInstance().IsTagCollidingWithTag(ColliderBase::TAG::BOSS
 		, ColliderBase::TAG::PLAYER);
 
-	if (a)
-	{
-		transformFeet_.pos.y += 100;
-	}
+	
 }
 
 void Boss::UpdateProcessPost(void)

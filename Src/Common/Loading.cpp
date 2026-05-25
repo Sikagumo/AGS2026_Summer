@@ -80,11 +80,7 @@ void Loading::ThreadFunc(std::function<void()> loadFunc)
 
         if (loadFunc)
         {
-            SetUseASyncLoadFlag(TRUE);
-
             loadFunc();
-
-            SetUseASyncLoadFlag(FALSE);
         }
 
         std::this_thread::sleep_for(std::chrono::milliseconds(100));

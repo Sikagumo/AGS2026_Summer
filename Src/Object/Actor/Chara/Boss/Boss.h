@@ -16,6 +16,12 @@ class WeaponRG;
 class Boss : public CharaBase
 {
 public:
+
+	enum class STAET_TYP
+	{
+
+	};
+
 	//ウェポンの接続ボーンの名前
 	enum class BONE_NAME
 	{
@@ -42,10 +48,14 @@ public:
 	// リソースロード
 	void Load(void) override;
 
-	void Release(void) override;
-
 	//ゲット・セット
 	VECTOR GetBossPos(void) const;
+
+	void SetWeponDamege(int _damage);
+	void SetBossDamege(int _damage);
+
+
+
 
 
 	void UpdateCollision(void);
@@ -111,6 +121,11 @@ private:
 	//ボーンアプデ
 	void BossTransformUpdate(void);
 
+
+
+	 
+
+
 protected:
 
 	// 大きさ、回転、座標の初期化
@@ -132,6 +147,8 @@ protected:
 
 	// 前描画
 	void DrawPre(void) override;
+
+	void ReleasePost(void) override;
 
 	void CollisionReserve(void) override  {};
 

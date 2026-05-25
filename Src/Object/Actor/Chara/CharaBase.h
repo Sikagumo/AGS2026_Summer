@@ -24,7 +24,7 @@ public:
 
 	void Update(void)override final;
 
-	void Release(void)override;
+	virtual void DrawDebug(void);
 
 protected:
 
@@ -67,6 +67,7 @@ protected:
 	virtual void UpdateProcessPost(void) = 0;
 
 	virtual void DrawPre(void)override;
+
 
 	// ˆÚ“®•ûŒü‚É‰ž‚¶‚½’x‰„‰ñ“]
 	void DelayRotate(void);

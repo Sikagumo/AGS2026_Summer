@@ -16,6 +16,8 @@ SceneGame::SceneGame(void)
 	player_ = std::make_unique<Player>(0, Player::BULLET_TYPE::BIG);
 	boss_ = std::make_unique<Boss>();
 	stage_ = std::make_unique<Stage>();
+	damageController_ = std::make_unique<DamageController>();
+
 }
 
 
@@ -94,6 +96,7 @@ void SceneGame::Update(void)
 	player_->Update();
 	boss_->Update();
 	stage_->Update();
+	damageController_->Update();
 }
 
 void SceneGame::UpdateCollision(void)

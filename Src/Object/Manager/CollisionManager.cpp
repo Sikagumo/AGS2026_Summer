@@ -119,8 +119,8 @@ bool CollisionManager::CheckCollision(const ColliderBase* _colliderA, const Coll
 	// 形状タイプ取得
 	using SHAPE = ColliderBase::SHAPE;
 
-	auto shapeA = _colliderA->GetShapeType();
-	auto shapeB = _colliderB->GetShapeType();
+	SHAPE shapeA = _colliderA->GetShapeType();
+	SHAPE shapeB = _colliderB->GetShapeType();
 
 	// 形状の組み合わせによる判定の振り分け
 	if (shapeA == SHAPE::SPHERE && shapeB == SHAPE::SPHERE)
@@ -242,6 +242,7 @@ void CollisionManager::ResolveCollision(ActorBase* _actorA, ActorBase* _actorB,
 	using TAG = ColliderBase::TAG;
 
 	// 1. 通常の押し戻しベクトルを計算
+	// 通常の押し戻しベクトルを計算
 	VECTOR pushVector = VScale(_info.hitNormal, _info.penetration);
 
 	TAG tagA = _info.myCollider->GetCollisionTag();
@@ -403,10 +404,16 @@ bool CollisionManager::CanCollide(int _tagA, int _tagB) const
 	}
 
 	// プレイヤーの衝突ルール
-	if (tagHit == TAG::PLAYER)
 	{
 		if (tagHurt == TAG::ENEMY || tagHurt == TAG::STAGE || tagHurt == TAG::BOSS || tagHurt == TAG::WEAPON_CANNON_L || tagHurt == TAG::WEAPON_CANNON_R || tagHurt == TAG::WEAPON_MG_L || tagHurt == TAG::WEAPON_MG_R || tagHurt == TAG::WEAPON_MP_L ||
 			tagHurt == TAG::WEAPON_MP_R || tagHurt == TAG::WEAPON_RG)
+		if (tagHurt == TAG::ENEMY
+		 || tagHurt == TAG::STAGE
+		 || tagHurt == TAG::BOSS
+		 || tagHurt == TAG::WEAPON_CANNON_L || tagHurt == TAG::WEAPON_CANNON_R
+		 || tagHurt == TAG::WEAPON_MG_L	|| tagHurt == TAG::WEAPON_MG_R
+		 || tagHurt == TAG::WEAPON_MP_L || tagHurt == TAG::WEAPON_MP_R
+		 || tagHurt == TAG::WEAPON_RG)
 		{
 			return true;
 		}
@@ -415,6 +422,7 @@ bool CollisionManager::CanCollide(int _tagA, int _tagB) const
 	if (tagHit == TAG::BOSS)
 	{
 		if (tagHurt == TAG::PLAYER|| tagHurt == TAG::STAGE)
+		if (tagHurt == TAG::PLAYER || tagHurt == TAG::PLAYER_BULLET || tagHurt == TAG::STAGE)
 		{
 			return true;
 		}
@@ -423,6 +431,7 @@ bool CollisionManager::CanCollide(int _tagA, int _tagB) const
 	if (tagHit == TAG::STAGE)
 	{
 		if (tagHurt == TAG::PLAYER || tagHurt == TAG::BOSS)
+		if (tagHurt == TAG::PLAYER || tagHurt == TAG::PLAYER_BULLET || tagHurt == TAG::BOSS)
 		{
 			return true;
 		}
@@ -494,7 +503,11 @@ bool CollisionManager::CheckSphereVsCapsule(const ColliderBase* _sphereCol,
 	const auto* sphereHit = dynamic_cast<const ColliderSphere*>(_sphereCol);
 	const auto* capsuleHit = dynamic_cast<const ColliderCapsule*>(_capsuleCol);
 
+<<<<<<< HEAD
 	if (sphereHit == nullptr || capsuleHit)
+=======
+	if (sphereHit == nullptr || capsuleHit == nullptr)
+>>>>>>> main
 	{
 		return false;
 	}

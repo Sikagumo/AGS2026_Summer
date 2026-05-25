@@ -12,7 +12,7 @@ WeaponRG::WeaponRG(void)
 		
 }
 
-void WeaponRG::Release(void)
+void WeaponRG::ReleasePost(void)
 {
 }
 
@@ -22,7 +22,6 @@ void WeaponRG::SetBone(int _id, Transform _trans, ColliderBase::TAG _tag)
 	bone_.transform = _trans;
 	tag_ = _tag;
 }
-
 
 VECTOR WeaponRG::GetPos(void) const
 {

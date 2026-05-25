@@ -62,7 +62,7 @@ void SceneManager::Initialize(void)
     CollisionManager::GetInstance().Initialize();
 
     // ƒJƒƒ‰‚ð‰Šú‰»‚·‚é
-    //camera_->Initialize();
+    camera_->Init();
 
     // 3D•`‰æÝ’è‚ð‰Šú‰»‚·‚é
     Init3D();
@@ -225,8 +225,6 @@ void SceneManager::Update(void)
         current->Update();
     }
 
-    // ƒJƒƒ‰‚âÕ“Ë”»’è
-    //if (camera_) camera_->UpdateBeforeCollision();
     CollisionManager::GetInstance().Update();
 
     if (current)
@@ -234,7 +232,9 @@ void SceneManager::Update(void)
         current->UpdateCollision();
     }
 
+    
     if (camera_) camera_->Update();
+
 }
 
 void SceneManager::Draw(void)

@@ -53,6 +53,7 @@ void Application::Init(void)
 	// DxLib‚Ì‰Šú‰»
 	SetUseDirect3DVersion(DX_DIRECT3D_11);
 	isInitFail_ = false;
+	SetMultiThreadFlag(true);
 	if (DxLib_Init() == -1)
 	{
 		isInitFail_ = true;
