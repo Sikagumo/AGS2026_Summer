@@ -17,22 +17,22 @@ public:
     /// @param localStartPos ローカル空間での開始位置
     /// @param localEndPos ローカル空間での終了位置
     /// @param radius カプセルの半径
-    ColliderCapsule(TAG collisionTag, const Transform* followTarget, const VECTOR& localStartPos, const VECTOR& localEndPos, float radius);
+    ColliderCapsule(TAG _collisionTag, const Transform* _followTarget, const VECTOR& _localStartPos, const VECTOR& _localEndPos, float _radius);
 
     /// @brief デストラクタ
     ~ColliderCapsule(void) override = default;
 
     /// @brief ローカル開始位置の設定
     /// @param pos ローカル空間での開始位置
-    void SetLocalStartPos(const VECTOR& position);
+    void SetLocalStartPos(const VECTOR& _position);
 
     /// @brief ローカル終了位置の設定
     /// @param pos ローカル空間での終了位置
-    void SetLocalEndPos(const VECTOR& position);
+    void SetLocalEndPos(const VECTOR& _position);
 
     /// @brief 半径の設定
     /// @param radius カプセルの半径
-    void SetRadius(float radius);
+    void SetRadius(float _radius) override;
 
     /// @brief ローカル開始位置の取得
     /// @return ローカル空間での開始位置
