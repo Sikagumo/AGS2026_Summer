@@ -19,6 +19,7 @@ public:
 
 		/* •¡”‰æ‘œ */
 		IMGS_TEXTS,
+		IMGE_TITLE_TEXT,
 
 		/* ƒ‚ƒfƒ‹ */
 		MODEL_SKYDOME,

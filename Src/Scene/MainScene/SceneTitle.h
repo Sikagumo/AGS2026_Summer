@@ -40,7 +40,7 @@ private:
 
     int imageTitle_;
 
-    std::array<int, 3> imageMenu_;
+    std::array<int, 2> imageMenu_;
 
     void DrawDebug(void);
 
