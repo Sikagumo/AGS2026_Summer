@@ -12,7 +12,7 @@ WeaponRG::WeaponRG(void)
 		
 }
 
-void WeaponRG::Release(void)
+void WeaponRG::ReleasePost(void)
 {
 }
 

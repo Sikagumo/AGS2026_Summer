@@ -55,6 +55,8 @@ void ActorBase::Draw(void)
 
 void ActorBase::Release(void)
 {
+	ReleasePost();
+
 	transform_.Release();
 
 	// 自身のコライダ解放

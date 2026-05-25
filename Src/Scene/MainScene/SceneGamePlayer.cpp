@@ -26,6 +26,8 @@ void SceneGamePlayer::Load(void)
 
 	Loading::GetInstance()->SetProgress(15.0f);
 
+	player_->Load();
+
 	Loading::GetInstance()->SetProgress(25.0f);
 
 	boss_->Load();
@@ -57,8 +59,6 @@ void SceneGamePlayer::Initialize(void)
 	sceneManager_.GetCamera()->SetFollow(&player_->GetTransform());
 
 	if (Loading::GetInstance()->IsLoading()) { return; }
-
-	player_->Load();
 	player_->Init();
 	boss_->Init();
 	stage_->Init();

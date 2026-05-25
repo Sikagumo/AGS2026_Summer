@@ -12,7 +12,7 @@ WeaponMGR::WeaponMGR()
 	
 }
 
-void WeaponMGR::Release(void)
+void WeaponMGR::ReleasePost(void)
 {
 }
 

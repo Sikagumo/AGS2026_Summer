@@ -24,7 +24,7 @@ public:
 
 	
 
-	void Release(void)override;
+	void ReleasePost(void)override;
 	/// <summary>
 	/// ボーン情報とタグの取得
 	/// </summary>

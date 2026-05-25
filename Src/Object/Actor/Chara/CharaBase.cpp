@@ -75,22 +75,17 @@ void CharaBase::DrawDebug(void)
 #endif
 }
 
-void CharaBase::Release(void)
-{
-	
-}
-
 void CharaBase::CalcGravityPow(void)
 {
 	// 重力方向
-	VECTOR dirGravity = UtilityMath::DIR_DOWN;
+	const VECTOR DIR_GRAVITY = UtilityMath::DIR_DOWN;
 
 	// 重力の強さ
 	float gravityPow = Application::GetInstance().GetGravityPow() * sceneManager_.GetDeltaTime();
 
 	
 	// 重力
-	VECTOR gravity = VScale(dirGravity, gravityPow);
+	VECTOR gravity = VScale(DIR_GRAVITY, gravityPow);
 
 	
 
@@ -125,7 +120,7 @@ void CharaBase::CollisionGravity(void)
 	// 床に触れていて、かつ下方向に落下している（または静止している）なら着地
 	if (isHitStage && jumpPow_.y <= 0.0f)
 	{
-		isJump_ = false;
+   		isJump_ = false;
 		jumpPow_ = UtilityMath::VECTOR_ZERO; // 落下速度を止める
 		stepJump_ = 0.0f;                    // ジャンプ受付リセット
 	}

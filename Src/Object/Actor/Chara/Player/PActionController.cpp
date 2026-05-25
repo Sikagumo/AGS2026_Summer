@@ -98,6 +98,7 @@ void PActionController::Update_Action(void)
 			animation_->Stop(actions_[curActionNum_].timeStop);
 		}
 	}
+
 	if (animation_->isStop()) { return; }
 	
 

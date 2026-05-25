@@ -61,9 +61,6 @@ public:
 	// デバッグ用描画
 	void DrawDebug(void);
 
-	// 解放
-	void Release(void)override;
-
 	// 座標の取得
 	const VECTOR& GetPos(void) const { return transform_.pos; };
 

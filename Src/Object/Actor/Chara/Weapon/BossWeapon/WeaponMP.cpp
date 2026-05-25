@@ -12,7 +12,7 @@ WeaponMP::WeaponMP(void)
 	
 }
 
-void WeaponMP::Release(void)
+void WeaponMP::ReleasePost(void)
 {
 }
 
@@ -54,7 +54,7 @@ void WeaponMP::InitCollider(void)
 
 	ColliderSphere* colSphere = new ColliderSphere(
 		tag_, &transform_, { 0.0f,0.0f,-40.0f },40.0f);
-	ownColliders_.emplace(static_cast<int>(ColliderBase::SHAPE::CAPSULE), colSphere);
+	ownColliders_.emplace(static_cast<int>(ColliderBase::SHAPE::SPHERE), colSphere);
 	colSphere->SetTriger(false);
 }
 
@@ -86,6 +86,7 @@ void WeaponMP::DrawPre(void)
 	MV1DrawModel(transform_.modelId);
 	for (auto& col : ownColliders_)
 	{
+		return;
 		col.second->Draw();
 	}
 }
