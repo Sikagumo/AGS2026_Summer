@@ -19,6 +19,8 @@ public:
 	
 	VECTOR GetPos(void) const override;
 
+	void SetDameg(int _damege)override { hp_ -= _damege; }
+
 protected:
 
 	// ‘å‚«‚³A‰ñ“]AÀ•W‚Ì‰Šú‰»

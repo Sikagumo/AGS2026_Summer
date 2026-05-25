@@ -16,6 +16,12 @@ class WeaponRG;
 class Boss : public CharaBase
 {
 public:
+
+	enum class STAET_TYP
+	{
+
+	};
+
 	//ウェポンの接続ボーンの名前
 	enum class BONE_NAME
 	{
@@ -47,9 +53,8 @@ public:
 	//ゲット・セット
 	VECTOR GetBossPos(void) const;
 
-	void SetWeponDamege(int Damege);
-	int GetWeponAttack(void);
-	void SetBossDamege(int Damege);
+	void SetWeponDamege(int _damege);
+	void SetBossDamege(int _damege);
 
 
 
@@ -117,6 +122,11 @@ private:
 	void BoneParam(void);
 	//ボーンアプデ
 	void BossTransformUpdate(void);
+
+
+
+	 
+
 
 protected:
 

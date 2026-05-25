@@ -119,8 +119,8 @@ bool CollisionManager::CheckCollision(const ColliderBase* _colliderA, const Coll
 	// 形状タイプ取得
 	using SHAPE = ColliderBase::SHAPE;
 
-	auto shapeA = _colliderA->GetShapeType();
-	auto shapeB = _colliderB->GetShapeType();
+	SHAPE shapeA = _colliderA->GetShapeType();
+	SHAPE shapeB = _colliderB->GetShapeType();
 
 	// 形状の組み合わせによる判定の振り分け
 	if (shapeA == SHAPE::SPHERE && shapeB == SHAPE::SPHERE)
@@ -133,7 +133,7 @@ bool CollisionManager::CheckCollision(const ColliderBase* _colliderA, const Coll
 	}
 	else if (shapeA == SHAPE::CAPSULE && shapeB == SHAPE::SPHERE)
 	{
-		return CheckSphereVsCapsule(_colliderA, _colliderB, _outInfo);
+		return CheckSphereVsCapsule(_colliderB, _colliderA, _outInfo);
 	}
 	else if (shapeA == SHAPE::CAPSULE && shapeB == SHAPE::CAPSULE)
 	{
@@ -197,7 +197,7 @@ void CollisionManager::ResolveCollision(ActorBase* _actorA, ActorBase* _actorB,
 
 	using TAG = ColliderBase::TAG;
 
-	// 1. 通常の押し戻しベクトルを計算
+	// 通常の押し戻しベクトルを計算
 	VECTOR pushVector = VScale(_info.hitNormal, _info.penetration);
 
 	TAG tagA = _info.myCollider->GetCollisionTag();
@@ -445,10 +445,16 @@ bool CollisionManager::CheckSphereVsSphere(const ColliderBase* _colliderA,
 bool CollisionManager::CheckSphereVsCapsule(const ColliderBase* _sphereCol,
 	const ColliderBase* _capsuleCol, CollisionInfo& _outInfo)
 {
+
+	if (!_sphereCol || !_capsuleCol) { return false; }
+
 	const auto* sphereHit = dynamic_cast<const ColliderSphere*>(_sphereCol);
 	const auto* capsuleHit = dynamic_cast<const ColliderCapsule*>(_capsuleCol);
 
-	if (!_sphereCol || !_capsuleCol) { return false; }
+	if (sphereHit == nullptr || capsuleHit == nullptr)
+	{
+		return false;
+	}
 
 	// 各形状のパラメータ取得
 	VECTOR spherePos = sphereHit->GetWorldPosition();
@@ -494,10 +500,15 @@ bool CollisionManager::CheckSphereVsCapsule(const ColliderBase* _sphereCol,
 bool CollisionManager::CheckCapsuleVsModel(const ColliderBase* _capsuleCol,
 	const ColliderBase* _modelCol, CollisionInfo& _outInfo)
 {
+	if (!_capsuleCol || !_modelCol) { return false; }
+
 	const auto* capsule = dynamic_cast<const ColliderCapsule*>(_capsuleCol);
 	const auto* model = dynamic_cast<const ColliderModel*>(_modelCol);
 
-	if (!capsule || !model) { return false; };
+	if (capsule == nullptr || model == nullptr)
+	{
+		return false;
+	}
 
 	// モデルハンドル取得
 	int modelHandle = model->GetModelHandle();

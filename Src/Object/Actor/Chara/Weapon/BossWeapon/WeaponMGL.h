@@ -17,6 +17,7 @@ public:
 	void SetBone(int _id,Transform _trans, ColliderBase::TAG _tag) override;
 
 	VECTOR GetPos(void) const override;
+	void SetDameg(int _damege)override { hp_ -= _damege; }
 
 protected:
 
