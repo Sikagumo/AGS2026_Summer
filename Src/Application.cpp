@@ -125,7 +125,7 @@ void Application::Run(void)
 void Application::DestroyInstance(void)
 {
 	InputManager::GetInstance().DestroyInstance();
-	ResourceManager::GetInstance().DestroyInstance();
+	ResourceManager::GetInstance().DestroyInstance(); 
 	// ネットワーク管理破棄
 	NetManager::GetInstance().DestroyInstance();
 

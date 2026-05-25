@@ -1,11 +1,13 @@
 #include "../../../../Manager/Generic/ResourceManager.h"
 #include "../../../../Manager/Generic/InputManager.h"
+#include "../../../../Manager/Generic/SceneManager.h"
 #include "../../../../Utility/UtilityMath.h"
 #include "../../../../Utility/MatrixUtility.h"
 #include "../../../Common/Transform.h"
 #include "../../../Collider/ColliderBase.h"
 #include "../../../Collider/ColliderCapsule.h"
 #include "../../../Collider/ColliderLine.h"
+#include "../../../Collider/ColliderSphere.h"
 #include "../../../Manager/CollisionManager.h"
 #include "../Weapon/WeaponBase.h"
 #include "../Weapon/BossWeapon/WeaponMGL.h"
@@ -15,7 +17,7 @@
 #include "../Weapon/BossWeapon/WeaponCannon.h"
 #include "Boss.h"
 
-Boss::Boss(void):
+Boss::Boss(void) :
 	transformFeet_(),
 	transformBody_(),
 	transformFeetCar_(),
@@ -24,6 +26,8 @@ Boss::Boss(void):
 	hp_(1000),
 	attackDelay_(20),
 	boneName_(),
+	hitWaveRadius_(4.0f),
+	safeWaveRadius_(2.0f),
 
 
 	CharaBase()
@@ -98,10 +102,8 @@ void Boss::BossTransformUpdate(void)
 	weaponCannonR_->Update();
 }
 
-void Boss::UpdateCollision(void)
-{
 
-}
+
 
 void Boss::Load(void)
 {
@@ -136,6 +138,8 @@ void Boss::InitTransform(void)
 	transformBody_.pos = MV1GetFramePosition(transform_.modelId, JOINT_FEET_BODY);
 
 	transformBody_.Update();
+
+
 	BoneParam();
 }
 
@@ -150,6 +154,12 @@ void Boss::InitCollider(void)
 		ColliderBase::TAG::BOSS, &transform_, COL_CAPSULE_START_POS, COL_CAPSULE_END_POS, COL_CAPSULE_END_RADIUS);
 	ownColliders_.emplace(static_cast<int>(ColliderBase::SHAPE::CAPSULE), colCapsule);
 	colCapsule->SetTriger(false);
+
+	ColliderSphere* colHitSphere = new ColliderSphere(ColliderBase::TAG::HITWAVE, &transform_, { 0.0f,0.0f,0.0f }, hitWaveRadius_);
+	ownColliders_.emplace(static_cast<int>(ColliderBase::SHAPE::SPHERE), colHitSphere);
+
+	ColliderSphere* colSafeSphere = new ColliderSphere(ColliderBase::TAG::HITWAVE, &transform_, { 0.0f,0.0f,0.0f }, safeWaveRadius_);
+	ownColliders_.emplace(static_cast<int>(ColliderBase::SHAPE::SPHERE), colSafeSphere);
 
 	CollisionManager::GetInstance().RegisterActor(this);
 
@@ -178,7 +188,60 @@ void Boss::InitPost(void)
 	weaponRG_->Init();
 	weaponCannonL_->Init();
 	weaponCannonR_->Init();
+
+	stateChanges_.emplace(static_cast<int>(STATE::IDLE),
+		std::bind(&Boss::ChangeStateIdle, this));
+	stateChanges_.emplace(static_cast<int>(STATE::ATTACK), std::bind(&Boss::ChangeStateAttack, this));
+	stateChanges_.emplace(static_cast<int>(STATE::JUMP), std::bind(&Boss::ChangeStateJump, this));
+	stateChanges_.emplace(static_cast<int>(STATE::END), std::bind(&Boss::ChangeStateEnd, this));
+	ChangeState(STATE::IDLE);
 }
+
+void Boss::ChangeState(STATE _state)
+{
+	state_ = _state;
+
+	int state = static_cast<int>(state_);
+
+	// Šeó‘Ô‘JˆÚ‚Ì‰Šúˆ—
+	Boss::ChangeState(state);
+}
+
+void Boss::ChangeState(int state)
+{
+	stateBase_ = state;
+	// Šeó‘Ô‘JˆÚ‚Ì‰Šúˆ—
+	stateChanges_[stateBase_]();
+
+}
+
+void Boss::ChangeStateIdle(void)
+{
+	stateUpdate_ = std::bind(&Boss::UpdateIdle, this);
+	attackCount_ = 0;
+}
+
+void Boss::ChangeStateAttack(void)
+{
+	stateUpdate_ = std::bind(&Boss::UpdateAttack, this);
+	attackCount_ = 0;
+	
+}
+
+void Boss::ChangeStateJump(void)
+{
+	stateUpdate_ = std::bind(&Boss::UpdateJump, this);
+	// ƒWƒƒƒ“ƒv—Ê‚ÌŒvŽZ
+	float jumpSpeed = POW_JUMP_INIT * SceneManager::GetInstance().GetDeltaTime();
+	jumpPow_ = VScale(UtilityMath::DIR_UP, jumpSpeed);
+	isJump_ = true;
+}
+
+void Boss::ChangeStateEnd(void)
+{
+	stateUpdate_ = std::bind(&Boss::UpdateEnd, this);
+}
+
 
 void Boss::UpdateProcess(void)
 {
@@ -188,6 +251,7 @@ void Boss::UpdateProcess(void)
 		transform_.pos.y += 10.0f;
 	}
 
+	
 	transformBody_.pos = MV1GetFramePosition(transform_.modelId, JOINT_FEET_BODY);
 
 	
@@ -215,11 +279,52 @@ void Boss::UpdateProcess(void)
 	bool a = CollisionManager::GetInstance().IsTagCollidingWithTag(ColliderBase::TAG::BOSS
 		, ColliderBase::TAG::PLAYER);
 
-	
+	stateUpdate_();
+
 }
 
 void Boss::UpdateProcessPost(void)
 {
+}
+
+void Boss::UpdateIdle(void)
+{
+
+	attackCount_++;
+	if (attackCount_ >= 300)
+	{
+		ChangeState(STATE::ATTACK);
+	}
+}
+
+void Boss::UpdateAttack(void)
+{
+	ChangeState(STATE::JUMP);
+}
+
+void Boss::UpdateJump(void)
+{
+	if (!isJump_)
+	{
+		hitWaveRadius_ += 3.0f;
+		safeWaveRadius_ += 3.0f;
+		CollisionManager::GetInstance().
+	}
+	
+	if (transform_.pos.y >= 3500)
+	{
+		jumpPow_ = VScale(UtilityMath::DIR_UP, -50.0f);
+	}
+}
+
+void Boss::UpdateEnd(void)
+{
+	
+}
+
+void Boss::UpdateCollision(void)
+{
+
 }
 
 void Boss::DrawPre(void)

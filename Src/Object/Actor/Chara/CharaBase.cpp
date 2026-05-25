@@ -7,6 +7,7 @@
 #include "../../Collider/ColliderModel.h"
 #include "../../Collider/ColliderCapsule.h"
 #include "../../Manager/CollisionManager.h"
+#include "../../../Manager/System/TimeManager.h"
 #include "../../../Camera/Camera.h"
 #include "../../../Application.h"
 
@@ -86,20 +87,16 @@ void CharaBase::CalcGravityPow(void)
 	VECTOR dirGravity = UtilityMath::DIR_DOWN;
 
 	// èdóÕÇÃã≠Ç≥
-	float gravityPow = Application::GetInstance().GetGravityPow() * sceneManager_.GetDeltaTime();
-
+	float gravityPow = Application::GetInstance().GetGravityPow() * SceneManager::GetInstance().GetDeltaTime();
 	
 	// èdóÕ
 	VECTOR gravity = VScale(dirGravity, gravityPow);
 
-	
 
 	jumpPow_ = VAdd(jumpPow_, gravity);
 
 	// èdóÕêßå¿	
 	jumpPow_.y = ((jumpPow_.y < MAX_FALL_SPEED) ? MAX_FALL_SPEED : jumpPow_.y);
-
-
 
 }
 
