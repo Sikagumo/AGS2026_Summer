@@ -24,6 +24,8 @@ public:
 
 	void Update(void)override final;
 
+	virtual void DrawDebug(void);
+
 	void Release(void)override;
 
 protected:

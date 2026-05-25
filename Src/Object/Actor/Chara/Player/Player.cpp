@@ -35,7 +35,13 @@ Player::Player(int _playerNo, BULLET_TYPE _playerType)
 
 void Player::Load(void)
 {
-	transform_.modelId = resourceManager_.LoadHandleId(ResourceManager::SRC::MODEL_PLAYER_HUMAN);
+	transform_.modelId = resourceManager_.LoadModelDuplicate(ResourceManager::SRC::MODEL_PLAYER_HUMAN);
+}
+void Player::DrawDebug(void)
+{
+	CharaBase::DrawDebug();
+
+
 }
 void Player::InitAnimation(void)
 {
@@ -271,11 +277,12 @@ void Player::ProcessJump(void)
 		stepJump_ = 0.0f;
 	}
 
-	bool isHitKey = input.IsTrgDown(KEY_INPUT_SPACE)
+	bool isHitTrg = input.IsTrgDown(KEY_INPUT_SPACE)
 		|| input.IsPadBtnTrgDown(InputManager::JOYPAD_NO::PAD1,
 			InputManager::JOYPAD_BTN::RB_BOTTOM);
+
 	// ジャンプ
-	if (isHitKey && !isJump_)
+	if (isHitTrg && !isJump_)
 	{
 		// ジャンプ量の計算
 		float jumpSpeed = (POW_JUMP_INIT * sceneManager_.GetDeltaTime());
