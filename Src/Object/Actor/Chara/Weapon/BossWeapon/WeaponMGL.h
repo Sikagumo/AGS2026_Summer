@@ -12,7 +12,6 @@ public:
 	// リソースロード
 	void Load(void) override;
 
-	void Release(void)override;
 
 	void SetBone(int _id,Transform _trans, ColliderBase::TAG _tag) override;
 
@@ -40,6 +39,8 @@ protected:
 
 	// 前描画
 	void DrawPre(void) override;
+
+	void ReleasePost(void)override;
 
 	void CollisionReserve(void) override {};
 };

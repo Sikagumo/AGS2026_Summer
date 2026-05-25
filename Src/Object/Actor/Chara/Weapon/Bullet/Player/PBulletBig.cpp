@@ -3,12 +3,12 @@
 #include <algorithm>
 #include "../../../../../../Manager/Generic/SceneManager.h"
 
-constexpr float RADIUS_BIG = 8.5f;
-constexpr float RADIUS_INCREMENT = 25.0f;
+constexpr float RADIUS_BIG = 9.0f;
+constexpr float RADIUS_INCREMENT = 22.5f;
 constexpr float RADIUS_BIG_BLAST = RADIUS_BIG + (RADIUS_INCREMENT * 4);
 constexpr float SCALE_BIG = 1.5f;
 constexpr float SCALE_BIG_INCREMENT = 2.5f;
-constexpr float SHOT_SPEED_BIG = 10.0f;
+constexpr float SHOT_SPEED_BIG = 5.0f;
 constexpr float TIME_ALIVE_BIG = 5.0f;
 
 

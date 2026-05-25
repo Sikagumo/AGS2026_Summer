@@ -41,7 +41,7 @@ Boss::~Boss(void)
 {
 }
 
-void Boss::Release(void)
+void Boss::ReleasePost(void)
 {
 }
 

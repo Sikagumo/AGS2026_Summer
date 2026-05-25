@@ -19,7 +19,7 @@ void WeaponBase::Update(void)
 
 
 
-void WeaponBase::Release(void)
+void WeaponBase::ReleasePost(void)
 {
 }
 

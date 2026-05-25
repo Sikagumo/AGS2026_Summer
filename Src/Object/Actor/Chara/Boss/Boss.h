@@ -48,8 +48,6 @@ public:
 	// リソースロード
 	void Load(void) override;
 
-	void Release(void) override;
-
 	//ゲット・セット
 	VECTOR GetBossPos(void) const;
 
@@ -149,6 +147,8 @@ protected:
 
 	// 前描画
 	void DrawPre(void) override;
+
+	void ReleasePost(void) override;
 
 	void CollisionReserve(void) override  {};
 

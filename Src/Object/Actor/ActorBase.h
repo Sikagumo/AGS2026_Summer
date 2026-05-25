@@ -33,7 +33,7 @@ public:
 	virtual void Draw(void);
 
 	// ‰ğ•ú
-	virtual void Release(void);
+	void Release(void);
 
 	// ‘å‚«‚³A‰ñ“]AÀ•W“™‚Ìæ“¾
 	const Transform& GetTransform(void) const;
@@ -92,4 +92,6 @@ protected:
 
 	// Œã•`‰æ
 	virtual void DrawLate(void) {};
+
+	virtual void ReleasePost(void) {};
 };

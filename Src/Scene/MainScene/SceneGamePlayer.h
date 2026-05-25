@@ -4,6 +4,7 @@
 #include "../../Object/Actor/Chara/Player/Player.h"
 #include "../../Object/Actor/Chara/Boss/Boss.h"
 #include "../../Object/Actor/Stage/Stage.h"
+#include "../../Object/Common/DamageController.h"
 class SceneManager;
 
 
@@ -44,6 +45,8 @@ private:
     std::unique_ptr<Boss> boss_;
 
     std::unique_ptr<Stage> stage_;
+
+    std::unique_ptr<DamageController> damageController_;
 
     VECTOR tempBossWeaponPos_;
 

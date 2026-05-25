@@ -403,7 +403,7 @@ bool CollisionManager::CanCollide(int _tagA, int _tagB) const
 	}
 
 	// プレイヤーの衝突ルール
-	if (tagHit == TAG::PLAYER)
+	if (tagHit == TAG::PLAYER || tagHit == TAG::PLAYER_BULLET)
 	{
 		if (tagHurt == TAG::ENEMY
 		 || tagHurt == TAG::STAGE
@@ -419,7 +419,7 @@ bool CollisionManager::CanCollide(int _tagA, int _tagB) const
 
 	if (tagHit == TAG::BOSS)
 	{
-		if (tagHurt == TAG::PLAYER|| tagHurt == TAG::STAGE)
+		if (tagHurt == TAG::PLAYER || tagHurt == TAG::PLAYER_BULLET || tagHurt == TAG::STAGE)
 		{
 			return true;
 		}
@@ -427,7 +427,7 @@ bool CollisionManager::CanCollide(int _tagA, int _tagB) const
 
 	if (tagHit == TAG::STAGE)
 	{
-		if (tagHurt == TAG::PLAYER || tagHurt == TAG::BOSS)
+		if (tagHurt == TAG::PLAYER || tagHurt == TAG::PLAYER_BULLET || tagHurt == TAG::BOSS)
 		{
 			return true;
 		}
