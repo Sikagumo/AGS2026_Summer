@@ -133,7 +133,7 @@ bool CollisionManager::CheckCollision(const ColliderBase* _colliderA, const Coll
 	}
 	else if (shapeA == SHAPE::CAPSULE && shapeB == SHAPE::SPHERE)
 	{
-		return CheckSphereVsCapsule(_colliderA, _colliderB, _outInfo);
+		return CheckSphereVsCapsule(_colliderB, _colliderA, _outInfo);
 	}
 	else if (shapeA == SHAPE::CAPSULE && shapeB == SHAPE::CAPSULE)
 	{
@@ -434,10 +434,15 @@ bool CollisionManager::CanCollide(int _tagA, int _tagB) const
 bool CollisionManager::CheckSphereVsSphere(const ColliderBase* _colliderA,
 	const ColliderBase* _colliderB, CollisionInfo& _outInfo)
 {
+	if (!_colliderA || !_colliderB) { return false; }
+
 	const auto* sphereA = dynamic_cast<const ColliderSphere*>(_colliderA);
 	const auto* sphereB = dynamic_cast<const ColliderSphere*>(_colliderB);
 
-	if (!sphereA || !sphereB) { return false; }
+	if (sphereA == nullptr || sphereB == nullptr) 
+	{
+		return false; 
+	}
 
 	// 距離計算
 	VECTOR positionA = sphereA->GetWorldPosition();
@@ -484,10 +489,15 @@ bool CollisionManager::CheckSphereVsSphere(const ColliderBase* _colliderA,
 bool CollisionManager::CheckSphereVsCapsule(const ColliderBase* _sphereCol,
 	const ColliderBase* _capsuleCol, CollisionInfo& _outInfo)
 {
+	if (!_sphereCol || !_capsuleCol) { return false; }
+
 	const auto* sphereHit = dynamic_cast<const ColliderSphere*>(_sphereCol);
 	const auto* capsuleHit = dynamic_cast<const ColliderCapsule*>(_capsuleCol);
 
-	if (!_sphereCol || !_capsuleCol) { return false; }
+	if (sphereHit == nullptr || capsuleHit)
+	{
+		return false;
+	}
 
 	// 各形状のパラメータ取得
 	VECTOR spherePos = sphereHit->GetWorldPosition();
@@ -533,10 +543,15 @@ bool CollisionManager::CheckSphereVsCapsule(const ColliderBase* _sphereCol,
 bool CollisionManager::CheckCapsuleVsModel(const ColliderBase* _capsuleCol,
 	const ColliderBase* _modelCol, CollisionInfo& _outInfo)
 {
+	if (!_capsuleCol || !_modelCol) { return false; }
+
 	const auto* capsule = dynamic_cast<const ColliderCapsule*>(_capsuleCol);
 	const auto* model = dynamic_cast<const ColliderModel*>(_modelCol);
 
-	if (!capsule || !model) { return false; };
+	if (capsule == nullptr || model == nullptr)  
+	{
+		return false; 
+	}
 
 	// モデルハンドル取得
 	int modelHandle = model->GetModelHandle();
@@ -625,6 +640,8 @@ bool CollisionManager::CheckCapsuleVsModel(const ColliderBase* _capsuleCol,
 bool CollisionManager::CheckLineVsModel(const ColliderBase* _lineCol,
 	const ColliderBase* _modelCol, CollisionInfo& _outInfo)
 {
+	if (!_lineCol || _modelCol) { return false; }
+
 	const auto* line = dynamic_cast<const ColliderLine*>(_lineCol);
 	const auto* model = dynamic_cast<const ColliderModel*>(_modelCol);
 
