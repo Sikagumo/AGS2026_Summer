@@ -33,9 +33,9 @@ public:
 		WEAPON_MG_L,	//マシンガン（左
 		WEAPON_MG_R,	//マシンガン（右
 		WEAPON_CANNON_L,//キャノン（左
-		WEAPON_CANNON_R,//キャノン（左
+		WEAPON_CANNON_R,//キャノン（右
 		WEAPON_MP_L,	//ミサイルポッド（左
-		WEAPON_MP_R,	//ミサイルポッド（左
+		WEAPON_MP_R,	//ミサイルポッド（右
 		WEAPON_RG,		//レールガン
 		CAMERA,      // カメラ
 		WALL,        // 壁

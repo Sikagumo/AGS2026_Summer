@@ -22,10 +22,6 @@ void WeaponMGL::SetBone(int _id, Transform _trans, ColliderBase::TAG _tag)
 	bone_.transform = _trans;
 	tag_ = _tag;
 }
-int WeaponMGL::GetDamage(void)
-{
-	return 0;
-}
 
 VECTOR WeaponMGL::GetPos(void) const
 {

@@ -256,6 +256,8 @@ void CollisionManager::UpdateCollisionPars(void)
 		actor->ClearHitCollider();
 	}
 
+	activeCollisions_.clear();
+
 	size_t actorCount = actors_.size();
 
 	// 判定対象が2つ未満なら処理終了
@@ -274,12 +276,14 @@ void CollisionManager::UpdateCollisionPars(void)
 			bool isStageCollision = false;
 
 			// アクターAのコライダーの中にSTAGEがあるかチェック
-			for (auto& [idA, colA] : actorA->GetOwnColliders())
+			for (const auto& [idA, colA] : collidersA) 
 			{
 				if (colA->GetCollisionTag() == ColliderBase::TAG::STAGE) { isStageCollision = true; break; }
 			}
+
 			// アクターBのコライダーの中にSTAGEがあるかチェック
-			for (auto& [idB, colB] : actorB->GetOwnColliders())
+			const auto& collidersB = actorB->GetOwnColliders();
+			for (const auto& [idB, colB] : collidersB)
 			{
 				if (colB->GetCollisionTag() == ColliderBase::TAG::STAGE) { isStageCollision = true; break; }
 			}
@@ -297,8 +301,6 @@ void CollisionManager::UpdateCollisionPars(void)
 				// 一定距離以上離れている場合は、詳細な判定をスキップ
 				if (distSquare > cullingDistSquare_) { continue; }
 			}
-
-			const auto& collidersB = actorB->GetOwnColliders();
 			
 			// コライダー同士の詳細判定
 			for (auto& [idA, colA] : collidersA)
@@ -320,6 +322,13 @@ void CollisionManager::UpdateCollisionPars(void)
 							// 衝突した相手を相互に登録
 							actorA->AddHitCollider(colB);
 							actorB->AddHitCollider(colA);
+
+							auto tagA = colA->GetCollisionTag();
+							auto tagB = colB->GetCollisionTag();
+
+							auto pair = (tagA < tagB) ? std::make_pair(tagA, tagB) : std::make_pair(tagB, tagA);
+
+							activeCollisions_.insert(pair);
 
 							if (!colA->IsTrigger() && !colB->IsTrigger())
 							{

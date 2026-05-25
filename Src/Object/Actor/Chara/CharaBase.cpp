@@ -118,8 +118,6 @@ void CharaBase::CollisionGravity(void)
 	if (isHitStage && jumpPow_.y <= 0.0f)
 	{
 		isJump_ = false;
-		jumpPow_ = UtilityMath::VECTOR_ZERO;
-
 		jumpPow_ = UtilityMath::VECTOR_ZERO; // 落下速度を止める
 		stepJump_ = 0.0f;                    // ジャンプ受付リセット
 	}

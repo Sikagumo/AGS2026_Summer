@@ -32,17 +32,7 @@ public:
 	/// <param name="_trans">ボーンを持つ相手のトランスフォーム</param>
 	/// <param name="_tag">当たり判定用のタグ</param>
 	virtual void SetBone(int _id, Transform _trans,ColliderBase::TAG _tag)=0;
-	/// <summary>
-	/// ダメージの受け渡し
-	/// </summary>
-	/// <param name=""></param>
-	/// <returns></returns>
-	virtual int GetDamage(void) { return attackDamage_; }
-	/// <summary>
-	/// ダメージの受け取り
-	/// </summary>
-	/// <param name="_damege">ダメージの数値</param>
-	virtual void SetDamage(int _damege) { hp_ -= _damege; }
+	
 	/// <summary>
 	/// ロックオン用の座標
 	/// </summary>

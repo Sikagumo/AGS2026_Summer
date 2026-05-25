@@ -61,7 +61,7 @@ private:
 	//当たり判定の座標
 	//ライン
 	static constexpr VECTOR COL_LINE_START_POS = { 0.0f,60.0f,0.0f };
-	static constexpr VECTOR COL_LINE_END_POS = { 0.0f,0.0f,0.0f };
+	static constexpr VECTOR COL_LINE_END_POS = { 0.0f,-1.0f,0.0f };
 	//カプセル
 	static constexpr VECTOR COL_CAPSULE_START_POS = { 0.0f,130.0f,0.0f };
 	static constexpr VECTOR COL_CAPSULE_END_POS = { 0.0f,80.0f,0.0f };
