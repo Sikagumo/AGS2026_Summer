@@ -67,6 +67,14 @@ void CharaBase::Update(void)
 
 }
 
+void CharaBase::DrawDebug(void)
+{
+#ifdef _DEBUG
+	DrawFormatString(0, (16 * 12), 0xffff00, "jumpPow(%.2f,%.2f,%2f), movePow(%.2f,%.2f,%.2f)"
+		, jumpPow_.x, jumpPow_.y, jumpPow_.z, movePow_.x, movePow_.y, movePow_.z);
+#endif
+}
+
 void CharaBase::Release(void)
 {
 	
@@ -120,11 +128,6 @@ void CharaBase::CollisionGravity(void)
 		isJump_ = false;
 		jumpPow_ = UtilityMath::VECTOR_ZERO; // 落下速度を止める
 		stepJump_ = 0.0f;                    // ジャンプ受付リセット
-	}
-	else
-	{
-		// 床に触れていない、あるいは上昇中なら空中状態
-		isJump_ = true;
 	}
 }
 

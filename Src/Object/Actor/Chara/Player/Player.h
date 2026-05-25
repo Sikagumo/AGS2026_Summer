@@ -27,6 +27,8 @@ public:
 
 	void Load(void)override;
 
+	void DrawDebug(void)override;
+
 	void Release(void)override;
 
 
@@ -79,13 +81,13 @@ private:
 
 
 	// ジャンプ力
-	static constexpr float POW_JUMP_INIT = 50.0f;
+	static constexpr float POW_JUMP_INIT = 1250.0f;
 
 	// 持続ジャンプ力
-	static constexpr float POW_JUMP_KEEP = 575.0f;
+	static constexpr float POW_JUMP_KEEP = 10.0f;
 
 	// ジャンプ受付時間
-	static constexpr float TIME_JUMP_INPUT = 0.6f;
+	static constexpr float TIME_JUMP_INPUT = 0.25f;
 
 
 	InputManager& inputManager_;
