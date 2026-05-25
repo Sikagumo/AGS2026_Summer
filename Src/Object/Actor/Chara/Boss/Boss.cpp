@@ -43,6 +43,15 @@ VECTOR Boss::GetBossPos(void) const
 	return transformBody_.pos;
 }
 
+void Boss::SetWeponDamege(int Damege)
+{
+}
+
+
+void Boss::SetBossDamege(int Damege)
+{
+}
+
 
 
 void Boss::BoneParam(void)

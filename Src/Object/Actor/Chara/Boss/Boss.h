@@ -47,6 +47,13 @@ public:
 	//ゲット・セット
 	VECTOR GetBossPos(void) const;
 
+	void SetWeponDamege(int Damege);
+	int GetWeponAttack(void);
+	void SetBossDamege(int Damege);
+
+
+
+
 
 	void UpdateCollision(void);
 
