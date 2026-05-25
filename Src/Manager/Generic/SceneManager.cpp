@@ -62,12 +62,12 @@ void SceneManager::Initialize(void)
     CollisionManager::GetInstance().Initialize();
 
     // ƒJƒƒ‰‚ğ‰Šú‰»‚·‚é
-    //camera_->Initialize();
+    camera_->Init();
 
     // 3D•`‰æİ’è‚ğ‰Šú‰»‚·‚é
     Init3D();
 
-    ChangeScene(std::make_shared<SceneGamePlayer>());
+    ChangeScene(std::make_shared<SceneGame>());
 }
 
 void SceneManager::Init3D(void)
@@ -225,8 +225,6 @@ void SceneManager::Update(void)
         current->Update();
     }
 
-    // ƒJƒƒ‰‚âÕ“Ë”»’è
-    //if (camera_) camera_->UpdateBeforeCollision();
     CollisionManager::GetInstance().Update();
 
     if (current)
@@ -234,7 +232,9 @@ void SceneManager::Update(void)
         current->UpdateCollision();
     }
 
+    
     if (camera_) camera_->Update();
+
 }
 
 void SceneManager::Draw(void)

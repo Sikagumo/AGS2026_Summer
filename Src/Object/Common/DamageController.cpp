@@ -29,58 +29,73 @@ void DamageController::Update()
 	if (CollisionManager::GetInstance().IsTagCollidingWithTag(ColliderBase::TAG::WEAPON_CANNON_L, ColliderBase::TAG::PLAYER_BULLET))
 	{
 		weaponDamege_ = playerAttack_;
+		bossDamege_ = playerAttack_ * BOSS_CAT_DAMEGE;
 	}
 	else
 	{
 		weaponDamege_ = 0;
+		bossDamege_ = 0;
 	}
 	if (CollisionManager::GetInstance().IsTagCollidingWithTag(ColliderBase::TAG::WEAPON_CANNON_R, ColliderBase::TAG::PLAYER_BULLET))
 	{
 		weaponDamege_ = playerAttack_;
+		bossDamege_ = playerAttack_ * BOSS_CAT_DAMEGE;
 	}
 	else
 	{
 		weaponDamege_ = 0;
+		bossDamege_ = 0;
 	}
 	if (CollisionManager::GetInstance().IsTagCollidingWithTag(ColliderBase::TAG::WEAPON_MG_L, ColliderBase::TAG::PLAYER_BULLET))
 	{
 		weaponDamege_ = playerAttack_;
+		bossDamege_ = playerAttack_ * BOSS_CAT_DAMEGE;
 	}
 	else
 	{
 		weaponDamege_ = 0;
+		bossDamege_ = 0;
 	}
 	if (CollisionManager::GetInstance().IsTagCollidingWithTag(ColliderBase::TAG::WEAPON_MG_R, ColliderBase::TAG::PLAYER_BULLET))
 	{
 		weaponDamege_ = playerAttack_;
+		bossDamege_ = playerAttack_ * BOSS_CAT_DAMEGE;
 	}
 	else
 	{
 		weaponDamege_ = 0;
+		bossDamege_ = 0;
 	}
 	if (CollisionManager::GetInstance().IsTagCollidingWithTag(ColliderBase::TAG::WEAPON_MP_L, ColliderBase::TAG::PLAYER_BULLET))
 	{
 		weaponDamege_ = playerAttack_;
+		bossDamege_ = playerAttack_ * BOSS_CAT_DAMEGE;
 	}
 	else
 	{
 		weaponDamege_ = 0;
+		bossDamege_ = 0;
 	}
 	if (CollisionManager::GetInstance().IsTagCollidingWithTag(ColliderBase::TAG::WEAPON_MP_R, ColliderBase::TAG::PLAYER_BULLET))
 	{
 		weaponDamege_ = playerAttack_;
+		bossDamege_ = playerAttack_ * BOSS_CAT_DAMEGE;
 	}
 	else
 	{
 		weaponDamege_ = 0;
+		bossDamege_ = 0;
 	}
 	if (CollisionManager::GetInstance().IsTagCollidingWithTag(ColliderBase::TAG::WEAPON_RG, ColliderBase::TAG::PLAYER_BULLET))
 	{
 		weaponDamege_ = playerAttack_;
+		bossDamege_ = playerAttack_* BOSS_CAT_DAMEGE;
 	}
 	else
 	{
 		weaponDamege_ = 0;
+		bossDamege_ = 0;
 	}
+
 
 }

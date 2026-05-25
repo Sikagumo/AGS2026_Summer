@@ -40,9 +40,8 @@ public:
 	/// <returns></returns>
 	virtual VECTOR GetPos(void) const = 0;
 
-	/*virtual int GetAttack(void) const = 0;
-	virtual void SetDameg(void) = 0;*/
-
+	
+	virtual void SetDamage(int _damage) = 0;
 
 private:
 

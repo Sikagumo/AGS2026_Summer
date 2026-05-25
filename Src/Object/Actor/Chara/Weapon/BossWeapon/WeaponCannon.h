@@ -19,6 +19,8 @@ public:
 	
 	VECTOR GetPos(void) const override;
 
+	void SetDamage(int _damage)override { hp_ -= _damage; }
+
 protected:
 
 	// ‘å‚«‚³A‰ñ“]AÀ•W‚Ì‰Šú‰»

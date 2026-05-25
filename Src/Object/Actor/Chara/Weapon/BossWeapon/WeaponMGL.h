@@ -17,6 +17,7 @@ public:
 	void SetBone(int _id,Transform _trans, ColliderBase::TAG _tag) override;
 
 	VECTOR GetPos(void) const override;
+	void SetDamage(int _damage)override { hp_ -= _damage; }
 
 protected:
 

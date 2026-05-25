@@ -117,7 +117,7 @@ void PBulletBase::Shot(const VECTOR& _shotDir, const Quaternion& _rot)
 
 	transform_.Update();
 
-	CollisionManager::GetInstance().RegisterActor(this);
+	//CollisionManager::GetInstance().RegisterActor(this);
 }
 
 bool PBulletBase::IsAlive(void) const

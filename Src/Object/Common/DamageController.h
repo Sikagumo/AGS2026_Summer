@@ -30,6 +30,9 @@ public:
 	
 
 private:
+	static constexpr float BOSS_CAT_DAMEGE = 0.8;
+
+
 	int playerDamege_;
 	int bossDamege_;
 	int weaponDamege_;
