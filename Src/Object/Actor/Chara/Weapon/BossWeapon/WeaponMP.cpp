@@ -12,7 +12,7 @@ WeaponMP::WeaponMP(void)
 	
 }
 
-void WeaponMP::Release(void)
+void WeaponMP::ReleasePost(void)
 {
 }
 
@@ -88,6 +88,7 @@ void WeaponMP::DrawPre(void)
 	MV1DrawModel(transform_.modelId);
 	for (auto& col : ownColliders_)
 	{
+		return;
 		col.second->Draw();
 	}
 }

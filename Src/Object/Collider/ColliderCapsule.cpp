@@ -1,27 +1,27 @@
 #include "ColliderCapsule.h"
 #include "../Common/Transform.h"
 
-ColliderCapsule::ColliderCapsule(TAG collisionTag, const Transform* followTarget, const VECTOR& localStartPos, const VECTOR& localEndPos, float radius)
-    : ColliderBase(SHAPE::CAPSULE, collisionTag, followTarget)
-    , localStartPos_(localStartPos)
-    , localEndPos_(localEndPos)
-    , radius_(radius)
+ColliderCapsule::ColliderCapsule(TAG _collisionTag, const Transform* _followTarget, const VECTOR& _localStartPos, const VECTOR& _localEndPos, float _radius)
+    : ColliderBase(SHAPE::CAPSULE, _collisionTag, _followTarget)
+    , localStartPos_(_localStartPos)
+    , localEndPos_(_localEndPos)
+    , radius_(_radius)
 {
 }
 
-void ColliderCapsule::SetLocalStartPos(const VECTOR& position)
+void ColliderCapsule::SetLocalStartPos(const VECTOR& _position)
 {
-    localStartPos_ = position;
+    localStartPos_ = _position;
 }
 
-void ColliderCapsule::SetLocalEndPos(const VECTOR& position)
+void ColliderCapsule::SetLocalEndPos(const VECTOR& _position)
 {
-    localEndPos_ = position;
+    localEndPos_ = _position;
 }
 
-void ColliderCapsule::SetRadius(float radius)
+void ColliderCapsule::SetRadius(float _radius)
 {
-    radius_ = radius;
+    radius_ = _radius;
 }
 
 const VECTOR& ColliderCapsule::GetLocalStartPos(void) const

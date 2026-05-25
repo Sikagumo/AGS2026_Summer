@@ -87,6 +87,9 @@ public:
 	/// @param isTrigger trueなら押し出す、falseなら押し出さない
 	void SetTriger(bool isTrigger);
 
+	/// @brief 半径を設定する
+	/// @param _radius 新しい半径の値
+	virtual void SetRadius(float _radius) {}
 protected:
 
 	// デバック表示の色

@@ -16,18 +16,18 @@ public:
     // @param followTarget 追従対象のTransform
     // @param localPosition ローカル空間での中心位置
     // @param radius 球体の半径
-    ColliderSphere(TAG collisionTag, const Transform* followTarget, const VECTOR& localPosition, float radius);
+    ColliderSphere(TAG _collisionTag, const Transform* _followTarget, const VECTOR& _localPosition, float _radius);
 
     // @brief デストラクタ
     ~ColliderSphere(void) override = default;
 
     // @brief ローカル座標の設定
     // @param position ローカル空間での中心位置
-    void SetLocalPosition(const VECTOR& position);
+    void SetLocalPosition(const VECTOR& _position);
 
     // @brief 半径の設定
     // @param radius 球体の半径
-    void SetRadius(float radius);
+    void SetRadius(float _radius) override;
 
     // @brief ローカル座標の取得
     // @return ローカル空間での中心位置
@@ -45,7 +45,7 @@ protected:
 
     // @brief デバッグ描画
     // @param color 描画色
-    void DrawDebug(int color) const override;
+    void DrawDebug(int _debugColor) const override;
 
 private:
 

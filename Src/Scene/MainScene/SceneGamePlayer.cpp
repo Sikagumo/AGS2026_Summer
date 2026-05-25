@@ -16,6 +16,7 @@ SceneGamePlayer::SceneGamePlayer(void)
 	player_ = std::make_unique<Player>(0, Player::BULLET_TYPE::BIG);
 	boss_ = std::make_unique<Boss>();
 	stage_ = std::make_unique<Stage>();
+	damageController_ = std::make_unique<DamageController>();
 }
 
 void SceneGamePlayer::Load(void)
@@ -25,6 +26,8 @@ void SceneGamePlayer::Load(void)
 	SceneBase::Load();
 
 	Loading::GetInstance()->SetProgress(15.0f);
+
+	player_->Load();
 
 	Loading::GetInstance()->SetProgress(25.0f);
 
@@ -58,7 +61,6 @@ void SceneGamePlayer::Initialize(void)
 
 	if (Loading::GetInstance()->IsLoading()) { return; }
 
-	player_->Load();
 	player_->Init();
 	boss_->Init();
 	stage_->Init();
@@ -92,6 +94,7 @@ void SceneGamePlayer::Update(void)
 	player_->Update();
 	boss_->Update();
 	stage_->Update();
+	damageController_->Update();
 }
 
 void SceneGamePlayer::Draw(void)

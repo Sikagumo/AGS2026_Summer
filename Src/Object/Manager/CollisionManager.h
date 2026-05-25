@@ -75,7 +75,20 @@ public:
 	/// @param _tagA 調査対象のタグA
 	/// @param _tagB 調査対象のタグB
 	/// @return 衝突していればtrue
-	bool IsTagCollidingWithTag(ColliderBase::TAG _tagA, ColliderBase::TAG _tagB) const;
+	bool IsTagCollidingWithTag(ColliderBase::TAG _targetTagA, ColliderBase::TAG _targetTagB) const;
+	
+	/// @brief 指定した衝突タグのコライダーの有効・無効を一括で切り替える
+	/// @param _targetActor 対象とするアクター
+	/// @param _targetTag 対象とする衝突タグ
+	/// @param _isActive 有効にする場合はtrue、無効にする場合はfalse
+	void SetCollisionActive(ActorBase* _targetActor, ColliderBase::TAG _targetTag, const bool _isActive = true);
+
+	/// @brief 指定したタグを持つコライダーの半径を一括で変更する
+	/// @param _targetActor 変更したいアクター
+	/// @param _targetTag 変更したいコライダーのタグ
+	/// @param _radius 新しく設定する半径の値
+	void SetActorColliderRadius(ActorBase* _targetActor, ColliderBase::TAG _targetTag, 
+		float _radius);
 
 	/// @brief 衝突したアクター同士の押し戻し処理を行う
 	/// @param actorA 動かす対象のアクターA

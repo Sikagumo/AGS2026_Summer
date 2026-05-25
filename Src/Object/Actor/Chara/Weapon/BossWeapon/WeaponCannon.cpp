@@ -12,7 +12,7 @@ WeaponCannon::WeaponCannon()
 	
 }
 
-void WeaponCannon::Release(void)
+void WeaponCannon::ReleasePost(void)
 {
 }
 

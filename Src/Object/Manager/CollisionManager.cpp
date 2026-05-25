@@ -174,10 +174,10 @@ bool CollisionManager::IsActorCollidingWithTag(const ActorBase* _actor,
 	return false;
 }
 
-bool CollisionManager::IsTagCollidingWithTag(ColliderBase::TAG _tagA, 
-	ColliderBase::TAG _tagB) const
+bool CollisionManager::IsTagCollidingWithTag(ColliderBase::TAG _targetTagA,
+	ColliderBase::TAG _targetTagB) const
 {
-	auto pair = (_tagA < _tagB) ? std::make_pair(_tagA, _tagB) : std::make_pair(_tagB, _tagA);
+	auto pair = (_targetTagA < _targetTagB) ? std::make_pair(_targetTagA, _targetTagB) : std::make_pair(_targetTagB, _targetTagA);
 
 	if (activeCollisions_.count(pair) > 0)
 	{
@@ -185,6 +185,50 @@ bool CollisionManager::IsTagCollidingWithTag(ColliderBase::TAG _tagA,
 	}
 
 	return false;
+}
+
+void CollisionManager::SetCollisionActive(ActorBase* _targetActor, 
+	ColliderBase::TAG _targetTag, const bool _isActive)
+{
+	if (_targetActor == nullptr)
+	{
+		return;
+	}
+
+	auto& ownColliders = _targetActor->GetOwnColliders();
+
+	// コライダーマップ(または配列)をループで回す
+	for (auto& [id, collider] : ownColliders)
+	{
+		if (collider == nullptr) { continue; }
+
+		if (collider->GetCollisionTag() == _targetTag)
+		{
+			collider->SetActive(_isActive);
+		}
+	}
+}
+
+void CollisionManager::SetActorColliderRadius(ActorBase* _targetActor,
+	ColliderBase::TAG _targetTag, float _radius)
+{
+	if (_targetActor == nullptr)
+	{
+		return;
+	}
+
+	auto& ownColliders = _targetActor->GetOwnColliders();
+
+	// コライダーマップ(または配列)をループで回す
+	for (auto& [id, collider] : ownColliders)
+	{
+		if (collider == nullptr) { continue; }
+
+		if (collider->GetCollisionTag() == _targetTag)
+		{
+			collider->SetRadius(_radius);
+		}
+	}
 }
 
 void CollisionManager::ResolveCollision(ActorBase* _actorA, ActorBase* _actorB,
@@ -197,6 +241,7 @@ void CollisionManager::ResolveCollision(ActorBase* _actorA, ActorBase* _actorB,
 
 	using TAG = ColliderBase::TAG;
 
+	// 1. 通常の押し戻しベクトルを計算
 	// 通常の押し戻しベクトルを計算
 	VECTOR pushVector = VScale(_info.hitNormal, _info.penetration);
 
@@ -376,6 +421,7 @@ bool CollisionManager::CanCollide(int _tagA, int _tagB) const
 	if (tagHit == TAG::BOSS)
 	{
 		if (tagHurt == TAG::PLAYER|| tagHurt == TAG::STAGE)
+		if (tagHurt == TAG::PLAYER || tagHurt == TAG::PLAYER_BULLET || tagHurt == TAG::STAGE)
 		{
 			return true;
 		}
@@ -384,6 +430,7 @@ bool CollisionManager::CanCollide(int _tagA, int _tagB) const
 	if (tagHit == TAG::STAGE)
 	{
 		if (tagHurt == TAG::PLAYER || tagHurt == TAG::BOSS)
+		if (tagHurt == TAG::PLAYER || tagHurt == TAG::PLAYER_BULLET || tagHurt == TAG::BOSS)
 		{
 			return true;
 		}
@@ -395,10 +442,15 @@ bool CollisionManager::CanCollide(int _tagA, int _tagB) const
 bool CollisionManager::CheckSphereVsSphere(const ColliderBase* _colliderA,
 	const ColliderBase* _colliderB, CollisionInfo& _outInfo)
 {
+	if (!_colliderA || !_colliderB) { return false; }
+
 	const auto* sphereA = dynamic_cast<const ColliderSphere*>(_colliderA);
 	const auto* sphereB = dynamic_cast<const ColliderSphere*>(_colliderB);
 
-	if (!sphereA || !sphereB) { return false; }
+	if (sphereA == nullptr || sphereB == nullptr) 
+	{
+		return false; 
+	}
 
 	// 距離計算
 	VECTOR positionA = sphereA->GetWorldPosition();
@@ -445,7 +497,6 @@ bool CollisionManager::CheckSphereVsSphere(const ColliderBase* _colliderA,
 bool CollisionManager::CheckSphereVsCapsule(const ColliderBase* _sphereCol,
 	const ColliderBase* _capsuleCol, CollisionInfo& _outInfo)
 {
-
 	if (!_sphereCol || !_capsuleCol) { return false; }
 
 	const auto* sphereHit = dynamic_cast<const ColliderSphere*>(_sphereCol);
@@ -505,9 +556,9 @@ bool CollisionManager::CheckCapsuleVsModel(const ColliderBase* _capsuleCol,
 	const auto* capsule = dynamic_cast<const ColliderCapsule*>(_capsuleCol);
 	const auto* model = dynamic_cast<const ColliderModel*>(_modelCol);
 
-	if (capsule == nullptr || model == nullptr)
+	if (capsule == nullptr || model == nullptr)  
 	{
-		return false;
+		return false; 
 	}
 
 	// モデルハンドル取得
@@ -597,6 +648,8 @@ bool CollisionManager::CheckCapsuleVsModel(const ColliderBase* _capsuleCol,
 bool CollisionManager::CheckLineVsModel(const ColliderBase* _lineCol,
 	const ColliderBase* _modelCol, CollisionInfo& _outInfo)
 {
+	if (!_lineCol || _modelCol) { return false; }
+
 	const auto* line = dynamic_cast<const ColliderLine*>(_lineCol);
 	const auto* model = dynamic_cast<const ColliderModel*>(_modelCol);
 

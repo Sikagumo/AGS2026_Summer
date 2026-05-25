@@ -52,13 +52,11 @@ public:
 	// リソースロード
 	void Load(void) override;
 
-	void Release(void) override;
-
 	//ゲット・セット
 	VECTOR GetBossPos(void) const;
 
-	void SetWeponDamege(int _damege);
-	void SetBossDamege(int _damege);
+	void SetWeponDamege(int _damage);
+	void SetBossDamege(int _damage);
 
 
 
@@ -185,6 +183,8 @@ protected:
 
 	// 前描画
 	void DrawPre(void) override;
+
+	void ReleasePost(void) override;
 
 	void CollisionReserve(void) override  {};
 
