@@ -648,7 +648,7 @@ bool CollisionManager::CheckCapsuleVsModel(const ColliderBase* _capsuleCol,
 bool CollisionManager::CheckLineVsModel(const ColliderBase* _lineCol,
 	const ColliderBase* _modelCol, CollisionInfo& _outInfo)
 {
-	if (!_lineCol || _modelCol) { return false; }
+	if (!_lineCol || !_modelCol) { return false; }
 
 	const auto* line = dynamic_cast<const ColliderLine*>(_lineCol);
 	const auto* model = dynamic_cast<const ColliderModel*>(_modelCol);

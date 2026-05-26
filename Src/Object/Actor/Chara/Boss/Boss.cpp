@@ -15,6 +15,7 @@
 #include "../Weapon/BossWeapon/WeaponMP.h"
 #include "../Weapon/BossWeapon/WeaponRG.h"
 #include "../Weapon/BossWeapon/WeaponCannon.h"
+#include "../Weapon/Bullet/Boss/BBulletWave.h"
 #include "Boss.h"
 
 Boss::Boss(void) :
@@ -26,7 +27,6 @@ Boss::Boss(void) :
 	hp_(1000),
 	attackDelay_(20),
 	boneName_(),
-	hitWaveRadius_(4.0f),
 	safeWaveRadius_(2.0f),
 
 
@@ -39,6 +39,7 @@ Boss::Boss(void) :
 	weaponRG_ = std::make_unique<WeaponRG>();
 	weaponCannonL_ = std::make_unique<WeaponCannon>();
 	weaponCannonR_ = std::make_unique<WeaponCannon>();
+	
 }
 
 Boss::~Boss(void)
@@ -155,10 +156,9 @@ void Boss::InitCollider(void)
 	ownColliders_.emplace(static_cast<int>(ColliderBase::SHAPE::CAPSULE), colCapsule);
 	colCapsule->SetTriger(false);
 
-	ColliderSphere* colHitSphere = new ColliderSphere(ColliderBase::TAG::HITWAVE, &transform_, { 0.0f,0.0f,0.0f }, hitWaveRadius_);
-	ownColliders_.emplace(static_cast<int>(ColliderBase::SHAPE::SPHERE), colHitSphere);
+	
 
-	ColliderSphere* colSafeSphere = new ColliderSphere(ColliderBase::TAG::HITWAVE, &transform_, { 0.0f,0.0f,0.0f }, safeWaveRadius_);
+	ColliderSphere* colSafeSphere = new ColliderSphere(ColliderBase::TAG::SAFEWAVE, &transform_, { 0.0f,0.0f,0.0f }, safeWaveRadius_);
 	ownColliders_.emplace(static_cast<int>(ColliderBase::SHAPE::SPHERE), colSafeSphere);
 
 	CollisionManager::GetInstance().RegisterActor(this);
@@ -172,6 +172,8 @@ void Boss::InitAnimation(void)
 void Boss::InitPost(void)
 {
 	//make_uniqueÇ≈èâä˙âª
+	wave_ = std::make_unique< BBulletWave>(transform_);
+
 
 	weaponMGL_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MGL_L)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MGL_L)].transform, ColliderBase::TAG::WEAPON_MG_L);
 	weaponMGR_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MGL_R)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MGL_R)].transform, ColliderBase::TAG::WEAPON_MG_R);
@@ -188,6 +190,7 @@ void Boss::InitPost(void)
 	weaponRG_->Init();
 	weaponCannonL_->Init();
 	weaponCannonR_->Init();
+	wave_->Init();
 
 	stateChanges_.emplace(static_cast<int>(STATE::IDLE),
 		std::bind(&Boss::ChangeStateIdle, this));
@@ -275,6 +278,8 @@ void Boss::UpdateProcess(void)
 	weaponRG_->Update();
 	weaponCannonL_->Update();
 	weaponCannonR_->Update();
+	wave_->SetPos(transform_.pos);
+	wave_->Update();
 
 	bool a = CollisionManager::GetInstance().IsTagCollidingWithTag(ColliderBase::TAG::BOSS
 		, ColliderBase::TAG::PLAYER);
@@ -306,9 +311,8 @@ void Boss::UpdateJump(void)
 {
 	if (!isJump_)
 	{
-		hitWaveRadius_ += 3.0f;
-		safeWaveRadius_ += 3.0f;
-		CollisionManager::GetInstance().SetActorColliderRadius(this, ColliderBase::TAG::HITWAVE, hitWaveRadius_);
+		wave_->SetIsAttac(true);
+		safeWaveRadius_ += 4.0f;
 		CollisionManager::GetInstance().SetActorColliderRadius(this, ColliderBase::TAG::SAFEWAVE, safeWaveRadius_);
 	}
 	
@@ -339,6 +343,7 @@ void Boss::DrawPre(void)
 	weaponRG_->Draw();
 	weaponCannonL_->Draw();
 	weaponCannonR_->Draw();
+	wave_->Draw();
 	for (auto& col : ownColliders_)
 	{
 		col.second->Draw();

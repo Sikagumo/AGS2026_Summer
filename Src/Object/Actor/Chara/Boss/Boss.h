@@ -12,7 +12,7 @@ class WeaponMGR;
 class WeaponCannon;
 class WeaponMP;
 class WeaponRG;
-
+class BBulletWave;
 
 class Boss : public CharaBase
 {
@@ -129,7 +129,7 @@ private:
 	std::unique_ptr<WeaponMP> weaponMPL_;
 	std::unique_ptr<WeaponMP> weaponMPR_;
 	std::unique_ptr<WeaponRG> weaponRG_;
-
+	std::unique_ptr< BBulletWave> wave_;
 	
 
 	//ƒ{[ƒ“‰Šú‰»
