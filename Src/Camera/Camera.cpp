@@ -58,7 +58,7 @@ void Camera::InitCollider(void)
 
 void Camera::InitPost(void)
 {
-	ChangeMode(MODE::FOLLOW);
+	ChangeMode(MODE::NONE);
 }
 
 void Camera::Update(void)

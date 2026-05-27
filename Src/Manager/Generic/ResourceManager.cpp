@@ -159,8 +159,12 @@ void ResourceManager::DestroyInstance(void)
 
 Resource ResourceManager::Load(SRC _src)
 {
+	SetUseASyncLoadFlag(false);
+
 	/* 読み込み処理 */
 	Resource* res = _Load(_src);
+
+	SetUseASyncLoadFlag(true);
 
 	if (res == nullptr) return Resource();
 
@@ -177,9 +181,11 @@ void ResourceManager::LoadHandleIds(SRC _src, int* _target)
 {
 	// 複数画像ではない場合、処理終了
 	if (resourcesMap_[_src].GetLoadType() != Resource::LOAD_TYPE::IMAGES) { return; }
+	SetUseASyncLoadFlag(false);
 
 	// 複数画像の対象にコピー
 	Load(_src).CopyHandle(_target);
+	SetUseASyncLoadFlag(true);
 
 #ifdef _DEBUG
 	if (*_target == -1)
@@ -231,9 +237,12 @@ const int ResourceManager::LoadHandleIdsOnce(SRC _src, int _imageNum)
 int ResourceManager::LoadModelDuplicate(SRC src)
 {
 	/* 3Dモデル重複利用時の読み込み */
+	SetUseASyncLoadFlag(false);
 
 	// 読み込み処理
 	Resource* resource = _Load(src);
+
+	SetUseASyncLoadFlag(true);
 
 	// 読み込み失敗
 	if (resource == nullptr)

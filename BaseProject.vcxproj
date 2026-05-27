@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Src\Object\Collider2D\Collider2DBase.cpp" />
     <ClCompile Include="Src\Object\Common\DamageController.cpp" />
     <ClCompile Include="Src\Common\ParametersIO.cpp" />
     <ClCompile Include="Src\Object\Actor\Chara\Boss\Boss.cpp" />
@@ -78,6 +79,7 @@
     <ClCompile Include="Src\Object\Actor\Chara\Weapon\BossWeapon\WeaponMGR.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Src\Object\Collider2D\Collider2DBase.h" />
     <ClInclude Include="Src\Object\Common\DamageController.h" />
     <ClInclude Include="Src\Common\ParametersIO.h" />
     <ClInclude Include="Src\Object\Actor\Chara\Boss\Boss.h" />

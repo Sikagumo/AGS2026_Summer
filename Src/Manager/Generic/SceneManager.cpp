@@ -9,7 +9,6 @@
 #include "../System/TimeManager.h"
 #include "../../Camera/Camera.h"
 #include "../../Common/Loading.h"
-#include "../../Object/Manager/CollisionManager.h"
 
 SceneManager* SceneManager::instance_ = nullptr;
 
@@ -61,13 +60,7 @@ void SceneManager::Initialize(void)
     CollisionManager::CreateInstance();
     CollisionManager::GetInstance().Initialize();
 
-    // ƒJƒƒ‰‚ğ‰Šú‰»‚·‚é
-    camera_->Init();
-
-    // 3D•`‰æİ’è‚ğ‰Šú‰»‚·‚é
-    Init3D();
-
-    ChangeScene(std::make_shared<SceneGame>());
+    isFirstFrame_ = true;
 }
 
 void SceneManager::Init3D(void)
@@ -192,6 +185,23 @@ void SceneManager::JumpScene(std::shared_ptr<SceneBase> scene)
 
 void SceneManager::Update(void)
 {
+    if (isFirstFrame_)
+    {
+        isFirstFrame_ = false; 
+
+        if (camera_)
+        {
+            // 3D•`‰æİ’è‚ğ‰Šú‰»‚·‚é
+            Init3D();
+
+            camera_->Init();
+        }
+
+        ChangeScene(std::make_shared<SceneTitle>());
+
+        return;
+    }
+
     if (scenes_.empty()) { return; }
 
     TimeManager::GetInstance().Update();
@@ -241,10 +251,13 @@ void SceneManager::Draw(void)
 {
     if (scenes_.empty()) { return; }
 
-    // ”ñ“¯Šúƒ[ƒh’†‚Ì•`‰æ
-    if (isSceneChanging_ || Loading::GetInstance()->IsLoading())
+    if (isSceneChanging_)
     {
-        Loading::GetInstance()->Draw();
+        auto loader = Loading::GetInstance();
+        if (loader)
+        {
+            loader->Draw(); 
+        }
         return;
     }
 

@@ -73,6 +73,7 @@ private:
     std::mutex sceneMutex_;                        // シーンアクセスを保護するミューテックス
     bool isGameEnd_;                               // ゲーム終了フラグ
     bool isSceneChanging_;                         // シーン切り替え中フラグ
+    bool isFirstFrame_;                            // 最初のフレームかどうかのフラグ
 
     // 時間・計測関連
     std::chrono::system_clock::time_point preTime_; // 前フレームの時刻
