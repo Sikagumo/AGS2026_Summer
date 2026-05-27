@@ -96,6 +96,14 @@ void DamageController::Update()
 		weaponDamege_ = 0;
 		bossDamege_ = 0;
 	}
-
+	if (CollisionManager::GetInstance().IsTagCollidingWithTag(ColliderBase::TAG::HITWAVE, ColliderBase::TAG::PLAYER))
+	{
+		playerDamege_ = playerHp_*(static_cast<float>(BOSS_WEPO_DAMEGE::PRESSWAVE)/10);
+		
+	}
+	else
+	{
+		playerDamege_ = 0;
+	}
 
 }

@@ -25,6 +25,6 @@ void WeaponBase::ReleasePost(void)
 
 void WeaponBase::DrawPre(void)
 {
-	MV1DrawModel(transform_.modelId);
+	
 }
 

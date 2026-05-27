@@ -97,6 +97,10 @@ void SceneGame::Update(void)
 	boss_->Update();
 	stage_->Update();
 	damageController_->Update();
+	boss_->SetBossDamege(damageController_->GetBossDamege());
+	boss_->SetWeponDamege(damageController_->GetWeaponDamege());
+	damageController_->SetPlayerAttack(10);
+
 }
 
 void SceneGame::UpdateCollision(void)

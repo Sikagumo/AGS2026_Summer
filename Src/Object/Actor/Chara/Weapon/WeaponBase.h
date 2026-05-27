@@ -55,8 +55,9 @@ protected:
 
 
 
-	int hp_;
+	int hp_=1000;
 	int attackDamage_;	
+	bool isAlive_;
 	VECTOR localBackPos_;	//当たり判定用の後方の座標
 	VECTOR localFrontPos_;	//当たり判定用の前方の座標
 	VECTOR localPos_;		//カメラのロックオン用の中央座標
@@ -68,8 +69,7 @@ protected:
 	virtual void UpdateProcess(void) = 0;
 	virtual void UpdateProcessPost(void) = 0;
 
-	//受けたダメージをボスに伝えるための関数
-	virtual float Damage(void)=0;
+	
 
 
 	virtual void CollisionReserve(void) {};

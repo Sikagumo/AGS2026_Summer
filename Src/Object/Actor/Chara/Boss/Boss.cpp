@@ -56,6 +56,41 @@ VECTOR Boss::GetBossPos(void) const
 
 void Boss::SetWeponDamege(int _damege)
 {
+	if (CollisionManager::GetInstance().IsTagCollidingWithTag(ColliderBase::TAG::WEAPON_CANNON_L, ColliderBase::TAG::PLAYER_BULLET))
+	{
+		weaponCannonL_->SetDamage(_damege);
+	}
+	
+	if (CollisionManager::GetInstance().IsTagCollidingWithTag(ColliderBase::TAG::WEAPON_CANNON_R, ColliderBase::TAG::PLAYER_BULLET))
+	{
+		weaponCannonR_->SetDamage(_damege);
+	}
+	
+	if (CollisionManager::GetInstance().IsTagCollidingWithTag(ColliderBase::TAG::WEAPON_MG_L, ColliderBase::TAG::PLAYER_BULLET))
+	{
+		weaponMGL_->SetDamage(_damege);
+	}
+	
+	if (CollisionManager::GetInstance().IsTagCollidingWithTag(ColliderBase::TAG::WEAPON_MG_R, ColliderBase::TAG::PLAYER_BULLET))
+	{
+		weaponMGR_->SetDamage(_damege);
+	}
+	
+	if (CollisionManager::GetInstance().IsTagCollidingWithTag(ColliderBase::TAG::WEAPON_MP_L, ColliderBase::TAG::PLAYER_BULLET))
+	{
+		weaponMPL_->SetDamage(_damege);
+	}
+
+	if (CollisionManager::GetInstance().IsTagCollidingWithTag(ColliderBase::TAG::WEAPON_MP_R, ColliderBase::TAG::PLAYER_BULLET))
+	{
+		weaponMPR_->SetDamage(_damege);
+	}
+
+	if (CollisionManager::GetInstance().IsTagCollidingWithTag(ColliderBase::TAG::WEAPON_RG, ColliderBase::TAG::PLAYER_BULLET))
+	{
+		weaponRG_->SetDamage(_damege);
+	}
+
 }
 
 
@@ -196,6 +231,9 @@ void Boss::InitPost(void)
 	stateChanges_.emplace(static_cast<int>(STATE::JUMP), std::bind(&Boss::ChangeStateJump, this));
 	stateChanges_.emplace(static_cast<int>(STATE::END), std::bind(&Boss::ChangeStateEnd, this));
 	ChangeState(STATE::IDLE);
+
+
+	hp_ = 1000;
 }
 
 void Boss::ChangeState(STATE _state)
@@ -346,5 +384,5 @@ void Boss::DrawPre(void)
 		col.second->Draw();
 	}
 	DrawFormatString(10, 100, 0xffffff, "bossÇÃç¿ïWÅF%f,%f,%f", transform_.pos.x, transform_.pos.y, transform_.pos.z);
-
+	DrawFormatString(10, 400, 0xffffff, "hp:%d", hp_);
 }

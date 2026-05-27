@@ -420,8 +420,15 @@ bool CollisionManager::CanCollide(int _tagA, int _tagB) const
 
 	if (tagHit == TAG::BOSS)
 	{
-		if (tagHurt == TAG::PLAYER|| tagHurt == TAG::STAGE)
 		if (tagHurt == TAG::PLAYER || tagHurt == TAG::PLAYER_BULLET || tagHurt == TAG::STAGE)
+		{
+			return true;
+		}
+	}
+
+	if (tagHit == TAG::HITWAVE)
+	{
+		if (tagHurt == TAG::PLAYER)
 		{
 			return true;
 		}
