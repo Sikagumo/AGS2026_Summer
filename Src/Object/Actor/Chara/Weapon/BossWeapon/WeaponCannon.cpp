@@ -49,7 +49,7 @@ void WeaponCannon::InitTransform(void)
 
 void WeaponCannon::InitCollider(void)
 {
-	ColliderLine* colLine = new ColliderLine(tag_, &transform_, {0.0f,0.0f,0.0f}, { 0.0f,-5.0f,0.0f });
+	ColliderLine* colLine = new ColliderLine(tag_, &transform_, {0.0f,50.0f,60.0f}, { 0.0f,51.0f,60.0f });
 	ownColliders_.emplace(static_cast<int>(ColliderBase::SHAPE::LINE), colLine);
 	
 
@@ -67,29 +67,37 @@ void WeaponCannon::InitAnimation(void)
 
 void WeaponCannon::InitPost(void)
 {
+	isAlive_ = true;
 }
 
 void WeaponCannon::UpdateProcess(void)
 {
 	transform_.pos = MV1GetFramePosition(bone_.transform.modelId, bone_.id);
 	transform_.Update();
+
+	if (hp_ <= 0)
+	{
+		isAlive_ = false;
+	}
+
 }
 
 void WeaponCannon::UpdateProcessPost(void)
 {
 }
 
-float WeaponCannon::Damage(void)
-{
-	return 0.0f;
-}
+
 
 void WeaponCannon::DrawPre(void)
 {
-	MV1DrawModel(transform_.modelId);
-
-	for (auto& col : ownColliders_)
+	if (isAlive_)
 	{
-		col.second->Draw();
+		MV1DrawModel(transform_.modelId);
+
+		for (auto& col : ownColliders_)
+		{
+			col.second->Draw();
+		}
 	}
+	DrawFormatString(10, 380, 0xffffff, "hp:%d", hp_);
 }

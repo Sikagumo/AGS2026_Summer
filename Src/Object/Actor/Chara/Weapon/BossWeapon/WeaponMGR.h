@@ -34,7 +34,7 @@ protected:
 	void UpdateProcess(void) override;
 	void UpdateProcessPost(void) override;
 
-	float Damage(void) override;
+	
 
 	// ‘O•`‰æ
 	void DrawPre(void) override;
