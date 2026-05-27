@@ -108,8 +108,7 @@ private:
 	Transform transformWheelFront_;
 
 	//ステータス
-	float hp_;						//HP
-	float attackDelay_;				//攻撃力
+	int hp_;						//HP
 	std::array<Bone,7> boneId_;		//各ボーン
 	BONE_NAME boneName_;			//ボーンの名前
 

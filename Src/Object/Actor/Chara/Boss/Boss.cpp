@@ -25,7 +25,6 @@ Boss::Boss(void) :
 	transformWheelBack_(),
 	transformWheelFront_(),
 	hp_(1000),
-	attackDelay_(20),
 	boneName_(),
 
 
