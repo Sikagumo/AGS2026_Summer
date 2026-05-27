@@ -10,7 +10,7 @@ PBulletBase::PBulletBase(void)
 	: ActorBase::ActorBase()
 	, bulletState_(BULLET_STATE::INACTIVE)
 	, radius_(0.0f)
-	, shotSpeed_(0.0f)
+	, shotSpeedXZ_(0.0f), shotSpeedY_(0.0f)
 	, shotPow_(UtilityMath::VECTOR_ZERO)
 	, curGravityPow_(0.0f)
 	, aliveTime_(0.0f)
@@ -42,7 +42,7 @@ void PBulletBase::Update(void)
 
 		if (aliveTime_ <= 0)
 		{
-			bulletState_ = BULLET_STATE::INACTIVE;
+			BlastAction();
 		}
 	}
 	else if (bulletState_ == BULLET_STATE::BLAST)
@@ -60,7 +60,7 @@ void PBulletBase::Update(void)
 	
 
 	if (colMng.IsActorCollidingWithTag(this, ColliderBase::TAG::BOSS)
-		|| colMng.IsActorCollidingWithTag(this, ColliderBase::TAG::STAGE))
+		|| colMng.IsActorCollidingWithTag(this, ColliderBase::TAG::STAGE) && shotPow_.y < 0.0f)
 	{
 		BlastAction();
 	}
@@ -88,8 +88,7 @@ void PBulletBase::BlastAction(void)
 
 	bulletState_ = BULLET_STATE::INACTIVE;
 	isVisible_ = false;
-
-	// [’e‚Ì“–‚½‚è”»’è–³Œøˆ—‚ð“±“ü]
+	CollisionManager::GetInstance().SetCollisionActive(this, ColliderBase::TAG::PLAYER_BULLET, false);
 
 
 	// Õ“Ë”»’èƒ}ƒl[ƒWƒƒ‚É“o˜^
@@ -117,7 +116,12 @@ void PBulletBase::Create(const VECTOR& _pos, const VECTOR& _throwDir, int _shotC
 
 void PBulletBase::Shot(const VECTOR& _shotDir)
 {
-	shotPow_ = VScale(UtilityMath::VNormalize(_shotDir), shotSpeed_);
+	VECTOR shotPowXZ = VScale(UtilityMath::VNormalize(_shotDir), shotSpeedXZ_);
+	float shotPowY = VScale(UtilityMath::VNormalize(_shotDir), shotSpeedY_).y;
+	shotPow_.x = shotPowXZ.x;
+	shotPow_.y = shotPowY;
+	shotPow_.z = shotPowXZ.z;
+
 
 	if (isFinish_)
 	{

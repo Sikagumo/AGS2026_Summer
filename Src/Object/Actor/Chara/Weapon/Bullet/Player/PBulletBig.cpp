@@ -8,7 +8,8 @@ constexpr float RADIUS_INCREMENT = 22.5f;
 constexpr float RADIUS_BIG_BLAST = RADIUS_BIG + (RADIUS_INCREMENT * 4);
 constexpr float SCALE_BIG = 1.5f;
 constexpr float SCALE_BIG_INCREMENT = 2.5f;
-constexpr float SHOT_SPEED_BIG = 5.0f;
+constexpr float SHOT_SPEED_BIG_XZ = 10.0f;
+constexpr float SHOT_SPEED_BIG_Y  = 7.5f;
 constexpr float TIME_ALIVE_BIG = 5.0f;
 
 
@@ -63,7 +64,8 @@ void PBulletBig::SetParam(void)
 	radius_ = RADIUS_BIG;
 	radiusMax_ = RADIUS_BIG + (RADIUS_INCREMENT * shotCnt_);
 
-	shotSpeed_ = SHOT_SPEED_BIG;
+	shotSpeedXZ_ = SHOT_SPEED_BIG_XZ;
+	shotSpeedY_ = SHOT_SPEED_BIG_Y;
 
 	aliveTime_ = TIME_ALIVE_BIG;
 

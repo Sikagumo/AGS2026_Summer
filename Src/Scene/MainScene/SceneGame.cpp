@@ -4,14 +4,14 @@
 #include "../../Manager/Generic/ResourceManager.h"
 #include "../../Manager/Decoration/SoundManager.h"
 #include "../../Manager/System/TimeManager.h"
+#include "../../Manager/Generic/SceneManager.h"
 #include "../../Common/Loading.h"
 #include "../../Camera/Camera.h"
 #include "../../Utility/UtilityMath.h"
 //#include "SceneScore.h"
 
 SceneGame::SceneGame(void)
-	: sceneManager_(SceneManager::GetInstance())
-	, tempBossWeaponPos_(VGet(0.0f, 100.0f, 500.0f))
+	: tempBossWeaponPos_(VGet(0.0f, 100.0f, 500.0f))
 {
 	player_ = std::make_unique<Player>(0, Player::BULLET_TYPE::BIG);
 	boss_ = std::make_unique<Boss>();
@@ -45,8 +45,9 @@ void SceneGame::Initialize(void)
 
 	if (Loading::GetInstance()->IsLoading()) { return; }
 
-	sceneManager_.GetCamera()->ChangeMode(Camera::MODE::FOLLOW);
-	sceneManager_.GetCamera()->SetFollow(&player_->GetTransform());
+	auto& camera = SceneManager::GetInstance().GetCamera();
+	camera->ChangeMode(Camera::MODE::FOLLOW);
+	camera->SetFollow(&player_->GetTransform());
 
 	player_->Init();
 	boss_->Init();
@@ -60,7 +61,7 @@ void SceneGame::Update(void)
 	auto& sound = SoundManager::GetInstance();
 	auto& input = InputManager::GetInstance();
 	auto& time = TimeManager::GetInstance();
-	auto& camera = sceneManager_.GetCamera();
+	auto& camera = SceneManager::GetInstance().GetCamera();
 	auto loader = Loading::GetInstance();
 
 	// ŽžŠÔ‚ðŽæ“¾
@@ -68,7 +69,8 @@ void SceneGame::Update(void)
 
 	if (InputManager::GetInstance().IsTrgDown(KEY_INPUT_E))
 	{
-		const std::unique_ptr<Camera>& camera = sceneManager_.GetCamera();
+		auto& camera = SceneManager::GetInstance().GetCamera();
+
 		if (!camera->GetIsLockOn())
 		{
 			camera->SetLockOnPosition(tempBossWeaponPos_);
@@ -82,6 +84,10 @@ void SceneGame::Update(void)
 	boss_->Update();
 	stage_->Update();
 	damageController_->Update();
+	boss_->SetBossDamege(damageController_->GetBossDamege());
+	boss_->SetWeponDamege(damageController_->GetWeaponDamege());
+	damageController_->SetPlayerAttack(10);
+
 }
 
 void SceneGame::UpdateCollision(void)

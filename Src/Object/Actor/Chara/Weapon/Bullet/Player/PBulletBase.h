@@ -55,7 +55,8 @@ protected:
 
 	float curGravityPow_;
 
-	float shotSpeed_;
+	float shotSpeedXZ_;
+	float shotSpeedY_;
 
 	// ”­ŽË•ûŒü
 	VECTOR shotPow_;

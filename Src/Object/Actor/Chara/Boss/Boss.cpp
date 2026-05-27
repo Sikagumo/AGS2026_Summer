@@ -1,11 +1,13 @@
 #include "../../../../Manager/Generic/ResourceManager.h"
 #include "../../../../Manager/Generic/InputManager.h"
+#include "../../../../Manager/System/TimeManager.h"
 #include "../../../../Utility/UtilityMath.h"
 #include "../../../../Utility/MatrixUtility.h"
 #include "../../../Common/Transform.h"
 #include "../../../Collider/ColliderBase.h"
 #include "../../../Collider/ColliderCapsule.h"
 #include "../../../Collider/ColliderLine.h"
+#include "../../../Collider/ColliderSphere.h"
 #include "../../../Manager/CollisionManager.h"
 #include "../Weapon/WeaponBase.h"
 #include "../Weapon/BossWeapon/WeaponMGL.h"
@@ -13,16 +15,16 @@
 #include "../Weapon/BossWeapon/WeaponMP.h"
 #include "../Weapon/BossWeapon/WeaponRG.h"
 #include "../Weapon/BossWeapon/WeaponCannon.h"
+#include "../Weapon/Bullet/Boss/BBulletWave.h"
 #include "Boss.h"
 
-Boss::Boss(void):
+Boss::Boss(void) :
 	transformFeet_(),
 	transformBody_(),
 	transformFeetCar_(),
 	transformWheelBack_(),
 	transformWheelFront_(),
 	hp_(1000),
-	attackDelay_(20),
 	boneName_(),
 
 
@@ -35,6 +37,7 @@ Boss::Boss(void):
 	weaponRG_ = std::make_unique<WeaponRG>();
 	weaponCannonL_ = std::make_unique<WeaponCannon>();
 	weaponCannonR_ = std::make_unique<WeaponCannon>();
+	
 }
 
 Boss::~Boss(void)
@@ -52,6 +55,41 @@ VECTOR Boss::GetBossPos(void) const
 
 void Boss::SetWeponDamege(int _damege)
 {
+	if (CollisionManager::GetInstance().IsTagCollidingWithTag(ColliderBase::TAG::WEAPON_CANNON_L, ColliderBase::TAG::PLAYER_BULLET))
+	{
+		weaponCannonL_->SetDamage(_damege);
+	}
+	
+	if (CollisionManager::GetInstance().IsTagCollidingWithTag(ColliderBase::TAG::WEAPON_CANNON_R, ColliderBase::TAG::PLAYER_BULLET))
+	{
+		weaponCannonR_->SetDamage(_damege);
+	}
+	
+	if (CollisionManager::GetInstance().IsTagCollidingWithTag(ColliderBase::TAG::WEAPON_MG_L, ColliderBase::TAG::PLAYER_BULLET))
+	{
+		weaponMGL_->SetDamage(_damege);
+	}
+	
+	if (CollisionManager::GetInstance().IsTagCollidingWithTag(ColliderBase::TAG::WEAPON_MG_R, ColliderBase::TAG::PLAYER_BULLET))
+	{
+		weaponMGR_->SetDamage(_damege);
+	}
+	
+	if (CollisionManager::GetInstance().IsTagCollidingWithTag(ColliderBase::TAG::WEAPON_MP_L, ColliderBase::TAG::PLAYER_BULLET))
+	{
+		weaponMPL_->SetDamage(_damege);
+	}
+
+	if (CollisionManager::GetInstance().IsTagCollidingWithTag(ColliderBase::TAG::WEAPON_MP_R, ColliderBase::TAG::PLAYER_BULLET))
+	{
+		weaponMPR_->SetDamage(_damege);
+	}
+
+	if (CollisionManager::GetInstance().IsTagCollidingWithTag(ColliderBase::TAG::WEAPON_RG, ColliderBase::TAG::PLAYER_BULLET))
+	{
+		weaponRG_->SetDamage(_damege);
+	}
+
 }
 
 
@@ -98,10 +136,8 @@ void Boss::BossTransformUpdate(void)
 	weaponCannonR_->Update();
 }
 
-void Boss::UpdateCollision(void)
-{
 
-}
+
 
 void Boss::Load(void)
 {
@@ -136,6 +172,8 @@ void Boss::InitTransform(void)
 	transformBody_.pos = MV1GetFramePosition(transform_.modelId, JOINT_FEET_BODY);
 
 	transformBody_.Update();
+
+
 	BoneParam();
 }
 
@@ -151,6 +189,10 @@ void Boss::InitCollider(void)
 	ownColliders_.emplace(static_cast<int>(ColliderBase::SHAPE::CAPSULE), colCapsule);
 	colCapsule->SetTriger(false);
 
+	
+
+	
+
 	CollisionManager::GetInstance().RegisterActor(this);
 
 }
@@ -162,6 +204,8 @@ void Boss::InitAnimation(void)
 void Boss::InitPost(void)
 {
 	//make_uniqueで初期化
+	wave_ = std::make_unique< BBulletWave>(transform_);
+
 
 	weaponMGL_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MGL_L)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MGL_L)].transform, ColliderBase::TAG::WEAPON_MG_L);
 	weaponMGR_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MGL_R)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MGL_R)].transform, ColliderBase::TAG::WEAPON_MG_R);
@@ -178,7 +222,64 @@ void Boss::InitPost(void)
 	weaponRG_->Init();
 	weaponCannonL_->Init();
 	weaponCannonR_->Init();
+	wave_->Init();
+
+	stateChanges_.emplace(static_cast<int>(STATE::IDLE),
+		std::bind(&Boss::ChangeStateIdle, this));
+	stateChanges_.emplace(static_cast<int>(STATE::ATTACK), std::bind(&Boss::ChangeStateAttack, this));
+	stateChanges_.emplace(static_cast<int>(STATE::JUMP), std::bind(&Boss::ChangeStateJump, this));
+	stateChanges_.emplace(static_cast<int>(STATE::END), std::bind(&Boss::ChangeStateEnd, this));
+	ChangeState(STATE::IDLE);
+
+
+	hp_ = 1000;
 }
+
+void Boss::ChangeState(STATE _state)
+{
+	state_ = _state;
+
+	int state = static_cast<int>(state_);
+
+	// 各状態遷移の初期処理
+	Boss::ChangeState(state);
+}
+
+void Boss::ChangeState(int state)
+{
+	stateBase_ = state;
+	// 各状態遷移の初期処理
+	stateChanges_[stateBase_]();
+
+}
+
+void Boss::ChangeStateIdle(void)
+{
+	stateUpdate_ = std::bind(&Boss::UpdateIdle, this);
+	attackCount_ = 0;
+}
+
+void Boss::ChangeStateAttack(void)
+{
+	stateUpdate_ = std::bind(&Boss::UpdateAttack, this);
+	attackCount_ = 0;
+	
+}
+
+void Boss::ChangeStateJump(void)
+{
+	stateUpdate_ = std::bind(&Boss::UpdateJump, this);
+	// ジャンプ量の計算
+	float jumpSpeed = POW_JUMP_INIT * TimeManager::GetInstance().GetDeltaTime();
+	jumpPow_ = VScale(UtilityMath::DIR_UP, jumpSpeed);
+	isJump_ = true;
+}
+
+void Boss::ChangeStateEnd(void)
+{
+	stateUpdate_ = std::bind(&Boss::UpdateEnd, this);
+}
+
 
 void Boss::UpdateProcess(void)
 {
@@ -188,6 +289,7 @@ void Boss::UpdateProcess(void)
 		transform_.pos.y += 10.0f;
 	}
 
+	
 	transformBody_.pos = MV1GetFramePosition(transform_.modelId, JOINT_FEET_BODY);
 
 	
@@ -211,15 +313,57 @@ void Boss::UpdateProcess(void)
 	weaponRG_->Update();
 	weaponCannonL_->Update();
 	weaponCannonR_->Update();
+	wave_->SetPos(transform_.pos);
+	wave_->Update();
 
 	bool a = CollisionManager::GetInstance().IsTagCollidingWithTag(ColliderBase::TAG::BOSS
 		, ColliderBase::TAG::PLAYER);
 
-	
+	stateUpdate_();
+
 }
 
 void Boss::UpdateProcessPost(void)
 {
+}
+
+void Boss::UpdateIdle(void)
+{
+
+	attackCount_++;
+	if (attackCount_ >= 300)
+	{
+		ChangeState(STATE::ATTACK);
+	}
+}
+
+void Boss::UpdateAttack(void)
+{
+	ChangeState(STATE::JUMP);
+}
+
+void Boss::UpdateJump(void)
+{
+	if (!isJump_)
+	{
+		wave_->SetIsAttac(true);
+		ChangeState(STATE::IDLE);
+	}
+	
+	if (transform_.pos.y >= 3500)
+	{
+		jumpPow_ = VScale(UtilityMath::DIR_UP, -50.0f);
+	}
+}
+
+void Boss::UpdateEnd(void)
+{
+	
+}
+
+void Boss::UpdateCollision(void)
+{
+
 }
 
 void Boss::DrawPre(void)
@@ -233,10 +377,11 @@ void Boss::DrawPre(void)
 	weaponRG_->Draw();
 	weaponCannonL_->Draw();
 	weaponCannonR_->Draw();
+	wave_->Draw();
 	for (auto& col : ownColliders_)
 	{
 		col.second->Draw();
 	}
 	DrawFormatString(10, 100, 0xffffff, "bossの座標：%f,%f,%f", transform_.pos.x, transform_.pos.y, transform_.pos.z);
-
+	DrawFormatString(10, 400, 0xffffff, "hp:%d", hp_);
 }

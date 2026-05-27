@@ -165,16 +165,22 @@ void Camera::SyncFollow(void)
 	// 同期先の位置
 	VECTOR pos = followTransform_->pos;
 
-	VECTOR temp;
-
 	// Y軸
 	rotY_ = Quaternion::AngleAxis(angles_.y, UtilityMath::AXIS_Y);
+
 	if (isLockOn_) 
 	{
-		temp = VSub(lockOnPos_, pos);
-		rotY_ = Quaternion::LookRotation(VNorm(temp));
-		rotY_.z = 0.0f;
+		// 追従位置 = ロックオン位置 - 追従座標
+		VECTOR target = followTransform_->pos;
+		target.y = lockOnPos_.y;
+		VECTOR toTarget = VSub(lockOnPos_, target);
+
+		// XZ平面に投影（Y成分を無視）してY軸回転角を求める
+		float yAngle = atan2(toTarget.x, toTarget.z);
+
+		rotY_ = Quaternion::AngleAxis(yAngle, UtilityMath::AXIS_Y);
 	}
+	
 	// Y軸 + X軸
 	transform_.quaRot = rotY_.Mult(Quaternion::AngleAxis(angles_.x, UtilityMath::AXIS_X));
 

@@ -210,6 +210,7 @@ void AnimationController::Update(void)
 void AnimationController::DrawDebug(void)
 {
 #ifdef _DEBUG
+	if (playType_ == -1) { return; }
 	auto& anim = animations_.at(playType_);
 
 	// アニメーションの描画

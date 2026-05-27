@@ -1,26 +1,23 @@
 #pragma once
-#include "../WeaponBase.h"
-class WeaponMP :
-	public WeaponBase
+#include "BBulletBase.h"
+
+class BBulletWave:public BBulletBase
 {
 public:
-
-	WeaponMP();
-
-	~WeaponMP(void)override = default;
+	BBulletWave(Transform& _transform);
+	~BBulletWave(void)override;
 
 	// リソースロード
 	void Load(void) override;
 
 	void ReleasePost(void)override;
 
-	void SetBone(int _id, Transform _trans, ColliderBase::TAG _tag) override;
+	
 
-	VECTOR GetPos(void) const override;
-	void SetDamage(int _damage)override { hp_ -= _damage; }
+	void SetIsAttac(bool _isAttac)override { isAttac_ = _isAttac; }
 
+	void SetPos(VECTOR _pos);
 protected:
-
 	// 大きさ、回転、座標の初期化
 	void InitTransform(void) override;
 
@@ -41,6 +38,18 @@ protected:
 	// 前描画
 	void DrawPre(void) override;
 
-	void CollisionReserve(void) override {};
+	
+
+	
+
+private:
+	static constexpr float INIT_RADIUS = 4.0f;
+	static constexpr float INCREASE_RADIUS = 4.0f;
+	static constexpr float MAX_RADIUS = 1000.0f;
+
+
+	Transform bossTransform_;
+	float radius_;
+
 };
 

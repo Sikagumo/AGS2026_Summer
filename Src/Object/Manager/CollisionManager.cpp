@@ -139,16 +139,16 @@ bool CollisionManager::CheckCollision(const ColliderBase* _colliderA, const Coll
 	{
 		return CheckCapsuleVsCapsule(_colliderA, _colliderB, _outInfo);
 	}
-	
-	if (shapeA == SHAPE::CAPSULE && shapeB == SHAPE::MODEL)
+	else if (shapeA == SHAPE::LINE && shapeB == SHAPE::MODEL)
+	{
+		return CheckLineVsModel(_colliderA, _colliderB, _outInfo);
+	}
+	else if (shapeA == SHAPE::CAPSULE && shapeB == SHAPE::MODEL)
 	{
 		return CheckCapsuleVsModel(_colliderA, _colliderB, _outInfo);
 	}
 
-	if (shapeA == SHAPE::LINE && shapeB == SHAPE::MODEL)
-	{
-		return CheckLineVsModel(_colliderA, _colliderB, _outInfo);
-	}
+	
 
 	return false;
 }
@@ -448,7 +448,7 @@ bool CollisionManager::CanCollide(int _tagA, int _tagB) const
 	}
 
 	// プレイヤーの衝突ルール
-	if (tagHit == TAG::PLAYER)
+	if (tagHit == TAG::PLAYER || tagHit == TAG::PLAYER_BULLET)
 	{
 		if (tagHurt == TAG::ENEMY
 		 || tagHurt == TAG::STAGE
@@ -464,8 +464,15 @@ bool CollisionManager::CanCollide(int _tagA, int _tagB) const
 
 	if (tagHit == TAG::BOSS)
 	{
-		if (tagHurt == TAG::PLAYER|| tagHurt == TAG::STAGE)
 		if (tagHurt == TAG::PLAYER || tagHurt == TAG::PLAYER_BULLET || tagHurt == TAG::STAGE)
+		{
+			return true;
+		}
+	}
+
+	if (tagHit == TAG::HITWAVE)
+	{
+		if (tagHurt == TAG::PLAYER)
 		{
 			return true;
 		}
@@ -473,7 +480,6 @@ bool CollisionManager::CanCollide(int _tagA, int _tagB) const
 
 	if (tagHit == TAG::STAGE)
 	{
-		if (tagHurt == TAG::PLAYER || tagHurt == TAG::BOSS)
 		if (tagHurt == TAG::PLAYER || tagHurt == TAG::PLAYER_BULLET || tagHurt == TAG::BOSS)
 		{
 			return true;

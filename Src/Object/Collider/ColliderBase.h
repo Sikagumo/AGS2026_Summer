@@ -39,6 +39,8 @@ public:
 		WEAPON_RG,		//レールガン
 		CAMERA,      // カメラ
 		WALL,        // 壁
+		HITWAVE,
+		SAFEWAVE,
 	};
 
 	/// @brief コンストラクタ

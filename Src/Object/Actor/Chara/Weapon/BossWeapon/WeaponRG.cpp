@@ -50,7 +50,7 @@ void WeaponRG::InitTransform(void)
 
 void WeaponRG::InitCollider(void)
 {
-	ColliderLine* colLine = new ColliderLine(tag_, &transform_, { 0.0f,0.0f,0.0f }, { 0.0f,-50.0f,0.0f });
+	ColliderLine* colLine = new ColliderLine(tag_, &transform_, { 0.0f,-10.0f,-60.0f }, { 0.0f,-11.0f,-60.0f });
 	ownColliders_.emplace(static_cast<int>(ColliderBase::SHAPE::LINE), colLine);
 
 	ColliderCapsule* colCapsule = new ColliderCapsule(
@@ -67,29 +67,36 @@ void WeaponRG::InitAnimation(void)
 
 void WeaponRG::InitPost(void)
 {
+	isAlive_ = true;
 }
 
 void WeaponRG::UpdateProcess(void)
 {
 	transform_.pos = MV1GetFramePosition(bone_.transform.modelId, bone_.id);
 	transform_.Update();
+	if (hp_ <= 0)
+	{
+		isAlive_ = false;
+	}
 }
 
 void WeaponRG::UpdateProcessPost(void)
 {
 }
 
-float WeaponRG::Damage(void)
-{
-	return 0.0f;
-}
+
 
 void WeaponRG::DrawPre(void)
 {
-	MV1DrawModel(transform_.modelId);
-
-	for (auto& col : ownColliders_)
+	if (isAlive_)
 	{
-		col.second->Draw();
+		MV1DrawModel(transform_.modelId);
+
+		for (auto& col : ownColliders_)
+		{
+			col.second->Draw();
+		}
 	}
+
+	DrawFormatString(10, 300, 0xffffff, "hp:%d", hp_);
 }

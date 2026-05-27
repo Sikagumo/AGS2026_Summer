@@ -228,9 +228,15 @@
     <ClCompile Include="Src\Object\Common\DamageController.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Object\Collider2D\Collider2DBase.cpp">
+    <ClCompile Include="Src\Object\Actor\Chara\Weapon\Bullet\Boss\BBulletBase.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="Src\Object\Actor\Chara\Weapon\Bullet\Boss\BBulletWave.cpp">
+		<Filter>ソース ファイル</Filter>
+	</ClCompile>
+		<ClCompile Include="Src\Object\Collider2D\Collider2DBase.cpp">
+			<Filter>ソース ファイル</Filter>
+		</ClCompile> 
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\Common\Fader.h">
@@ -410,6 +416,12 @@
     <ClInclude Include="Src\Object\Common\DamageController.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="Src\Object\Actor\Chara\Weapon\Bullet\Boss\BBulletBase.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Object\Actor\Chara\Weapon\Bullet\Boss\BBulletWave.h">
+	<Filter>ヘッダー ファイル</Filter>
+	</ClInclude>
     <ClInclude Include="Src\Object\Collider2D\Collider2DBase.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>

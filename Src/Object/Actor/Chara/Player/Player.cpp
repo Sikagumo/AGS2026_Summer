@@ -18,11 +18,21 @@
 #include "../Weapon/Bullet/Player/PBulletRapidFire.h"
 
 
+// 衝突判定用線分位置
+static constexpr VECTOR COL_LINE_START_LOCAL_POS = { 0.0f, 50.0f, 0.0f };
+static constexpr VECTOR COL_LINE_END_LOCAL_POS = { 0.0f, 0.0f, 0.0f };
+
+// 衝突判定用カプセル位置
+static constexpr VECTOR COL_CAPSULE_TOP_LOCAL_POS = { 0.0f, 50.0f, 0.0f };
+static constexpr VECTOR COL_CAPSULE_DOWN_LOCAL_POS = { 0.0f, 18.0f, 0.0f };
+
+// 衝突判定用カプセル球体半径
+static constexpr float COL_CAPSULE_RADIUS = 10.0f;
+
+
 Player::Player(int _playerNo, BULLET_TYPE _playerType)
 	: PlayerBase::PlayerBase(_playerNo, _playerType)
 	, shadowHandle_(-1)
-	, inputManager_(InputManager::GetInstance())
-	, sceneManager_(SceneManager::GetInstance())
 	, animType_(ANIM_TYPE::IDLE)	
 	,  curAttackNum_(0)
 	, throwPos_(UtilityMath::VECTOR_ZERO), throwDir_(UtilityMath::VECTOR_ZERO)
@@ -30,7 +40,7 @@ Player::Player(int _playerNo, BULLET_TYPE _playerType)
 	constexpr int BULLET_MAX = 3;
 	attackNumMax_ = BULLET_MAX;
 
-	constexpr float MOVE_SPEED = 5.0f;
+	constexpr float MOVE_SPEED = 6.5f;
 	moveSpeed_ = MOVE_SPEED;
 }
 
@@ -52,7 +62,7 @@ void Player::InitAnimation(void)
 		, 30.0f, resourceManager_.LoadHandleId(ResourceManager::SRC::ANIM_IDLE));
 
 	animation_->AddExternal(static_cast<int>(ANIM_TYPE::RUN)
-		, 30.0f, resourceManager_.LoadHandleId(ResourceManager::SRC::ANIM_RUN));
+		, 40.0f, resourceManager_.LoadHandleId(ResourceManager::SRC::ANIM_RUN));
 
 	animation_->AddExternal(static_cast<int>(ANIM_TYPE::THROW_LEFT)
 		, 17.5f, resourceManager_.LoadHandleId(ResourceManager::SRC::ANIM_THROW_LEFT));
@@ -77,20 +87,19 @@ void Player::InitTransform(void)
 		, Quaternion::Identity()
 		, Quaternion::AngleAxis(UtilityMath::Deg2RadF(LOCAL_ROT_Y), UtilityMath::AXIS_Y)
 		, UtilityMath::VECTOR_ZERO);
+
+	transform_.Update();
 }
 void Player::InitCollider(void)
 {
-	const VECTOR COL_CAPSULE_TOP = VScale(COL_CAPSULE_TOP_LOCAL_POS, transform_.scl.y);
-	const VECTOR COL_CAPSULE_DOWN = VScale(COL_CAPSULE_DOWN_LOCAL_POS, transform_.scl.y);
-	const float CAPSULE_RADIUS = (COL_CAPSULE_RADIUS * transform_.scl.y);
-	
-	const VECTOR POS_LINE_OFFSET = VGet(0.0f,-10.0f,0.0f );
-	ColliderLine* colLine = new ColliderLine(ColliderBase::TAG::PLAYER, &transform_, COL_CAPSULE_TOP, POS_LINE_OFFSET);
+	ColliderLine* colLine = new ColliderLine(ColliderBase::TAG::PLAYER, &transform_, COL_LINE_START_LOCAL_POS, COL_LINE_END_LOCAL_POS);
 	ownColliders_.emplace(static_cast<int>(ColliderBase::SHAPE::LINE), colLine);
 	colLine->SetTriger(false);
-
-	ownColliders_.emplace(0
-		, new ColliderCapsule(ColliderBase::TAG::PLAYER, &transform_, COL_CAPSULE_TOP, COL_CAPSULE_DOWN, CAPSULE_RADIUS));
+	
+	ColliderCapsule* colCap = new ColliderCapsule(ColliderBase::TAG::PLAYER
+									, &transform_, COL_CAPSULE_TOP_LOCAL_POS, COL_CAPSULE_DOWN_LOCAL_POS, COL_CAPSULE_RADIUS);
+										
+	ownColliders_.emplace(0, colCap);
 
 	ownColliders_.at(0)->SetTriger(false);
 
@@ -109,40 +118,35 @@ void Player::InitPost(void)
 
 	constexpr float SHOT_TIME_ACTIVE = 2.0f; // 有効時間
 	constexpr float SHOT_TIME_ACTION_ACTIVE = 1.25f; // 有効時間
-	constexpr float SHOT_TIME_ACTIVE_INPUT = 1.75f; // 入力可能時間
+	constexpr float SHOT_TIME_ACTIVE_INPUT = 1.725f; // 入力可能時間
 	constexpr float SHOT_TIME_END = 1.0f; // 終了時間
 
-	constexpr float SHOT_TIME_STOP = 0.85f; // 入力可能時間
-	constexpr float SHOT_TIME_STOP_ACTIVE = 1.15f; // 入力可能時間
+	constexpr float SHOT_TIME_STOP = 0.85f; // 停止時間
+	constexpr float SHOT_TIME_STOP_ACTIVE = 1.15f; // 停止有効化時間
 
 
 
-	float timeActive, timeActionActive, timeInput, timeStop, timeStopActive;
+	float timeActive, timeActionActive, timeInput;
 	timeActive = SHOT_TIME_ACTIVE;
 	timeActionActive = SHOT_TIME_ACTION_ACTIVE;
 	timeInput = SHOT_TIME_ACTIVE_INPUT;
-	timeStop = 0.1f;
-	timeStopActive = SHOT_TIME_STOP_ACTIVE;
 
 	actionController_->SetAction(0, timeActive, SHOT_TIME_END, timeActionActive
 								, std::bind(&Player::ShotBullet, this)
-								, timeStop, timeStopActive, timeInput);
+								, 0.0f, 0.0f, timeInput);
 
 	timeActive += SHOT_TIME_INCREMENT;
-	timeActionActive += SHOT_TIME_INC_ACTION;
-	timeInput += (SHOT_TIME_INCREMENT / 2);
-	timeStop = SHOT_TIME_STOP;
+	//timeActionActive += SHOT_TIME_INC_ACTION;
 	actionController_->SetAction(1, timeActive, SHOT_TIME_END, timeActionActive
 								, std::bind(&Player::ShotBullet, this)
-								, timeStop, timeStopActive, timeInput);
+								, SHOT_TIME_STOP, SHOT_TIME_STOP_ACTIVE, timeInput);
 
 	timeActive += SHOT_TIME_INCREMENT * 2;
-	timeActionActive += SHOT_TIME_INC_ACTION;
+	//timeActionActive += SHOT_TIME_INC_ACTION;
 	timeInput += (SHOT_TIME_INCREMENT / 2);
-	timeStop = SHOT_TIME_STOP;
 	actionController_->SetAction(2, timeActive, SHOT_TIME_END, timeActionActive
 								, std::bind(&Player::ShotBullet, this)
-								, timeStop, timeStopActive, timeInput);
+								, SHOT_TIME_STOP, SHOT_TIME_STOP_ACTIVE, timeInput);
 }
 
 
@@ -158,7 +162,7 @@ void Player::UpdateProcess(void)
 	UpdateBullets();
 
 	// ロックオン有効時、カメラ方向に回転
-	isDirRotActive_ = !sceneManager_.GetCamera()->GetIsLockOn();
+	isDirRotActive_ = !SceneManager::GetInstance().GetCamera()->GetIsLockOn();
 }
 
 void Player::UpdateProcessPost(void)
@@ -225,17 +229,15 @@ void Player::ProcessMove(void)
 		dir = UtilityMath::VNormalize(dir);
 		movePow_ = UtilityMath::VECTOR_ZERO;
 
-		if (!isJump_)
+		if (!isJump_
+			&& animType_ != ANIM_TYPE::THROW_LEFT
+			&& animType_ != ANIM_TYPE::THROW_RIGHT)
 		{
-			if (animType_ != ANIM_TYPE::THROW_LEFT
-				&& animType_ != ANIM_TYPE::THROW_RIGHT)
-			{
-				PlayAnim(ANIM_TYPE::RUN);
-			}
+			PlayAnim(ANIM_TYPE::RUN);
 		}
 
 		// カメラの方向で進行
-		Quaternion cameraRot = sceneManager_.GetCamera()->GetQuaRotY();
+		Quaternion cameraRot = SceneManager::GetInstance().GetCamera()->GetQuaRotY();
 
 		// 移動方向を取得
 		moveDir_ = Quaternion::PosAxis(cameraRot, dir);
@@ -248,7 +250,7 @@ void Player::ProcessMove(void)
 	{
 		movePow_ = UtilityMath::VECTOR_ZERO;
 
-		if (!isJump_)
+		if (!isJump_ && animType_ != ANIM_TYPE::IDLE)
 		{
 			if (animType_ != ANIM_TYPE::THROW_LEFT &&
 				animType_ != ANIM_TYPE::THROW_RIGHT)
@@ -262,38 +264,43 @@ void Player::ProcessMove(void)
 void Player::ProcessJump(void)
 {
 	auto& input = InputManager::GetInstance();
-
-	bool isHitKeyNew = input.IsNew(KEY_INPUT_SPACE)
-		|| input.IsPadBtnNew(InputManager::JOYPAD_NO::PAD1,
-			InputManager::JOYPAD_BTN::RB_BOTTOM);
-
-	bool isHitTrg = input.IsTrgDown(KEY_INPUT_SPACE)
-		|| input.IsPadBtnTrgDown(InputManager::JOYPAD_NO::PAD1,
-			InputManager::JOYPAD_BTN::RB_BOTTOM);
-
-	if (isHitKeyNew && !isJump_)
+	
+	if (!actionController_->IsActiveAction())
 	{
-		// ジャンプの入力受付時間を減少
-		stepJump_ += timeManager_.GetDeltaTime();
-		if (stepJump_ <= TIME_JUMP_INPUT)
+		bool isHitKeyNew = input.IsNew(KEY_INPUT_SPACE)
+			|| input.IsPadBtnNew(InputManager::JOYPAD_NO::PAD1,
+				InputManager::JOYPAD_BTN::RB_BOTTOM);
+
+		bool isHitTrg = input.IsTrgDown(KEY_INPUT_SPACE)
+			|| input.IsPadBtnTrgDown(InputManager::JOYPAD_NO::PAD1,
+				InputManager::JOYPAD_BTN::RB_BOTTOM);
+
+		if (isHitKeyNew && !isJump_)
 		{
-			// ジャンプ量の計算
-			float jumpSpeed = POW_JUMP_KEEP * timeManager_.GetDeltaTime();
-			jumpPow_ = VAdd(jumpPow_, VScale(UtilityMath::DIR_UP, jumpSpeed));
+			float deltaTime = TimeManager::GetInstance().GetDeltaTime();
+			if (isHitTrg)
+			{
+				// ジャンプ量の計算
+				float jumpSpeed = (POW_JUMP_INIT * deltaTime);
+				jumpPow_ = VScale(UtilityMath::DIR_UP, jumpSpeed);
+			}
+
+			// ジャンプの入力受付時間を減少
+			stepJump_ += deltaTime;
+			if (stepJump_ <= TIME_JUMP_INPUT)
+			{
+				// ジャンプ量の計算
+				float jumpSpeed = POW_JUMP_KEEP * deltaTime;
+				jumpPow_ = VAdd(jumpPow_, VScale(UtilityMath::DIR_UP, jumpSpeed));
+			}
+		}
+
+		// ジャンプ
+		if (isHitTrg && !isJump_)
+		{
+			isJump_ = true;
 		}
 	}
-	
-
-	// ジャンプ
-	if (isHitTrg && !isJump_)
-	{
-		// ジャンプ量の計算
-		float jumpSpeed = (POW_JUMP_INIT * timeManager_.GetDeltaTime());
-		jumpPow_ = VScale(UtilityMath::DIR_UP, jumpSpeed);
-
-		isJump_ = true;
-	}
-	return;
 
 	// Y軸制限
 	const float LIMIT_POS_Y = -1500.0f;
@@ -533,6 +540,7 @@ void Player::DrawShadowRound(void)
 void Player::PlayAnim(ANIM_TYPE _type, bool _isLoop)
 {
 	animType_ = _type;
+
 	animation_->Play(static_cast<int>(_type), _isLoop);
 }
 

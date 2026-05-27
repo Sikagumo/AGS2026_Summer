@@ -2,6 +2,7 @@
 #include <DxLib.h>
 #include <memory>
 #include <array>
+#include <functional>
 #include "../CharaBase.h"
 #include "../../../Common/Transform.h";
 
@@ -11,15 +12,18 @@ class WeaponMGR;
 class WeaponCannon;
 class WeaponMP;
 class WeaponRG;
-
+class BBulletWave;
 
 class Boss : public CharaBase
 {
 public:
 
-	enum class STAET_TYP
+	enum class STATE
 	{
-
+		IDLE,
+		ATTACK,
+		JUMP,
+		END,
 	};
 
 	//ウェポンの接続ボーンの名前
@@ -64,9 +68,11 @@ private:
 	//bossの大きさ
 	static constexpr VECTOR BOSS_SIZE = { 3.0f, 3.0f, 3.0f };
 	//bossの初期座標
-	static constexpr VECTOR BOSS_INIT_POS= { 500.0f, 0.0f, 100.0f };
+	static constexpr VECTOR BOSS_INIT_POS= { 0.0f, 0.0f, 500.0f };
 	//回転
 	static constexpr float INIT_ROT = 180.0f;
+	//ジャンプ力
+	static constexpr float POW_JUMP_INIT = 3000.0f;
 
 	//当たり判定の座標
 	//ライン
@@ -102,10 +108,15 @@ private:
 	Transform transformWheelFront_;
 
 	//ステータス
-	float hp_;						//HP
-	float attackDelay_;				//攻撃力
+	int hp_;						//HP
 	std::array<Bone,7> boneId_;		//各ボーン
 	BONE_NAME boneName_;			//ボーンの名前
+
+	//攻撃関連
+	int jumpCount_;
+	int attackCount_;
+
+
 
 	//武器のポインター宣言
 	std::unique_ptr<WeaponMGL> weaponMGL_;
@@ -115,14 +126,36 @@ private:
 	std::unique_ptr<WeaponMP> weaponMPL_;
 	std::unique_ptr<WeaponMP> weaponMPR_;
 	std::unique_ptr<WeaponRG> weaponRG_;
+	std::unique_ptr< BBulletWave> wave_;
+	
 
 	//ボーン初期化
 	void BoneParam(void);
 	//ボーンアプデ
 	void BossTransformUpdate(void);
 
+	// 状態
+	STATE state_;
+	// 状態管理
+	int stateBase_;
 
-
+	// 状態管理(状態遷移時初期処理)
+	std::map<int, std::function<void(void)>> stateChanges_;
+	// 状態遷移
+	void ChangeState(STATE _state);
+	// 状態遷移
+	void ChangeState(int state);
+	void ChangeStateIdle(void);
+	void ChangeStateAttack(void);
+	void ChangeStateJump(void);
+	void ChangeStateEnd(void);
+	// 更新系
+	// 状態管理(更新ステップ)
+	std::function<void(void)> stateUpdate_;
+	void UpdateIdle(void);
+	void UpdateAttack(void);
+	void UpdateJump(void);
+	void UpdateEnd(void);
 	 
 
 
@@ -151,6 +184,7 @@ protected:
 	void ReleasePost(void) override;
 
 	void CollisionReserve(void) override  {};
+
 
 
 };

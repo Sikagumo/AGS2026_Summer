@@ -1,13 +1,13 @@
 #include "CharaBase.h"
 #include "../../../Utility/UtilityMath.h"
-#include "../../../Manager/System/TimeManager.h"
 #include "../../../Manager/Generic/ResourceManager.h"
 #include "../../../Manager/Generic/SceneManager.h"
+#include "../../../Manager/System/TimeManager.h"
+#include "../../Manager/CollisionManager.h"
 #include "../../Collider/ColliderBase.h"
 #include "../../Collider/ColliderLine.h"
 #include "../../Collider/ColliderModel.h"
 #include "../../Collider/ColliderCapsule.h"
-#include "../../Manager/CollisionManager.h"
 #include "../../../Camera/Camera.h"
 #include "../../../Application.h"
 
@@ -83,19 +83,14 @@ void CharaBase::CalcGravityPow(void)
 
 	// èdóÕÇÃã≠Ç≥
 	float gravityPow = Application::GetInstance().GetGravityPow() * timeManager_.GetDeltaTime();
-
 	
 	// èdóÕ
 	VECTOR gravity = VScale(DIR_GRAVITY, gravityPow);
-
-	
 
 	jumpPow_ = VAdd(jumpPow_, gravity);
 
 	// èdóÕêßå¿	
 	jumpPow_.y = ((jumpPow_.y < MAX_FALL_SPEED) ? MAX_FALL_SPEED : jumpPow_.y);
-
-
 
 }
 
