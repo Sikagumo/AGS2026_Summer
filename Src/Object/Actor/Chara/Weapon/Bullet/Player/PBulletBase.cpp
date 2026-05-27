@@ -42,7 +42,7 @@ void PBulletBase::Update(void)
 
 		if (aliveTime_ <= 0)
 		{
-			bulletState_ = BULLET_STATE::INACTIVE;
+			BlastAction();
 		}
 	}
 	else if (bulletState_ == BULLET_STATE::BLAST)
@@ -60,7 +60,7 @@ void PBulletBase::Update(void)
 	
 
 	if (colMng.IsActorCollidingWithTag(this, ColliderBase::TAG::BOSS)
-		|| colMng.IsActorCollidingWithTag(this, ColliderBase::TAG::STAGE))
+		|| colMng.IsActorCollidingWithTag(this, ColliderBase::TAG::STAGE) && shotPow_.y < 0.0f)
 	{
 		BlastAction();
 	}
@@ -88,8 +88,7 @@ void PBulletBase::BlastAction(void)
 
 	bulletState_ = BULLET_STATE::INACTIVE;
 	isVisible_ = false;
-
-	// [’e‚Ì“–‚½‚è”»’è–³Œøˆ—‚ð“±“ü]
+	CollisionManager::GetInstance().SetCollisionActive(this, ColliderBase::TAG::PLAYER_BULLET, false);
 
 
 	// Õ“Ë”»’èƒ}ƒl[ƒWƒƒ‚É“o˜^

@@ -116,40 +116,35 @@ void Player::InitPost(void)
 
 	constexpr float SHOT_TIME_ACTIVE = 2.0f; // 有効時間
 	constexpr float SHOT_TIME_ACTION_ACTIVE = 1.25f; // 有効時間
-	constexpr float SHOT_TIME_ACTIVE_INPUT = 1.75f; // 入力可能時間
+	constexpr float SHOT_TIME_ACTIVE_INPUT = 1.725f; // 入力可能時間
 	constexpr float SHOT_TIME_END = 1.0f; // 終了時間
 
-	constexpr float SHOT_TIME_STOP = 0.85f; // 入力可能時間
-	constexpr float SHOT_TIME_STOP_ACTIVE = 1.15f; // 入力可能時間
+	constexpr float SHOT_TIME_STOP = 0.85f; // 停止時間
+	constexpr float SHOT_TIME_STOP_ACTIVE = 1.15f; // 停止有効化時間
 
 
 
-	float timeActive, timeActionActive, timeInput, timeStop, timeStopActive;
+	float timeActive, timeActionActive, timeInput;
 	timeActive = SHOT_TIME_ACTIVE;
 	timeActionActive = SHOT_TIME_ACTION_ACTIVE;
 	timeInput = SHOT_TIME_ACTIVE_INPUT;
-	timeStop = 0.0f;
-	timeStopActive = SHOT_TIME_STOP_ACTIVE;
 
 	actionController_->SetAction(0, timeActive, SHOT_TIME_END, timeActionActive
 								, std::bind(&Player::ShotBullet, this)
 								, 0.0f, 0.0f, timeInput);
 
 	timeActive += SHOT_TIME_INCREMENT;
-	timeActionActive += SHOT_TIME_INC_ACTION;
-	timeInput += (SHOT_TIME_INCREMENT / 2);
-	timeStop = SHOT_TIME_STOP;
+	//timeActionActive += SHOT_TIME_INC_ACTION;
 	actionController_->SetAction(1, timeActive, SHOT_TIME_END, timeActionActive
 								, std::bind(&Player::ShotBullet, this)
-								, timeStop, timeStopActive, timeInput);
+								, SHOT_TIME_STOP, SHOT_TIME_STOP_ACTIVE, timeInput);
 
 	timeActive += SHOT_TIME_INCREMENT * 2;
-	timeActionActive += SHOT_TIME_INC_ACTION;
+	//timeActionActive += SHOT_TIME_INC_ACTION;
 	timeInput += (SHOT_TIME_INCREMENT / 2);
-	timeStop = SHOT_TIME_STOP;
 	actionController_->SetAction(2, timeActive, SHOT_TIME_END, timeActionActive
 								, std::bind(&Player::ShotBullet, this)
-								, timeStop, timeStopActive, timeInput);
+								, SHOT_TIME_STOP, SHOT_TIME_STOP_ACTIVE, timeInput);
 }
 
 
