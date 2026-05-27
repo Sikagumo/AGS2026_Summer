@@ -49,6 +49,23 @@ void Player::Load(void)
 {
 	transform_.modelId = resourceManager_.LoadModelDuplicate(ResourceManager::SRC::MODEL_PLAYER_HUMAN);
 }
+void Player::Draw(void)
+{
+	COLOR_F material = COLOR_F();
+
+	if (curInvTime_ > 0.0f)
+	{
+		material = COLOR_F(1.0f, 0.0f, 0.0f, 1.0f);
+	}
+	else
+	{
+		material = COLOR_F(1.0f, 1.0f, 1.0f, 1.0f);
+	}
+	MV1SetMaterialDifColor(transform_.modelId, 0, material);
+
+	ActorBase::Draw();
+}
+
 void Player::DrawDebug(void)
 {
 	CharaBase::DrawDebug();
@@ -119,7 +136,7 @@ void Player::InitPost(void)
 	constexpr float SHOT_TIME_ACTIVE = 2.0f; // —LŒøŽžŠÔ
 	constexpr float SHOT_TIME_ACTION_ACTIVE = 1.25f; // —LŒøŽžŠÔ
 	constexpr float SHOT_TIME_ACTIVE_INPUT = 1.725f; // “ü—Í‰Â”\ŽžŠÔ
-	constexpr float SHOT_TIME_END = 1.0f; // I—¹ŽžŠÔ
+	constexpr float SHOT_TIME_END = 0.75f; // I—¹ŽžŠÔ
 
 	constexpr float SHOT_TIME_STOP = 0.85f; // ’âŽ~ŽžŠÔ
 	constexpr float SHOT_TIME_STOP_ACTIVE = 1.15f; // ’âŽ~—LŒø‰»ŽžŠÔ
@@ -131,20 +148,20 @@ void Player::InitPost(void)
 	timeActionActive = SHOT_TIME_ACTION_ACTIVE;
 	timeInput = SHOT_TIME_ACTIVE_INPUT;
 
-	actionController_->SetAction(0, timeActive, SHOT_TIME_END, timeActionActive
+	actionController_->SetAction(0, 50, timeActive, SHOT_TIME_END, timeActionActive
 								, std::bind(&Player::ShotBullet, this)
 								, 0.0f, 0.0f, timeInput);
 
 	timeActive += SHOT_TIME_INCREMENT;
 	//timeActionActive += SHOT_TIME_INC_ACTION;
-	actionController_->SetAction(1, timeActive, SHOT_TIME_END, timeActionActive
+	actionController_->SetAction(1, 75, timeActive, SHOT_TIME_END, timeActionActive
 								, std::bind(&Player::ShotBullet, this)
 								, SHOT_TIME_STOP, SHOT_TIME_STOP_ACTIVE, timeInput);
 
 	timeActive += SHOT_TIME_INCREMENT * 2;
 	//timeActionActive += SHOT_TIME_INC_ACTION;
 	timeInput += (SHOT_TIME_INCREMENT / 2);
-	actionController_->SetAction(2, timeActive, SHOT_TIME_END, timeActionActive
+	actionController_->SetAction(2, 150, timeActive, SHOT_TIME_END, timeActionActive
 								, std::bind(&Player::ShotBullet, this)
 								, SHOT_TIME_STOP, SHOT_TIME_STOP_ACTIVE, timeInput);
 }
@@ -152,6 +169,11 @@ void Player::InitPost(void)
 
 void Player::UpdateProcess(void)
 {
+	if (curInvTime_ > 0.0f)
+	{
+		curInvTime_ -= TimeManager::GetInstance().GetDeltaTime();
+	}
+
 	ProcessAttack();
 
 	ProcessJump();
@@ -183,10 +205,9 @@ void Player::DrawLate(void)
 
 	UtilityMath::DrawLineXYZ(transform_.pos, transform_.quaRot);
 
-	DrawFormatString(10, 160, 0xffffff, "player:(%.f,%.f,%.f)(%.2f‹,%.2f‹,%.2f‹)(%.2f‹,%.2f‹,%.2f‹)"
+	DrawFormatString(10, 160, 0xffff00, "player:(%.f,%.f,%.f), hp(%d), –³“G(%.2f)"
 		, transform_.pos.x, transform_.pos.y, transform_.pos.z
-		, UtilityMath::Rad2DegF(transform_.quaRot.x), UtilityMath::Rad2DegF(transform_.quaRot.y), UtilityMath::Rad2DegF(transform_.quaRot.z)
-		, UtilityMath::Rad2DegF(transform_.quaRotLocal.x), UtilityMath::Rad2DegF(transform_.quaRotLocal.y), UtilityMath::Rad2DegF(transform_.quaRotLocal.z));
+		, hp_, curInvTime_);
 
 	actionController_->DrawDebug();
 
@@ -201,6 +222,11 @@ void Player::DrawLate(void)
 
 void Player::ReleasePost(void)
 {
+}
+
+int Player::GetPower(void)
+{
+	return actionController_->GetActionAttackPower(curAttackNum_ - 1);
 }
 
 void Player::ProcessMove(void)
@@ -318,6 +344,7 @@ void Player::ProcessAttack(void)
 		if (animType_ == ANIM_TYPE::THROW_LEFT
 			|| animType_ == ANIM_TYPE::THROW_RIGHT)
 		{
+			curAttackNum_ = 0;
 			PlayAnim(ANIM_TYPE::IDLE);
 		}
 	}

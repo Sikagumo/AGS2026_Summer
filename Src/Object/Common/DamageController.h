@@ -15,14 +15,14 @@ public:
 	};
 
 
-	DamageController();
-	~DamageController();
+	DamageController(void);
+	~DamageController(void);
 
-	void Update();
+	void Update(void);
 
-	int GetBossDamege() { return bossDamege_;}
-	int GetPlayerDamege() { return playerDamege_; }
-	int GetWeaponDamege() { return weaponDamege_; }
+	int GetBossDamege(void) { return bossDamege_;}
+	int GetPlayerDamege(void) { return playerDamege_; }
+	int GetWeaponDamege(void) { return weaponDamege_; }
 
 	void SetPlayerAttack(int _attack) { playerAttack_ = _attack; }
 	void SetBossAttack(int _attack) { bossAttack_ = _attack; }

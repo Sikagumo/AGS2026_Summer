@@ -125,7 +125,8 @@ void PBulletBase::Shot(const VECTOR& _shotDir)
 
 	if (isFinish_)
 	{
-		shotPow_.y *= 2;
+		constexpr float SHOT_POW = 1.5f;
+		shotPow_.y *= SHOT_POW;
 	}
 	bulletState_ = BULLET_STATE::SHOT;
 
