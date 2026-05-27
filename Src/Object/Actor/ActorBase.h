@@ -4,7 +4,7 @@
 #include <vector>
 class ColliderBase;
 class ResourceManager;
-class SceneManager;
+class TimeManager;
 class InputManager;
 class CollisionManager;
 
@@ -62,7 +62,7 @@ protected:
 
 	// シングルトン参照
 	ResourceManager& resourceManager_;
-	SceneManager& sceneManager_;
+	TimeManager& timeManager_;
 	InputManager& inputManager_;
 
 

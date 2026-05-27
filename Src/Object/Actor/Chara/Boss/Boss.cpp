@@ -1,6 +1,6 @@
 #include "../../../../Manager/Generic/ResourceManager.h"
 #include "../../../../Manager/Generic/InputManager.h"
-#include "../../../../Manager/Generic/SceneManager.h"
+#include "../../../../Manager/System/TimeManager.h"
 #include "../../../../Utility/UtilityMath.h"
 #include "../../../../Utility/MatrixUtility.h"
 #include "../../../Common/Transform.h"
@@ -270,7 +270,7 @@ void Boss::ChangeStateJump(void)
 {
 	stateUpdate_ = std::bind(&Boss::UpdateJump, this);
 	// ƒWƒƒƒ“ƒv—Ê‚ÌŒvŽZ
-	float jumpSpeed = POW_JUMP_INIT * SceneManager::GetInstance().GetDeltaTime();
+	float jumpSpeed = POW_JUMP_INIT * TimeManager::GetInstance().GetDeltaTime();
 	jumpPow_ = VScale(UtilityMath::DIR_UP, jumpSpeed);
 	isJump_ = true;
 }

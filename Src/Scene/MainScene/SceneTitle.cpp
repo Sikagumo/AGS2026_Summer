@@ -18,24 +18,18 @@ void SceneTitle::Load(void)
     auto& resourceManager = ResourceManager::GetInstance();
 
     // BGM・SEロード
-    Loading::GetInstance()->SetProgress(25.0f);
 
     // 音量調整
-    Loading::GetInstance()->SetProgress(45.0f);
 
     // ロゴ・操作説明・再生用画像ロード
-    Loading::GetInstance()->SetProgress(60.0f);
 
     imageTitle_ = resourceManager.LoadHandleId(ResourceManager::SRC::IMG_TITLE);
     ResourceManager::GetInstance().LoadHandleIds(ResourceManager::SRC::IMGE_TITLE_TEXT, imageMenu_.data());
 
     // その他画像
-    Loading::GetInstance()->SetProgress(80.0f);
 
     //時間カウントリセット
     TimeManager::GetInstance().Reset();
-
-    Loading::GetInstance()->SetProgress(100.0f);
 }
 
 void SceneTitle::EndLoad(void)

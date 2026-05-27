@@ -39,8 +39,6 @@ SceneManager::SceneManager(void)
 {
     isGameEnd_ = false;
     isSceneChanging_ = false;
-    deltaTime_ = 1.0f / 60.0f;
-    preTime_ = std::chrono::system_clock::now();
 
     camera_ = std::make_unique<Camera>();
 }
@@ -205,9 +203,6 @@ void SceneManager::Update(void)
     if (scenes_.empty()) { return; }
 
     TimeManager::GetInstance().Update();
-    auto nowTime = std::chrono::system_clock::now();
-    deltaTime_ = std::chrono::duration<float>(nowTime - preTime_).count();
-    preTime_ = nowTime;
 
     if (isGameEnd_) { return; }
 
@@ -251,15 +246,16 @@ void SceneManager::Draw(void)
 {
     if (scenes_.empty()) { return; }
 
-    if (isSceneChanging_)
+    auto loader = Loading::GetInstance();
+
+    if (isSceneChanging_ || (loader && loader->IsLoading()))
     {
-        auto loader = Loading::GetInstance();
         if (loader)
         {
             loader->Draw(); 
         }
         return;
-    }
+    }   
 
     if (camera_ == nullptr)
     {
@@ -315,21 +311,7 @@ bool SceneManager::GetGameEnd(void) const
     return isGameEnd_;
 }
 
-float SceneManager::GetDeltaTime(void) const
-{
-    return deltaTime_;
-}
-
 const std::unique_ptr<Camera>& SceneManager::GetCamera(void) const
 {
     return camera_;
-}
-
-void SceneManager::ResetDeltaTime(void)
-{
-    const float DefaultFps = 60.0f;
-    const float DefaultDeltaTime = 1.0f / DefaultFps;
-
-    deltaTime_ = DefaultDeltaTime;
-    preTime_ = std::chrono::system_clock::now();
 }

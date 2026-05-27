@@ -1,7 +1,7 @@
 #include "PBulletBase.h"
 #include <DxLib.h>
 #include "../../../../../../Utility/UtilityMath.h"
-#include "../../../../../../Manager/Generic/SceneManager.h"
+#include "../../../../../../Manager/System/TimeManager.h"
 #include "../../../../../../Application.h"
 #include "../../../../../Manager/CollisionManager.h"
 #include "../../../../../Collider/ColliderSphere.h"
@@ -35,7 +35,7 @@ void PBulletBase::Update(void)
 	if (bulletState_ == BULLET_STATE::SHOT)
 	{
 		VECTOR pos = shotPow_;
-		curGravityPow_ += (Application::GRAVITY * sceneManager_.GetDeltaTime());
+		curGravityPow_ += (Application::GRAVITY * timeManager_.GetDeltaTime());
 		pos.y -= curGravityPow_;
 
 		transform_.Translate(pos);

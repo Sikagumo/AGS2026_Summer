@@ -1,6 +1,6 @@
 #include "ActorBase.h"
 #include "../../Manager/Generic/ResourceManager.h"
-#include "../../Manager/Generic/SceneManager.h"
+#include "../../Manager/System/TimeManager.h"
 #include "../../Manager/Generic/InputManager.h"
 #include "../../Object/Manager/CollisionManager.h"
 #include "../Collider/ColliderBase.h"
@@ -9,7 +9,7 @@ ActorBase::ActorBase(void)
 	: 
 	resourceManager_(ResourceManager::GetInstance()),
 	inputManager_(InputManager::GetInstance()),
-	sceneManager_(SceneManager::GetInstance()),
+	timeManager_(TimeManager::GetInstance()),
 	transform_(Transform())
 {
 }

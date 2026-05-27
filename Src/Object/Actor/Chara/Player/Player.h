@@ -3,8 +3,6 @@
 #include "../Player/PlayerBase.h"
 #include "./PActionController.h"
 #include <DxLib.h>
-class InputManager;
-class PBulletBig;
 
 class Player : public PlayerBase
 {
@@ -58,9 +56,6 @@ private:
 
 	// ƒWƒƒƒ“ƒvó•tŠÔ
 	static constexpr float TIME_JUMP_INPUT = 0.5f;
-
-
-	InputManager& inputManager_;
 
 	// UŒ‚‰ñ”
 	int attackNumMax_;

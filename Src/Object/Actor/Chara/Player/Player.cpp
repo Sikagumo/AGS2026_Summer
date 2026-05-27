@@ -7,6 +7,7 @@
 #include "../../../../Utility/UtilityMath.h"
 #include "../../../../Manager/Generic/InputManager.h"
 #include "../../../../Manager/Generic/SceneManager.h"
+#include "../../../../Manager/System/TimeManager.h"
 #include "../../../../Camera/Camera.h"
 #include "../../../../Common/Quaternion.h"
 #include "../../../Manager/CollisionManager.h"
@@ -32,7 +33,6 @@ static constexpr float COL_CAPSULE_RADIUS = 10.0f;
 Player::Player(int _playerNo, BULLET_TYPE _playerType)
 	: PlayerBase::PlayerBase(_playerNo, _playerType)
 	, shadowHandle_(-1)
-	, inputManager_(InputManager::GetInstance())
 	, animType_(ANIM_TYPE::IDLE)	
 	,  curAttackNum_(0)
 	, throwPos_(UtilityMath::VECTOR_ZERO), throwDir_(UtilityMath::VECTOR_ZERO)
@@ -95,9 +95,11 @@ void Player::InitCollider(void)
 	ColliderLine* colLine = new ColliderLine(ColliderBase::TAG::PLAYER, &transform_, COL_LINE_START_LOCAL_POS, COL_LINE_END_LOCAL_POS);
 	ownColliders_.emplace(static_cast<int>(ColliderBase::SHAPE::LINE), colLine);
 	colLine->SetTriger(false);
-
-	ownColliders_.emplace(0, new ColliderCapsule(ColliderBase::TAG::PLAYER
-										, &transform_, COL_CAPSULE_TOP_LOCAL_POS, COL_CAPSULE_DOWN_LOCAL_POS, COL_CAPSULE_RADIUS));
+	
+	ColliderCapsule* colCap = new ColliderCapsule(ColliderBase::TAG::PLAYER
+									, &transform_, COL_CAPSULE_TOP_LOCAL_POS, COL_CAPSULE_DOWN_LOCAL_POS, COL_CAPSULE_RADIUS);
+										
+	ownColliders_.emplace(0, colCap);
 
 	ownColliders_.at(0)->SetTriger(false);
 
@@ -165,7 +167,7 @@ void Player::UpdateProcess(void)
 	UpdateBullets();
 
 	// ロックオン有効時、カメラ方向に回転
-	isDirRotActive_ = !sceneManager_.GetCamera()->GetIsLockOn();
+	isDirRotActive_ = !SceneManager::GetInstance().GetCamera()->GetIsLockOn();
 }
 
 void Player::UpdateProcessPost(void)
@@ -242,7 +244,7 @@ void Player::ProcessMove(void)
 		}
 
 		// カメラの方向で進行
-		Quaternion cameraRot = sceneManager_.GetCamera()->GetQuaRotY();
+		Quaternion cameraRot = SceneManager::GetInstance().GetCamera()->GetQuaRotY();
 
 		// 移動方向を取得
 		moveDir_ = Quaternion::PosAxis(cameraRot, dir);
@@ -282,19 +284,20 @@ void Player::ProcessJump(void)
 
 		if (isHitKeyNew && !isJump_)
 		{
+			float deltaTime = TimeManager::GetInstance().GetDeltaTime();
 			if (isHitTrg)
 			{
 				// ジャンプ量の計算
-				float jumpSpeed = (POW_JUMP_INIT * sceneManager_.GetDeltaTime());
+				float jumpSpeed = (POW_JUMP_INIT * deltaTime);
 				jumpPow_ = VScale(UtilityMath::DIR_UP, jumpSpeed);
 			}
 
 			// ジャンプの入力受付時間を減少
-			stepJump_ += sceneManager_.GetDeltaTime();
+			stepJump_ += deltaTime;
 			if (stepJump_ <= TIME_JUMP_INPUT)
 			{
 				// ジャンプ量の計算
-				float jumpSpeed = POW_JUMP_KEEP * sceneManager_.GetDeltaTime();
+				float jumpSpeed = POW_JUMP_KEEP * deltaTime;
 				jumpPow_ = VAdd(jumpPow_, VScale(UtilityMath::DIR_UP, jumpSpeed));
 			}
 		}
