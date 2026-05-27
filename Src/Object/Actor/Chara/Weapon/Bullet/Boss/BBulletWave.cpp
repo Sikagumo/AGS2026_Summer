@@ -42,7 +42,7 @@ void BBulletWave::InitTransform(void)
 void BBulletWave::InitCollider(void)
 {
 	transform_.pos = bossTransform_.pos;
-	ColliderSphere* colHitSphere = new ColliderSphere(ColliderBase::TAG::HITWAVE, &transform_, { 0.0f,0.0f,0.0f }, radius_);
+	ColliderSphere* colHitSphere = new ColliderSphere(ColliderBase::TAG::HIT_WAVE, &transform_, { 0.0f,0.0f,0.0f }, radius_);
 	ownColliders_.emplace(static_cast<int>(ColliderBase::SHAPE::SPHERE), colHitSphere);
 
 	CollisionManager::GetInstance().RegisterActor(this);
@@ -62,12 +62,12 @@ void BBulletWave::UpdateProcess(void)
 	if (isAttac_)
 	{
 		radius_ += INCREASE_RADIUS;
-		CollisionManager::GetInstance().SetActorColliderRadius(this, ColliderBase::TAG::HITWAVE, radius_);
+		CollisionManager::GetInstance().SetActorColliderRadius(this, ColliderBase::TAG::HIT_WAVE, radius_);
 	}
 	if (radius_ >= MAX_RADIUS)
 	{
 		radius_ = INIT_RADIUS;
-		CollisionManager::GetInstance().SetActorColliderRadius(this, ColliderBase::TAG::HITWAVE, radius_);
+		CollisionManager::GetInstance().SetActorColliderRadius(this, ColliderBase::TAG::HIT_WAVE, radius_);
 		isAttac_ = false;		
 	}
 }

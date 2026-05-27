@@ -55,7 +55,14 @@ public:
 	//ゲット・セット
 	VECTOR GetBossPos(void) const;
 
-	void SetWeponDamege(int _damage);
+	void SetWeponMGLDamege(int _damege);
+	void SetWeponMGRDamege(int _damege);
+	void SetWeponMPLDamege(int _damege);
+	void SetWeponMPRDamege(int _damege);
+	void SetWeponCannonLDamege(int _damege);
+	void SetWeponCannonRDamege(int _damege);
+	void SetWeponRGDamege(int _damege);
+
 	void SetBossDamege(int _damage);
 
 

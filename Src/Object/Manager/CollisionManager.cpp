@@ -412,13 +412,18 @@ bool CollisionManager::CanCollide(int _tagA, int _tagB) const
 		 || tagHurt == TAG::WEAPON_CANNON_L || tagHurt == TAG::WEAPON_CANNON_R
 		 || tagHurt == TAG::WEAPON_MG_L	|| tagHurt == TAG::WEAPON_MG_R
 		 || tagHurt == TAG::WEAPON_MP_L || tagHurt == TAG::WEAPON_MP_R
-		 || tagHurt == TAG::WEAPON_RG)
+		 || tagHurt == TAG::WEAPON_RG||tagHurt==TAG::HIT_WAVE)
 		{
 			return true;
 		}
 	}
 
-	if (tagHit == TAG::BOSS)
+	
+
+	if (tagHit == TAG::BOSS || tagHit == TAG::WEAPON_CANNON_L || tagHit == TAG::WEAPON_CANNON_R
+		|| tagHit == TAG::WEAPON_MG_L || tagHit == TAG::WEAPON_MG_R
+		|| tagHit == TAG::WEAPON_MP_L || tagHit == TAG::WEAPON_MP_R
+		|| tagHit == TAG::WEAPON_RG)
 	{
 		if (tagHurt == TAG::PLAYER || tagHurt == TAG::PLAYER_BULLET || tagHurt == TAG::STAGE)
 		{
@@ -426,7 +431,7 @@ bool CollisionManager::CanCollide(int _tagA, int _tagB) const
 		}
 	}
 
-	if (tagHit == TAG::HITWAVE)
+	if (tagHit == TAG::HIT_WAVE)
 	{
 		if (tagHurt == TAG::PLAYER)
 		{
@@ -436,7 +441,10 @@ bool CollisionManager::CanCollide(int _tagA, int _tagB) const
 
 	if (tagHit == TAG::STAGE)
 	{
-		if (tagHurt == TAG::PLAYER || tagHurt == TAG::PLAYER_BULLET || tagHurt == TAG::BOSS)
+		if (tagHurt == TAG::PLAYER || tagHurt == TAG::PLAYER_BULLET || tagHurt == TAG::BOSS || tagHurt == TAG::WEAPON_CANNON_L || tagHurt == TAG::WEAPON_CANNON_R
+			|| tagHurt == TAG::WEAPON_MG_L || tagHurt == TAG::WEAPON_MG_R
+			|| tagHurt == TAG::WEAPON_MP_L || tagHurt == TAG::WEAPON_MP_R
+			|| tagHurt == TAG::WEAPON_RG)
 		{
 			return true;
 		}

@@ -85,7 +85,14 @@ void SceneGame::Update(void)
 	stage_->Update();
 	damageController_->Update();
 	boss_->SetBossDamege(damageController_->GetBossDamege());
-	boss_->SetWeponDamege(damageController_->GetWeaponDamege());
+	boss_->SetWeponCannonLDamege(damageController_->GetWeaponCannonLDamege());
+	boss_->SetWeponCannonRDamege(damageController_->GetWeaponCannonRDamege());
+	boss_->SetWeponMGLDamege(damageController_->GetWeaponMGLDamege());
+	boss_->SetWeponMGRDamege(damageController_->GetWeaponMGRDamege());
+	boss_->SetWeponMPLDamege(damageController_->GetWeaponMPLDamege());
+	boss_->SetWeponMPRDamege(damageController_->GetWeaponMPRDamege());
+	boss_->SetWeponRGDamege(damageController_->GetWeaponRGDamege());
+
 	damageController_->SetPlayerAttack(10);
 
 }

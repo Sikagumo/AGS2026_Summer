@@ -53,45 +53,41 @@ VECTOR Boss::GetBossPos(void) const
 	return transformBody_.pos;
 }
 
-void Boss::SetWeponDamege(int _damege)
+void Boss::SetWeponMGLDamege(int _damege)
 {
-	if (CollisionManager::GetInstance().IsTagCollidingWithTag(ColliderBase::TAG::WEAPON_CANNON_L, ColliderBase::TAG::PLAYER_BULLET))
-	{
-		weaponCannonL_->SetDamage(_damege);
-	}
-	
-	if (CollisionManager::GetInstance().IsTagCollidingWithTag(ColliderBase::TAG::WEAPON_CANNON_R, ColliderBase::TAG::PLAYER_BULLET))
-	{
-		weaponCannonR_->SetDamage(_damege);
-	}
-	
-	if (CollisionManager::GetInstance().IsTagCollidingWithTag(ColliderBase::TAG::WEAPON_MG_L, ColliderBase::TAG::PLAYER_BULLET))
-	{
-		weaponMGL_->SetDamage(_damege);
-	}
-	
-	if (CollisionManager::GetInstance().IsTagCollidingWithTag(ColliderBase::TAG::WEAPON_MG_R, ColliderBase::TAG::PLAYER_BULLET))
-	{
-		weaponMGR_->SetDamage(_damege);
-	}
-	
-	if (CollisionManager::GetInstance().IsTagCollidingWithTag(ColliderBase::TAG::WEAPON_MP_L, ColliderBase::TAG::PLAYER_BULLET))
-	{
-		weaponMPL_->SetDamage(_damege);
-	}
 
-	if (CollisionManager::GetInstance().IsTagCollidingWithTag(ColliderBase::TAG::WEAPON_MP_R, ColliderBase::TAG::PLAYER_BULLET))
-	{
-		weaponMPR_->SetDamage(_damege);
-	}
-
-	if (CollisionManager::GetInstance().IsTagCollidingWithTag(ColliderBase::TAG::WEAPON_RG, ColliderBase::TAG::PLAYER_BULLET))
-	{
-		weaponRG_->SetDamage(_damege);
-	}
-
+	weaponMGL_->SetDamage(_damege);
 }
 
+void Boss::SetWeponMGRDamege(int _damege)
+{
+	weaponMPR_->SetDamage(_damege);
+}
+
+void Boss::SetWeponMPLDamege(int _damege)
+{
+	weaponMPL_->SetDamage(_damege);
+}
+
+void Boss::SetWeponMPRDamege(int _damege)
+{
+	weaponMGR_->SetDamage(_damege);
+}
+
+void Boss::SetWeponCannonLDamege(int _damege)
+{
+	weaponCannonL_->SetDamage(_damege);
+}
+
+void Boss::SetWeponCannonRDamege(int _damege)
+{
+	weaponCannonR_->SetDamage(_damege);
+}
+
+void Boss::SetWeponRGDamege(int _damege)
+{
+	weaponRG_->SetDamage(_damege);
+}
 
 void Boss::SetBossDamege(int _damege)
 {
@@ -330,8 +326,8 @@ void Boss::UpdateProcessPost(void)
 void Boss::UpdateIdle(void)
 {
 
-	attackCount_++;
-	if (attackCount_ >= 300)
+	//attackCount_++;
+	if (attackCount_ >= 600)
 	{
 		ChangeState(STATE::ATTACK);
 	}
@@ -370,6 +366,7 @@ void Boss::DrawPre(void)
 {
 	MV1DrawModel(transform_.modelId);
 	MV1DrawModel(transformBody_.modelId);
+	if(weaponMGL_->GetIsAlive)
 	weaponMGL_->Draw();
 	weaponMGR_->Draw();
 	weaponMPL_->Draw();

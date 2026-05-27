@@ -42,7 +42,8 @@ public:
 
 	
 	virtual void SetDamage(int _damage) = 0;
-
+	virtual bool GetIsAlive(void)=0;
+	virtual int GetHp(void) = 0;
 private:
 
 
@@ -55,7 +56,7 @@ protected:
 
 
 
-	int hp_=1000;
+	int hp_=500;
 	int attackDamage_;	
 	bool isAlive_;
 	VECTOR localBackPos_;	//“–‚½‚è”»’è—p‚ÌŒã•û‚ÌÀ•W

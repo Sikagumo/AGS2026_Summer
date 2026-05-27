@@ -91,11 +91,10 @@ void WeaponMGR::DrawPre(void)
 	if (isAlive_)
 	{
 
-		MV1DrawModel(transform_.modelId);
+		
 		for (auto& col : ownColliders_)
 		{
 			col.second->Draw();
 		}
 	}
-	DrawFormatString(10, 340, 0xffffff, "hp:%d", hp_);
 }

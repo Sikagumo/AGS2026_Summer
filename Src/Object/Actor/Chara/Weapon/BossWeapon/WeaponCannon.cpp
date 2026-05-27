@@ -90,14 +90,11 @@ void WeaponCannon::UpdateProcessPost(void)
 
 void WeaponCannon::DrawPre(void)
 {
-	if (isAlive_)
-	{
-		MV1DrawModel(transform_.modelId);
 
-		for (auto& col : ownColliders_)
-		{
-			col.second->Draw();
-		}
+
+	for (auto& col : ownColliders_)
+	{
+		col.second->Draw();
 	}
-	DrawFormatString(10, 380, 0xffffff, "hp:%d", hp_);
+
 }

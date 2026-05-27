@@ -90,7 +90,7 @@ void WeaponRG::DrawPre(void)
 {
 	if (isAlive_)
 	{
-		MV1DrawModel(transform_.modelId);
+		
 
 		for (auto& col : ownColliders_)
 		{
@@ -98,5 +98,4 @@ void WeaponRG::DrawPre(void)
 		}
 	}
 
-	DrawFormatString(10, 300, 0xffffff, "hp:%d", hp_);
 }
