@@ -293,6 +293,50 @@ void CollisionManager::ResolveCollision(ActorBase* _actorA, ActorBase* _actorB,
 	}
 }
 
+bool CollisionManager::CheckHitWave(const ColliderBase* _hitCapsuleCol, ColliderBase* _waveCol, float _waveThickness)
+{
+	if (!_hitCapsuleCol || !_waveCol)
+	{
+		return false;
+	}
+
+	const auto* capsule = dynamic_cast <const ColliderCapsule*>(_hitCapsuleCol);
+	const auto* wave = dynamic_cast<const ColliderSphere*>(_waveCol);
+
+	if (capsule == nullptr || wave == nullptr)
+	{
+		return false;
+	}
+
+	VECTOR wavePos = wave->GetLocalPosition();
+
+	VECTOR capStartPos = capsule->GetWorldStartPos();
+	VECTOR capEndPos = capsule->GetWorldEndPos();
+
+	VECTOR nearestPos = GetNearestPointOnSegment(capStartPos, capEndPos, wavePos);
+
+	VECTOR wavePosXZ = wavePos;
+	VECTOR nearestPosXZ = nearestPos;
+
+	wavePosXZ.y = 0.0f;
+	nearestPosXZ.y = 0.0f;
+
+	float distance = static_cast<float>(UtilityMath::Distance(nearestPosXZ, wavePosXZ));
+
+	float waveRadius = wave->GetRadius();
+
+	float totalThickness = _waveThickness + capsule->GetRadius();
+
+	bool isHit = abs(distance - waveRadius) < totalThickness;
+
+	if (isHit)
+	{
+		return true;
+	}
+
+	return false;
+}
+
 void CollisionManager::UpdateCollisionPars(void)
 {
 	// 前フレームの衝突情報リセット

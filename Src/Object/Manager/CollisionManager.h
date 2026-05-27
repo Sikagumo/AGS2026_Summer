@@ -96,6 +96,13 @@ public:
 	/// @param info 衝突判定の結果
 	void ResolveCollision(ActorBase* actorA, ActorBase* actorB, const CollisionInfo& info);
 
+	/// @brief 衝撃波の当たり判定を行う
+	/// @param _hitCol 当たる側のコライダー
+	/// @param _waveCol 衝撃波のコライダー
+	/// @param _waveThickness 衝撃波の厚み
+	/// @return あったっていれば true
+	bool CheckHitWave(const ColliderBase* _hitCapsuleCol, ColliderBase* _waveCol, float _waveThickness);
+
 private:
 
 	// カリングを行う距離のデフォルト値
