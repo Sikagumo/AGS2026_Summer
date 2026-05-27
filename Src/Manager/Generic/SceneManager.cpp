@@ -1,4 +1,4 @@
-#include "SceneManager.h"
+ï»¿#include "SceneManager.h"
 #include "../../Scene/SceneBase.h"
 #include "../../Scene/MainScene/SceneTitle.h"
 #include "../../Scene/MainScene/SceneGame.h"
@@ -39,8 +39,6 @@ SceneManager::SceneManager(void)
 {
     isGameEnd_ = false;
     isSceneChanging_ = false;
-    deltaTime_ = 1.0f / 60.0f;
-    preTime_ = std::chrono::system_clock::now();
 
     camera_ = std::make_unique<Camera>();
 }
@@ -65,48 +63,48 @@ void SceneManager::Initialize(void)
 
 void SceneManager::Init3D(void)
 {
-    // ”wŒiF
+    // èƒŒæ™¯è‰²
     constexpr COLOR_F BACK_COLOR = { 125,125,125 };
 
-    // ŠÂ‹«Œõ‚Ì‹­‚³
+    // ç’°å¢ƒå…‰ã®å¼·ã•
     const float AmbientVal = 0.8f;
 
-    // ‹¾–ÊŒõEŠÂ‹«Œõ‚Ìƒx[ƒX’l
+    // é¡é¢å…‰ãƒ»ç’°å¢ƒå…‰ã®ãƒ™ãƒ¼ã‚¹å€¤
     const float LightMidVal = 0.5f;
 
-    // ƒtƒHƒO‚ÌF
+    // ãƒ•ã‚©ã‚°ã®è‰²
     const int FogCol = 5;
 
-    // ƒtƒHƒOŠJn‹——£
+    // ãƒ•ã‚©ã‚°é–‹å§‹è·é›¢
     const float FogStart = 10000.0f;
 
-    // ƒtƒHƒOI—¹‹——£
+    // ãƒ•ã‚©ã‚°çµ‚äº†è·é›¢
     const float FogEnd = 20000.0f;
 
-    // ”wŒiF‚ğİ’è‚·‚é
+    // èƒŒæ™¯è‰²ã‚’è¨­å®šã™ã‚‹
     SetBackgroundColor(BACK_COLOR.r, BACK_COLOR.g,BACK_COLOR.b);
 
-    // Zƒoƒbƒtƒ@‚ğ—LŒø‚É‚·‚é
+    // Zãƒãƒƒãƒ•ã‚¡ã‚’æœ‰åŠ¹ã«ã™ã‚‹
     SetUseZBuffer3D(true);
 
-    // Zƒoƒbƒtƒ@‚Ö‚Ì‘‚«‚İ‚ğ—LŒø‚É‚·‚é
+    // Zãƒãƒƒãƒ•ã‚¡ã¸ã®æ›¸ãè¾¼ã¿ã‚’æœ‰åŠ¹ã«ã™ã‚‹
     SetWriteZBuffer3D(true);
 
-    // ƒoƒbƒNƒJƒŠƒ“ƒO‚ğ—LŒø‚É‚·‚é
+    // ãƒãƒƒã‚¯ã‚«ãƒªãƒ³ã‚°ã‚’æœ‰åŠ¹ã«ã™ã‚‹
     SetUseBackCulling(true);
 
-    // ƒ‰ƒCƒeƒBƒ“ƒO‚ğ—LŒø‚É‚·‚é
+    // ãƒ©ã‚¤ãƒ†ã‚£ãƒ³ã‚°ã‚’æœ‰åŠ¹ã«ã™ã‚‹
     SetUseLighting(true);
     SetLightEnable(true);
 
     SetGlobalAmbientLight(GetColorF(AmbientVal, AmbientVal, AmbientVal, 1.0f));
 
-    ChangeLightTypeDir(VGet(0.0f, -1.0f, 1.0f));                               // ƒ‰ƒCƒg‚Ì•ûŒü
-    SetLightDifColor(GetColorF(1.0f, 1.0f, 1.0f, 1.0f));                       // ŠgUŒõ
-    SetLightSpcColor(GetColorF(LightMidVal, LightMidVal, LightMidVal, 1.0f));  // ‹¾–ÊŒõ
-    SetLightAmbColor(GetColorF(LightMidVal, LightMidVal, LightMidVal, 1.0f));  // ŠÂ‹«Œõ
+    ChangeLightTypeDir(VGet(0.0f, -1.0f, 1.0f));                               // ãƒ©ã‚¤ãƒˆã®æ–¹å‘
+    SetLightDifColor(GetColorF(1.0f, 1.0f, 1.0f, 1.0f));                       // æ‹¡æ•£å…‰
+    SetLightSpcColor(GetColorF(LightMidVal, LightMidVal, LightMidVal, 1.0f));  // é¡é¢å…‰
+    SetLightAmbColor(GetColorF(LightMidVal, LightMidVal, LightMidVal, 1.0f));  // ç’°å¢ƒå…‰
 
-    // ƒtƒHƒO‚ğİ’è‚·‚é
+    // ãƒ•ã‚©ã‚°ã‚’è¨­å®šã™ã‚‹
     SetFogEnable(true);
     SetFogColor(FogCol, FogCol, FogCol);
     SetFogStartEnd(FogStart, FogEnd);
@@ -114,7 +112,7 @@ void SceneManager::Init3D(void)
 
 void SceneManager::ChangeScene(std::shared_ptr<SceneBase> scene)
 {
-    // ŒÃ‚¢ƒV[ƒ“‚ğ‰ğ•ú
+    // å¤ã„ã‚·ãƒ¼ãƒ³ã‚’è§£æ”¾
     for (auto& s : scenes_)
     {
         s->Release();
@@ -122,17 +120,17 @@ void SceneManager::ChangeScene(std::shared_ptr<SceneBase> scene)
     scenes_.clear();
    
 
-    // CollisionController‚ğƒNƒŠƒA
+    // CollisionControllerã‚’ã‚¯ãƒªã‚¢
     //CollisionController::GetInstance().Clear();
 
-    // BGM‚ğ’â~‚·‚é
+    // BGMã‚’åœæ­¢ã™ã‚‹
     SoundManager::GetInstance().StopAllBGM();
 
-    // V‚µ‚¢ƒV[ƒ“‚ğİ’è
+    // æ–°ã—ã„ã‚·ãƒ¼ãƒ³ã‚’è¨­å®š
     scenes_.push_back(scene);
     isSceneChanging_ = true;
 
-    // ”ñ“¯Šúƒ[ƒhŠJniƒ[ƒh‰æ–Ê•t‚«j
+    // éåŒæœŸãƒ­ãƒ¼ãƒ‰é–‹å§‹ï¼ˆãƒ­ãƒ¼ãƒ‰ç”»é¢ä»˜ãï¼‰
     Loading::GetInstance()->StartAsyncLoad([scene]()
         {
         scene->Load();
@@ -143,7 +141,7 @@ void SceneManager::PushScene(std::shared_ptr<SceneBase> scene)
 {
     scenes_.push_back(scene);
 
-    // ‘¦ƒ[ƒhE‰Šú‰»
+    // å³æ™‚ãƒ­ãƒ¼ãƒ‰ãƒ»åˆæœŸåŒ–
     scene->Load();
     scene->EndLoad();
     scene->Initialize();
@@ -167,16 +165,16 @@ void SceneManager::JumpScene(std::shared_ptr<SceneBase> scene)
 {
     scenes_.clear();
 
-    // CollisionController‚ğƒNƒŠƒA
+    // CollisionControllerã‚’ã‚¯ãƒªã‚¢
     CollisionManager::GetInstance().Clear();
 
-    // BGM‚ğ’â~‚·‚é
+    // BGMã‚’åœæ­¢ã™ã‚‹
     SoundManager::GetInstance().StopAllBGM();
 
     isSceneChanging_ = true;
     scenes_.push_back(scene);
 
-    // ”ñ“¯Šúƒ[ƒh‚ğŠJn‚·‚é
+    // éåŒæœŸãƒ­ãƒ¼ãƒ‰ã‚’é–‹å§‹ã™ã‚‹
     Loading::GetInstance()->StartAsyncLoad([scene]()
         {
         scene->Load();
@@ -191,7 +189,7 @@ void SceneManager::Update(void)
 
         if (camera_)
         {
-            // 3D•`‰æİ’è‚ğ‰Šú‰»‚·‚é
+            // 3Dæç”»è¨­å®šã‚’åˆæœŸåŒ–ã™ã‚‹
             Init3D();
 
             camera_->Init();
@@ -205,15 +203,12 @@ void SceneManager::Update(void)
     if (scenes_.empty()) { return; }
 
     TimeManager::GetInstance().Update();
-    auto nowTime = std::chrono::system_clock::now();
-    deltaTime_ = std::chrono::duration<float>(nowTime - preTime_).count();
-    preTime_ = nowTime;
 
     if (isGameEnd_) { return; }
 
     const float LoadCompleteThreshold = 100.0f;
 
-    // ƒ[ƒh’†‚Ìˆ—‚ğŠ®‘S‚É•ª—£‚·‚é
+    // ãƒ­ãƒ¼ãƒ‰ä¸­ã®å‡¦ç†ã‚’å®Œå…¨ã«åˆ†é›¢ã™ã‚‹
     if (isSceneChanging_)
     {
         auto loader = Loading::GetInstance();
@@ -251,22 +246,23 @@ void SceneManager::Draw(void)
 {
     if (scenes_.empty()) { return; }
 
-    if (isSceneChanging_)
+    auto loader = Loading::GetInstance();
+
+    if (isSceneChanging_ || (loader && loader->IsLoading()))
     {
-        auto loader = Loading::GetInstance();
         if (loader)
         {
             loader->Draw(); 
         }
         return;
-    }
+    }   
 
     if (camera_ == nullptr)
     {
         return;
     }
 
-    // ’Êí‚Ì•`‰æ
+    // é€šå¸¸æ™‚ã®æç”»
     if (camera_) camera_->SetBeforeDraw();
 
     for (auto& scene : scenes_)
@@ -279,7 +275,7 @@ void SceneManager::Draw(void)
 
 void SceneManager::Release(void)
 {
-    // ƒ[ƒhŠ®—¹‚ğ‘Ò‹@‚·‚é
+    // ãƒ­ãƒ¼ãƒ‰å®Œäº†ã‚’å¾…æ©Ÿã™ã‚‹
     if (Loading::GetInstance()->IsLoading())
     {
         while (Loading::GetInstance()->IsLoading())
@@ -288,17 +284,17 @@ void SceneManager::Release(void)
         }
     }
 
-    // ŠeƒV[ƒ“‚ğ‰ğ•ú‚·‚é
+    // å„ã‚·ãƒ¼ãƒ³ã‚’è§£æ”¾ã™ã‚‹
     for (auto& scene : scenes_)
     {
         scene->Release();
     }
     scenes_.clear();
 
-    // ƒJƒƒ‰‚ğ‰ğ•ú‚·‚é
+    // ã‚«ãƒ¡ãƒ©ã‚’è§£æ”¾ã™ã‚‹
     camera_.reset();
 
-    // Šeƒ}ƒl[ƒWƒƒ[‚ğ”jŠü‚·‚é
+    // å„ãƒãƒãƒ¼ã‚¸ãƒ£ãƒ¼ã‚’ç ´æ£„ã™ã‚‹
     SoundManager::GetInstance().DestroyInstance();
     TimeManager::GetInstance().DestroyInstance();
     Loading::GetInstance()->DestroyInstance();
@@ -315,21 +311,7 @@ bool SceneManager::GetGameEnd(void) const
     return isGameEnd_;
 }
 
-float SceneManager::GetDeltaTime(void) const
-{
-    return deltaTime_;
-}
-
 const std::unique_ptr<Camera>& SceneManager::GetCamera(void) const
 {
     return camera_;
-}
-
-void SceneManager::ResetDeltaTime(void)
-{
-    const float DefaultFps = 60.0f;
-    const float DefaultDeltaTime = 1.0f / DefaultFps;
-
-    deltaTime_ = DefaultDeltaTime;
-    preTime_ = std::chrono::system_clock::now();
 }

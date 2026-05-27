@@ -3,6 +3,7 @@
 #include "../Player/PlayerBase.h"
 #include "./PActionController.h"
 #include <DxLib.h>
+class SceneManager;
 class InputManager;
 class PBulletBig;
 
@@ -91,6 +92,7 @@ private:
 
 
 	InputManager& inputManager_;
+	SceneManager& sceneManager_;
 
 	// UŒ‚‰ñ”
 	int attackNumMax_;

@@ -1,5 +1,5 @@
 #include "PActionController.h"
-#include "../../../../Manager/Generic/SceneManager.h"
+#include "../../../../Manager/System/TimeManager.h"
 #include "../../../Common/AnimationController.h"
 #include <DxLib.h>
 
@@ -73,7 +73,7 @@ void PActionController::Update(void)
 
 	if (!animation_->isStop())
 	{
-		curTimeAction_ -= SceneManager::GetInstance().GetDeltaTime();
+		curTimeAction_ -= TimeManager::GetInstance().GetDeltaTime();
 	}
 
 	if (actionState_ == PACTION_STATE::ACTION)
@@ -90,7 +90,7 @@ void PActionController::Update_Action(void)
 {
 	if (curTimeStopActive_ > 0.0f)
 	{
-		curTimeStopActive_ -= SceneManager::GetInstance().GetDeltaTime();
+		curTimeStopActive_ -= TimeManager::GetInstance().GetDeltaTime();
 
 		// 一度だけ行動を実行
 		if (curTimeStopActive_ <= 0.0f)
@@ -102,11 +102,11 @@ void PActionController::Update_Action(void)
 	if (animation_->isStop()) { return; }
 	
 
-	curTimeInput_ = ((curTimeInput_ > 0) ? curTimeInput_ - SceneManager::GetInstance().GetDeltaTime() : 0.0f);
+	curTimeInput_ = ((curTimeInput_ > 0) ? curTimeInput_ - TimeManager::GetInstance().GetDeltaTime() : 0.0f);
 
 	if (curTimeActionActive_ > 0.0f)
 	{
-		curTimeActionActive_ -= SceneManager::GetInstance().GetDeltaTime();
+		curTimeActionActive_ -= TimeManager::GetInstance().GetDeltaTime();
 
 		// 一度だけ行動を実行
 		if (curTimeActionActive_ <= 0.0f)

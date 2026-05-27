@@ -23,32 +23,16 @@ SceneGame::SceneGame(void)
 
 void SceneGame::Load(void)
 {
-	Loading::GetInstance()->SetProgress(10.0f);
-
 	SceneBase::Load();
-
-	Loading::GetInstance()->SetProgress(15.0f);
 
 	player_->Load();
 
-	Loading::GetInstance()->SetProgress(25.0f);
-
 	boss_->Load();
-
-	Loading::GetInstance()->SetProgress(45.0f);
 
 	stage_->Load();
 
-	Loading::GetInstance()->SetProgress(60.0f);
-
-
-	Loading::GetInstance()->SetProgress(80.0f);
-
 	//時間カウントリセット
 	TimeManager::GetInstance().Reset();
-
-
-	Loading::GetInstance()->SetProgress(100.0f);
 }
 
 void SceneGame::EndLoad(void)
@@ -58,10 +42,11 @@ void SceneGame::EndLoad(void)
 
 void SceneGame::Initialize(void)
 {
-	sceneManager_.GetCamera()->ChangeMode(Camera::MODE::FOLLOW);
-	sceneManager_.GetCamera()->SetFollow(&player_->GetTransform());
 
 	if (Loading::GetInstance()->IsLoading()) { return; }
+
+	sceneManager_.GetCamera()->ChangeMode(Camera::MODE::FOLLOW);
+	sceneManager_.GetCamera()->SetFollow(&player_->GetTransform());
 
 	player_->Init();
 	boss_->Init();
@@ -106,6 +91,8 @@ void SceneGame::UpdateCollision(void)
 
 void SceneGame::Draw(void)
 {
+	if (Loading::GetInstance()->IsLoading()) { return; }
+
 	DrawString(0, 0, "Game Scene Now!", GetColor(255, 255, 255));
 
 	stage_->Draw();

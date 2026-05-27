@@ -40,6 +40,7 @@ void TimeManager::Initialize(void)
 	gameSpeed_ = 1.0f;
 	timers_.clear();
 	isPaused_ = false;
+	deltaTime_ = 0.0f;
 
 	// 初期化時の時間を記録
 	prevTime_ = std::chrono::steady_clock::now();
@@ -54,13 +55,16 @@ void TimeManager::Update(void)
 
 	prevTime_ = now;
 
-	// 一時停止中は更新を行わない
-	if (isPaused_) { return; }
+	if (isPaused_)
+	{
+		deltaTime_ = 0.0f;
+		return;
+	}
 
-	float deltaTime = delta.count();
+	deltaTime_ = delta.count();
 
 	// ゲーム内時間の更新
-	gameTime_ += deltaTime * gameSpeed_;
+	gameTime_ += deltaTime_ * gameSpeed_;
 
 	// 登録されている全タイマーの更新
 	for (auto& pair : timers_)
@@ -68,7 +72,7 @@ void TimeManager::Update(void)
 		Timer& timer = pair.second;
 		if (timer.timeLeft > 0.0f)
 		{
-			timer.timeLeft -= deltaTime;
+			timer.timeLeft -= deltaTime_;
 		}
 	}
 }
@@ -129,4 +133,9 @@ void TimeManager::ResetTimer(const std::string& id)
 		// 開始時の持続時間で残り時間をリセット
 		it->second.timeLeft = it->second.duration;
 	}
+}
+
+float TimeManager::GetDeltaTime(void) const
+{
+	return deltaTime_;
 }

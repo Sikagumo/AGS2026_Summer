@@ -70,6 +70,10 @@ public:
 	/// @return ポーズ中ならtrue
 	bool IsPaused(void) const { return isPaused_; }
 
+	/// @brief 前フレームからの経過時間を取得する
+	/// @return デルタタイム
+	float GetDeltaTime(void) const;
+
 private:
 
 	// タイマー構造体定義
@@ -85,6 +89,8 @@ private:
 	// ゲーム内時間管理関連
 	float gameTime_;   // ゲーム開始時からの累積時間
 	float gameSpeed_;  // 時間の進行速度（1.0が等倍）
+	float deltaTime_;  // 前フレームからの経過時間
+
 	bool isPaused_;    // ポーズフラグ
 
 	// 前フレームのシステム時刻

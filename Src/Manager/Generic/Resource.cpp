@@ -33,9 +33,6 @@ Resource::Resource(LOAD_TYPE _type, const std::string& _path
 void Resource::Load(void)
 {
 	/* ÉäÉ\Å[ÉXì«Ç›çûÇ›èàóù */
-	const int TEMPORATY_FLAG = GetUseASyncLoadFlag();
-
-	SetUseASyncLoadFlag(false);
 
 	switch (resType_)
 	{
@@ -60,7 +57,6 @@ void Resource::Load(void)
 		break;
 	}
 
-	SetUseASyncLoadFlag(TEMPORATY_FLAG);
 }
 
 void Resource::Load_ImageAndMovie(void)

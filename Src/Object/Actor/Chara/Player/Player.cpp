@@ -7,6 +7,7 @@
 #include "../../../../Utility/UtilityMath.h"
 #include "../../../../Manager/Generic/InputManager.h"
 #include "../../../../Manager/Generic/SceneManager.h"
+#include "../../../../Manager/System/TimeManager.h"
 #include "../../../../Camera/Camera.h"
 #include "../../../../Common/Quaternion.h"
 #include "../../../Manager/CollisionManager.h"
@@ -21,6 +22,7 @@ Player::Player(int _playerNo, BULLET_TYPE _playerType)
 	: PlayerBase::PlayerBase(_playerNo, _playerType)
 	, shadowHandle_(-1)
 	, inputManager_(InputManager::GetInstance())
+	, sceneManager_(SceneManager::GetInstance())
 	, animType_(ANIM_TYPE::IDLE)	
 	,  curAttackNum_(0)
 	, throwPos_(UtilityMath::VECTOR_ZERO), throwDir_(UtilityMath::VECTOR_ZERO)
@@ -272,11 +274,11 @@ void Player::ProcessJump(void)
 	if (isHitKeyNew && !isJump_)
 	{
 		// ジャンプの入力受付時間を減少
-		stepJump_ += sceneManager_.GetDeltaTime();
+		stepJump_ += timeManager_.GetDeltaTime();
 		if (stepJump_ <= TIME_JUMP_INPUT)
 		{
 			// ジャンプ量の計算
-			float jumpSpeed = POW_JUMP_KEEP * sceneManager_.GetDeltaTime();
+			float jumpSpeed = POW_JUMP_KEEP * timeManager_.GetDeltaTime();
 			jumpPow_ = VAdd(jumpPow_, VScale(UtilityMath::DIR_UP, jumpSpeed));
 		}
 	}
@@ -286,7 +288,7 @@ void Player::ProcessJump(void)
 	if (isHitTrg && !isJump_)
 	{
 		// ジャンプ量の計算
-		float jumpSpeed = (POW_JUMP_INIT * sceneManager_.GetDeltaTime());
+		float jumpSpeed = (POW_JUMP_INIT * timeManager_.GetDeltaTime());
 		jumpPow_ = VScale(UtilityMath::DIR_UP, jumpSpeed);
 
 		isJump_ = true;

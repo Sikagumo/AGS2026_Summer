@@ -1,7 +1,7 @@
 #include "PBulletBig.h"
 #include "PBulletBase.h"
 #include <algorithm>
-#include "../../../../../../Manager/Generic/SceneManager.h"
+#include "../../../../../../Manager/System/TimeManager.h"
 
 constexpr float RADIUS_BIG = 9.0f;
 constexpr float RADIUS_INCREMENT = 22.5f;
@@ -38,7 +38,7 @@ void PBulletBig::UpdatePost(void)
 	if (isScaleUp_ && radius_ < radiusMax_)
 	{
 		constexpr float RADIUS_DURATION = 1.0f;
-		scaleUpTime_ += sceneManager_.GetDeltaTime();
+		scaleUpTime_ += timeManager_.GetDeltaTime();
 
 		float term = (scaleUpTime_ / RADIUS_DURATION);
 		term = std::clamp(term, 0.0f, 1.0f);

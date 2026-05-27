@@ -1,7 +1,8 @@
 #include "CharaBase.h"
 #include "../../../Utility/UtilityMath.h"
-#include "../../../Manager/Generic/SceneManager.h"
+#include "../../../Manager/System/TimeManager.h"
 #include "../../../Manager/Generic/ResourceManager.h"
+#include "../../../Manager/Generic/SceneManager.h"
 #include "../../Collider/ColliderBase.h"
 #include "../../Collider/ColliderLine.h"
 #include "../../Collider/ColliderModel.h"
@@ -81,7 +82,7 @@ void CharaBase::CalcGravityPow(void)
 	const VECTOR DIR_GRAVITY = UtilityMath::DIR_DOWN;
 
 	// èdóÕÇÃã≠Ç≥
-	float gravityPow = Application::GetInstance().GetGravityPow() * sceneManager_.GetDeltaTime();
+	float gravityPow = Application::GetInstance().GetGravityPow() * timeManager_.GetDeltaTime();
 
 	
 	// èdóÕ

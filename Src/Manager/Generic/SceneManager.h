@@ -53,10 +53,6 @@ public:
     /// @return 終了する場合はtrue
     bool GetGameEnd(void) const;
 
-    /// @brief 前フレームからの経過時間を取得する
-    /// @return デルタタイム（秒）
-    float GetDeltaTime(void) const;
-
     /// @brief 現在管理しているカメラを取得する
     /// @return カメラオブジェクトの共有ポインタ
     const std::unique_ptr<Camera>& GetCamera(void) const;
@@ -75,18 +71,11 @@ private:
     bool isSceneChanging_;                         // シーン切り替え中フラグ
     bool isFirstFrame_;                            // 最初のフレームかどうかのフラグ
 
-    // 時間・計測関連
-    std::chrono::system_clock::time_point preTime_; // 前フレームの時刻
-    float deltaTime_;                               // デルタタイム
-
     // カメラ
     std::unique_ptr<Camera> camera_;
 
     /// @brief 3D描画に関する初期設定
     void Init3D(void);
-
-    /// @brief デルタタイム計算用の時刻をリセットする
-    void ResetDeltaTime(void);
 
     /// @brief コンストラクタ
     SceneManager(void);

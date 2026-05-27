@@ -1,5 +1,5 @@
 ﻿#include "CollisionManager.h"
-#include "../../Manager/Generic/SceneManager.h"
+#include "../../Manager/System/TimeManager.h"
 #include "../Common/Transform.h"
 #include "../Actor/ActorBase.h"
 #include "../Collider/ColliderCapsule.h"
@@ -54,7 +54,7 @@ void CollisionManager::Initialize(void)
 
 void CollisionManager::Update(void)
 {
-	updateTimer_ += SceneManager::GetInstance().GetDeltaTime();
+	updateTimer_ += TimeManager::GetInstance().GetDeltaTime();
 
 	// 一定間隔ごとに衝突判定を実行
 	if (updateTimer_ >= UPDATE_INTERVAL)

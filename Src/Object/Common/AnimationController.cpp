@@ -3,7 +3,7 @@
 #include <string>
 #include <cassert>
 #include <algorithm>
-#include "../../Manager/Generic/SceneManager.h"
+#include "../../Manager/System/TimeManager.h"
 
 AnimationController::AnimationController(int _modelId)
 	: animations_{}
@@ -152,7 +152,7 @@ void AnimationController::Play(int _type, bool _isLoop, float _playSpeed, float 
 void AnimationController::Update(void)
 {
 	// Œo‰ßŽžŠÔ‚ÌŽæ“¾
-	float deltaTime = SceneManager::GetInstance().GetDeltaTime();
+	float deltaTime = TimeManager::GetInstance().GetDeltaTime();
 	auto& curAnim = animations_[playType_];
 	auto& preAnim = animations_[prePlayType_];
 	
