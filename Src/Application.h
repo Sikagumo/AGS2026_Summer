@@ -36,7 +36,7 @@ public:
 
 	// 重力
 	static constexpr float GRAVITY = 9.81f;
-	static constexpr float GRAVITY_SCALE = 0.7f;
+	static constexpr float GRAVITY_SCALE = 0.8f;
 
 	// インスタンスを明示的に生成
 	static void CreateInstance(void);

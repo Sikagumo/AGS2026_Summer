@@ -17,6 +17,18 @@
 #include "../Weapon/Bullet/Player/PBulletRapidFire.h"
 
 
+// 衝突判定用線分位置
+static constexpr VECTOR COL_LINE_START_LOCAL_POS = { 0.0f, 50.0f, 0.0f };
+static constexpr VECTOR COL_LINE_END_LOCAL_POS = { 0.0f, 0.0f, 0.0f };
+
+// 衝突判定用カプセル位置
+static constexpr VECTOR COL_CAPSULE_TOP_LOCAL_POS = { 0.0f, 50.0f, 0.0f };
+static constexpr VECTOR COL_CAPSULE_DOWN_LOCAL_POS = { 0.0f, 18.0f, 0.0f };
+
+// 衝突判定用カプセル球体半径
+static constexpr float COL_CAPSULE_RADIUS = 10.0f;
+
+
 Player::Player(int _playerNo, BULLET_TYPE _playerType)
 	: PlayerBase::PlayerBase(_playerNo, _playerType)
 	, shadowHandle_(-1)
@@ -75,20 +87,17 @@ void Player::InitTransform(void)
 		, Quaternion::Identity()
 		, Quaternion::AngleAxis(UtilityMath::Deg2RadF(LOCAL_ROT_Y), UtilityMath::AXIS_Y)
 		, UtilityMath::VECTOR_ZERO);
+
+	transform_.Update();
 }
 void Player::InitCollider(void)
 {
-	const VECTOR COL_CAPSULE_TOP = VScale(COL_CAPSULE_TOP_LOCAL_POS, transform_.scl.y);
-	const VECTOR COL_CAPSULE_DOWN = VScale(COL_CAPSULE_DOWN_LOCAL_POS, transform_.scl.y);
-	const float CAPSULE_RADIUS = (COL_CAPSULE_RADIUS * transform_.scl.y);
-	
-	const VECTOR POS_LINE_OFFSET = VGet(0.0f,-10.0f,0.0f );
-	ColliderLine* colLine = new ColliderLine(ColliderBase::TAG::PLAYER, &transform_, COL_CAPSULE_TOP, POS_LINE_OFFSET);
+	ColliderLine* colLine = new ColliderLine(ColliderBase::TAG::PLAYER, &transform_, COL_LINE_START_LOCAL_POS, COL_LINE_END_LOCAL_POS);
 	ownColliders_.emplace(static_cast<int>(ColliderBase::SHAPE::LINE), colLine);
 	colLine->SetTriger(false);
 
-	ownColliders_.emplace(0
-		, new ColliderCapsule(ColliderBase::TAG::PLAYER, &transform_, COL_CAPSULE_TOP, COL_CAPSULE_DOWN, CAPSULE_RADIUS));
+	ownColliders_.emplace(0, new ColliderCapsule(ColliderBase::TAG::PLAYER
+										, &transform_, COL_CAPSULE_TOP_LOCAL_POS, COL_CAPSULE_DOWN_LOCAL_POS, COL_CAPSULE_RADIUS));
 
 	ownColliders_.at(0)->SetTriger(false);
 
@@ -119,12 +128,12 @@ void Player::InitPost(void)
 	timeActive = SHOT_TIME_ACTIVE;
 	timeActionActive = SHOT_TIME_ACTION_ACTIVE;
 	timeInput = SHOT_TIME_ACTIVE_INPUT;
-	timeStop = 0.1f;
+	timeStop = 0.0f;
 	timeStopActive = SHOT_TIME_STOP_ACTIVE;
 
 	actionController_->SetAction(0, timeActive, SHOT_TIME_END, timeActionActive
 								, std::bind(&Player::ShotBullet, this)
-								, timeStop, timeStopActive, timeInput);
+								, 0.0f, 0.0f, timeInput);
 
 	timeActive += SHOT_TIME_INCREMENT;
 	timeActionActive += SHOT_TIME_INC_ACTION;
@@ -246,7 +255,7 @@ void Player::ProcessMove(void)
 	{
 		movePow_ = UtilityMath::VECTOR_ZERO;
 
-		if (!isJump_)
+		if (!isJump_ && animType_ != ANIM_TYPE::IDLE)
 		{
 			if (animType_ != ANIM_TYPE::THROW_LEFT &&
 				animType_ != ANIM_TYPE::THROW_RIGHT)
@@ -260,38 +269,42 @@ void Player::ProcessMove(void)
 void Player::ProcessJump(void)
 {
 	auto& input = InputManager::GetInstance();
-
-	bool isHitKeyNew = input.IsNew(KEY_INPUT_SPACE)
-		|| input.IsPadBtnNew(InputManager::JOYPAD_NO::PAD1,
-			InputManager::JOYPAD_BTN::RB_BOTTOM);
-
-	bool isHitTrg = input.IsTrgDown(KEY_INPUT_SPACE)
-		|| input.IsPadBtnTrgDown(InputManager::JOYPAD_NO::PAD1,
-			InputManager::JOYPAD_BTN::RB_BOTTOM);
-
-	if (isHitKeyNew && !isJump_)
+	
+	if (!actionController_->IsActiveAction())
 	{
-		// ジャンプの入力受付時間を減少
-		stepJump_ += sceneManager_.GetDeltaTime();
-		if (stepJump_ <= TIME_JUMP_INPUT)
+		bool isHitKeyNew = input.IsNew(KEY_INPUT_SPACE)
+			|| input.IsPadBtnNew(InputManager::JOYPAD_NO::PAD1,
+				InputManager::JOYPAD_BTN::RB_BOTTOM);
+
+		bool isHitTrg = input.IsTrgDown(KEY_INPUT_SPACE)
+			|| input.IsPadBtnTrgDown(InputManager::JOYPAD_NO::PAD1,
+				InputManager::JOYPAD_BTN::RB_BOTTOM);
+
+		if (isHitKeyNew && !isJump_)
 		{
-			// ジャンプ量の計算
-			float jumpSpeed = POW_JUMP_KEEP * sceneManager_.GetDeltaTime();
-			jumpPow_ = VAdd(jumpPow_, VScale(UtilityMath::DIR_UP, jumpSpeed));
+			if (isHitTrg)
+			{
+				// ジャンプ量の計算
+				float jumpSpeed = (POW_JUMP_INIT * sceneManager_.GetDeltaTime());
+				jumpPow_ = VScale(UtilityMath::DIR_UP, jumpSpeed);
+			}
+
+			// ジャンプの入力受付時間を減少
+			stepJump_ += sceneManager_.GetDeltaTime();
+			if (stepJump_ <= TIME_JUMP_INPUT)
+			{
+				// ジャンプ量の計算
+				float jumpSpeed = POW_JUMP_KEEP * sceneManager_.GetDeltaTime();
+				jumpPow_ = VAdd(jumpPow_, VScale(UtilityMath::DIR_UP, jumpSpeed));
+			}
+		}
+
+		// ジャンプ
+		if (isHitTrg && !isJump_)
+		{
+			isJump_ = true;
 		}
 	}
-	
-
-	// ジャンプ
-	if (isHitTrg && !isJump_)
-	{
-		// ジャンプ量の計算
-		float jumpSpeed = (POW_JUMP_INIT * sceneManager_.GetDeltaTime());
-		jumpPow_ = VScale(UtilityMath::DIR_UP, jumpSpeed);
-
-		isJump_ = true;
-	}
-	return;
 
 	// Y軸制限
 	const float LIMIT_POS_Y = -1500.0f;
@@ -531,6 +544,7 @@ void Player::DrawShadowRound(void)
 void Player::PlayAnim(ANIM_TYPE _type, bool _isLoop)
 {
 	animType_ = _type;
+
 	animation_->Play(static_cast<int>(_type), _isLoop);
 }
 

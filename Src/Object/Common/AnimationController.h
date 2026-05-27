@@ -84,6 +84,7 @@ public:
 	/// @brief 再生中のアニメーション番号取得
 	int GetPlayType(void) { return playType_; };
 
+
 	/// @brief アニメーション停止処理
 	/// @param _stopTime 停止時間
 	void Stop(float _stopTime);
