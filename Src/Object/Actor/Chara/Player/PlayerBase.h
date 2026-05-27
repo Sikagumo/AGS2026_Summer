@@ -47,14 +47,24 @@ public:
 
 	//std::vector<std::unique_ptr<PBulletBase>>& GetPBullet(void);
 
+	void SetDamage(int _damage);
+
+	int GetCurHp(void) { return hp_; };
+	int GetMaxHp(void) { return MAX_HP; };
 
 protected:
 
 	// ƒvƒŒƒCƒ„[”Ô†
 	const int playerNo_;
 
+	const int MAX_HP;
+
+	// –³“GŠÔ
+	float curInvTime_;
+
 	std::vector<std::unique_ptr<PBulletBase>> bullets_;
 	
+	int hp_;
 
 	BULLET_TYPE bulletType_;
 

@@ -17,9 +17,11 @@ public:
 	/// @brief 個別サウンドの識別子
 	enum class SOUND
 	{
-		NONE,
+		NONE = -1,
 		BGM_TITLE,
-		BGM_GAME, 
+		BGM_GAME,
+
+		SE_DAMAGE_PLAYER, // プレイヤー被ダメージ処理
 	};
 
 	/// @brief サウンドのリソースデータ構造体

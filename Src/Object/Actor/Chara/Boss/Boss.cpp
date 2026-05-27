@@ -329,7 +329,6 @@ void Boss::UpdateProcessPost(void)
 
 void Boss::UpdateIdle(void)
 {
-
 	attackCount_++;
 	if (attackCount_ >= 300)
 	{

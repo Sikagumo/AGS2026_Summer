@@ -52,6 +52,7 @@ void SceneGame::Initialize(void)
 	player_->Init();
 	boss_->Init();
 	stage_->Init();
+	damageController_->SetPlayerMaxHp(player_->GetMaxHp());
 }
 
 void SceneGame::Update(void)
@@ -86,7 +87,8 @@ void SceneGame::Update(void)
 	damageController_->Update();
 	boss_->SetBossDamege(damageController_->GetBossDamege());
 	boss_->SetWeponDamege(damageController_->GetWeaponDamege());
-	damageController_->SetPlayerAttack(10);
+	damageController_->SetPlayerAttack(player_->GetPower());
+	player_->SetDamage(damageController_->GetPlayerDamege());
 
 }
 
