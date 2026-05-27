@@ -81,12 +81,12 @@ void Application::Init(void)
 	// ネットワーク管理初期化
 	NetManager::CreateInstance();
 
-	// リソース管理初期化
 	ResourceManager::CreateInstance();
+
 
 	// シーン管理初期化
 	SceneManager::CreateInstance();
-	SoundManager::CreateInstance();
+
 }
 
 void Application::Run(void)
