@@ -375,6 +375,13 @@ public:
 	/// <returns>なし</returns>
 	static void DrawLineXYZ(const VECTOR& pos, const Quaternion& rot, float len = 50.0f);
 
+	/// @brief 指定した中心点から円周上の位置を計算する
+    /// @param center 中心座標
+    /// @param radius 半径
+    /// @param angle 角度（ラジアン）
+    /// @return 円周上の位置座標
+	static VECTOR GetCirclePos(const VECTOR& center, float radius, float angle);
+
 	//待機時間
 	//static bool IsTimeOver(float& totalTime, const float& waitTime);
 

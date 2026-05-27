@@ -275,13 +275,12 @@ void SceneManager::Draw(void)
 
 void SceneManager::Release(void)
 {
-    // ロード完了を待機する
-    if (Loading::GetInstance()->IsLoading())
+    if (Loading::GetInstance())
     {
-        while (Loading::GetInstance()->IsLoading())
-        {
-            std::this_thread::sleep_for(std::chrono::milliseconds(1));
-        }
+        // 非同期ロードそのものをキャンセルさせる
+        SetUseASyncLoadFlag(false);
+        // Loadingの状態を強制的に終了させる
+        Loading::GetInstance()->EndAsyncLoad();
     }
 
     // 各シーンを解放する

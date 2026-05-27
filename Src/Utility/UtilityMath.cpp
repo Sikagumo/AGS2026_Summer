@@ -580,6 +580,12 @@ void UtilityMath::DrawLineXYZ(const VECTOR& pos, const Quaternion& rot, float le
 //	return false;
 //}
 
+VECTOR UtilityMath::GetCirclePos(const VECTOR& center, float radius, float angle)
+{
+	return VGet(center.x + std::cosf(angle) * radius,
+		center.y + std::sinf(angle) * radius, center.z);
+}
+
 // ƒ‰ƒ“ƒ_ƒ€‚È”’l‚ğ•Ô‚·(float—p)
 float UtilityMath::RandRangeF(float min, float max)
 {

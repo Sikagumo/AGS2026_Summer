@@ -102,8 +102,17 @@ void Application::Run(void)
 
 
 	// ゲームループ
-	while (ProcessMessage() == 0 && CheckHitKey(KEY_INPUT_ESCAPE) == 0)
+	while (ProcessMessage() == 0)
 	{
+		if (sceneManager.IsSceneChanging() && CheckHitKey(KEY_INPUT_ESCAPE) != 0)
+		{
+
+		}
+		else if (CheckHitKey(KEY_INPUT_ESCAPE) != 0)
+		{
+			break;
+		}
+
 		ClearDrawScreen();
 
 		netManager.Update();
@@ -134,6 +143,8 @@ void Application::DestroyInstance(void)
 
 	// シーン管理解放
 	SceneManager::GetInstance().DestroyInstance();
+
+	SetUseASyncLoadFlag(false);
 
 	// Effekseerを終了する。
 	Effkseer_End();

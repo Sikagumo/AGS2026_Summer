@@ -57,6 +57,9 @@ public:
     /// @return カメラオブジェクトの共有ポインタ
     const std::unique_ptr<Camera>& GetCamera(void) const;
 
+    /// ロード中かどうかを判定する関数を追加
+    bool IsSceneChanging(void) const { return isSceneChanging_; }
+
     /// @brief ゲーム終了フラグを立てる
     void GameEnd(void);
 
