@@ -33,6 +33,9 @@ Resource::Resource(LOAD_TYPE _type, const std::string& _path
 void Resource::Load(void)
 {
 	/* リソース読み込み処理 */
+	const int TEMPORATY_FLAG = GetUseASyncLoadFlag();
+
+	SetUseASyncLoadFlag(false);
 
 	switch (resType_)
 	{
@@ -56,7 +59,10 @@ void Resource::Load(void)
 			Load_Sound();
 		break;
 	}
+
+	SetUseASyncLoadFlag(TEMPORATY_FLAG);
 }
+
 void Resource::Load_ImageAndMovie(void)
 {
 	/* 単一画像・映像ファイルの読み込み */

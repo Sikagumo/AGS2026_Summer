@@ -261,6 +261,11 @@ void SceneManager::Draw(void)
         return;
     }
 
+    if (camera_ == nullptr)
+    {
+        return;
+    }
+
     // ’ÊíŽž‚Ì•`‰æ
     if (camera_) camera_->SetBeforeDraw();
 

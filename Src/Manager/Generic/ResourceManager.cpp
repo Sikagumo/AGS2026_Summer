@@ -159,12 +159,9 @@ void ResourceManager::DestroyInstance(void)
 
 Resource ResourceManager::Load(SRC _src)
 {
-	SetUseASyncLoadFlag(false);
 
 	/* “Ç‚İ‚İˆ— */
 	Resource* res = _Load(_src);
-
-	SetUseASyncLoadFlag(true);
 
 	if (res == nullptr) return Resource();
 
@@ -237,12 +234,9 @@ const int ResourceManager::LoadHandleIdsOnce(SRC _src, int _imageNum)
 int ResourceManager::LoadModelDuplicate(SRC src)
 {
 	/* 3Dƒ‚ƒfƒ‹d•¡—˜—p‚Ì“Ç‚İ‚İ */
-	SetUseASyncLoadFlag(false);
 
 	// “Ç‚İ‚İˆ—
 	Resource* resource = _Load(src);
-
-	SetUseASyncLoadFlag(true);
 
 	// “Ç‚İ‚İ¸”s
 	if (resource == nullptr)
