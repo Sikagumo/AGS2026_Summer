@@ -40,7 +40,7 @@ Player::Player(int _playerNo, BULLET_TYPE _playerType)
 	constexpr int BULLET_MAX = 3;
 	attackNumMax_ = BULLET_MAX;
 
-	constexpr float MOVE_SPEED = 5.0f;
+	constexpr float MOVE_SPEED = 6.5f;
 	moveSpeed_ = MOVE_SPEED;
 }
 
@@ -62,7 +62,7 @@ void Player::InitAnimation(void)
 		, 30.0f, resourceManager_.LoadHandleId(ResourceManager::SRC::ANIM_IDLE));
 
 	animation_->AddExternal(static_cast<int>(ANIM_TYPE::RUN)
-		, 30.0f, resourceManager_.LoadHandleId(ResourceManager::SRC::ANIM_RUN));
+		, 40.0f, resourceManager_.LoadHandleId(ResourceManager::SRC::ANIM_RUN));
 
 	animation_->AddExternal(static_cast<int>(ANIM_TYPE::THROW_LEFT)
 		, 17.5f, resourceManager_.LoadHandleId(ResourceManager::SRC::ANIM_THROW_LEFT));
@@ -118,40 +118,35 @@ void Player::InitPost(void)
 
 	constexpr float SHOT_TIME_ACTIVE = 2.0f; // 有効時間
 	constexpr float SHOT_TIME_ACTION_ACTIVE = 1.25f; // 有効時間
-	constexpr float SHOT_TIME_ACTIVE_INPUT = 1.75f; // 入力可能時間
+	constexpr float SHOT_TIME_ACTIVE_INPUT = 1.725f; // 入力可能時間
 	constexpr float SHOT_TIME_END = 1.0f; // 終了時間
 
-	constexpr float SHOT_TIME_STOP = 0.85f; // 入力可能時間
-	constexpr float SHOT_TIME_STOP_ACTIVE = 1.15f; // 入力可能時間
+	constexpr float SHOT_TIME_STOP = 0.85f; // 停止時間
+	constexpr float SHOT_TIME_STOP_ACTIVE = 1.15f; // 停止有効化時間
 
 
 
-	float timeActive, timeActionActive, timeInput, timeStop, timeStopActive;
+	float timeActive, timeActionActive, timeInput;
 	timeActive = SHOT_TIME_ACTIVE;
 	timeActionActive = SHOT_TIME_ACTION_ACTIVE;
 	timeInput = SHOT_TIME_ACTIVE_INPUT;
-	timeStop = 0.0f;
-	timeStopActive = SHOT_TIME_STOP_ACTIVE;
 
 	actionController_->SetAction(0, timeActive, SHOT_TIME_END, timeActionActive
 								, std::bind(&Player::ShotBullet, this)
 								, 0.0f, 0.0f, timeInput);
 
 	timeActive += SHOT_TIME_INCREMENT;
-	timeActionActive += SHOT_TIME_INC_ACTION;
-	timeInput += (SHOT_TIME_INCREMENT / 2);
-	timeStop = SHOT_TIME_STOP;
+	//timeActionActive += SHOT_TIME_INC_ACTION;
 	actionController_->SetAction(1, timeActive, SHOT_TIME_END, timeActionActive
 								, std::bind(&Player::ShotBullet, this)
-								, timeStop, timeStopActive, timeInput);
+								, SHOT_TIME_STOP, SHOT_TIME_STOP_ACTIVE, timeInput);
 
 	timeActive += SHOT_TIME_INCREMENT * 2;
-	timeActionActive += SHOT_TIME_INC_ACTION;
+	//timeActionActive += SHOT_TIME_INC_ACTION;
 	timeInput += (SHOT_TIME_INCREMENT / 2);
-	timeStop = SHOT_TIME_STOP;
 	actionController_->SetAction(2, timeActive, SHOT_TIME_END, timeActionActive
 								, std::bind(&Player::ShotBullet, this)
-								, timeStop, timeStopActive, timeInput);
+								, SHOT_TIME_STOP, SHOT_TIME_STOP_ACTIVE, timeInput);
 }
 
 
@@ -234,13 +229,11 @@ void Player::ProcessMove(void)
 		dir = UtilityMath::VNormalize(dir);
 		movePow_ = UtilityMath::VECTOR_ZERO;
 
-		if (!isJump_)
+		if (!isJump_
+			&& animType_ != ANIM_TYPE::THROW_LEFT
+			&& animType_ != ANIM_TYPE::THROW_RIGHT)
 		{
-			if (animType_ != ANIM_TYPE::THROW_LEFT
-				&& animType_ != ANIM_TYPE::THROW_RIGHT)
-			{
-				PlayAnim(ANIM_TYPE::RUN);
-			}
+			PlayAnim(ANIM_TYPE::RUN);
 		}
 
 		// カメラの方向で進行

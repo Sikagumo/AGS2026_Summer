@@ -52,10 +52,10 @@ private:
 	static constexpr float POW_JUMP_INIT = 100.0f;
 
 	// 持続ジャンプ力
-	static constexpr float POW_JUMP_KEEP = 500.0f;
+	static constexpr float POW_JUMP_KEEP = 250.0f;
 
 	// ジャンプ受付時間
-	static constexpr float TIME_JUMP_INPUT = 0.5f;
+	static constexpr float TIME_JUMP_INPUT = 1.85f;
 
 	// 攻撃回数
 	int attackNumMax_;
