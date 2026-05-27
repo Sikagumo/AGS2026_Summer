@@ -62,13 +62,13 @@ void BBulletWave::UpdateProcess(void)
 	if (isAttac_)
 	{
 		radius_ += INCREASE_RADIUS;
-		CollisionManager::GetInstance().SetActorColliderRadius(this, ColliderBase::TAG::SAFEWAVE, radius_);
+		CollisionManager::GetInstance().SetActorColliderRadius(this, ColliderBase::TAG::HITWAVE, radius_);
 	}
-	if (radius_ >= MAX_RADIUS*10)
+	if (radius_ >= MAX_RADIUS)
 	{
-		radius_ = 0;
-		isAttac_ = false;
-		
+		radius_ = INIT_RADIUS;
+		CollisionManager::GetInstance().SetActorColliderRadius(this, ColliderBase::TAG::HITWAVE, radius_);
+		isAttac_ = false;		
 	}
 }
 

@@ -45,7 +45,7 @@ protected:
 private:
 	static constexpr float INIT_RADIUS = 4.0f;
 	static constexpr float INCREASE_RADIUS = 4.0f;
-	static constexpr float MAX_RADIUS = 400.0f;
+	static constexpr float MAX_RADIUS = 2000.0f;
 
 
 	Transform bossTransform_;

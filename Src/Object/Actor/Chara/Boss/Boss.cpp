@@ -27,7 +27,6 @@ Boss::Boss(void) :
 	hp_(1000),
 	attackDelay_(20),
 	boneName_(),
-	safeWaveRadius_(2.0f),
 
 
 	CharaBase()
@@ -158,8 +157,7 @@ void Boss::InitCollider(void)
 
 	
 
-	ColliderSphere* colSafeSphere = new ColliderSphere(ColliderBase::TAG::SAFEWAVE, &transform_, { 0.0f,0.0f,0.0f }, safeWaveRadius_);
-	ownColliders_.emplace(static_cast<int>(ColliderBase::SHAPE::SPHERE), colSafeSphere);
+	
 
 	CollisionManager::GetInstance().RegisterActor(this);
 
@@ -312,8 +310,7 @@ void Boss::UpdateJump(void)
 	if (!isJump_)
 	{
 		wave_->SetIsAttac(true);
-		safeWaveRadius_ += 4.0f;
-		CollisionManager::GetInstance().SetActorColliderRadius(this, ColliderBase::TAG::SAFEWAVE, safeWaveRadius_);
+		ChangeState(STATE::IDLE);
 	}
 	
 	if (transform_.pos.y >= 3500)

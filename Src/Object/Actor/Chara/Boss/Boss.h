@@ -112,8 +112,6 @@ private:
 	float attackDelay_;				//攻撃力
 	std::array<Bone,7> boneId_;		//各ボーン
 	BONE_NAME boneName_;			//ボーンの名前
-	float hitWaveRadius_;
-	float safeWaveRadius_;
 
 	//攻撃関連
 	int jumpCount_;
