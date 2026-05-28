@@ -35,10 +35,11 @@ void SceneManager::DestroyInstance(void)
     }
 }
 
-SceneManager::SceneManager(void)
+SceneManager::SceneManager(void):
+    isGameEnd_(false),
+    isSceneChanging_(false),
+    isFirstFrame_(true)
 {
-    isGameEnd_ = false;
-    isSceneChanging_ = false;
 
     camera_ = std::make_unique<Camera>();
 }

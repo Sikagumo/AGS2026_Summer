@@ -4,7 +4,7 @@ class DamageController
 
 public:
 
-	enum class BOSS_WEPO_DAMEGE
+	enum class BOSS_WEPO_DAMAGE
 	{
 		MG,
 		PRESSWAVE,
@@ -20,19 +20,19 @@ public:
 
 	void Update(void);
 
-	int GetBossDamege(void) { return bossDamege_;}
-	int GetPlayerDamege(void) { return playerDamege_; }
+	int GetBossDamage(void) { return bossDamage_;}
+	int GetPlayerDamage(void) { return playerDamage_; }
 
-	int GetWeaponMGRDamege(void) { return weaponMGRDamege_; }
-	int GetWeaponMGLDamege(void) { return weaponMGLDamege_; }
+	int GetWeaponMGRDamage(void) { return weaponMGRDamage_; }
+	int GetWeaponMGLDamage(void) { return weaponMGLDamage_; }
 
-	int GetWeaponMPRDamege(void) { return weaponMPRDamege_; }
-	int GetWeaponMPLDamege(void) { return weaponMPLDamege_; }
+	int GetWeaponMPRDamage(void) { return weaponMPRDamage_; }
+	int GetWeaponMPLDamage(void) { return weaponMPLDamage_; }
 
-	int GetWeaponRGDamege(void) { return weaponRGDamege_; }
+	int GetWeaponRGDamage(void) { return weaponRGDamage_; }
 
-	int GetWeaponCannonLDamege(void) { return weaponCannonLDamege_; }
-	int GetWeaponCannonRDamege(void) { return weaponCannonRDamege_; }
+	int GetWeaponCannonLDamage(void) { return weaponCannonLDamage_; }
+	int GetWeaponCannonRDamage(void) { return weaponCannonRDamage_; }
 
 
 	void SetPlayerAttack(int _attack) { playerAttack_ = _attack; }
@@ -41,18 +41,18 @@ public:
 	
 
 private:
-	static constexpr float BOSS_CAT_DAMEGE = 0.8;
+	static constexpr float BOSS_CUT_DAMAGE = 0.8f;
 
 
-	int playerDamege_;
-	int bossDamege_;
-	int weaponMGRDamege_;
-	int weaponMGLDamege_;
-	int weaponMPRDamege_;
-	int weaponMPLDamege_;
-	int weaponRGDamege_;
-	int weaponCannonLDamege_;
-	int weaponCannonRDamege_;
+	int playerDamage_;
+	int bossDamage_;
+	int weaponMGRDamage_;
+	int weaponMGLDamage_;
+	int weaponMPRDamage_;
+	int weaponMPLDamage_;
+	int weaponRGDamage_;
+	int weaponCannonLDamage_;
+	int weaponCannonRDamage_;
 	int playerAttack_;
 	int bossAttack_;
 	int playerHp_;

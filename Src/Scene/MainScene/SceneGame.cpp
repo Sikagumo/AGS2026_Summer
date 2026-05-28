@@ -85,21 +85,21 @@ void SceneGame::Update(void)
 	boss_->Update();
 	stage_->Update();
 	damageController_->Update();
-	boss_->SetBossDamege(damageController_->GetBossDamege());
+	boss_->SetBossDamage(damageController_->GetBossDamage());
 
-	boss_->SetWeponCannonLDamege(damageController_->GetWeaponCannonLDamege());
-	boss_->SetWeponCannonRDamege(damageController_->GetWeaponCannonRDamege());
+	boss_->SetWeaponCannonLDamage(damageController_->GetWeaponCannonLDamage());
+	boss_->SetWeaponCannonRDamage(damageController_->GetWeaponCannonRDamage());
 
-	boss_->SetWeponMGLDamege(damageController_->GetWeaponMGLDamege());
-	boss_->SetWeponMGRDamege(damageController_->GetWeaponMGRDamege());
+	boss_->SetWeaponMGLDamage(damageController_->GetWeaponMGLDamage());
+	boss_->SetWeaponMGRDamage(damageController_->GetWeaponMGRDamage());
 
-	boss_->SetWeponMPLDamege(damageController_->GetWeaponMPLDamege());
-	boss_->SetWeponMPRDamege(damageController_->GetWeaponMPRDamege());
+	boss_->SetWeaponMPLDamage(damageController_->GetWeaponMPLDamage());
+	boss_->SetWeaponMPRDamage(damageController_->GetWeaponMPRDamage());
 
-	boss_->SetWeponRGDamege(damageController_->GetWeaponRGDamege());
+	boss_->SetWeaponRGDamage(damageController_->GetWeaponRGDamage());
 
 	damageController_->SetPlayerAttack(player_->GetPower());
-	player_->SetDamage(damageController_->GetPlayerDamege());
+	player_->SetDamage(damageController_->GetPlayerDamage());
 }
 
 void SceneGame::UpdateCollision(void)

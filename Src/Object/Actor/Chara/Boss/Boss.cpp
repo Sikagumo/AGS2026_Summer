@@ -53,46 +53,46 @@ VECTOR Boss::GetBossPos(void) const
 	return transformBody_.pos;
 }
 
-void Boss::SetWeponMGLDamege(int _damege)
+void Boss::SetWeaponMGLDamage(int _damage)
 {
 
-	weaponMGL_->SetDamage(_damege);
+	weaponMGL_->SetDamage(_damage);
 }
 
-void Boss::SetWeponMGRDamege(int _damege)
+void Boss::SetWeaponMGRDamage(int _damage)
 {
-	weaponMGR_->SetDamage(_damege);
+	weaponMGR_->SetDamage(_damage);
 }
 
-void Boss::SetWeponMPLDamege(int _damege)
+void Boss::SetWeaponMPLDamage(int _damage)
 {
-	weaponMPL_->SetDamage(_damege);
+	weaponMPL_->SetDamage(_damage);
 }
 
-void Boss::SetWeponMPRDamege(int _damege)
+void Boss::SetWeaponMPRDamage(int _damage)
 {
-	weaponMPR_->SetDamage(_damege);
+	weaponMPR_->SetDamage(_damage);
 	
 }
 
-void Boss::SetWeponCannonLDamege(int _damege)
+void Boss::SetWeaponCannonLDamage(int _damage)
 {
-	weaponCannonL_->SetDamage(_damege);
+	weaponCannonL_->SetDamage(_damage);
 }
 
-void Boss::SetWeponCannonRDamege(int _damege)
+void Boss::SetWeaponCannonRDamage(int _damage)
 {
-	weaponCannonR_->SetDamage(_damege);
+	weaponCannonR_->SetDamage(_damage);
 }
 
-void Boss::SetWeponRGDamege(int _damege)
+void Boss::SetWeaponRGDamage(int _damage)
 {
-	weaponRG_->SetDamage(_damege);
+	weaponRG_->SetDamage(_damage);
 }
 
-void Boss::SetBossDamege(int _damege)
+void Boss::SetBossDamage(int _damage)
 {
-	hp_ -= _damege;
+	hp_ -= _damage;
 }
 
 

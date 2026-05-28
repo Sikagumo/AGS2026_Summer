@@ -124,7 +124,7 @@ bool CollisionManager::CheckCollision(const ColliderBase* _colliderA, const Coll
 	{
 		if (_colliderB->GetShapeType() == SHAPE::CAPSULE)
 		{
-			return CheckHIT_WAVE(_colliderB, const_cast<ColliderBase*>(_colliderA), HIT_WAVE_THICKNESS, HIT_WAVE_HEIGHT);
+			return CheckHitWave(_colliderB, const_cast<ColliderBase*>(_colliderA), HIT_WAVE_THICKNESS, HIT_WAVE_HEIGHT);
 		}
 
 		return false;
@@ -313,7 +313,7 @@ void CollisionManager::ResolveCollision(ActorBase* _actorA, ActorBase* _actorB,
 	}
 }
 
-bool CollisionManager::CheckHit_Wave(const ColliderBase* _hitCapsuleCol, ColliderBase* _waveCol, float _waveThickness, float _waveHeight)
+bool CollisionManager::CheckHitWave(const ColliderBase* _hitCapsuleCol, ColliderBase* _waveCol, float _waveThickness, float _waveHeight)
 {
 	if (!_hitCapsuleCol || !_waveCol)
 	{
@@ -492,7 +492,8 @@ bool CollisionManager::CanCollide(int _tagA, int _tagB) const
 		}
 	}
 	
-	if (tagHit == TAG::BOSS || tagHit == TAG::WEAPON_CANNON_L || tagHit == TAG::WEAPON_CANNON_R
+	if (tagHit == TAG::BOSS
+		|| tagHit == TAG::WEAPON_CANNON_L || tagHit == TAG::WEAPON_CANNON_R
 		|| tagHit == TAG::WEAPON_MG_L || tagHit == TAG::WEAPON_MG_R
 		|| tagHit == TAG::WEAPON_MP_L || tagHit == TAG::WEAPON_MP_R
 		|| tagHit == TAG::WEAPON_RG)

@@ -36,6 +36,7 @@ Player::Player(int _playerNo, BULLET_TYPE _playerType)
 	, animType_(ANIM_TYPE::IDLE)	
 	,  curAttackNum_(0)
 	, throwPos_(UtilityMath::VECTOR_ZERO), throwDir_(UtilityMath::VECTOR_ZERO)
+	, shotIndex_(-1)
 {
 	constexpr int BULLET_MAX = 3;
 	attackNumMax_ = BULLET_MAX;
