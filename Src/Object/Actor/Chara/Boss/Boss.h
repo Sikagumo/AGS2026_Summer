@@ -53,7 +53,7 @@ public:
 	void Load(void) override;
 
 	//ゲット・セット
-	VECTOR GetBossPos(void) const;
+	const VECTOR& GetBossPos(void) const;
 
 	void SetWeaponMGLDamage(int _damage);
 	void SetWeaponMGRDamage(int _damage);

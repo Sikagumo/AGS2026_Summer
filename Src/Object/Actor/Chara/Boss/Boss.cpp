@@ -48,7 +48,7 @@ void Boss::ReleasePost(void)
 {
 }
 
-VECTOR Boss::GetBossPos(void) const
+const VECTOR& Boss::GetBossPos(void) const
 {
 	return transformBody_.pos;
 }

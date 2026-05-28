@@ -106,9 +106,14 @@ void Camera::SetBeforeDraw(void)
 void Camera::DrawDebug(void)
 {
 #ifdef _DEBUG
-	DrawFormatString(0, 32, 0xffffff, "\nCamera(pos(%.1f, %.1f, %.1f), rot(%.1f, %.1f, %.1f))\n"
+
+	if (followTransform_ == nullptr) { return; }
+	VECTOR target = VSub(lockOnPos_, VGet(followTransform_->pos.x, lockOnPos_.y, followTransform_->pos.z));
+	float tan = atan2f(target.x, target.z);
+
+	DrawFormatString(0, 32, 0xffffff, "\nCamera(pos(%.1f, %.1f, %.1f), angle(%.1f, %.1f, %.1f))\n"
 		, transform_.pos.x, transform_.pos.y, transform_.pos.z
-		, transform_.rot.x, transform_.rot.y, transform_.rot.z);
+		, target.x, target.y, target.z);
 #endif
 }
 
@@ -143,7 +148,22 @@ void Camera::SetLockOnPosition(const VECTOR& _pos)
 {
 	isLockOn_ = true;
 
+	VECTOR posFollow = VGet(_pos.x, 0.0f, _pos.z);
+	VECTOR posCamera = VGet(transform_.pos.x, 0.0f, transform_.pos.z);
+
+	float sizeXZ = std::abs(VSize(VSub(posFollow, posCamera)));
+	constexpr float POS_SPACE_MIN = 200.0f;
+	constexpr float POS_SPACE_MAX = 1350.0f;
+	if (sizeXZ > POS_SPACE_MAX || sizeXZ < POS_SPACE_MIN)
+	{
+		isLockOn_ = false;
+		return;
+	}
+
 	lockOnPos_ = _pos;
+
+	constexpr float POS_MAX_Y = 250.0f;
+	lockOnPos_.y = std::clamp(lockOnPos_.y, -POS_MAX_Y, POS_MAX_Y);
 }
 
 void Camera::SetDefault(void)
@@ -174,6 +194,7 @@ void Camera::SyncFollow(void)
 		VECTOR target = followTransform_->pos;
 		target.y = lockOnPos_.y;
 		VECTOR toTarget = VSub(lockOnPos_, target);
+		
 
 		// XZ•½–Ê‚É“Š‰eiY¬•ª‚ğ–³‹j‚µ‚ÄY²‰ñ“]Šp‚ğ‹‚ß‚é
 		float yAngle = atan2(toTarget.x, toTarget.z);

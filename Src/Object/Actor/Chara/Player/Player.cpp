@@ -307,10 +307,11 @@ void Player::ProcessMove(void)
 
 void Player::ProcessJump(void)
 {
-	auto& input = InputManager::GetInstance();
-	
-	if (!actionController_->IsActiveAction())
+	if (!actionController_->IsActiveAction() &&
+		actionController_->GetActionState() == PActionController::PACTION_STATE::NONE)
 	{
+		auto& input = InputManager::GetInstance();
+
 		bool isHitKeyNew = input.IsNew(KEY_INPUT_SPACE)
 			|| input.IsPadBtnNew(InputManager::JOYPAD_NO::PAD1,
 				InputManager::JOYPAD_BTN::RB_BOTTOM);
@@ -344,6 +345,10 @@ void Player::ProcessJump(void)
 		{
 			isJump_ = true;
 		}
+	}
+	else if (jumpPow_.y > 0.0f)
+	{
+		jumpPow_.y = 0.0f;
 	}
 
 	// Yé≤êßå¿
