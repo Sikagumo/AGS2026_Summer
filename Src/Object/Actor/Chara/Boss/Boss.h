@@ -17,7 +17,7 @@ class BBulletWave;
 class Boss : public CharaBase
 {
 public:
-
+	///ステートパターン
 	enum class STATE
 	{
 		IDLE,
@@ -26,7 +26,7 @@ public:
 		END,
 	};
 
-	//ウェポンの接続ボーンの名前
+	///ウェポンの接続ボーンの名前
 	enum class BONE_NAME
 	{
 		WEAPON_JOINT_MGL_L=0,
@@ -39,7 +39,7 @@ public:
 		MAX,
 	};
 
-	//各ボーンの情報
+	///各ボーンの情報
 	struct Bone {
 		int id = 0;
 		Transform transform;
@@ -53,23 +53,38 @@ public:
 	void Load(void) override;
 
 	//ゲット・セット
+	
+	/// <summary>
+	/// ボスの現在座標
+	/// </summary>
+	/// <param name=""></param>
+	/// <returns></returns>
 	VECTOR GetBossPos(void) const;
 
+	//各武器のダメージ受け取り用関数
+	//ガトリング
 	void SetWeaponMGLDamage(int _damage);
 	void SetWeaponMGRDamage(int _damage);
-
+	//ミサイルポッド
 	void SetWeaponMPLDamage(int _damage);
 	void SetWeaponMPRDamage(int _damage);
-
+	//キャノン
 	void SetWeaponCannonLDamage(int _damage);
 	void SetWeaponCannonRDamage(int _damage);
-
+	//レールガン
 	void SetWeaponRGDamage(int _damage);
-
+	//ボス本体へのダメージ受け取り用
 	void SetBossDamage(int _damage);
 
 
 	void UpdateCollision(void);
+	/// <summary>
+	/// ボス現在HP
+	/// </summary>
+	/// <param name=""></param>
+	/// <returns></returns>
+	int GetHP(void) { return hp_; }
+
 
 private:
 	//bossの大きさ
@@ -136,14 +151,14 @@ private:
 	std::unique_ptr< BBulletWave> wave_;
 	
 
-	//ボーン初期化
+	///ボーン初期化
 	void BoneParam(void);
-	//ボーンアプデ
+	///ボーンアプデ
 	void BossTransformUpdate(void);
 
-	// 状態
+	/// 状態
 	STATE state_;
-	// 状態管理
+	/// 状態管理
 	int stateBase_;
 
 	// 状態管理(状態遷移時初期処理)
@@ -168,18 +183,21 @@ private:
 
 protected:
 
-	// 大きさ、回転、座標の初期化
+	/// 大きさ、回転、座標の初期化
 	void InitTransform(void) override;
 
-	// 衝突判定の初期化
+	/// 衝突判定の初期化
 	void InitCollider(void) override;
 
-	// アニメーションの初期化
+	/// アニメーションの初期化
 	void InitAnimation(void) override;
 
-	// 初期化後の個別処理
+	
+
+	///初期化後の個別処理
 	void InitPost(void) override;
 
+	///アップデート関数
 	void UpdateProcess(void) override;
 	void UpdateProcessPost(void) override;
 
@@ -192,7 +210,21 @@ protected:
 
 	void CollisionReserve(void) override  {};
 
+	///ウェポンセット呼び出し関数まとめ用
+	void WeaponSet(void);
 
+	///ウェポンロード呼び出し関数まとめ用
+	void WeaponLoad(void);
 
+	///ウェポンイニット呼び出し関数まとめ用
+	void WeaponInit(void);
+
+	///ウェポンアップデート呼び出し関数まとめ用
+	void WeaponUpdate(void);
+
+	///ウェポンドロー呼び出し関数まとめ用
+	void WeaponDraw(void);
+	
+	
 };
 
