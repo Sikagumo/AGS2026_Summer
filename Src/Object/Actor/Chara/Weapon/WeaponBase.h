@@ -49,16 +49,21 @@ private:
 
 protected:
 
-	
+	// 最大落下速度
+	static constexpr float MAX_FALL_SPEED = -300.0f;
 
 	static constexpr VECTOR WEAPON_SIZE = { 3.0f,3.0f,3.0f };
 	static constexpr float WEAPON_ROT = 180.0f;
 
 
 
-	int hp_=500;
+	int hp_=50;
 	int attackDamage_;	
 	bool isAlive_;
+	VECTOR movePow_;
+	VECTOR jumpPow_;
+	// ジャンプ判定
+	bool isJump_;
 	VECTOR localBackPos_;	//当たり判定用の後方の座標
 	VECTOR localFrontPos_;	//当たり判定用の前方の座標
 	VECTOR localPos_;		//カメラのロックオン用の中央座標
@@ -70,9 +75,11 @@ protected:
 	virtual void UpdateProcess(void) = 0;
 	virtual void UpdateProcessPost(void) = 0;
 
-	
+	void CalcGravityPow(void);
 
-
+	// 衝突判定
+	void Collision(void);
+	void CollisionGravity(void);
 	virtual void CollisionReserve(void) {};
 };
 

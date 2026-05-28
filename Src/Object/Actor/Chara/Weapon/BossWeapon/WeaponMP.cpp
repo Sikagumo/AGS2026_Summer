@@ -48,7 +48,7 @@ void WeaponMP::InitTransform(void)
 
 void WeaponMP::InitCollider(void)
 {
-	ColliderLine* colLine = new ColliderLine(tag_, &transform_, { 0.0f,0.0f,-40.0f }, { 0.0f,-1.0f,-40.0f });
+	ColliderLine* colLine = new ColliderLine(ColliderBase::TAG::STAGE, &transform_, { 0.0f,0.0f,-40.0f }, { 0.0f,-1.0f,-40.0f });
 	ownColliders_.emplace(static_cast<int>(ColliderBase::SHAPE::LINE), colLine);
 
 
@@ -71,11 +71,13 @@ void WeaponMP::InitPost(void)
 
 void WeaponMP::UpdateProcess(void)
 {
-	transform_.pos = MV1GetFramePosition(bone_.transform.modelId, bone_.id);
-	transform_.Update();
-	if (hp_ <= 0)
+	if (isAlive_)
+	{
+		transform_.pos = MV1GetFramePosition(bone_.transform.modelId, bone_.id);
+	}
 	{
 		isAlive_ = false;
+		//CollisionManager::GetInstance().SetCollisionActive(this, tag_, false);
 	}
 }
 

@@ -49,7 +49,7 @@ void WeaponCannon::InitTransform(void)
 
 void WeaponCannon::InitCollider(void)
 {
-	ColliderLine* colLine = new ColliderLine(tag_, &transform_, {0.0f,50.0f,60.0f}, { 0.0f,51.0f,60.0f });
+	ColliderLine* colLine = new ColliderLine(ColliderBase::TAG::STAGE, &transform_, {0.0f,50.0f,60.0f}, { 0.0f,51.0f,60.0f });
 	ownColliders_.emplace(static_cast<int>(ColliderBase::SHAPE::LINE), colLine);
 	
 
@@ -72,12 +72,15 @@ void WeaponCannon::InitPost(void)
 
 void WeaponCannon::UpdateProcess(void)
 {
-	transform_.pos = MV1GetFramePosition(bone_.transform.modelId, bone_.id);
-	transform_.Update();
+	if (isAlive_)
+	{
+		transform_.pos = MV1GetFramePosition(bone_.transform.modelId, bone_.id);
+	}
 
 	if (hp_ <= 0)
 	{
 		isAlive_ = false;
+		//CollisionManager::GetInstance().SetCollisionActive(this, tag_, false);
 	}
 
 }

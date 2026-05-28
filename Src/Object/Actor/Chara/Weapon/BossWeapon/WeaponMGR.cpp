@@ -37,7 +37,8 @@ void WeaponMGR::Load(void)
 void WeaponMGR::InitTransform(void)
 {
 	transform_.scl = WEAPON_SIZE;
-	transform_.quaRot = Quaternion::Identity();
+	transform_.quaRot = Quaternion::Mult(transform_.quaRot,
+		Quaternion::AngleAxis(UtilityMath::Deg2RadF(WEAPON_ROT), UtilityMath::AXIS_Y));
 	transform_.quaRotLocal =
 		Quaternion::Mult(transform_.quaRotLocal,
 			Quaternion::AngleAxis(UtilityMath::Deg2RadF(WEAPON_ROT), UtilityMath::AXIS_Y));
@@ -48,7 +49,7 @@ void WeaponMGR::InitTransform(void)
 
 void WeaponMGR::InitCollider(void)
 {
-	ColliderLine* colLine = new ColliderLine(tag_, &transform_, { 50.0f,0.0f,50.0f }, { 50.0f,-1.0f,50.0f });
+	ColliderLine* colLine = new ColliderLine(ColliderBase::TAG::STAGE, &transform_, { 50.0f,0.0f,50.0f }, { 50.0f,-1.0f,50.0f });
 	ownColliders_.emplace(static_cast<int>(ColliderBase::SHAPE::LINE), colLine);
 
 
@@ -71,11 +72,14 @@ void WeaponMGR::InitPost(void)
 
 void WeaponMGR::UpdateProcess(void)
 {
-	transform_.pos = MV1GetFramePosition(bone_.transform.modelId, bone_.id);
-	transform_.Update();
+	if (isAlive_)
+	{
+		transform_.pos = MV1GetFramePosition(bone_.transform.modelId, bone_.id);
+	}
 	if (hp_ <= 0)
 	{
 		isAlive_ = false;
+		//CollisionManager::GetInstance().SetCollisionActive(this, tag_, false);
 	}
 }
 
@@ -97,4 +101,5 @@ void WeaponMGR::DrawPre(void)
 			col.second->Draw();
 		}
 	}
+	DrawFormatString(10, 300, 0xffffff, "MGR_HP:%d", hp_);
 }
