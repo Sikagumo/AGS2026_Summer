@@ -49,7 +49,7 @@ void WeaponCannon::InitTransform(void)
 
 void WeaponCannon::InitCollider(void)
 {
-	ColliderLine* colLine = new ColliderLine(ColliderBase::TAG::STAGE, &transform_, {0.0f,50.0f,60.0f}, { 0.0f,51.0f,60.0f });
+	ColliderLine* colLine = new ColliderLine(ColliderBase::TAG::STAGE, &transform_, {0.0f,50.0f,60.0f}, { 0.0f,40.0f,60.0f });
 	ownColliders_.emplace(static_cast<int>(ColliderBase::SHAPE::LINE), colLine);
 	
 

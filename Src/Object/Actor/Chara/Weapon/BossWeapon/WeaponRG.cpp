@@ -50,7 +50,7 @@ void WeaponRG::InitTransform(void)
 
 void WeaponRG::InitCollider(void)
 {
-	ColliderLine* colLine = new ColliderLine(ColliderBase::TAG::STAGE, &transform_, { 0.0f,-10.0f,-60.0f }, { 0.0f,-11.0f,-60.0f });
+	ColliderLine* colLine = new ColliderLine(ColliderBase::TAG::STAGE, &transform_, { 0.0f,-10.0f,-60.0f }, { 0.0f,-20.0f,-60.0f });
 	ownColliders_.emplace(static_cast<int>(ColliderBase::SHAPE::LINE), colLine);
 
 	ColliderCapsule* colCapsule = new ColliderCapsule(

@@ -57,7 +57,7 @@ protected:
 
 
 
-	int hp_=50;
+	int hp_=500;
 	int attackDamage_;	
 	bool isAlive_;
 	VECTOR movePow_;
