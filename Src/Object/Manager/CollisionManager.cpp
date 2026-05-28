@@ -135,7 +135,7 @@ bool CollisionManager::CheckCollision(const ColliderBase* _colliderA, const Coll
 	{
 		if (_colliderA->GetShapeType() == SHAPE::CAPSULE)
 		{
-			return CheckHIT_WAVE(_colliderA, const_cast<ColliderBase*>(_colliderB), HIT_WAVE_THICKNESS, HIT_WAVE_HEIGHT);
+			return CheckHitWave(_colliderA, const_cast<ColliderBase*>(_colliderB), HIT_WAVE_THICKNESS, HIT_WAVE_HEIGHT);
 		}
 	}
 
@@ -313,7 +313,7 @@ void CollisionManager::ResolveCollision(ActorBase* _actorA, ActorBase* _actorB,
 	}
 }
 
-bool CollisionManager::CheckHIT_WAVE(const ColliderBase* _hitCapsuleCol, ColliderBase* _waveCol, float _waveThickness, float _waveHeight)
+bool CollisionManager::CheckHit_Wave(const ColliderBase* _hitCapsuleCol, ColliderBase* _waveCol, float _waveThickness, float _waveHeight)
 {
 	if (!_hitCapsuleCol || !_waveCol)
 	{
@@ -486,14 +486,13 @@ bool CollisionManager::CanCollide(int _tagA, int _tagB) const
 		 || tagHurt == TAG::WEAPON_MG_L	|| tagHurt == TAG::WEAPON_MG_R
 		 || tagHurt == TAG::WEAPON_MP_L || tagHurt == TAG::WEAPON_MP_R
 		 || tagHurt == TAG::WEAPON_RG
-		 || tagHurt == TAG::HIT_WAVE)
+		 || tagHurt==TAG::HIT_WAVE)
 		{
 			return true;
 		}
 	}
-
-	if (tagHit == TAG::BOSS
-		|| tagHit == TAG::WEAPON_CANNON_L || tagHit == TAG::WEAPON_CANNON_R
+	
+	if (tagHit == TAG::BOSS || tagHit == TAG::WEAPON_CANNON_L || tagHit == TAG::WEAPON_CANNON_R
 		|| tagHit == TAG::WEAPON_MG_L || tagHit == TAG::WEAPON_MG_R
 		|| tagHit == TAG::WEAPON_MP_L || tagHit == TAG::WEAPON_MP_R
 		|| tagHit == TAG::WEAPON_RG)
@@ -508,14 +507,13 @@ bool CollisionManager::CanCollide(int _tagA, int _tagB) const
 	{
 		return true;
 	}
-	if (tagHit == TAG::PLAYER && tagHurt == TAG::HIT_WAVE)
-	{
-		return true;
-	}
 
 	if (tagHit == TAG::STAGE)
 	{
-		if (tagHurt == TAG::PLAYER || tagHurt == TAG::PLAYER_BULLET || tagHurt == TAG::BOSS)
+		if (tagHurt == TAG::PLAYER || tagHurt == TAG::PLAYER_BULLET || tagHurt == TAG::BOSS || tagHurt == TAG::WEAPON_CANNON_L || tagHurt == TAG::WEAPON_CANNON_R
+			|| tagHurt == TAG::WEAPON_MG_L || tagHurt == TAG::WEAPON_MG_R
+			|| tagHurt == TAG::WEAPON_MP_L || tagHurt == TAG::WEAPON_MP_R
+			|| tagHurt == TAG::WEAPON_RG)
 		{
 			return true;
 		}

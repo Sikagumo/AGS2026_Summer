@@ -53,45 +53,42 @@ VECTOR Boss::GetBossPos(void) const
 	return transformBody_.pos;
 }
 
-void Boss::SetWeponDamege(int _damege)
+void Boss::SetWeponMGLDamege(int _damege)
 {
-	if (CollisionManager::GetInstance().IsTagCollidingWithTag(ColliderBase::TAG::WEAPON_CANNON_L, ColliderBase::TAG::PLAYER_BULLET))
-	{
-		weaponCannonL_->SetDamage(_damege);
-	}
-	
-	if (CollisionManager::GetInstance().IsTagCollidingWithTag(ColliderBase::TAG::WEAPON_CANNON_R, ColliderBase::TAG::PLAYER_BULLET))
-	{
-		weaponCannonR_->SetDamage(_damege);
-	}
-	
-	if (CollisionManager::GetInstance().IsTagCollidingWithTag(ColliderBase::TAG::WEAPON_MG_L, ColliderBase::TAG::PLAYER_BULLET))
-	{
-		weaponMGL_->SetDamage(_damege);
-	}
-	
-	if (CollisionManager::GetInstance().IsTagCollidingWithTag(ColliderBase::TAG::WEAPON_MG_R, ColliderBase::TAG::PLAYER_BULLET))
-	{
-		weaponMGR_->SetDamage(_damege);
-	}
-	
-	if (CollisionManager::GetInstance().IsTagCollidingWithTag(ColliderBase::TAG::WEAPON_MP_L, ColliderBase::TAG::PLAYER_BULLET))
-	{
-		weaponMPL_->SetDamage(_damege);
-	}
 
-	if (CollisionManager::GetInstance().IsTagCollidingWithTag(ColliderBase::TAG::WEAPON_MP_R, ColliderBase::TAG::PLAYER_BULLET))
-	{
-		weaponMPR_->SetDamage(_damege);
-	}
-
-	if (CollisionManager::GetInstance().IsTagCollidingWithTag(ColliderBase::TAG::WEAPON_RG, ColliderBase::TAG::PLAYER_BULLET))
-	{
-		weaponRG_->SetDamage(_damege);
-	}
-
+	weaponMGL_->SetDamage(_damege);
 }
 
+void Boss::SetWeponMGRDamege(int _damege)
+{
+	weaponMGR_->SetDamage(_damege);
+}
+
+void Boss::SetWeponMPLDamege(int _damege)
+{
+	weaponMPL_->SetDamage(_damege);
+}
+
+void Boss::SetWeponMPRDamege(int _damege)
+{
+	weaponMPR_->SetDamage(_damege);
+	
+}
+
+void Boss::SetWeponCannonLDamege(int _damege)
+{
+	weaponCannonL_->SetDamage(_damege);
+}
+
+void Boss::SetWeponCannonRDamege(int _damege)
+{
+	weaponCannonR_->SetDamage(_damege);
+}
+
+void Boss::SetWeponRGDamege(int _damege)
+{
+	weaponRG_->SetDamage(_damege);
+}
 
 void Boss::SetBossDamege(int _damege)
 {
@@ -121,19 +118,19 @@ void Boss::BossTransformUpdate(void)
 
 	weaponMGL_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MGL_L)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MGL_L)].transform, ColliderBase::TAG::WEAPON_MG_L);
 	weaponMGR_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MGL_R)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MGL_R)].transform, ColliderBase::TAG::WEAPON_MG_R);
-	weaponMPL_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MP_L)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MP_L)].transform, ColliderBase::TAG::WEAPON_MP_L);
+	/*weaponMPL_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MP_L)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MP_L)].transform, ColliderBase::TAG::WEAPON_MP_L);
 	weaponMPR_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MP_R)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MP_R)].transform, ColliderBase::TAG::WEAPON_MP_R);
 	weaponRG_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_RG)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_RG)].transform, ColliderBase::TAG::WEAPON_RG);
 	weaponCannonL_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_CANNON_L)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_CANNON_L)].transform, ColliderBase::TAG::WEAPON_CANNON_L);
-	weaponCannonR_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_CANNON_R)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_CANNON_R)].transform, ColliderBase::TAG::WEAPON_CANNON_R);
+	weaponCannonR_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_CANNON_R)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_CANNON_R)].transform, ColliderBase::TAG::WEAPON_CANNON_R);*/
 
 	weaponMGL_->Update();
 	weaponMGR_->Update();
-	weaponMPL_->Update();
-	weaponMPR_->Update();
-	weaponRG_->Update();
-	weaponCannonL_->Update();
-	weaponCannonR_->Update();
+	//weaponMPL_->Update();
+	//weaponMPR_->Update();
+	//weaponRG_->Update();
+	//weaponCannonL_->Update();
+	//weaponCannonR_->Update();
 }
 
 
@@ -146,11 +143,11 @@ void Boss::Load(void)
 
 	weaponMGL_->Load();
 	weaponMGR_->Load();
-	weaponMPL_->Load();
-	weaponMPR_->Load();
-	weaponRG_->Load();
-	weaponCannonL_->Load();
-	weaponCannonR_->Load();
+	//weaponMPL_->Load();
+	//weaponMPR_->Load();
+	//weaponRG_->Load();
+	//weaponCannonL_->Load();
+	//weaponCannonR_->Load();
 	
 }
 
@@ -159,10 +156,14 @@ void Boss::InitTransform(void)
 	transform_.scl = BOSS_SIZE;
 	transformBody_.scl = BOSS_SIZE;
 	transform_.quaRot = Quaternion::Identity();
+
 	transform_.quaRotLocal =
 		Quaternion::Mult(transform_.quaRotLocal,
 			Quaternion::AngleAxis(UtilityMath::Deg2RadF(INIT_ROT), UtilityMath::AXIS_Y));
-	transformBody_.quaRot = Quaternion::Identity();
+
+	transformBody_.quaRot = Quaternion::Mult(transformBody_.quaRot,
+		Quaternion::AngleAxis(UtilityMath::Deg2RadF(INIT_ROT), UtilityMath::AXIS_Y));
+
 	transformBody_.quaRotLocal =
 		Quaternion::Mult(transformBody_.quaRotLocal,
 			Quaternion::AngleAxis(UtilityMath::Deg2RadF(INIT_ROT), UtilityMath::AXIS_Y));
@@ -209,19 +210,19 @@ void Boss::InitPost(void)
 
 	weaponMGL_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MGL_L)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MGL_L)].transform, ColliderBase::TAG::WEAPON_MG_L);
 	weaponMGR_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MGL_R)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MGL_R)].transform, ColliderBase::TAG::WEAPON_MG_R);
-	weaponMPL_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MP_L)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MP_L)].transform, ColliderBase::TAG::WEAPON_MP_L);
-	weaponMPR_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MP_R)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MP_R)].transform, ColliderBase::TAG::WEAPON_MP_R);
-	weaponRG_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_RG)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_RG)].transform, ColliderBase::TAG::WEAPON_RG);
-	weaponCannonL_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_CANNON_L)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_CANNON_L)].transform, ColliderBase::TAG::WEAPON_CANNON_L);
-	weaponCannonR_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_CANNON_R)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_CANNON_R)].transform, ColliderBase::TAG::WEAPON_CANNON_R);
+	//weaponMPL_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MP_L)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MP_L)].transform, ColliderBase::TAG::WEAPON_MP_L);
+	//weaponMPR_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MP_R)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MP_R)].transform, ColliderBase::TAG::WEAPON_MP_R);
+	//weaponRG_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_RG)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_RG)].transform, ColliderBase::TAG::WEAPON_RG);
+	//weaponCannonL_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_CANNON_L)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_CANNON_L)].transform, ColliderBase::TAG::WEAPON_CANNON_L);
+	//weaponCannonR_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_CANNON_R)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_CANNON_R)].transform, ColliderBase::TAG::WEAPON_CANNON_R);
 
 	weaponMGL_->Init();
 	weaponMGR_->Init();
-	weaponMPL_->Init();
-	weaponMPR_->Init();
-	weaponRG_->Init();
-	weaponCannonL_->Init();
-	weaponCannonR_->Init();
+	//weaponMPL_->Init();
+	//weaponMPR_->Init();
+	//weaponRG_->Init();
+	//weaponCannonL_->Init();
+	//weaponCannonR_->Init();
 	wave_->Init();
 
 	stateChanges_.emplace(static_cast<int>(STATE::IDLE),
@@ -299,20 +300,20 @@ void Boss::UpdateProcess(void)
 	// 各武器にボーン情報を設定（ここはそのまま）
 	weaponMGL_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MGL_L)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MGL_L)].transform, ColliderBase::TAG::WEAPON_MG_L);
 	weaponMGR_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MGL_R)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MGL_R)].transform, ColliderBase::TAG::WEAPON_MG_R);
-	weaponMPL_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MP_L)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MP_L)].transform, ColliderBase::TAG::WEAPON_MP_L);
-	weaponMPR_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MP_R)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MP_R)].transform, ColliderBase::TAG::WEAPON_MP_R);
-	weaponRG_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_RG)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_RG)].transform, ColliderBase::TAG::WEAPON_RG);
-	weaponCannonL_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_CANNON_L)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_CANNON_L)].transform, ColliderBase::TAG::WEAPON_CANNON_L);
-	weaponCannonR_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_CANNON_R)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_CANNON_R)].transform, ColliderBase::TAG::WEAPON_CANNON_R);
+	//weaponMPL_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MP_L)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MP_L)].transform, ColliderBase::TAG::WEAPON_MP_L);
+	//weaponMPR_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MP_R)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MP_R)].transform, ColliderBase::TAG::WEAPON_MP_R);
+	//weaponRG_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_RG)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_RG)].transform, ColliderBase::TAG::WEAPON_RG);
+	//weaponCannonL_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_CANNON_L)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_CANNON_L)].transform, ColliderBase::TAG::WEAPON_CANNON_L);
+	//weaponCannonR_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_CANNON_R)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_CANNON_R)].transform, ColliderBase::TAG::WEAPON_CANNON_R);
 
 	// 武器の更新
 	weaponMGL_->Update();
 	weaponMGR_->Update();
-	weaponMPL_->Update();
-	weaponMPR_->Update();
-	weaponRG_->Update();
-	weaponCannonL_->Update();
-	weaponCannonR_->Update();
+	//weaponMPL_->Update();
+	//weaponMPR_->Update();
+	//weaponRG_->Update();
+	//weaponCannonL_->Update();
+	//weaponCannonR_->Update();
 	wave_->SetPos(transform_.pos);
 	wave_->Update();
 
@@ -330,7 +331,7 @@ void Boss::UpdateProcessPost(void)
 void Boss::UpdateIdle(void)
 {
 	attackCount_++;
-	if (attackCount_ >= 300)
+	if (attackCount_ >= 600)
 	{
 		ChangeState(STATE::ATTACK);
 	}
@@ -371,11 +372,11 @@ void Boss::DrawPre(void)
 	MV1DrawModel(transformBody_.modelId);
 	weaponMGL_->Draw();
 	weaponMGR_->Draw();
-	weaponMPL_->Draw();
-	weaponMPR_->Draw();
-	weaponRG_->Draw();
-	weaponCannonL_->Draw();
-	weaponCannonR_->Draw();
+	//weaponMPL_->Draw();
+	//weaponMPR_->Draw();
+	//weaponRG_->Draw();
+	//weaponCannonL_->Draw();
+	//weaponCannonR_->Draw();
 	wave_->Draw();
 	for (auto& col : ownColliders_)
 	{

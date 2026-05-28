@@ -22,7 +22,18 @@ public:
 
 	int GetBossDamege(void) { return bossDamege_;}
 	int GetPlayerDamege(void) { return playerDamege_; }
-	int GetWeaponDamege(void) { return weaponDamege_; }
+
+	int GetWeaponMGRDamege(void) { return weaponMGRDamege_; }
+	int GetWeaponMGLDamege(void) { return weaponMGLDamege_; }
+
+	int GetWeaponMPRDamege(void) { return weaponMPRDamege_; }
+	int GetWeaponMPLDamege(void) { return weaponMPLDamege_; }
+
+	int GetWeaponRGDamege(void) { return weaponRGDamege_; }
+
+	int GetWeaponCannonLDamege(void) { return weaponCannonLDamege_; }
+	int GetWeaponCannonRDamege(void) { return weaponCannonRDamege_; }
+
 
 	void SetPlayerAttack(int _attack) { playerAttack_ = _attack; }
 	void SetBossAttack(int _attack) { bossAttack_ = _attack; }
@@ -35,7 +46,13 @@ private:
 
 	int playerDamege_;
 	int bossDamege_;
-	int weaponDamege_;
+	int weaponMGRDamege_;
+	int weaponMGLDamege_;
+	int weaponMPRDamege_;
+	int weaponMPLDamege_;
+	int weaponRGDamege_;
+	int weaponCannonLDamege_;
+	int weaponCannonRDamege_;
 	int playerAttack_;
 	int bossAttack_;
 	int playerHp_;
