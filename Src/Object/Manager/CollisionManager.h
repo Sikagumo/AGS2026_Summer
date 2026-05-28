@@ -102,7 +102,7 @@ public:
 	/// @param _waveThickness ÕŒ‚”g‚ÌŒú‚İ
 	/// @param _waveHeight ÕŒ‚”g‚Ì‚‚³
 	/// @return ‚ ‚Á‚½‚Á‚Ä‚¢‚ê‚Î true
-	bool CheckHitWave(const ColliderBase* _hitCapsuleCol, ColliderBase* _waveCol, float _waveThickness, float _waveHeight);
+	bool CheckHIT_WAVE(const ColliderBase* _hitCapsuleCol, ColliderBase* _waveCol, float _waveThickness, float _waveHeight);
 
 private:
 
