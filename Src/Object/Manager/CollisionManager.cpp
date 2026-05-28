@@ -118,6 +118,26 @@ bool CollisionManager::CheckCollision(const ColliderBase* _colliderA, const Coll
 
 	// 形状タイプ取得
 	using SHAPE = ColliderBase::SHAPE;
+	using TAG = ColliderBase::TAG;
+
+	if (_colliderA->GetCollisionTag() == TAG::HIT_WAVE)
+	{
+		if (_colliderB->GetShapeType() == SHAPE::CAPSULE)
+		{
+			return CheckHitWave(_colliderB, const_cast<ColliderBase*>(_colliderA), HIT_WAVE_THICKNESS, HIT_WAVE_HEIGHT);
+		}
+
+		return false;
+			
+	}
+
+	if (_colliderB->GetCollisionTag() == TAG::HIT_WAVE)
+	{
+		if (_colliderA->GetShapeType() == SHAPE::CAPSULE)
+		{
+			return CheckHitWave(_colliderA, const_cast<ColliderBase*>(_colliderB), HIT_WAVE_THICKNESS, HIT_WAVE_HEIGHT);
+		}
+	}
 
 	SHAPE shapeA = _colliderA->GetShapeType();
 	SHAPE shapeB = _colliderB->GetShapeType();
@@ -293,7 +313,7 @@ void CollisionManager::ResolveCollision(ActorBase* _actorA, ActorBase* _actorB,
 	}
 }
 
-bool CollisionManager::CheckHitWave(const ColliderBase* _hitCapsuleCol, ColliderBase* _waveCol, float _waveThickness)
+bool CollisionManager::CheckHitWave(const ColliderBase* _hitCapsuleCol, ColliderBase* _waveCol, float _waveThickness, float _waveHeight)
 {
 	if (!_hitCapsuleCol || !_waveCol)
 	{
@@ -308,7 +328,7 @@ bool CollisionManager::CheckHitWave(const ColliderBase* _hitCapsuleCol, Collider
 		return false;
 	}
 
-	VECTOR wavePos = wave->GetLocalPosition();
+	VECTOR wavePos = wave->GetWorldPosition();
 
 	VECTOR capStartPos = capsule->GetWorldStartPos();
 	VECTOR capEndPos = capsule->GetWorldEndPos();
@@ -329,12 +349,21 @@ bool CollisionManager::CheckHitWave(const ColliderBase* _hitCapsuleCol, Collider
 
 	bool isHit = abs(distance - waveRadius) < totalThickness;
 
-	if (isHit)
+	if (!isHit)
 	{
-		return true;
+		return false;
 	}
 
-	return false;
+	float capsuleFootY = (capStartPos.y < capEndPos.y ? capStartPos.y : capEndPos.y) - capsule->GetRadius();
+
+	float differenceY = nearestPos.y - wavePos.y;
+
+	if (capsuleFootY > (wavePos.y + _waveHeight))
+	{
+		return false;
+	}
+
+	return true;
 }
 
 void CollisionManager::UpdateCollisionPars(void)
@@ -475,12 +504,13 @@ bool CollisionManager::CanCollide(int _tagA, int _tagB) const
 		}
 	}
 
-	if (tagHit == TAG::HITWAVE)
+	if (tagHit == TAG::HIT_WAVE && tagHurt == TAG::PLAYER)
 	{
-		if (tagHurt == TAG::PLAYER)
-		{
-			return true;
-		}
+		return true;
+	}
+	if (tagHit == TAG::PLAYER && tagHurt == TAG::HIT_WAVE)
+	{
+		return true;
 	}
 
 	if (tagHit == TAG::STAGE)

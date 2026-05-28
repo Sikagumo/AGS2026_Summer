@@ -100,8 +100,9 @@ public:
 	/// @param _hitCol 当たる側のコライダー
 	/// @param _waveCol 衝撃波のコライダー
 	/// @param _waveThickness 衝撃波の厚み
+	/// @param _waveHeight 衝撃波の高さ
 	/// @return あったっていれば true
-	bool CheckHitWave(const ColliderBase* _hitCapsuleCol, ColliderBase* _waveCol, float _waveThickness);
+	bool CheckHitWave(const ColliderBase* _hitCapsuleCol, ColliderBase* _waveCol, float _waveThickness, float _waveHeight);
 
 private:
 
@@ -110,6 +111,10 @@ private:
 
 	// 更新のインターバル時間
 	static constexpr float UPDATE_INTERVAL = 0.016f;
+
+	// 衝撃波の定数関連
+	static constexpr float HIT_WAVE_THICKNESS = 3.0f; // 衝撃波の厚み
+	static constexpr float HIT_WAVE_HEIGHT = 15.0f;    // 衝撃波の高さ
 
 	// シングルトンインスタンス
 	static CollisionManager* instance_;

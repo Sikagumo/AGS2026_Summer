@@ -275,16 +275,13 @@ void SceneManager::Draw(void)
 
 void SceneManager::Release(void)
 {
-<<<<<<< HEAD
     if (Loading::GetInstance())
-=======
+
     // ���[�h������ҋ@����
     if (Loading::GetInstance()->IsLoading())
->>>>>>> main
     {
-        // 非同期ロードそのものをキャンセルさせる
         SetUseASyncLoadFlag(false);
-        // Loadingの状態を強制的に終了させる
+
         Loading::GetInstance()->EndAsyncLoad();
     }
 

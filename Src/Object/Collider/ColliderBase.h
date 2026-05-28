@@ -39,7 +39,7 @@ public:
 		WEAPON_RG,		//ƒŒ[ƒ‹ƒKƒ“
 		CAMERA,      // ƒJƒƒ‰
 		WALL,        // •Ç
-		HITWAVE,
+		HIT_WAVE,
 		SAFEWAVE,
 	};
 
