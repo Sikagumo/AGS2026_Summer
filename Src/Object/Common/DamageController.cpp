@@ -27,7 +27,6 @@ DamageController::~DamageController()
 
 void DamageController::Update()
 {
-	
 	bossDamage_ = 0;
 	playerDamage_ = 0;
 	weaponMGRDamage_ = 0;
@@ -38,6 +37,7 @@ void DamageController::Update()
 	weaponCannonLDamage_ = 0;
 	weaponCannonRDamage_ = 0;
 
+	// ボスとプレイヤー弾
 	if (CollisionManager::GetInstance().IsTagCollidingWithTag(ColliderBase::TAG::BOSS, ColliderBase::TAG::PLAYER_BULLET))
 	{
 		bossDamage_ = playerAttack_;
@@ -77,13 +77,14 @@ void DamageController::Update()
 		weaponRGDamage_ = playerAttack_;
 		bossDamage_ = static_cast<int>(playerAttack_* BOSS_CUT_DAMAGE);
 	}
+	
 
+	// プレイヤーとボスの攻撃
 	if (CollisionManager::GetInstance().IsTagCollidingWithTag(ColliderBase::TAG::HIT_WAVE, ColliderBase::TAG::PLAYER))
 	{
-		// 割合ダメージ値
+		// HP割合ダメージ
 		const float RATE_DAMAGE = (playerHp_ * (static_cast<float>(BOSS_WEPO_DAMAGE::PRESSWAVE) / 10));
 		playerDamage_ = static_cast<int>(RATE_DAMAGE);
-		
 	}
 	else
 	{

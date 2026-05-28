@@ -11,6 +11,8 @@ constexpr float SCALE_BIG_INCREMENT = 2.5f;
 constexpr float SHOT_SPEED_BIG_XZ = 10.0f;
 constexpr float SHOT_SPEED_BIG_Y  = 7.5f;
 constexpr float TIME_ALIVE_BIG = 5.0f;
+constexpr int POWER_START = 50;
+constexpr int POWER_INCREMENT = 50;
 
 
 PBulletBig::PBulletBig(void)
@@ -71,6 +73,7 @@ void PBulletBig::SetParam(void)
 
 	scaleUpTime_ = 0.0f;
 
+	power_ = POWER_START + (POWER_INCREMENT * shotCnt_);
 	scaleMax_ = SCALE_BIG + (SCALE_BIG_INCREMENT * shotCnt_);
 	transform_.InitTransform(SCALE_BIG, transform_.quaRot, Quaternion::Identity());
 }

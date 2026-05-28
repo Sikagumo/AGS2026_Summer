@@ -227,6 +227,22 @@ void Player::ReleasePost(void)
 
 int Player::GetPower(void)
 {
+	/*
+	int power = 0;
+	for (auto& bullet : bullets_)
+	{
+		if (!bullet->GetIsVisible()) { continue; }
+
+		power += bullet->GetPower();
+
+		if (bullet->GetPower() > 0)
+		{
+			bullet->BlastAction();
+		}
+	}
+
+	return power;*/
+
 	return actionController_->GetActionAttackPower(curAttackNum_ - 1);
 }
 
@@ -245,7 +261,8 @@ void Player::ProcessMove(void)
 	if (inputManager_.IsNew(KEY_INPUT_A)) { dir.x += -1.0f; }
 	if (inputManager_.IsNew(KEY_INPUT_D)) { dir.x += 1.0f; }
 
-	if (actionController_->IsActiveAction())
+	if (actionController_->IsActiveAction()
+		|| actionController_->GetActionState() != PActionController::PACTION_STATE::NONE)
 	{
 		movePow_ = UtilityMath::VECTOR_ZERO;
 		return;
@@ -421,7 +438,6 @@ void Player::CreateBullet(void)
 	{
 		if (!bullet->IsAlive())
 		{
-			bullet->Release();
 			bullet->Init();
 
 			bullet->Create(transform_.pos, throwDir_, curAttackNum_, (curAttackNum_ >= (attackNumMax_ - 1)));

@@ -85,6 +85,7 @@ void SceneGame::Update(void)
 	boss_->Update();
 	stage_->Update();
 	damageController_->Update();
+	
 	boss_->SetBossDamage(damageController_->GetBossDamage());
 
 	boss_->SetWeaponCannonLDamage(damageController_->GetWeaponCannonLDamage());
@@ -97,8 +98,11 @@ void SceneGame::Update(void)
 	boss_->SetWeaponMPRDamage(damageController_->GetWeaponMPRDamage());
 
 	boss_->SetWeaponRGDamage(damageController_->GetWeaponRGDamage());
-
+	
+	// プレイヤーの攻撃
 	damageController_->SetPlayerAttack(player_->GetPower());
+	
+	// プレイヤー被ダメージ処理
 	player_->SetDamage(damageController_->GetPlayerDamage());
 }
 

@@ -16,8 +16,6 @@ public:
 	};
 
 
-	/// @brief コンストラクタ
-	/// @param _shotCnt 発射回数
 	PBulletBase(void);
 
 	virtual ~PBulletBase(void)override = default;
@@ -40,11 +38,17 @@ public:
 
 	bool IsAlive(void)const;
 
+	bool GetIsVisible(void)const { return isVisible_; };
+
 	float GetRadius(void)const { return radius_; }
 
 	void SetFollow(const VECTOR& _pos, const VECTOR& _offsetDir);
 
 	virtual void PreActiveProcess(void){};
+
+	int GetPower(void) { return activePower_; }
+
+	virtual void BlastAction(void);
 
 
 protected:
@@ -68,6 +72,7 @@ protected:
 	bool isVisible_;
 
 	int power_;
+	int activePower_;
 
 	bool isFinish_;
 
@@ -88,8 +93,6 @@ protected:
 	virtual void UpdatePost(void) = 0;
 
 	void ReleasePost(void)override;
-
-	virtual void BlastAction(void);
 
 	virtual void ChangeBulletState(BULLET_STATE _state) = 0;
 };

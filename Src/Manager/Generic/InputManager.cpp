@@ -421,9 +421,6 @@ bool InputManager::IsPadBtnTrgUp(JOYPAD_NO no, JOYPAD_BTN btn) const
 
 VECTOR InputManager::GetDirectionXZAKey(int aKeyX, int aKeyY) const
 {
-
-	VECTOR ret = { 0.0f, 0.0f, 0.0f };
-
 	// スティックの個々の入力値は、
 	// -1000.0f ～ 1000.0f の範囲で返ってくるが、
 	// X:1000.0f、Y:1000.0fになることは無い(1000と500くらいが最大)
@@ -440,7 +437,7 @@ VECTOR InputManager::GetDirectionXZAKey(int aKeyX, int aKeyY) const
 	if (len < THRESHOLD)
 	{
 		// (0.0f, 0.0f, 0.0f)
-		return ret;
+		return UtilityMath::VECTOR_ZERO;
 	}
 
 	// デッドゾーン境界からに再スケーリング(可変デッドゾーン)
@@ -450,9 +447,7 @@ VECTOR InputManager::GetDirectionXZAKey(int aKeyX, int aKeyY) const
 	dirZ = (dirZ / len) * scale;
 
 	// Zは前に倒すとマイナス値が返ってくるので反転
-	ret = UtilityMath::VNormalize(VGet(dirX, 0.0f, -dirZ));
-
-	return ret;
+	return UtilityMath::VNormalize(VGet(dirX, 0.0f, -dirZ));
 
 }
 

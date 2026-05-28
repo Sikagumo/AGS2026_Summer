@@ -17,6 +17,7 @@ PBulletBase::PBulletBase(void)
 	, shotCnt_(0)
 	, isVisible_(false)
 	, isFinish_(false)
+	, power_(0), activePower_(0)
 {
 }
 
@@ -47,7 +48,8 @@ void PBulletBase::Update(void)
 	}
 	else if (bulletState_ == BULLET_STATE::BLAST)
 	{
-
+		activePower_ = 0;
+		bulletState_ = BULLET_STATE::INACTIVE;
 	}
 	// è’ìÀéû
 	//bulletState_ = BULLET_STATE::BLAST;
@@ -56,11 +58,27 @@ void PBulletBase::Update(void)
 
 	CollisionManager& colMng = CollisionManager::GetInstance();
 
-	if (bulletState_ == BULLET_STATE::INACTIVE) { return; }
-	
+	if (bulletState_ == BULLET_STATE::INACTIVE
+		|| bulletState_ == BULLET_STATE::BLAST) {
+		return;
+	}
 
-	if (colMng.IsActorCollidingWithTag(this, ColliderBase::TAG::BOSS)
-		|| colMng.IsActorCollidingWithTag(this, ColliderBase::TAG::STAGE) && shotPow_.y < 0.0f)
+
+	const std::vector<ColliderBase::TAG> BOSS_TAG
+		= { ColliderBase::TAG::BOSS
+			, ColliderBase::TAG::WEAPON_CANNON_L, ColliderBase::TAG::WEAPON_CANNON_R
+			, ColliderBase::TAG::WEAPON_MG_L, ColliderBase::TAG::WEAPON_MG_R
+			, ColliderBase::TAG::WEAPON_MP_L, ColliderBase::TAG::WEAPON_MP_R
+			, ColliderBase::TAG::WEAPON_RG};
+	for (auto tag : BOSS_TAG)
+	{
+		if (colMng.IsActorCollidingWithTag(this, tag))
+		{
+			BlastAction();
+			return;
+		}
+	}
+	if (colMng.IsActorCollidingWithTag(this, ColliderBase::TAG::STAGE) && shotPow_.y < 0.0f)
 	{
 		BlastAction();
 	}
@@ -84,10 +102,11 @@ void PBulletBase::ReleasePost(void)
 
 void PBulletBase::BlastAction(void)
 {
-	// damageController_.É_ÉÅÅ[ÉWìoò^(power_);
-
-	bulletState_ = BULLET_STATE::INACTIVE;
+	bulletState_ = BULLET_STATE::BLAST;
 	isVisible_ = false;
+	activePower_ = power_;
+
+	// ìñÇΩÇËîªíËñ≥å¯âª
 	CollisionManager::GetInstance().SetCollisionActive(this, ColliderBase::TAG::PLAYER_BULLET, false);
 
 
@@ -122,12 +141,6 @@ void PBulletBase::Shot(const VECTOR& _shotDir)
 	shotPow_.y = shotPowY;
 	shotPow_.z = shotPowXZ.z;
 
-
-	if (isFinish_)
-	{
-		constexpr float SHOT_POW = 1.5f;
-		shotPow_.y *= SHOT_POW;
-	}
 	bulletState_ = BULLET_STATE::SHOT;
 
 	curGravityPow_ = 0.0f;
