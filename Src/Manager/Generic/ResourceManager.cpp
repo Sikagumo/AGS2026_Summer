@@ -110,8 +110,6 @@ void ResourceManager::Initialize(void)
 void ResourceManager::_SetResource(Resource::LOAD_TYPE _loadType, SRC _src, std::string _path
 								   , int _allNum, int _numX, int _numY)
 {
-	Resource* ret = new Resource();
-	Resource res;
 	if (_allNum == -1)
 	{
 		// ÇªÇÃëºì«Ç›çûÇ›
@@ -164,8 +162,6 @@ Resource ResourceManager::Load(SRC _src)
 	Resource* res = _Load(_src);
 
 	if (res == nullptr) return Resource();
-
-	Resource ret = *res;
 
 	return *res;
 }

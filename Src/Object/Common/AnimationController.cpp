@@ -294,9 +294,8 @@ float AnimationController::GetPlayPointRate(void)
 	if (playType_ == -1) { return 0.0f; }
 
 	Animation& anim = animations_.at(playType_);
-	float ret = (anim.step / anim.totalTime);
 
-	return ret;
+	return (anim.step / anim.totalTime);
 }
 
 void AnimationController::Stop(float _stopTime)
@@ -383,13 +382,11 @@ void AnimationController::Add(int _type, Animation& _animation)
 
 bool AnimationController::IsFindAnimation(int _type)
 {
-	bool ret = false;
-
 	auto it = animations_.find(_type);
 	if (it != animations_.end())
 	{
 		// ”­Œ©
-		ret = true;
+		return true;
 	}
 #ifdef _DEBUG
 	else
@@ -398,5 +395,5 @@ bool AnimationController::IsFindAnimation(int _type)
 	}
 #endif
 
-	return ret;
+	return false;
 }

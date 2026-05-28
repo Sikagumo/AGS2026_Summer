@@ -18,6 +18,7 @@ DamageController::~DamageController()
 
 void DamageController::Update()
 {
+	/* ボスとプレイヤー弾 */
 	if (CollisionManager::GetInstance().IsTagCollidingWithTag(ColliderBase::TAG::BOSS, ColliderBase::TAG::PLAYER_BULLET))
 	{
 		bossDamege_ = playerAttack_;
@@ -63,9 +64,11 @@ void DamageController::Update()
 		bossDamege_ = 0;
 	}
 	
+
+	/* プレイヤーとボスの攻撃 */
 	if (CollisionManager::GetInstance().IsTagCollidingWithTag(ColliderBase::TAG::HIT_WAVE, ColliderBase::TAG::PLAYER))
 	{
-		playerDamege_ = playerHp_*(static_cast<float>(BOSS_WEPO_DAMEGE::PRESSWAVE)/10);
+		playerDamege_ = playerHp_*(static_cast<float>(BOSS_WEPO_DAMEGE::PRESSWAVE) / 10);
 		
 	}
 	else

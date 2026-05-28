@@ -30,8 +30,8 @@ void InputTextManager::Update(void)
 	// １　：キー入力は正常に終了した
 	// ２　：キー入力はキャンセルされた
 	int handle = instance_->inputTextArea_->GetKeyHandle();
-	int ret = CheckKeyInput(handle);
-	if (ret != 0)
+
+	if (CheckKeyInput(handle) != 0)
 	{
 
 		// 入力された文字列をセット

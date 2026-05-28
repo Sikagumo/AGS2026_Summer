@@ -85,9 +85,14 @@ void SceneGame::Update(void)
 	boss_->Update();
 	stage_->Update();
 	damageController_->Update();
+
 	boss_->SetBossDamege(damageController_->GetBossDamege());
 	boss_->SetWeponDamege(damageController_->GetWeaponDamege());
+
+	// プレイヤーの攻撃
 	damageController_->SetPlayerAttack(player_->GetPower());
+	
+	// プレイヤー被ダメージ処理
 	player_->SetDamage(damageController_->GetPlayerDamege());
 
 }

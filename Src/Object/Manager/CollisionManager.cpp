@@ -124,7 +124,7 @@ bool CollisionManager::CheckCollision(const ColliderBase* _colliderA, const Coll
 	{
 		if (_colliderB->GetShapeType() == SHAPE::CAPSULE)
 		{
-			return CheckHIT_WAVE(_colliderB, const_cast<ColliderBase*>(_colliderA), HIT_WAVE_THICKNESS, HIT_WAVE_HEIGHT);
+			return CheckHitWave(_colliderB, const_cast<ColliderBase*>(_colliderA), HIT_WAVE_THICKNESS, HIT_WAVE_HEIGHT);
 		}
 
 		return false;
@@ -135,7 +135,7 @@ bool CollisionManager::CheckCollision(const ColliderBase* _colliderA, const Coll
 	{
 		if (_colliderA->GetShapeType() == SHAPE::CAPSULE)
 		{
-			return CheckHIT_WAVE(_colliderA, const_cast<ColliderBase*>(_colliderB), HIT_WAVE_THICKNESS, HIT_WAVE_HEIGHT);
+			return CheckHitWave(_colliderA, const_cast<ColliderBase*>(_colliderB), HIT_WAVE_THICKNESS, HIT_WAVE_HEIGHT);
 		}
 	}
 
@@ -313,7 +313,7 @@ void CollisionManager::ResolveCollision(ActorBase* _actorA, ActorBase* _actorB,
 	}
 }
 
-bool CollisionManager::CheckHIT_WAVE(const ColliderBase* _hitCapsuleCol, ColliderBase* _waveCol, float _waveThickness, float _waveHeight)
+bool CollisionManager::CheckHitWave(const ColliderBase* _hitCapsuleCol, ColliderBase* _waveCol, float _waveThickness, float _waveHeight)
 {
 	if (!_hitCapsuleCol || !_waveCol)
 	{

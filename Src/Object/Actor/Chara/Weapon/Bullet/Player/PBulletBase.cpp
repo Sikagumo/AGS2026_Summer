@@ -17,6 +17,7 @@ PBulletBase::PBulletBase(void)
 	, shotCnt_(0)
 	, isVisible_(false)
 	, isFinish_(false)
+	, power_(0), activePower_(0)
 {
 }
 
@@ -47,7 +48,8 @@ void PBulletBase::Update(void)
 	}
 	else if (bulletState_ == BULLET_STATE::BLAST)
 	{
-
+		activePower_ = 0;
+		bulletState_ = BULLET_STATE::INACTIVE;
 	}
 	// è’ìÀéû
 	//bulletState_ = BULLET_STATE::BLAST;
@@ -56,7 +58,8 @@ void PBulletBase::Update(void)
 
 	CollisionManager& colMng = CollisionManager::GetInstance();
 
-	if (bulletState_ == BULLET_STATE::INACTIVE) { return; }
+	if (bulletState_ == BULLET_STATE::INACTIVE
+		|| bulletState_ == BULLET_STATE::BLAST) { return; }
 	
 
 	if (colMng.IsActorCollidingWithTag(this, ColliderBase::TAG::BOSS)
@@ -84,10 +87,11 @@ void PBulletBase::ReleasePost(void)
 
 void PBulletBase::BlastAction(void)
 {
-	// damageController_.É_ÉÅÅ[ÉWìoò^(power_);
-
-	bulletState_ = BULLET_STATE::INACTIVE;
+	bulletState_ = BULLET_STATE::BLAST;
 	isVisible_ = false;
+	activePower_ = power_;
+
+	// ìñÇΩÇËîªíËñ≥å¯âª
 	CollisionManager::GetInstance().SetCollisionActive(this, ColliderBase::TAG::PLAYER_BULLET, false);
 
 
