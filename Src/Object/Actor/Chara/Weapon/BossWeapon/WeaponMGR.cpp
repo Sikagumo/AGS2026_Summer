@@ -79,7 +79,7 @@ void WeaponMGR::UpdateProcess(void)
 	if (hp_ <= 0)
 	{
 		isAlive_ = false;
-		//CollisionManager::GetInstance().SetCollisionActive(this, tag_, false);
+		CollisionManager::GetInstance().SetCollisionActive(this, tag_, false);
 	}
 }
 

@@ -48,9 +48,9 @@ void WeaponMGL::InitTransform(void)
 
 void WeaponMGL::InitCollider(void)
 {
-	ColliderLine* colLine = new ColliderLine(ColliderBase::TAG::STAGE, &transform_, { -50.0f,0.0f,50.0f }, { -50.0f,1.0f,50.0f });
+	ColliderLine* colLine = new ColliderLine(ColliderBase::TAG::STAGE, &transform_, { -50.0f,0.0f,50.0f }, { -50.0f,5.0f,50.0f });
 	ownColliders_.emplace(static_cast<int>(ColliderBase::SHAPE::LINE), colLine);
-
+	colLine->SetTriger(false);
 
 	ColliderCapsule* colCapsule = new ColliderCapsule(
 		tag_, &transform_, { -50.0f,0.0f,140.0f }, { -50.0f,0.0f,-40.0f }, 20.0f);
@@ -79,7 +79,7 @@ void WeaponMGL::UpdateProcess(void)
 	if (hp_ <= 0)
 	{
 		isAlive_ = false;
-		//CollisionManager::GetInstance().SetCollisionActive(this, tag_, false);
+		CollisionManager::GetInstance().SetCollisionActive(this, tag_, false);
 	}
 }
 
