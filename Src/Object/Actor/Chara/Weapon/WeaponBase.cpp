@@ -64,11 +64,12 @@ void WeaponBase::Collision(void)
 
 	
 
-	// ジャンプ量を加算
-	transform_.pos = VAdd(transform_.pos, jumpPow_);
+	
 
 	// 衝突(重力)
 	CollisionGravity();
+	// ジャンプ量を加算
+	transform_.pos = VAdd(transform_.pos, jumpPow_);
 }
 
 void WeaponBase::CollisionGravity(void)

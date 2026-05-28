@@ -48,7 +48,7 @@ void WeaponMGL::InitTransform(void)
 
 void WeaponMGL::InitCollider(void)
 {
-	ColliderLine* colLine = new ColliderLine(ColliderBase::TAG::STAGE, &transform_, { -50.0f,-10.0f,50.0f }, { -50.0f,5.0f,50.0f });
+	ColliderLine* colLine = new ColliderLine(ColliderBase::TAG::STAGE, &transform_, { -50.0f,0.0f,50.0f }, { -50.0f,-10.0f,50.0f });
 	ownColliders_.emplace(static_cast<int>(ColliderBase::SHAPE::LINE), colLine);
 	colLine->SetTriger(false);
 

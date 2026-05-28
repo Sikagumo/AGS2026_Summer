@@ -50,7 +50,7 @@ private:
 protected:
 
 	// ç≈ëÂóéâ∫ë¨ìx
-	static constexpr float MAX_FALL_SPEED = -300.0f;
+	static constexpr float MAX_FALL_SPEED = -30.0f;
 
 	static constexpr VECTOR WEAPON_SIZE = { 3.0f,3.0f,3.0f };
 	static constexpr float WEAPON_ROT = 180.0f;
