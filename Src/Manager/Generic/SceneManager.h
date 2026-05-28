@@ -70,6 +70,7 @@ private:
     // シーン管理関連
     std::list<std::shared_ptr<SceneBase>> scenes_; // シーンを保持する（スタック構造）
     std::mutex sceneMutex_;                        // シーンアクセスを保護するミューテックス
+    std::shared_ptr<SceneBase> nextScene_;         // 次に遷移するシーン
     bool isGameEnd_;                               // ゲーム終了フラグ
     bool isSceneChanging_;                         // シーン切り替え中フラグ
     bool isFirstFrame_;                            // 最初のフレームかどうかのフラグ

@@ -51,12 +51,9 @@ void PBulletBase::Update(void)
 		activePower_ = 0;
 		bulletState_ = BULLET_STATE::INACTIVE;
 	}
-	// è’ìÀéû
-	//bulletState_ = BULLET_STATE::BLAST;
 
 	UpdatePost();
 
-	CollisionManager& colMng = CollisionManager::GetInstance();
 
 	if (bulletState_ == BULLET_STATE::INACTIVE
 		|| bulletState_ == BULLET_STATE::BLAST) {
@@ -70,6 +67,9 @@ void PBulletBase::Update(void)
 			, ColliderBase::TAG::WEAPON_MG_L, ColliderBase::TAG::WEAPON_MG_R
 			, ColliderBase::TAG::WEAPON_MP_L, ColliderBase::TAG::WEAPON_MP_R
 			, ColliderBase::TAG::WEAPON_RG};
+
+	CollisionManager& colMng = CollisionManager::GetInstance();
+
 	for (auto tag : BOSS_TAG)
 	{
 		if (colMng.IsActorCollidingWithTag(this, tag))
