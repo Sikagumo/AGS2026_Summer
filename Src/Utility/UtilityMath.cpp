@@ -127,7 +127,6 @@ int UtilityMath::DirNearAroundRad(float from, float to)
 		}
 		else
 		{
-
 			//反時計回り
 			ret = -1.0f;
 		}
@@ -187,11 +186,7 @@ int UtilityMath::Lerp(int start, int end, float t)
 		return end;
 	}
 
-	int ret = start;
-
-	ret += Round(t * static_cast<float>(end - start));
-
-	return ret;
+	return (start + Round(t * static_cast<float>(end - start)));;
 }
 
 // 浮動小数点値を線形補間する
@@ -203,11 +198,7 @@ float UtilityMath::Lerp(float start, float end, float t)
 		return end;
 	}
 
-	float ret = start;
-
-	ret += t * (end - start);
-
-	return ret;
+	return (start + (t * (end - start)));
 }
 
 // 倍精度浮動小数点値を線形補間する
@@ -219,11 +210,7 @@ double UtilityMath::Lerp(double start, double end, double t)
 		return end;
 	}
 
-	double ret = start;
-
-	ret += t * (end - start);
-
-	return ret;
+	return (start + (t * (end - start)));;
 }
 
 // 2Dベクトルを線形補間する
@@ -235,12 +222,9 @@ Vector2 UtilityMath::Lerp(const Vector2& start, const Vector2& end, float t)
 		return end;
 	}
 
-	Vector2 ret = start;
-
-	ret.x += Round(t * static_cast<float>((end.x - start.x)));
-	ret.y += Round(t * static_cast<float>((end.y - start.y)));
-
-	return end;
+	
+	return Vector2(start.x + Round(t * static_cast<float>((end.x - start.x)))
+				 , start.y + Round(t * static_cast<float>((end.y - start.y))));
 }
 
 // 3Dベクトルを線形補間する
@@ -252,13 +236,9 @@ VECTOR UtilityMath::Lerp(const VECTOR& start, const VECTOR& end, float t)
 		return end;
 	}
 
-	VECTOR ret = start;
-
-	ret.x += t * (end.x - start.x);
-	ret.y += t * (end.y - start.y);
-	ret.z += t * (end.z - start.z);
-
-	return ret;
+	return VGet(start.x + t * (end.x - start.x)
+		, start.y + t * (end.y - start.y)
+		, start.z + t * (end.z - start.z));
 }
 
 // 度単位で角度を線形補間し、360度を考慮する
@@ -306,15 +286,10 @@ COLOR_F UtilityMath::Lerp(const COLOR_F& start, const COLOR_F& end, float t)
 	{
 		return end;
 	}
-
-	COLOR_F ret = start;
-
-	ret.r += t * (end.r - start.r);
-	ret.g += t * (end.g - start.g);
-	ret.b += t * (end.b - start.b);
-	ret.a += t * (end.a - start.a);
-
-	return ret;
+	return COLOR_F(start.r + t * (end.r - start.r)
+		, start.g + t * (end.g - start.g)
+		, start.b + t * (end.b - start.b)
+		, start.a + t * (end.a - start.a));
 }
 
 // 2Dベクトルの3点間でベジエ補間する
@@ -579,6 +554,12 @@ void UtilityMath::DrawLineXYZ(const VECTOR& pos, const Quaternion& rot, float le
 //
 //	return false;
 //}
+
+VECTOR UtilityMath::GetCirclePos(const VECTOR& center, float radius, float angle)
+{
+	return VGet(center.x + std::cosf(angle) * radius,
+		center.y + std::sinf(angle) * radius, center.z);
+}
 
 // ランダムな数値を返す(float用)
 float UtilityMath::RandRangeF(float min, float max)

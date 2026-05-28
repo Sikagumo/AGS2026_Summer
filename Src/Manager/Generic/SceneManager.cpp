@@ -36,16 +36,18 @@ void SceneManager::DestroyInstance(void)
 }
 
 SceneManager::SceneManager(void)
+	: isGameEnd_(false)
+    , isSceneChanging_(false)
+    , isFirstFrame_(true)
+    , sceneMutex_()
 {
-    isGameEnd_ = false;
-    isSceneChanging_ = false;
-
     camera_ = std::make_unique<Camera>();
+    scenes_ = std::list<std::shared_ptr<SceneBase>>();
+    nextScene_ = nullptr;
 }
 
 SceneManager::~SceneManager(void)
 {
-    Release();
 }
 
 void SceneManager::Initialize(void)
@@ -57,8 +59,6 @@ void SceneManager::Initialize(void)
     Loading::GetInstance()->Initialize();
     CollisionManager::CreateInstance();
     CollisionManager::GetInstance().Initialize();
-
-    isFirstFrame_ = true;
 }
 
 void SceneManager::Init3D(void)
@@ -112,14 +112,6 @@ void SceneManager::Init3D(void)
 
 void SceneManager::ChangeScene(std::shared_ptr<SceneBase> scene)
 {
-    // 古いシーンを解放
-    for (auto& s : scenes_)
-    {
-        s->Release();
-    }
-    scenes_.clear();
-   
-
     // CollisionControllerをクリア
     //CollisionController::GetInstance().Clear();
 
@@ -127,7 +119,7 @@ void SceneManager::ChangeScene(std::shared_ptr<SceneBase> scene)
     SoundManager::GetInstance().StopAllBGM();
 
     // 新しいシーンを設定
-    scenes_.push_back(scene);
+    nextScene_ = scene;
     isSceneChanging_ = true;
 
     // 非同期ロード開始（ロード画面付き）
@@ -153,11 +145,6 @@ void SceneManager::PopScene(void)
     {
         scenes_.back()->Release();
         scenes_.pop_back();
-
-        //if (!scenes_.empty())
-        //{
-        //    scenes_.back()->OnResume();
-        //}
     }
 }
 
@@ -200,8 +187,6 @@ void SceneManager::Update(void)
         return;
     }
 
-    if (scenes_.empty()) { return; }
-
     TimeManager::GetInstance().Update();
 
     if (isGameEnd_) { return; }
@@ -216,13 +201,24 @@ void SceneManager::Update(void)
 
         if (loader->GetProgress() >= LoadCompleteThreshold && !loader->IsLoading())
         {
-            auto current = scenes_.back();
-            current->EndLoad();
-            current->Initialize();
+            // 古いシーンを解放
+            for (auto& scene : scenes_)
+            {
+                scene->Release();
+            }
+            scenes_.clear();
+
+            scenes_.push_back(nextScene_);
+            nextScene_->EndLoad();
+            nextScene_->Initialize();
+
+            nextScene_ = nullptr;
             isSceneChanging_ = false;
         }
         return;
     }
+
+    if (scenes_.empty()) { return; }
 
     auto current = scenes_.back();
     if (current)
@@ -244,44 +240,35 @@ void SceneManager::Update(void)
 
 void SceneManager::Draw(void)
 {
-    if (scenes_.empty()) { return; }
+    if (!scenes_.empty())
+    {
+        if (camera_) camera_->SetBeforeDraw();
+
+        for (auto& scene : scenes_)
+        {
+            if (scene) scene->Draw();
+        }
+
+        if (camera_) camera_->DrawDebug();
+    }
 
     auto loader = Loading::GetInstance();
-
-    if (isSceneChanging_ || (loader && loader->IsLoading()))
+    if (isSceneChanging_ && loader && loader->IsLoading())
     {
-        if (loader)
-        {
-            loader->Draw(); 
-        }
-        return;
-    }   
-
-    if (camera_ == nullptr)
-    {
-        return;
+        loader->Draw();
     }
-
-    // 通常時の描画
-    if (camera_) camera_->SetBeforeDraw();
-
-    for (auto& scene : scenes_)
-    {
-        if (scene) scene->Draw();
-    }
-
-    if (camera_) camera_->DrawDebug();
 }
 
 void SceneManager::Release(void)
 {
+    if (Loading::GetInstance())
+
     // ロード完了を待機する
     if (Loading::GetInstance()->IsLoading())
     {
-        while (Loading::GetInstance()->IsLoading())
-        {
-            std::this_thread::sleep_for(std::chrono::milliseconds(1));
-        }
+        SetUseASyncLoadFlag(false);
+
+        Loading::GetInstance()->EndAsyncLoad();
     }
 
     // 各シーンを解放する

@@ -40,6 +40,7 @@ public:
 		CAMERA,      // カメラ
 		WALL,        // 壁
 		HIT_WAVE,
+		SAFE_WAVE,
 	};
 
 	/// @brief コンストラクタ

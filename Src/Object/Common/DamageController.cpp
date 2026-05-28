@@ -6,16 +6,18 @@
 
 DamageController::DamageController():
 	bossAttack_(0),
-	bossDamege_(0),
+	bossDamage_(0),
 	playerAttack_(0),
-	playerDamege_(0),
-	weaponMGRDamege_(0),
-	weaponMGLDamege_(0),
-	weaponMPRDamege_(0),
-	weaponMPLDamege_(0),
-	weaponRGDamege_(0),
-	weaponCannonLDamege_(0),
-	weaponCannonRDamege_(0)
+	playerDamage_(0),
+	weaponMGRDamage_(0),
+	weaponMGLDamage_(0),
+	weaponMPRDamage_(0),
+	weaponMPLDamage_(0),
+	weaponRGDamage_(0),
+	weaponCannonLDamage_(0),
+	weaponCannonRDamage_(0),
+	playerHp_(0)
+
 {
 }
 
@@ -25,64 +27,67 @@ DamageController::~DamageController()
 
 void DamageController::Update()
 {
-	
-	bossDamege_ = 0;
-	playerDamege_ = 0;
-	weaponMGRDamege_ = 0;
-	weaponMGLDamege_ = 0;
-	weaponMPRDamege_ = 0;
-	weaponMPLDamege_ = 0;
-	weaponRGDamege_ = 0;
-	weaponCannonLDamege_ = 0;
-	weaponCannonRDamege_ = 0;
+	bossDamage_ = 0;
+	playerDamage_ = 0;
+	weaponMGRDamage_ = 0;
+	weaponMGLDamage_ = 0;
+	weaponMPRDamage_ = 0;
+	weaponMPLDamage_ = 0;
+	weaponRGDamage_ = 0;
+	weaponCannonLDamage_ = 0;
+	weaponCannonRDamage_ = 0;
 
+	// ボスとプレイヤー弾
 	if (CollisionManager::GetInstance().IsTagCollidingWithTag(ColliderBase::TAG::BOSS, ColliderBase::TAG::PLAYER_BULLET))
 	{
-		bossDamege_ = playerAttack_;
+		bossDamage_ = playerAttack_;
 	}
 	if (CollisionManager::GetInstance().IsTagCollidingWithTag(ColliderBase::TAG::WEAPON_CANNON_L, ColliderBase::TAG::PLAYER_BULLET))
 	{
-		weaponCannonLDamege_ = playerAttack_;
-		bossDamege_ = playerAttack_ * BOSS_CAT_DAMEGE;
+		weaponCannonLDamage_ = playerAttack_;
+		bossDamage_ = static_cast<int>(playerAttack_ * BOSS_CUT_DAMAGE);
 	}
 	if (CollisionManager::GetInstance().IsTagCollidingWithTag(ColliderBase::TAG::WEAPON_CANNON_R, ColliderBase::TAG::PLAYER_BULLET))
 	{
-		weaponCannonRDamege_ = playerAttack_;
-		bossDamege_ = playerAttack_ * BOSS_CAT_DAMEGE;
+		weaponCannonRDamage_ = playerAttack_;
+		bossDamage_ = static_cast<int>(playerAttack_ * BOSS_CUT_DAMAGE);
 	}
 	if (CollisionManager::GetInstance().IsTagCollidingWithTag(ColliderBase::TAG::WEAPON_MG_L, ColliderBase::TAG::PLAYER_BULLET))
 	{
-		weaponMGLDamege_ = playerAttack_;
-		bossDamege_ = playerAttack_ * BOSS_CAT_DAMEGE;
+		weaponMGLDamage_ = playerAttack_;
+		bossDamage_ = static_cast<int>(playerAttack_ * BOSS_CUT_DAMAGE);
 	}
 	if (CollisionManager::GetInstance().IsTagCollidingWithTag(ColliderBase::TAG::WEAPON_MG_R, ColliderBase::TAG::PLAYER_BULLET))
 	{
-		weaponMGRDamege_ = playerAttack_;
-		bossDamege_ = playerAttack_ * BOSS_CAT_DAMEGE;
+		weaponMGRDamage_ = playerAttack_;
+		bossDamage_ = static_cast<int>(playerAttack_ * BOSS_CUT_DAMAGE);
 	}
 	if (CollisionManager::GetInstance().IsTagCollidingWithTag(ColliderBase::TAG::WEAPON_MP_L, ColliderBase::TAG::PLAYER_BULLET))
 	{
-		weaponMPLDamege_ = playerAttack_;
-		bossDamege_ = playerAttack_ * BOSS_CAT_DAMEGE;
+		weaponMPLDamage_ = playerAttack_;
+		bossDamage_ = static_cast<int>(playerAttack_ * BOSS_CUT_DAMAGE);
 	}
 	if (CollisionManager::GetInstance().IsTagCollidingWithTag(ColliderBase::TAG::WEAPON_MP_R, ColliderBase::TAG::PLAYER_BULLET))
 	{
-		weaponMPRDamege_ = playerAttack_;
-		bossDamege_ = playerAttack_ * BOSS_CAT_DAMEGE;
+		weaponMPRDamage_ = playerAttack_;
+		bossDamage_ = static_cast<int>(playerAttack_ * BOSS_CUT_DAMAGE);
 	}
 	if (CollisionManager::GetInstance().IsTagCollidingWithTag(ColliderBase::TAG::WEAPON_RG, ColliderBase::TAG::PLAYER_BULLET))
 	{
-		weaponRGDamege_ = playerAttack_;
-		bossDamege_ = playerAttack_* BOSS_CAT_DAMEGE;
+		weaponRGDamage_ = playerAttack_;
+		bossDamage_ = static_cast<int>(playerAttack_* BOSS_CUT_DAMAGE);
 	}
 	
-		
-	
-	
+
+	// プレイヤーとボスの攻撃
 	if (CollisionManager::GetInstance().IsTagCollidingWithTag(ColliderBase::TAG::HIT_WAVE, ColliderBase::TAG::PLAYER))
 	{
-		playerDamege_ = playerHp_*(static_cast<float>(BOSS_WEPO_DAMEGE::PRESSWAVE)/10);
-		
+		// HP割合ダメージ
+		const float RATE_DAMAGE = (playerHp_ * (static_cast<float>(BOSS_WEPO_DAMAGE::PRESSWAVE) / 10));
+		playerDamage_ = static_cast<int>(RATE_DAMAGE);
 	}
-
+	else
+	{
+		playerDamage_ = 0;
+	}
 }

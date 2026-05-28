@@ -118,6 +118,26 @@ bool CollisionManager::CheckCollision(const ColliderBase* _colliderA, const Coll
 
 	// 形状タイプ取得
 	using SHAPE = ColliderBase::SHAPE;
+	using TAG = ColliderBase::TAG;
+
+	if (_colliderA->GetCollisionTag() == TAG::HIT_WAVE)
+	{
+		if (_colliderB->GetShapeType() == SHAPE::CAPSULE)
+		{
+			return CheckHitWave(_colliderB, const_cast<ColliderBase*>(_colliderA), HIT_WAVE_THICKNESS, HIT_WAVE_HEIGHT);
+		}
+
+		return false;
+			
+	}
+
+	if (_colliderB->GetCollisionTag() == TAG::HIT_WAVE)
+	{
+		if (_colliderA->GetShapeType() == SHAPE::CAPSULE)
+		{
+			return CheckHitWave(_colliderA, const_cast<ColliderBase*>(_colliderB), HIT_WAVE_THICKNESS, HIT_WAVE_HEIGHT);
+		}
+	}
 
 	SHAPE shapeA = _colliderA->GetShapeType();
 	SHAPE shapeB = _colliderB->GetShapeType();
@@ -293,6 +313,59 @@ void CollisionManager::ResolveCollision(ActorBase* _actorA, ActorBase* _actorB,
 	}
 }
 
+bool CollisionManager::CheckHitWave(const ColliderBase* _hitCapsuleCol, ColliderBase* _waveCol, float _waveThickness, float _waveHeight)
+{
+	if (!_hitCapsuleCol || !_waveCol)
+	{
+		return false;
+	}
+
+	const auto* capsule = dynamic_cast <const ColliderCapsule*>(_hitCapsuleCol);
+	const auto* wave = dynamic_cast<const ColliderSphere*>(_waveCol);
+
+	if (capsule == nullptr || wave == nullptr)
+	{
+		return false;
+	}
+
+	VECTOR wavePos = wave->GetWorldPosition();
+
+	VECTOR capStartPos = capsule->GetWorldStartPos();
+	VECTOR capEndPos = capsule->GetWorldEndPos();
+
+	VECTOR nearestPos = GetNearestPointOnSegment(capStartPos, capEndPos, wavePos);
+
+	VECTOR wavePosXZ = wavePos;
+	VECTOR nearestPosXZ = nearestPos;
+
+	wavePosXZ.y = 0.0f;
+	nearestPosXZ.y = 0.0f;
+
+	float distance = static_cast<float>(UtilityMath::Distance(nearestPosXZ, wavePosXZ));
+
+	float waveRadius = wave->GetRadius();
+
+	float totalThickness = _waveThickness + capsule->GetRadius();
+
+	bool isHit = abs(distance - waveRadius) < totalThickness;
+
+	if (!isHit)
+	{
+		return false;
+	}
+
+	float capsuleFootY = (capStartPos.y < capEndPos.y ? capStartPos.y : capEndPos.y) - capsule->GetRadius();
+
+	float differenceY = nearestPos.y - wavePos.y;
+
+	if (capsuleFootY > (wavePos.y + _waveHeight))
+	{
+		return false;
+	}
+
+	return true;
+}
+
 void CollisionManager::UpdateCollisionPars(void)
 {
 	// 前フレームの衝突情報リセット
@@ -414,15 +487,15 @@ bool CollisionManager::CanCollide(int _tagA, int _tagB) const
 		 || tagHurt == TAG::WEAPON_CANNON_L || tagHurt == TAG::WEAPON_CANNON_R
 		 || tagHurt == TAG::WEAPON_MG_L	|| tagHurt == TAG::WEAPON_MG_R
 		 || tagHurt == TAG::WEAPON_MP_L || tagHurt == TAG::WEAPON_MP_R
-		 || tagHurt == TAG::WEAPON_RG||tagHurt==TAG::HIT_WAVE)
+		 || tagHurt == TAG::WEAPON_RG
+		 || tagHurt==TAG::HIT_WAVE)
 		{
 			return true;
 		}
 	}
-
 	
-
-	if (tagHit == TAG::BOSS || tagHit == TAG::WEAPON_CANNON_L || tagHit == TAG::WEAPON_CANNON_R
+	if (tagHit == TAG::BOSS
+		|| tagHit == TAG::WEAPON_CANNON_L || tagHit == TAG::WEAPON_CANNON_R
 		|| tagHit == TAG::WEAPON_MG_L || tagHit == TAG::WEAPON_MG_R
 		|| tagHit == TAG::WEAPON_MP_L || tagHit == TAG::WEAPON_MP_R
 		|| tagHit == TAG::WEAPON_RG)
@@ -433,12 +506,9 @@ bool CollisionManager::CanCollide(int _tagA, int _tagB) const
 		}
 	}
 
-	if (tagHit == TAG::HIT_WAVE)
+	if (tagHit == TAG::HIT_WAVE && tagHurt == TAG::PLAYER)
 	{
-		if (tagHurt == TAG::PLAYER)
-		{
-			return true;
-		}
+		return true;
 	}
 
 	if (tagHit == TAG::STAGE)

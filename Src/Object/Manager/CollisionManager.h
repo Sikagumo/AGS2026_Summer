@@ -96,6 +96,14 @@ public:
 	/// @param info 衝突判定の結果
 	void ResolveCollision(ActorBase* actorA, ActorBase* actorB, const CollisionInfo& info);
 
+	/// @brief 衝撃波の当たり判定を行う
+	/// @param _hitCol 当たる側のコライダー
+	/// @param _waveCol 衝撃波のコライダー
+	/// @param _waveThickness 衝撃波の厚み
+	/// @param _waveHeight 衝撃波の高さ
+	/// @return 当たっていれば true
+	bool CheckHitWave(const ColliderBase* _hitCapsuleCol, ColliderBase* _waveCol, float _waveThickness, float _waveHeight);
+
 private:
 
 	// カリングを行う距離のデフォルト値
@@ -103,6 +111,10 @@ private:
 
 	// 更新のインターバル時間
 	static constexpr float UPDATE_INTERVAL = 0.016f;
+
+	// 衝撃波の定数関連
+	static constexpr float HIT_WAVE_THICKNESS = 3.0f; // 衝撃波の厚み
+	static constexpr float HIT_WAVE_HEIGHT = 15.0f;    // 衝撃波の高さ
 
 	// シングルトンインスタンス
 	static CollisionManager* instance_;

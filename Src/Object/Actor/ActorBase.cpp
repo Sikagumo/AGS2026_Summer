@@ -60,9 +60,12 @@ void ActorBase::Release(void)
 	transform_.Release();
 
 	// 自身のコライダ解放
-	for (auto& own : ownColliders_)
+	if (!ownColliders_.empty())
 	{
-		delete own.second;
+		for (auto& own : ownColliders_)
+		{
+			delete own.second;
+		}
 	}
 }
 

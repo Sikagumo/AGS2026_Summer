@@ -1,8 +1,12 @@
 ﻿#include "Loading.h"
+
 #include <DxLib.h>
 #include <iostream>
+
 #include "../Application.h"
 #include "../Manager/Generic/ResourceManager.h"
+#include "../Manager/System/TimeManager.h"
+#include "../Utility/UtilityMath.h"
 
 Loading* Loading::instance_ = nullptr;
 
@@ -69,12 +73,6 @@ void Loading::Update(void)
 		return;
 	}
 
-	if (ProcessMessage() != 0)
-	{
-		isLoading_ = false;
-		return;
-	}
-
 	const int LOAD_COUNT = GetASyncLoadNum(); 
 
 	if (progress_ < 100.0f)
@@ -97,36 +95,23 @@ void Loading::Update(void)
 
 void Loading::Draw(void)
 {
-	const int screenWidth = Application::SCREEN_SIZE_X;
-	const int screenHeight = Application::SCREEN_SIZE_Y;
-
 	ClearDrawScreen();
 
 	// 背景を黒で塗りつぶす
-	DrawBox(0, 0, screenWidth, screenHeight, GetColor(0, 0, 0), TRUE);
+	DrawBox(0, 0, Application::SCREEN_SIZE_X, Application::SCREEN_SIZE_Y, GetColor(0, 0, 0), true);
 
-	// 💡 調整用パラメータ
-	// 画面の幅（例: 1280）からマージンを引いた分だけ動くようにする
-	const int margin = 100;
-	const int heightOffset = 100; // プラスで下に、マイナスで上に
+	float time = TimeManager::GetInstance().GetGameTime();
+	float speed = 3.0f;
+	float radius = 350.0f;
+	float currentAngle = time * speed;
 
-	// 画像のサイズを取得
-	int imageWidth = 0;
-	int imageHeight = 0;
-	GetGraphSize(imageHandle_, &imageWidth, &imageHeight);
+	VECTOR center = VGet(Application::SCREEN_HALF_X, Application::SCREEN_HALF_Y, 0.0f);
 
-	// X座標の開始地点（左端）と終了地点（右端）を計算
-	const int startX = -imageWidth; // 完全に画面の外からスタート
-	const int endX = screenWidth;   // 完全に画面の外へ抜ける
+	VECTOR pos = UtilityMath::GetCirclePos(center, radius, time * speed);
 
-	// 現在の進捗率を基に、左端から右端まで線形補間
-	const int imageX = static_cast<int>(startX + (endX - startX) * (progress_ / 100.0f));
+	float rotationAngle = currentAngle + (DX_PI_F / 2.0f);
 
-	// Y座標（画面中央ベースで調整）
-	const int centerY = (screenHeight / 2) + heightOffset;
-	const int imageY = centerY - imageHeight / 2;
-
-	DrawRotaGraph(imageX, imageY, 0.5f, 0.0f, imageHandle_, true);
+	DrawRotaGraph(static_cast<int>(pos.x), static_cast<int>(pos.y), 0.2f, rotationAngle, imageHandle_, true);
 }
 
 void Loading::EndAsyncLoad(void)

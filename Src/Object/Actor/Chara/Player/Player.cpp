@@ -36,6 +36,7 @@ Player::Player(int _playerNo, BULLET_TYPE _playerType)
 	, animType_(ANIM_TYPE::IDLE)	
 	,  curAttackNum_(0)
 	, throwPos_(UtilityMath::VECTOR_ZERO), throwDir_(UtilityMath::VECTOR_ZERO)
+	, shotIndex_(-1)
 {
 	constexpr int BULLET_MAX = 3;
 	attackNumMax_ = BULLET_MAX;
@@ -49,6 +50,23 @@ void Player::Load(void)
 {
 	transform_.modelId = resourceManager_.LoadModelDuplicate(ResourceManager::SRC::MODEL_PLAYER_HUMAN);
 }
+void Player::Draw(void)
+{
+	COLOR_F material = COLOR_F();
+
+	if (curInvTime_ > 0.0f)
+	{
+		material = COLOR_F(1.0f, 0.0f, 0.0f, 1.0f);
+	}
+	else
+	{
+		material = COLOR_F(1.0f, 1.0f, 1.0f, 1.0f);
+	}
+	MV1SetMaterialDifColor(transform_.modelId, 0, material);
+
+	ActorBase::Draw();
+}
+
 void Player::DrawDebug(void)
 {
 	CharaBase::DrawDebug();
@@ -119,7 +137,7 @@ void Player::InitPost(void)
 	constexpr float SHOT_TIME_ACTIVE = 2.0f; // —LŒøŠÔ
 	constexpr float SHOT_TIME_ACTION_ACTIVE = 1.25f; // —LŒøŠÔ
 	constexpr float SHOT_TIME_ACTIVE_INPUT = 1.725f; // “ü—Í‰Â”\ŠÔ
-	constexpr float SHOT_TIME_END = 1.0f; // I—¹ŠÔ
+	constexpr float SHOT_TIME_END = 0.75f; // I—¹ŠÔ
 
 	constexpr float SHOT_TIME_STOP = 0.85f; // ’â~ŠÔ
 	constexpr float SHOT_TIME_STOP_ACTIVE = 1.15f; // ’â~—LŒø‰»ŠÔ
@@ -131,20 +149,20 @@ void Player::InitPost(void)
 	timeActionActive = SHOT_TIME_ACTION_ACTIVE;
 	timeInput = SHOT_TIME_ACTIVE_INPUT;
 
-	actionController_->SetAction(0, timeActive, SHOT_TIME_END, timeActionActive
+	actionController_->SetAction(0, 50, timeActive, SHOT_TIME_END, timeActionActive
 								, std::bind(&Player::ShotBullet, this)
 								, 0.0f, 0.0f, timeInput);
 
 	timeActive += SHOT_TIME_INCREMENT;
 	//timeActionActive += SHOT_TIME_INC_ACTION;
-	actionController_->SetAction(1, timeActive, SHOT_TIME_END, timeActionActive
+	actionController_->SetAction(1, 75, timeActive, SHOT_TIME_END, timeActionActive
 								, std::bind(&Player::ShotBullet, this)
 								, SHOT_TIME_STOP, SHOT_TIME_STOP_ACTIVE, timeInput);
 
 	timeActive += SHOT_TIME_INCREMENT * 2;
 	//timeActionActive += SHOT_TIME_INC_ACTION;
 	timeInput += (SHOT_TIME_INCREMENT / 2);
-	actionController_->SetAction(2, timeActive, SHOT_TIME_END, timeActionActive
+	actionController_->SetAction(2, 150, timeActive, SHOT_TIME_END, timeActionActive
 								, std::bind(&Player::ShotBullet, this)
 								, SHOT_TIME_STOP, SHOT_TIME_STOP_ACTIVE, timeInput);
 }
@@ -152,6 +170,11 @@ void Player::InitPost(void)
 
 void Player::UpdateProcess(void)
 {
+	if (curInvTime_ > 0.0f)
+	{
+		curInvTime_ -= TimeManager::GetInstance().GetDeltaTime();
+	}
+
 	ProcessAttack();
 
 	ProcessJump();
@@ -183,10 +206,9 @@ void Player::DrawLate(void)
 
 	UtilityMath::DrawLineXYZ(transform_.pos, transform_.quaRot);
 
-	DrawFormatString(10, 160, 0xffffff, "player:(%.f,%.f,%.f)(%.2f‹,%.2f‹,%.2f‹)(%.2f‹,%.2f‹,%.2f‹)"
+	DrawFormatString(10, 160, 0xffff00, "player:(%.f,%.f,%.f), hp(%d), –³“G(%.2f)"
 		, transform_.pos.x, transform_.pos.y, transform_.pos.z
-		, UtilityMath::Rad2DegF(transform_.quaRot.x), UtilityMath::Rad2DegF(transform_.quaRot.y), UtilityMath::Rad2DegF(transform_.quaRot.z)
-		, UtilityMath::Rad2DegF(transform_.quaRotLocal.x), UtilityMath::Rad2DegF(transform_.quaRotLocal.y), UtilityMath::Rad2DegF(transform_.quaRotLocal.z));
+		, hp_, curInvTime_);
 
 	actionController_->DrawDebug();
 
@@ -201,6 +223,27 @@ void Player::DrawLate(void)
 
 void Player::ReleasePost(void)
 {
+}
+
+int Player::GetPower(void)
+{
+	/*
+	int power = 0;
+	for (auto& bullet : bullets_)
+	{
+		if (!bullet->GetIsVisible()) { continue; }
+
+		power += bullet->GetPower();
+
+		if (bullet->GetPower() > 0)
+		{
+			bullet->BlastAction();
+		}
+	}
+
+	return power;*/
+
+	return actionController_->GetActionAttackPower(curAttackNum_ - 1);
 }
 
 void Player::ProcessMove(void)
@@ -218,7 +261,8 @@ void Player::ProcessMove(void)
 	if (inputManager_.IsNew(KEY_INPUT_A)) { dir.x += -1.0f; }
 	if (inputManager_.IsNew(KEY_INPUT_D)) { dir.x += 1.0f; }
 
-	if (actionController_->IsActiveAction())
+	if (actionController_->IsActiveAction()
+		|| actionController_->GetActionState() != PActionController::PACTION_STATE::NONE)
 	{
 		movePow_ = UtilityMath::VECTOR_ZERO;
 		return;
@@ -318,6 +362,7 @@ void Player::ProcessAttack(void)
 		if (animType_ == ANIM_TYPE::THROW_LEFT
 			|| animType_ == ANIM_TYPE::THROW_RIGHT)
 		{
+			curAttackNum_ = 0;
 			PlayAnim(ANIM_TYPE::IDLE);
 		}
 	}
@@ -393,7 +438,6 @@ void Player::CreateBullet(void)
 	{
 		if (!bullet->IsAlive())
 		{
-			bullet->Release();
 			bullet->Init();
 
 			bullet->Create(transform_.pos, throwDir_, curAttackNum_, (curAttackNum_ >= (attackNumMax_ - 1)));

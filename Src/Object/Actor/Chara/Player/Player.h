@@ -26,9 +26,13 @@ public:
 
 	void Load(void)override;
 
+	void Draw(void)override;
+
 	void DrawDebug(void)override;
 
 	void ReleasePost(void)override;
+
+	int GetPower(void);
 
 
 protected:
