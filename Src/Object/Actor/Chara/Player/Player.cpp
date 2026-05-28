@@ -148,20 +148,20 @@ void Player::InitPost(void)
 	timeActionActive = SHOT_TIME_ACTION_ACTIVE;
 	timeInput = SHOT_TIME_ACTIVE_INPUT;
 
-	actionController_->SetAction(0, 15, timeActive, SHOT_TIME_END, timeActionActive
+	actionController_->SetAction(0, 100, timeActive, SHOT_TIME_END, timeActionActive
 								, std::bind(&Player::ShotBullet, this)
 								, 0.0f, 0.0f, timeInput);
 
 	timeActive += SHOT_TIME_INCREMENT;
 	//timeActionActive += SHOT_TIME_INC_ACTION;
-	actionController_->SetAction(1, 20, timeActive, SHOT_TIME_END, timeActionActive
+	actionController_->SetAction(1, 150, timeActive, SHOT_TIME_END, timeActionActive
 								, std::bind(&Player::ShotBullet, this)
 								, SHOT_TIME_STOP, SHOT_TIME_STOP_ACTIVE, timeInput);
 
 	timeActive += SHOT_TIME_INCREMENT * 2;
 	//timeActionActive += SHOT_TIME_INC_ACTION;
 	timeInput += (SHOT_TIME_INCREMENT / 2);
-	actionController_->SetAction(2, 30, timeActive, SHOT_TIME_END, timeActionActive
+	actionController_->SetAction(2, 325, timeActive, SHOT_TIME_END, timeActionActive
 								, std::bind(&Player::ShotBullet, this)
 								, SHOT_TIME_STOP, SHOT_TIME_STOP_ACTIVE, timeInput);
 }

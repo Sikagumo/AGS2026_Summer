@@ -59,11 +59,26 @@ void PBulletBase::Update(void)
 	CollisionManager& colMng = CollisionManager::GetInstance();
 
 	if (bulletState_ == BULLET_STATE::INACTIVE
-		|| bulletState_ == BULLET_STATE::BLAST) { return; }
-	
+		|| bulletState_ == BULLET_STATE::BLAST) {
+		return;
+	}
 
-	if (colMng.IsActorCollidingWithTag(this, ColliderBase::TAG::BOSS)
-		|| colMng.IsActorCollidingWithTag(this, ColliderBase::TAG::STAGE) && shotPow_.y < 0.0f)
+
+	const std::vector<ColliderBase::TAG> BOSS_TAG
+		= { ColliderBase::TAG::BOSS
+			, ColliderBase::TAG::WEAPON_CANNON_L, ColliderBase::TAG::WEAPON_CANNON_R
+			, ColliderBase::TAG::WEAPON_MG_L, ColliderBase::TAG::WEAPON_MG_R
+			, ColliderBase::TAG::WEAPON_MP_L, ColliderBase::TAG::WEAPON_MP_R
+			, ColliderBase::TAG::WEAPON_RG};
+	for (auto tag : BOSS_TAG)
+	{
+		if (colMng.IsActorCollidingWithTag(this, tag))
+		{
+			BlastAction();
+			return;
+		}
+	}
+	if (colMng.IsActorCollidingWithTag(this, ColliderBase::TAG::STAGE) && shotPow_.y < 0.0f)
 	{
 		BlastAction();
 	}
