@@ -159,7 +159,9 @@ bool CollisionManager::CheckCollision(const ColliderBase* _colliderA, const Coll
 	{
 		return CheckCapsuleVsCapsule(_colliderA, _colliderB, _outInfo);
 	}
-	else if (shapeA == SHAPE::LINE && shapeB == SHAPE::MODEL)
+	
+	// 地面との判定はほかの判定と一緒にしない
+	if (shapeA == SHAPE::LINE && shapeB == SHAPE::MODEL)
 	{
 		return CheckLineVsModel(_colliderA, _colliderB, _outInfo);
 	}
@@ -261,54 +263,74 @@ void CollisionManager::ResolveCollision(ActorBase* _actorA, ActorBase* _actorB,
 
 	using TAG = ColliderBase::TAG;
 
-	// 1. 通常の押し戻しベクトルを計算
 	// 通常の押し戻しベクトルを計算
 	VECTOR pushVector = VScale(_info.hitNormal, _info.penetration);
 
 	TAG tagA = _info.myCollider->GetCollisionTag();
 	TAG tagB = _info.hitCollider->GetCollisionTag();
 
-	if ((tagA == TAG::PLAYER || tagA == TAG::BOSS) && tagB == TAG::STAGE)
+	if (tagA == TAG::STAGE && tagB == TAG::STAGE)
 	{
 		float overlap = fabsf(_info.penetration);
+		VECTOR stagePush = VScale(VGet(0.0f, 1.0f, 0.0f), overlap);
 
+		bool isHaveMyCollider = false;
+		for (const auto& [id, col] : _actorA->GetOwnColliders())
+		{
+			if (col == _info.myCollider)
+			{
+				isHaveMyCollider = true;
+				break;
+			}
+		}
+
+		if (isHaveMyCollider)
+		{
+			_actorA->GetTransform().Translate(stagePush);
+		}
+		else
+		{
+			_actorB->GetTransform().Translate(stagePush);
+		}
+		return;
+	}
+
+	if (tagA != TAG::STAGE && tagB == TAG::STAGE)
+	{
+		float overlap = fabsf(_info.penetration);
 		VECTOR stagePush = VGet(0.0f, overlap, 0.0f);
 
 		_actorA->GetTransform().Translate(stagePush);
 		return;
 	}
-	else if (tagA == TAG::STAGE && (tagB == TAG::PLAYER || tagB == TAG::BOSS))
+	else if (tagA == TAG::STAGE && tagB != TAG::STAGE)
 	{
 		float overlap = fabsf(_info.penetration);
-
 		VECTOR stagePush = VGet(0.0f, overlap, 0.0f);
 
 		_actorB->GetTransform().Translate(stagePush);
 		return;
 	}
 
-	// キャラクター同士は上下に沈まないように、Y軸の押し戻しをゼロにする
 	pushVector.y = 0.0f;
 
-	// どちらの所有コライダーがベースになっているかによって押し戻す対象を決める
-	bool isAHaveMyCollider = false;
+	bool isHaveMyCollider = false;
+
 	for (const auto& [id, col] : _actorA->GetOwnColliders())
 	{
 		if (col == _info.myCollider)
 		{
-			isAHaveMyCollider = true;
+			isHaveMyCollider = true;
 			break;
 		}
 	}
 
-	if (isAHaveMyCollider)
+	if (isHaveMyCollider)
 	{
-		// myColliderがAのものなら、Aを押し戻す
 		_actorA->GetTransform().Translate(pushVector);
 	}
 	else
 	{
-		// myColliderがBのものなら、Bを逆方向に押し戻す
 		_actorB->GetTransform().Translate(VScale(pushVector, -1.0f));
 	}
 }
