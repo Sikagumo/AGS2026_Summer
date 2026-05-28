@@ -11,7 +11,6 @@
 //#include "SceneScore.h"
 
 SceneGame::SceneGame(void)
-	: tempBossWeaponPos_(VGet(0.0f, 100.0f, 500.0f))
 {
 	player_ = std::make_unique<Player>(0, Player::BULLET_TYPE::BIG);
 	boss_ = std::make_unique<Boss>();
@@ -70,17 +69,20 @@ void SceneGame::Update(void)
 
 	if (InputManager::GetInstance().IsTrgDown(KEY_INPUT_E))
 	{
-		auto& camera = SceneManager::GetInstance().GetCamera();
-
 		if (!camera->GetIsLockOn())
 		{
-			camera->SetLockOnPosition(tempBossWeaponPos_);
+			camera->SetLockOnPosition(boss_->GetBossPos());
 		}
 		else
 		{
 			camera->SetIsLockOn(false);
 		}
 	}
+	if (camera->GetIsLockOn())
+	{
+		camera->SetLockOnPosition(boss_->GetBossPos());
+	}
+
 	player_->Update();
 	boss_->Update();
 	stage_->Update();
@@ -122,10 +124,6 @@ void SceneGame::Draw(void)
 	player_->Draw();
 
 	boss_->Draw();
-	
-	// ’Ç]ˆÊ’u
-	DrawSphere3D(tempBossWeaponPos_, 10.0f, 16, 0x0000ff, 0xffffff, true);
-
 
 #ifdef _DEBUG
 	DrawDebug();
@@ -144,5 +142,5 @@ void SceneGame::Release(void)
 
 void SceneGame::DrawDebug(void)
 {
-
+	SceneManager::GetInstance().GetCamera()->DrawDebug();
 }

@@ -143,6 +143,7 @@ private:
 	// ターゲット
 	bool isLockOn_;
 	VECTOR lockOnPos_;
+	VECTOR lockOnPrePos_;
 
 
 	
