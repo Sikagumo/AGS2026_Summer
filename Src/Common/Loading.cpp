@@ -77,7 +77,7 @@ void Loading::Update(void)
 
 	if (progress_ < 100.0f)
 	{
-		progress_ += 0.1f;
+		progress_ += 0.5f;
 	}
 
 	if (progress_ >= 100.0f)
