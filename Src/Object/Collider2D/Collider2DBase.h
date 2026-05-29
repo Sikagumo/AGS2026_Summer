@@ -1,10 +1,10 @@
 #pragma once
 
-class Transform;
-
 /// @brief 2Dコライダーの共通親クラス
 class Collider2DBase
 {
+public:
+
 	/// @brief 2D形状の種別
 	enum class SHAPE_2D
 	{
@@ -13,24 +13,22 @@ class Collider2DBase
 	};
 
 	/// @brief 衝突の識別タグ
-	enum  class TAG_2D
+	enum class TAG_2D
 	{
-		UI_BUTTON,
+		SOLO_PLAY_BUTTON,
+		MULTI_PLAY_BUTTON,
+		OPTION_BUTTON,
+		EXIT_UTTON,
 		MOUSE_CURSOR,
 	};
 
 	/// @brief コンストラクタ
 	/// @param _shapeType 2D形状の種類
 	/// @param _collisionTag 衝突の2D識別タグ
-	/// @param _followTarget 追従対象のTransform
-	Collider2DBase(SHAPE_2D _shapeType, TAG_2D _collisionTag, const Transform* _followTarget);
+	Collider2DBase(SHAPE_2D _shapeType, TAG_2D _collisionTag);
 
 	/// @brief デストラクタ
 	virtual ~Collider2DBase(void) = default;
-
-	/// @brief デバック描画
-	/// @param _color 描画色
-	virtual void DrawDebug(int _color) const = 0;
 
 	/// @brief 2D形状タイプの取得
 	/// @return 2D形状タイプ
@@ -40,17 +38,13 @@ class Collider2DBase
 	/// @return 衝突2Dタグ
 	TAG_2D GetCollisionTag(void) const;
 
-private:
+	/// @brief デバッグ描画
+	/// @param _color 描画色
+	virtual void DrawDebug(int _color) const = 0;
 
-	// 2D形状の種別
-	SHAPE_2D shapeType_;
+protected:
 
-	// 衝突の2D識別タグ
-	TAG_2D collisionTag_;
-
-	// 追従対象のTransform
-
-
-
+	// コライダー設定関連
+	SHAPE_2D shapeType_;      // 2D形状の種別
+	TAG_2D collisionTag_;     // 衝突の2D識別タグ
 };
-

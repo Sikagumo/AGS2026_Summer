@@ -1,4 +1,5 @@
-﻿#include "CollisionManager.h"
+﻿#define NOMINMAX
+#include "CollisionManager.h"
 #include "../../Manager/System/TimeManager.h"
 #include "../Common/Transform.h"
 #include "../Actor/ActorBase.h"
@@ -7,6 +8,8 @@
 #include "../Collider/ColliderModel.h"
 #include "../../Utility/UtilityMath.h"
 #include "../Collider/ColliderLine.h"
+#include "../Collider2D/Collider2DCircle.h"
+#include "../Collider2D/Collider2DBox.h"
 
 CollisionManager* CollisionManager::instance_ = nullptr;
 
@@ -50,6 +53,18 @@ void CollisionManager::Initialize(void)
 	cullingDistSquare_ = DEFAULT_CULL_DIST * DEFAULT_CULL_DIST;
 
 	updateTimer_ = 0.0f;
+
+	colliders2D_.clear();
+
+	for (size_t i = 0; i < MATRIX_SIZE_2D; ++i)
+	{
+		for (size_t j = 0; j < MATRIX_SIZE_2D; ++j)
+		{
+			collisionMatrix2D_[i][j] = false;
+		}
+	}
+	
+	SetCollisionGroup2D(Collider2DBase::TAG_2D::MOUSE_CURSOR, Collider2DBase::TAG_2D::SOLO_PLAY_BUTTON, true);
 }
 
 void CollisionManager::Update(void)
@@ -62,6 +77,8 @@ void CollisionManager::Update(void)
 		updateTimer_ = 0.0f;
 
 		UpdateCollisionPars();
+
+		UpdateCollision2D();
 	}
 }
 
@@ -878,4 +895,276 @@ VECTOR CollisionManager::GetNearestPointOnSegment(const VECTOR& _startPos,
 	VECTOR nearestPos = VAdd(_startPos, VScale(segmentVec, segmentRatio));
 
 	return nearestPos;
+}
+
+
+void CollisionManager::RegisterCollider2D(Collider2DBase* _collider)
+{
+	if (_collider == nullptr)
+	{
+		return;
+	}
+
+	auto it = std::find(colliders2D_.begin(), colliders2D_.end(), _collider);
+	if (it == colliders2D_.end())
+	{
+		colliders2D_.push_back(_collider);
+	}
+}
+
+void CollisionManager::UnregisterCollider2D(Collider2DBase* _collider)
+{
+	if (_collider == nullptr)
+	{
+		return;
+	}
+
+	auto it = std::find(colliders2D_.begin(), colliders2D_.end(), _collider);
+	if (it != colliders2D_.end())
+	{
+		colliders2D_.erase(it);
+	}
+}
+
+void CollisionManager::ClearColliders2D(void)
+{
+	colliders2D_.clear();
+}
+
+void CollisionManager::SetCollisionGroup2D(Collider2DBase::TAG_2D _tagA, Collider2DBase::TAG_2D _tagB, bool _isEnable)
+{
+	size_t indexA = static_cast<size_t>(_tagA);
+	size_t indexB = static_cast<size_t>(_tagB);
+
+	if (indexA >= MATRIX_SIZE_2D || indexB >= MATRIX_SIZE_2D)
+	{
+		return;
+	}
+
+	collisionMatrix2D_[indexA][indexB] = _isEnable;
+	collisionMatrix2D_[indexB][indexA] = _isEnable;
+}
+
+void CollisionManager::UpdateCollision2D(void)
+{
+	activeCollisions2D_.clear();
+
+	size_t count = colliders2D_.size();
+	if (count < 2)
+	{
+		return;
+	}
+
+	for (size_t i = 0; i < count; ++i)
+	{
+		auto colA = colliders2D_[i];
+
+		for (size_t j = i + 1; j < count; ++j)
+		{
+			auto colB = colliders2D_[j];
+
+			if (CanCollide2D(colA->GetCollisionTag(), colB->GetCollisionTag()))
+			{
+				if (CheckCollision2D(colA, colB))
+				{
+					auto tagA = colA->GetCollisionTag();
+					auto tagB = colB->GetCollisionTag();
+
+					auto pair = (tagA < tagB) ? std::make_pair(tagA, tagB) : std::make_pair(tagB, tagA);
+					activeCollisions2D_.insert(pair);
+				}
+			}
+		}
+	}
+}
+
+bool CollisionManager::CanCollide2D(Collider2DBase::TAG_2D _tagA, Collider2DBase::TAG_2D _tagB) const
+{
+	size_t indexA = static_cast<size_t>(_tagA);
+	size_t indexB = static_cast<size_t>(_tagB);
+
+	if (indexA >= MATRIX_SIZE_2D || indexB >= MATRIX_SIZE_2D)
+	{
+		return false;
+	}
+
+	return collisionMatrix2D_[indexA][indexB];
+}
+
+bool CollisionManager::CheckCollision2D(const Collider2DBase* _colA, const Collider2DBase* _colB) const
+{
+	using SHAPE = Collider2DBase::SHAPE_2D;
+	SHAPE shapeA = _colA->GetShapeType();
+	SHAPE shapeB = _colB->GetShapeType();
+
+	if (shapeA == SHAPE::CIRCLE && shapeB == SHAPE::CIRCLE)
+	{
+		return CheckCircleVsCircle(static_cast<const Collider2DCircle*>(_colA), static_cast<const Collider2DCircle*>(_colB));
+	}
+
+	if (shapeA == SHAPE::BOX && shapeB == SHAPE::BOX)
+	{
+		return CheckBoxVsBox(static_cast<const Collider2DBox*>(_colA), static_cast<const Collider2DBox*>(_colB));
+	}
+
+	if (shapeA == SHAPE::CIRCLE && shapeB == SHAPE::BOX)
+	{
+		return CheckCircleVsBox(static_cast<const Collider2DCircle*>(_colA), static_cast<const Collider2DBox*>(_colB));
+	}
+
+	if (shapeA == SHAPE::BOX && shapeB == SHAPE::CIRCLE)
+	{
+		return CheckCircleVsBox(static_cast<const Collider2DCircle*>(_colB), static_cast<const Collider2DBox*>(_colA));
+	}
+
+	return false;
+}
+
+bool CollisionManager::IsTagCollidingWithTag2D(Collider2DBase::TAG_2D _targetTagA, 
+	Collider2DBase::TAG_2D _targetTagB) const
+{
+	// 登録時と同じ順番（小さい順）にしてペアを作る
+	auto pair = (_targetTagA < _targetTagB) ? std::make_pair(_targetTagA, _targetTagB) 
+		: std::make_pair(_targetTagB, _targetTagA);
+
+	// 履歴の中に存在していれば当たっている
+	if (activeCollisions2D_.count(pair) > 0)
+	{
+		return true;
+	}
+
+	return false;
+}
+
+void CollisionManager::DrawDebug2D(void)
+{
+	// 登録されている2Dコライダーが一つもなければ何もしない
+	if (colliders2D_.empty())
+	{
+		return;
+	}
+
+	// 通常時の色（緑）と、衝突時の色（赤）のカラーコードを取得
+	int colorGreen = GetColor(0, 255, 0);
+	int colorRed = GetColor(255, 0, 0);
+
+	// 全ての2Dコライダーをループ処理して描画
+	for (const auto* collider : colliders2D_)
+	{
+		if (collider == nullptr)
+		{
+			continue;
+		}
+
+		// 初期状態は緑色に設定
+		int drawColor = colorGreen;
+
+		for (const auto* other : colliders2D_)
+		{
+			if (other == nullptr || collider == other)
+			{
+				continue;
+			}
+
+			// 自分と相手のタグの組み合わせが衝突履歴（activeCollisions2D_）にあるか調べる
+			if (IsTagCollidingWithTag2D(collider->GetCollisionTag(), other->GetCollisionTag()))
+			{
+				// 衝突している組み合わせがあれば赤色にする
+				drawColor = colorRed;
+				break;
+			}
+		}
+
+		// 各コライダー（円や矩形）が自分で持っている DrawDebug を呼び出して実際の形を描画
+		collider->DrawDebug(drawColor);
+	}
+}
+
+bool CollisionManager::CheckCircleVsCircle(const Collider2DBase* _circleA, const Collider2DBase* _circleB) const
+{
+	if (!_circleA || !_circleB) { return false; }
+
+	const auto* circleA = dynamic_cast<const Collider2DCircle*>(_circleA);
+	const auto* circleB = dynamic_cast<const Collider2DCircle*>(_circleB);
+
+	if (circleA == nullptr || circleB == nullptr) { return false; }
+
+	Vector2F posA = circleA->GetWorldCenterPos();
+	Vector2F posB = circleB->GetWorldCenterPos();
+
+	float distX = posB.x - posA.x;
+	float distY = posB.y - posA.y;
+	float distSquare = (distX * distX) + (distY * distY);
+
+	float radiusSum = circleA->GetRadius() + circleB->GetRadius();
+	float radiusSumSquare = radiusSum * radiusSum;
+
+	if (distSquare < radiusSumSquare)
+	{
+		return true;
+	}
+
+	return false;
+}
+
+bool CollisionManager::CheckBoxVsBox(const Collider2DBase* _boxA, const Collider2DBase* _boxB) const
+{
+	if (!_boxA || !_boxB) { return false; }
+
+	const auto* boxA = dynamic_cast<const Collider2DBox*>(_boxA);
+	const auto* boxB = dynamic_cast<const Collider2DBox*>(_boxB);
+
+	if (boxA == nullptr || boxB == nullptr) { return false; }
+
+	Vector2F leftTopA = boxA->GetLeftTop();
+	Vector2F rightBottomA = boxA->GetRightBottom();
+
+	Vector2F leftTopB = boxB->GetLeftTop();
+	Vector2F rightBottomB = boxB->GetRightBottom();
+
+	if (rightBottomA.x < leftTopB.x) { return false; }
+	if (leftTopA.x > rightBottomB.x) { return false; }
+	if (rightBottomA.y < leftTopB.y) { return false; }
+	if (leftTopA.y > rightBottomB.y) { return false; }
+
+	return true;
+}
+
+bool CollisionManager::CheckCircleVsBox(const Collider2DBase* _circle, const Collider2DBase * _box) const
+{
+	if (!_circle || !_box) { return false; }
+
+	const auto* circle = dynamic_cast<const Collider2DCircle*>(_circle);
+	if (circle == nullptr)
+	{
+		circle = dynamic_cast<const Collider2DCircle*>(_box);
+	}
+
+	const auto* box = dynamic_cast<const Collider2DBox*>(_box);
+	if (box == nullptr)
+	{
+		box = dynamic_cast<const Collider2DBox*>(_circle);
+	}
+
+	if (circle == nullptr || box == nullptr) { return false; }
+
+	Vector2F circlePos = circle->GetWorldCenterPos();
+	Vector2F boxLeftTop = box->GetLeftTop();
+	Vector2F boxRightBottom = box->GetRightBottom();
+
+	float closestX = std::max(boxLeftTop.x, std::min(circlePos.x, boxRightBottom.x));
+	float closestY = std::max(boxLeftTop.y, std::min(circlePos.y, boxRightBottom.y));
+
+	float distX = circlePos.x - closestX;
+	float distY = circlePos.y - closestY;
+	float distSquare = (distX * distX) + (distY * distY);
+
+	float radiusSquare = circle->GetRadius() * circle->GetRadius();
+
+	if (distSquare < radiusSquare)
+	{
+		return true;
+	}
+
+	return false;
 }
