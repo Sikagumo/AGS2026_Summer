@@ -59,7 +59,7 @@ public:
 	/// </summary>
 	/// <param name=""></param>
 	/// <returns></returns>
-	VECTOR GetBossPos(void) const;
+	const VECTOR GetBossPos(void) const;
 
 	//各武器のダメージ受け取り用関数
 	//ガトリング

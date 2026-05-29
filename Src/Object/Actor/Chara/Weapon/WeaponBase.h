@@ -39,7 +39,7 @@ public:
 	/// </summary>
 	/// <param name=""></param>
 	/// <returns></returns>
-	virtual VECTOR GetPos(void) const = 0;
+	virtual const VECTOR GetPos(void) const = 0;
 
 	/// <summary>
 	/// ウェポンのダメージ受け取り用
@@ -81,7 +81,7 @@ protected:
 	VECTOR localPos_;		//カメラのロックオン用の中央座標
 	Bone bone_;				//ボーン情報
 	ColliderBase::TAG tag_;	//当たり判定登録用タグの保管
-
+	Transform followTarget_;
 
 	//ドロー処理
 	virtual void DrawPre(void)override;

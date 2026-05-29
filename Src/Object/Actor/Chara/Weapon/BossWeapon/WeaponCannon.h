@@ -23,7 +23,7 @@ public:
 	void SetBone(int _id, Transform _trans, ColliderBase::TAG _tag) override;
 
 	///現在の座標
-	VECTOR GetPos(void) const override;
+	const VECTOR GetPos(void) const override;
 	/// <summary>
 	/// ウェポンのダメージ受け取り用
 	/// </summary>
@@ -66,6 +66,13 @@ protected:
 
 	void CollisionReserve(void) override {};
 
+private:
+
+	static constexpr VECTOR LINE_START_POS = { 0.0f,50.0f,60.0f };
+	static constexpr VECTOR LINE_END_POS = { 0.0f,40.0f,60.0f };
+	static constexpr VECTOR CAPSULE_START_POS = { 0.0f,50.0f,160.0f };
+	static constexpr VECTOR CAPSULE_END_POS = { 0.0f,50.0f,-40.0f };
+	static constexpr float CAPSULE_RADIUS = 20.0f;
 
 };
 
