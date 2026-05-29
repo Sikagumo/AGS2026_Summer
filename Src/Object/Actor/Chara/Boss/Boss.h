@@ -130,7 +130,6 @@ private:
 	std::array<Bone,7> boneId_;		//各ボーン
 	BONE_NAME boneName_;			//ボーンの名前
 
-
 	//攻撃関連
 	int jumpCount_;
 	int attackCount_;

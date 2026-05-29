@@ -18,7 +18,7 @@ public:
 
 	// 追従位置からカメラ位置までの相対座標
 	static constexpr VECTOR FOLLOW_LOCAL_POS = { 25.0f, 50.0f, -150.0f };
-	static constexpr VECTOR FOLLOW_LOCAL_POS_LOCKON = { 60.0f, 50.0f, -100.0f };
+	static constexpr VECTOR FOLLOW_LOCAL_POS_LOCKON = { 60.0f, 35.0f, -100.0f };
 
 	// 追従位置から注視点までの相対座標
 	static constexpr VECTOR FOLLOW_TARGET_LOCAL_POS = { 50.0f, 45.0f, 50.0f };

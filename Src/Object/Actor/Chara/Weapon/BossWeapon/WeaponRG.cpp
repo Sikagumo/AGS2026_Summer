@@ -23,9 +23,13 @@ void WeaponRG::SetBone(int _id, Transform _trans, ColliderBase::TAG _tag)
 	tag_ = _tag;
 }
 
-VECTOR WeaponRG::GetPos(void) const
+const VECTOR WeaponRG::GetPos(void) const
 {
-	return transform_.pos;
+	// ローカル座標を回転させてワールド座標へ変換
+	VECTOR localRotPos = transform_.quaRot.PosAxis(localPos_);
+
+	// 位置を加算して最終的なワールド座標にする
+	return VAdd(transform_.pos, localRotPos);
 }
 
 void WeaponRG::Load(void)
@@ -50,11 +54,11 @@ void WeaponRG::InitTransform(void)
 
 void WeaponRG::InitCollider(void)
 {
-	ColliderLine* colLine = new ColliderLine(ColliderBase::TAG::STAGE, &transform_, { 0.0f,-10.0f,-60.0f }, { 0.0f,-20.0f,-60.0f });
+	ColliderLine* colLine = new ColliderLine(ColliderBase::TAG::STAGE, &transform_, LINE_START_POS, LINE_END_POS);
 	ownColliders_.emplace(static_cast<int>(ColliderBase::SHAPE::LINE), colLine);
 
 	ColliderCapsule* colCapsule = new ColliderCapsule(
-		tag_, &transform_, {0.0f,-100.0f,-60.0f }, { 0.0f,80.0f,-60.0f }, 30.0f);
+		tag_, &transform_, CAPSULE_START_POS, CAPSULE_END_POS, CAPSULE_RADIUS);
 	ownColliders_.emplace(static_cast<int>(ColliderBase::SHAPE::CAPSULE), colCapsule);
 	colCapsule->SetTriger(false);
 
@@ -68,6 +72,7 @@ void WeaponRG::InitAnimation(void)
 void WeaponRG::InitPost(void)
 {
 	isAlive_ = true;
+	localPos_ = LINE_START_POS;
 }
 
 void WeaponRG::UpdateProcess(void)
