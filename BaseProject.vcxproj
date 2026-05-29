@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Src\Scene\MainScene\SceneResult.cpp" />
     <ClCompile Include="Src\Object\Collider2D\Collider2DBox.cpp" />
     <ClCompile Include="Src\Object\Collider2D\Collider2DCircle.cpp" />
     <ClCompile Include="Src\Object\Actor\Chara\Weapon\Bullet\Boss\BBulletBase.cpp" />
@@ -83,6 +84,7 @@
     <ClCompile Include="Src\Object\Actor\Chara\Weapon\BossWeapon\WeaponMGR.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Src\Scene\MainScene\SceneResult.h" />
     <ClInclude Include="Src\Object\Collider2D\Collider2DBox.h" />
     <ClInclude Include="Src\Object\Collider2D\Collider2DCircle.h" />
     <ClInclude Include="Src\Object\Actor\Chara\Weapon\Bullet\Boss\BBulletBase.h" />

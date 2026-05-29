@@ -9,6 +9,7 @@
 #include "../../Camera/Camera.h"
 #include "../../Utility/UtilityMath.h"
 #include "SceneTitle.h"
+#include "SceneResult.h"
 //#include "SceneScore.h"
 
 SceneGame::SceneGame(void)
@@ -45,6 +46,9 @@ void SceneGame::Initialize(void)
 
 	if (Loading::GetInstance()->IsLoading()) { return; }
 
+	// マウスを表示しない設定にする
+	SetMouseDispFlag(FALSE);
+	
 	auto& camera = SceneManager::GetInstance().GetCamera();
 	camera->ChangeMode(Camera::MODE::FOLLOW);
 	camera->SetFollow(&player_->GetTransform());
@@ -79,7 +83,8 @@ void SceneGame::Update(void)
 
 	if (player_->GetCurHp() <= 0 || boss_->GetHP() <= 0)
 	{
-		SceneManager::GetInstance().ChangeScene(std::make_shared<SceneTitle>());
+		bool isGameOver = (boss_->GetHP() <= 0 && player_->GetCurHp() > 0);
+		SceneManager::GetInstance().ChangeScene(std::make_shared<SceneResult>(isGameOver));
 	}
 }
 

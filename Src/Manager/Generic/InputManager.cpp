@@ -456,10 +456,6 @@ Vector2F InputManager::GetMouseVelocityAndFixCenter(void)
 {
 	/* マウスを中央に固定・非表示にする */
 
-	// マウスを表示しない設定にする
-	SetMouseDispFlag(FALSE);
-
-
 	int centerX = Application::SCREEN_HALF_X;
 	int centerY = Application::SCREEN_HALF_Y;
 

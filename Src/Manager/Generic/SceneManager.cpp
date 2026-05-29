@@ -52,6 +52,8 @@ SceneManager::~SceneManager(void)
 
 void SceneManager::Initialize(void)
 {
+    SetMouseDispFlag(true);
+
     SoundManager::CreateInstance();
     SoundManager::GetInstance().Initialize();
     TimeManager::CreateInstance();
