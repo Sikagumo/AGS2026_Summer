@@ -1,10 +1,14 @@
 #pragma once
+
 #include <vector>
 #include <map>
-#include <DxLib.h>
 #include <set>
+#include <array>
+#include <DxLib.h>
+
 
 #include "../Collider/ColliderBase.h"
+#include "../Collider2D/Collider2DBase.h"
 
 class ActorBase;
 
@@ -102,7 +106,43 @@ public:
 	/// @param _waveThickness 衝撃波の厚み
 	/// @param _waveHeight 衝撃波の高さ
 	/// @return 当たっていれば true
-	bool CheckHitWave(const ColliderBase* _hitCapsuleCol, ColliderBase* _waveCol, float _waveThickness, float _waveHeight);
+	bool CheckHitWave(const ColliderBase* _hitCapsuleCol, ColliderBase* _waveCol, 
+		float _waveThickness, float _waveHeight);
+
+	/// @brief 2Dコライダーの登録
+	/// @param _collider 登録する2Dコライダーのポインタ
+	void RegisterCollider2D(Collider2DBase* _collider);
+
+	/// @brief 2Dコライダーの登録解除
+	/// @param _collider 解除する2Dコライダーのポインタ
+	void UnregisterCollider2D(Collider2DBase* _collider);
+
+	/// @brief 全ての2Dコライダーをクリア
+	void ClearColliders2D(void);
+
+	/// @brief 特定の2Dタグ同士の衝突判定の有効・無効を設定する
+	/// @param _tagA 対象の2DタグA
+	/// @param _tagB 対象の2DタグB
+	/// @param _isEnable 衝突を有効にするか（trueで有効）
+	void SetCollisionGroup2D(Collider2DBase::TAG_2D _tagA, 
+		Collider2DBase::TAG_2D _tagB, bool _isEnable);
+
+	/// @brief コライダー同士の詳細な衝突チェック
+	/// @param _colA 1つ目の2Dコライダー
+	/// @param _colB 2つ目の2Dコライダー
+	/// @return 衝突しているか（trueで衝突）
+	bool CheckCollision2D(const Collider2DBase* _colA, 
+		const Collider2DBase* _colB) const;
+
+	/// @brief 特定の2Dタグ同士が現在衝突しているか調べる
+	/// @param _targetTagA 調査対象の2DタグA
+	/// @param _targetTagB 調査対象の2DタグB
+	/// @return 衝突していればtrue
+	bool IsTagCollidingWithTag2D(Collider2DBase::TAG_2D _targetTagA,
+		Collider2DBase::TAG_2D _targetTagB) const;
+
+	/// @brief 2Dコライダーのデバック表記 
+	void DrawDebug2D(void);
 
 private:
 
@@ -116,6 +156,9 @@ private:
 	static constexpr float HIT_WAVE_THICKNESS = 5.0f; // 衝撃波の厚み
 	static constexpr float HIT_WAVE_HEIGHT = 75.0f;    // 衝撃波の高さ
 
+	// 配列サイズ
+	static const size_t MATRIX_SIZE_2D = 32;
+
 	// シングルトンインスタンス
 	static CollisionManager* instance_;
 
@@ -124,6 +167,16 @@ private:
 
 	// 現在当たっているタグの組み合わせを保存する
 	std::set<std::pair<ColliderBase::TAG, ColliderBase::TAG>> activeCollisions_;
+
+	// 2Dコライダー管理関連
+	std::vector<Collider2DBase*> colliders2D_;
+
+	// 2D衝突履歴関連
+	// 現在当たっている2Dタグの組み合わせを毎フレーム保存する
+	std::set<std::pair<Collider2DBase::TAG_2D, Collider2DBase::TAG_2D>> activeCollisions2D_;
+
+	// 2D衝突マトリクス関連
+	std::array<std::array<bool, MATRIX_SIZE_2D>, MATRIX_SIZE_2D> collisionMatrix2D_;
 
 	// 内部パラメータ関連
 	float cullingDistSquare_;           // カリング距離の2乗（計算高速化用）
@@ -197,5 +250,33 @@ private:
 	/// @return 衝突している場合はtrue
 	bool CheckCapsuleVsCapsule(const ColliderBase* _colliderA, const ColliderBase* _colliderB,
 		CollisionInfo& _outInfo);
+
+	/// @brief 2Dコライダーの総当たり判定更新（Updateから呼ばれる）
+	void UpdateCollision2D(void);
+
+	/// @brief タグの組み合わせによる衝突判定可否の確認
+	/// @param _tagA 1つ目の2Dタグ
+	/// @param _tagB 2つ目の2Dタグ
+	/// @return 衝突許可フラグ（trueで判定を行う）
+	bool CanCollide2D(Collider2DBase::TAG_2D _tagA, Collider2DBase::TAG_2D _tagB) const;
+
+	/// @brief 円と円の衝突判定
+	/// @param _circleA 1つ目の円コライダー
+	/// @param _circleB 2つ目の円コライダー
+	/// @return 衝突しているか
+	bool CheckCircleVsCircle(const Collider2DBase* _circleA,
+		const Collider2DBase* _circleB) const;
+
+	/// @brief 矩形と矩形の衝突判定
+	/// @param _boxA 1つ目の矩形コライダー
+	/// @param _boxB 2つ目の矩形コライダー
+	/// @return 衝突しているか
+	bool CheckBoxVsBox(const Collider2DBase* _boxA, const Collider2DBase* _boxB) const;
+
+	/// @brief 円と矩形の衝突判定
+	/// @param _circle 円コライダー
+	/// @param _box 矩形コライダー
+	/// @return 衝突しているか
+	bool CheckCircleVsBox(const Collider2DBase* _circle, const Collider2DBase* _box) const;
 };
 
