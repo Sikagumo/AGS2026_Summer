@@ -12,9 +12,6 @@ WeaponMGR::WeaponMGR()
 	
 }
 
-void WeaponMGR::ReleasePost(void)
-{
-}
 
 
 void WeaponMGR::SetBone(int _id, Transform _trans, ColliderBase::TAG _tag)

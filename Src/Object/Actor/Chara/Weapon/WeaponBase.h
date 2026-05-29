@@ -9,6 +9,7 @@ class WeaponBase :
     public ActorBase
 {
 public:
+	//ボーン情報の受け取り用
 	struct Bone {
 		int id = 0;
 		Transform transform;
@@ -40,9 +41,22 @@ public:
 	/// <returns></returns>
 	virtual VECTOR GetPos(void) const = 0;
 
-	
+	/// <summary>
+	/// ウェポンのダメージ受け取り用
+	/// </summary>
+	/// <param name="_damage">実数ダメージ</param>
 	virtual void SetDamage(int _damage) = 0;
+	/// <summary>
+	/// ウェポンの生存状態を渡すよう
+	/// </summary>
+	/// <param name=""></param>
+	/// <returns>true=生きている</returns>
 	virtual bool GetIsAlive(void)=0;
+	/// <summary>
+	/// ウェポンの現在HPを渡すよう
+	/// </summary>
+	/// <param name=""></param>
+	/// <returns>現在HP</returns>
 	virtual int GetHp(void) = 0;
 private:
 
@@ -57,24 +71,26 @@ protected:
 
 
 
-	int hp_=500;
-	int attackDamage_;	
-	bool isAlive_;
-	VECTOR movePow_;
-	VECTOR jumpPow_;
-	// ジャンプ判定
-	bool isJump_;
+	int hp_=500;			//ウェポンのHP
+	bool isAlive_;			//ウェポンの生存フラグ
+	VECTOR movePow_;		//重力用移動量
+	VECTOR jumpPow_;		//吹っ飛び用の移動量
+	bool isJump_;			//吹っ飛び中かのフラグ
 	VECTOR localBackPos_;	//当たり判定用の後方の座標
 	VECTOR localFrontPos_;	//当たり判定用の前方の座標
 	VECTOR localPos_;		//カメラのロックオン用の中央座標
-	Bone bone_;
-	ColliderBase::TAG tag_;
+	Bone bone_;				//ボーン情報
+	ColliderBase::TAG tag_;	//当たり判定登録用タグの保管
 
+
+	//ドロー処理
 	virtual void DrawPre(void)override;
 
+	//アップデート処理
 	virtual void UpdateProcess(void) = 0;
 	virtual void UpdateProcessPost(void) = 0;
 
+	//重力
 	void CalcGravityPow(void);
 
 	// 衝突判定
