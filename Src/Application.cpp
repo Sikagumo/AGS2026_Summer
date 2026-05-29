@@ -41,13 +41,17 @@ void Application::Init(void)
 {
 
 	// アプリケーションの初期設定
-	SetWindowText("蜘蛛と布団と人形と");
+	SetWindowText("MOMOTARO伝説");
 
 	// ウィンドウサイズ
 	SetGraphMode(SCREEN_SIZE_X, SCREEN_SIZE_Y, 32);
 	
-	const bool IS_WINDOW = true;
-	ChangeWindowMode(IS_WINDOW);
+#ifdef _DEBUG
+	ChangeWindowMode(TRUE);
+#else
+	ChangeWindowMode(FALSE);
+#endif
+
 	// FPS制御初期化
 	fpsController_ = new FpsController(FRAME_RATE);
 

@@ -93,11 +93,10 @@ void WeaponCannon::UpdateProcessPost(void)
 
 void WeaponCannon::DrawPre(void)
 {
-
-
+#ifdef _DEBUG
 	for (auto& col : ownColliders_)
 	{
 		col.second->Draw();
 	}
-
+#endif
 }

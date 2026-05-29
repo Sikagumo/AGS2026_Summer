@@ -82,7 +82,8 @@ void BBulletWave::DrawPre(void)
 	{
 		col.second->Draw();
 	}
-
+#ifdef _DEBUG
 	DrawFormatString(10, 200, 0xffffff, "radius:%f", radius_);
 	DrawFormatString(10, 230, 0xffffff, "pos:%f,%f,%f", transform_.pos.x, transform_.pos.y, transform_.pos.z);
+#endif
 }

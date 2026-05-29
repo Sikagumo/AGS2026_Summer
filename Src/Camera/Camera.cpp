@@ -8,6 +8,7 @@
 #include "../Object/Collider/ColliderBase.h"
 #include "../Object/Collider/ColliderModel.h"
 #include "../Object/Collider/ColliderSphere.h"
+#include "../Application.h"
 
 
 // カメラの初期座標
@@ -21,6 +22,12 @@ const float ROT_POW_KEY = UtilityMath::Deg2RadF(5.0f);
 const float ROT_POW_RAD = UtilityMath::Deg2RadF(2.5f);
 const float ROT_POW_MOUSE = UtilityMath::Deg2RadF(0.05f);
 
+// 追従対象の最大Y軸座標
+constexpr float TARGET_POS_MAX_Y = 275.0f;
+
+// 追従有効範囲
+constexpr float POS_SPACE_MIN = 300.0f;
+constexpr float POS_SPACE_MAX = 1350.0f;
 
 Camera::Camera(void)
 	: ActorBase::ActorBase()
@@ -34,6 +41,7 @@ Camera::Camera(void)
 	, isLockOn_(false)
 	, fovRate_(1.0f)
 	, lockOnPos_(UtilityMath::VECTOR_ZERO)
+	, lockOnTarget_(-1)
 {
 	// DxLibの初期設定では、
 	// カメラの位置が x = 320.0f, y = 240.0f, z = (画面のサイズによって変化)、
@@ -59,6 +67,8 @@ void Camera::InitCollider(void)
 void Camera::InitPost(void)
 {
 	ChangeMode(MODE::NONE);
+
+	lockOnTarget_ = -1;
 }
 
 void Camera::Update(void)
@@ -115,6 +125,14 @@ void Camera::DrawDebug(void)
 		, transform_.pos.x, transform_.pos.y, transform_.pos.z
 		, target.x, target.y, target.z);
 #endif
+
+	std::string targetText = "追従対象：";
+
+	targetText += ((!isLockOn_ || lockOnTarget_ == -1) ? "なし" : "");
+	targetText += ((isLockOn_ && lockOnTarget_ == 0) ? "ボス胴体" : "");
+	targetText += ((isLockOn_ && lockOnTarget_ == 1) ? "左マシンガン" : "");
+	targetText += ((isLockOn_ && lockOnTarget_ == 2) ? "右マシンガン" : "");
+	DrawString(Application::SCREEN_HALF_X - 50, 0, targetText.c_str(), 0xff0000);
 }
 
 VECTOR Camera::GetForward(void) const
@@ -144,26 +162,70 @@ void Camera::ChangeMode(MODE _mode)
 
 }
 
-void Camera::SetLockOnPosition(const VECTOR& _pos)
+void Camera::SetLockOnTargets(int _target, const VECTOR& _targetPos, bool _isActive)
 {
-	isLockOn_ = true;
+	if (!targetsPos_.empty())
+	{
+		if (!_isActive)
+		{
+			targetsPos_.erase(_target);
 
-	VECTOR posFollow = VGet(_pos.x, 0.0f, _pos.z);
-	VECTOR posCamera = VGet(transform_.pos.x, 0.0f, transform_.pos.z);
+			if (lockOnTarget_ == _target)
+			{
+				lockOnTarget_ = -1;
+				isLockOn_ = false;
+			}
+			return;
+		}
 
-	float sizeXZ = std::abs(VSize(VSub(posFollow, posCamera)));
-	constexpr float POS_SPACE_MIN = 200.0f;
-	constexpr float POS_SPACE_MAX = 1350.0f;
-	if (sizeXZ > POS_SPACE_MAX || sizeXZ < POS_SPACE_MIN)
+		if (targetsPos_.contains(_target))
+		{
+			targetsPos_.at(_target) = _targetPos;
+			return;
+		}
+	}
+
+	if (!_isActive) { return; }
+
+	// 対象をリストに追加
+	targetsPos_.emplace(_target, _targetPos);
+}
+
+void Camera::LockOnChoice(void)
+{
+	float vSize = 10000.0f;
+	lockOnTarget_ = -1;
+	
+	for (int i = 0; i < targetsPos_.size(); i++)
+	{
+		VECTOR posFollow = VGet(targetsPos_.at(i).x, 0.0f, targetsPos_.at(i).z);
+		VECTOR posCamera = VGet(transform_.pos.x, 0.0f, transform_.pos.z);
+
+		// 最も近い対象範囲内にいる対象を追尾
+		float sizeXZ = std::abs(VSize(VSub(posFollow, posCamera)));
+
+		if (sizeXZ < vSize
+			&& sizeXZ <= POS_SPACE_MAX && sizeXZ >= POS_SPACE_MIN)
+		{
+			vSize = sizeXZ;
+			lockOnTarget_ = i;
+		}
+	}
+
+
+	if (lockOnTarget_ == -1)
 	{
 		isLockOn_ = false;
 		return;
 	}
 
-	lockOnPos_ = _pos;
+	isLockOn_ = true;
+	lockOnPos_ = targetsPos_.at(lockOnTarget_);
+}
 
-	constexpr float POS_MAX_Y = 250.0f;
-	lockOnPos_.y = std::clamp(lockOnPos_.y, -POS_MAX_Y, POS_MAX_Y);
+void Camera::FollowLockOnPosition(void)
+{
+	lockOnPos_ = targetsPos_.at(lockOnTarget_);
 }
 
 void Camera::SetDefault(void)
@@ -212,7 +274,9 @@ void Camera::SyncFollow(void)
 
 	if (isLockOn_)
 	{
-		targetPos_ = VAdd(pos, VSub(lockOnPos_, pos));
+		VECTOR lockOn = VAdd(pos, VSub(lockOnPos_, pos));
+		lockOn.y = std::clamp(lockOn.y, -TARGET_POS_MAX_Y, TARGET_POS_MAX_Y);
+		targetPos_ = lockOn;
 	}
 
 	// カメラ位置
@@ -268,6 +332,10 @@ void Camera::SetBeforeDrawFollow(void)
 	if (!isLockOn_)
 	{
 		ProcessRot(true);
+	}
+	else if(!IsTargetSpace())
+	{
+		isLockOn_ = false;
 	}
 
 	// 追従対象との相対位置を同期
@@ -488,4 +556,20 @@ void Camera::Collision(void)
 		// 反発処理
 		//transform_.pos = colliderSphere->GetPosPushBackAlongNormal(hitPoly, CNT_TRY_COLLISION_CAMERA, COLLISION_BACK_DIS);
 	}
+}
+
+bool Camera::IsTargetSpace(void)
+{
+	if (lockOnTarget_ == -1) { return false; }
+
+	VECTOR posFollow = VGet(targetsPos_.at(lockOnTarget_).x, 0.0f, targetsPos_.at(lockOnTarget_).z);
+	VECTOR posCamera = VGet(transform_.pos.x, 0.0f, transform_.pos.z);
+
+	// 最も近い対象範囲内にいる対象を追尾
+	float sizeXZ = std::abs(VSize(VSub(posFollow, posCamera)));
+	if (sizeXZ <= POS_SPACE_MAX && sizeXZ >= POS_SPACE_MIN)
+	{
+		return true;
+	}
+	return false;
 }

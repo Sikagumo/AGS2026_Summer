@@ -8,6 +8,7 @@
 #include "../../Common/Loading.h"
 #include "../../Camera/Camera.h"
 #include "../../Utility/UtilityMath.h"
+#include "SceneTitle.h"
 //#include "SceneScore.h"
 
 SceneGame::SceneGame(void)
@@ -67,27 +68,23 @@ void SceneGame::Update(void)
 	// 時間を取得
 	float times = time.GetGameTime();
 
-	if (InputManager::GetInstance().IsTrgDown(KEY_INPUT_E))
-	{
-		if (!camera->GetIsLockOn())
-		{
-			camera->SetLockOnPosition(boss_->GetBossPos());
-		}
-		else
-		{
-			camera->SetIsLockOn(false);
-		}
-	}
-	if (camera->GetIsLockOn())
-	{
-		camera->SetLockOnPosition(boss_->GetBossPos());
-	}
-
 	player_->Update();
 	boss_->Update();
 	stage_->Update();
 	damageController_->Update();
 	
+	CameraLockOn();
+
+	DamageProcess();
+
+	if (player_->GetCurHp() <= 0 || boss_->GetHp() <= 0)
+	{
+		SceneManager::GetInstance().ChangeScene(std::make_shared<SceneTitle>());
+	}
+}
+
+void SceneGame::DamageProcess(void)
+{
 	boss_->SetBossDamage(damageController_->GetBossDamage());
 
 	boss_->SetWeaponCannonLDamage(damageController_->GetWeaponCannonLDamage());
@@ -100,12 +97,35 @@ void SceneGame::Update(void)
 	boss_->SetWeaponMPRDamage(damageController_->GetWeaponMPRDamage());
 
 	boss_->SetWeaponRGDamage(damageController_->GetWeaponRGDamage());
-	
+
 	// プレイヤーの攻撃
 	damageController_->SetPlayerAttack(player_->GetPower());
-	
+
 	// プレイヤー被ダメージ処理
 	player_->SetDamage(damageController_->GetPlayerDamage());
+}
+
+void SceneGame::CameraLockOn(void)
+{
+	auto& camera = SceneManager::GetInstance().GetCamera();
+
+	if (InputManager::GetInstance().IsTrgDown(KEY_INPUT_E))
+	{
+		if (!camera->GetIsLockOn())
+		{
+			camera->LockOnChoice();
+		}
+		else
+		{
+			camera->SetIsLockOn(false);
+		}
+	}
+
+	// ロックオン時、常に追従位置を取得する
+	if (camera->GetIsLockOn())
+	{
+		camera->FollowLockOnPosition();
+	}
 }
 
 void SceneGame::UpdateCollision(void)
@@ -113,11 +133,10 @@ void SceneGame::UpdateCollision(void)
 	boss_->UpdateCollision();
 }
 
+
 void SceneGame::Draw(void)
 {
 	if (Loading::GetInstance()->IsLoading()) { return; }
-
-	DrawString(0, 0, "Game Scene Now!", GetColor(255, 255, 255));
 
 	stage_->Draw();
 

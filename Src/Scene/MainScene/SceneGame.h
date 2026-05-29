@@ -51,4 +51,8 @@ private:
 
     /// @brief デバッグ情報の描画
     void DrawDebug(void);
+
+    void DamageProcess(void);
+
+    void CameraLockOn(void);
 };

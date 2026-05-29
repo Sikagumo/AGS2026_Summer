@@ -112,8 +112,8 @@ void SceneManager::Init3D(void)
 
 void SceneManager::ChangeScene(std::shared_ptr<SceneBase> scene)
 {
-    // CollisionControllerをクリア
-    //CollisionController::GetInstance().Clear();
+    // CollisionManagerをクリア
+    CollisionManager::GetInstance().Clear();
 
     // BGMを停止する
     SoundManager::GetInstance().StopAllBGM();

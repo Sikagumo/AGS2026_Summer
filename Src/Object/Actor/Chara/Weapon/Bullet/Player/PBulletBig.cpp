@@ -73,6 +73,8 @@ void PBulletBig::SetParam(void)
 
 	scaleUpTime_ = 0.0f;
 
+	isScaleUp_ = false;
+
 	power_ = POWER_START + (POWER_INCREMENT * shotCnt_);
 	scaleMax_ = SCALE_BIG + (SCALE_BIG_INCREMENT * shotCnt_);
 	transform_.InitTransform(SCALE_BIG, transform_.quaRot, Quaternion::Identity());

@@ -16,6 +16,7 @@
 #include "../../../Collider/ColliderLine.h"
 #include "../Weapon/Bullet/Player/PBulletBig.h"
 #include "../Weapon/Bullet/Player/PBulletRapidFire.h"
+#include "../../../../Application.h"
 
 
 // 衝突判定用線分位置
@@ -154,17 +155,15 @@ void Player::InitPost(void)
 								, 0.0f, 0.0f, timeInput);
 
 	timeActive += SHOT_TIME_INCREMENT;
-	//timeActionActive += SHOT_TIME_INC_ACTION;
 	actionController_->SetAction(1, 75, timeActive, SHOT_TIME_END, timeActionActive
 								, std::bind(&Player::ShotBullet, this)
 								, SHOT_TIME_STOP, SHOT_TIME_STOP_ACTIVE, timeInput);
 
 	timeActive += SHOT_TIME_INCREMENT * 2;
-	//timeActionActive += SHOT_TIME_INC_ACTION;
 	timeInput += (SHOT_TIME_INCREMENT / 2);
 	actionController_->SetAction(2, 150, timeActive, SHOT_TIME_END, timeActionActive
 								, std::bind(&Player::ShotBullet, this)
-								, SHOT_TIME_STOP, SHOT_TIME_STOP_ACTIVE, timeInput);
+								, SHOT_TIME_STOP, SHOT_TIME_STOP_ACTIVE, 0.0f);
 }
 
 
@@ -202,13 +201,11 @@ void Player::DrawPre(void)
 
 void Player::DrawLate(void)
 {
+	DrawFormatString(10, Application::SCREEN_HALF_Y + (16 * 5), 0xff0000, "プレイヤーHP：%d"
+		, hp_);
 #ifdef _DEBUG
 
 	UtilityMath::DrawLineXYZ(transform_.pos, transform_.quaRot);
-
-	DrawFormatString(10, 160, 0xffff00, "player:(%.f,%.f,%.f), hp(%d), 無敵(%.2f)"
-		, transform_.pos.x, transform_.pos.y, transform_.pos.z
-		, hp_, curInvTime_);
 
 	actionController_->DrawDebug();
 

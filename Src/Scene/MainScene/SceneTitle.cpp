@@ -69,13 +69,13 @@ void SceneTitle::Draw(void)
 {
     if (Loading::GetInstance()->IsLoading()) { return; }
 
-    DrawString(0, 0, "Title Scene Now!", GetColor(255, 255, 255));
-    
     const int IMAGET_TITLE_Y = Application::SCREEN_SIZE_Y / 3;
 
+    // ƒ^ƒCƒgƒ‹
     DrawRotaGraph(Application::SCREEN_HALF_X, IMAGET_TITLE_Y, 1.0f, UtilityMath::DEG2RAD, imageTitle_, true);
   
-    DrawRotaGraph(Application::SCREEN_HALF_X, Application::SCREEN_HALF_Y, 5.0f, 
+
+    DrawRotaGraph(Application::SCREEN_HALF_X, Application::SCREEN_HALF_Y, 1.0f, 
         UtilityMath::DEG2RAD, imageMenu_[0], true);
 }
 

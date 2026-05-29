@@ -1,8 +1,10 @@
 #include "../../../../Manager/Generic/ResourceManager.h"
 #include "../../../../Manager/Generic/InputManager.h"
+#include "../../../../Manager/Generic/SceneManager.h"
 #include "../../../../Manager/System/TimeManager.h"
 #include "../../../../Utility/UtilityMath.h"
 #include "../../../../Utility/MatrixUtility.h"
+#include "../../../../Camera/Camera.h"
 #include "../../../Common/Transform.h"
 #include "../../../Collider/ColliderBase.h"
 #include "../../../Collider/ColliderCapsule.h"
@@ -27,7 +29,6 @@ Boss::Boss(void) :
 	hp_(1000),
 	boneName_(),
 
-
 	CharaBase()
 {
 	weaponMGL_ = std::make_unique<WeaponMGL>();
@@ -37,7 +38,6 @@ Boss::Boss(void) :
 	weaponRG_ = std::make_unique<WeaponRG>();
 	weaponCannonL_ = std::make_unique<WeaponCannon>();
 	weaponCannonR_ = std::make_unique<WeaponCannon>();
-	
 }
 
 Boss::~Boss(void)
@@ -51,6 +51,11 @@ void Boss::ReleasePost(void)
 const VECTOR& Boss::GetBossPos(void) const
 {
 	return transformBody_.pos;
+}
+
+int Boss::GetHp(void) const
+{
+	return hp_;
 }
 
 void Boss::SetWeaponMGLDamage(int _damage)
@@ -232,7 +237,6 @@ void Boss::InitPost(void)
 	stateChanges_.emplace(static_cast<int>(STATE::END), std::bind(&Boss::ChangeStateEnd, this));
 	ChangeState(STATE::IDLE);
 
-
 	hp_ = 1000;
 }
 
@@ -284,17 +288,17 @@ void Boss::ChangeStateEnd(void)
 
 void Boss::UpdateProcess(void)
 {
-	
+
 	if (inputManager_.IsTrgDown(KEY_INPUT_U))
 	{
 		transform_.pos.y += 10.0f;
 	}
 
-	
+
 	transformBody_.pos = MV1GetFramePosition(transform_.modelId, JOINT_FEET_BODY);
 
-	
-	
+
+
 	BossTransformUpdate();
 
 	// 各武器にボーン情報を設定（ここはそのまま）
@@ -322,6 +326,11 @@ void Boss::UpdateProcess(void)
 
 	stateUpdate_();
 
+
+	// カメラの追従対象に登録
+	SceneManager::GetInstance().GetCamera()->SetLockOnTargets(0, transformBody_.pos);
+	SceneManager::GetInstance().GetCamera()->SetLockOnTargets(1, weaponMGL_->GetPos(), weaponMGL_->GetIsAlive());
+	SceneManager::GetInstance().GetCamera()->SetLockOnTargets(2, weaponMGR_->GetPos(), weaponMGR_->GetIsAlive());
 }
 
 void Boss::UpdateProcessPost(void)
@@ -378,10 +387,15 @@ void Boss::DrawPre(void)
 	//weaponCannonL_->Draw();
 	//weaponCannonR_->Draw();
 	wave_->Draw();
+
+
+#ifdef _DEBUG
 	for (auto& col : ownColliders_)
 	{
 		col.second->Draw();
 	}
+
 	DrawFormatString(10, 100, 0xffffff, "bossの座標：%f,%f,%f", transform_.pos.x, transform_.pos.y, transform_.pos.z);
 	DrawFormatString(10, 400, 0xffffff, "hp:%d", hp_);
+#endif
 }
