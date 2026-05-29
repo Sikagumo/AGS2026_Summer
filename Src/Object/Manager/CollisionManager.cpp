@@ -87,6 +87,8 @@ void CollisionManager::Clear(void)
 	actors_.clear();
 
 	activeCollisions_.clear();
+
+	ClearColliders2D();
 }
 
 void CollisionManager::RegisterActor(ActorBase* _actor)

@@ -52,6 +52,8 @@ SceneManager::~SceneManager(void)
 
 void SceneManager::Initialize(void)
 {
+    SetMouseDispFlag(true);
+
     SoundManager::CreateInstance();
     SoundManager::GetInstance().Initialize();
     TimeManager::CreateInstance();
@@ -112,8 +114,8 @@ void SceneManager::Init3D(void)
 
 void SceneManager::ChangeScene(std::shared_ptr<SceneBase> scene)
 {
-    // CollisionControllerをクリア
-    //CollisionController::GetInstance().Clear();
+    // CollisionManagerをクリア
+    CollisionManager::GetInstance().Clear();
 
     // BGMを停止する
     SoundManager::GetInstance().StopAllBGM();

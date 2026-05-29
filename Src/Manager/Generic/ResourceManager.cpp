@@ -69,8 +69,11 @@ void ResourceManager::Initialize(void)
 	_SetResource(LOAD_TYPE::IMAGES, SRC::IMGS_TEXTS, PATH_IMAGE + "Text.png"
 		, imagesAllNum, imagesNumX, imagesNumY);
 
-	_SetResource(LOAD_TYPE::IMAGES, SRC::IMGE_TITLE_TEXT, PATH_IMAGE + "testFont.png"
-	,2, 1, 2);
+	_SetResource(LOAD_TYPE::IMAGES, SRC::IMGE_TITLE_TEXT, PATH_IMAGE + "txt.png"
+	,8, 1, 8);
+
+	_SetResource(LOAD_TYPE::IMAGES, SRC::IMAGE_RESULT, PATH_IMAGE + "EndTxt.png"
+		, 4, 1, 4);
 
 
 	/* ƒ‚ƒfƒ‹ */
