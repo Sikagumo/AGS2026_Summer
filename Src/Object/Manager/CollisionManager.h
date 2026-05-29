@@ -113,8 +113,8 @@ private:
 	static constexpr float UPDATE_INTERVAL = 0.016f;
 
 	// 衝撃波の定数関連
-	static constexpr float HIT_WAVE_THICKNESS = 3.0f; // 衝撃波の厚み
-	static constexpr float HIT_WAVE_HEIGHT = 15.0f;    // 衝撃波の高さ
+	static constexpr float HIT_WAVE_THICKNESS = 5.0f; // 衝撃波の厚み
+	static constexpr float HIT_WAVE_HEIGHT = 75.0f;    // 衝撃波の高さ
 
 	// シングルトンインスタンス
 	static CollisionManager* instance_;

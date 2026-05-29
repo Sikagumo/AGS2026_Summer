@@ -112,8 +112,8 @@ void SceneManager::Init3D(void)
 
 void SceneManager::ChangeScene(std::shared_ptr<SceneBase> scene)
 {
-    // CollisionControllerをクリア
-    //CollisionController::GetInstance().Clear();
+    // CollisionManagerをクリア
+    CollisionManager::GetInstance().Clear();
 
     // BGMを停止する
     SoundManager::GetInstance().StopAllBGM();
@@ -248,8 +248,6 @@ void SceneManager::Draw(void)
         {
             if (scene) scene->Draw();
         }
-
-        if (camera_) camera_->DrawDebug();
     }
 
     auto loader = Loading::GetInstance();

@@ -84,7 +84,7 @@ void SceneGamePlayer::Update(void)
 		const std::unique_ptr<Camera>& camera = sceneManager_.GetCamera();
 		if (!camera->GetIsLockOn())
 		{
-			camera->SetLockOnPosition(tempBossWeaponPos_);
+			camera->LockOnChoice();
 		}
 		else
 		{
@@ -106,9 +106,6 @@ void SceneGamePlayer::Draw(void)
 	player_->Draw();
 
 	boss_->Draw();
-
-	// í«è]à íu
-	DrawSphere3D(tempBossWeaponPos_, 10.0f, 16, 0x0000ff, 0xffffff, true);
 
 #ifdef _DEBUG
 	DrawDebug();

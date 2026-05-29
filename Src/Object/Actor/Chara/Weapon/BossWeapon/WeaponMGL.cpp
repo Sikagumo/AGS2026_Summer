@@ -91,13 +91,17 @@ void WeaponMGL::UpdateProcessPost(void)
 
 void WeaponMGL::DrawPre(void)
 {
+#ifdef _DEBUG
 	if (isAlive_)
 	{
-		
+
 		for (auto& col : ownColliders_)
 		{
 			col.second->Draw();
 		}
 	}
+
 	DrawFormatString(10, 320, 0xffffff, "MGL_HP:%d", hp_);
+
+#endif
 }

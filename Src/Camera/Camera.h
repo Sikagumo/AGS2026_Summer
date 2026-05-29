@@ -3,6 +3,7 @@
 #include "../Common/Quaternion.h"
 #include "../Object/Actor/ActorBase.h"
 #include <vector>
+#include <map>
 class Transform;
 class InputManager;
 
@@ -17,10 +18,10 @@ public:
 
 	// 追従位置からカメラ位置までの相対座標
 	static constexpr VECTOR FOLLOW_LOCAL_POS = { 25.0f, 50.0f, -150.0f };
-	static constexpr VECTOR FOLLOW_LOCAL_POS_LOCKON = { 60.0f, 45.0f, -75.0f };
+	static constexpr VECTOR FOLLOW_LOCAL_POS_LOCKON = { 60.0f, 50.0f, -100.0f };
 
 	// 追従位置から注視点までの相対座標
-	static constexpr VECTOR FOLLOW_TARGET_LOCAL_POS = { 50.0f, 50.0f, 50.0f };
+	static constexpr VECTOR FOLLOW_TARGET_LOCAL_POS = { 50.0f, 45.0f, 50.0f };
 
 
 	// カメラのX回転上限度角
@@ -82,12 +83,17 @@ public:
 	// 追従対象の設定
 	void SetFollow(const Transform* _follow) { followTransform_ = _follow; };
 
-	void SetLockOnPosition(const VECTOR& _pos);
+	void SetLockOnTargets(int target,const VECTOR& _targetPos, bool _isActive = true);
+
+	void LockOnChoice(void);
+	void FollowLockOnPosition(void);
 
 	// ロックオンするか否かの設定
 	void SetIsLockOn(bool _isLockOn) { isLockOn_ = _isLockOn; };
 	bool GetIsLockOn(void)const { return isLockOn_; };
 
+	/// @brief 追従対象が範囲内か否か
+	bool IsTargetSpace(void);
 
 protected:
 
@@ -143,7 +149,8 @@ private:
 	// ターゲット
 	bool isLockOn_;
 	VECTOR lockOnPos_;
-
+	std::map<int, VECTOR> targetsPos_;
+	int lockOnTarget_;
 
 	
 	// カメラを初期位置に戻す

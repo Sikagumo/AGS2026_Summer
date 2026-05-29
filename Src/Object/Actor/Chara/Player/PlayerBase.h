@@ -52,6 +52,8 @@ public:
 	int GetCurHp(void) { return hp_; };
 	int GetMaxHp(void) { return MAX_HP; };
 
+	const VECTOR& GetPos(void)const { return transform_.pos; };
+
 protected:
 
 	// ƒvƒŒƒCƒ„[”Ô†

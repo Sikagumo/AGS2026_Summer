@@ -29,7 +29,7 @@ public:
 	///ウェポンの接続ボーンの名前
 	enum class BONE_NAME
 	{
-		WEAPON_JOINT_MGL_L=0,
+		WEAPON_JOINT_MGL_L = 0,
 		WEAPON_JOINT_MGL_R,
 		WEAPON_JOINT_CANNON_L,
 		WEAPON_JOINT_CANNON_R,
@@ -79,9 +79,7 @@ public:
 	/// <summary>
 	/// ボス現在HP
 	/// </summary>
-	/// <param name=""></param>
-	/// <returns></returns>
-	int GetHP(void) { return hp_; }
+	int GetHP(void)const { return hp_; }
 
 
 private:
@@ -131,6 +129,7 @@ private:
 	int hp_;						//HP
 	std::array<Bone,7> boneId_;		//各ボーン
 	BONE_NAME boneName_;			//ボーンの名前
+
 
 	//攻撃関連
 	int jumpCount_;
