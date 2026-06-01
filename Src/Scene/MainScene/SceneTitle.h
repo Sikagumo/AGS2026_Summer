@@ -4,7 +4,7 @@
 #include <memory>
 
 #include "../SceneBase.h"
-
+#include "../../Common/Vector2.h"
 #include "../../Object/Collider2D/Collider2DCircle.h"
 #include "../../Object/Collider2D/Collider2DBox.h"
 
@@ -44,6 +44,12 @@ private:
 	// 画像関連
 	int imageTitle_;                  // タイトルロゴの画像ハンドル
 	std::array<int, 8> imageMenu_;    // メニュー項目（4つ）の画像ハンドル
+
+	// 選択しの回数(pad用)
+	int selectCount_;
+
+	// 前回のマウス座標
+	Vector2F prevMousePos_;
 
 	// 2D衝突判定関連
 	std::unique_ptr<Collider2DCircle> cursorCollider_;        // マウスカーソル用の円コライダー

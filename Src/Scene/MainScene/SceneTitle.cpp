@@ -40,6 +40,14 @@ void SceneTitle::EndLoad(void)
 
 SceneTitle::SceneTitle(void)
     : imageTitle_(-1)
+    , selectCount_(0)
+    , cursorCollider_(nullptr)
+    , soloPlayButtonCollider_(nullptr)
+    , multiPlayButtonCollider_(nullptr)
+    , optionButtonCollider_(nullptr)
+    , exitButtonCollider_(nullptr)
+    , imageMenu_()
+    , prevMousePos_(0.0f, 0.0f)
 {
     for (size_t i = 0; i < imageMenu_.size(); ++i)
     {
@@ -103,6 +111,13 @@ void SceneTitle::Update(void)
     cursorCollider_->SetCenterPos(mousePosF);
 
     using TAG_2D = Collider2DBase::TAG_2D;
+
+    if (mousePosF.x != prevMousePos_.x || mousePosF.y != prevMousePos_.y)
+    {
+        SetMouseDispFlag(true);
+
+        prevMousePos_ = mousePosF;
+    }
 
     // É\ÉçÉvÉåÉC
     if (CollisionManager::GetInstance().IsTagCollidingWithTag2D
