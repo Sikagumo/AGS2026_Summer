@@ -13,7 +13,10 @@ WeaponBase::WeaponBase(void)
 void WeaponBase::Update(void)
 {
 	// 各キャラクターごとの更新処理
+
+
 	UpdateProcess();
+
 	// 重力処理
 	if (!isAlive_)
 	{
@@ -21,6 +24,8 @@ void WeaponBase::Update(void)
 	}
 	// 衝突判定
 	Collision();
+
+
 
 	transform_.Update();
 
@@ -84,4 +89,6 @@ void WeaponBase::CollisionGravity(void)
 		
 	}
 }
+
+
 

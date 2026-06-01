@@ -16,10 +16,11 @@ void WeaponMGL::ReleasePost(void)
 {
 }
 
-void WeaponMGL::SetBone(int _id, Transform _trans, ColliderBase::TAG _tag)
+void WeaponMGL::SetBone(int _id, Transform _trans, ColliderBase::TAG _tag, VECTOR _playerPos)
 {
 	bone_.id = _id;
 	bone_.transform = _trans;
+	bone_.playerPos = _playerPos;
 	tag_ = _tag;
 }
 
@@ -40,11 +41,8 @@ void WeaponMGL::Load(void)
 void WeaponMGL::InitTransform(void)
 {
 	transform_.scl = WEAPON_SIZE;
-	transform_.quaRot = Quaternion::Mult(transform_.quaRot,
-		Quaternion::AngleAxis(UtilityMath::Deg2RadF(WEAPON_ROT), UtilityMath::AXIS_Y));
-	transform_.quaRotLocal=
-		Quaternion::Mult(transform_.quaRotLocal,
-			Quaternion::AngleAxis(UtilityMath::Deg2RadF(WEAPON_ROT), UtilityMath::AXIS_Y));
+	transform_.quaRot = bone_.transform.quaRot;
+	transform_.quaRotLocal=Quaternion::AngleAxis(UtilityMath::Deg2RadF(WEAPON_ROT), UtilityMath::AXIS_Y);
 
 	transform_.pos= MV1GetFramePosition(bone_.transform.modelId, bone_.id);
 	transform_.Update();
@@ -80,6 +78,8 @@ void WeaponMGL::UpdateProcess(void)
 	if (isAlive_)
 	{
 		transform_.pos = MV1GetFramePosition(bone_.transform.modelId, bone_.id);
+		
+		LookPlayer();
 	}
 	if (hp_ <= 0)
 	{
@@ -105,4 +105,23 @@ void WeaponMGL::DrawPre(void)
 		}
 	}
 	DrawFormatString(10, 320, 0xffffff, "MGL_HP:%d", hp_);
+}
+
+void WeaponMGL::LookPlayer(void)
+{
+
+	VECTOR moveDir;
+
+	// プレイヤーの位置に向かう方向を計算
+	moveDir = VSub(bone_.playerPos, transform_.pos);
+
+	moveDir = VNorm(moveDir);
+
+	float horizontalDistance = sqrtf(moveDir.z * moveDir.z + moveDir.x * moveDir.x);
+
+	float targetAngle = atan2(moveDir.y,horizontalDistance);
+
+	Quaternion weaponPitch = Quaternion::AngleAxis(-targetAngle, UtilityMath::AXIS_X);
+
+	transform_.quaRot = Quaternion::Mult( bone_.transform.quaRot, weaponPitch);
 }

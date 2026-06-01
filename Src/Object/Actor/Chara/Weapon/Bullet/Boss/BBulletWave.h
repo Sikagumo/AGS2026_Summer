@@ -17,6 +17,8 @@ public:
 	void SetIsAttac(bool _isAttac)override { isAttac_ = _isAttac; }
 
 	void SetPos(VECTOR _pos);
+
+	void CreateBullets(VECTOR _pos, VECTOR _dir, float _radiuse)override {}
 protected:
 	// ‘å‚«‚³A‰ñ“]AÀ•W‚Ì‰Šú‰»
 	void InitTransform(void) override;

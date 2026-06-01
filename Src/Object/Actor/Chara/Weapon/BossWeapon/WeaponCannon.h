@@ -20,7 +20,7 @@ public:
 	/// <param name="_id">接続ボーンの番号</param>
 	/// <param name="_trans">接続ボーンを持つ対象のトランスフォーム</param>
 	/// <param name="_tag">当たり判定登録よタグ</param>
-	void SetBone(int _id, Transform _trans, ColliderBase::TAG _tag) override;
+	void SetBone(int _id, Transform _trans, ColliderBase::TAG _tag, VECTOR _playerPos) override;
 
 	///現在の座標
 	const VECTOR GetPos(void) const override;
@@ -41,6 +41,9 @@ public:
 	/// <param name=""></param>
 	/// <returns>現在HP</returns>
 	int GetHp(void)override { return hp_; }
+
+
+	void LookPlayer(void) override {};
 protected:
 
 	// 大きさ、回転、座標の初期化

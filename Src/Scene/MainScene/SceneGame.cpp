@@ -86,6 +86,8 @@ void SceneGame::Update(void)
 	stage_->Update();
 	damageController_->Update();
 	
+	boss_->SetPlayer1Pos(player_->GetTransform().pos);
+
 	boss_->SetBossDamage(damageController_->GetBossDamage());
 
 	boss_->SetWeaponCannonLDamage(damageController_->GetWeaponCannonLDamage());
