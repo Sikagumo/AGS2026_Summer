@@ -203,16 +203,20 @@ void SceneManager::Update(void)
 
         if (loader->GetProgress() >= LoadCompleteThreshold && !loader->IsLoading())
         {
-            // 古いシーンを解放
-            for (auto& scene : scenes_)
-            {
-                scene->Release();
-            }
-            scenes_.clear();
 
             scenes_.push_back(nextScene_);
             nextScene_->EndLoad();
             nextScene_->Initialize();
+
+            // 古いシーンを解放
+            for (auto& scene : scenes_)
+            {
+                if (scene != nextScene_) { scene->Release(); }
+            }
+            scenes_.remove_if([this](const std::shared_ptr<SceneBase>& scene)
+                {
+                    return scene != nextScene_; 
+                });
 
             nextScene_ = nullptr;
             isSceneChanging_ = false;
@@ -245,24 +249,23 @@ void SceneManager::Draw(void)
     if (!scenes_.empty())
     {
         if (camera_) camera_->SetBeforeDraw();
-
         for (auto& scene : scenes_)
         {
             if (scene) scene->Draw();
         }
     }
 
+    // ロード中ならその上にロード画面を重ねる
     auto loader = Loading::GetInstance();
-    if (isSceneChanging_ && loader && loader->IsLoading())
+
+    if (isSceneChanging_)
     {
-        loader->Draw();
+        if (loader) loader->Draw();
     }
 }
 
 void SceneManager::Release(void)
 {
-    if (Loading::GetInstance())
-
     // ロード完了を待機する
     if (Loading::GetInstance()->IsLoading())
     {
