@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Src\Manager\Generic\KeyConfInputManager.cpp" />
     <ClCompile Include="Src\Scene\MainScene\SceneResult.cpp" />
     <ClCompile Include="Src\Object\Collider2D\Collider2DBox.cpp" />
     <ClCompile Include="Src\Object\Collider2D\Collider2DCircle.cpp" />
@@ -84,6 +85,7 @@
     <ClCompile Include="Src\Object\Actor\Chara\Weapon\BossWeapon\WeaponMGR.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Src\Manager\Generic\KeyConfInputManager.h" />
     <ClInclude Include="Src\Scene\MainScene\SceneResult.h" />
     <ClInclude Include="Src\Object\Collider2D\Collider2DBox.h" />
     <ClInclude Include="Src\Object\Collider2D\Collider2DCircle.h" />
