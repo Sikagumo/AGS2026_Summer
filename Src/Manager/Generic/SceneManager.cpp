@@ -234,10 +234,6 @@ void SceneManager::Update(void)
     {
         current->UpdateCollision();
     }
-
-    
-    if (camera_) camera_->Update();
-
 }
 
 void SceneManager::Draw(void)

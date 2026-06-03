@@ -38,6 +38,7 @@ Player::Player(int _playerNo, BULLET_TYPE _playerType)
 	,  curAttackNum_(0)
 	, throwPos_(UtilityMath::VECTOR_ZERO), throwDir_(UtilityMath::VECTOR_ZERO)
 	, shotIndex_(-1)
+	, isCameraRotActive_(false)
 {
 	constexpr int BULLET_MAX = 3;
 	attackNumMax_ = BULLET_MAX;
@@ -74,6 +75,11 @@ void Player::DrawDebug(void)
 
 
 }
+void Player::SetKnock(const VECTOR& _knockDirXZ, float _knockPowXZ, bool _isStan, float _knockPowY)
+{
+
+}
+
 void Player::InitAnimation(void)
 {
 	animation_ = std::make_unique<AnimationController>(transform_.modelId);
@@ -182,9 +188,6 @@ void Player::UpdateProcess(void)
 	ProcessMove();
 
 	UpdateBullets();
-
-	// ロックオン有効時、カメラ方向に回転
-	isDirRotActive_ = !SceneManager::GetInstance().GetCamera()->GetIsLockOn();
 }
 
 void Player::UpdateProcessPost(void)
@@ -265,6 +268,9 @@ void Player::ProcessMove(void)
 		return;
 	}
 
+	// カメラの方向で進行
+	Quaternion cameraRot = SceneManager::GetInstance().GetCamera()->GetQuaRotY();
+
 	if (!UtilityMath::EqualsVZero(dir))
 	{
 		dir = UtilityMath::VNormalize(dir);
@@ -276,9 +282,6 @@ void Player::ProcessMove(void)
 		{
 			PlayAnim(ANIM_TYPE::RUN);
 		}
-
-		// カメラの方向で進行
-		Quaternion cameraRot = SceneManager::GetInstance().GetCamera()->GetQuaRotY();
 
 		// 移動方向を取得
 		moveDir_ = Quaternion::PosAxis(cameraRot, dir);
@@ -428,6 +431,33 @@ void Player::UpdateBullets(void)
 
 		bullets_[shotIndex_]->SetFollow(throwPos_, throwDir_);
 	}
+}
+
+void Player::DelayRotate(void)
+{
+	Quaternion goalRot = Quaternion::Identity();
+
+	// ロックオン有効時、カメラ方向に回転
+	isCameraRotActive_ = SceneManager::GetInstance().GetCamera()->GetIsLockOn();
+
+	if (isCameraRotActive_)
+	{
+		// カメラのY軸回転を回転に変換する
+		goalRot = SceneManager::GetInstance().GetCamera()->GetQuaRotY();
+		goalRot.x = 0.0f;
+		moveDir_ = Quaternion::PosAxis(goalRot, UtilityMath::DIR_F);
+	}
+	else if (!UtilityMath::EqualsVZero(moveDir_))
+	{
+		// 移動方向から回転に変換する
+		goalRot = Quaternion::LookRotation(moveDir_);
+	}
+
+
+	constexpr float ROT_TERM = 0.2f;
+
+	// 回転の補間
+	transform_.quaRot = Quaternion::Slerp(transform_.quaRot, goalRot, ROT_TERM);
 }
 
 void Player::CreateBullet(void)

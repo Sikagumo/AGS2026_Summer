@@ -290,9 +290,10 @@ void Boss::UpdateProcess(void)
 
 
 	// ƒJƒƒ‰‚Ì’Ç]‘ÎÛ‚É“o˜^
-	SceneManager::GetInstance().GetCamera()->SetLockOnTargets(0, transformBody_.pos);
-	SceneManager::GetInstance().GetCamera()->SetLockOnTargets(1, weaponMGL_->GetPos(), weaponMGL_->GetIsAlive());
-	SceneManager::GetInstance().GetCamera()->SetLockOnTargets(2, weaponMGR_->GetPos(), weaponMGR_->GetIsAlive());
+	const std::unique_ptr<Camera>& camera = SceneManager::GetInstance().GetCamera();
+	camera->SetLockOnTargets(Camera::LOCKON_TARGET::BOSS_BODY, transformBody_.pos);
+	camera->SetLockOnTargets(Camera::LOCKON_TARGET::BOSS_WEAPON_MGL_L, weaponMGL_->GetPos(), weaponMGL_->GetIsAlive());
+	camera->SetLockOnTargets(Camera::LOCKON_TARGET::BOSS_WEAPON_MGL_R, weaponMGR_->GetPos(), weaponMGR_->GetIsAlive());
 }
 
 void Boss::UpdateProcessPost(void)

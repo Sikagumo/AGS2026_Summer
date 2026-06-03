@@ -20,7 +20,6 @@ CharaBase::CharaBase(void)
 	, prevPos_(UtilityMath::VECTOR_ZERO)
 	, moveDir_(UtilityMath::VECTOR_ZERO)
 	, movePow_(UtilityMath::VECTOR_ZERO)
-	, isDirRotActive_(true)
 	, animation_(nullptr)
 {
 }
@@ -138,25 +137,13 @@ void CharaBase::DrawPre(void)
 
 void CharaBase::DelayRotate(void)
 {
-	Quaternion goalRot = Quaternion::Identity();
-	
-	if (isDirRotActive_)
-	{
-		// ˆÚ“®•ûŒü‚©‚ç‰ñ“]‚É•ÏŠ·‚·‚é
-		if (!UtilityMath::EqualsVZero(moveDir_))
-		{
-			goalRot = Quaternion::LookRotation(moveDir_);
-		}
-	}
-	else
-	{
-		// ƒJƒƒ‰‚ÌYŽ²‰ñ“]‚ð‰ñ“]‚É•ÏŠ·‚·‚é
-		goalRot = SceneManager::GetInstance().GetCamera()->GetQuaRotY();
-
-		goalRot.x = 0.0f;
-	}
-
 	constexpr float ROT_TERM = 0.2f;
+
+	// ˆÚ“®•ûŒü‚©‚ç‰ñ“]‚É•ÏŠ·‚·‚é
+	if (UtilityMath::EqualsVZero(moveDir_)) { return; }
+
 	// ‰ñ“]‚Ì•âŠÔ
-	transform_.quaRot = Quaternion::Slerp(transform_.quaRot, goalRot, ROT_TERM);
+	transform_.quaRot = Quaternion::Slerp(transform_.quaRot
+							, Quaternion::LookRotation(moveDir_)
+							, ROT_TERM);
 }

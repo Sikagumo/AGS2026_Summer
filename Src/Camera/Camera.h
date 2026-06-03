@@ -2,7 +2,6 @@
 #include <DxLib.h>
 #include "../Common/Quaternion.h"
 #include "../Object/Actor/ActorBase.h"
-#include <vector>
 #include <map>
 class Transform;
 class InputManager;
@@ -44,6 +43,19 @@ public:
 		MAX,
 	};
 
+	enum class LOCKON_TARGET
+	{
+		NONE = -1,
+		BOSS_BODY,
+		BOSS_WEAPON_MGL_L,
+		BOSS_WEAPON_MGL_R,
+		BOSS_WEAPON_CANNON_L,
+		BOSS_WEAPON_CANNON_R,
+		BOSS_WEAPON_MP_L,
+		BOSS_WEAPON_MP_R,
+		BOSS_WEAPON_RG,
+	};
+
 
 	// コンストラクタ
 	Camera(void);
@@ -83,17 +95,27 @@ public:
 	// 追従対象の設定
 	void SetFollow(const Transform* _follow) { followTransform_ = _follow; };
 
-	void SetLockOnTargets(int target,const VECTOR& _targetPos, bool _isActive = true);
+	/// @brief 追従対象割り当て
+	/// @param _target 対象の種類
+	/// @param _targetPos 追従位置
+	/// @param _isActive 追従可能か否か
+	void SetLockOnTargets(LOCKON_TARGET _target,const VECTOR& _targetPos, bool _isActive = true);
 
+	/// @brief 現在の追従対象割り当て
+	LOCKON_TARGET GetLockOnTargetNum(void) { return lockOnTarget_; };
+
+	/// @brief 追従対象選択処理
 	void LockOnChoice(void);
 	void FollowLockOnPosition(void);
 
 	// ロックオンするか否かの設定
-	void SetIsLockOn(bool _isLockOn) { isLockOn_ = _isLockOn; };
+	void SetIsLockOn(bool _isLockOn);
 	bool GetIsLockOn(void)const { return isLockOn_; };
 
 	/// @brief 追従対象が範囲内か否か
 	bool IsTargetSpace(void);
+
+	//bool IsTarget
 
 protected:
 
@@ -149,8 +171,8 @@ private:
 	// ターゲット
 	bool isLockOn_;
 	VECTOR lockOnPos_;
-	std::map<int, VECTOR> targetsPos_;
-	int lockOnTarget_;
+	std::map<LOCKON_TARGET, VECTOR> targetsPos_;
+	LOCKON_TARGET lockOnTarget_;
 
 	
 	// カメラを初期位置に戻す
@@ -158,6 +180,9 @@ private:
 
 	// 追従対象との位置同期を取る
 	void SyncFollow(void);
+
+	/// @brief アングルとY軸回転の同期処理
+	void SyncAngleYFromRotY(void);
 
 	// カメラ操作
 	void ProcessRot(bool _isLimit);
