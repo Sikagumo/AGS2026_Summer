@@ -112,7 +112,7 @@ void Application::Run(void)
 		{
 
 		}
-		else if (CheckHitKey(KEY_INPUT_ESCAPE) != 0)
+		else if (CheckHitKey(KEY_INPUT_ESCAPE) != 0 || sceneManager.GetGameEnd())
 		{
 			break;
 		}
