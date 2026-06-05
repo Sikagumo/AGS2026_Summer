@@ -14,10 +14,11 @@ WeaponMGR::WeaponMGR()
 
 
 
-void WeaponMGR::SetBone(int _id, Transform _trans, ColliderBase::TAG _tag)
+void WeaponMGR::SetBone(int _id, Transform _trans, ColliderBase::TAG _tag, VECTOR _playerPos)
 {
 	bone_.id = _id;
 	bone_.transform = _trans;
+	bone_.playerPos = _playerPos;
 	tag_ = _tag;
 }
 
@@ -77,6 +78,7 @@ void WeaponMGR::UpdateProcess(void)
 	if (isAlive_)
 	{
 		transform_.pos = MV1GetFramePosition(bone_.transform.modelId, bone_.id);
+		LookPlayer();
 	}
 	if (hp_ <= 0)
 	{
@@ -107,4 +109,22 @@ void WeaponMGR::DrawPre(void)
 
 	DrawFormatString(10, 300, 0xffffff, "MGR_HP:%d", hp_);
 #endif
+}
+
+void WeaponMGR::LookPlayer(void)
+{
+	VECTOR moveDir;
+
+	// プレイヤーの位置に向かう方向を計算
+	moveDir = VSub(bone_.playerPos, transform_.pos);
+
+	moveDir = VNorm(moveDir);
+
+	float horizontalDistance = sqrtf(moveDir.z * moveDir.z + moveDir.x * moveDir.x);
+
+	float targetAngle = atan2(moveDir.y, horizontalDistance);
+
+	Quaternion weaponPitch = Quaternion::AngleAxis(-targetAngle, UtilityMath::AXIS_X);
+
+	transform_.quaRot = Quaternion::Mult(bone_.transform.quaRot, weaponPitch);
 }

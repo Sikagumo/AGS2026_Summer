@@ -13,7 +13,7 @@ public:
 	struct Bone {
 		int id = 0;
 		Transform transform;
-
+		VECTOR playerPos;
 	};
 
 
@@ -32,7 +32,7 @@ public:
 	/// <param name="_id">ボーンのナンバー</param>
 	/// <param name="_trans">ボーンを持つ相手のトランスフォーム</param>
 	/// <param name="_tag">当たり判定用のタグ</param>
-	virtual void SetBone(int _id, Transform _trans,ColliderBase::TAG _tag)=0;
+	virtual void SetBone(int _id, Transform _trans,ColliderBase::TAG _tag, VECTOR _playerPos)=0;
 	
 	/// <summary>
 	/// ロックオン用の座標
@@ -81,7 +81,6 @@ protected:
 	VECTOR localPos_;		//カメラのロックオン用の中央座標
 	Bone bone_;				//ボーン情報
 	ColliderBase::TAG tag_;	//当たり判定登録用タグの保管
-	Transform followTarget_;
 
 	//ドロー処理
 	virtual void DrawPre(void)override;
@@ -97,5 +96,7 @@ protected:
 	void Collision(void);
 	void CollisionGravity(void);
 	virtual void CollisionReserve(void) {};
+
+	virtual void LookPlayer(void) {};
 };
 

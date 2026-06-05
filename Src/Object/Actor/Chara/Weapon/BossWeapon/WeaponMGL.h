@@ -1,5 +1,10 @@
 #pragma once
+#include <memory>
+#include <vector>
 #include "../WeaponBase.h"
+
+class BBulletBase;
+
 class WeaponMGL :
 	public WeaponBase
 {
@@ -19,7 +24,7 @@ public:
 	/// <param name="_id">接続ボーンの番号</param>
 	/// <param name="_trans">接続ボーンを持つ対象のトランスフォーム</param>
 	/// <param name="_tag">当たり判定登録よタグ</param>
-	void SetBone(int _id, Transform _trans, ColliderBase::TAG _tag) override;
+	void SetBone(int _id, Transform _trans, ColliderBase::TAG _tag, VECTOR _playerPos) override;
 
 	///現在の座標
 	const VECTOR GetPos(void) const override;
@@ -65,6 +70,8 @@ protected:
 
 	void CollisionReserve(void) override {};
 
+	void LookPlayer(void) override;
+
 private:
 
 	static constexpr VECTOR LINE_START_POS = { -50.0f,0.0f,50.0f };
@@ -72,5 +79,15 @@ private:
 	static constexpr VECTOR CAPSULE_START_POS = { -50.0f,0.0f,140.0f };
 	static constexpr VECTOR CAPSULE_END_POS = { -50.0f,0.0f,-40.0f };
 	static constexpr float CAPSULE_RADIUS = 20.0f;
+	static constexpr int MAX_BULLET_COUNT = 200;
+
+	std::vector<std::shared_ptr<BBulletBase>> bullets_;
+	VECTOR bulletDir_;
+
+	int bulletCount_;
+
+
+	std::shared_ptr<BBulletBase> GetValidBullet(void);
+	void CreateBullets(void);
 };
 

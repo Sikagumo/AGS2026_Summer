@@ -12,10 +12,18 @@ public:
 	void Update(void)override final;
 	void Draw(void)override final;
 	virtual void SetIsAttac(bool _isAttac) = 0;
-protected:
-	bool isAttac_ = false;
 
-	
+	virtual void CreateBullets(VECTOR _pos, VECTOR _dir,float _radiuse)=0;
+	bool GetIsAlive(void) { return isAlive_; }
+
+protected:
+	bool isAttac_;
+	bool isAlive_;
+	float speed_;
+	float radiuse_;
+	VECTOR dir_;
+
+
 	virtual void UpdateProcess(void) = 0;
 	virtual void UpdateProcessPost(void) = 0;
 

@@ -16,10 +16,11 @@ void WeaponCannon::ReleasePost(void)
 {
 }
 
-void WeaponCannon::SetBone(int _id, Transform _trans, ColliderBase::TAG _tag)
+void WeaponCannon::SetBone(int _id, Transform _trans, ColliderBase::TAG _tag, VECTOR _playerPos)
 {
 	bone_.id = _id;
 	bone_.transform = _trans;
+	bone_.playerPos = _playerPos;
 	tag_ = _tag;
 }
 
@@ -81,6 +82,7 @@ void WeaponCannon::UpdateProcess(void)
 	if (isAlive_)
 	{
 		transform_.pos = MV1GetFramePosition(bone_.transform.modelId, bone_.id);
+		transform_.quaRot = bone_.transform.quaRot;
 	}
 
 	if (hp_ <= 0)

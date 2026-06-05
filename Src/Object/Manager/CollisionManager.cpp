@@ -523,13 +523,14 @@ bool CollisionManager::CanCollide(int _tagA, int _tagB) const
 	if (tagHit == TAG::PLAYER || tagHit == TAG::PLAYER_BULLET)
 	{
 		if (tagHurt == TAG::ENEMY
-		 || tagHurt == TAG::STAGE
-		 || tagHurt == TAG::BOSS
-		 || tagHurt == TAG::WEAPON_CANNON_L || tagHurt == TAG::WEAPON_CANNON_R
-		 || tagHurt == TAG::WEAPON_MG_L	|| tagHurt == TAG::WEAPON_MG_R
-		 || tagHurt == TAG::WEAPON_MP_L || tagHurt == TAG::WEAPON_MP_R
-		 || tagHurt == TAG::WEAPON_RG
-		 || tagHurt==TAG::HIT_WAVE)
+			|| tagHurt == TAG::STAGE
+			|| tagHurt == TAG::BOSS
+			|| tagHurt == TAG::WEAPON_CANNON_L || tagHurt == TAG::WEAPON_CANNON_R
+			|| tagHurt == TAG::WEAPON_MG_L || tagHurt == TAG::WEAPON_MG_R
+			|| tagHurt == TAG::WEAPON_MP_L || tagHurt == TAG::WEAPON_MP_R
+			|| tagHurt == TAG::WEAPON_RG
+			|| tagHurt == TAG::HIT_WAVE
+			|| tagHurt == TAG::MG_BULLET)
 		{
 			return true;
 		}
@@ -547,9 +548,21 @@ bool CollisionManager::CanCollide(int _tagA, int _tagB) const
 		}
 	}
 
-	if (tagHit == TAG::HIT_WAVE && tagHurt == TAG::PLAYER)
+	if (tagHit == TAG::MG_BULLET)
 	{
-		return true;
+		if (tagHurt == TAG::PLAYER || tagHurt == TAG::STAGE)
+		{
+			return true;
+		}
+	}
+
+
+	if (tagHit == TAG::HIT_WAVE)
+	{
+		if (tagHurt == TAG::PLAYER)
+		{
+			return true;
+		}
 	}
 
 	if (tagHit == TAG::STAGE)
@@ -557,10 +570,11 @@ bool CollisionManager::CanCollide(int _tagA, int _tagB) const
 		if (tagHurt == TAG::PLAYER || tagHurt == TAG::PLAYER_BULLET || tagHurt == TAG::BOSS || tagHurt == TAG::WEAPON_CANNON_L || tagHurt == TAG::WEAPON_CANNON_R
 			|| tagHurt == TAG::WEAPON_MG_L || tagHurt == TAG::WEAPON_MG_R
 			|| tagHurt == TAG::WEAPON_MP_L || tagHurt == TAG::WEAPON_MP_R
-			|| tagHurt == TAG::WEAPON_RG)
+			|| tagHurt == TAG::WEAPON_RG || tagHurt == TAG::MG_BULLET)
 		{
 			return true;
 		}
+		
 	}
 
 	return false;

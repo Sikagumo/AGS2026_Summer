@@ -81,6 +81,26 @@ public:
 	/// </summary>
 	int GetHP(void)const { return hp_; }
 
+	/// <summary>
+	/// プレイヤー1の座標取得
+	/// </summary>
+	/// <param name="_playerPos">プレイヤーの座標</param>
+	void SetPlayer1Pos(VECTOR _playerPos) {player1Pos_ = _playerPos;}
+	/// <summary>
+	/// プレイヤー2の座標取得
+	/// </summary>
+	/// <param name="_playerPos">プレイヤーの座標</param>
+	void SetPlayer2Pos(VECTOR _playerPos) { player2Pos_ = _playerPos; }
+	/// <summary>
+	/// プレイヤー3の座標取得
+	/// </summary>
+	/// <param name="_playerPos">プレイヤーの座標</param>
+	void SetPlayer3Pos(VECTOR _playerPos) { player3Pos_ = _playerPos; }
+	/// <summary>
+	/// プレイヤー4の座標取得
+	/// </summary>
+	/// <param name="_playerPos">プレイヤーの座標</param>
+	void SetPlayer4Pos(VECTOR _playerPos) { player4Pos_ = _playerPos; }
 
 private:
 	//bossの大きさ
@@ -134,7 +154,11 @@ private:
 	int jumpCount_;
 	int attackCount_;
 
-
+	//攻撃対象情報
+	VECTOR player1Pos_;
+	VECTOR player2Pos_;
+	VECTOR player3Pos_;
+	VECTOR player4Pos_;
 
 	//武器のポインター宣言
 	std::unique_ptr<WeaponMGL> weaponMGL_;
@@ -174,7 +198,9 @@ private:
 	void UpdateAttack(void);
 	void UpdateJump(void);
 	void UpdateEnd(void);
-	 
+
+	//機能関数
+	void LookPlayer(void);
 
 
 protected:
