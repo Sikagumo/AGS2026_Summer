@@ -46,6 +46,7 @@ void BBulletMG::InitAnimation(void)
 
 void BBulletMG::InitPost(void)
 {
+	aliveTime_ = 0;
 	speed_ = INIT_SPEED;
 	isAlive_ = true;
 }
@@ -60,12 +61,17 @@ void BBulletMG::UpdateProcess(void)
 
 	if (isAlive_)
 	{
+		aliveTime_++;
 		// ’e‚ðˆÚ“®‚³‚¹‚é
 		// ˆÚ“®—Ê‚ÌŒvŽZ(•ûŒü~ƒXƒs[ƒh)
 		VECTOR movePow = VScale(dir_, speed_);
 		// ˆÚ“®ˆ—
 		transform_.pos = VAdd(transform_.pos, movePow);
 
+		if (aliveTime_ > MAX_ALIVE_TIME)
+		{
+			isAlive_ = false;
+		}
 	}
 	else
 	{
