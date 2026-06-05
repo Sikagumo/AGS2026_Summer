@@ -47,8 +47,12 @@ protected:
 
 private:
 
-	static constexpr float INIT_SPEED = 10.0f;
+	
 
+	static constexpr float INIT_SPEED = 10.0f;
+	static constexpr float MAX_ALIVE_TIME = 120.0f;
+
+	int aliveTime_ = 0;
 
 };
 
