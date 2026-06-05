@@ -9,6 +9,7 @@
 #include "../System/TimeManager.h"
 #include "../../Camera/Camera.h"
 #include "../../Common/Loading.h"
+#include "../../Application.h"
 
 SceneManager* SceneManager::instance_ = nullptr;
 
@@ -36,8 +37,7 @@ void SceneManager::DestroyInstance(void)
 }
 
 SceneManager::SceneManager(void)
-	: isGameEnd_(false)
-    , isSceneChanging_(false)
+    : isSceneChanging_(false)
     , isFirstFrame_(true)
     , sceneMutex_()
 {
@@ -191,7 +191,7 @@ void SceneManager::Update(void)
 
     TimeManager::GetInstance().Update();
 
-    if (isGameEnd_) { return; }
+    if (Application::GetInstance().GetGameEnd()) { return; }
 
     const float LoadCompleteThreshold = 100.0f;
 
@@ -289,16 +289,6 @@ void SceneManager::Release(void)
     TimeManager::GetInstance().DestroyInstance();
     Loading::GetInstance()->DestroyInstance();
     CollisionManager::DestroyInstance();
-}
-
-void SceneManager::GameEnd(void)
-{
-    isGameEnd_ = true;
-}
-
-bool SceneManager::GetGameEnd(void) const
-{
-    return isGameEnd_;
 }
 
 const std::unique_ptr<Camera>& SceneManager::GetCamera(void) const
