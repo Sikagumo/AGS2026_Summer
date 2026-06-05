@@ -14,9 +14,11 @@ public:
 	virtual void SetIsAttac(bool _isAttac) = 0;
 
 	virtual void CreateBullets(VECTOR _pos, VECTOR _dir,float _radiuse)=0;
+	bool GetIsAlive(void) { return isAlive_; }
 
 protected:
 	bool isAttac_;
+	bool isAlive_;
 	float speed_;
 	float radiuse_;
 	VECTOR dir_;

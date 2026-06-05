@@ -84,7 +84,7 @@ void WeaponMP::UpdateProcess(void)
 	}
 	{
 		isAlive_ = false;
-		//CollisionManager::GetInstance().SetCollisionActive(this, tag_, false);
+		CollisionManager::GetInstance().SetCollisionActive(this, tag_, false);
 	}
 }
 

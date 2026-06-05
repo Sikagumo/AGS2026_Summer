@@ -16,7 +16,10 @@ public:
 
 	void SetIsAttac(bool _isAttac)override { isAttac_ = _isAttac; }
 
-	void SetPos(VECTOR _pos);
+	void SetPos(VECTOR _pos) {};
+
+	void CreateBullets(VECTOR _pos, VECTOR _dir, float _radiuse)override { transform_.pos = _pos; dir_ = _dir; radiuse_ = _radiuse; }
+
 protected:
 	// ‘å‚«‚³A‰ñ“]AÀ•W‚Ì‰Šú‰»
 	void InitTransform(void) override;
@@ -43,5 +46,9 @@ protected:
 
 
 private:
+
+	static constexpr float INIT_SPEED = 10.0f;
+
+
 };
 

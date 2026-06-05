@@ -1,5 +1,10 @@
 #pragma once
+#include <memory>
+#include <vector>
 #include "../WeaponBase.h"
+
+class BBulletBase;
+
 class WeaponMGL :
 	public WeaponBase
 {
@@ -74,5 +79,15 @@ private:
 	static constexpr VECTOR CAPSULE_START_POS = { -50.0f,0.0f,140.0f };
 	static constexpr VECTOR CAPSULE_END_POS = { -50.0f,0.0f,-40.0f };
 	static constexpr float CAPSULE_RADIUS = 20.0f;
+	static constexpr int MAX_BULLET_COUNT = 200;
+
+	std::vector<std::shared_ptr<BBulletBase>> bullets_;
+	VECTOR bulletDir_;
+
+	int bulletCount_;
+
+
+	std::shared_ptr<BBulletBase> GetValidBullet(void);
+	void CreateBullets(void);
 };
 
