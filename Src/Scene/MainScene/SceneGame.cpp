@@ -107,7 +107,7 @@ void SceneGame::DamageProcess(void)
 	damageController_->SetPlayerAttack(player_->GetPower());
 
 	// プレイヤー被ダメージ処理
-	player_->SetDamage(damageController_->GetPlayerDamage());
+	player_->SetDamage(damageController_->GetPlayerDamage(), true);
 }
 
 void SceneGame::CameraLockOn(void)

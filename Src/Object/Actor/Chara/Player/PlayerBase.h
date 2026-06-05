@@ -47,7 +47,10 @@ public:
 
 	//std::vector<std::unique_ptr<PBulletBase>>& GetPBullet(void);
 
-	void SetDamage(int _damage);
+	/// @brief プレイヤーにダメージ処理
+	/// @param _damage ダメージ量
+	/// @param _isInvincible 無敵化させるか否か (default=true)
+	void SetDamage(int _damage, bool _isInvincible);
 
 	int GetCurHp(void) { return hp_; };
 	int GetMaxHp(void) { return MAX_HP; };

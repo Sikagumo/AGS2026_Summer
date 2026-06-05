@@ -41,27 +41,7 @@ void AnimationController::AddInternal(int _type, float _speed)
 	// アニメーション追加処理
 	Add(_type, anim);
 }
-void AnimationController::AddExternal(int _type, float _speed, const std::string _path)
-{
-	/* 外部のアニメーションの追加 */
-	Animation anim = Animation();
 
-	anim.modelId = MV1LoadModel(_path.c_str());
-
-	// パス読み込み判定有効
-	anim.isLoadPath = true;
-
-	// アニメーション速度割り当て
-	anim.speed = _speed;
-
-	// アニメーション状態割り当て
-	anim.type = ANIM_TYPE::EXTERNAL;
-
-	anim.step = 0.0f;
-
-	// アニメーション追加処理
-	Add(_type, anim);
-}
 void AnimationController::AddExternal(int _type, float _speed, int _handle)
 {
 	/* 外部のアニメーションの追加 */
@@ -80,6 +60,29 @@ void AnimationController::AddExternal(int _type, float _speed, int _handle)
 	// アニメーション追加処理
 	Add(_type, anim);
 }
+void AnimationController::AddExternal(int _type, float _speed, int _handle, const VECTOR& _inPlaceLocalPos)
+{
+	/* 外部のアニメーションの追加 */
+	Animation anim;
+
+	anim.modelId = _handle;
+
+	// アニメーション速度割り当て
+	anim.speed = _speed;
+
+	// アニメーション状態割り当て
+	anim.type = ANIM_TYPE::EXTERNAL;
+
+	anim.step = 0.0f;
+
+	anim.isInPlace = true;
+
+	anim.inPlaceLocalPos = _inPlaceLocalPos;
+
+	// アニメーション追加処理
+	Add(_type, anim);
+}
+
 
 void AnimationController::Play(int _type, bool _isLoop, float _playSpeed, float _blendTime)
 {
@@ -100,11 +103,6 @@ void AnimationController::Play(int _type, bool _isLoop, float _playSpeed, float 
 		prePlayType_ = playType_;
 	}
 
-	auto& playAnim = animations_[_type];
-
-	// 初期化
-	playAnim.step = 0.0f;
-
 	// アニメーションループ
 	isLoop_ = _isLoop;
 
@@ -118,6 +116,12 @@ void AnimationController::Play(int _type, bool _isLoop, float _playSpeed, float 
 	curBlendTime_ = 0.0f;
 
 	blendTime_ = _blendTime;
+
+
+	auto& playAnim = animations_[_type];
+
+	// 初期化
+	playAnim.step = 0.0f;
 
 	// 再生速度割り当て
 	playSpeed_ = ((_playSpeed >= 0.0f) ? _playSpeed : playAnim.speed);
@@ -135,6 +139,12 @@ void AnimationController::Play(int _type, bool _isLoop, float _playSpeed, float 
 		// DxModelViewerを確認すること(大体0か1)
 		int animIdx = 0;
 		playAnim.attachNo = MV1AttachAnim(modelId_, animIdx, playAnim.modelId);
+	}
+
+	if (playAnim.isInPlace)
+	{
+		// アニメーション位置固定処理
+		AnimationInPlace(playAnim);
 	}
 
 	// アニメーション総時間の取得
@@ -220,7 +230,7 @@ void AnimationController::DrawDebug(void)
 
 void AnimationController::Release(void)
 {
-	if (animations_.empty()) return;
+	if (animations_.empty()) { return; }
 
 	// ロードしたアニメーションを解放
 	for (auto& [type, anim] : animations_)
@@ -396,4 +406,30 @@ bool AnimationController::IsFindAnimation(int _type)
 #endif
 
 	return false;
+}
+
+void AnimationController::AnimationInPlace(Animation& _playAnim)
+{
+	// ROOTフレーム番号
+	constexpr int FRAME_ROOT_NUM = 0;
+
+	// 対象フレームのローカル行列を初期値にリセットする
+	MV1ResetFrameUserLocalMatrix(_playAnim.modelId, FRAME_ROOT_NUM);
+
+	// 対象フレームのローカル行列(大きさ、回転、位置)を取得する
+	MATRIX mat = MV1GetFrameLocalMatrix(_playAnim.modelId, FRAME_ROOT_NUM);
+	VECTOR scl = MGetSize(mat);
+	MATRIX rot = MGetRotElem(mat);
+	VECTOR pos = MGetTranslateElem(mat);
+
+	// 大きさ、回転、位置をローカル行列に戻す
+	MATRIX mix = MGetIdent();
+	mix = MMult(mix, MGetScale(scl));
+	mix = MMult(mix, rot);
+
+	// ローカル座標を行列にそのまま戻さず、調整したローカル座標を設定する
+	mix = MMult(mix, MGetTranslate(_playAnim.inPlaceLocalPos));
+
+	// 対象フレームにセットし直し、アニメーションの移動値を無効化
+	MV1SetFrameUserLocalMatrix(_playAnim.modelId, FRAME_ROOT_NUM, mix);
 }

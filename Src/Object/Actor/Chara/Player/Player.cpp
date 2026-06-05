@@ -77,7 +77,7 @@ void Player::DrawDebug(void)
 }
 void Player::SetKnock(const VECTOR& _knockDirXZ, float _knockPowXZ, bool _isStan, float _knockPowY)
 {
-
+	
 }
 
 void Player::InitAnimation(void)
@@ -90,10 +90,10 @@ void Player::InitAnimation(void)
 		, 40.0f, resourceManager_.LoadHandleId(ResourceManager::SRC::ANIM_RUN));
 
 	animation_->AddExternal(static_cast<int>(ANIM_TYPE::THROW_LEFT)
-		, 17.5f, resourceManager_.LoadHandleId(ResourceManager::SRC::ANIM_THROW_LEFT));
+		, 17.5f, resourceManager_.LoadHandleId(ResourceManager::SRC::ANIM_THROW_LEFT), {});
 
 	animation_->AddExternal(static_cast<int>(ANIM_TYPE::THROW_RIGHT)
-		, 17.5f, resourceManager_.LoadHandleId(ResourceManager::SRC::ANIM_THROW_RIGHT));
+		, 17.5f, resourceManager_.LoadHandleId(ResourceManager::SRC::ANIM_THROW_RIGHT), {});
 
 	animation_->AddExternal(static_cast<int>(ANIM_TYPE::THROW_RUN)
 		, 20.0f, resourceManager_.LoadHandleId(ResourceManager::SRC::ANIM_THROW_RUN));
@@ -138,13 +138,13 @@ void Player::InitPost(void)
 
 	curAttackNum_ = 0;
 
-	constexpr float SHOT_TIME_INCREMENT = 0.5f; // 行動間隔上昇値
+	constexpr float SHOT_TIME_INCREMENT = 0.25f; // 行動間隔上昇値
 	constexpr float SHOT_TIME_INC_ACTION = 0.1875f; // 行動間隔上昇値
 
 	constexpr float SHOT_TIME_ACTIVE = 2.0f; // 有効時間
 	constexpr float SHOT_TIME_ACTION_ACTIVE = 1.25f; // 有効時間
 	constexpr float SHOT_TIME_ACTIVE_INPUT = 1.725f; // 入力可能時間
-	constexpr float SHOT_TIME_END = 0.75f; // 終了時間
+	constexpr float SHOT_TIME_END = 0.25f; // 終了時間
 
 	constexpr float SHOT_TIME_STOP = 0.85f; // 停止時間
 	constexpr float SHOT_TIME_STOP_ACTIVE = 1.15f; // 停止有効化時間
@@ -344,6 +344,7 @@ void Player::ProcessJump(void)
 		if (isHitTrg && !isJump_)
 		{
 			isJump_ = true;
+			PlayAnim(ANIM_TYPE::JUMP, false);
 		}
 	}
 	else if (jumpPow_.y > 0.0f)
