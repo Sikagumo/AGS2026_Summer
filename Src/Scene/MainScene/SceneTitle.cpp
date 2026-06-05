@@ -155,7 +155,7 @@ void SceneTitle::Update(void)
     {
         if (input.IsTrgMouseLeft())
         {
-
+            Application::GetInstance().GameEnd();
         }
     }
 

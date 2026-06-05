@@ -112,7 +112,7 @@ void Application::Run(void)
 		{
 
 		}
-		else if (CheckHitKey(KEY_INPUT_ESCAPE) != 0)
+		else if (CheckHitKey(KEY_INPUT_ESCAPE) != 0 || isGameEnd_)
 		{
 			break;
 		}
@@ -174,10 +174,21 @@ bool Application::IsReleaseFail(void) const
 	return isReleaseFail_;
 }
 
+void Application::GameEnd(void)
+{
+	isGameEnd_ = true;
+}
+
+bool Application::GetGameEnd(void)
+{
+	return isGameEnd_;
+}
+
 Application::Application(void)
 	:
 	isInitFail_(false),
-	isReleaseFail_(false)
+	isReleaseFail_(false),
+	isGameEnd_(false)
 {
 }
 
