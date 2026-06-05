@@ -41,7 +41,7 @@ Camera::Camera(void)
 	, isLockOn_(false)
 	, fovRate_(1.0f)
 	, lockOnPos_(UtilityMath::VECTOR_ZERO)
-	, lockOnTarget_(-1)
+	, lockOnTarget_(LOCKON_TARGET::NONE)
 {
 	// DxLibの初期設定では、
 	// カメラの位置が x = 320.0f, y = 240.0f, z = (画面のサイズによって変化)、
@@ -68,12 +68,33 @@ void Camera::InitPost(void)
 {
 	ChangeMode(MODE::NONE);
 
-	lockOnTarget_ = -1;
+	lockOnTarget_ = LOCKON_TARGET::NONE;
 }
 
 void Camera::Update(void)
 {
+	if (InputManager::GetInstance().IsTrgDown(KEY_INPUT_E))
+	{
+		if (!isLockOn_)
+		{
+			LockOnChoice();
+		}
+		else
+		{
+			SetIsLockOn(false);
+		}
+	}
 
+	// ロックオン時、常に追従位置を取得する
+	if (isLockOn_)
+	{
+		if (InputManager::GetInstance().IsTrgMouseRight())
+		{
+			LockOnChoice();
+		}
+
+		FollowLockOnPosition();
+	}
 }
 
 void Camera::SetBeforeDraw(void)
@@ -120,18 +141,24 @@ void Camera::DrawDebug(void)
 	if (followTransform_ == nullptr) { return; }
 	VECTOR target = VSub(lockOnPos_, VGet(followTransform_->pos.x, lockOnPos_.y, followTransform_->pos.z));
 	float tan = atan2f(target.x, target.z);
+	VECTOR rotY = rotY_.ToEuler();
 
-	DrawFormatString(0, 32, 0xffffff, "\nCamera(pos(%.1f, %.1f, %.1f), angle(%.1f, %.1f, %.1f))\n"
+	DrawFormatString(0, 32, 0xffffff, "Camera(pos(%.1f, %.1f, %.1f), \nangle(%.1f°, %.1f°, %.1f°)),rotY(%.1f°, %.1f°, %.1f°))"
 		, transform_.pos.x, transform_.pos.y, transform_.pos.z
-		, target.x, target.y, target.z);
+		, UtilityMath::Rad2DegF(angles_.x), UtilityMath::Rad2DegF(angles_.y), UtilityMath::Rad2DegF(angles_.z)
+		, UtilityMath::Rad2DegF(rotY.x), UtilityMath::Rad2DegF(rotY.y), UtilityMath::Rad2DegF(rotY.z));
 #endif
 
 	std::string targetText = "追従対象：";
 
-	targetText += ((!isLockOn_ || lockOnTarget_ == -1) ? "なし" : "");
-	targetText += ((isLockOn_ && lockOnTarget_ == 0) ? "ボス胴体" : "");
-	targetText += ((isLockOn_ && lockOnTarget_ == 1) ? "左マシンガン" : "");
-	targetText += ((isLockOn_ && lockOnTarget_ == 2) ? "右マシンガン" : "");
+	targetText += ((!isLockOn_ || lockOnTarget_ == LOCKON_TARGET::NONE)
+					? "なし" : "");
+	targetText += ((isLockOn_ && lockOnTarget_ == LOCKON_TARGET::BOSS_BODY)
+					? "ボス胴体" : "");
+	targetText += ((isLockOn_ && lockOnTarget_ == LOCKON_TARGET::BOSS_WEAPON_MGL_L)
+					? "左マシンガン" : "");
+	targetText += ((isLockOn_ && lockOnTarget_ == LOCKON_TARGET::BOSS_WEAPON_MGL_R)
+					? "右マシンガン" : "");
 	DrawString(Application::SCREEN_HALF_X - 50, 0, targetText.c_str(), 0xff0000);
 }
 
@@ -162,17 +189,21 @@ void Camera::ChangeMode(MODE _mode)
 
 }
 
-void Camera::SetLockOnTargets(int _target, const VECTOR& _targetPos, bool _isActive)
+void Camera::SetLockOnTargets(LOCKON_TARGET _target, const VECTOR& _targetPos, bool _isActive)
 {
 	if (!targetsPos_.empty())
 	{
 		if (!_isActive)
 		{
-			targetsPos_.erase(_target);
+			// 追従対象が無効時、追従リストから除外させる
+			if (targetsPos_.contains(_target))
+			{
+				targetsPos_.erase(_target);
+			}
 
 			if (lockOnTarget_ == _target)
 			{
-				lockOnTarget_ = -1;
+				lockOnTarget_ = LOCKON_TARGET::NONE;
 				isLockOn_ = false;
 			}
 			return;
@@ -180,6 +211,7 @@ void Camera::SetLockOnTargets(int _target, const VECTOR& _targetPos, bool _isAct
 
 		if (targetsPos_.contains(_target))
 		{
+			// 追従リストに追従対象がある場合、対象にする
 			targetsPos_.at(_target) = _targetPos;
 			return;
 		}
@@ -194,11 +226,15 @@ void Camera::SetLockOnTargets(int _target, const VECTOR& _targetPos, bool _isAct
 void Camera::LockOnChoice(void)
 {
 	float vSize = 10000.0f;
-	lockOnTarget_ = -1;
+	LOCKON_TARGET lockTarget = LOCKON_TARGET::NONE;
 	
-	for (int i = 0; i < targetsPos_.size(); i++)
+	if (targetsPos_.empty()) { return; }
+
+	for (auto& [target, pos] : targetsPos_)
 	{
-		VECTOR posFollow = VGet(targetsPos_.at(i).x, 0.0f, targetsPos_.at(i).z);
+		if (lockOnTarget_ == target) { continue; }
+
+		VECTOR posFollow = VGet(pos.x, 0.0f, pos.z);
 		VECTOR posCamera = VGet(transform_.pos.x, 0.0f, transform_.pos.z);
 
 		// 最も近い対象範囲内にいる対象を追尾
@@ -208,24 +244,39 @@ void Camera::LockOnChoice(void)
 			&& sizeXZ <= POS_SPACE_MAX && sizeXZ >= POS_SPACE_MIN)
 		{
 			vSize = sizeXZ;
-			lockOnTarget_ = i;
+			lockTarget = target;
 		}
 	}
 
 
-	if (lockOnTarget_ == -1)
+	if (lockTarget == LOCKON_TARGET::NONE)
 	{
 		isLockOn_ = false;
 		return;
 	}
 
+
 	isLockOn_ = true;
+	lockOnTarget_ = lockTarget;
 	lockOnPos_ = targetsPos_.at(lockOnTarget_);
 }
 
 void Camera::FollowLockOnPosition(void)
 {
+	if (targetsPos_.empty()) { return; }
+
 	lockOnPos_ = targetsPos_.at(lockOnTarget_);
+}
+
+void Camera::SetIsLockOn(bool _isLockOn)
+{
+	// ロックオン解除時、アングルとY軸回転を同期
+	if (isLockOn_ && !_isLockOn)
+	{
+		SyncAngleYFromRotY();
+	}
+
+	isLockOn_ = _isLockOn;
 }
 
 void Camera::SetDefault(void)
@@ -285,6 +336,17 @@ void Camera::SyncFollow(void)
 	transform_.pos = VAdd(pos, localPos);
 }
 
+void Camera::SyncAngleYFromRotY(void)
+{
+	// rotY_が示す前方ベクトルをXZ平面上で求める
+	VECTOR forward = rotY_.PosAxis(UtilityMath::DIR_F);
+
+	// atan2でY軸角度を逆算してangles_.yに書き戻す
+	angles_.y = atan2f(forward.x, forward.z);
+
+	SyncFollow();
+}
+
 void Camera::ProcessRot(bool _isLimit)
 {
 
@@ -335,7 +397,7 @@ void Camera::SetBeforeDrawFollow(void)
 	}
 	else if(!IsTargetSpace())
 	{
-		isLockOn_ = false;
+		SetIsLockOn(false);
 	}
 
 	// 追従対象との相対位置を同期
@@ -366,7 +428,6 @@ void Camera::ProcessMove(void)
 
 		// 左スティックの傾き
 		moveDir = inputManager_.GetDirectionXZAKey(padState.AKeyLX, padState.AKeyLY);
-
 	}
 
 	// 移動処理
@@ -560,7 +621,7 @@ void Camera::Collision(void)
 
 bool Camera::IsTargetSpace(void)
 {
-	if (lockOnTarget_ == -1) { return false; }
+	if (lockOnTarget_ == LOCKON_TARGET::NONE) { return false; }
 
 	VECTOR posFollow = VGet(targetsPos_.at(lockOnTarget_).x, 0.0f, targetsPos_.at(lockOnTarget_).z);
 	VECTOR posCamera = VGet(transform_.pos.x, 0.0f, transform_.pos.z);

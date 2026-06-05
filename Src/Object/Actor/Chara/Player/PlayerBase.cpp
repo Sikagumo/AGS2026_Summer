@@ -1,6 +1,6 @@
 #include "PlayerBase.h"
 
-constexpr int HP = 1;
+constexpr int HP = 50;
 constexpr float INVINSIVE_TIME = 1.0f;
 
 PlayerBase::PlayerBase(int _playerNo, BULLET_TYPE _bulletType, PLAYER_TYPE _playerType)
@@ -13,11 +13,17 @@ PlayerBase::PlayerBase(int _playerNo, BULLET_TYPE _bulletType, PLAYER_TYPE _play
 {
 }
 
-void PlayerBase::SetDamage(int _damage)
+void PlayerBase::SetDamage(int _damage, bool _isInvincible)
 {
-	if (curInvTime_ > 0.0f || hp_ <= 0 || _damage <= 0) { return; }
+	// –³“G‰Â”\Žž‚É–³“G’†AHP‚ª‚OˆÈ‰ºAƒ_ƒ[ƒW—Ê‚ª0ˆÈ‰ºŽžAˆ—I—¹
+	if (_isInvincible && curInvTime_ > 0.0f
+		|| hp_ <= 0 || _damage <= 0) { return; }
 
-	curInvTime_ = INVINSIVE_TIME;
+	if (_isInvincible)
+	{
+		// –³“G‰Â”\ŽžA–³“GŽžŠÔŠ„‚è“–‚Ä
+		curInvTime_ = INVINSIVE_TIME;
+	}
 
 	hp_ -= _damage;
 }

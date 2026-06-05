@@ -57,9 +57,6 @@ protected:
 	// ƒWƒƒƒ“ƒv”»’è
 	bool isJump_;
 
-	// ˆÚ“®—Ê‚É‰ž‚¶‚½‰ñ“]‚ð‚·‚é‚©”Û‚©
-	bool isDirRotActive_;
-
 	
 	virtual void InitAnimation(void)override;
 
@@ -70,7 +67,7 @@ protected:
 
 
 	// ˆÚ“®•ûŒü‚É‰ž‚¶‚½’x‰„‰ñ“]
-	void DelayRotate(void);
+	virtual  void DelayRotate(void);
 
 	void CalcGravityPow(void);
 

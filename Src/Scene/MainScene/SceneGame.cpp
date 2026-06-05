@@ -72,12 +72,12 @@ void SceneGame::Update(void)
 	// 時間を取得
 	float times = time.GetGameTime();
 
+	SceneManager::GetInstance().GetCamera()->Update();
+
 	player_->Update();
 	boss_->Update();
 	stage_->Update();
 	damageController_->Update();
-	
-	CameraLockOn();
 
 	DamageProcess();
 
@@ -109,30 +109,16 @@ void SceneGame::DamageProcess(void)
 	damageController_->SetPlayerAttack(player_->GetPower());
 
 	// プレイヤー被ダメージ処理
-	player_->SetDamage(damageController_->GetPlayerDamage());
+	player_->SetDamage(damageController_->GetPlayerDamage(), true);
 }
 
 void SceneGame::CameraLockOn(void)
 {
-	auto& camera = SceneManager::GetInstance().GetCamera();
+	
 
-	if (InputManager::GetInstance().IsTrgDown(KEY_INPUT_E))
-	{
-		if (!camera->GetIsLockOn())
-		{
-			camera->LockOnChoice();
-		}
-		else
-		{
-			camera->SetIsLockOn(false);
-		}
-	}
+	
 
-	// ロックオン時、常に追従位置を取得する
-	if (camera->GetIsLockOn())
-	{
-		camera->FollowLockOnPosition();
-	}
+	
 }
 
 void SceneGame::UpdateCollision(void)

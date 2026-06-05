@@ -1,6 +1,7 @@
 #pragma once
 #include <unordered_map>
 #include <string>
+#include "../../Utility/UtilityMath.h"
 
 class AnimationController
 {
@@ -19,11 +20,13 @@ public:
 		ANIM_TYPE type = ANIM_TYPE::NONE;
 		int modelId		= -1; // アニメーションモデル
 		int attachNo	= -1;
-		int animIndex	= 0;    // モデル内アニメーション番号
-		float speed		= 0.0f; // 再生速度
-		float totalTime = 0.0f; // 最大再生時間
-		float step		= 0.0f; // 現在再生時間
+		int animIndex	= 0;	 // モデル内アニメーション番号
+		float speed		= 0.0f;	 // 再生速度
+		float totalTime = 0.0f;	 // 最大再生時間
+		float step		= 0.0f;	 // 現在再生時間
 		bool isLoadPath = false; // パスで読み込んでいるか否か
+		bool isInPlace = false; // アニメーションの位置を固定するか否か
+		VECTOR inPlaceLocalPos = UtilityMath::VECTOR_ZERO; // 固定するアニメーションローカル位置
 	};
 
 
@@ -39,17 +42,21 @@ public:
 	/// @param speed アニメーション速度 
 	void AddInternal(int _type, float _speed = 30.0f);
 
-	/// @brief 別のアニメーションモデルから準備
-	/// @param _type アニメーション種類
-	/// @param _speed アニメーション速度 
-	/// @param _path アニメーションのパス
-	void AddExternal(int _type, float _speed, const std::string _path);
 
 	/// @brief 別の読み込み済みアニメーションモデルから準備
 	/// @param _type アニメーション種類
 	/// @param _speed アニメーション速度 
 	/// @param _handle アニメーションのハンドル
 	void AddExternal(int _type, float _speed, int _handle);
+
+	/// @brief 別の読み込み済みアニメーションモデルから準備
+	/// @see 詳細な説明
+	/// @param _type アニメーション種類
+	/// @param _speed アニメーション速度 
+	/// @param _handle アニメーションのハンドル
+	/// @param _placeLocalPos 固定するアニメーションローカル位置
+	void AddExternal(int _type, float _speed, int _handle
+					, const VECTOR& _inPlaceLocalPos);
 
 
 	/// @brief アニメーション再生
@@ -144,9 +151,11 @@ private:
 	/// @param _animIndex 格納するアニメーションリスト
 	void Add(int _type, Animation& _animIndex);
 
-	/// <summary>
-	/// アニメーションが格納されているか判定
-	/// </summary>
-	/// <param name="_type">アニメーションの種類</param>
+	/// @brief アニメーションが格納されているか判定
+	/// @param _type アニメーションの種類
 	bool IsFindAnimation(int _type);
+
+	/// @brief 固定アニメーション処理
+	/// @param _playAnim 再生中のアニメーション
+	void AnimationInPlace(Animation& _playAnim);
 };
