@@ -56,6 +56,7 @@ KeyConfInputManager::KeyConfInputManager(void)
 void KeyConfInputManager::InitInputTable(void)
 {
 	inputTable_.clear();
+	XINPUT_STATE input;
 
 	inputTable_["UP"] =
 	{
@@ -84,11 +85,13 @@ void KeyConfInputManager::InitInputTable(void)
 	inputTable_["JUMP"] =
 	{
 		{INPUT_TYPE::KEY_BOARD, KEY_INPUT_SPACE},
+		{INPUT_TYPE::JOYPAD, PAD_INPUT_A}
 	};
 
 	inputTable_["ATTACK"] =
 	{
-		{INPUT_TYPE::MOUSE, MOUSE_INPUT_LEFT}
+		{INPUT_TYPE::MOUSE, MOUSE_INPUT_LEFT},
+		{INPUT_TYPE::JOYPAD,input.RightTrigger}
 	};
 
 	inputTable_["OK"] =
