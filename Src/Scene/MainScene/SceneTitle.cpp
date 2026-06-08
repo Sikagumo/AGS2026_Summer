@@ -158,7 +158,6 @@ void SceneTitle::UpdateCollision(void)
 
 void SceneTitle::Draw(void)
 {
-    if (Loading::GetInstance()->IsLoading()) { return; }
 
     using TAG_2D = Collider2DBase::TAG_2D;
 
