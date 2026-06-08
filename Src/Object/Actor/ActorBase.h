@@ -6,7 +6,7 @@ class ColliderBase;
 class ResourceManager;
 class TimeManager;
 class InputManager;
-class CollisionManager;
+class CollisionController;
 
 class ActorBase
 {

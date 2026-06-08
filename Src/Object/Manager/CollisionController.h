@@ -30,7 +30,7 @@ struct CollisionInfo
 };
 
 /// @brief ゲーム内の衝突判定を一元管理するシングルトンクラス
-class CollisionManager
+class CollisionController
 {
 public:
 
@@ -38,8 +38,8 @@ public:
 	static void CreateInstance(void);
 
 	/// @brief インスタンスの取得
-	/// @return CollisionManagerの参照
-	static CollisionManager& GetInstance(void);
+	/// @return CollisionControllerの参照
+	static CollisionController& GetInstance(void);
 
 	/// @brief インスタンスの破棄
 	static void DestroyInstance(void);
@@ -100,15 +100,6 @@ public:
 	/// @param info 衝突判定の結果
 	void ResolveCollision(ActorBase* actorA, ActorBase* actorB, const CollisionInfo& info);
 
-	/// @brief 衝撃波の当たり判定を行う
-	/// @param _hitCol 当たる側のコライダー
-	/// @param _waveCol 衝撃波のコライダー
-	/// @param _waveThickness 衝撃波の厚み
-	/// @param _waveHeight 衝撃波の高さ
-	/// @return 当たっていれば true
-	bool CheckHitWave(const ColliderBase* _hitCapsuleCol, ColliderBase* _waveCol, 
-		float _waveThickness, float _waveHeight);
-
 	/// @brief 2Dコライダーの登録
 	/// @param _collider 登録する2Dコライダーのポインタ
 	void RegisterCollider2D(Collider2DBase* _collider);
@@ -152,15 +143,11 @@ private:
 	// 更新のインターバル時間
 	static constexpr float UPDATE_INTERVAL = 0.016f;
 
-	// 衝撃波の定数関連
-	static constexpr float HIT_WAVE_THICKNESS = 2.0f; // 衝撃波の厚み
-	static constexpr float HIT_WAVE_HEIGHT = 75.0f;    // 衝撃波の高さ
-
 	// 配列サイズ
 	static const size_t MATRIX_SIZE_2D = 32;
 
 	// シングルトンインスタンス
-	static CollisionManager* instance_;
+	static CollisionController* instance_;
 
 	// 判定対象のアクターリスト
 	std::vector<ActorBase*> actors_;
@@ -183,16 +170,16 @@ private:
 	float updateTimer_;                 // 更新タイマー
 
 	/// @brief コンストラクタ
-	CollisionManager(void);
+	CollisionController(void);
 
 	/// @brief デストラクタ
-	~CollisionManager(void) = default;
+	~CollisionController(void) = default;
 
 	/// @brief コピー禁止
-	CollisionManager(const CollisionManager&) = delete;
+	CollisionController(const CollisionController&) = delete;
 
 	/// @brief 代入禁止 
-	CollisionManager& operator=(const CollisionManager&) = delete;
+	CollisionController& operator=(const CollisionController&) = delete;
 
 	/// @brief 全アクターのペアに対して衝突判定を更新
 	void UpdateCollisionPars(void);
@@ -203,62 +190,6 @@ private:
 	/// @return 衝突する組み合わせならtrue
 	bool CanCollide(int _tagA, int _tagB) const;
 
-	/// @brief 球体 vs 球体の衝突判定
-	/// @param colliderA 判定対象A（球体）
-    /// @param colliderB 判定対象B（球体）
-    /// @param outInfo 衝突時の詳細データを格納する構造体
-    /// @return 衝突している場合はtrue
-	bool CheckSphereVsSphere(const ColliderBase* _colliderA, const ColliderBase* _colliderB,
-		CollisionInfo& _outInfo);
-
-	/// @brief 球体 vs カプセルの衝突判定
-    /// @param sphereCol 判定対象（球体）
-    /// @param capsuleCol 判定対象（カプセル）
-    /// @param outInfo 衝突時の詳細データを格納する構造体
-    /// @return 衝突している場合はtrue
-	bool CheckSphereVsCapsule(const ColliderBase* _sphereCol, const ColliderBase* _capsuleCol,
-		CollisionInfo& _outInfo);
-
-	/// @brief 球体 vs モデルの衝突判定
-	/// @param _sphereCol 判定対象 (球体)
-	/// @param _modelCol 判定対象 (3Dモデル/メッシュ)
-	/// @param _outInfo 衝突時の詳細データを格納する構造体
-	/// @return 衝突している場合はtrue
-	bool CheckSphereVsModel(const ColliderBase* _sphereCol, const ColliderBase* _modelCol,
-		CollisionInfo& _outInfo);
-
-	/// @brief カプセル vs モデル（地形）の衝突判定
-    /// @param capsuleCol 判定対象（カプセル）
-    /// @param modelCol 判定対象（3Dモデル/メッシュ）
-    /// @param outInfo 衝突時の詳細データを格納する構造体
-    /// @return 衝突している場合はtrue
-	bool CheckCapsuleVsModel(const ColliderBase* _capsuleCol, const ColliderBase* _modelCol,
-		CollisionInfo& _outInfo);
-
-	/// @brief 線分 vs モデル（地形）の衝突判定
-    /// @param lineCol 判定対象（線分/レイ）
-    /// @param modelCol 判定対象（3Dモデル/メッシュ）
-    /// @param outInfo 衝突時の詳細データを格納する構造体
-    /// @return 衝突している場合はtrue
-	bool CheckLineVsModel(const ColliderBase* _lineCol, const ColliderBase* _modelCol,
-		CollisionInfo& _outInfo);
-
-	/// @brief 線分上の最もターゲットに近い座標を算出
-	/// @param startPos 線分の開始点
-	/// @param endPos 線分の終了点
-	/// @param targetPos ターゲット座標
-	/// @return 線分上の最近接座標
-	VECTOR GetNearestPointOnSegment(const VECTOR& _startPos,
-		const VECTOR& _endPos, const VECTOR& _targetPos);
-
-	/// @brief カプセル vs カプセルの衝突判定
-	/// @param colliderA 判定対象A（カプセル）
-	/// @param colliderB 判定対象B（カプセル）
-	/// @param outInfo 衝突時の詳細データを格納する構造体
-	/// @return 衝突している場合はtrue
-	bool CheckCapsuleVsCapsule(const ColliderBase* _colliderA, const ColliderBase* _colliderB,
-		CollisionInfo& _outInfo);
-
 	/// @brief 2Dコライダーの総当たり判定更新（Updateから呼ばれる）
 	void UpdateCollision2D(void);
 
@@ -267,24 +198,5 @@ private:
 	/// @param _tagB 2つ目の2Dタグ
 	/// @return 衝突許可フラグ（trueで判定を行う）
 	bool CanCollide2D(Collider2DBase::TAG_2D _tagA, Collider2DBase::TAG_2D _tagB) const;
-
-	/// @brief 円と円の衝突判定
-	/// @param _circleA 1つ目の円コライダー
-	/// @param _circleB 2つ目の円コライダー
-	/// @return 衝突しているか
-	bool CheckCircleVsCircle(const Collider2DBase* _circleA,
-		const Collider2DBase* _circleB) const;
-
-	/// @brief 矩形と矩形の衝突判定
-	/// @param _boxA 1つ目の矩形コライダー
-	/// @param _boxB 2つ目の矩形コライダー
-	/// @return 衝突しているか
-	bool CheckBoxVsBox(const Collider2DBase* _boxA, const Collider2DBase* _boxB) const;
-
-	/// @brief 円と矩形の衝突判定
-	/// @param _circle 円コライダー
-	/// @param _box 矩形コライダー
-	/// @return 衝突しているか
-	bool CheckCircleVsBox(const Collider2DBase* _circle, const Collider2DBase* _box) const;
 };
 

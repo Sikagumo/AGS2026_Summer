@@ -387,5 +387,13 @@ public:
 
 	// ランダムな数値を返す(float用)
 	static float  RandRangeF(float min, float max);
+
+	/// @brief 線分上の最もターゲットに近い座標を算出
+	/// @param startPos 線分の開始点
+	/// @param endPos 線分の終了点
+	/// @param targetPos ターゲット座標
+	/// @return 線分上の最近接座標
+	static VECTOR GetNearestPointOnSegment(const VECTOR& _startPos,
+		const VECTOR& _endPos, const VECTOR& _targetPos);
 };
 

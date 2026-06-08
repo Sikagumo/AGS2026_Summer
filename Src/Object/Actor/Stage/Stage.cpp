@@ -1,7 +1,7 @@
 #include "Stage.h"
 #include "../../Actor/ActorBase.h"
 #include "../../../Manager/Generic/ResourceManager.h"
-#include "../../../Object/Manager/CollisionManager.h"
+#include "../../../Object/Manager/CollisionController.h"
 #include "../../../Utility/UtilityMath.h"
 #include "../../Collider/ColliderModel.h"
 
@@ -51,7 +51,7 @@ void Stage::InitCollider(void)
 		colModel->AddExcludeFrameIds(name);
 	}
 
-	CollisionManager::GetInstance().RegisterActor(this);
+	CollisionController::GetInstance().RegisterActor(this);
 }
 
 

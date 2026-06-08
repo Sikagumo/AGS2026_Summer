@@ -5,7 +5,7 @@
 #include "../../Scene/MainScene/SceneGamePlayer.h"
 #include "../../Scene/MainScene/SceneGameBoss.h"
 #include "../Decoration/SoundManager.h"
-#include "../../Object/Manager/CollisionManager.h"
+#include "../../Object/Manager/CollisionController.h"
 #include "../System/TimeManager.h"
 #include "../../Camera/Camera.h"
 #include "../../Common/Loading.h"
@@ -59,8 +59,8 @@ void SceneManager::Initialize(void)
     TimeManager::CreateInstance();
     Loading::CreateInstance();
     Loading::GetInstance()->Initialize();
-    CollisionManager::CreateInstance();
-    CollisionManager::GetInstance().Initialize();
+    CollisionController::CreateInstance();
+    CollisionController::GetInstance().Initialize();
 }
 
 void SceneManager::Init3D(void)
@@ -114,8 +114,8 @@ void SceneManager::Init3D(void)
 
 void SceneManager::ChangeScene(std::shared_ptr<SceneBase> scene)
 {
-    // CollisionManagerをクリア
-    CollisionManager::GetInstance().Clear();
+    // CollisionControllerをクリア
+    CollisionController::GetInstance().Clear();
 
     // BGMを停止する
     SoundManager::GetInstance().StopAllBGM();
@@ -155,7 +155,7 @@ void SceneManager::JumpScene(std::shared_ptr<SceneBase> scene)
     scenes_.clear();
 
     // CollisionControllerをクリア
-    CollisionManager::GetInstance().Clear();
+    CollisionController::GetInstance().Clear();
 
     // BGMを停止する
     SoundManager::GetInstance().StopAllBGM();
@@ -232,7 +232,7 @@ void SceneManager::Update(void)
         current->Update();
     }
 
-    CollisionManager::GetInstance().Update();
+    CollisionController::GetInstance().Update();
 
     if (current)
     {
@@ -284,7 +284,7 @@ void SceneManager::Release(void)
     SoundManager::GetInstance().DestroyInstance();
     TimeManager::GetInstance().DestroyInstance();
     Loading::GetInstance()->DestroyInstance();
-    CollisionManager::DestroyInstance();
+    CollisionController::DestroyInstance();
 }
 
 const std::unique_ptr<Camera>& SceneManager::GetCamera(void) const

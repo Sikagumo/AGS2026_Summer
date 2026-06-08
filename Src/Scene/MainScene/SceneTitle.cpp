@@ -3,7 +3,7 @@
 #include "../../Manager/Generic/InputManager.h"
 #include "../../Manager/Generic/ResourceManager.h"
 #include "../../Manager/Decoration/SoundManager.h"
-#include "../../Object/Manager/CollisionManager.h"
+#include "../../Object/Manager/CollisionController.h"
 #include "../../Camera/Camera.h"
 #include "SceneGame.h"
 #include "SceneResult.h"
@@ -61,7 +61,7 @@ void SceneTitle::Initialize(void)
 
     // マウスカーソル用のコライダー生成（半径1の円）
     cursorCollider_ = std::make_unique<Collider2DCircle>(Vector2F(0.0f, 0.0f), 1.0f, Collider2DBase::TAG_2D::MOUSE_CURSOR);
-    CollisionManager::GetInstance().RegisterCollider2D(cursorCollider_.get());
+    CollisionController::GetInstance().RegisterCollider2D(cursorCollider_.get());
 
     // UIボタンの配置計算設定
     const float BUTTON_WIDTH = 250.0f;
@@ -73,26 +73,26 @@ void SceneTitle::Initialize(void)
     // ソロプレイボタン
     Vector2F posSolo(CENTER_X, START_Y + (INTERVAL_Y * 0.0f));
     soloPlayButtonCollider_ = std::make_unique<Collider2DBox>(posSolo, BUTTON_WIDTH, BUTTON_HEIGHT, Collider2DBase::TAG_2D::SOLO_PLAY_BUTTON);
-    CollisionManager::GetInstance().RegisterCollider2D(soloPlayButtonCollider_.get());
-    CollisionManager::GetInstance().SetCollisionGroup2D(Collider2DBase::TAG_2D::MOUSE_CURSOR, Collider2DBase::TAG_2D::SOLO_PLAY_BUTTON, true);
+    CollisionController::GetInstance().RegisterCollider2D(soloPlayButtonCollider_.get());
+    CollisionController::GetInstance().SetCollisionGroup2D(Collider2DBase::TAG_2D::MOUSE_CURSOR, Collider2DBase::TAG_2D::SOLO_PLAY_BUTTON, true);
 
     // マルチプレイボタン
     Vector2F posMulti(CENTER_X, START_Y + (INTERVAL_Y * 1.0f));
     multiPlayButtonCollider_ = std::make_unique<Collider2DBox>(posMulti, BUTTON_WIDTH, BUTTON_HEIGHT, Collider2DBase::TAG_2D::MULTI_PLAY_BUTTON);
-    CollisionManager::GetInstance().RegisterCollider2D(multiPlayButtonCollider_.get());
-    CollisionManager::GetInstance().SetCollisionGroup2D(Collider2DBase::TAG_2D::MOUSE_CURSOR, Collider2DBase::TAG_2D::MULTI_PLAY_BUTTON, true);
+    CollisionController::GetInstance().RegisterCollider2D(multiPlayButtonCollider_.get());
+    CollisionController::GetInstance().SetCollisionGroup2D(Collider2DBase::TAG_2D::MOUSE_CURSOR, Collider2DBase::TAG_2D::MULTI_PLAY_BUTTON, true);
 
     // 設定ボタン
     Vector2F posOption(CENTER_X, START_Y + (INTERVAL_Y * 2.0f));
     optionButtonCollider_ = std::make_unique<Collider2DBox>(posOption, BUTTON_WIDTH, BUTTON_HEIGHT, Collider2DBase::TAG_2D::OPTION_BUTTON);
-    CollisionManager::GetInstance().RegisterCollider2D(optionButtonCollider_.get());
-    CollisionManager::GetInstance().SetCollisionGroup2D(Collider2DBase::TAG_2D::MOUSE_CURSOR, Collider2DBase::TAG_2D::OPTION_BUTTON, true);
+    CollisionController::GetInstance().RegisterCollider2D(optionButtonCollider_.get());
+    CollisionController::GetInstance().SetCollisionGroup2D(Collider2DBase::TAG_2D::MOUSE_CURSOR, Collider2DBase::TAG_2D::OPTION_BUTTON, true);
 
     // 終了ボタン
     Vector2F posExit(CENTER_X, START_Y + (INTERVAL_Y * 3.0f));
     exitButtonCollider_ = std::make_unique<Collider2DBox>(posExit, BUTTON_WIDTH, BUTTON_HEIGHT, Collider2DBase::TAG_2D::EXIT_UTTON);
-    CollisionManager::GetInstance().RegisterCollider2D(exitButtonCollider_.get());
-    CollisionManager::GetInstance().SetCollisionGroup2D(Collider2DBase::TAG_2D::MOUSE_CURSOR, Collider2DBase::TAG_2D::EXIT_UTTON, true);
+    CollisionController::GetInstance().RegisterCollider2D(exitButtonCollider_.get());
+    CollisionController::GetInstance().SetCollisionGroup2D(Collider2DBase::TAG_2D::MOUSE_CURSOR, Collider2DBase::TAG_2D::EXIT_UTTON, true);
 
     SceneManager::GetInstance().GetCamera()->ChangeMode(Camera::MODE::NONE);
 }
@@ -120,7 +120,7 @@ void SceneTitle::Update(void)
     }
 
     // ソロプレイ
-    if (CollisionManager::GetInstance().IsTagCollidingWithTag2D
+    if (CollisionController::GetInstance().IsTagCollidingWithTag2D
     (TAG_2D::MOUSE_CURSOR, TAG_2D::SOLO_PLAY_BUTTON))
     {
         if (input.IsTrgMouseLeft())
@@ -130,7 +130,7 @@ void SceneTitle::Update(void)
     }
 
     // マルチ
-    if (CollisionManager::GetInstance().IsTagCollidingWithTag2D
+    if (CollisionController::GetInstance().IsTagCollidingWithTag2D
     (TAG_2D::MOUSE_CURSOR, TAG_2D::MULTI_PLAY_BUTTON))
     {
         if (input.IsTrgMouseLeft())
@@ -140,7 +140,7 @@ void SceneTitle::Update(void)
     }
 
     // 設定
-    if (CollisionManager::GetInstance().IsTagCollidingWithTag2D
+    if (CollisionController::GetInstance().IsTagCollidingWithTag2D
     (TAG_2D::MOUSE_CURSOR, TAG_2D::OPTION_BUTTON))
     {
         if (input.IsTrgMouseLeft())
@@ -150,7 +150,7 @@ void SceneTitle::Update(void)
     }
 
     // 終了
-    if (CollisionManager::GetInstance().IsTagCollidingWithTag2D
+    if (CollisionController::GetInstance().IsTagCollidingWithTag2D
     (TAG_2D::MOUSE_CURSOR, TAG_2D::EXIT_UTTON))
     {
         if (input.IsTrgMouseLeft())
@@ -190,7 +190,7 @@ void SceneTitle::Draw(void)
 
 
     // ソロプレイ
-    if (CollisionManager::GetInstance().IsTagCollidingWithTag2D
+    if (CollisionController::GetInstance().IsTagCollidingWithTag2D
     (TAG_2D::MOUSE_CURSOR, TAG_2D::SOLO_PLAY_BUTTON))
     {
         Vector2F posSolo = soloPlayButtonCollider_->GetCenterPos();
@@ -204,7 +204,7 @@ void SceneTitle::Draw(void)
     }
 
     // マルチ
-    if (CollisionManager::GetInstance().IsTagCollidingWithTag2D
+    if (CollisionController::GetInstance().IsTagCollidingWithTag2D
     (TAG_2D::MOUSE_CURSOR, TAG_2D::MULTI_PLAY_BUTTON))
     {
         Vector2F posMulti = multiPlayButtonCollider_->GetCenterPos();
@@ -218,7 +218,7 @@ void SceneTitle::Draw(void)
     }
 
     // 設定
-    if (CollisionManager::GetInstance().IsTagCollidingWithTag2D
+    if (CollisionController::GetInstance().IsTagCollidingWithTag2D
     (TAG_2D::MOUSE_CURSOR, TAG_2D::OPTION_BUTTON))
     {
 
@@ -235,7 +235,7 @@ void SceneTitle::Draw(void)
     }
 
     // 終了
-    if (CollisionManager::GetInstance().IsTagCollidingWithTag2D
+    if (CollisionController::GetInstance().IsTagCollidingWithTag2D
     (TAG_2D::MOUSE_CURSOR, TAG_2D::EXIT_UTTON))
     {
         Vector2F posExit = exitButtonCollider_->GetCenterPos();
@@ -260,6 +260,6 @@ void SceneTitle::Release(void)
 
 void SceneTitle::DrawDebug(void)
 {
-    CollisionManager::GetInstance().DrawDebug2D();
+    CollisionController::GetInstance().DrawDebug2D();
 }
 

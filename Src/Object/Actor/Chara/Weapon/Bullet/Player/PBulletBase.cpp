@@ -3,7 +3,7 @@
 #include "../../../../../../Utility/UtilityMath.h"
 #include "../../../../../../Manager/System/TimeManager.h"
 #include "../../../../../../Application.h"
-#include "../../../../../Manager/CollisionManager.h"
+#include "../../../../../Manager/CollisionController.h"
 #include "../../../../../Collider/ColliderSphere.h"
 
 PBulletBase::PBulletBase(void)
@@ -76,7 +76,7 @@ void PBulletBase::Update(void)
 			, ColliderBase::TAG::WEAPON_MP_L, ColliderBase::TAG::WEAPON_MP_R
 			, ColliderBase::TAG::WEAPON_RG};
 
-	CollisionManager& colMng = CollisionManager::GetInstance();
+	CollisionController& colMng = CollisionController::GetInstance();
 
 	for (auto tag : BOSS_TAG)
 	{
@@ -115,7 +115,7 @@ void PBulletBase::BlastAction(void)
 	activePower_ = power_;
 
 	// “–‚½‚è”»’è–³Œø‰»
-	CollisionManager::GetInstance().SetCollisionActive(this, ColliderBase::TAG::PLAYER_BULLET, false);
+	CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::PLAYER_BULLET, false);
 
 
 	// Õ“Ë”»’èƒ}ƒl[ƒWƒƒ‚É“o˜^
@@ -157,8 +157,8 @@ void PBulletBase::Shot(const VECTOR& _shotDir)
 
 	// “–‚½‚è”»’è“o˜^
 	ownColliders_.at(0)->SetRadius(radius_);
-	CollisionManager::GetInstance().RegisterActor(this);
-	CollisionManager::GetInstance().SetCollisionActive(this, ColliderBase::TAG::PLAYER_BULLET, true);
+	CollisionController::GetInstance().RegisterActor(this);
+	CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::PLAYER_BULLET, true);
 }
 
 bool PBulletBase::IsAlive(void) const

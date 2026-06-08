@@ -4,7 +4,7 @@
 #include "../../../../Collider/ColliderBase.h"
 #include "../../../../Collider/ColliderCapsule.h"
 #include "../../../../Collider/ColliderLine.h"
-#include "../../../../Manager/CollisionManager.h"
+#include "../../../../Manager/CollisionController.h"
 #include "WeaponRG.h"
 
 WeaponRG::WeaponRG(void)
@@ -63,7 +63,7 @@ void WeaponRG::InitCollider(void)
 	ownColliders_.emplace(static_cast<int>(ColliderBase::SHAPE::CAPSULE), colCapsule);
 	colCapsule->SetTriger(false);
 
-	CollisionManager::GetInstance().RegisterActor(this);
+	CollisionController::GetInstance().RegisterActor(this);
 }
 
 void WeaponRG::InitAnimation(void)
@@ -86,7 +86,7 @@ void WeaponRG::UpdateProcess(void)
 	if (hp_ <= 0)
 	{
 		isAlive_ = false;
-		//CollisionManager::GetInstance().SetCollisionActive(this, tag_, false);
+		//CollisionController::GetInstance().SetCollisionActive(this, tag_, false);
 	}
 }
 

@@ -2,7 +2,7 @@
 #include "../../Manager/Generic/ResourceManager.h"
 #include "../../Manager/System/TimeManager.h"
 #include "../../Manager/Generic/InputManager.h"
-#include "../../Object/Manager/CollisionManager.h"
+#include "../../Object/Manager/CollisionController.h"
 #include "../Collider/ColliderBase.h"
 
 ActorBase::ActorBase(void)

@@ -1,7 +1,7 @@
 
 #include "../../../../../Collider/ColliderBase.h"
 #include "../../../../../Collider/ColliderSphere.h"
-#include "../../../../../Manager/CollisionManager.h"
+#include "../../../../../Manager/CollisionController.h"
 #include "BBulletMG.h"
 
 BBulletMG::BBulletMG(Transform& _transform)
@@ -36,7 +36,7 @@ void BBulletMG::InitCollider(void)
 	ownColliders_.emplace(static_cast<int>(ColliderBase::SHAPE::SPHERE), colSphere);
 	
 
-	CollisionManager::GetInstance().RegisterActor(this);
+	CollisionController::GetInstance().RegisterActor(this);
 
 }
 
@@ -54,7 +54,7 @@ void BBulletMG::InitPost(void)
 void BBulletMG::UpdateProcess(void)
 {
 
-	if (CollisionManager::GetInstance().IsActorCollidingWithTag(this, ColliderBase::TAG::PLAYER) || CollisionManager::GetInstance().IsActorCollidingWithTag(this, ColliderBase::TAG::STAGE))
+	if (CollisionController::GetInstance().IsActorCollidingWithTag(this, ColliderBase::TAG::PLAYER) || CollisionController::GetInstance().IsActorCollidingWithTag(this, ColliderBase::TAG::STAGE))
 	{
 		isAlive_ = false;
 	}
@@ -75,7 +75,7 @@ void BBulletMG::UpdateProcess(void)
 	}
 	else
 	{
-		CollisionManager::GetInstance().SetCollisionActive(this, ColliderBase::TAG::MG_BULLET, false);
+		CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::MG_BULLET, false);
 	}
 }
 

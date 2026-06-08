@@ -2,7 +2,7 @@
 #include "../../../../Application.h"
 #include "../../../../Utility/UtilityMath.h"
 #include "../../../../Manager/System/TimeManager.h"
-#include "../../../Manager/CollisionManager.h"
+#include "../../../Manager/CollisionController.h"
 #include "WeaponBase.h"
 
 WeaponBase::WeaponBase(void)
@@ -79,7 +79,7 @@ void WeaponBase::Collision(void)
 
 void WeaponBase::CollisionGravity(void)
 {
-	bool isHitStage = CollisionManager::GetInstance().IsActorCollidingWithTag(this, ColliderBase::TAG::STAGE);
+	bool isHitStage = CollisionController::GetInstance().IsActorCollidingWithTag(this, ColliderBase::TAG::STAGE);
 
 	// 床に触れていて、かつ下方向に落下している（または静止している）なら着地
 	if (isHitStage && jumpPow_.y <= 0.0f)

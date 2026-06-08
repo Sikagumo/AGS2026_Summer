@@ -10,7 +10,7 @@
 #include "../../../Collider/ColliderCapsule.h"
 #include "../../../Collider/ColliderLine.h"
 #include "../../../Collider/ColliderSphere.h"
-#include "../../../Manager/CollisionManager.h"
+#include "../../../Manager/CollisionController.h"
 #include "../Weapon/WeaponBase.h"
 #include "../Weapon/BossWeapon/WeaponMGL.h"
 #include "../Weapon/BossWeapon/WeaponMGR.h"
@@ -163,7 +163,7 @@ void Boss::InitCollider(void)
 
 	
 
-	CollisionManager::GetInstance().RegisterActor(this);
+	CollisionController::GetInstance().RegisterActor(this);
 
 }
 

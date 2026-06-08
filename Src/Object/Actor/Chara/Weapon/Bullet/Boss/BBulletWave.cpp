@@ -1,7 +1,7 @@
 #include <DxLib.h>
 #include "../../../../../Collider/ColliderSphere.h"
 #include "../../../../../Collider/ColliderBase.h"
-#include "../../../../../Manager/CollisionManager.h"
+#include "../../../../../Manager/CollisionController.h"
 #include "BBulletWave.h"
 
 BBulletWave::BBulletWave(Transform& _transform):
@@ -45,7 +45,7 @@ void BBulletWave::InitCollider(void)
 	ColliderSphere* colHitSphere = new ColliderSphere(ColliderBase::TAG::HIT_WAVE, &transform_, { 0.0f,0.0f,0.0f }, radius_);
 	ownColliders_.emplace(static_cast<int>(ColliderBase::SHAPE::SPHERE), colHitSphere);
 
-	CollisionManager::GetInstance().RegisterActor(this);
+	CollisionController::GetInstance().RegisterActor(this);
 }
 
 void BBulletWave::InitAnimation(void)
@@ -62,12 +62,12 @@ void BBulletWave::UpdateProcess(void)
 	if (isAttac_)
 	{
 		radius_ += INCREASE_RADIUS;
-		CollisionManager::GetInstance().SetActorColliderRadius(this, ColliderBase::TAG::HIT_WAVE, radius_);
+		CollisionController::GetInstance().SetActorColliderRadius(this, ColliderBase::TAG::HIT_WAVE, radius_);
 	}
 	if (radius_ >= MAX_RADIUS)
 	{
 		radius_ = INIT_RADIUS;
-		CollisionManager::GetInstance().SetActorColliderRadius(this, ColliderBase::TAG::HIT_WAVE, radius_);
+		CollisionController::GetInstance().SetActorColliderRadius(this, ColliderBase::TAG::HIT_WAVE, radius_);
 		isAttac_ = false;		
 	}
 }

@@ -566,3 +566,26 @@ float UtilityMath::RandRangeF(float min, float max)
 {
 	return min + static_cast<float>(rand()) / static_cast<float>(RAND_MAX) * (max - min);
 }
+
+VECTOR UtilityMath::GetNearestPointOnSegment(const VECTOR& _startPos,
+	const VECTOR& _endPos, const VECTOR& _targetPos)
+{
+	VECTOR segmentVec = VSub(_endPos, _startPos);
+	VECTOR toTargetVec = VSub(_targetPos, _startPos);
+
+	float lenSquare = static_cast<float>(UtilityMath::SqrMagnitude(segmentVec));
+
+	if (lenSquare < 1e-6)
+	{
+		return _startPos;
+	}
+
+	float segmentRatio = VDot(toTargetVec, segmentVec) / lenSquare;
+
+	if (segmentRatio < 0.0f) { segmentRatio = 0.0f; }
+	if (segmentRatio > 1.0f) { segmentRatio = 1.0f; }
+
+	VECTOR nearestPos = VAdd(_startPos, VScale(segmentVec, segmentRatio));
+
+	return nearestPos;
+}

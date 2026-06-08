@@ -10,7 +10,7 @@
 #include "../../../../Manager/System/TimeManager.h"
 #include "../../../../Camera/Camera.h"
 #include "../../../../Common/Quaternion.h"
-#include "../../../Manager/CollisionManager.h"
+#include "../../../Manager/CollisionController.h"
 #include "../../../Collider/ColliderBase.h"
 #include "../../../Collider/ColliderCapsule.h"
 #include "../../../Collider/ColliderLine.h"
@@ -129,7 +129,7 @@ void Player::InitCollider(void)
 	ownColliders_.at(0)->SetTriger(false);
 
 	// 衝突判定マネージャに登録
-	CollisionManager::GetInstance().RegisterActor(this);
+	CollisionController::GetInstance().RegisterActor(this);
 }
 void Player::InitPost(void)
 {

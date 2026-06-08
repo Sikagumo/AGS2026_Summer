@@ -4,7 +4,7 @@
 #include "../../../../Collider/ColliderBase.h"
 #include "../../../../Collider/ColliderSphere.h"
 #include "../../../../Collider/ColliderLine.h"
-#include "../../../../Manager/CollisionManager.h"
+#include "../../../../Manager/CollisionController.h"
 #include "WeaponMP.h"
 
 WeaponMP::WeaponMP(void)
@@ -62,7 +62,7 @@ void WeaponMP::InitCollider(void)
 	ownColliders_.emplace(static_cast<int>(ColliderBase::SHAPE::SPHERE), colSphere);
 	colSphere->SetTriger(false);
 
-	CollisionManager::GetInstance().RegisterActor(this);
+	CollisionController::GetInstance().RegisterActor(this);
 }
 
 void WeaponMP::InitAnimation(void)
@@ -84,7 +84,7 @@ void WeaponMP::UpdateProcess(void)
 	}
 	{
 		isAlive_ = false;
-		CollisionManager::GetInstance().SetCollisionActive(this, tag_, false);
+		CollisionController::GetInstance().SetCollisionActive(this, tag_, false);
 	}
 }
 

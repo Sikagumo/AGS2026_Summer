@@ -3,7 +3,7 @@
 #include "../../../Manager/Generic/ResourceManager.h"
 #include "../../../Manager/Generic/SceneManager.h"
 #include "../../../Manager/System/TimeManager.h"
-#include "../../Manager/CollisionManager.h"
+#include "../../Manager/CollisionController.h"
 #include "../../Collider/ColliderBase.h"
 #include "../../Collider/ColliderLine.h"
 #include "../../Collider/ColliderModel.h"
@@ -110,7 +110,7 @@ void CharaBase::Collision(void)
 
 void CharaBase::CollisionGravity(void)
 {
-	bool isHitStage = CollisionManager::GetInstance().IsActorCollidingWithTag(this, ColliderBase::TAG::STAGE);
+	bool isHitStage = CollisionController::GetInstance().IsActorCollidingWithTag(this, ColliderBase::TAG::STAGE);
 
 	// 床に触れていて、かつ下方向に落下している（または静止している）なら着地
 	if (isHitStage && jumpPow_.y <= 0.0f)
