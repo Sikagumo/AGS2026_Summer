@@ -219,6 +219,14 @@ private:
 	bool CheckSphereVsCapsule(const ColliderBase* _sphereCol, const ColliderBase* _capsuleCol,
 		CollisionInfo& _outInfo);
 
+	/// @brief 球体 vs モデルの衝突判定
+	/// @param _sphereCol 判定対象 (球体)
+	/// @param _modelCol 判定対象 (3Dモデル/メッシュ)
+	/// @param _outInfo 衝突時の詳細データを格納する構造体
+	/// @return 衝突している場合はtrue
+	bool CheckSphereVsModel(const ColliderBase* _sphereCol, const ColliderBase* _modelCol,
+		CollisionInfo& _outInfo);
+
 	/// @brief カプセル vs モデル（地形）の衝突判定
     /// @param capsuleCol 判定対象（カプセル）
     /// @param modelCol 判定対象（3Dモデル/メッシュ）

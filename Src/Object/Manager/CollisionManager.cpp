@@ -166,11 +166,15 @@ bool CollisionManager::CheckCollision(const ColliderBase* _colliderA, const Coll
 	}
 	else if (shapeA == SHAPE::SPHERE && shapeB == SHAPE::CAPSULE)
 	{
-		return CheckSphereVsCapsule(_colliderA, _colliderB, _outInfo);
+		return CheckSphereVsCapsule(_colliderB, _colliderA, _outInfo);
 	}
 	else if (shapeA == SHAPE::CAPSULE && shapeB == SHAPE::SPHERE)
 	{
 		return CheckSphereVsCapsule(_colliderB, _colliderA, _outInfo);
+	}
+	else if (shapeA == SHAPE::SPHERE && shapeB == SHAPE::MODEL)
+	{
+		return CheckSphereVsModel(_colliderA, _colliderB, _outInfo);
 	}
 	else if (shapeA == SHAPE::CAPSULE && shapeB == SHAPE::CAPSULE)
 	{
@@ -670,6 +674,92 @@ bool CollisionManager::CheckSphereVsCapsule(const ColliderBase* _sphereCol,
 		return true;
 	}
 
+	return false;
+}
+
+bool CollisionManager::CheckSphereVsModel(const ColliderBase* _sphereCol, const ColliderBase* _modelCol, CollisionInfo& _outInfo)
+{
+	if (!_sphereCol || !_modelCol) { return false; }
+
+	const auto* sphere = dynamic_cast<const ColliderSphere*>(_sphereCol);
+	const auto* model = dynamic_cast<const ColliderModel*>(_modelCol);
+
+	if (sphere == nullptr || model == nullptr)
+	{
+		return false;
+	}
+
+	int modelHandle = model->GetModelHandle();
+
+	if (modelHandle == -1)
+	{
+		return false;
+	}
+
+	VECTOR centerPos = sphere->GetWorldPosition();
+	float radius = sphere->GetRadius();
+	
+	// 球体とモデル全体の衝突判定
+	MV1_COLL_RESULT_POLY_DIM hitResult = MV1CollCheck_Sphere(modelHandle, -1, centerPos);
+
+	// 衝突の解析
+	if (hitResult.HitNum > 0)
+	{
+		float maxUpward = -2.0f;
+		int bestIndex = -1;
+
+		for (int i = 0; i < hitResult.HitNum; ++i)
+		{
+			// 除外対象のフレームチェック
+			if (model->IsExcludedFrame(hitResult.Dim[i].FrameIndex))
+			{
+				continue;
+			}
+
+			if (hitResult.Dim[i].Normal.y > maxUpward)
+			{
+				maxUpward = hitResult.Dim[i].Normal.y;
+				bestIndex = i;
+			}
+		}
+
+		if (bestIndex == -1)
+		{
+			MV1CollResultPolyDimTerminate(hitResult);
+			return false;
+		}
+
+		const auto& bestHit = hitResult.Dim[bestIndex];
+
+		_outInfo.myCollider = _sphereCol;
+		_outInfo.hitCollider = _modelCol;
+		_outInfo.hitPosition = bestHit.HitPosition;
+		_outInfo.hitNormal = bestHit.Normal;
+		_outInfo.isActive = true;
+
+		if (bestHit.Normal.y > 0.5f)
+		{
+			float sphereBottomY = centerPos.y - radius;
+
+			_outInfo.penetration = bestHit.HitPosition.y - sphereBottomY;
+		}
+		else
+		{
+			float distance = UtilityMath::MagnitudeF(VSub(bestHit.HitPosition, centerPos));
+			
+			_outInfo.penetration = radius - distance;
+		}
+
+		// めり込み量が極端にマイナスにならないよにする
+		if (_outInfo.penetration < 0.0f)
+		{
+			_outInfo.penetration = 0.0f;
+		}
+
+		MV1CollResultPolyDimTerminate(hitResult);
+		return true;
+	}
+	MV1CollResultPolyDimTerminate(hitResult);
 	return false;
 }
 
