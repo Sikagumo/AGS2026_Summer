@@ -7,6 +7,7 @@
 #include "Manager/Generic/ResourceManager.h"
 #include "Manager/Generic/SceneManager.h"
 #include "Manager/InputTextManager.h"
+#include "Manager/Generic/KeyConfInputManager.h"
 #include "Manager/Decoration/SoundManager.h"
 #include "Manager/System/NetManager.h"
 #include "FPS/FpsController.h"
@@ -84,6 +85,7 @@ void Application::Init(void)
 	SetUseDirectInputFlag(true);
 	InputManager::CreateInstance();
 	InputTextManager::CreateInstance();
+	KeyConfInputManager::CreateInstance();
 
 	// ネットワーク管理初期化
 	NetManager::CreateInstance();
@@ -112,7 +114,7 @@ void Application::Run(void)
 		{
 
 		}
-		else if (CheckHitKey(KEY_INPUT_ESCAPE) != 0 || isGameEnd_)
+		else if (KeyConfInputManager::GetInstance().isTrigerDown("CANCEL") != 0 || isGameEnd_)
 		{
 			break;
 		}
@@ -122,6 +124,7 @@ void Application::Run(void)
 		netManager.Update();
 		inputTextManager.Update();
 		inputManager.Update();
+		KeyConfInputManager::GetInstance().Update();
 		sceneManager.Update();
 
 		sceneManager.Draw();
@@ -141,6 +144,7 @@ void Application::Run(void)
 void Application::DestroyInstance(void)
 {
 	InputManager::GetInstance().DestroyInstance();
+	KeyConfInputManager::GetInstance().DestroyInstance();
 	ResourceManager::GetInstance().DestroyInstance(); 
 	// ネットワーク管理破棄
 	NetManager::GetInstance().DestroyInstance();

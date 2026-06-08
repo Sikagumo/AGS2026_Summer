@@ -94,7 +94,8 @@ void KeyConfInputManager::InitInputTable(void)
 	inputTable_["OK"] =
 	{
 		{INPUT_TYPE::KEY_BOARD, KEY_INPUT_SPACE},
-		{INPUT_TYPE::MOUSE, MOUSE_INPUT_LEFT}
+		{INPUT_TYPE::MOUSE, MOUSE_INPUT_LEFT},
+		{INPUT_TYPE::JOYPAD, PAD_INPUT_A}
 	};
 
 	inputTable_["CANCEL"] =
@@ -289,12 +290,36 @@ Vector2F KeyConfInputManager::GetRIghtStick(void) const
 
 Vector2F KeyConfInputManager::GetLeftStickRaw(void) const
 {
-	return Vector2F(static_cast<float>(stickInfo_.lx) , static_cast<float>(stickInfo_.ly));
+	float normalX = static_cast<float>(stickInfo_.lx) / XINPUT_VAL_MAX;
+	float normalY = static_cast<float>(stickInfo_.ly) / XINPUT_VAL_MAX;
+
+	float length = sqrtf(normalX * normalX + normalY * normalY);
+
+	// デッドゾーン以下なら0を返す
+	if (length < LEFT_STICK_DEAD_ZONE)
+	{
+		return Vector2F(0.0f, 0.0f);
+	}
+
+	// デッドゾーン考慮後の値を返す
+	return Vector2F(normalX, normalY);
 }
 
 Vector2F KeyConfInputManager::GetRightStickRaw(void) const
 {
-	return Vector2F(static_cast<float>(stickInfo_.rx), static_cast<float>(stickInfo_.ry));
+	float normalX = static_cast<float>(stickInfo_.rx) / XINPUT_VAL_MAX;
+	float normalY = static_cast<float>(stickInfo_.ry) / XINPUT_VAL_MAX;
+
+	float length = sqrtf(normalX * normalX + normalY * normalY);
+
+	// 右スティック用デッドゾーンを適用
+	// (右スティックには個別の設定があるのでそれを使用)
+	if (length < rStickSensitivity_.deadZone)
+	{
+		return Vector2F(0.0f, 0.0f);
+	}
+
+	return Vector2F(normalX, normalY);
 }
 
 void KeyConfInputManager::SetRStickSensitivity(const RStickSensitivity& _sensitivity)

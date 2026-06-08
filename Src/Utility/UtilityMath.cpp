@@ -561,7 +561,6 @@ VECTOR UtilityMath::GetCirclePos(const VECTOR& center, float radius, float angle
 		center.y + std::sinf(angle) * radius, center.z);
 }
 
-// ƒ‰ƒ“ƒ_ƒ€‚È”’l‚ğ•Ô‚·(float—p)
 float UtilityMath::RandRangeF(float min, float max)
 {
 	return min + static_cast<float>(rand()) / static_cast<float>(RAND_MAX) * (max - min);
