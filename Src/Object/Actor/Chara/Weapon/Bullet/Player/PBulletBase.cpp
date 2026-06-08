@@ -23,11 +23,18 @@ PBulletBase::PBulletBase(void)
 
 void PBulletBase::InitCollider(void)
 {
+	// Ä‰Šú‰»ŽžAˆ—‚ðI—¹
+	if (!ownColliders_.empty()) { return; }
+
+	// Õ“Ë”»’èƒ}ƒl[ƒWƒƒ‚É“o˜^
+	ColliderSphere* sphere = new ColliderSphere(ColliderBase::TAG::PLAYER_BULLET, &transform_, UtilityMath::VECTOR_ZERO, radius_);
+	ownColliders_.emplace(0, sphere);
 }
 
 void PBulletBase::InitPost(void)
 {
 	isVisible_ = true;
+	bulletState_ = BULLET_STATE::INACTIVE;
 }
 
 
@@ -50,6 +57,7 @@ void PBulletBase::Update(void)
 	{
 		activePower_ = 0;
 		bulletState_ = BULLET_STATE::INACTIVE;
+		return;
 	}
 
 	UpdatePost();
@@ -147,11 +155,10 @@ void PBulletBase::Shot(const VECTOR& _shotDir)
 
 	transform_.Update();
 
-	// Õ“Ë”»’èƒ}ƒl[ƒWƒƒ‚É“o˜^
-	ColliderSphere* sphere = new ColliderSphere(ColliderBase::TAG::PLAYER_BULLET, &transform_, UtilityMath::VECTOR_ZERO, radius_);
-	ownColliders_.emplace(0, sphere);
-
+	// “–‚½‚è”»’è“o˜^
+	ownColliders_.at(0)->SetRadius(radius_);
 	CollisionManager::GetInstance().RegisterActor(this);
+	CollisionManager::GetInstance().SetCollisionActive(this, ColliderBase::TAG::PLAYER_BULLET, true);
 }
 
 bool PBulletBase::IsAlive(void) const

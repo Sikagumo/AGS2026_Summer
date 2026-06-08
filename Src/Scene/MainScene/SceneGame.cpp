@@ -8,10 +8,11 @@
 #include "../../Common/Loading.h"
 #include "../../Camera/Camera.h"
 #include "../../Utility/UtilityMath.h"
+#include "SceneTitle.h"
+#include "SceneResult.h"
 //#include "SceneScore.h"
 
 SceneGame::SceneGame(void)
-	: tempBossWeaponPos_(VGet(0.0f, 100.0f, 500.0f))
 {
 	player_ = std::make_unique<Player>(0, Player::BULLET_TYPE::BIG);
 	boss_ = std::make_unique<Boss>();
@@ -45,6 +46,9 @@ void SceneGame::Initialize(void)
 
 	if (Loading::GetInstance()->IsLoading()) { return; }
 
+	// マウスを表示しない設定にする
+	SetMouseDispFlag(FALSE);
+	
 	auto& camera = SceneManager::GetInstance().GetCamera();
 	camera->ChangeMode(Camera::MODE::FOLLOW);
 	camera->SetFollow(&player_->GetTransform());
@@ -68,23 +72,25 @@ void SceneGame::Update(void)
 	// 時間を取得
 	float times = time.GetGameTime();
 
-	if (InputManager::GetInstance().IsTrgDown(KEY_INPUT_E))
-	{
-		auto& camera = SceneManager::GetInstance().GetCamera();
+	SceneManager::GetInstance().GetCamera()->Update();
 
-		if (!camera->GetIsLockOn())
-		{
-			camera->SetLockOnPosition(tempBossWeaponPos_);
-		}
-		else
-		{
-			camera->SetIsLockOn(false);
-		}
-	}
 	player_->Update();
 	boss_->Update();
 	stage_->Update();
 	damageController_->Update();
+
+	DamageProcess();
+
+	if (player_->GetCurHp() <= 0 || boss_->GetHP() <= 0)
+	{
+		bool isGameOver = (boss_->GetHP() <= 0 && player_->GetCurHp() > 0);
+		SceneManager::GetInstance().ChangeScene(std::make_shared<SceneResult>(isGameOver));
+	}
+}
+
+void SceneGame::DamageProcess(void)
+{
+	boss_->SetPlayer1Pos(player_->GetTransform().pos);
 	
 	boss_->SetBossDamage(damageController_->GetBossDamage());
 
@@ -98,12 +104,21 @@ void SceneGame::Update(void)
 	boss_->SetWeaponMPRDamage(damageController_->GetWeaponMPRDamage());
 
 	boss_->SetWeaponRGDamage(damageController_->GetWeaponRGDamage());
-	
+
 	// プレイヤーの攻撃
 	damageController_->SetPlayerAttack(player_->GetPower());
-	
+
 	// プレイヤー被ダメージ処理
-	player_->SetDamage(damageController_->GetPlayerDamage());
+	player_->SetDamage(damageController_->GetPlayerDamage(), true);
+}
+
+void SceneGame::CameraLockOn(void)
+{
+	
+
+	
+
+	
 }
 
 void SceneGame::UpdateCollision(void)
@@ -111,26 +126,22 @@ void SceneGame::UpdateCollision(void)
 	boss_->UpdateCollision();
 }
 
+
 void SceneGame::Draw(void)
 {
 	if (Loading::GetInstance()->IsLoading()) { return; }
-
-	DrawString(0, 0, "Game Scene Now!", GetColor(255, 255, 255));
 
 	stage_->Draw();
 
 	player_->Draw();
 
 	boss_->Draw();
-	
-	// 追従位置
-	DrawSphere3D(tempBossWeaponPos_, 10.0f, 16, 0x0000ff, 0xffffff, true);
-
 
 #ifdef _DEBUG
 	DrawDebug();
 #endif // _DEBUG
 
+	SceneManager::GetInstance().GetCamera()->DrawDebug();
 }
 
 void SceneGame::Release(void)
@@ -144,5 +155,5 @@ void SceneGame::Release(void)
 
 void SceneGame::DrawDebug(void)
 {
-
+	SceneManager::GetInstance().GetCamera()->DrawDebug();
 }

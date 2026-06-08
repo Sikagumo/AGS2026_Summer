@@ -2,7 +2,7 @@
 #include <DxLib.h>
 #include "../Common/Quaternion.h"
 #include "../Object/Actor/ActorBase.h"
-#include <vector>
+#include <map>
 class Transform;
 class InputManager;
 
@@ -17,10 +17,10 @@ public:
 
 	// 追従位置からカメラ位置までの相対座標
 	static constexpr VECTOR FOLLOW_LOCAL_POS = { 25.0f, 50.0f, -150.0f };
-	static constexpr VECTOR FOLLOW_LOCAL_POS_LOCKON = { 60.0f, 45.0f, -75.0f };
+	static constexpr VECTOR FOLLOW_LOCAL_POS_LOCKON = { 60.0f, 35.0f, -100.0f };
 
 	// 追従位置から注視点までの相対座標
-	static constexpr VECTOR FOLLOW_TARGET_LOCAL_POS = { 50.0f, 50.0f, 50.0f };
+	static constexpr VECTOR FOLLOW_TARGET_LOCAL_POS = { 50.0f, 45.0f, 50.0f };
 
 
 	// カメラのX回転上限度角
@@ -41,6 +41,19 @@ public:
 	{
 		SPHERE,
 		MAX,
+	};
+
+	enum class LOCKON_TARGET
+	{
+		NONE = -1,
+		BOSS_BODY,
+		BOSS_WEAPON_MGL_L,
+		BOSS_WEAPON_MGL_R,
+		BOSS_WEAPON_CANNON_L,
+		BOSS_WEAPON_CANNON_R,
+		BOSS_WEAPON_MP_L,
+		BOSS_WEAPON_MP_R,
+		BOSS_WEAPON_RG,
 	};
 
 
@@ -82,12 +95,27 @@ public:
 	// 追従対象の設定
 	void SetFollow(const Transform* _follow) { followTransform_ = _follow; };
 
-	void SetLockOnPosition(const VECTOR& _pos);
+	/// @brief 追従対象割り当て
+	/// @param _target 対象の種類
+	/// @param _targetPos 追従位置
+	/// @param _isActive 追従可能か否か
+	void SetLockOnTargets(LOCKON_TARGET _target,const VECTOR& _targetPos, bool _isActive = true);
+
+	/// @brief 現在の追従対象割り当て
+	LOCKON_TARGET GetLockOnTargetNum(void) { return lockOnTarget_; };
+
+	/// @brief 追従対象選択処理
+	void LockOnChoice(void);
+	void FollowLockOnPosition(void);
 
 	// ロックオンするか否かの設定
-	void SetIsLockOn(bool _isLockOn) { isLockOn_ = _isLockOn; };
+	void SetIsLockOn(bool _isLockOn);
 	bool GetIsLockOn(void)const { return isLockOn_; };
 
+	/// @brief 追従対象が範囲内か否か
+	bool IsTargetSpace(void);
+
+	//bool IsTarget
 
 protected:
 
@@ -143,7 +171,8 @@ private:
 	// ターゲット
 	bool isLockOn_;
 	VECTOR lockOnPos_;
-
+	std::map<LOCKON_TARGET, VECTOR> targetsPos_;
+	LOCKON_TARGET lockOnTarget_;
 
 	
 	// カメラを初期位置に戻す
@@ -151,6 +180,9 @@ private:
 
 	// 追従対象との位置同期を取る
 	void SyncFollow(void);
+
+	/// @brief アングルとY軸回転の同期処理
+	void SyncAngleYFromRotY(void);
 
 	// カメラ操作
 	void ProcessRot(bool _isLimit);

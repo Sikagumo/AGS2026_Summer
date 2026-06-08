@@ -9,6 +9,7 @@
 #include "../System/TimeManager.h"
 #include "../../Camera/Camera.h"
 #include "../../Common/Loading.h"
+#include "../../Application.h"
 
 SceneManager* SceneManager::instance_ = nullptr;
 
@@ -36,8 +37,7 @@ void SceneManager::DestroyInstance(void)
 }
 
 SceneManager::SceneManager(void)
-	: isGameEnd_(false)
-    , isSceneChanging_(false)
+    : isSceneChanging_(false)
     , isFirstFrame_(true)
     , sceneMutex_()
 {
@@ -52,6 +52,8 @@ SceneManager::~SceneManager(void)
 
 void SceneManager::Initialize(void)
 {
+    SetMouseDispFlag(true);
+
     SoundManager::CreateInstance();
     SoundManager::GetInstance().Initialize();
     TimeManager::CreateInstance();
@@ -112,8 +114,8 @@ void SceneManager::Init3D(void)
 
 void SceneManager::ChangeScene(std::shared_ptr<SceneBase> scene)
 {
-    // CollisionControllerをクリア
-    //CollisionController::GetInstance().Clear();
+    // CollisionManagerをクリア
+    CollisionManager::GetInstance().Clear();
 
     // BGMを停止する
     SoundManager::GetInstance().StopAllBGM();
@@ -189,7 +191,7 @@ void SceneManager::Update(void)
 
     TimeManager::GetInstance().Update();
 
-    if (isGameEnd_) { return; }
+    if (Application::GetInstance().GetGameEnd()) { return; }
 
     const float LoadCompleteThreshold = 100.0f;
 
@@ -201,16 +203,20 @@ void SceneManager::Update(void)
 
         if (loader->GetProgress() >= LoadCompleteThreshold && !loader->IsLoading())
         {
-            // 古いシーンを解放
-            for (auto& scene : scenes_)
-            {
-                scene->Release();
-            }
-            scenes_.clear();
 
             scenes_.push_back(nextScene_);
             nextScene_->EndLoad();
             nextScene_->Initialize();
+
+            // 古いシーンを解放
+            for (auto& scene : scenes_)
+            {
+                if (scene != nextScene_) { scene->Release(); }
+            }
+            scenes_.remove_if([this](const std::shared_ptr<SceneBase>& scene)
+                {
+                    return scene != nextScene_; 
+                });
 
             nextScene_ = nullptr;
             isSceneChanging_ = false;
@@ -232,10 +238,6 @@ void SceneManager::Update(void)
     {
         current->UpdateCollision();
     }
-
-    
-    if (camera_) camera_->Update();
-
 }
 
 void SceneManager::Draw(void)
@@ -243,26 +245,23 @@ void SceneManager::Draw(void)
     if (!scenes_.empty())
     {
         if (camera_) camera_->SetBeforeDraw();
-
         for (auto& scene : scenes_)
         {
             if (scene) scene->Draw();
         }
-
-        if (camera_) camera_->DrawDebug();
     }
 
+    // ロード中ならその上にロード画面を重ねる
     auto loader = Loading::GetInstance();
-    if (isSceneChanging_ && loader && loader->IsLoading())
+
+    if (isSceneChanging_)
     {
-        loader->Draw();
+        if (loader) loader->Draw();
     }
 }
 
 void SceneManager::Release(void)
 {
-    if (Loading::GetInstance())
-
     // ロード完了を待機する
     if (Loading::GetInstance()->IsLoading())
     {
@@ -286,16 +285,6 @@ void SceneManager::Release(void)
     TimeManager::GetInstance().DestroyInstance();
     Loading::GetInstance()->DestroyInstance();
     CollisionManager::DestroyInstance();
-}
-
-void SceneManager::GameEnd(void)
-{
-    isGameEnd_ = true;
-}
-
-bool SceneManager::GetGameEnd(void) const
-{
-    return isGameEnd_;
 }
 
 const std::unique_ptr<Camera>& SceneManager::GetCamera(void) const

@@ -16,6 +16,7 @@
 #include "../../../Collider/ColliderLine.h"
 #include "../Weapon/Bullet/Player/PBulletBig.h"
 #include "../Weapon/Bullet/Player/PBulletRapidFire.h"
+#include "../../../../Application.h"
 
 
 // 衝突判定用線分位置
@@ -37,6 +38,7 @@ Player::Player(int _playerNo, BULLET_TYPE _playerType)
 	,  curAttackNum_(0)
 	, throwPos_(UtilityMath::VECTOR_ZERO), throwDir_(UtilityMath::VECTOR_ZERO)
 	, shotIndex_(-1)
+	, isCameraRotActive_(false)
 {
 	constexpr int BULLET_MAX = 3;
 	attackNumMax_ = BULLET_MAX;
@@ -73,6 +75,11 @@ void Player::DrawDebug(void)
 
 
 }
+void Player::SetKnock(const VECTOR& _knockDirXZ, float _knockPowXZ, bool _isStan, float _knockPowY)
+{
+	
+}
+
 void Player::InitAnimation(void)
 {
 	animation_ = std::make_unique<AnimationController>(transform_.modelId);
@@ -83,10 +90,10 @@ void Player::InitAnimation(void)
 		, 40.0f, resourceManager_.LoadHandleId(ResourceManager::SRC::ANIM_RUN));
 
 	animation_->AddExternal(static_cast<int>(ANIM_TYPE::THROW_LEFT)
-		, 17.5f, resourceManager_.LoadHandleId(ResourceManager::SRC::ANIM_THROW_LEFT));
+		, 17.5f, resourceManager_.LoadHandleId(ResourceManager::SRC::ANIM_THROW_LEFT), {});
 
 	animation_->AddExternal(static_cast<int>(ANIM_TYPE::THROW_RIGHT)
-		, 17.5f, resourceManager_.LoadHandleId(ResourceManager::SRC::ANIM_THROW_RIGHT));
+		, 17.5f, resourceManager_.LoadHandleId(ResourceManager::SRC::ANIM_THROW_RIGHT), {});
 
 	animation_->AddExternal(static_cast<int>(ANIM_TYPE::THROW_RUN)
 		, 20.0f, resourceManager_.LoadHandleId(ResourceManager::SRC::ANIM_THROW_RUN));
@@ -131,13 +138,13 @@ void Player::InitPost(void)
 
 	curAttackNum_ = 0;
 
-	constexpr float SHOT_TIME_INCREMENT = 0.5f; // 行動間隔上昇値
+	constexpr float SHOT_TIME_INCREMENT = 0.25f; // 行動間隔上昇値
 	constexpr float SHOT_TIME_INC_ACTION = 0.1875f; // 行動間隔上昇値
 
 	constexpr float SHOT_TIME_ACTIVE = 2.0f; // 有効時間
 	constexpr float SHOT_TIME_ACTION_ACTIVE = 1.25f; // 有効時間
 	constexpr float SHOT_TIME_ACTIVE_INPUT = 1.725f; // 入力可能時間
-	constexpr float SHOT_TIME_END = 0.75f; // 終了時間
+	constexpr float SHOT_TIME_END = 0.25f; // 終了時間
 
 	constexpr float SHOT_TIME_STOP = 0.85f; // 停止時間
 	constexpr float SHOT_TIME_STOP_ACTIVE = 1.15f; // 停止有効化時間
@@ -154,17 +161,15 @@ void Player::InitPost(void)
 								, 0.0f, 0.0f, timeInput);
 
 	timeActive += SHOT_TIME_INCREMENT;
-	//timeActionActive += SHOT_TIME_INC_ACTION;
 	actionController_->SetAction(1, 75, timeActive, SHOT_TIME_END, timeActionActive
 								, std::bind(&Player::ShotBullet, this)
 								, SHOT_TIME_STOP, SHOT_TIME_STOP_ACTIVE, timeInput);
 
 	timeActive += SHOT_TIME_INCREMENT * 2;
-	//timeActionActive += SHOT_TIME_INC_ACTION;
 	timeInput += (SHOT_TIME_INCREMENT / 2);
 	actionController_->SetAction(2, 150, timeActive, SHOT_TIME_END, timeActionActive
 								, std::bind(&Player::ShotBullet, this)
-								, SHOT_TIME_STOP, SHOT_TIME_STOP_ACTIVE, timeInput);
+								, SHOT_TIME_STOP, SHOT_TIME_STOP_ACTIVE, 0.0f);
 }
 
 
@@ -183,9 +188,6 @@ void Player::UpdateProcess(void)
 	ProcessMove();
 
 	UpdateBullets();
-
-	// ロックオン有効時、カメラ方向に回転
-	isDirRotActive_ = !SceneManager::GetInstance().GetCamera()->GetIsLockOn();
 }
 
 void Player::UpdateProcessPost(void)
@@ -202,13 +204,11 @@ void Player::DrawPre(void)
 
 void Player::DrawLate(void)
 {
+	DrawFormatString(10, Application::SCREEN_HALF_Y + (16 * 5), 0xff0000, "プレイヤーHP：%d"
+		, hp_);
 #ifdef _DEBUG
 
 	UtilityMath::DrawLineXYZ(transform_.pos, transform_.quaRot);
-
-	DrawFormatString(10, 160, 0xffff00, "player:(%.f,%.f,%.f), hp(%d), 無敵(%.2f)"
-		, transform_.pos.x, transform_.pos.y, transform_.pos.z
-		, hp_, curInvTime_);
 
 	actionController_->DrawDebug();
 
@@ -268,6 +268,9 @@ void Player::ProcessMove(void)
 		return;
 	}
 
+	// カメラの方向で進行
+	Quaternion cameraRot = SceneManager::GetInstance().GetCamera()->GetQuaRotY();
+
 	if (!UtilityMath::EqualsVZero(dir))
 	{
 		dir = UtilityMath::VNormalize(dir);
@@ -279,9 +282,6 @@ void Player::ProcessMove(void)
 		{
 			PlayAnim(ANIM_TYPE::RUN);
 		}
-
-		// カメラの方向で進行
-		Quaternion cameraRot = SceneManager::GetInstance().GetCamera()->GetQuaRotY();
 
 		// 移動方向を取得
 		moveDir_ = Quaternion::PosAxis(cameraRot, dir);
@@ -307,10 +307,11 @@ void Player::ProcessMove(void)
 
 void Player::ProcessJump(void)
 {
-	auto& input = InputManager::GetInstance();
-	
-	if (!actionController_->IsActiveAction())
+	if (!actionController_->IsActiveAction() &&
+		actionController_->GetActionState() == PActionController::PACTION_STATE::NONE)
 	{
+		auto& input = InputManager::GetInstance();
+
 		bool isHitKeyNew = input.IsNew(KEY_INPUT_SPACE)
 			|| input.IsPadBtnNew(InputManager::JOYPAD_NO::PAD1,
 				InputManager::JOYPAD_BTN::RB_BOTTOM);
@@ -343,7 +344,12 @@ void Player::ProcessJump(void)
 		if (isHitTrg && !isJump_)
 		{
 			isJump_ = true;
+			PlayAnim(ANIM_TYPE::JUMP, false);
 		}
+	}
+	else if (jumpPow_.y > 0.0f)
+	{
+		jumpPow_.y = 0.0f;
 	}
 
 	// Y軸制限
@@ -426,6 +432,33 @@ void Player::UpdateBullets(void)
 
 		bullets_[shotIndex_]->SetFollow(throwPos_, throwDir_);
 	}
+}
+
+void Player::DelayRotate(void)
+{
+	Quaternion goalRot = Quaternion::Identity();
+
+	// ロックオン有効時、カメラ方向に回転
+	isCameraRotActive_ = SceneManager::GetInstance().GetCamera()->GetIsLockOn();
+
+	if (isCameraRotActive_)
+	{
+		// カメラのY軸回転を回転に変換する
+		goalRot = SceneManager::GetInstance().GetCamera()->GetQuaRotY();
+		goalRot.x = 0.0f;
+		moveDir_ = Quaternion::PosAxis(goalRot, UtilityMath::DIR_F);
+	}
+	else if (!UtilityMath::EqualsVZero(moveDir_))
+	{
+		// 移動方向から回転に変換する
+		goalRot = Quaternion::LookRotation(moveDir_);
+	}
+
+
+	constexpr float ROT_TERM = 0.2f;
+
+	// 回転の補間
+	transform_.quaRot = Quaternion::Slerp(transform_.quaRot, goalRot, ROT_TERM);
 }
 
 void Player::CreateBullet(void)

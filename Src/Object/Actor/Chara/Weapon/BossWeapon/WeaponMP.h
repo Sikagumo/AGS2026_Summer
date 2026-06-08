@@ -14,11 +14,32 @@ public:
 
 	void ReleasePost(void)override;
 
-	void SetBone(int _id, Transform _trans, ColliderBase::TAG _tag) override;
+	/// <summary>
+	/// ボーン情報の受け取り用
+	/// </summary>
+	/// <param name="_id">接続ボーンの番号</param>
+	/// <param name="_trans">接続ボーンを持つ対象のトランスフォーム</param>
+	/// <param name="_tag">当たり判定登録よタグ</param>
+	void SetBone(int _id, Transform _trans, ColliderBase::TAG _tag, VECTOR _playerPos) override;
 
-	VECTOR GetPos(void) const override;
+	///現在の座標
+	const VECTOR GetPos(void) const override;
+	/// <summary>
+	/// ウェポンのダメージ受け取り用
+	/// </summary>
+	/// <param name="_damage">実数ダメージ</param>
 	void SetDamage(int _damage)override { hp_ -= _damage; }
+	/// <summary>
+	/// ウェポンの生存状態を渡すよう
+	/// </summary>
+	/// <param name=""></param>
+	/// <returns>true=生きている</returns>
 	bool GetIsAlive(void)override { return isAlive_; }
+	/// <summary>
+	/// ウェポンの現在HPを渡すよう
+	/// </summary>
+	/// <param name=""></param>
+	/// <returns>現在HP</returns>
 	int GetHp(void)override { return hp_; }
 protected:
 
@@ -43,5 +64,14 @@ protected:
 	void DrawPre(void) override;
 
 	void CollisionReserve(void) override {};
+
+	void LookPlayer(void) override {};
+
+private:
+
+	static constexpr VECTOR LINE_START_POS = { 0.0f,0.0f,-40.0f };
+	static constexpr VECTOR LINE_END_POS = { 0.0f,-10.0f,-40.0f };
+	static constexpr VECTOR SPHERE_START_POS = { 0.0f,0.0f,-40.0f };
+	static constexpr float SPHERE_RADIUS = 40.0f;
 };
 

@@ -4,7 +4,7 @@
 #include <memory>
 
 #include "../SceneBase.h"
-
+#include "../../Common/Vector2.h"
 #include "../../Object/Collider2D/Collider2DCircle.h"
 #include "../../Object/Collider2D/Collider2DBox.h"
 
@@ -17,6 +17,12 @@ public:
 
 	/// @brief デストラクタ
 	~SceneTitle(void) override = default;
+
+	/// @brief リソースの読み込み開始
+	void Load(void) override;
+
+	/// @brief リソースの読み込み完了処理
+	void EndLoad(void) override;
 
 	/// @brief 初期化処理
 	void Initialize(void) override;
@@ -33,17 +39,17 @@ public:
 	/// @brief 解放処理
 	void Release(void) override;
 
-	/// @brief リソースの読み込み開始
-	void Load(void) override;
-
-	/// @brief リソースの読み込み完了処理
-	void EndLoad(void) override;
-
 private:
 
 	// 画像関連
 	int imageTitle_;                  // タイトルロゴの画像ハンドル
-	std::array<int, 4> imageMenu_;    // メニュー項目（4つ）の画像ハンドル
+	std::array<int, 8> imageMenu_;    // メニュー項目（4つ）の画像ハンドル
+
+	// 選択しの回数(pad用)
+	int selectCount_;
+
+	// 前回のマウス座標
+	Vector2F prevMousePos_;
 
 	// 2D衝突判定関連
 	std::unique_ptr<Collider2DCircle> cursorCollider_;        // マウスカーソル用の円コライダー

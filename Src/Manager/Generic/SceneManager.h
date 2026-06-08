@@ -49,19 +49,12 @@ public:
     /// @param scene 遷移先シーンのポインタ
     void JumpScene(std::shared_ptr<SceneBase> scene);
 
-    /// @brief ゲーム終了フラグの状態を取得する
-    /// @return 終了する場合はtrue
-    bool GetGameEnd(void) const;
-
     /// @brief 現在管理しているカメラを取得する
     /// @return カメラオブジェクトの共有ポインタ
     const std::unique_ptr<Camera>& GetCamera(void) const;
 
     /// ロード中かどうかを判定する関数を追加
     bool IsSceneChanging(void) const { return isSceneChanging_; }
-
-    /// @brief ゲーム終了フラグを立てる
-    void GameEnd(void);
 
 private:
     // 唯一のインスタンス
@@ -71,7 +64,6 @@ private:
     std::list<std::shared_ptr<SceneBase>> scenes_; // シーンを保持する（スタック構造）
     std::mutex sceneMutex_;                        // シーンアクセスを保護するミューテックス
     std::shared_ptr<SceneBase> nextScene_;         // 次に遷移するシーン
-    bool isGameEnd_;                               // ゲーム終了フラグ
     bool isSceneChanging_;                         // シーン切り替え中フラグ
     bool isFirstFrame_;                            // 最初のフレームかどうかのフラグ
 

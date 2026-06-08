@@ -16,16 +16,22 @@ void WeaponCannon::ReleasePost(void)
 {
 }
 
-void WeaponCannon::SetBone(int _id, Transform _trans, ColliderBase::TAG _tag)
+void WeaponCannon::SetBone(int _id, Transform _trans, ColliderBase::TAG _tag, VECTOR _playerPos)
 {
 	bone_.id = _id;
 	bone_.transform = _trans;
+	bone_.playerPos = _playerPos;
 	tag_ = _tag;
 }
 
-VECTOR WeaponCannon::GetPos(void) const
+const VECTOR WeaponCannon::GetPos(void) const
 {
-	return transform_.pos;
+	
+	// ローカル座標を回転させてワールド座標へ変換
+	VECTOR localRotPos = transform_.quaRot.PosAxis(localPos_);
+
+	// 位置を加算して最終的なワールド座標にする
+	return VAdd(transform_.pos, localRotPos);
 }
 
 void WeaponCannon::Load(void)
@@ -49,12 +55,12 @@ void WeaponCannon::InitTransform(void)
 
 void WeaponCannon::InitCollider(void)
 {
-	ColliderLine* colLine = new ColliderLine(ColliderBase::TAG::STAGE, &transform_, {0.0f,50.0f,60.0f}, { 0.0f,51.0f,60.0f });
+	ColliderLine* colLine = new ColliderLine(ColliderBase::TAG::STAGE, &transform_, LINE_START_POS, LINE_END_POS);
 	ownColliders_.emplace(static_cast<int>(ColliderBase::SHAPE::LINE), colLine);
 	
 
 	ColliderCapsule* colCapsule = new ColliderCapsule(
-		tag_, &transform_, {0.0f,50.0f,160.0f}, { 0.0f,50.0f,-40.0f }, 20.0f);
+		tag_, &transform_, CAPSULE_START_POS, CAPSULE_END_POS, CAPSULE_RADIUS);
 	ownColliders_.emplace(static_cast<int>(ColliderBase::SHAPE::CAPSULE), colCapsule);
 	colCapsule->SetTriger(false);
 
@@ -68,6 +74,7 @@ void WeaponCannon::InitAnimation(void)
 void WeaponCannon::InitPost(void)
 {
 	isAlive_ = true;
+	localPos_ = LINE_START_POS;
 }
 
 void WeaponCannon::UpdateProcess(void)
@@ -75,6 +82,7 @@ void WeaponCannon::UpdateProcess(void)
 	if (isAlive_)
 	{
 		transform_.pos = MV1GetFramePosition(bone_.transform.modelId, bone_.id);
+		transform_.quaRot = bone_.transform.quaRot;
 	}
 
 	if (hp_ <= 0)
@@ -93,11 +101,10 @@ void WeaponCannon::UpdateProcessPost(void)
 
 void WeaponCannon::DrawPre(void)
 {
-
-
+#ifdef _DEBUG
 	for (auto& col : ownColliders_)
 	{
 		col.second->Draw();
 	}
-
+#endif
 }

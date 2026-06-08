@@ -69,8 +69,11 @@ void ResourceManager::Initialize(void)
 	_SetResource(LOAD_TYPE::IMAGES, SRC::IMGS_TEXTS, PATH_IMAGE + "Text.png"
 		, imagesAllNum, imagesNumX, imagesNumY);
 
-	_SetResource(LOAD_TYPE::IMAGES, SRC::IMGE_TITLE_TEXT, PATH_IMAGE + "testFont.png"
-	,2, 1, 2);
+	_SetResource(LOAD_TYPE::IMAGES, SRC::IMGE_TITLE_TEXT, PATH_IMAGE + "txt.png"
+	,8, 1, 8);
+
+	_SetResource(LOAD_TYPE::IMAGES, SRC::IMAGE_RESULT, PATH_IMAGE + "EndTxt.png"
+		, 4, 1, 4);
 
 
 	/* ƒ‚ƒfƒ‹ */
@@ -96,7 +99,7 @@ void ResourceManager::Initialize(void)
 	_SetResource(LOAD_TYPE::ANIM, SRC::ANIM_THROW_RUN, PATH_ANIM + "Throw_Run.mv1");
 	_SetResource(LOAD_TYPE::ANIM, SRC::ANIM_THROW_LEFT, PATH_ANIM + "Throw_Left.mv1");
 	_SetResource(LOAD_TYPE::ANIM, SRC::ANIM_THROW_RIGHT, PATH_ANIM + "Throw_Right.mv1");
-	_SetResource(LOAD_TYPE::ANIM, SRC::ANIM_JUMP, PATH_ANIM + "Flying.mv1");
+	_SetResource(LOAD_TYPE::ANIM, SRC::ANIM_JUMP, PATH_ANIM + "Jump.mv1");
 
 	/* BGM */
 	_SetResource(LOAD_TYPE::SOUND, SRC::BGM_TITLE, PATH_BGM + "TitleBGM.mp3");

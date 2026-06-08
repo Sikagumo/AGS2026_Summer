@@ -40,7 +40,7 @@ public:
 		CAMERA,      // カメラ
 		WALL,        // 壁
 		HIT_WAVE,
-		SAFE_WAVE,
+		MG_BULLET,		//マシンガンの弾
 	};
 
 	/// @brief コンストラクタ

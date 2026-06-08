@@ -16,16 +16,21 @@ void WeaponMP::ReleasePost(void)
 {
 }
 
-void WeaponMP::SetBone(int _id, Transform _trans, ColliderBase::TAG _tag)
+void WeaponMP::SetBone(int _id, Transform _trans, ColliderBase::TAG _tag, VECTOR _playerPos)
 {
 	bone_.id = _id;
 	bone_.transform = _trans;
+	bone_.playerPos = _playerPos;
 	tag_ = _tag;
 }
 
-VECTOR WeaponMP::GetPos(void) const
+const VECTOR WeaponMP::GetPos(void) const
 {
-	return transform_.pos;
+	// ローカル座標を回転させてワールド座標へ変換
+	VECTOR localRotPos = transform_.quaRot.PosAxis(localPos_);
+
+	// 位置を加算して最終的なワールド座標にする
+	return VAdd(transform_.pos, localRotPos);
 }
 
 void WeaponMP::Load(void)
@@ -48,12 +53,12 @@ void WeaponMP::InitTransform(void)
 
 void WeaponMP::InitCollider(void)
 {
-	ColliderLine* colLine = new ColliderLine(ColliderBase::TAG::STAGE, &transform_, { 0.0f,0.0f,-40.0f }, { 0.0f,-1.0f,-40.0f });
+	ColliderLine* colLine = new ColliderLine(ColliderBase::TAG::STAGE, &transform_, LINE_START_POS, LINE_END_POS);
 	ownColliders_.emplace(static_cast<int>(ColliderBase::SHAPE::LINE), colLine);
 
 
 	ColliderSphere* colSphere = new ColliderSphere(
-		tag_, &transform_, { 0.0f,0.0f,-40.0f },40.0f);
+		tag_, &transform_, SPHERE_START_POS, SPHERE_RADIUS);
 	ownColliders_.emplace(static_cast<int>(ColliderBase::SHAPE::SPHERE), colSphere);
 	colSphere->SetTriger(false);
 
@@ -67,6 +72,7 @@ void WeaponMP::InitAnimation(void)
 void WeaponMP::InitPost(void)
 {
 	isAlive_ = true;
+	localPos_ = LINE_START_POS;
 }
 
 void WeaponMP::UpdateProcess(void)
@@ -74,10 +80,11 @@ void WeaponMP::UpdateProcess(void)
 	if (isAlive_)
 	{
 		transform_.pos = MV1GetFramePosition(bone_.transform.modelId, bone_.id);
+		transform_.quaRot = bone_.transform.quaRot;
 	}
 	{
 		isAlive_ = false;
-		//CollisionManager::GetInstance().SetCollisionActive(this, tag_, false);
+		CollisionManager::GetInstance().SetCollisionActive(this, tag_, false);
 	}
 }
 

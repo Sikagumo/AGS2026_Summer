@@ -1,0 +1,47 @@
+#pragma once
+
+#include <array>
+
+#include "../SceneBase.h"
+
+class SceneResult : public SceneBase
+{
+public:
+
+	SceneResult(void) = default;
+
+	/// @brief コンストラクタ
+	SceneResult(bool _isGameOver);
+
+	/// @brief デストラクタ
+	~SceneResult(void) override = default;
+
+	/// @brief リソースの読み込み開始
+	void Load(void) override;
+
+	/// @brief リソースの読み込み完了処理
+	void EndLoad(void) override;
+
+	/// @brief 初期化処理
+	void Initialize(void) override;
+
+	/// @brief 更新処理
+	void Update(void) override;
+
+	/// @brief 衝突の影響だけを更新する処理 
+	void UpdateCollision(void) override;
+
+	/// @brief 描画処理
+	void Draw(void) override;
+
+	/// @brief 解放処理
+	void Release(void) override;
+
+private:
+
+	std::array<int, 4> imageResult_;
+
+	bool isGameOver_;
+
+};
+

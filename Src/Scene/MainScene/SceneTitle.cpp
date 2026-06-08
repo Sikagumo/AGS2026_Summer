@@ -4,7 +4,9 @@
 #include "../../Manager/Generic/ResourceManager.h"
 #include "../../Manager/Decoration/SoundManager.h"
 #include "../../Object/Manager/CollisionManager.h"
+#include "../../Camera/Camera.h"
 #include "SceneGame.h"
+#include "SceneResult.h"
 #include "../../Application.h"
 #include "../../Manager/System/TimeManager.h"
 #include "../../Common/Loading.h"
@@ -38,6 +40,14 @@ void SceneTitle::EndLoad(void)
 
 SceneTitle::SceneTitle(void)
     : imageTitle_(-1)
+    , selectCount_(0)
+    , cursorCollider_(nullptr)
+    , soloPlayButtonCollider_(nullptr)
+    , multiPlayButtonCollider_(nullptr)
+    , optionButtonCollider_(nullptr)
+    , exitButtonCollider_(nullptr)
+    , imageMenu_()
+    , prevMousePos_(0.0f, 0.0f)
 {
     for (size_t i = 0; i < imageMenu_.size(); ++i)
     {
@@ -47,15 +57,17 @@ SceneTitle::SceneTitle(void)
 
 void SceneTitle::Initialize(void)
 {
+    SetMouseDispFlag(true);
+
     // マウスカーソル用のコライダー生成（半径1の円）
     cursorCollider_ = std::make_unique<Collider2DCircle>(Vector2F(0.0f, 0.0f), 1.0f, Collider2DBase::TAG_2D::MOUSE_CURSOR);
     CollisionManager::GetInstance().RegisterCollider2D(cursorCollider_.get());
 
     // UIボタンの配置計算設定
-    const float BUTTON_WIDTH = 200.0f;
+    const float BUTTON_WIDTH = 250.0f;
     const float BUTTON_HEIGHT = 50.0f;
-    const float START_Y = Application::SCREEN_HALF_Y;
-    const float INTERVAL_Y = 60.0f;
+    const float START_Y = Application::SCREEN_HALF_Y + 10;
+    const float INTERVAL_Y = 100.0f;
     const float CENTER_X = Application::SCREEN_HALF_X;
 
     // ソロプレイボタン
@@ -81,6 +93,8 @@ void SceneTitle::Initialize(void)
     exitButtonCollider_ = std::make_unique<Collider2DBox>(posExit, BUTTON_WIDTH, BUTTON_HEIGHT, Collider2DBase::TAG_2D::EXIT_UTTON);
     CollisionManager::GetInstance().RegisterCollider2D(exitButtonCollider_.get());
     CollisionManager::GetInstance().SetCollisionGroup2D(Collider2DBase::TAG_2D::MOUSE_CURSOR, Collider2DBase::TAG_2D::EXIT_UTTON, true);
+
+    SceneManager::GetInstance().GetCamera()->ChangeMode(Camera::MODE::NONE);
 }
 
 void SceneTitle::Update(void)
@@ -97,6 +111,13 @@ void SceneTitle::Update(void)
     cursorCollider_->SetCenterPos(mousePosF);
 
     using TAG_2D = Collider2DBase::TAG_2D;
+
+    if (mousePosF.x != prevMousePos_.x || mousePosF.y != prevMousePos_.y)
+    {
+        SetMouseDispFlag(true);
+
+        prevMousePos_ = mousePosF;
+    }
 
     // ソロプレイ
     if (CollisionManager::GetInstance().IsTagCollidingWithTag2D
@@ -134,14 +155,16 @@ void SceneTitle::Update(void)
     {
         if (input.IsTrgMouseLeft())
         {
-
+            Application::GetInstance().GameEnd();
         }
     }
 
+#ifdef _DEBUG
     if (input.IsTrgDown(KEY_INPUT_SPACE))
     {
-        sceneManager.ChangeScene(std::make_shared<SceneGame>());
+        sceneManager.ChangeScene(std::make_shared<SceneResult>(false));
     }
+#endif
 }
 
 void SceneTitle::UpdateCollision(void)
@@ -158,73 +181,76 @@ void SceneTitle::Draw(void)
     
     const int IMAGET_TITLE_Y = Application::SCREEN_SIZE_Y / 3;
 
+    // タイトル
     DrawRotaGraph(Application::SCREEN_HALF_X, IMAGET_TITLE_Y, 1.0f, UtilityMath::DEG2RAD, imageTitle_, true);
 
-    const float DEFULT_SCALE = 1.0f;
+
+    const float DEFULT_SCALE = 0.5f;
     const float SELECT_SCALE = 2.0f;
 
-    float soloScale = DEFULT_SCALE;
-    float multiScale = DEFULT_SCALE;
-    float optionScale = DEFULT_SCALE;
-    float exitScale = DEFULT_SCALE;
 
     // ソロプレイ
     if (CollisionManager::GetInstance().IsTagCollidingWithTag2D
     (TAG_2D::MOUSE_CURSOR, TAG_2D::SOLO_PLAY_BUTTON))
     {
-        soloScale = SELECT_SCALE;
+        Vector2F posSolo = soloPlayButtonCollider_->GetCenterPos();
+        DrawRotaGraph(static_cast<int>(posSolo.x), static_cast<int>(posSolo.y), DEFULT_SCALE, UtilityMath::DEG2RAD, imageMenu_[1], true);
+
     }
     else
     {
-        soloScale = DEFULT_SCALE;
+        Vector2F posSolo = soloPlayButtonCollider_->GetCenterPos();
+        DrawRotaGraph(static_cast<int>(posSolo.x), static_cast<int>(posSolo.y), DEFULT_SCALE, UtilityMath::DEG2RAD, imageMenu_[0], true);
     }
 
     // マルチ
     if (CollisionManager::GetInstance().IsTagCollidingWithTag2D
     (TAG_2D::MOUSE_CURSOR, TAG_2D::MULTI_PLAY_BUTTON))
     {
-        multiScale = SELECT_SCALE;
+        Vector2F posMulti = multiPlayButtonCollider_->GetCenterPos();
+        DrawRotaGraph(static_cast<int>(posMulti.x), static_cast<int>(posMulti.y), DEFULT_SCALE, UtilityMath::DEG2RAD, imageMenu_[3], true);
     }
     else
     {
-        multiScale = DEFULT_SCALE;
+        Vector2F posMulti = multiPlayButtonCollider_->GetCenterPos();
+        DrawRotaGraph(static_cast<int>(posMulti.x), static_cast<int>(posMulti.y), DEFULT_SCALE, UtilityMath::DEG2RAD, imageMenu_[2], true);
+
     }
 
     // 設定
     if (CollisionManager::GetInstance().IsTagCollidingWithTag2D
     (TAG_2D::MOUSE_CURSOR, TAG_2D::OPTION_BUTTON))
     {
-        optionScale = SELECT_SCALE;
+
+        Vector2F posOption = optionButtonCollider_->GetCenterPos();
+        DrawRotaGraph(static_cast<int>(posOption.x), static_cast<int>(posOption.y), DEFULT_SCALE, UtilityMath::DEG2RAD, imageMenu_[5], true);
+
     }
     else
     {
-        optionScale = DEFULT_SCALE;
+
+        Vector2F posOption = optionButtonCollider_->GetCenterPos();
+        DrawRotaGraph(static_cast<int>(posOption.x), static_cast<int>(posOption.y), DEFULT_SCALE, UtilityMath::DEG2RAD, imageMenu_[4], true);
+
     }
 
     // 終了
     if (CollisionManager::GetInstance().IsTagCollidingWithTag2D
     (TAG_2D::MOUSE_CURSOR, TAG_2D::EXIT_UTTON))
     {
-        exitScale = SELECT_SCALE;
+        Vector2F posExit = exitButtonCollider_->GetCenterPos();
+        DrawRotaGraph(static_cast<int>(posExit.x), static_cast<int>(posExit.y), DEFULT_SCALE, UtilityMath::DEG2RAD, imageMenu_[7], true);
     }
     else
     {
-        exitScale = DEFULT_SCALE;
+        Vector2F posExit = exitButtonCollider_->GetCenterPos();
+        DrawRotaGraph(static_cast<int>(posExit.x), static_cast<int>(posExit.y), DEFULT_SCALE, UtilityMath::DEG2RAD, imageMenu_[6], true);
     }
 
-    Vector2F posSolo = soloPlayButtonCollider_->GetCenterPos();
-    DrawRotaGraph(static_cast<int>(posSolo.x), static_cast<int>(posSolo.y), soloScale, UtilityMath::DEG2RAD, imageMenu_[0], true);
-
-    Vector2F posMulti = multiPlayButtonCollider_->GetCenterPos();
-    DrawRotaGraph(static_cast<int>(posMulti.x), static_cast<int>(posMulti.y), multiScale, UtilityMath::DEG2RAD, imageMenu_[1], true);
-
-    Vector2F posOption = optionButtonCollider_->GetCenterPos();
-    DrawRotaGraph(static_cast<int>(posOption.x), static_cast<int>(posOption.y), optionScale, UtilityMath::DEG2RAD, imageMenu_[0], true);
-
-    Vector2F posExit = exitButtonCollider_->GetCenterPos();
-    DrawRotaGraph(static_cast<int>(posExit.x), static_cast<int>(posExit.y), exitScale, UtilityMath::DEG2RAD, imageMenu_[1], true);
-
+#ifdef _DEBUG
     DrawDebug();
+#endif // _DEBUG
+
 }
 
 void SceneTitle::Release(void)

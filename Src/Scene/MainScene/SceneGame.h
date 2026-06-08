@@ -49,8 +49,10 @@ private:
 
     std::unique_ptr<DamageController> damageController_;
 
-    VECTOR tempBossWeaponPos_;
-
     /// @brief デバッグ情報の描画
     void DrawDebug(void);
+
+    void DamageProcess(void);
+
+    void CameraLockOn(void);
 };

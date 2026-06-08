@@ -17,7 +17,10 @@ void Stage::Update(void)
 void Stage::Draw(void)
 {
 	ActorBase::Draw();
+
+#ifdef _DEBUG
 	DrawFormatString(10, 120, 0xffffff, "ステージの座標：%f,%f,%f", transform_.pos.x, transform_.pos.y, transform_.pos.z);
+#endif
 }
 
 void Stage::Load(void)
