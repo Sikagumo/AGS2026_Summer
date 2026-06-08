@@ -1,5 +1,12 @@
 #pragma once
+#include <memory>
+#include <vector>
 #include "../WeaponBase.h"
+
+
+class BBulletBase;
+
+
 class WeaponMGR :
     public WeaponBase
 {
@@ -38,6 +45,10 @@ public:
 	/// <param name=""></param>
 	/// <returns>åªç›HP</returns>
 	int GetHp(void)override { return hp_; }
+
+
+	// èÛë‘ëJà⁄
+	void ChangeState(STATE _state)override;
 protected:
 
 	// ëÂÇ´Ç≥ÅAâÒì]ÅAç¿ïWÇÃèâä˙âª
@@ -64,6 +75,15 @@ protected:
 	void CollisionReserve(void) override {};
 
 	void LookPlayer(void)override;
+	// èÛë‘ëJà⁄
+	void ChangeState(int state)override;
+	void ChangeStateIdle(void)override;
+	void ChangeStateAttack(void)override;
+	void ChangeStateEnd(void)override;
+
+	void UpdateAttack(void)override;
+	void UpdateIdle(void)override;
+	void UpdateEnd(void)override;
 
 private:
 
@@ -72,5 +92,34 @@ private:
 	static constexpr VECTOR CAPSULE_START_POS = { 50.0f,0.0f,140.0f };
 	static constexpr VECTOR CAPSULE_END_POS = { 50.0f,0.0f,-40.0f };
 	static constexpr float CAPSULE_RADIUS = 20.0f;
+	static constexpr int MAX_BULLET_COUNT = 200;
+
+	//î≠éÀà íu
+	static constexpr int MUZZLE_MAX_COUNT = 6;
+
+	const VECTOR MUZZLE_POS[MUZZLE_MAX_COUNT] = {
+		{ 52.0f,4.0f,150.0f },
+		{ 47.0f,1.0f,150.0f },
+		{ 47.0f,-5.0f,150.0f },
+		{ 52.0f,-8.0f,150.0f },
+		{ 57.0f,1.0f,150.0f },
+		{ 57.0f,-5.0f,150.0f },
+	};
+
+
+
+
+
+	std::vector<std::shared_ptr<BBulletBase>> bullets_;
+	VECTOR bulletDir_;
+
+	int bulletCount_;
+
+	VECTOR muzzlePos_[MUZZLE_MAX_COUNT];
+	int muzzleCount_;
+
+
+	std::shared_ptr<BBulletBase> GetValidBullet(void);
+	void CreateBullets(void);
 };
 

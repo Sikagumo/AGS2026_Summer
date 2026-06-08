@@ -90,5 +90,34 @@ void WeaponBase::CollisionGravity(void)
 	}
 }
 
+void WeaponBase::ChangeState(STATE _state)
+{
+}
 
+void WeaponBase::ChangeState(int state)
+{
+}
 
+void WeaponBase::ChangeStateIdle(void)
+{
+}
+
+void WeaponBase::ChangeStateAttack(void)
+{
+}
+
+void WeaponBase::ChangeStateEnd(void)
+{
+}
+
+void WeaponBase::UpdateAttack(void)
+{
+}
+
+void WeaponBase::UpdateIdle(void)
+{
+}
+
+void WeaponBase::UpdateEnd(void)
+{
+}

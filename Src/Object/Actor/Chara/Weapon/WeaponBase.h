@@ -1,7 +1,8 @@
 
 #pragma once
-
 #include <memory>
+#include <array>
+#include <functional>
 #include "../../ActorBase.h"
 #include "../../../Collider/ColliderBase.h"
 
@@ -9,6 +10,15 @@ class WeaponBase :
     public ActorBase
 {
 public:
+
+	///ステートパターン
+	enum class STATE
+	{
+		IDLE,
+		ATTACK,
+		END,
+	};
+
 	//ボーン情報の受け取り用
 	struct Bone {
 		int id = 0;
@@ -58,6 +68,10 @@ public:
 	/// <param name=""></param>
 	/// <returns>現在HP</returns>
 	virtual int GetHp(void) = 0;
+
+	// 状態遷移
+	virtual void ChangeState(STATE _state);
+
 private:
 
 
@@ -95,8 +109,27 @@ protected:
 	// 衝突判定
 	void Collision(void);
 	void CollisionGravity(void);
-	virtual void CollisionReserve(void) {};
+	virtual void CollisionReserve(void) {}
 
-	virtual void LookPlayer(void) {};
+	virtual void LookPlayer(void) {}
+	/// 状態
+	STATE state_;
+	/// 状態管理
+	int stateBase_;
+
+	// 状態管理(状態遷移時初期処理)
+	std::map<int, std::function<void(void)>> stateChanges_;
+	
+	// 状態遷移
+	virtual void ChangeState(int state);
+	virtual void ChangeStateIdle(void);
+	virtual void ChangeStateAttack(void);
+	virtual void ChangeStateEnd(void);
+	// 更新系
+	// 状態管理(更新ステップ)
+	std::function<void(void)> stateUpdate_;
+	virtual void UpdateAttack(void);
+	virtual void UpdateIdle(void);
+	virtual void UpdateEnd(void);
 };
 
