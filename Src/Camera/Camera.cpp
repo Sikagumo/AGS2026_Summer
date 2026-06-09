@@ -619,6 +619,21 @@ void Camera::Collision(void)
 	}
 }
 
+VECTOR Camera::EasingChangeTarget(const VECTOR& _fromVec, const VECTOR& _toVec, float _term)
+{
+	/* ExpoInイージング */
+	constexpr float EXPONENTIAL_POWER = 10.0f;         // 指数カーブの強さ
+
+	_term = std::clamp(_term, 0.0f, 1.0f);
+	const float easedT = (_term <= 0.0f)
+		? 0.0f
+		: std::pow(2.0f, EXPONENTIAL_POWER * _term - EXPONENTIAL_POWER);
+
+	return VGet(_fromVec.x + (_toVec.x - _fromVec.x) * easedT,
+				_fromVec.y + (_toVec.y - _fromVec.y) * easedT,
+				_fromVec.z + (_toVec.z - _fromVec.z) * easedT);
+}
+
 bool Camera::IsTargetSpace(void)
 {
 	if (lockOnTarget_ == LOCKON_TARGET::NONE) { return false; }
