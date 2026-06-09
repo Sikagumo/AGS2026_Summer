@@ -90,7 +90,7 @@ void WeaponMGL::InitPost(void)
 void WeaponMGL::UpdateProcess(void)
 {
 
-	stateUpdate_();
+	
 
 	
 	if (hp_ <= 0)
@@ -101,6 +101,7 @@ void WeaponMGL::UpdateProcess(void)
 	{
 		shot->Update();
 	}
+	stateUpdate_();
 }
 
 void WeaponMGL::UpdateProcessPost(void)
@@ -194,6 +195,7 @@ void WeaponMGL::ChangeStateIdle(void)
 
 void WeaponMGL::ChangeStateAttack(void)
 {
+
 	stateUpdate_ = std::bind(&WeaponMGL::UpdateAttack, this);
 	bulletCount_ = MAX_BULLET_COUNT;
 }

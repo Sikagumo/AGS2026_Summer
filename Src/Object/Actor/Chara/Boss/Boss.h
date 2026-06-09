@@ -23,6 +23,7 @@ public:
 		IDLE,
 		ATTACK,
 		JUMP,
+		ROADATTACK,
 		END,
 	};
 
@@ -111,6 +112,7 @@ private:
 	static constexpr float INIT_ROT = 180.0f;
 	//ジャンプ力
 	static constexpr float POW_JUMP_INIT = 3000.0f;
+	static constexpr float MOVE_SPEED_INIT = 20.0f;
 
 	//当たり判定の座標
 	//ライン
@@ -128,27 +130,33 @@ private:
 	static constexpr int JOINT_CAR_WHEEL_FRONT_R = 16;
 	static constexpr int JOINT_CAR_WHEEL_BACK_FRONT_L = 8;
 	static constexpr int JOINT_CAR_WHEEL_BACK_FRONT_R = JOINT_FEET_BODY;
-	static constexpr int JOINT_CAP_WHEEL_BACK_L = 10;
-	static constexpr int JOINT_CAP_WHEEL_BACK_R = 14;
+	static constexpr int JOINT_CAR_WHEEL_BACK_L = 10;
+	static constexpr int JOINT_CAR_WHEEL_BACK_R = 14;
 	static constexpr int JOINT_WAEAPON_MG_L = JOINT_CAR_BODY;
 	static constexpr int JOINT_WAEAPON_MG_R = 10;
 	static constexpr int JOINT_WAEAPON_CANNON_L = 6;
 	static constexpr int JOINT_WAEAPON_CANNON_R = JOINT_FEET_BODY;
 	static constexpr int JOINT_WAEAPON_MP_L = JOINT_CAR_WHEEL_BACK_FRONT_L;
-	static constexpr int JOINT_WAEAPON_MP_R = JOINT_CAP_WHEEL_BACK_R;
+	static constexpr int JOINT_WAEAPON_MP_R = JOINT_CAR_WHEEL_BACK_R;
 	static constexpr int JOINT_WAEAPON_RG = JOINT_CAR_WHEEL_FRONT_R;
 
 	//ボス本体の各トランスフォーム
 	Transform transformFeet_;
 	Transform transformBody_;
 	Transform transformFeetCar_;
-	Transform transformWheelBack_;
-	Transform transformWheelFront_;
+	Transform transformWheelBackL_;
+	Transform transformWheelBackFrontL_;
+	Transform transformWheelFrontL_;
+	Transform transformWheelBackR_;
+	Transform transformWheelBackFrontR_;
+	Transform transformWheelFrontR_;
 
 	//ステータス
 	int hp_;						//HP
 	std::array<Bone,7> boneId_;		//各ボーン
 	BONE_NAME boneName_;			//ボーンの名前
+	VECTOR jumpDir_;
+	float speed_;
 
 	//攻撃関連
 	int jumpCount_;
@@ -190,6 +198,7 @@ private:
 	void ChangeStateIdle(void);
 	void ChangeStateAttack(void);
 	void ChangeStateJump(void);
+	void ChangeRoadAttack(void);
 	void ChangeStateEnd(void);
 	// 更新系
 	// 状態管理(更新ステップ)
@@ -197,6 +206,7 @@ private:
 	void UpdateIdle(void);
 	void UpdateAttack(void);
 	void UpdateJump(void);
+	void UpdateRoadAttack(void);
 	void UpdateEnd(void);
 
 	//機能関数

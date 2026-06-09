@@ -95,18 +95,12 @@ void DamageController::Update()
 		const float RATE_DAMAGE = (playerHp_ * (static_cast<float>(BOSS_WEPO_DAMAGE::PRESSWAVE) / 10));
 		playerDamage_ = static_cast<int>(RATE_DAMAGE);
 	}
-	else
-	{
-		playerDamage_ = 0;
-	}
+	
 	if (CollisionController::GetInstance().IsTagCollidingWithTag(ColliderBase::TAG::MG_BULLET, ColliderBase::TAG::PLAYER))
 	{
 		// HPäÑçáÉ_ÉÅÅ[ÉW
 		const float RATE_DAMAGE = (playerHp_ * (static_cast<float>(BOSS_WEPO_DAMAGE::MG) *0.1));
 		playerDamage_ = static_cast<int>(RATE_DAMAGE);
 	}
-	else
-	{
-		playerDamage_ = 0;
-	}
+	
 }
