@@ -22,7 +22,6 @@
     <ClCompile Include="Src\Object\Collision\CollisionBox.cpp" />
     <ClCompile Include="Src\Object\Collision\CollisionCircle.cpp" />
     <ClCompile Include="Src\Object\Collision\CollisionLine.cpp" />
-    <ClCompile Include="Src\Object\Actor\Chara\Weapon\Bullet\Boss\BBulletMG.cpp" />
     <ClCompile Include="Src\Object\Collision\CollisionCapsule.cpp" />
     <ClCompile Include="Src\Object\Collision\CollisionSphere.cpp" />
     <ClCompile Include="Src\Manager\Generic\KeyConfInputManager.cpp" />
@@ -30,6 +29,7 @@
     <ClCompile Include="Src\Object\Collider2D\Collider2DBox.cpp" />
     <ClCompile Include="Src\Object\Collider2D\Collider2DCircle.cpp" />
     <ClCompile Include="Src\Object\Actor\Chara\Weapon\Bullet\Boss\BBulletBase.cpp" />
+    <ClCompile Include="Src\Object\Actor\Chara\Weapon\Bullet\Boss\BBulletMG.cpp" />
     <ClCompile Include="Src\Object\Actor\Chara\Weapon\Bullet\Boss\BBulletWave.cpp" />
     <ClCompile Include="Src\Object\Collider2D\Collider2DBase.cpp" />
     <ClCompile Include="Src\Object\Common\DamageController.cpp" />
@@ -94,7 +94,6 @@
     <ClInclude Include="Src\Object\Collision\CollisionBox.h" />
     <ClInclude Include="Src\Object\Collision\CollisionCircle.h" />
     <ClInclude Include="Src\Object\Collision\CollisionLine.h" />
-    <ClInclude Include="Src\Object\Actor\Chara\Weapon\Bullet\Boss\BBulletMG.h" />
     <ClInclude Include="Src\Object\Collision\CollisionCapsule.h" />
     <ClInclude Include="Src\Object\Collision\CollisionSphere.h" />
     <ClInclude Include="Src\Manager\Generic\KeyConfInputManager.h" />
@@ -102,6 +101,7 @@
     <ClInclude Include="Src\Object\Collider2D\Collider2DBox.h" />
     <ClInclude Include="Src\Object\Collider2D\Collider2DCircle.h" />
     <ClInclude Include="Src\Object\Actor\Chara\Weapon\Bullet\Boss\BBulletBase.h" />
+    <ClInclude Include="Src\Object\Actor\Chara\Weapon\Bullet\Boss\BBulletMG.h" />
     <ClInclude Include="Src\Object\Actor\Chara\Weapon\Bullet\Boss\BBulletWave.h" />
     <ClInclude Include="Src\Object\Collider2D\Collider2DBase.h" />
     <ClInclude Include="Src\Object\Common\DamageController.h" />

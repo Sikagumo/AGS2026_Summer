@@ -183,7 +183,6 @@ void SceneTitle::UpdateCollision(void)
 
 void SceneTitle::Draw(void)
 {
-    if (Loading::GetInstance()->IsLoading()) { return; }
 
     DrawString(0, 0, "Title Scene Now!", GetColor(255, 255, 255));
 

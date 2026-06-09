@@ -174,6 +174,15 @@ private:
 	std::map<LOCKON_TARGET, VECTOR> targetsPos_;
 	LOCKON_TARGET lockOnTarget_;
 
+
+	// ロックオン切替イージング用
+	static constexpr float LOCKON_EASING_DURATION = 0.6f; // イージング継続時間(秒)
+
+	bool isEasingLockOn_;
+	float easingTimer_;      // イージング経過時間(秒)
+	VECTOR easingFromPos_;    // カメラ位置イージング開始座標
+	VECTOR easingFromTarget_; // 注視点イージング開始座標
+
 	
 	// カメラを初期位置に戻す
 	void SetDefault(void);
@@ -201,4 +210,5 @@ private:
 	// 衝突判定
 	void Collision(void);
 
+	VECTOR EasingChangeTarget(const VECTOR& _fromVec, const VECTOR& _toVec, float _term);
 };

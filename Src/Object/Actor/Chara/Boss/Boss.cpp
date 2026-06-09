@@ -300,7 +300,24 @@ void Boss::UpdateIdle(void)
 
 void Boss::UpdateAttack(void)
 {
-	ChangeState(STATE::JUMP);
+	int attackSelect=1;
+	switch (attackSelect)
+	{
+	case 0:
+		ChangeState(STATE::JUMP);
+		break;
+	case 1:
+		weaponMGL_->ChangeState(WeaponMGL::STATE::ATTACK);
+		weaponMGR_->ChangeState(WeaponMGR::STATE::ATTACK);
+		ChangeState(STATE::IDLE);
+		break;
+			
+	default:
+		break;
+
+	}
+
+	
 }
 
 void Boss::UpdateJump(void)
@@ -356,6 +373,8 @@ void Boss::LookPlayer(void)
 	
 	VECTOR moveDir;
 	
+	
+
 	// プレイヤーの位置に向かう方向を計算
 	moveDir = VSub(player1Pos_, (transformBody_.pos));
 	moveDir.y = 0.0f;

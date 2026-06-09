@@ -9,6 +9,11 @@ class WeaponMGL :
 	public WeaponBase
 {
 public:
+	//発射位置
+	//{ -55.0f,5.0f,140.0f }
+	//
+
+
 
 	WeaponMGL(void);
 
@@ -45,6 +50,11 @@ public:
 	/// <param name=""></param>
 	/// <returns>現在HP</returns>
 	int GetHp(void)override { return hp_; }
+
+
+	// 状態遷移
+	void ChangeState(STATE _state)override;
+
 protected:
 
 	// 大きさ、回転、座標の初期化
@@ -72,6 +82,17 @@ protected:
 
 	void LookPlayer(void) override;
 
+	
+	// 状態遷移
+	void ChangeState(int state)override;
+	void ChangeStateIdle(void)override;
+	void ChangeStateAttack(void)override;
+	void ChangeStateEnd(void)override;
+
+	void UpdateAttack(void)override;
+	void UpdateIdle(void)override;
+	void UpdateEnd(void)override;
+
 private:
 
 	static constexpr VECTOR LINE_START_POS = { -50.0f,0.0f,50.0f };
@@ -81,10 +102,29 @@ private:
 	static constexpr float CAPSULE_RADIUS = 20.0f;
 	static constexpr int MAX_BULLET_COUNT = 200;
 
+	//発射位置
+	static constexpr int MUZZLE_MAX_COUNT = 6;
+
+	const VECTOR MUZZLE_POS[MUZZLE_MAX_COUNT] = {
+		{ -52.0f,4.0f,150.0f },
+		{ -47.0f,1.0f,150.0f },
+		{ -47.0f,-5.0f,150.0f },
+		{ -52.0f,-8.0f,150.0f },
+		{ -57.0f,1.0f,150.0f },
+		{-57.0f,-5.0f,150.0f },
+	};
+
+
+	
+
+
 	std::vector<std::shared_ptr<BBulletBase>> bullets_;
 	VECTOR bulletDir_;
 
 	int bulletCount_;
+
+	VECTOR muzzlePos_[MUZZLE_MAX_COUNT];
+	int muzzleCount_;
 
 
 	std::shared_ptr<BBulletBase> GetValidBullet(void);
