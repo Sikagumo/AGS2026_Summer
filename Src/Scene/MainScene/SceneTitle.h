@@ -5,6 +5,7 @@
 
 #include "../SceneBase.h"
 #include "../../Common/Vector2.h"
+#include "../../Object/Collider2D/Collider2DBase.h"
 #include "../../Object/Collider2D/Collider2DCircle.h"
 #include "../../Object/Collider2D/Collider2DBox.h"
 
@@ -40,13 +41,26 @@ public:
 	void Release(void) override;
 
 private:
+	enum class MENU_ITEM 
+	{
+		SOLO,
+		MULTI,
+		OPTION,
+		EXIT,
+		COUNT
+	};
+
+	std::array<Collider2DBase::TAG_2D, 4> buttonTags;
+
+	// メニュー数
+	static constexpr int MENU_BUTTON_NUM = 4;
 
 	// 画像関連
 	int imageTitle_;                  // タイトルロゴの画像ハンドル
 	std::array<int, 8> imageMenu_;    // メニュー項目（4つ）の画像ハンドル
 
-	// 選択しの回数(pad用)
-	int selectCount_;
+	// 選択インデックス（パッド操作用）
+	int selectedIdx_;
 
 	// 前回のマウス座標
 	Vector2F prevMousePos_;

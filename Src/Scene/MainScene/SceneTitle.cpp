@@ -1,6 +1,6 @@
 #include "SceneTitle.h"
 #include "../../Manager/Generic/SceneManager.h"
-#include "../../Manager/Generic/InputManager.h"
+#include "../../Manager/Generic/KeyConfInputManager.h"
 #include "../../Manager/Generic/ResourceManager.h"
 #include "../../Manager/Decoration/SoundManager.h"
 #include "../../Object/Manager/CollisionController.h"
@@ -40,13 +40,14 @@ void SceneTitle::EndLoad(void)
 
 SceneTitle::SceneTitle(void)
     : imageTitle_(-1)
-    , selectCount_(0)
+    , selectedIdx_(0)
     , cursorCollider_(nullptr)
     , soloPlayButtonCollider_(nullptr)
     , multiPlayButtonCollider_(nullptr)
     , optionButtonCollider_(nullptr)
     , exitButtonCollider_(nullptr)
     , imageMenu_()
+    , buttonTags()
     , prevMousePos_(0.0f, 0.0f)
 {
     for (size_t i = 0; i < imageMenu_.size(); ++i)
@@ -95,76 +96,85 @@ void SceneTitle::Initialize(void)
     CollisionController::GetInstance().SetCollisionGroup2D(Collider2DBase::TAG_2D::MOUSE_CURSOR, Collider2DBase::TAG_2D::EXIT_UTTON, true);
 
     SceneManager::GetInstance().GetCamera()->ChangeMode(Camera::MODE::NONE);
+
+    buttonTags =
+    {
+        Collider2DBase::TAG_2D::SOLO_PLAY_BUTTON,
+        Collider2DBase::TAG_2D::MULTI_PLAY_BUTTON,
+        Collider2DBase::TAG_2D::OPTION_BUTTON,
+        Collider2DBase::TAG_2D::EXIT_UTTON
+    };
 }
 
 void SceneTitle::Update(void)
 {
-
     if (Loading::GetInstance()->IsLoading()) { return; }
 
     auto& sceneManager = SceneManager::GetInstance();
-    auto& input = InputManager::GetInstance();
+    auto& keyConfInputManager = KeyConfInputManager::GetInstance();
 
-    Vector2 mousePos = input.GetMousePos();
+    // スティック入力による選択インデックスの更新
+    Vector2F stick = keyConfInputManager.GetLeftStickRaw();
+    const float THRESHOLD = 0.5f;
+    const int STICK_TINERVAL = 15;
+    static int inputIntervalCounter = 0;
+
+    if (inputIntervalCounter > 0)
+    {
+        inputIntervalCounter--;
+    }
+    else if (std::abs(stick.y) > THRESHOLD)
+    {
+        if (stick.y < 0.0f) 
+        { 
+            selectedIdx_ = (selectedIdx_ + 1) % MENU_BUTTON_NUM; 
+        }
+        else 
+        {
+            selectedIdx_ = (selectedIdx_ - 1 + MENU_BUTTON_NUM) % MENU_BUTTON_NUM; 
+        }
+        inputIntervalCounter = STICK_TINERVAL;
+    }
+
+    // マウス座標の更新
+    Vector2 mousePos = keyConfInputManager.GetMousePosition();
     Vector2F mousePosF(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y));
-    
     cursorCollider_->SetCenterPos(mousePosF);
 
-    using TAG_2D = Collider2DBase::TAG_2D;
-
-    if (mousePosF.x != prevMousePos_.x || mousePosF.y != prevMousePos_.y)
+    // マウスが動いたときはパッドの選択カーソルも追従させる
+    for (int i = 0; i < MENU_BUTTON_NUM; ++i)
     {
-        SetMouseDispFlag(true);
-
-        prevMousePos_ = mousePosF;
-    }
-
-    // ソロプレイ
-    if (CollisionController::GetInstance().IsTagCollidingWithTag2D
-    (TAG_2D::MOUSE_CURSOR, TAG_2D::SOLO_PLAY_BUTTON))
-    {
-        if (input.IsTrgMouseLeft())
+        if (CollisionController::GetInstance().IsTagCollidingWithTag2D(Collider2DBase::TAG_2D::MOUSE_CURSOR, buttonTags[i]))
         {
-            sceneManager.ChangeScene(std::make_shared<SceneGame>());
+            selectedIdx_ = i;
+            break;
         }
     }
 
-    // マルチ
-    if (CollisionController::GetInstance().IsTagCollidingWithTag2D
-    (TAG_2D::MOUSE_CURSOR, TAG_2D::MULTI_PLAY_BUTTON))
+    // 決定処理
+    for (int i = 0; i < MENU_BUTTON_NUM; ++i)
     {
-        if (input.IsTrgMouseLeft())
+        bool isTarget = CollisionController::GetInstance().IsTagCollidingWithTag2D(Collider2DBase::TAG_2D::MOUSE_CURSOR, buttonTags[i]) || (selectedIdx_ == i);
+
+        if (isTarget && keyConfInputManager.isTrigerDown("OK"))
         {
-            
+            switch (static_cast<MENU_ITEM>(i))
+            {
+            case MENU_ITEM::SOLO:
+                sceneManager.ChangeScene(std::make_shared<SceneGame>());
+                break;
+            case MENU_ITEM::MULTI:
+                // マルチプレイ処理
+                break;
+            case MENU_ITEM::OPTION:
+                // 設定処理
+                break;
+            case MENU_ITEM::EXIT:
+                Application::GetInstance().GameEnd();
+                break;
+            }
         }
     }
-
-    // 設定
-    if (CollisionController::GetInstance().IsTagCollidingWithTag2D
-    (TAG_2D::MOUSE_CURSOR, TAG_2D::OPTION_BUTTON))
-    {
-        if (input.IsTrgMouseLeft())
-        {
-         
-        }
-    }
-
-    // 終了
-    if (CollisionController::GetInstance().IsTagCollidingWithTag2D
-    (TAG_2D::MOUSE_CURSOR, TAG_2D::EXIT_UTTON))
-    {
-        if (input.IsTrgMouseLeft())
-        {
-            Application::GetInstance().GameEnd();
-        }
-    }
-
-#ifdef _DEBUG
-    if (input.IsTrgDown(KEY_INPUT_SPACE))
-    {
-        sceneManager.ChangeScene(std::make_shared<SceneResult>(false));
-    }
-#endif
 }
 
 void SceneTitle::UpdateCollision(void)
@@ -174,84 +184,41 @@ void SceneTitle::UpdateCollision(void)
 void SceneTitle::Draw(void)
 {
 
-    using TAG_2D = Collider2DBase::TAG_2D;
-
     DrawString(0, 0, "Title Scene Now!", GetColor(255, 255, 255));
-    
-    const int IMAGET_TITLE_Y = Application::SCREEN_SIZE_Y / 3;
 
-    // タイトル
+    const int IMAGET_TITLE_Y = Application::SCREEN_SIZE_Y / 3;
     DrawRotaGraph(Application::SCREEN_HALF_X, IMAGET_TITLE_Y, 1.0f, UtilityMath::DEG2RAD, imageTitle_, true);
 
+    const float DEFAULT_SCALE = 0.5f;
+    using TAG_2D = Collider2DBase::TAG_2D;
 
-    const float DEFULT_SCALE = 0.5f;
-    const float SELECT_SCALE = 2.0f;
-
-
-    // ソロプレイ
-    if (CollisionController::GetInstance().IsTagCollidingWithTag2D
-    (TAG_2D::MOUSE_CURSOR, TAG_2D::SOLO_PLAY_BUTTON))
+    // 各ボタンの情報を配列にまとめる
+    std::array<Collider2DBox*, 4> colliders = 
     {
-        Vector2F posSolo = soloPlayButtonCollider_->GetCenterPos();
-        DrawRotaGraph(static_cast<int>(posSolo.x), static_cast<int>(posSolo.y), DEFULT_SCALE, UtilityMath::DEG2RAD, imageMenu_[1], true);
+        soloPlayButtonCollider_.get(),
+        multiPlayButtonCollider_.get(),
+        optionButtonCollider_.get(),
+        exitButtonCollider_.get()
+    };
 
-    }
-    else
+    for (int i = 0; i < MENU_BUTTON_NUM; ++i)
     {
-        Vector2F posSolo = soloPlayButtonCollider_->GetCenterPos();
-        DrawRotaGraph(static_cast<int>(posSolo.x), static_cast<int>(posSolo.y), DEFULT_SCALE, UtilityMath::DEG2RAD, imageMenu_[0], true);
-    }
+        // マウスホバー OR パッドで選択中
+        bool isSelected = CollisionController::GetInstance().IsTagCollidingWithTag2D(TAG_2D::MOUSE_CURSOR, buttonTags[i])
+            || (selectedIdx_ == i);
 
-    // マルチ
-    if (CollisionController::GetInstance().IsTagCollidingWithTag2D
-    (TAG_2D::MOUSE_CURSOR, TAG_2D::MULTI_PLAY_BUTTON))
-    {
-        Vector2F posMulti = multiPlayButtonCollider_->GetCenterPos();
-        DrawRotaGraph(static_cast<int>(posMulti.x), static_cast<int>(posMulti.y), DEFULT_SCALE, UtilityMath::DEG2RAD, imageMenu_[3], true);
-    }
-    else
-    {
-        Vector2F posMulti = multiPlayButtonCollider_->GetCenterPos();
-        DrawRotaGraph(static_cast<int>(posMulti.x), static_cast<int>(posMulti.y), DEFULT_SCALE, UtilityMath::DEG2RAD, imageMenu_[2], true);
+        // 選択状態に応じて画像インデックスを切り替え
+        int imgIdx = isSelected ? (i * 2 + 1) : (i * 2);
 
-    }
-
-    // 設定
-    if (CollisionController::GetInstance().IsTagCollidingWithTag2D
-    (TAG_2D::MOUSE_CURSOR, TAG_2D::OPTION_BUTTON))
-    {
-
-        Vector2F posOption = optionButtonCollider_->GetCenterPos();
-        DrawRotaGraph(static_cast<int>(posOption.x), static_cast<int>(posOption.y), DEFULT_SCALE, UtilityMath::DEG2RAD, imageMenu_[5], true);
-
-    }
-    else
-    {
-
-        Vector2F posOption = optionButtonCollider_->GetCenterPos();
-        DrawRotaGraph(static_cast<int>(posOption.x), static_cast<int>(posOption.y), DEFULT_SCALE, UtilityMath::DEG2RAD, imageMenu_[4], true);
-
-    }
-
-    // 終了
-    if (CollisionController::GetInstance().IsTagCollidingWithTag2D
-    (TAG_2D::MOUSE_CURSOR, TAG_2D::EXIT_UTTON))
-    {
-        Vector2F posExit = exitButtonCollider_->GetCenterPos();
-        DrawRotaGraph(static_cast<int>(posExit.x), static_cast<int>(posExit.y), DEFULT_SCALE, UtilityMath::DEG2RAD, imageMenu_[7], true);
-    }
-    else
-    {
-        Vector2F posExit = exitButtonCollider_->GetCenterPos();
-        DrawRotaGraph(static_cast<int>(posExit.x), static_cast<int>(posExit.y), DEFULT_SCALE, UtilityMath::DEG2RAD, imageMenu_[6], true);
+        // 描画
+        Vector2F pos = colliders[i]->GetCenterPos();
+        DrawRotaGraph(static_cast<int>(pos.x), static_cast<int>(pos.y), DEFAULT_SCALE, UtilityMath::DEG2RAD, imageMenu_[imgIdx], true);
     }
 
 #ifdef _DEBUG
     DrawDebug();
-#endif // _DEBUG
-
+#endif
 }
-
 void SceneTitle::Release(void)
 {
 
