@@ -129,7 +129,6 @@ void SceneGame::UpdateCollision(void)
 
 void SceneGame::Draw(void)
 {
-	if (Loading::GetInstance()->IsLoading()) { return; }
 
 	stage_->Draw();
 
