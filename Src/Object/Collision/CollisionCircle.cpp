@@ -2,6 +2,7 @@
 #include "CollisionCircle.h"
 
 #include <cmath>
+#include <algorithm>
 
 #include "../Collider2D/Collider2DCircle.h"
 #include "../Collider2D/Collider2DBox.h"

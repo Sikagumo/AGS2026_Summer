@@ -56,7 +56,7 @@ KeyConfInputManager::KeyConfInputManager(void)
 void KeyConfInputManager::InitInputTable(void)
 {
 	inputTable_.clear();
-	XINPUT_STATE input;
+	XINPUT_STATE input = XINPUT_STATE();
 
 	inputTable_["UP"] =
 	{

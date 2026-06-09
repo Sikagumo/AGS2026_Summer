@@ -49,12 +49,17 @@ void BBulletMG::InitPost(void)
 	aliveTime_ = 0;
 	speed_ = INIT_SPEED;
 	isAlive_ = true;
+	CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::MG_BULLET, true);
 }
 
 void BBulletMG::UpdateProcess(void)
 {
 
-	if (CollisionController::GetInstance().IsActorCollidingWithTag(this, ColliderBase::TAG::PLAYER) || CollisionController::GetInstance().IsActorCollidingWithTag(this, ColliderBase::TAG::STAGE))
+	if (CollisionController::GetInstance().IsActorCollidingWithTag(this, ColliderBase::TAG::PLAYER))
+	{
+		isAlive_ = false;
+	}
+	if (CollisionController::GetInstance().IsActorCollidingWithTag(this, ColliderBase::TAG::STAGE))
 	{
 		isAlive_ = false;
 	}
@@ -87,6 +92,10 @@ void BBulletMG::DrawPre(void)
 {
 	if (isAlive_)
 	{
-		DrawSphere3D(transform_.pos, radiuse_, 16,0xffff00, 0xffff00, true);
+		//DrawSphere3D(transform_.pos, radiuse_, 16,0xffff00, 0xffff00, true);
+		for (auto& col : ownColliders_)
+		{
+			col.second->Draw();
+		}
 	}
 }
