@@ -250,9 +250,10 @@ void WeaponMGL::CreateBullets(void)
 
 	// 位置を加算して最終的なワールド座標にする
 	VECTOR bulletpos = VAdd(transform_.pos, localRotPos);
-	bullet->Init();
 
 	bullet->CreateBullets(bulletpos, bulletDir_, 2.0f);
+	bullet->Init();
+
 }
 
 std::shared_ptr<BBulletBase> WeaponMGL::GetValidBullet(void)
