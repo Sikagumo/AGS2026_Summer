@@ -232,6 +232,40 @@ bool CollisionController::IsTagCollidingWithTag(ColliderBase::TAG _targetTagA,
 	return false;
 }
 
+VECTOR CollisionController::IsActorHitPosWithTag(const ActorBase* _actor, 
+	ColliderBase::TAG _targetTag) const
+{
+	if (_actor == nullptr)
+	{
+		return UtilityMath::VECTOR_ZERO;
+	}
+
+	auto hitColInfo = currentColInfos_.find(_actor);
+	
+	// 当たった履歴が1つもなければ即座にゼロを返す
+	if (hitColInfo == currentColInfos_.end())
+	{
+		return UtilityMath::VECTOR_ZERO;
+	}
+
+	const auto& hitInfos = hitColInfo->second;
+
+	for (const auto& info : hitInfos)
+	{
+		if (info.hitCollider == nullptr)
+		{
+			continue;
+		}
+
+		if (info.hitCollider->GetCollisionTag() == _targetTag)
+		{
+			return info.hitPosition;
+		}
+	}
+
+	return UtilityMath::VECTOR_ZERO;
+}
+
 void CollisionController::SetCollisionActive(ActorBase* _targetActor, 
 	ColliderBase::TAG _targetTag, const bool _isActive)
 {
@@ -367,6 +401,7 @@ void CollisionController::UpdateCollisionPars(void)
 	}
 
 	activeCollisions_.clear();
+	currentColInfos_.clear();
 
 	size_t actorCount = actors_.size();
 
@@ -432,6 +467,14 @@ void CollisionController::UpdateCollisionPars(void)
 							// 衝突した相手を相互に登録
 							actorA->AddHitCollider(colB);
 							actorB->AddHitCollider(colA);
+
+							currentColInfos_[actorA].push_back(info);
+
+							CollisionInfo reorderInfo = info;
+							reorderInfo.myCollider = info.hitCollider;
+							reorderInfo.hitCollider = info.myCollider;
+							reorderInfo.hitNormal = VScale(info.hitNormal, -1.0f);
+							currentColInfos_[actorB].push_back(reorderInfo);
 
 							auto tagA = colA->GetCollisionTag();
 							auto tagB = colB->GetCollisionTag();
