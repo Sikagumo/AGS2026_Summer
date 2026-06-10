@@ -110,7 +110,7 @@ private:
 	//回転
 	static constexpr float INIT_ROT = 180.0f;
 	//ジャンプ力
-	static constexpr float POW_JUMP_INIT = 3000.0f;
+	static constexpr float JUMP_POW = 3000.0f;
 
 	//当たり判定の座標
 	//ライン

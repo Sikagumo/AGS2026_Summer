@@ -230,9 +230,10 @@ void Boss::ChangeStateAttack(void)
 void Boss::ChangeStateJump(void)
 {
 	stateUpdate_ = std::bind(&Boss::UpdateJump, this);
+
 	// ƒWƒƒƒ“ƒv—Ê‚ÌŒvŽZ
-	float jumpSpeed = POW_JUMP_INIT * TimeManager::GetInstance().GetDeltaTime();
-	jumpPow_ = VScale(UtilityMath::DIR_UP, jumpSpeed);
+	float jumpSpeed = (JUMP_POW * TimeManager::GetInstance().GetDeltaTime());
+	jumpPow_ *= jumpSpeed;
 	isJump_ = true;
 }
 
@@ -330,7 +331,7 @@ void Boss::UpdateJump(void)
 	
 	if (transform_.pos.y >= 3500)
 	{
-		jumpPow_ = VScale(UtilityMath::DIR_UP, -50.0f);
+		jumpPow_ *= -50.0f;
 	}
 }
 

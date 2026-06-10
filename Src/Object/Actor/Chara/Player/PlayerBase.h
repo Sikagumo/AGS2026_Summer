@@ -58,7 +58,7 @@ public:
 	/// @param _damage É_ÉÅÅ[ÉWó 
 	/// @param _isInvincible ñ≥ìGâªÇ≥ÇπÇÈÇ©î€Ç©
 	/// @param _timeInvincible ñ≥ìGéûä‘
-	void SetDamage(int _damage, bool _isInvincible, float _timeInvincible = TIME_INVINCIBLE);
+	void SetDamage(int _damage, bool _isInvincible = true, float _timeInvincible = TIME_INVINCIBLE);
 
 	int GetCurHp(void) { return hp_; };
 	int GetMaxHp(void) { return MAX_HP; };

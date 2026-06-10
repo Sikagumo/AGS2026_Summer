@@ -46,15 +46,12 @@ protected:
 
 	VECTOR movePow_;
 
-	VECTOR jumpPow_;
+	float jumpPow_;
 
 	VECTOR knockPow_;
 
 	// 移動前の座標
 	VECTOR prevPos_;
-
-	// ジャンプの入力受付時間
-	float stepJump_;
 
 	// ジャンプ判定
 	bool isJump_;

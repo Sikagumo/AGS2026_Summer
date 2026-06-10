@@ -31,14 +31,14 @@ public:
 	/// @param _actionNum “o˜^”Ô†
 	/// @param _attackPower UŒ‚—Í
 	/// @param _timeActive s“®—LŒøŠÔ
-	/// @param _timeEnd s“®I—¹ŠÔ
 	/// @param _timeActionActive s“®‚Ü‚Å‚ÌŠÔ
+	/// @param _timeEnd s“®I—¹ŠÔ
 	/// @param _actionProc s“®
-	/// @param _timeStop ’â~‚Ü‚Å‚ÌŠÔ
+	/// @param _timeStop ’â~‚·‚éŠÔ
 	/// @param _timeStopActive ’â~‚Ü‚Å‚ÌŠÔ
 	/// @param _timeInput Ÿ‚Ì“ü—Í‚Ü‚Å‚ÌŠÔ
-	void SetAction(int _actionNum, int _attackPower, float _timeActive, float _timeEnd
-		, float _timeActionActive, std::function<void(void)> _actionProc, float _timeStop = 0.0f, float _timeStopActive = 0.0f, float _timeInput = 0.0f);
+	void SetAction(int _actionNum, int _attackPower, float _timeActive, float _timeActionActive
+				   , float _timeEnd, std::function<void(void)> _actionProc, float _timeStop = 0.0f, float _timeStopActive = 0.0f, float _timeInput = 0.0f);
 
 	/// @brief “o˜^‚µ‚½s“®‚ğŠJn‚·‚é
 	/// @param _actionName “o˜^‚µ‚½s“®–¼

@@ -61,17 +61,9 @@ protected:
 
 	void DrawPre(void)override;
 	void DrawLate(void)override;
+
+
 private:
-
-
-	// ジャンプ力
-	static constexpr float POW_JUMP_INIT = 100.0f;
-
-	// 持続ジャンプ力
-	static constexpr float POW_JUMP_KEEP = 250.0f;
-
-	// ジャンプ受付時間
-	static constexpr float TIME_JUMP_INPUT = 1.85f;
 
 	// 攻撃回数
 	int attackNumMax_;
@@ -96,12 +88,13 @@ private:
 
 	// ジャンプ
 	void ProcessJump(void);
+	void Jump(void);
 
 	void ProcessAttack(void);
 
 
 	void DrawShadowRound(void);
-	void PlayAnim(ANIM_TYPE _type, bool _isLoop = true);
+	void PlayAnimation(ANIM_TYPE _type, bool _isLoop = true);
 
 	void CreateBullet(void);
 	void ShotBullet(void);

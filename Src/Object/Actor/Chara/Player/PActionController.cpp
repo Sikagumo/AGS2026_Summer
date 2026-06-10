@@ -13,8 +13,9 @@ PActionController::PActionController(std::unique_ptr<AnimationController>& _anim
 {
 }
 
-void PActionController::SetAction(int _actionNum, int _attackPower, float _timeActive, float _timeEnd
-	, float _timeActionActive, std::function<void(void)> _actionProc, float _timeStop, float _timeStopActive, float _timeInput)
+void PActionController::SetAction(int _actionNum, int _attackPower, float _timeActive, float _timeActionActive
+	, float _timeEnd, std::function<void(void)> _actionProc
+	, float _timeStop, float _timeStopActive, float _timeInput)
 {
 	if (_actionNum < 0)
 	{

@@ -15,7 +15,7 @@
 
 CharaBase::CharaBase(void)
 	: ActorBase::ActorBase()
-	, isJump_(false), jumpPow_(UtilityMath::VECTOR_ZERO), stepJump_(0.0f)
+	, isJump_(false), jumpPow_(0.0f)
 	, moveSpeed_(0.0f)
 	, prevPos_(UtilityMath::VECTOR_ZERO)
 	, moveDir_(UtilityMath::VECTOR_ZERO)
@@ -70,8 +70,8 @@ void CharaBase::Update(void)
 void CharaBase::DrawDebug(void)
 {
 #ifdef _DEBUG
-	DrawFormatString(0, (16 * 12), 0xffff00, "jumpPow(%.2f,%.2f,%2f), movePow(%.2f,%.2f,%.2f)"
-		, jumpPow_.x, jumpPow_.y, jumpPow_.z, movePow_.x, movePow_.y, movePow_.z);
+	DrawFormatString(0, (16 * 12), 0xffff00, "jumpPow(%.2f), movePow(%.2f,%.2f,%.2f)"
+		, jumpPow_, movePow_.x, movePow_.y, movePow_.z);
 #endif
 }
 
@@ -86,10 +86,10 @@ void CharaBase::CalcGravityPow(void)
 	// 重力
 	VECTOR gravity = VScale(DIR_GRAVITY, gravityPow);
 
-	jumpPow_ = VAdd(jumpPow_, gravity);
+	jumpPow_ += gravity.y;
 
 	// 重力制限	
-	jumpPow_.y = ((jumpPow_.y < MAX_FALL_SPEED) ? MAX_FALL_SPEED : jumpPow_.y);
+	jumpPow_ = ((jumpPow_ < MAX_FALL_SPEED) ? MAX_FALL_SPEED : jumpPow_);
 
 
 	/* 吹っ飛ばしの重力加算 */
@@ -118,11 +118,11 @@ void CharaBase::Collision(void)
 
 	CollisionCapsule();
 
-	// ジャンプ量を加算
+	// 吹っ飛ばし量を加算
 	transform_.pos = VAdd(transform_.pos, knockPow_);
 
 	// ジャンプ量を加算
-	transform_.pos = VAdd(transform_.pos, jumpPow_);
+	transform_.pos.y += jumpPow_;
 
 	// 衝突(重力)
 	CollisionGravity();
@@ -134,11 +134,10 @@ void CharaBase::CollisionGravity(void)
 	bool isHitStage = CollisionController::GetInstance().IsActorCollidingWithTag(this, ColliderBase::TAG::STAGE);
 
 	// 床に触れていて、かつ下方向に落下している（または静止している）なら着地
-	if (isHitStage && jumpPow_.y <= 0.0f)
+	if (isHitStage && jumpPow_ <= 0.0f)
 	{
    		isJump_ = false;
-		jumpPow_ = UtilityMath::VECTOR_ZERO; // 落下速度を止める
-		stepJump_ = 0.0f;                    // ジャンプ受付リセット
+		jumpPow_ = 0.0f; // 落下速度を止める
 	}
 }
 
