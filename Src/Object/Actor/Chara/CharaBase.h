@@ -16,10 +16,10 @@ public:
 		MAX,
 	};
 
-	// コンストラクタ
+	/// @brief コンストラクタ
 	CharaBase(void);
 
-	// デストラクタ
+	/// @brief デストラクタ
 	virtual ~CharaBase(void) override = default;
 
 	void Update(void)override final;
@@ -47,6 +47,8 @@ protected:
 	VECTOR movePow_;
 
 	VECTOR jumpPow_;
+
+	VECTOR knockPow_;
 
 	// 移動前の座標
 	VECTOR prevPos_;

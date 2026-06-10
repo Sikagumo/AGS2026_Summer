@@ -1,7 +1,6 @@
 #include "PlayerBase.h"
 
 constexpr int HP = 50;
-constexpr float INVINSIVE_TIME = 1.0f;
 
 PlayerBase::PlayerBase(int _playerNo, BULLET_TYPE _bulletType, PLAYER_TYPE _playerType)
 	: CharaBase::CharaBase()
@@ -13,7 +12,7 @@ PlayerBase::PlayerBase(int _playerNo, BULLET_TYPE _bulletType, PLAYER_TYPE _play
 {
 }
 
-void PlayerBase::SetDamage(int _damage, bool _isInvincible)
+void PlayerBase::SetDamage(int _damage, bool _isInvincible, float _timeInvincible)
 {
 	// 無敵可能時に無敵中、HPが０以下、ダメージ量が0以下時、処理終了
 	if (_isInvincible && curInvTime_ > 0.0f
@@ -22,7 +21,7 @@ void PlayerBase::SetDamage(int _damage, bool _isInvincible)
 	if (_isInvincible)
 	{
 		// 無敵可能時、無敵時間割り当て
-		curInvTime_ = INVINSIVE_TIME;
+		curInvTime_ = _timeInvincible;
 	}
 
 	hp_ -= _damage;

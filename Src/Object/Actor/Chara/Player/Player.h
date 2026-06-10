@@ -8,7 +8,7 @@ class Player : public PlayerBase
 {
 private:
 
-	static constexpr float KNOCK_POW_Y = 10.0f;
+	static constexpr float KNOCK_POW_Y = 100.0f;
 public:
 
 	enum class ANIM_TYPE
@@ -35,12 +35,14 @@ public:
 
 	void ReleasePost(void)override;
 
+	/// @brief Œ»İUŒ‚—Íæ“¾
 	int GetPower(void);
 
 	/// @brief ‚Á”ò‚Î‚µˆ—
 	/// @param _knockDirXZ ‰¡‚Á”ò‚Î‚µ•ûŒü
 	/// @param _knockPowXZ ‰¡‚Á”ò‚Î‚µ—Í
 	/// @param _isStan ƒXƒ^ƒ“‚³‚¹‚é‚©”Û‚© 
+	/// @param _knockPowY c‚Á”ò‚Î‚µ—Í
 	void SetKnock(const VECTOR& _knockDirXZ, float _knockPowXZ
 					, bool _isStan, float _knockPowY = KNOCK_POW_Y);
 

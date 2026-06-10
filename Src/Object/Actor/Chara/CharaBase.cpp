@@ -20,6 +20,7 @@ CharaBase::CharaBase(void)
 	, prevPos_(UtilityMath::VECTOR_ZERO)
 	, moveDir_(UtilityMath::VECTOR_ZERO)
 	, movePow_(UtilityMath::VECTOR_ZERO)
+	, knockPow_(UtilityMath::VECTOR_ZERO)
 	, animation_(nullptr)
 {
 }
@@ -35,7 +36,6 @@ void CharaBase::InitAnimation(void)
 
 void CharaBase::Update(void)
 {
-
 	// 移動前座標を更新
 	prevPos_ = transform_.pos;
 
@@ -91,6 +91,24 @@ void CharaBase::CalcGravityPow(void)
 	// 重力制限	
 	jumpPow_.y = ((jumpPow_.y < MAX_FALL_SPEED) ? MAX_FALL_SPEED : jumpPow_.y);
 
+
+	/* 吹っ飛ばしの重力加算 */
+	if (!UtilityMath::EqualsVZero(knockPow_))
+	{
+		// 重力加速
+		knockPow_.y -= Application::GRAVITY_SCALE;
+
+		if (knockPow_.y > Application::GRAVITY)
+		{
+			knockPow_.y = Application::GRAVITY;
+		}
+
+		if (knockPow_.y < 0.0f)
+		{
+			knockPow_ = UtilityMath::VECTOR_ZERO;
+		}
+	}
+
 }
 
 void CharaBase::Collision(void)
@@ -99,6 +117,9 @@ void CharaBase::Collision(void)
 	transform_.pos = VAdd(transform_.pos, movePow_);
 
 	CollisionCapsule();
+
+	// ジャンプ量を加算
+	transform_.pos = VAdd(transform_.pos, knockPow_);
 
 	// ジャンプ量を加算
 	transform_.pos = VAdd(transform_.pos, jumpPow_);

@@ -1,16 +1,12 @@
 #include "ActorBase.h"
 #include "../../Manager/Generic/ResourceManager.h"
 #include "../../Manager/System/TimeManager.h"
-#include "../../Manager/Generic/InputManager.h"
 #include "../../Object/Manager/CollisionController.h"
 #include "../Collider/ColliderBase.h"
 
 ActorBase::ActorBase(void)
-	: 
-	resourceManager_(ResourceManager::GetInstance()),
-	inputManager_(InputManager::GetInstance()),
-	timeManager_(TimeManager::GetInstance()),
-	transform_(Transform())
+	: timeManager_(TimeManager::GetInstance())
+	, transform_(Transform())
 {
 }
 

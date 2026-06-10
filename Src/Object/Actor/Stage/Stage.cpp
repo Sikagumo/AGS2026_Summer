@@ -25,7 +25,7 @@ void Stage::Draw(void)
 
 void Stage::Load(void)
 {
-	transform_.modelId = resourceManager_.LoadHandleId(ResourceManager::SRC::MODEL_STAGE);
+	transform_.modelId = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::MODEL_STAGE);
 }
 
 void Stage::InitTransform(void)

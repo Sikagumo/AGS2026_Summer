@@ -35,7 +35,7 @@ const VECTOR WeaponRG::GetPos(void) const
 
 void WeaponRG::Load(void)
 {
-	transform_.SetModel(resourceManager_.LoadHandleId(ResourceManager::SRC::MODEL_BOSS_WEAPON_RG));
+	transform_.SetModel(ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::MODEL_BOSS_WEAPON_RG));
 }
 
 void WeaponRG::InitTransform(void)

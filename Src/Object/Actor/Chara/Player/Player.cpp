@@ -50,7 +50,7 @@ Player::Player(int _playerNo, BULLET_TYPE _playerType)
 
 void Player::Load(void)
 {
-	transform_.modelId = resourceManager_.LoadModelDuplicate(ResourceManager::SRC::MODEL_PLAYER_HUMAN);
+	transform_.modelId = ResourceManager::GetInstance().LoadModelDuplicate(ResourceManager::SRC::MODEL_PLAYER_HUMAN);
 }
 void Player::Draw(void)
 {
@@ -77,29 +77,47 @@ void Player::DrawDebug(void)
 }
 void Player::SetKnock(const VECTOR& _knockDirXZ, float _knockPowXZ, bool _isStan, float _knockPowY)
 {
-	
+	VECTOR knockVelo = UtilityMath::VECTOR_ONE;
+
+	knockVelo.x *= (_knockDirXZ.x * _knockPowXZ);
+	knockVelo.z *= (_knockDirXZ.z * _knockPowXZ);
+
+	knockVelo.y *= (_knockPowY);
+
+	// Yの加速度が負の値の時は、Y吹っ飛ばしを０にする
+	if (knockVelo.y < 0.0f) { knockVelo.y = 0.0f; }
+
+	if (_isStan)
+	{
+		movePow_ = UtilityMath::VECTOR_ZERO;
+	}
+
+	// 吹っ飛ばし量に加算
+	knockPow_ = knockVelo;
 }
 
 void Player::InitAnimation(void)
 {
+	ResourceManager& resMng = ResourceManager::GetInstance();
+
 	animation_ = std::make_unique<AnimationController>(transform_.modelId);
 	animation_->AddExternal(static_cast<int>(ANIM_TYPE::IDLE)
-		, 30.0f, resourceManager_.LoadHandleId(ResourceManager::SRC::ANIM_IDLE));
+		, 30.0f, resMng.LoadHandleId(ResourceManager::SRC::ANIM_IDLE));
 
 	animation_->AddExternal(static_cast<int>(ANIM_TYPE::RUN)
-		, 40.0f, resourceManager_.LoadHandleId(ResourceManager::SRC::ANIM_RUN));
+		, 40.0f, resMng.LoadHandleId(ResourceManager::SRC::ANIM_RUN));
 
 	animation_->AddExternal(static_cast<int>(ANIM_TYPE::THROW_LEFT)
-		, 17.5f, resourceManager_.LoadHandleId(ResourceManager::SRC::ANIM_THROW_LEFT), {});
+		, 17.5f, resMng.LoadHandleId(ResourceManager::SRC::ANIM_THROW_LEFT), {});
 
 	animation_->AddExternal(static_cast<int>(ANIM_TYPE::THROW_RIGHT)
-		, 17.5f, resourceManager_.LoadHandleId(ResourceManager::SRC::ANIM_THROW_RIGHT), {});
+		, 17.5f, resMng.LoadHandleId(ResourceManager::SRC::ANIM_THROW_RIGHT), {});
 
 	animation_->AddExternal(static_cast<int>(ANIM_TYPE::THROW_RUN)
-		, 20.0f, resourceManager_.LoadHandleId(ResourceManager::SRC::ANIM_THROW_RUN));
+		, 20.0f, resMng.LoadHandleId(ResourceManager::SRC::ANIM_THROW_RUN));
 
 	animation_->AddExternal(static_cast<int>(ANIM_TYPE::JUMP)
-		, 20.0f, resourceManager_.LoadHandleId(ResourceManager::SRC::ANIM_JUMP));
+		, 20.0f, resMng.LoadHandleId(ResourceManager::SRC::ANIM_JUMP));
 
 	PlayAnim(ANIM_TYPE::IDLE);
 }
@@ -188,6 +206,12 @@ void Player::UpdateProcess(void)
 	ProcessMove();
 
 	UpdateBullets();
+
+	if (CollisionController::GetInstance().IsActorCollidingWithTag(this,ColliderBase::TAG::HIT_WAVE))
+	{
+		SetKnock(VNorm(VGet(1.0f, 0.0f, 1.0f)), 10.0f, false);
+		//SetKnock(CollisionController::GetInstance().衝突位置, 10.0f, false);
+	}
 }
 
 void Player::UpdateProcessPost(void)
@@ -250,16 +274,18 @@ void Player::ProcessMove(void)
 {
 	VECTOR dir = UtilityMath::VECTOR_ZERO;
 
+	InputManager& input = InputManager::GetInstance();
+
 	// 接続されているゲームパッド１の情報を取得
-	InputManager::JOYPAD_IN_STATE padState = inputManager_.GetJPadInputState(InputManager::JOYPAD_NO::PAD1);
+	InputManager::JOYPAD_IN_STATE padState = input.GetJPadInputState(InputManager::JOYPAD_NO::PAD1);
 
 	// 右スティックの傾き
-	dir = inputManager_.GetDirectionXZAKey(padState.AKeyLX, padState.AKeyLY);
+	dir = input.GetDirectionXZAKey(padState.AKeyLX, padState.AKeyLY);
 
-	if (inputManager_.IsNew(KEY_INPUT_W)) { dir.z += 1.0f; }
-	if (inputManager_.IsNew(KEY_INPUT_S)) { dir.z += -1.0f; }
-	if (inputManager_.IsNew(KEY_INPUT_A)) { dir.x += -1.0f; }
-	if (inputManager_.IsNew(KEY_INPUT_D)) { dir.x += 1.0f; }
+	if (input.IsNew(KEY_INPUT_W)) { dir.z += 1.0f; }
+	if (input.IsNew(KEY_INPUT_S)) { dir.z += -1.0f; }
+	if (input.IsNew(KEY_INPUT_A)) { dir.x += -1.0f; }
+	if (input.IsNew(KEY_INPUT_D)) { dir.x += 1.0f; }
 
 	if (actionController_->IsActiveAction()
 		|| actionController_->GetActionState() != PActionController::PACTION_STATE::NONE)
@@ -380,7 +406,7 @@ void Player::ProcessAttack(void)
 	if (actionController_->IsActiveAction()) { return; }
 
 
-	if (inputManager_.IsTrgMouseLeft())
+	if (InputManager::GetInstance().IsTrgMouseLeft())
 	{
 		// 行動回数が最大値を超えた場合、０に戻す
 		if (curAttackNum_ >= attackNumMax_)
