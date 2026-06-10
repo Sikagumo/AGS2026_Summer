@@ -3,9 +3,7 @@
 #include <map>
 #include <vector>
 class ColliderBase;
-class ResourceManager;
 class TimeManager;
-class InputManager;
 class CollisionController;
 
 class ActorBase
@@ -61,9 +59,7 @@ public:
 protected:
 
 	// シングルトン参照
-	ResourceManager& resourceManager_;
 	TimeManager& timeManager_;
-	InputManager& inputManager_;
 
 
 	// モデル制御の基本情報

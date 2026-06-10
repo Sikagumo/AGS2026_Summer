@@ -30,6 +30,9 @@ static constexpr VECTOR COL_CAPSULE_DOWN_LOCAL_POS = { 0.0f, 18.0f, 0.0f };
 // 衝突判定用カプセル球体半径
 static constexpr float COL_CAPSULE_RADIUS = 10.0f;
 
+// ジャンプ力
+static constexpr float JUMP_POW = 5.0f;
+
 
 Player::Player(int _playerNo, BULLET_TYPE _playerType)
 	: PlayerBase::PlayerBase(_playerNo, _playerType)
@@ -50,7 +53,7 @@ Player::Player(int _playerNo, BULLET_TYPE _playerType)
 
 void Player::Load(void)
 {
-	transform_.modelId = resourceManager_.LoadModelDuplicate(ResourceManager::SRC::MODEL_PLAYER_HUMAN);
+	transform_.modelId = ResourceManager::GetInstance().LoadModelDuplicate(ResourceManager::SRC::MODEL_PLAYER_HUMAN);
 }
 void Player::Draw(void)
 {
@@ -77,31 +80,49 @@ void Player::DrawDebug(void)
 }
 void Player::SetKnock(const VECTOR& _knockDirXZ, float _knockPowXZ, bool _isStan, float _knockPowY)
 {
-	
+	VECTOR knockVelo = UtilityMath::VECTOR_ONE;
+
+	knockVelo.x *= (_knockDirXZ.x * _knockPowXZ);
+	knockVelo.z *= (_knockDirXZ.z * _knockPowXZ);
+
+	knockVelo.y *= (_knockPowY);
+
+	// Yの加速度が負の値の時は、Y吹っ飛ばしを０にする
+	if (knockVelo.y < 0.0f) { knockVelo.y = 0.0f; }
+
+	if (_isStan)
+	{
+		movePow_ = UtilityMath::VECTOR_ZERO;
+	}
+
+	// 吹っ飛ばし量に加算
+	knockPow_ = knockVelo;
 }
 
 void Player::InitAnimation(void)
 {
+	ResourceManager& resMng = ResourceManager::GetInstance();
+
 	animation_ = std::make_unique<AnimationController>(transform_.modelId);
 	animation_->AddExternal(static_cast<int>(ANIM_TYPE::IDLE)
-		, 30.0f, resourceManager_.LoadHandleId(ResourceManager::SRC::ANIM_IDLE));
+		, 30.0f, resMng.LoadHandleId(ResourceManager::SRC::ANIM_IDLE));
 
 	animation_->AddExternal(static_cast<int>(ANIM_TYPE::RUN)
-		, 40.0f, resourceManager_.LoadHandleId(ResourceManager::SRC::ANIM_RUN));
+		, 40.0f, resMng.LoadHandleId(ResourceManager::SRC::ANIM_RUN));
 
 	animation_->AddExternal(static_cast<int>(ANIM_TYPE::THROW_LEFT)
-		, 17.5f, resourceManager_.LoadHandleId(ResourceManager::SRC::ANIM_THROW_LEFT), {});
+		, 17.5f, resMng.LoadHandleId(ResourceManager::SRC::ANIM_THROW_LEFT), {});
 
 	animation_->AddExternal(static_cast<int>(ANIM_TYPE::THROW_RIGHT)
-		, 17.5f, resourceManager_.LoadHandleId(ResourceManager::SRC::ANIM_THROW_RIGHT), {});
+		, 17.5f, resMng.LoadHandleId(ResourceManager::SRC::ANIM_THROW_RIGHT), {});
 
 	animation_->AddExternal(static_cast<int>(ANIM_TYPE::THROW_RUN)
-		, 20.0f, resourceManager_.LoadHandleId(ResourceManager::SRC::ANIM_THROW_RUN));
+		, 20.0f, resMng.LoadHandleId(ResourceManager::SRC::ANIM_THROW_RUN));
 
 	animation_->AddExternal(static_cast<int>(ANIM_TYPE::JUMP)
-		, 20.0f, resourceManager_.LoadHandleId(ResourceManager::SRC::ANIM_JUMP));
+		, 37.5f, resMng.LoadHandleId(ResourceManager::SRC::ANIM_JUMP));
 
-	PlayAnim(ANIM_TYPE::IDLE);
+	PlayAnimation(ANIM_TYPE::IDLE);
 }
 void Player::InitTransform(void)
 {
@@ -156,20 +177,26 @@ void Player::InitPost(void)
 	timeActionActive = SHOT_TIME_ACTION_ACTIVE;
 	timeInput = SHOT_TIME_ACTIVE_INPUT;
 
-	actionController_->SetAction(0, 50, timeActive, SHOT_TIME_END, timeActionActive
+	actionController_->SetAction(0, 50, timeActive, timeActionActive, SHOT_TIME_END
 								, std::bind(&Player::ShotBullet, this)
 								, 0.0f, 0.0f, timeInput);
 
 	timeActive += SHOT_TIME_INCREMENT;
-	actionController_->SetAction(1, 75, timeActive, SHOT_TIME_END, timeActionActive
+	actionController_->SetAction(1, 75, timeActive, timeActionActive, SHOT_TIME_END
 								, std::bind(&Player::ShotBullet, this)
 								, SHOT_TIME_STOP, SHOT_TIME_STOP_ACTIVE, timeInput);
 
 	timeActive += SHOT_TIME_INCREMENT * 2;
 	timeInput += (SHOT_TIME_INCREMENT / 2);
-	actionController_->SetAction(2, 150, timeActive, SHOT_TIME_END, timeActionActive
+	actionController_->SetAction(2, 150, timeActive, timeActionActive, SHOT_TIME_END
 								, std::bind(&Player::ShotBullet, this)
 								, SHOT_TIME_STOP, SHOT_TIME_STOP_ACTIVE, 0.0f);
+
+
+	// ジャンプ
+	actionController_->SetAction(3, 0, 0.4f, 0.35f, 0.0f
+								, std::bind(&Player::Jump, this)
+								, 0.075f, 0.2f);
 }
 
 
@@ -188,6 +215,12 @@ void Player::UpdateProcess(void)
 	ProcessMove();
 
 	UpdateBullets();
+
+	if (CollisionController::GetInstance().IsActorCollidingWithTag(this,ColliderBase::TAG::HIT_WAVE))
+	{
+		SetKnock(VNorm(VGet(1.0f, 0.0f, 1.0f)), 10.0f, false);
+		//SetKnock(CollisionController::GetInstance().衝突位置, 10.0f, false);
+	}
 }
 
 void Player::UpdateProcessPost(void)
@@ -250,16 +283,18 @@ void Player::ProcessMove(void)
 {
 	VECTOR dir = UtilityMath::VECTOR_ZERO;
 
+	InputManager& input = InputManager::GetInstance();
+
 	// 接続されているゲームパッド１の情報を取得
-	InputManager::JOYPAD_IN_STATE padState = inputManager_.GetJPadInputState(InputManager::JOYPAD_NO::PAD1);
+	InputManager::JOYPAD_IN_STATE padState = input.GetJPadInputState(InputManager::JOYPAD_NO::PAD1);
 
 	// 右スティックの傾き
-	dir = inputManager_.GetDirectionXZAKey(padState.AKeyLX, padState.AKeyLY);
+	dir = input.GetDirectionXZAKey(padState.AKeyLX, padState.AKeyLY);
 
-	if (inputManager_.IsNew(KEY_INPUT_W)) { dir.z += 1.0f; }
-	if (inputManager_.IsNew(KEY_INPUT_S)) { dir.z += -1.0f; }
-	if (inputManager_.IsNew(KEY_INPUT_A)) { dir.x += -1.0f; }
-	if (inputManager_.IsNew(KEY_INPUT_D)) { dir.x += 1.0f; }
+	if (input.IsNew(KEY_INPUT_W)) { dir.z += 1.0f; }
+	if (input.IsNew(KEY_INPUT_S)) { dir.z += -1.0f; }
+	if (input.IsNew(KEY_INPUT_A)) { dir.x += -1.0f; }
+	if (input.IsNew(KEY_INPUT_D)) { dir.x += 1.0f; }
 
 	if (actionController_->IsActiveAction()
 		|| actionController_->GetActionState() != PActionController::PACTION_STATE::NONE)
@@ -280,7 +315,7 @@ void Player::ProcessMove(void)
 			&& animType_ != ANIM_TYPE::THROW_LEFT
 			&& animType_ != ANIM_TYPE::THROW_RIGHT)
 		{
-			PlayAnim(ANIM_TYPE::RUN);
+			PlayAnimation(ANIM_TYPE::RUN);
 		}
 
 		// 移動方向を取得
@@ -299,7 +334,7 @@ void Player::ProcessMove(void)
 			if (animType_ != ANIM_TYPE::THROW_LEFT &&
 				animType_ != ANIM_TYPE::THROW_RIGHT)
 			{
-				PlayAnim(ANIM_TYPE::IDLE);
+				PlayAnimation(ANIM_TYPE::IDLE);
 			}
 		}
 	}
@@ -310,46 +345,18 @@ void Player::ProcessJump(void)
 	if (!actionController_->IsActiveAction() &&
 		actionController_->GetActionState() == PActionController::PACTION_STATE::NONE)
 	{
-		auto& input = InputManager::GetInstance();
-
-		bool isHitKeyNew = input.IsNew(KEY_INPUT_SPACE)
-			|| input.IsPadBtnNew(InputManager::JOYPAD_NO::PAD1,
-				InputManager::JOYPAD_BTN::RB_BOTTOM);
-
-		bool isHitTrg = input.IsTrgDown(KEY_INPUT_SPACE)
-			|| input.IsPadBtnTrgDown(InputManager::JOYPAD_NO::PAD1,
-				InputManager::JOYPAD_BTN::RB_BOTTOM);
-
-		if (isHitKeyNew && !isJump_)
-		{
-			float deltaTime = TimeManager::GetInstance().GetDeltaTime();
-			if (isHitTrg)
-			{
-				// ジャンプ量の計算
-				float jumpSpeed = (POW_JUMP_INIT * deltaTime);
-				jumpPow_ = VScale(UtilityMath::DIR_UP, jumpSpeed);
-			}
-
-			// ジャンプの入力受付時間を減少
-			stepJump_ += deltaTime;
-			if (stepJump_ <= TIME_JUMP_INPUT)
-			{
-				// ジャンプ量の計算
-				float jumpSpeed = POW_JUMP_KEEP * deltaTime;
-				jumpPow_ = VAdd(jumpPow_, VScale(UtilityMath::DIR_UP, jumpSpeed));
-			}
-		}
-
+		bool isHitTrg = InputManager::GetInstance().IsTrgDown(KEY_INPUT_SPACE)
+					 || InputManager::GetInstance().IsPadBtnTrgDown(InputManager::JOYPAD_NO::PAD1, InputManager::JOYPAD_BTN::RB_BOTTOM);
 		// ジャンプ
 		if (isHitTrg && !isJump_)
 		{
-			isJump_ = true;
-			PlayAnim(ANIM_TYPE::JUMP, false);
+			PlayAnimation(ANIM_TYPE::JUMP, false);
+			actionController_->Active(3);
 		}
 	}
-	else if (jumpPow_.y > 0.0f)
+	else if (jumpPow_ > 0.0f)
 	{
-		jumpPow_.y = 0.0f;
+		//jumpPow_.y = 0.0f;
 	}
 
 	// Y軸制限
@@ -358,6 +365,12 @@ void Player::ProcessJump(void)
 	{
 		transform_.pos.y = -(LIMIT_POS_Y);
 	}
+}
+
+void Player::Jump(void)
+{
+	isJump_ = true;
+	jumpPow_ = JUMP_POW;
 }
 
 void Player::ProcessAttack(void)
@@ -369,7 +382,7 @@ void Player::ProcessAttack(void)
 			|| animType_ == ANIM_TYPE::THROW_RIGHT)
 		{
 			curAttackNum_ = 0;
-			PlayAnim(ANIM_TYPE::IDLE);
+			PlayAnimation(ANIM_TYPE::IDLE);
 		}
 	}
 
@@ -379,8 +392,7 @@ void Player::ProcessAttack(void)
 	// 行動中は処理終了
 	if (actionController_->IsActiveAction()) { return; }
 
-
-	if (inputManager_.IsTrgMouseLeft())
+	if (InputManager::GetInstance().IsTrgMouseLeft())
 	{
 		// 行動回数が最大値を超えた場合、０に戻す
 		if (curAttackNum_ >= attackNumMax_)
@@ -397,7 +409,7 @@ void Player::ProcessAttack(void)
 			curAttackNum_++;
 
 			ANIM_TYPE type = ((curAttackNum_ % 2 == 0) ? ANIM_TYPE::THROW_LEFT : ANIM_TYPE::THROW_RIGHT);
-			PlayAnim(type, false);
+			PlayAnimation(type, false);
 		}
 	}
 }
@@ -614,7 +626,7 @@ void Player::DrawShadowRound(void)
 	*/
 }
 
-void Player::PlayAnim(ANIM_TYPE _type, bool _isLoop)
+void Player::PlayAnimation(ANIM_TYPE _type, bool _isLoop)
 {
 	animType_ = _type;
 

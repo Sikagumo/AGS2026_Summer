@@ -124,16 +124,15 @@ void Boss::BoneParam(void)
 
 void Boss::Load(void)
 {
-	
-	transformFeet_.modelId = resourceManager_.LoadHandleId(ResourceManager::SRC::MODEL_BOSS_FEET);
-	transformBody_.modelId = resourceManager_.LoadHandleId(ResourceManager::SRC::MODEL_BOSS_BODY);
-	transformFeetCar_.modelId = resourceManager_.LoadHandleId(ResourceManager::SRC::MODEL_BOSS_CAR);
-	transformWheelBackL_.modelId = resourceManager_.LoadModelDuplicate(ResourceManager::SRC::MODEL_BOSS_WHEEL_BACK);
-	transformWheelBackFrontL_.modelId = resourceManager_.LoadModelDuplicate(ResourceManager::SRC::MODEL_BOSS_WHEEL_BACK);
-	transformWheelFrontL_.modelId = resourceManager_.LoadModelDuplicate(ResourceManager::SRC::MODEL_BOSS_WHEEL_FRONT);
-	transformWheelBackR_.modelId = resourceManager_.LoadModelDuplicate(ResourceManager::SRC::MODEL_BOSS_WHEEL_BACK);
-	transformWheelBackFrontR_.modelId = resourceManager_.LoadModelDuplicate(ResourceManager::SRC::MODEL_BOSS_WHEEL_BACK);
-	transformWheelFrontR_.modelId = resourceManager_.LoadModelDuplicate(ResourceManager::SRC::MODEL_BOSS_WHEEL_FRONT);
+	transformFeet_.modelId = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::MODEL_BOSS_FEET);
+	transformBody_.modelId = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::MODEL_BOSS_BODY);
+	transformFeetCar_.modelId = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::MODEL_BOSS_CAR);
+	transformWheelBackL_.modelId = ResourceManager::GetInstance().LoadModelDuplicate(ResourceManager::SRC::MODEL_BOSS_WHEEL_BACK);
+	transformWheelBackFrontL_.modelId = ResourceManager::GetInstance().LoadModelDuplicate(ResourceManager::SRC::MODEL_BOSS_WHEEL_BACK);
+	transformWheelFrontL_.modelId = ResourceManager::GetInstance().LoadModelDuplicate(ResourceManager::SRC::MODEL_BOSS_WHEEL_FRONT);
+	transformWheelBackR_.modelId = ResourceManager::GetInstance().LoadModelDuplicate(ResourceManager::SRC::MODEL_BOSS_WHEEL_BACK);
+	transformWheelBackFrontR_.modelId = ResourceManager::GetInstance().LoadModelDuplicate(ResourceManager::SRC::MODEL_BOSS_WHEEL_BACK);
+	transformWheelFrontR_.modelId = ResourceManager::GetInstance().LoadModelDuplicate(ResourceManager::SRC::MODEL_BOSS_WHEEL_FRONT);
 
 	WeaponLoad();
 	
@@ -312,9 +311,10 @@ void Boss::ChangeStateAttack(void)
 void Boss::ChangeStateJump(void)
 {
 	stateUpdate_ = std::bind(&Boss::UpdateJump, this);
+
 	// ƒWƒƒƒ“ƒv—Ê‚ÌŒvZ
 	float jumpSpeed = POW_JUMP_INIT * TimeManager::GetInstance().GetDeltaTime();
-	jumpPow_ = VScale(UtilityMath::DIR_UP, jumpSpeed);
+	jumpPow_ *= jumpSpeed;
 	isJump_ = true;
 }
 
@@ -466,10 +466,10 @@ void Boss::UpdateJump(void)
 	
 	if (transform_.pos.y >= 3500)
 	{
-		jumpPow_ = VScale(UtilityMath::DIR_UP, -50.0f);
+		jumpPow_ *= -50.0f;
 	}
 	
-	if(jumpPow_.y>=-50)
+	if(jumpPow_>=-50)
 	{
 		VECTOR movePow = VScale(jumpDir_, speed_);
 		// ˆÚ“®ˆ—
