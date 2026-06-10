@@ -46,6 +46,7 @@ void BBulletWave::InitCollider(void)
 	ownColliders_.emplace(static_cast<int>(ColliderBase::SHAPE::SPHERE), colHitSphere);
 
 	CollisionController::GetInstance().RegisterActor(this);
+	CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::HIT_WAVE, false);
 }
 
 void BBulletWave::InitAnimation(void)
@@ -63,10 +64,13 @@ void BBulletWave::UpdateProcess(void)
 	{
 		radius_ += INCREASE_RADIUS;
 		CollisionController::GetInstance().SetActorColliderRadius(this, ColliderBase::TAG::HIT_WAVE, radius_);
+		CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::HIT_WAVE, true);
 	}
 	if (radius_ >= MAX_RADIUS)
 	{
 		radius_ = INIT_RADIUS;
+
+		CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::HIT_WAVE, false);
 		CollisionController::GetInstance().SetActorColliderRadius(this, ColliderBase::TAG::HIT_WAVE, radius_);
 		isAttac_ = false;		
 	}

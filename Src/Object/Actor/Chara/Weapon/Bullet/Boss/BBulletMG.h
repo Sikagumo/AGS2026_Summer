@@ -49,7 +49,7 @@ private:
 
 	
 
-	static constexpr float INIT_SPEED = 1.0f;
+	static constexpr float INIT_SPEED = 40.0f;
 	static constexpr float MAX_ALIVE_TIME = 300.0f;
 
 	int aliveTime_ = 0;

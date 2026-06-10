@@ -21,13 +21,24 @@
 #include "Boss.h"
 
 Boss::Boss(void) :
-	transformFeet_(),
-	transformBody_(),
-	transformFeetCar_(),
-	transformWheelBack_(),
-	transformWheelFront_(),
+	               
 	hp_(1000),
-	boneName_(),
+	boneName_(BONE_NAME::WEAPON_JOINT_MGL_L), 
+	jumpDir_({ 0.0f, 0.0f, 0.0f }),          
+	speed_(MOVE_SPEED_INIT),
+	jumpCount_(0),                           
+	attackCount_(0),                         
+	player1Pos_({ 0.0f, 0.0f, 0.0f }),      
+	player2Pos_({ 0.0f, 0.0f, 0.0f }),       
+	player3Pos_({ 0.0f, 0.0f, 0.0f }),       
+	player4Pos_({ 0.0f, 0.0f, 0.0f }),       
+	state_(STATE::IDLE),
+	stateBase_(-1),
+	roadCount_(0),
+	roadDir_({0.0f,0.0f,0.0f}),
+	roadIsAttack_(false),
+	roadAttackTime_(-1),
+	roadLockTime_(-1),
 
 	CharaBase()
 {
@@ -113,8 +124,16 @@ void Boss::BoneParam(void)
 
 void Boss::Load(void)
 {
-	transform_.modelId = resourceManager_.LoadHandleId(ResourceManager::SRC::MODEL_BOSS_FEET);
+	
+	transformFeet_.modelId = resourceManager_.LoadHandleId(ResourceManager::SRC::MODEL_BOSS_FEET);
 	transformBody_.modelId = resourceManager_.LoadHandleId(ResourceManager::SRC::MODEL_BOSS_BODY);
+	transformFeetCar_.modelId = resourceManager_.LoadHandleId(ResourceManager::SRC::MODEL_BOSS_CAR);
+	transformWheelBackL_.modelId = resourceManager_.LoadModelDuplicate(ResourceManager::SRC::MODEL_BOSS_WHEEL_BACK);
+	transformWheelBackFrontL_.modelId = resourceManager_.LoadModelDuplicate(ResourceManager::SRC::MODEL_BOSS_WHEEL_BACK);
+	transformWheelFrontL_.modelId = resourceManager_.LoadModelDuplicate(ResourceManager::SRC::MODEL_BOSS_WHEEL_FRONT);
+	transformWheelBackR_.modelId = resourceManager_.LoadModelDuplicate(ResourceManager::SRC::MODEL_BOSS_WHEEL_BACK);
+	transformWheelBackFrontR_.modelId = resourceManager_.LoadModelDuplicate(ResourceManager::SRC::MODEL_BOSS_WHEEL_BACK);
+	transformWheelFrontR_.modelId = resourceManager_.LoadModelDuplicate(ResourceManager::SRC::MODEL_BOSS_WHEEL_FRONT);
 
 	WeaponLoad();
 	
@@ -122,25 +141,82 @@ void Boss::Load(void)
 
 void Boss::InitTransform(void)
 {
+	//ベース
+	transform_.modelId = transformFeet_.modelId;
 	transform_.scl = BOSS_SIZE;
-	transformBody_.scl = BOSS_SIZE;
 	transform_.quaRot = Quaternion::Identity();
-
 	transform_.quaRotLocal =
 		Quaternion::Mult(transform_.quaRotLocal,
 			Quaternion::AngleAxis(UtilityMath::Deg2RadF(INIT_ROT), UtilityMath::AXIS_Y));
+	transform_.pos = BOSS_INIT_POS;
+	transform_.Update();
 
+	//足
+
+	transformFeet_.scl = BOSS_SIZE;
+	transformFeet_.Update();
+
+	//車体
+	transformFeetCar_.scl = { 5.0f,5.0f,5.0f };
+	transformFeetCar_.quaRot = Quaternion::Identity();
+	transformFeetCar_.quaRotLocal =
+		Quaternion::Mult(transformFeetCar_.quaRotLocal,
+			Quaternion::AngleAxis(UtilityMath::Deg2RadF(INIT_ROT), UtilityMath::AXIS_Y));
+	transformFeetCar_.pos = transform_.pos;
+	transformFeetCar_.Update();
+
+	//前輪L
+	transformWheelFrontL_.scl = { 5.0f,5.0f,5.0f };
+	transformWheelFrontL_.quaRot = Quaternion::Identity();
+	transformWheelFrontL_.quaRotLocal =
+		Quaternion::Mult(transformWheelFrontL_.quaRotLocal,
+			Quaternion::AngleAxis(UtilityMath::Deg2RadF(INIT_ROT), UtilityMath::AXIS_Y));
+	transformWheelFrontL_.Update();
+	//前輪R
+	transformWheelFrontR_.scl = { 5.0f,5.0f,5.0f };
+	transformWheelFrontR_.quaRot = Quaternion::Identity();
+	transformWheelFrontR_.quaRotLocal =
+		Quaternion::Mult(transformWheelFrontR_.quaRotLocal,
+			Quaternion::AngleAxis(UtilityMath::Deg2RadF(0.0f), UtilityMath::AXIS_Y));
+	transformWheelFrontR_.Update();
+	//後輪前L
+	transformWheelBackFrontL_.scl = { 5.0f,5.0f,5.0f };
+	transformWheelBackFrontL_.quaRot = Quaternion::Identity();
+	transformWheelBackFrontL_.quaRotLocal =
+		Quaternion::Mult(transformWheelBackFrontL_.quaRotLocal,
+			Quaternion::AngleAxis(UtilityMath::Deg2RadF(INIT_ROT), UtilityMath::AXIS_Y));
+	transformWheelBackFrontL_.Update();
+	//後輪前R
+	transformWheelBackFrontR_.scl = { 5.0f,5.0f,5.0f };
+	transformWheelBackFrontR_.quaRot = Quaternion::Identity();
+	transformWheelBackFrontR_.quaRotLocal =
+		Quaternion::Mult(transformWheelBackFrontR_.quaRotLocal,
+			Quaternion::AngleAxis(UtilityMath::Deg2RadF(0.0f), UtilityMath::AXIS_Y));
+	transformWheelBackFrontR_.Update();
+	//後輪L
+	transformWheelBackL_.scl = { 5.0f,5.0f,5.0f };
+	transformWheelBackL_.quaRot = Quaternion::Identity();
+	transformWheelBackL_.quaRotLocal =
+		Quaternion::Mult(transformWheelBackL_.quaRotLocal,
+			Quaternion::AngleAxis(UtilityMath::Deg2RadF(INIT_ROT), UtilityMath::AXIS_Y));
+	transformWheelBackL_.Update();
+	//後輪R
+	transformWheelBackR_.scl = { 5.0f,5.0f,5.0f };
+	transformWheelBackR_.quaRot = Quaternion::Identity();
+	transformWheelBackR_.quaRotLocal =
+		Quaternion::Mult(transformWheelBackR_.quaRotLocal,
+			Quaternion::AngleAxis(UtilityMath::Deg2RadF(0.0f), UtilityMath::AXIS_Y));
+	transformWheelBackR_.Update();
+
+
+
+	//胴体
+	transformBody_.scl = BOSS_SIZE;
 	transformBody_.quaRot = Quaternion::Identity();
-
 	transformBody_.quaRotLocal =
 		Quaternion::Mult(transformBody_.quaRotLocal,
 			Quaternion::AngleAxis(UtilityMath::Deg2RadF(INIT_ROT), UtilityMath::AXIS_Y));
-
-	transform_.pos = BOSS_INIT_POS;
-
-	transform_.Update();
 	transformBody_.pos = MV1GetFramePosition(transform_.modelId, JOINT_FEET_BODY);
-
 	transformBody_.Update();
 
 
@@ -159,11 +235,16 @@ void Boss::InitCollider(void)
 	ownColliders_.emplace(static_cast<int>(ColliderBase::SHAPE::CAPSULE), colCapsule);
 	colCapsule->SetTriger(false);
 
+	ColliderSphere* colSphere = new ColliderSphere(ColliderBase::TAG::ROAD_ATTACK, &transform_, { 0.0f,0.0f,0.0f }, 200.0f);
+	ownColliders_.emplace(static_cast<int>(ColliderBase::SHAPE::SPHERE), colSphere);
 	
 
 	
 
 	CollisionController::GetInstance().RegisterActor(this);
+
+	CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::ROAD_ATTACK, false);
+
 
 }
 
@@ -190,6 +271,7 @@ void Boss::InitPost(void)
 		std::bind(&Boss::ChangeStateIdle, this));
 	stateChanges_.emplace(static_cast<int>(STATE::ATTACK), std::bind(&Boss::ChangeStateAttack, this));
 	stateChanges_.emplace(static_cast<int>(STATE::JUMP), std::bind(&Boss::ChangeStateJump, this));
+	stateChanges_.emplace(static_cast<int>(STATE::ROADATTACK), std::bind(&Boss::ChangeRoadAttack, this));
 	stateChanges_.emplace(static_cast<int>(STATE::END), std::bind(&Boss::ChangeStateEnd, this));
 	ChangeState(STATE::IDLE);
 
@@ -236,6 +318,45 @@ void Boss::ChangeStateJump(void)
 	isJump_ = true;
 }
 
+void Boss::ChangeRoadAttack(void)
+{
+	stateUpdate_ = std::bind(&Boss::UpdateRoadAttack, this);
+	transform_.modelId = transformFeetCar_.modelId;
+	transform_.scl = transformFeetCar_.scl;
+	transform_.quaRot = transformFeetCar_.quaRot;
+	transform_.Update();
+	transformBody_.pos = MV1GetFramePosition(transform_.modelId, JOINT_CAR_BODY);
+	transformWheelFrontL_.pos = MV1GetFramePosition(transform_.modelId, JOINT_CAR_WHEEL_FRONT_L);
+	transformWheelFrontR_.pos = MV1GetFramePosition(transform_.modelId, JOINT_CAR_WHEEL_FRONT_R);
+	transformWheelBackFrontL_.pos = MV1GetFramePosition(transform_.modelId, JOINT_CAR_WHEEL_BACK_FRONT_L);
+	transformWheelBackFrontR_.pos = MV1GetFramePosition(transform_.modelId, JOINT_CAR_WHEEL_BACK_FRONT_R);
+	transformWheelBackL_.pos = MV1GetFramePosition(transform_.modelId, JOINT_CAR_WHEEL_BACK_L);
+	transformWheelBackR_.pos = MV1GetFramePosition(transform_.modelId, JOINT_CAR_WHEEL_BACK_R);
+
+
+
+	transformWheelBackFrontL_.quaRot = transform_.quaRot;
+	transformWheelBackFrontR_.quaRot = transform_.quaRot;
+	transformWheelFrontL_.quaRot = transform_.quaRot;
+	transformWheelFrontR_.quaRot = transform_.quaRot;
+	transformWheelBackL_.quaRot = transform_.quaRot;
+	transformWheelBackR_.quaRot = transform_.quaRot;
+
+
+
+	transformWheelBackFrontL_.Update();
+	transformWheelBackFrontR_.Update();
+	transformWheelBackL_.Update();
+	transformWheelBackR_.Update();
+	transformWheelFrontL_.Update();
+	transformWheelFrontR_.Update();
+	transformBody_.Update();
+	roadIsAttack_ = true;
+	roadCount_ = 0;
+	roadAttackTime_ = 0;
+	CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::ROAD_ATTACK, true);
+}
+
 void Boss::ChangeStateEnd(void)
 {
 	stateUpdate_ = std::bind(&Boss::UpdateEnd, this);
@@ -249,6 +370,12 @@ void Boss::BossTransformUpdate(void)
 
 	transform_.Update();
 	transformFeetCar_.Update();
+	transformWheelBackFrontL_.Update();
+	transformWheelBackFrontR_.Update();
+	transformWheelBackL_.Update();
+	transformWheelBackR_.Update();
+	transformWheelFrontL_.Update();
+	transformWheelFrontR_.Update();
 
 	transformBody_.Update();
 	BoneParam();
@@ -261,16 +388,18 @@ void Boss::BossTransformUpdate(void)
 
 void Boss::UpdateProcess(void)
 {	
-	transformBody_.pos = MV1GetFramePosition(transform_.modelId, JOINT_FEET_BODY);
-
 	
+		
+	
+
+	stateUpdate_();
 
 	BossTransformUpdate();
 	
 	wave_->SetPos(transform_.pos);
 	wave_->Update();
 	
-	stateUpdate_();
+	
 
 	// カメラの追従対象に登録
 	const std::unique_ptr<Camera>& camera = SceneManager::GetInstance().GetCamera();
@@ -281,6 +410,7 @@ void Boss::UpdateProcess(void)
 
 void Boss::UpdateProcessPost(void)
 {
+	
 }
 
 void Boss::UpdateCollision(void)
@@ -291,6 +421,7 @@ void Boss::UpdateCollision(void)
 //各ステイトのアップデート関数＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝－
 void Boss::UpdateIdle(void)
 {
+	transformBody_.pos = MV1GetFramePosition(transform_.modelId, JOINT_FEET_BODY);
 	attackCount_++;
 	if (attackCount_ >= 600)
 	{
@@ -300,7 +431,8 @@ void Boss::UpdateIdle(void)
 
 void Boss::UpdateAttack(void)
 {
-	int attackSelect=1;
+	transformBody_.pos = MV1GetFramePosition(transform_.modelId, JOINT_FEET_BODY);
+	int attackSelect=UtilityMath::RandRangeF(0,3);
 	switch (attackSelect)
 	{
 	case 0:
@@ -311,7 +443,10 @@ void Boss::UpdateAttack(void)
 		weaponMGR_->ChangeState(WeaponMGR::STATE::ATTACK);
 		ChangeState(STATE::IDLE);
 		break;
-			
+	case 2:
+		ChangeState(STATE::ROADATTACK);
+		break;
+
 	default:
 		break;
 
@@ -322,6 +457,7 @@ void Boss::UpdateAttack(void)
 
 void Boss::UpdateJump(void)
 {
+	transformBody_.pos = MV1GetFramePosition(transform_.modelId, JOINT_FEET_BODY);
 	if (!isJump_)
 	{
 		wave_->SetIsAttac(true);
@@ -332,6 +468,92 @@ void Boss::UpdateJump(void)
 	{
 		jumpPow_ = VScale(UtilityMath::DIR_UP, -50.0f);
 	}
+	
+	if(jumpPow_.y>=-50)
+	{
+		VECTOR movePow = VScale(jumpDir_, speed_);
+		// 移動処理
+		transform_.pos = VAdd(transform_.pos, movePow);
+	}
+
+
+}
+
+void Boss::UpdateRoadAttack(void)
+{
+
+	
+	transformBody_.pos = MV1GetFramePosition(transform_.modelId, JOINT_CAR_BODY);
+	transformWheelFrontL_.pos = MV1GetFramePosition(transform_.modelId, JOINT_CAR_WHEEL_FRONT_L);
+	transformWheelFrontR_.pos = MV1GetFramePosition(transform_.modelId, JOINT_CAR_WHEEL_FRONT_R);
+	transformWheelBackFrontL_.pos = MV1GetFramePosition(transform_.modelId, JOINT_CAR_WHEEL_BACK_FRONT_L);
+	transformWheelBackFrontR_.pos = MV1GetFramePosition(transform_.modelId, JOINT_CAR_WHEEL_BACK_FRONT_R);
+	transformWheelBackL_.pos = MV1GetFramePosition(transform_.modelId, JOINT_CAR_WHEEL_BACK_L);
+	transformWheelBackR_.pos = MV1GetFramePosition(transform_.modelId, JOINT_CAR_WHEEL_BACK_R);
+
+
+	transformWheelFrontL_.quaRotLocal = Quaternion::Mult(transformWheelFrontL_.quaRotLocal,
+		Quaternion::AngleAxis(UtilityMath::Deg2RadF(WHEEL_ROT), UtilityMath::AXIS_X));
+	transformWheelFrontR_.quaRotLocal = Quaternion::Mult(transformWheelFrontR_.quaRotLocal,
+		Quaternion::AngleAxis(UtilityMath::Deg2RadF(-WHEEL_ROT), UtilityMath::AXIS_X));
+	transformWheelBackFrontL_.quaRotLocal = Quaternion::Mult(transformWheelBackFrontL_.quaRotLocal,
+		Quaternion::AngleAxis(UtilityMath::Deg2RadF(WHEEL_ROT), UtilityMath::AXIS_X));
+	transformWheelBackFrontR_.quaRotLocal = Quaternion::Mult(transformWheelBackFrontR_.quaRotLocal,
+		Quaternion::AngleAxis(UtilityMath::Deg2RadF(-WHEEL_ROT), UtilityMath::AXIS_X));
+	transformWheelBackL_.quaRotLocal = Quaternion::Mult(transformWheelBackL_.quaRotLocal,
+		Quaternion::AngleAxis(UtilityMath::Deg2RadF(WHEEL_ROT), UtilityMath::AXIS_X));
+	transformWheelBackR_.quaRotLocal = Quaternion::Mult(transformWheelBackR_.quaRotLocal,
+		Quaternion::AngleAxis(UtilityMath::Deg2RadF(-WHEEL_ROT), UtilityMath::AXIS_X));
+
+	if (!roadIsAttack_)
+	{
+		roadLockTime_++;
+		
+		transform_.quaRot = transformFeetCar_.quaRot;
+		transformWheelBackFrontL_.quaRot = transform_.quaRot;
+		transformWheelBackFrontR_.quaRot = transform_.quaRot;
+		transformWheelFrontL_.quaRot = transform_.quaRot;
+		transformWheelFrontR_.quaRot = transform_.quaRot;
+		transformWheelBackL_.quaRot = transform_.quaRot;
+		transformWheelBackR_.quaRot = transform_.quaRot;
+		
+		
+
+		if (roadLockTime_ >= MAX_ROAD_LOCK_TIME)
+		{
+			roadLockTime_ = 0;
+			roadIsAttack_ = true;
+			CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::ROAD_ATTACK, true);
+		}
+		
+
+	}
+	if (roadIsAttack_)
+	{
+		speed_ = MOVE_SPEED_ROAD;
+		VECTOR movePow = VScale(roadDir_, speed_);
+		// 移動処理
+		transform_.pos = VAdd(transform_.pos, movePow);
+		roadAttackTime_++;
+		if (roadAttackTime_ >= MAX_ROAD_ATTACK_TIME)
+		{
+			roadCount_++;
+			roadAttackTime_ = 0;
+			roadIsAttack_ = false;
+			CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::ROAD_ATTACK, false);
+		}
+	}
+
+	if (roadCount_ >= MAX_ROAD_COUNT)
+	{
+		transform_.modelId = transformFeet_.modelId;
+		transform_.scl = transformFeet_.scl;
+		CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::ROAD_ATTACK, false);
+		ChangeState(STATE::IDLE);
+	}
+
+
+
 }
 
 void Boss::UpdateEnd(void)
@@ -347,7 +569,16 @@ void Boss::DrawPre(void)
 {
 	MV1DrawModel(transform_.modelId);
 	MV1DrawModel(transformBody_.modelId);
-	
+	if (state_ == STATE::ROADATTACK)
+	{
+		MV1DrawModel(transformWheelBackFrontL_.modelId);
+		MV1DrawModel(transformWheelBackFrontR_.modelId);
+		MV1DrawModel(transformWheelBackL_.modelId);
+		MV1DrawModel(transformWheelBackR_.modelId);
+		MV1DrawModel(transformWheelFrontL_.modelId);
+		MV1DrawModel(transformWheelFrontR_.modelId);
+	}
+
 	WeaponDraw();
 
 	wave_->Draw();
@@ -370,23 +601,25 @@ void Boss::DrawPre(void)
 //機能関数
 void Boss::LookPlayer(void)
 {
-	
-	VECTOR moveDir;
-	
-	
 
-	// プレイヤーの位置に向かう方向を計算
-	moveDir = VSub(player1Pos_, (transformBody_.pos));
+	
+	// 突進「中」は、すでに決まった `roadDir_` に向かって進むので、振り向かない
+	if (state_ == STATE::ROADATTACK && roadIsAttack_)
+	{
+		return;
+	}
+	
+	VECTOR moveDir = VSub(player1Pos_, transformBody_.pos);
 	moveDir.y = 0.0f;
-
 	moveDir = VNorm(moveDir);
-	
 	float targetAngle = atan2(moveDir.x, moveDir.z);
-
-	/*transformBody_.quaRot = Quaternion::Mult(transformBody_.quaRot,
-		Quaternion::AngleAxis(UtilityMath::Deg2RadF(atan2(moveDir.x, moveDir.z)), UtilityMath::AXIS_Y));*/
-
 	transformBody_.quaRot = Quaternion::AngleAxis(targetAngle, UtilityMath::AXIS_Y);
+	transformFeetCar_.quaRot = Quaternion::AngleAxis(targetAngle, UtilityMath::AXIS_Y);
+
+	// 突進していない（準備中）なら、突進方向を常にプレイヤーに向ける
+	jumpDir_ = moveDir;
+	roadDir_ = moveDir;
+	
 }
 
 
