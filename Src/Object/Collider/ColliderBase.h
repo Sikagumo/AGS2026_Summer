@@ -39,8 +39,9 @@ public:
 		WEAPON_RG,		//レールガン
 		CAMERA,      // カメラ
 		WALL,        // 壁
-		HIT_WAVE,
+		HIT_WAVE,		//衝撃波
 		MG_BULLET,		//マシンガンの弾
+		ROAD_ATTACK,	//体当たり
 	};
 
 	/// @brief コンストラクタ

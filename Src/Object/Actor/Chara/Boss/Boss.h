@@ -114,6 +114,13 @@ private:
 	static constexpr float POW_JUMP_INIT = 3000.0f;
 	static constexpr float MOVE_SPEED_INIT = 20.0f;
 
+	//ロードアッタク
+	static constexpr float WHEEL_ROT = 10.0f;
+	static constexpr float MOVE_SPEED_ROAD = 20.0f;
+	static constexpr int MAX_ROAD_ATTACK_TIME = 80;
+	static constexpr int MAX_ROAD_LOCK_TIME = 30;
+	static constexpr int MAX_ROAD_COUNT = 3;
+
 	//当たり判定の座標
 	//ライン
 	static constexpr VECTOR COL_LINE_START_POS = { 0.0f,60.0f,0.0f };
@@ -127,9 +134,9 @@ private:
 	static constexpr int JOINT_FEET_BODY = 12;
 	static constexpr int JOINT_CAR_BODY = 4;
 	static constexpr int JOINT_CAR_WHEEL_FRONT_L = 6;
-	static constexpr int JOINT_CAR_WHEEL_FRONT_R = 16;
+	static constexpr int JOINT_CAR_WHEEL_FRONT_R = JOINT_FEET_BODY;
 	static constexpr int JOINT_CAR_WHEEL_BACK_FRONT_L = 8;
-	static constexpr int JOINT_CAR_WHEEL_BACK_FRONT_R = JOINT_FEET_BODY;
+	static constexpr int JOINT_CAR_WHEEL_BACK_FRONT_R = 16;
 	static constexpr int JOINT_CAR_WHEEL_BACK_L = 10;
 	static constexpr int JOINT_CAR_WHEEL_BACK_R = 14;
 	static constexpr int JOINT_WAEAPON_MG_L = JOINT_CAR_BODY;
@@ -155,8 +162,13 @@ private:
 	int hp_;						//HP
 	std::array<Bone,7> boneId_;		//各ボーン
 	BONE_NAME boneName_;			//ボーンの名前
-	VECTOR jumpDir_;
-	float speed_;
+	VECTOR jumpDir_;				//ジャンプ中の移動方向
+	VECTOR roadDir_;				//体当たり中の移動方向
+	float speed_;					//移動スピード
+	int roadCount_;					//体当たりの回数の計測
+	int roadAttackTime_;			//体当たりの突進時間
+	int roadLockTime_;				//体当たりのロックオン時間
+	bool roadIsAttack_;				//体当たり攻撃中かのフラグ
 
 	//攻撃関連
 	int jumpCount_;
