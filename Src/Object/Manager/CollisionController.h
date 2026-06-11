@@ -144,7 +144,7 @@ public:
 private:
 
 	// カリングを行う距離のデフォルト値
-	static constexpr float DEFAULT_CULL_DIST = 1500.0f;
+	static constexpr float DEFAULT_CULL_DIST = 300.0f;
 
 	// 更新のインターバル時間
 	static constexpr float UPDATE_INTERVAL = 0.016f;

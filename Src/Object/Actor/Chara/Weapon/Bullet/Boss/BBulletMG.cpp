@@ -15,7 +15,7 @@ BBulletMG::~BBulletMG(void)
 
 void BBulletMG::Load(void)
 {
-	transform_.SetModel(resourceManager_.LoadModelDuplicate(ResourceManager::SRC::MODEL_BOSS_BULLET));
+	transform_.SetModel(ResourceManager::GetInstance().LoadModelDuplicate(ResourceManager::SRC::MODEL_BOSS_BULLET));
 }
 
 void BBulletMG::ReleasePost(void)
@@ -34,7 +34,7 @@ void BBulletMG::InitTransform(void)
 void BBulletMG::InitCollider(void)
 {
 	ColliderSphere* colSphere = new ColliderSphere(
-		ColliderBase::TAG::MG_BULLET, &transform_, {0.0f,0.0f,0.0f}, radiuse_);
+		ColliderBase::TAG::MG_BULLET, &transform_, {0.0f,0.0f,0.0f}, radius_);
 	ownColliders_.emplace(static_cast<int>(ColliderBase::SHAPE::SPHERE), colSphere);
 	
 

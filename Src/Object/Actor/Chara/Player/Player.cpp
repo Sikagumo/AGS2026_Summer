@@ -48,6 +48,7 @@ Player::Player(int _playerNo, BULLET_TYPE _playerType)
 	, shotIndex_(-1)
 	, isCameraRotActive_(false)
 	, curTimeWaitDodge_(TIME_WAIT_DODGE)
+	, knockPow_(0.0f)
 	, knockPowXZ_(UtilityMath::VECTOR2F_ZERO)
 {
 	constexpr int BULLET_MAX = 3;
