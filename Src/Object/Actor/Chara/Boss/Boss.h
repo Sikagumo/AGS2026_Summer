@@ -158,6 +158,8 @@ private:
 	Transform transformWheelBackFrontR_;
 	Transform transformWheelFrontR_;
 
+	Transform bullet_;
+
 	//ステータス
 	int hp_;						//HP
 	std::array<Bone,7> boneId_;		//各ボーン

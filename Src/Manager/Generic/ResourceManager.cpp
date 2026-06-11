@@ -93,6 +93,8 @@ void ResourceManager::Initialize(void)
 	_SetResource(LOAD_TYPE::MODEL, SRC::MODEL_BOSS_WEAPON_RK, PATH_MODEL + "Boss/oni_RK.mv1");
 	_SetResource(LOAD_TYPE::MODEL, SRC::MODEL_BOSS_WEAPON_RG, PATH_MODEL + "Boss/oni_RG.mv1");
 
+	_SetResource(LOAD_TYPE::MODEL, SRC::MODEL_BOSS_BULLET, PATH_MODEL + "Boss/BBullet.mv1");
+
 	/* アニメーション */
 	_SetResource(LOAD_TYPE::ANIM, SRC::ANIM_IDLE, PATH_ANIM + "Idle.mv1");
 	_SetResource(LOAD_TYPE::ANIM, SRC::ANIM_RUN, PATH_ANIM + "Run.mv1");
