@@ -16,6 +16,8 @@ public:
 	virtual void CreateBullets(VECTOR _pos, VECTOR _dir,float _radius)=0;
 	bool GetIsAlive(void) { return isAlive_; }
 
+	
+
 protected:
 	bool isAttack_;
 	bool isAlive_;

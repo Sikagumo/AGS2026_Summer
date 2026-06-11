@@ -1,4 +1,5 @@
-
+#include <DxLib.h>
+#include "../../../../../../Manager/Generic/ResourceManager.h"
 #include "../../../../../Collider/ColliderBase.h"
 #include "../../../../../Collider/ColliderSphere.h"
 #include "../../../../../Manager/CollisionController.h"
@@ -14,6 +15,7 @@ BBulletMG::~BBulletMG(void)
 
 void BBulletMG::Load(void)
 {
+	transform_.SetModel(resourceManager_.LoadModelDuplicate(ResourceManager::SRC::MODEL_BOSS_BULLET));
 }
 
 void BBulletMG::ReleasePost(void)
@@ -23,7 +25,7 @@ void BBulletMG::ReleasePost(void)
 
 void BBulletMG::InitTransform(void)
 {
-	transform_.scl = { 1.0f,1.0f,1.0f };
+	transform_.scl = { 0.05f,0.05f,0.05f };
 	transform_.quaRot = Quaternion::Identity();
 	transform_.quaRotLocal = Quaternion::Identity();
 	transform_.Update();
@@ -32,7 +34,7 @@ void BBulletMG::InitTransform(void)
 void BBulletMG::InitCollider(void)
 {
 	ColliderSphere* colSphere = new ColliderSphere(
-		ColliderBase::TAG::MG_BULLET, &transform_, {0.0f,0.0f,0.0f}, radius_);
+		ColliderBase::TAG::MG_BULLET, &transform_, {0.0f,0.0f,0.0f}, radiuse_);
 	ownColliders_.emplace(static_cast<int>(ColliderBase::SHAPE::SPHERE), colSphere);
 	
 
@@ -90,12 +92,5 @@ void BBulletMG::UpdateProcessPost(void)
 
 void BBulletMG::DrawPre(void)
 {
-	if (isAlive_)
-	{
-		//DrawSphere3D(transform_.pos, radius_, 16,0xffff00, 0xffff00, true);
-		for (auto& col : ownColliders_)
-		{
-			col.second->Draw();
-		}
-	}
+	MV1DrawModel(transform_.modelId);
 }

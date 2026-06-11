@@ -117,7 +117,11 @@ void WeaponMGR::DrawPre(void)
 
 	for (std::shared_ptr<BBulletBase> shot : bullets_)
 	{
-		shot->Draw();
+		if (shot->GetIsAlive() == true)
+		{
+			shot->Draw();
+		}
+		
 	}
 
 #ifdef _DEBUG
@@ -133,7 +137,8 @@ void WeaponMGR::DrawPre(void)
 		
 	}
 
-	DrawFormatString(10, 300, 0xffffff, "MGR_HP:%d", hp_);
+	DrawFormatString(10, 250, 0xffffff, "MG_L_Bullet%d", bullets_.size());
+
 
 	
 
@@ -248,7 +253,7 @@ std::shared_ptr<BBulletBase> WeaponMGR::GetValidBullet(void)
 	std::shared_ptr<BBulletBase> bullet = std::make_shared<BBulletMG>(transform_);
 	// ‰Â•Ï’·”z—ñ‚É’Ç‰Á
 	bullets_.push_back(bullet);
-
+	bullet->Load();
 
 	return bullet;
 }

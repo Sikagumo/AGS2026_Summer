@@ -115,7 +115,10 @@ void WeaponMGL::DrawPre(void)
 
 	for (std::shared_ptr<BBulletBase> shot : bullets_)
 	{
-		shot->Draw();
+		if (shot->GetIsAlive()==true)
+		{
+			shot->Draw();
+		}
 	}
 #ifdef _DEBUG
 	if (isAlive_)
@@ -130,7 +133,7 @@ void WeaponMGL::DrawPre(void)
 	}
 
 	
-
+	DrawFormatString(10, 270, 0xffffff, "MG_L_Bullet%d", bullets_.size());
 
 
 #endif
@@ -274,6 +277,7 @@ std::shared_ptr<BBulletBase> WeaponMGL::GetValidBullet(void)
 	// ‰Â•Ï’·”z—ñ‚É’Ç‰Á
 	bullets_.push_back(bullet);
 
+	bullet->Load();
 
 	return bullet;
 }

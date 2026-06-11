@@ -40,6 +40,8 @@ public:
 		MODEL_BOSS_WEAPON_RG,
 		MODEL_BOSS_WEAPON_RK,
 
+		MODEL_BOSS_BULLET,
+
 		MODEL_STAGE,
 
 		/* 外部アニメーション */
