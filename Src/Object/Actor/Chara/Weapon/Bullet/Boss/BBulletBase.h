@@ -5,22 +5,27 @@ class BBulletBase :
 {
 public:
 
-	BBulletBase();
+	BBulletBase(void);
 
-	virtual ~BBulletBase();
+	virtual ~BBulletBase(void);
 
 	void Update(void)override final;
 	void Draw(void)override final;
-	virtual void SetIsAttac(bool _isAttac) = 0;
+	virtual void SetIsAttack(bool _isAttack) = 0;
 
-	virtual void CreateBullets(VECTOR _pos, VECTOR _dir,float _radiuse)=0;
+	virtual void CreateBullets(VECTOR _pos, VECTOR _dir,float _radius)=0;
 	bool GetIsAlive(void) { return isAlive_; }
 
+	
+
 protected:
-	bool isAttac_;
+
+	static constexpr float INIT_ROT = 180.0f;
+
+	bool isAttack_;
 	bool isAlive_;
 	float speed_;
-	float radiuse_;
+	float radius_;
 	VECTOR dir_;
 
 

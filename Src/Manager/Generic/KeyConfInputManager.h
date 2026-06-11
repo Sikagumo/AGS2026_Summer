@@ -159,6 +159,9 @@ public:
 	/// @param padNo DxLib定数(DX_INPUT_PAD1 ～ DX_INPUT_PAD4)
 	void SetUsePadNo(int _padNo);
 
+	/// @brief 入力の初期化 
+	void ClearInputState(void);
+
 private:
 	// 入力テーブル関連
 	using InputTable_t = std::unordered_map<std::string, std::vector<InputInfo>>;  

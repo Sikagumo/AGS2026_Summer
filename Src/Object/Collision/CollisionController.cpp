@@ -179,22 +179,32 @@ bool CollisionController::CheckCollision(const ColliderBase* _colliderA, const C
 		return CollisionCapsule::CheckCapsuleVsSphere(_colliderA, _colliderB, _outInfo);
 	}
 	
-	// 地面との判定はほかの判定と一緒にしない
+	// 地面（MODEL）との判定
 	if (shapeA == SHAPE::LINE && shapeB == SHAPE::MODEL)
 	{
 		return CollisionLine::CheckLineVsModel(_colliderA, _colliderB, _outInfo);
+	}
+	else if (shapeA == SHAPE::MODEL && shapeB == SHAPE::LINE)
+	{
+		return CollisionLine::CheckLineVsModel(_colliderB, _colliderA, _outInfo);
 	}
 	else if (shapeA == SHAPE::CAPSULE && shapeB == SHAPE::MODEL)
 	{
 		return CollisionCapsule::CheckCapsuleVsModel(_colliderA, _colliderB, _outInfo);
 	}
+	else if (shapeA == SHAPE::MODEL && shapeB == SHAPE::CAPSULE)
+	{
+		return CollisionCapsule::CheckCapsuleVsModel(_colliderB, _colliderA, _outInfo);
+	}
 	else if (shapeA == SHAPE::SPHERE && shapeB == SHAPE::MODEL)
 	{
 		return CollisionSphere::CheckSphereVsModel(_colliderA, _colliderB, _outInfo);
 	}
-
+	else if (shapeA == SHAPE::MODEL && shapeB == SHAPE::SPHERE)
+	{
+		return CollisionSphere::CheckSphereVsModel(_colliderB, _colliderA, _outInfo);
+	}
 	
-
 	return false;
 }
 
@@ -230,6 +240,40 @@ bool CollisionController::IsTagCollidingWithTag(ColliderBase::TAG _targetTagA,
 	}
 
 	return false;
+}
+
+VECTOR CollisionController::IsActorHitPosWithTag(const ActorBase* _actor, 
+	ColliderBase::TAG _targetTag) const
+{
+	if (_actor == nullptr)
+	{
+		return UtilityMath::VECTOR_ZERO;
+	}
+
+	auto hitColInfo = currentColInfos_.find(_actor);
+	
+	// 当たった履歴が1つもなければ即座にゼロを返す
+	if (hitColInfo == currentColInfos_.end())
+	{
+		return UtilityMath::VECTOR_ZERO;
+	}
+
+	const auto& hitInfos = hitColInfo->second;
+
+	for (const auto& info : hitInfos)
+	{
+		if (info.hitCollider == nullptr)
+		{
+			continue;
+		}
+
+		if (info.hitCollider->GetCollisionTag() == _targetTag)
+		{
+			return info.hitPosition;
+		}
+	}
+
+	return UtilityMath::VECTOR_ZERO;
 }
 
 void CollisionController::SetCollisionActive(ActorBase* _targetActor, 
@@ -367,6 +411,7 @@ void CollisionController::UpdateCollisionPars(void)
 	}
 
 	activeCollisions_.clear();
+	currentColInfos_.clear();
 
 	size_t actorCount = actors_.size();
 
@@ -433,6 +478,14 @@ void CollisionController::UpdateCollisionPars(void)
 							actorA->AddHitCollider(colB);
 							actorB->AddHitCollider(colA);
 
+							currentColInfos_[actorA].push_back(info);
+
+							CollisionInfo reorderInfo = info;
+							reorderInfo.myCollider = info.hitCollider;
+							reorderInfo.hitCollider = info.myCollider;
+							reorderInfo.hitNormal = VScale(info.hitNormal, -1.0f);
+							currentColInfos_[actorB].push_back(reorderInfo);
+
 							auto tagA = colA->GetCollisionTag();
 							auto tagB = colB->GetCollisionTag();
 
@@ -481,7 +534,8 @@ bool CollisionController::CanCollide(int _tagA, int _tagB) const
 			|| tagHurt == TAG::WEAPON_MP_L || tagHurt == TAG::WEAPON_MP_R
 			|| tagHurt == TAG::WEAPON_RG
 			|| tagHurt == TAG::HIT_WAVE
-			|| tagHurt == TAG::MG_BULLET)
+			|| tagHurt == TAG::MG_BULLET
+			|| tagHurt == TAG::ROAD_ATTACK)
 		{
 			return true;
 		}
@@ -508,7 +562,7 @@ bool CollisionController::CanCollide(int _tagA, int _tagB) const
 	}
 
 
-	if (tagHit == TAG::HIT_WAVE)
+	if (tagHit == TAG::HIT_WAVE||tagHit==TAG::ROAD_ATTACK)
 	{
 		if (tagHurt == TAG::PLAYER)
 		{

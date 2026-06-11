@@ -4,7 +4,7 @@
 #include "../../../../Collider/ColliderBase.h"
 #include "../../../../Collider/ColliderCapsule.h"
 #include "../../../../Collider/ColliderLine.h"
-#include "../../../../Manager/CollisionController.h"
+#include "../../../../Collision/CollisionController.h"
 #include "WeaponCannon.h"
 
 WeaponCannon::WeaponCannon()
@@ -36,8 +36,8 @@ const VECTOR WeaponCannon::GetPos(void) const
 
 void WeaponCannon::Load(void)
 {
-	//transform_.SetModel(resourceManager_.LoadHandleId(ResourceManager::SRC::MODEL_BOSS_WEAPON_CN));
-	transform_.SetModel(resourceManager_.LoadModelDuplicate(ResourceManager::SRC::MODEL_BOSS_WEAPON_CN));
+	//transform_.SetModel(ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::MODEL_BOSS_WEAPON_CN));
+	transform_.SetModel(ResourceManager::GetInstance().LoadModelDuplicate(ResourceManager::SRC::MODEL_BOSS_WEAPON_CN));
 }
 
 void WeaponCannon::InitTransform(void)

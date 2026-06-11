@@ -5,11 +5,12 @@
 #include "../../Scene/MainScene/SceneGamePlayer.h"
 #include "../../Scene/MainScene/SceneGameBoss.h"
 #include "../Decoration/SoundManager.h"
-#include "../../Object/Manager/CollisionController.h"
+#include "../../Object/Collision/CollisionController.h"
 #include "../System/TimeManager.h"
 #include "../../Camera/Camera.h"
 #include "../../Common/Loading.h"
 #include "../../Application.h"
+#include "KeyConfInputManager.h"
 
 SceneManager* SceneManager::instance_ = nullptr;
 
@@ -84,7 +85,9 @@ void SceneManager::Init3D(void)
     const float FogEnd = 20000.0f;
 
     // 背景色を設定する
-    SetBackgroundColor(BACK_COLOR.r, BACK_COLOR.g,BACK_COLOR.b);
+    SetBackgroundColor(static_cast<int>(BACK_COLOR.r)
+                       , static_cast<int>(BACK_COLOR.g)
+                       , static_cast<int>(BACK_COLOR.b));
 
     // Zバッファを有効にする
     SetUseZBuffer3D(true);
@@ -116,6 +119,7 @@ void SceneManager::ChangeScene(std::shared_ptr<SceneBase> scene)
 {
     // CollisionControllerをクリア
     CollisionController::GetInstance().Clear();
+    KeyConfInputManager::GetInstance().ClearInputState();
 
     // BGMを停止する
     SoundManager::GetInstance().StopAllBGM();
@@ -134,6 +138,7 @@ void SceneManager::ChangeScene(std::shared_ptr<SceneBase> scene)
 void SceneManager::PushScene(std::shared_ptr<SceneBase> scene)
 {
     scenes_.push_back(scene);
+    KeyConfInputManager::GetInstance().ClearInputState();
 
     // 即時ロード・初期化
     scene->Load();
@@ -143,6 +148,9 @@ void SceneManager::PushScene(std::shared_ptr<SceneBase> scene)
 
 void SceneManager::PopScene(void)
 {
+
+    KeyConfInputManager::GetInstance().ClearInputState();
+
     if (scenes_.size() > 1)
     {
         scenes_.back()->Release();
@@ -156,6 +164,7 @@ void SceneManager::JumpScene(std::shared_ptr<SceneBase> scene)
 
     // CollisionControllerをクリア
     CollisionController::GetInstance().Clear();
+    KeyConfInputManager::GetInstance().ClearInputState();
 
     // BGMを停止する
     SoundManager::GetInstance().StopAllBGM();
@@ -234,10 +243,6 @@ void SceneManager::Update(void)
 
     CollisionController::GetInstance().Update();
 
-    if (current)
-    {
-        current->UpdateCollision();
-    }
 }
 
 void SceneManager::Draw(void)

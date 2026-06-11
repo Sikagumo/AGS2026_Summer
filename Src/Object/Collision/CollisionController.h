@@ -81,6 +81,12 @@ public:
 	/// @return 衝突していればtrue
 	bool IsTagCollidingWithTag(ColliderBase::TAG _targetTagA, ColliderBase::TAG _targetTagB) const;
 	
+	/// @brief 
+	/// @param _actor 
+	/// @param _targetTag 
+	/// @return 
+	VECTOR IsActorHitPosWithTag(const ActorBase* _actor, ColliderBase::TAG _targetTag) const;
+
 	/// @brief 指定した衝突タグのコライダーの有効・無効を一括で切り替える
 	/// @param _targetActor 対象とするアクター
 	/// @param _targetTag 対象とする衝突タグ
@@ -138,7 +144,7 @@ public:
 private:
 
 	// カリングを行う距離のデフォルト値
-	static constexpr float DEFAULT_CULL_DIST = 1500.0f;
+	static constexpr float DEFAULT_CULL_DIST = 300.0f;
 
 	// 更新のインターバル時間
 	static constexpr float UPDATE_INTERVAL = 0.016f;
@@ -154,6 +160,9 @@ private:
 
 	// 現在当たっているタグの組み合わせを保存する
 	std::set<std::pair<ColliderBase::TAG, ColliderBase::TAG>> activeCollisions_;
+
+	// 全衝突情報をアクターごとに保存する
+	std::map<const ActorBase*, std::vector<CollisionInfo>> currentColInfos_;
 
 	// 2Dコライダー管理関連
 	std::vector<Collider2DBase*> colliders2D_;

@@ -4,7 +4,7 @@
 #include "../../../../Collider/ColliderBase.h"
 #include "../../../../Collider/ColliderCapsule.h"
 #include "../../../../Collider/ColliderLine.h"
-#include "../../../../Manager/CollisionController.h"
+#include "../../../../Collision/CollisionController.h"
 #include "../Bullet/Boss/BBulletMG.h"
 #include "WeaponMGL.h"
 
@@ -40,7 +40,7 @@ const VECTOR WeaponMGL::GetPos(void) const
 
 void WeaponMGL::Load(void)
 {
-	transform_.SetModel(resourceManager_.LoadHandleId(ResourceManager::SRC::MODEL_BOSS_WEAPON_MG_L));
+	transform_.SetModel(ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::MODEL_BOSS_WEAPON_MG_L));
 }
 
 void WeaponMGL::InitTransform(void)
@@ -90,7 +90,7 @@ void WeaponMGL::InitPost(void)
 void WeaponMGL::UpdateProcess(void)
 {
 
-	stateUpdate_();
+	
 
 	
 	if (hp_ <= 0)
@@ -101,6 +101,7 @@ void WeaponMGL::UpdateProcess(void)
 	{
 		shot->Update();
 	}
+	stateUpdate_();
 }
 
 void WeaponMGL::UpdateProcessPost(void)
@@ -114,7 +115,10 @@ void WeaponMGL::DrawPre(void)
 
 	for (std::shared_ptr<BBulletBase> shot : bullets_)
 	{
-		shot->Draw();
+		if (shot->GetIsAlive()==true)
+		{
+			shot->Draw();
+		}
 	}
 #ifdef _DEBUG
 	if (isAlive_)
@@ -129,7 +133,7 @@ void WeaponMGL::DrawPre(void)
 	}
 
 	
-
+	DrawFormatString(10, 270, 0xffffff, "MG_L_Bullet%d", bullets_.size());
 
 
 #endif
@@ -194,6 +198,7 @@ void WeaponMGL::ChangeStateIdle(void)
 
 void WeaponMGL::ChangeStateAttack(void)
 {
+
 	stateUpdate_ = std::bind(&WeaponMGL::UpdateAttack, this);
 	bulletCount_ = MAX_BULLET_COUNT;
 }
@@ -272,6 +277,7 @@ std::shared_ptr<BBulletBase> WeaponMGL::GetValidBullet(void)
 	// ‰Â•Ï’·”z—ñ‚É’Ç‰Á
 	bullets_.push_back(bullet);
 
+	bullet->Load();
 
 	return bullet;
 }

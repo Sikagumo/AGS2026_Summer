@@ -8,7 +8,7 @@ class Player : public PlayerBase
 {
 private:
 
-	static constexpr float KNOCK_POW_Y = 10.0f;
+	static constexpr float KNOCK_POW_Y = 5.0f;
 public:
 
 	enum class ANIM_TYPE
@@ -20,6 +20,7 @@ public:
 		THROW_RIGHT,
 		THROW_RUN,
 		JUMP,
+		DODGE,
 		MAX,
 	};
 
@@ -35,12 +36,14 @@ public:
 
 	void ReleasePost(void)override;
 
+	/// @brief 現在攻撃力取得
 	int GetPower(void);
 
 	/// @brief 吹っ飛ばし処理
 	/// @param _knockDirXZ 横吹っ飛ばし方向
 	/// @param _knockPowXZ 横吹っ飛ばし力
 	/// @param _isStan スタンさせるか否か 
+	/// @param _knockPowY 縦吹っ飛ばし力
 	void SetKnock(const VECTOR& _knockDirXZ, float _knockPowXZ
 					, bool _isStan, float _knockPowY = KNOCK_POW_Y);
 
@@ -59,17 +62,10 @@ protected:
 
 	void DrawPre(void)override;
 	void DrawLate(void)override;
+
+	VECTOR CalcAddPosition(void) override;
+
 private:
-
-
-	// ジャンプ力
-	static constexpr float POW_JUMP_INIT = 100.0f;
-
-	// 持続ジャンプ力
-	static constexpr float POW_JUMP_KEEP = 250.0f;
-
-	// ジャンプ受付時間
-	static constexpr float TIME_JUMP_INPUT = 1.85f;
 
 	// 攻撃回数
 	int attackNumMax_;
@@ -80,26 +76,42 @@ private:
 
 	ANIM_TYPE animType_;
 
+	// 投げる位置
 	VECTOR throwPos_;
 	VECTOR throwDir_;
+
+	// 吹っ飛ばし量
+	Vector2F knockPowXZ_;
+
+	Vector2F dodgePowXZ_;
+	float curTimeActiveDodge_;
 
 	// カメラに応じた回転をするか否か
 	bool isCameraRotActive_;
 
-	std::unique_ptr<PActionController> actionController_;
+	// 回避クールタイム
+	float curTimeWaitDodge_;
 
+	std::unique_ptr<PActionController> actionController_;
 
 	// 操作
 	void ProcessMove(void);
 
-	// ジャンプ
+	/// @brief ジャンプ処理
 	void ProcessJump(void);
+	void Jump(void);
+
+	/// @brief 回避処理
+	void ProcessDodge(void);
+	void Dodge(void);
+
+	void ProcessKnock(void);
 
 	void ProcessAttack(void);
 
 
 	void DrawShadowRound(void);
-	void PlayAnim(ANIM_TYPE _type, bool _isLoop = true);
+	void PlayAnimation(ANIM_TYPE _type, bool _isLoop = true);
 
 	void CreateBullet(void);
 	void ShotBullet(void);

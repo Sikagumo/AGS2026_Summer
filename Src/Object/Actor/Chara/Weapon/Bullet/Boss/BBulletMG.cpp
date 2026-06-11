@@ -1,7 +1,9 @@
-
+#include <DxLib.h>
+#include "../../../../../../Utility/UtilityMath.h"
+#include "../../../../../../Manager/Generic/ResourceManager.h"
 #include "../../../../../Collider/ColliderBase.h"
 #include "../../../../../Collider/ColliderSphere.h"
-#include "../../../../../Manager/CollisionController.h"
+#include "../../../../../Collision/CollisionController.h"
 #include "BBulletMG.h"
 
 BBulletMG::BBulletMG(Transform& _transform)
@@ -14,6 +16,7 @@ BBulletMG::~BBulletMG(void)
 
 void BBulletMG::Load(void)
 {
+	transform_.SetModel(ResourceManager::GetInstance().LoadModelDuplicate(ResourceManager::SRC::MODEL_BOSS_BULLET));
 }
 
 void BBulletMG::ReleasePost(void)
@@ -23,16 +26,16 @@ void BBulletMG::ReleasePost(void)
 
 void BBulletMG::InitTransform(void)
 {
-	transform_.scl = { 1.0f,1.0f,1.0f };
+	transform_.scl = { 0.05f,0.05f,0.05f };
 	transform_.quaRot = Quaternion::Identity();
-	transform_.quaRotLocal = Quaternion::Identity();
+	transform_.quaRotLocal =Quaternion::AngleAxis(UtilityMath::Deg2RadF(INIT_ROT), UtilityMath::AXIS_Y);
 	transform_.Update();
 }
 
 void BBulletMG::InitCollider(void)
 {
 	ColliderSphere* colSphere = new ColliderSphere(
-		ColliderBase::TAG::MG_BULLET, &transform_, {0.0f,0.0f,0.0f}, radiuse_);
+		ColliderBase::TAG::MG_BULLET, &transform_, {0.0f,0.0f,0.0f}, radius_);
 	ownColliders_.emplace(static_cast<int>(ColliderBase::SHAPE::SPHERE), colSphere);
 	
 
@@ -69,6 +72,11 @@ void BBulletMG::UpdateProcess(void)
 		aliveTime_++;
 		// ’e‚ðˆÚ“®‚³‚¹‚é
 		// ˆÚ“®—Ê‚ÌŒvŽZ(•ûŒü~ƒXƒs[ƒh)
+		float targetAngle = atan2(dir_.x, dir_.z);
+		transform_.quaRot = Quaternion::AngleAxis(targetAngle, UtilityMath::AXIS_Y);
+			
+		
+
 		VECTOR movePow = VScale(dir_, speed_);
 		// ˆÚ“®ˆ—
 		transform_.pos = VAdd(transform_.pos, movePow);
@@ -81,6 +89,7 @@ void BBulletMG::UpdateProcess(void)
 	else
 	{
 		CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::MG_BULLET, false);
+		CollisionController::GetInstance().UnregisterActor(this);
 	}
 }
 
@@ -90,12 +99,5 @@ void BBulletMG::UpdateProcessPost(void)
 
 void BBulletMG::DrawPre(void)
 {
-	if (isAlive_)
-	{
-		//DrawSphere3D(transform_.pos, radiuse_, 16,0xffff00, 0xffff00, true);
-		for (auto& col : ownColliders_)
-		{
-			col.second->Draw();
-		}
-	}
+	MV1DrawModel(transform_.modelId);
 }

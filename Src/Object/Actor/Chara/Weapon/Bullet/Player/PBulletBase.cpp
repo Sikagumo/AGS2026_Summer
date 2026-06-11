@@ -3,7 +3,7 @@
 #include "../../../../../../Utility/UtilityMath.h"
 #include "../../../../../../Manager/System/TimeManager.h"
 #include "../../../../../../Application.h"
-#include "../../../../../Manager/CollisionController.h"
+#include "../../../../../Collision/CollisionController.h"
 #include "../../../../../Collider/ColliderSphere.h"
 
 PBulletBase::PBulletBase(void)

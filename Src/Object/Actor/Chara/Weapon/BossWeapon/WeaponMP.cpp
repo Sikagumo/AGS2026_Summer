@@ -4,7 +4,7 @@
 #include "../../../../Collider/ColliderBase.h"
 #include "../../../../Collider/ColliderSphere.h"
 #include "../../../../Collider/ColliderLine.h"
-#include "../../../../Manager/CollisionController.h"
+#include "../../../../Collision/CollisionController.h"
 #include "WeaponMP.h"
 
 WeaponMP::WeaponMP(void)
@@ -35,7 +35,7 @@ const VECTOR WeaponMP::GetPos(void) const
 
 void WeaponMP::Load(void)
 {
-	transform_.SetModel(resourceManager_.LoadModelDuplicate(ResourceManager::SRC::MODEL_BOSS_WEAPON_RK));
+	transform_.SetModel(ResourceManager::GetInstance().LoadModelDuplicate(ResourceManager::SRC::MODEL_BOSS_WEAPON_RK));
 }
 
 

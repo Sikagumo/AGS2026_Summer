@@ -35,9 +35,16 @@ public:
 		ATTACK,
 	};
 
+	static constexpr float TIME_INVINCIBLE = 1.0f;
+
+	/// @brief コンストラクタ
+	/// @param _playerNo プレイヤー番号
+	/// @param _bulletType 弾の種類
+	/// @param _playerType プレイヤーの見た目の種類
 	PlayerBase(int _playerNo, BULLET_TYPE _bulletType, PLAYER_TYPE _playerType = PLAYER_TYPE::HYMAN);
 
 	virtual ~PlayerBase(void)override = default;
+
 
 	/// @brief プレイヤー番号取得
 	int GetPlayerNo(void)const { return playerNo_; };
@@ -49,13 +56,15 @@ public:
 
 	/// @brief プレイヤーにダメージ処理
 	/// @param _damage ダメージ量
-	/// @param _isInvincible 無敵化させるか否か (default=true)
-	void SetDamage(int _damage, bool _isInvincible);
+	/// @param _isInvincible 無敵化させるか否か
+	/// @param _timeInvincible 無敵時間
+	void SetDamage(int _damage, bool _isInvincible = true, float _timeInvincible = TIME_INVINCIBLE);
 
 	int GetCurHp(void) { return hp_; };
 	int GetMaxHp(void) { return MAX_HP; };
 
 	const VECTOR& GetPos(void)const { return transform_.pos; };
+
 
 protected:
 

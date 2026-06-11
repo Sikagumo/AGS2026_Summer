@@ -5,7 +5,7 @@ class DamageController
 public:
 
 	///武器ダメージの登録用
-	enum class BOSS_WEPO_DAMAGE
+	enum class BOSS_WEPO_TYPE
 	{
 		NONE,
 		MG,
@@ -13,8 +13,17 @@ public:
 		CANNON,
 		MP,
 		RG,
+		RODE,
 		
 	};
+
+	struct DATA
+	{
+		BOSS_WEPO_TYPE type;
+		float attack;
+
+	};
+
 
 
 	DamageController(void);
@@ -61,5 +70,14 @@ private:
 	int weaponCannonRDamage_;	//左キャノンが受けるダメージの保管
 	int playerAttack_;			//プレイヤーが与えるダメージの保管
 	int playerHp_;				//プレイヤーの最大HPの保管
+
+
+	
+	DATA cannon_;
+	DATA mg_;
+	DATA mp_;
+	DATA rg_;
+	DATA pressWave_;
+	DATA rode_;
 };
 

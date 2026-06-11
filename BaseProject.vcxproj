@@ -39,7 +39,7 @@
     <ClCompile Include="Src\Object\Actor\Chara\Player\PActionController.cpp" />
     <ClCompile Include="Src\Object\Actor\Chara\Weapon\Bullet\Player\PBulletRapidFire.cpp" />
     <ClCompile Include="Src\Scene\MainScene\SceneGameBoss.cpp" />
-    <ClCompile Include="Src\Object\Manager\CollisionController.cpp" />
+    <ClCompile Include="Src\Object\Collision\CollisionController.cpp" />
     <ClCompile Include="Src\Scene\MainScene\SceneLobby.cpp" />
     <ClCompile Include="Src\Object\Actor\Chara\Player\PlayerBase.cpp" />
     <ClCompile Include="Src\Object\Actor\Chara\Weapon\Bullet\Player\PBulletBase.cpp" />
@@ -110,7 +110,7 @@
     <ClInclude Include="Src\Object\Actor\Chara\Player\PActionController.h" />
     <ClInclude Include="Src\Object\Actor\Chara\Weapon\Bullet\Player\PBulletRapidFire.h" />
     <ClInclude Include="Src\Scene\MainScene\SceneGameBoss.h" />
-    <ClInclude Include="Src\Object\Manager\CollisionController.h" />
+    <ClInclude Include="Src\Object\Collision\CollisionController.h" />
     <ClInclude Include="Src\Scene\MainScene\SceneLobby.h" />
     <ClInclude Include="Src\Object\Actor\Chara\Player\PlayerBase.h" />
     <ClInclude Include="Src\Object\Actor\Chara\Weapon\Bullet\Player\PBulletBig.h" />

@@ -89,22 +89,30 @@ Vector2F Vector2F::operator+(const Vector2F& vec)const
 {
 	return Vector2F{ (x + vec.x), (y + vec.y) };
 }
-
 void Vector2F::operator+=(const Vector2F& vec)
 {
 	x += vec.x;
 	y += vec.y;
+}
+void Vector2F::operator+=(float _value)
+{
+	x += _value;
+	y += _value;
 }
 
 Vector2F Vector2F::operator-(const Vector2F& vec)const
 {
 	return Vector2F{ (x - vec.x), (y - vec.y) };
 }
-
 void Vector2F::operator-=(const Vector2F& vec)
 {
 	x -= vec.x;
 	y -= vec.y;
+}
+void Vector2F::operator-=(float _value)
+{
+	x -= _value;
+	y -= _value;
 }
 
 Vector2F Vector2F::operator*(const Vector2F& vec)const

@@ -40,6 +40,8 @@ public:
 		MODEL_BOSS_WEAPON_RG,
 		MODEL_BOSS_WEAPON_RK,
 
+		MODEL_BOSS_BULLET,
+
 		MODEL_STAGE,
 
 		/* 外部アニメーション */
@@ -49,6 +51,7 @@ public:
 		ANIM_THROW_LEFT,
 		ANIM_THROW_RIGHT,
 		ANIM_JUMP,
+		ANIM_DODGE,
 
 		/* エフェクト */
 

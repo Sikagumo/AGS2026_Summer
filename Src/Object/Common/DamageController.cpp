@@ -1,5 +1,5 @@
 #include "../Collider/ColliderBase.h"
-#include "../Manager/CollisionController.h"
+#include "../Collision/CollisionController.h"
 
 
 #include "DamageController.h"
@@ -19,6 +19,20 @@ DamageController::DamageController():
 	playerHp_(0)
 
 {
+
+	cannon_.type = BOSS_WEPO_TYPE::CANNON;
+
+	mg_.type = BOSS_WEPO_TYPE::MG;
+	mg_.attack = 0.01;
+
+	mp_.type = BOSS_WEPO_TYPE::MP;
+	
+	rg_.type = BOSS_WEPO_TYPE::RG;
+
+	pressWave_.type = BOSS_WEPO_TYPE::PRESSWAVE;
+	pressWave_.attack = 0.1;
+	rode_.type = BOSS_WEPO_TYPE::RODE;
+	rode_.attack = 0.3;
 }
 
 DamageController::~DamageController()
@@ -92,21 +106,22 @@ void DamageController::Update()
 	if (CollisionController::GetInstance().IsTagCollidingWithTag(ColliderBase::TAG::HIT_WAVE, ColliderBase::TAG::PLAYER))
 	{
 		// HP割合ダメージ
-		const float RATE_DAMAGE = (playerHp_ * (static_cast<float>(BOSS_WEPO_DAMAGE::PRESSWAVE) / 10));
+		const float RATE_DAMAGE = (playerHp_ * pressWave_.attack);
 		playerDamage_ = static_cast<int>(RATE_DAMAGE);
 	}
-	else
-	{
-		playerDamage_ = 0;
-	}
+	
 	if (CollisionController::GetInstance().IsTagCollidingWithTag(ColliderBase::TAG::MG_BULLET, ColliderBase::TAG::PLAYER))
 	{
 		// HP割合ダメージ
-		const float RATE_DAMAGE = (playerHp_ * (static_cast<float>(BOSS_WEPO_DAMAGE::MG) *0.1));
+		const float RATE_DAMAGE = (playerHp_ * mg_.attack);
 		playerDamage_ = static_cast<int>(RATE_DAMAGE);
 	}
-	else
+
+	if (CollisionController::GetInstance().IsTagCollidingWithTag(ColliderBase::TAG::ROAD_ATTACK, ColliderBase::TAG::PLAYER))
 	{
-		playerDamage_ = 0;
+		// HP割合ダメージ
+		const float RATE_DAMAGE = (playerHp_ * rode_.attack);
+		playerDamage_ = static_cast<int>(RATE_DAMAGE);
 	}
+	
 }
