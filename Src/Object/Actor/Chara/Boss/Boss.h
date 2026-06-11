@@ -75,8 +75,6 @@ public:
 	//ボス本体へのダメージ受け取り用
 	void SetBossDamage(int _damage);
 
-
-	void UpdateCollision(void);
 	/// <summary>
 	/// ボス現在HP
 	/// </summary>

@@ -2,7 +2,7 @@
 #include "../../../../Application.h"
 #include "../../../../Utility/UtilityMath.h"
 #include "../../../../Manager/System/TimeManager.h"
-#include "../../../Manager/CollisionController.h"
+#include "../../../Collision/CollisionController.h"
 #include "WeaponBase.h"
 
 WeaponBase::WeaponBase(void)

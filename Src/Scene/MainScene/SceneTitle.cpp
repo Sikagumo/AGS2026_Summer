@@ -3,7 +3,7 @@
 #include "../../Manager/Generic/KeyConfInputManager.h"
 #include "../../Manager/Generic/ResourceManager.h"
 #include "../../Manager/Decoration/SoundManager.h"
-#include "../../Object/Manager/CollisionController.h"
+#include "../../Object/Collision/CollisionController.h"
 #include "../../Camera/Camera.h"
 #include "SceneGame.h"
 #include "SceneResult.h"
@@ -59,6 +59,8 @@ SceneTitle::SceneTitle(void)
 void SceneTitle::Initialize(void)
 {
     SetMouseDispFlag(true);
+
+    KeyConfInputManager::GetInstance().ClearInputState();
 
     // マウスカーソル用のコライダー生成（半径1の円）
     cursorCollider_ = std::make_unique<Collider2DCircle>(Vector2F(0.0f, 0.0f), 1.0f, Collider2DBase::TAG_2D::MOUSE_CURSOR);
@@ -156,7 +158,7 @@ void SceneTitle::Update(void)
     {
         bool isTarget = CollisionController::GetInstance().IsTagCollidingWithTag2D(Collider2DBase::TAG_2D::MOUSE_CURSOR, buttonTags[i]) || (selectedIdx_ == i);
 
-        if (isTarget && keyConfInputManager.isTrigerDown("ATTACK"))
+        if (isTarget && keyConfInputManager.isTrigerDown("OK"))
         {
             switch (static_cast<MENU_ITEM>(i))
             {
@@ -175,10 +177,6 @@ void SceneTitle::Update(void)
             }
         }
     }
-}
-
-void SceneTitle::UpdateCollision(void)
-{
 }
 
 void SceneTitle::Draw(void)

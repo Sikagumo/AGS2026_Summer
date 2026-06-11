@@ -1,7 +1,7 @@
 #include "Stage.h"
 #include "../../Actor/ActorBase.h"
 #include "../../../Manager/Generic/ResourceManager.h"
-#include "../../../Object/Manager/CollisionController.h"
+#include "../../../Object/Collision/CollisionController.h"
 #include "../../../Utility/UtilityMath.h"
 #include "../../Collider/ColliderModel.h"
 
@@ -42,7 +42,6 @@ void Stage::InitCollider(void)
 
 	// モデルのコライダ割り当て
 	ColliderModel* colModel = new ColliderModel(ColliderBase::TAG::STAGE, &transform_);
-
 	ownColliders_.emplace(static_cast<int>(ColliderBase::SHAPE::MODEL), colModel);
 	colModel->SetTriger(false);
 

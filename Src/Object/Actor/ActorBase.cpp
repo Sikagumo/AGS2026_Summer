@@ -1,7 +1,7 @@
 #include "ActorBase.h"
 #include "../../Manager/Generic/ResourceManager.h"
 #include "../../Manager/System/TimeManager.h"
-#include "../../Object/Manager/CollisionController.h"
+#include "../../Object/Collision/CollisionController.h"
 #include "../Collider/ColliderBase.h"
 
 ActorBase::ActorBase(void)

@@ -121,11 +121,6 @@ void SceneGame::CameraLockOn(void)
 	
 }
 
-void SceneGame::UpdateCollision(void)
-{
-	boss_->UpdateCollision();
-}
-
 
 void SceneGame::Draw(void)
 {

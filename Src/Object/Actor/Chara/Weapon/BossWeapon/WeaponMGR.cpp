@@ -4,7 +4,7 @@
 #include "../../../../Collider/ColliderBase.h"
 #include "../../../../Collider/ColliderCapsule.h"
 #include "../../../../Collider/ColliderLine.h"
-#include "../../../../Manager/CollisionController.h"
+#include "../../../../Collision/CollisionController.h"
 #include "../Bullet/Boss/BBulletMG.h"
 #include "WeaponMGR.h"
 

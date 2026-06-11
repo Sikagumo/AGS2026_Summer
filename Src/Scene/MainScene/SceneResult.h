@@ -28,9 +28,6 @@ public:
 	/// @brief 更新処理
 	void Update(void) override;
 
-	/// @brief 衝突の影響だけを更新する処理 
-	void UpdateCollision(void) override;
-
 	/// @brief 描画処理
 	void Draw(void) override;
 
