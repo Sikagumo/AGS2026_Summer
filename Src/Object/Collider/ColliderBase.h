@@ -37,8 +37,8 @@ public:
 		WEAPON_MP_L,	//ミサイルポッド（左
 		WEAPON_MP_R,	//ミサイルポッド（右
 		WEAPON_RG,		//レールガン
-		CAMERA,      // カメラ
-		WALL,        // 壁
+		CAMERA,         // カメラ
+		WALL,           // 壁
 		HIT_WAVE,		//衝撃波
 		MG_BULLET,		//マシンガンの弾
 		ROAD_ATTACK,	//体当たり

@@ -45,10 +45,6 @@ void SceneResult::Update(void)
 	}
 }
 
-void SceneResult::UpdateCollision(void)
-{
-}
-
 void SceneResult::Draw(void)
 {
 	const int IMAGET_TITLE_Y = Application::SCREEN_SIZE_Y / 3;

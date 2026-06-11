@@ -3,7 +3,7 @@
 #include "../../../Manager/Generic/ResourceManager.h"
 #include "../../../Manager/Generic/SceneManager.h"
 #include "../../../Manager/System/TimeManager.h"
-#include "../../Manager/CollisionController.h"
+#include "../../Collision/CollisionController.h"
 #include "../../Collider/ColliderBase.h"
 #include "../../Collider/ColliderLine.h"
 #include "../../Collider/ColliderModel.h"

@@ -2,7 +2,7 @@
 #include "../../../../../../Manager/Generic/ResourceManager.h"
 #include "../../../../../Collider/ColliderBase.h"
 #include "../../../../../Collider/ColliderSphere.h"
-#include "../../../../../Manager/CollisionController.h"
+#include "../../../../../Collision/CollisionController.h"
 #include "BBulletMG.h"
 
 BBulletMG::BBulletMG(Transform& _transform)

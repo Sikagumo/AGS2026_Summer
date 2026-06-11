@@ -10,7 +10,7 @@
 #include "../../../../Manager/System/TimeManager.h"
 #include "../../../../Camera/Camera.h"
 #include "../../../../Common/Quaternion.h"
-#include "../../../Manager/CollisionController.h"
+#include "../../../Collision/CollisionController.h"
 #include "../../../Collider/ColliderBase.h"
 #include "../../../Collider/ColliderCapsule.h"
 #include "../../../Collider/ColliderLine.h"

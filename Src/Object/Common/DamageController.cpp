@@ -1,5 +1,5 @@
 #include "../Collider/ColliderBase.h"
-#include "../Manager/CollisionController.h"
+#include "../Collision/CollisionController.h"
 
 
 #include "DamageController.h"

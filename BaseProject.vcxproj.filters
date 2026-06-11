@@ -165,7 +165,7 @@
     <ClCompile Include="Src\Utility\UtilityMath.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Object\Manager\CollisionController.cpp">
+    <ClCompile Include="Src\Object\Collision\CollisionController.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Src\Common\ParametersIO.cpp">
@@ -383,7 +383,7 @@
     <ClInclude Include="Src\Utility\UtilityMath.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Src\Object\Manager\CollisionController.h">
+    <ClInclude Include="Src\Object\Collision\CollisionController.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Src\Common\ParametersIO.h">

@@ -2,7 +2,7 @@
 #include "../Collider/ColliderSphere.h"
 #include "../Collider/ColliderCapsule.h"
 #include "../Collider/ColliderModel.h"
-#include "../Manager/CollisionController.h"
+#include "../Collision/CollisionController.h"
 #include "../../Utility/UtilityMath.h"
 
 

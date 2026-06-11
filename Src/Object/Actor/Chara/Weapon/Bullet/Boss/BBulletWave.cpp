@@ -1,7 +1,7 @@
 #include <DxLib.h>
 #include "../../../../../Collider/ColliderSphere.h"
 #include "../../../../../Collider/ColliderBase.h"
-#include "../../../../../Manager/CollisionController.h"
+#include "../../../../../Collision/CollisionController.h"
 #include "BBulletWave.h"
 
 BBulletWave::BBulletWave(Transform& _transform):

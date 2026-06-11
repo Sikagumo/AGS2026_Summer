@@ -10,7 +10,7 @@
 #include "../../../Collider/ColliderCapsule.h"
 #include "../../../Collider/ColliderLine.h"
 #include "../../../Collider/ColliderSphere.h"
-#include "../../../Manager/CollisionController.h"
+#include "../../../Collision/CollisionController.h"
 #include "../Weapon/WeaponBase.h"
 #include "../Weapon/BossWeapon/WeaponMGL.h"
 #include "../Weapon/BossWeapon/WeaponMGR.h"
@@ -411,11 +411,6 @@ void Boss::UpdateProcess(void)
 void Boss::UpdateProcessPost(void)
 {
 	
-}
-
-void Boss::UpdateCollision(void)
-{
-
 }
 
 //各ステイトのアップデート関数＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝－

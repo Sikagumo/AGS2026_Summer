@@ -179,22 +179,32 @@ bool CollisionController::CheckCollision(const ColliderBase* _colliderA, const C
 		return CollisionCapsule::CheckCapsuleVsSphere(_colliderA, _colliderB, _outInfo);
 	}
 	
-	// 地面との判定はほかの判定と一緒にしない
+	// 地面（MODEL）との判定
 	if (shapeA == SHAPE::LINE && shapeB == SHAPE::MODEL)
 	{
 		return CollisionLine::CheckLineVsModel(_colliderA, _colliderB, _outInfo);
+	}
+	else if (shapeA == SHAPE::MODEL && shapeB == SHAPE::LINE)
+	{
+		return CollisionLine::CheckLineVsModel(_colliderB, _colliderA, _outInfo);
 	}
 	else if (shapeA == SHAPE::CAPSULE && shapeB == SHAPE::MODEL)
 	{
 		return CollisionCapsule::CheckCapsuleVsModel(_colliderA, _colliderB, _outInfo);
 	}
+	else if (shapeA == SHAPE::MODEL && shapeB == SHAPE::CAPSULE)
+	{
+		return CollisionCapsule::CheckCapsuleVsModel(_colliderB, _colliderA, _outInfo);
+	}
 	else if (shapeA == SHAPE::SPHERE && shapeB == SHAPE::MODEL)
 	{
 		return CollisionSphere::CheckSphereVsModel(_colliderA, _colliderB, _outInfo);
 	}
-
+	else if (shapeA == SHAPE::MODEL && shapeB == SHAPE::SPHERE)
+	{
+		return CollisionSphere::CheckSphereVsModel(_colliderB, _colliderA, _outInfo);
+	}
 	
-
 	return false;
 }
 

@@ -1,7 +1,7 @@
 #include "CollisionLine.h"
 #include "../Collider/ColliderLine.h"
 #include "../Collider/ColliderModel.h"
-#include "../Manager/CollisionController.h"
+#include "../Collision/CollisionController.h"
 #include "../../Utility/UtilityMath.h"
 
 bool CollisionLine::CheckLineVsModel(const ColliderBase* _lineCol,

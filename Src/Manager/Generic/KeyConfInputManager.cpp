@@ -442,3 +442,12 @@ void KeyConfInputManager::SetUsePadNo(int _padNo)
 {
 	usePadNo_ = _padNo;
 }
+
+void KeyConfInputManager::ClearInputState(void)
+{
+	for (auto& pair : currentInputState_) 
+	{
+		pair.second = false;
+	}
+	previousInputState_ = currentInputState_;
+}

@@ -3,7 +3,7 @@
 #include "../Collider/ColliderCapsule.h"
 #include "../Collider/ColliderModel.h"
 #include "CollisionSphere.h"
-#include "../Manager/CollisionController.h"
+#include "../Collision/CollisionController.h"
 #include "../../Utility/UtilityMath.h"
 
 bool CollisionCapsule::CheckCapsuleVsCapsule(const ColliderBase* _colliderA,
