@@ -49,7 +49,7 @@ public:
 	/// @param _handle アニメーションのハンドル
 	void AddExternal(int _type, float _speed, int _handle);
 
-	/// @brief 別の読み込み済みアニメーションモデルから準備
+	/// @brief 別の読み込み済みアニメーションモデルから準備し、再生座標固定
 	/// @see 詳細な説明
 	/// @param _type アニメーション種類
 	/// @param _speed アニメーション速度 

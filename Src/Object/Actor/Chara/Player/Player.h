@@ -76,12 +76,15 @@ private:
 
 	ANIM_TYPE animType_;
 
+	// “Š‚°‚éˆÊ’u
 	VECTOR throwPos_;
 	VECTOR throwDir_;
 
 	// ‚Á”ò‚Î‚µ—Ê
 	Vector2F knockPowXZ_;
-	float knockPow_;
+
+	Vector2F dodgePowXZ_;
+	float curTimeActiveDodge_;
 
 	// ƒJƒƒ‰‚É‰‚¶‚½‰ñ“]‚ğ‚·‚é‚©”Û‚©
 	bool isCameraRotActive_;
@@ -101,6 +104,8 @@ private:
 	/// @brief ‰ñ”ğˆ—
 	void ProcessDodge(void);
 	void Dodge(void);
+
+	void ProcessKnock(void);
 
 	void ProcessAttack(void);
 
