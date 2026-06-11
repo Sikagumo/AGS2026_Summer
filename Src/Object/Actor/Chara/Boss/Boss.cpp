@@ -435,7 +435,7 @@ void Boss::UpdateAttack(void)
 
 	transformBody_.pos = MV1GetFramePosition(transform_.modelId, JOINT_FEET_BODY);
 	int randomAttack = static_cast<int>(UtilityMath::RandRangeF(0.0f, static_cast<float>(ATTACK_TYPE::MAX)));
-	ATTACK_TYPE attackSelect = ATTACK_TYPE::MG;// static_cast<ATTACK_TYPE>(randomAttack);
+	ATTACK_TYPE attackSelect =  static_cast<ATTACK_TYPE>(randomAttack);
 
 	switch (attackSelect)
 	{
