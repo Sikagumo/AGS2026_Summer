@@ -486,4 +486,10 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="srcGraphics\Pixel\NormalMap.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="srcGraphics\Common\Pixel\PixelShader2DHeader.hlsli" />
+  </ItemGroup>
 </Project>

@@ -164,6 +164,19 @@
     <ClInclude Include="Src\Object\Actor\Chara\Weapon\BossWeapon\WeaponMGL.h" />
     <ClInclude Include="Src\Object\Actor\Chara\Weapon\BossWeapon\WeaponMGR.h" />
   </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="srcGraphics\Pixel\NormalMap.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Data/Shdaer/%(Filename).cso</ObjectFileOutput>
+    </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="srcGraphics\Common\Pixel\PixelShader2DHeader.hlsli" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <ProjectGuid>{EAE8EE94-FD52-4CCB-AF50-ECC1E6485C92}</ProjectGuid>
