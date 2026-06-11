@@ -34,7 +34,7 @@ static constexpr float COL_CAPSULE_RADIUS = 10.0f;
 static constexpr float JUMP_POW = 5.0f;
 
 // 回避力
-static constexpr float DODGE_POW = 25.0f;
+static constexpr float DODGE_POW = 15.0f;
 static constexpr float TIME_DODGE = 1.0f;
 static constexpr float TIME_WAIT_DODGE = 1.75f;
 
@@ -47,8 +47,7 @@ Player::Player(int _playerNo, BULLET_TYPE _playerType)
 	, throwPos_(UtilityMath::VECTOR_ZERO), throwDir_(UtilityMath::VECTOR_ZERO)
 	, shotIndex_(-1)
 	, isCameraRotActive_(false)
-	, curTimeWaitDodge_(TIME_WAIT_DODGE)
-	, knockPow_(0.0f)
+	, curTimeWaitDodge_(0.0f), curTimeActiveDodge_(0.0f)
 	, knockPowXZ_(UtilityMath::VECTOR2F_ZERO)
 {
 	constexpr int BULLET_MAX = 3;
@@ -131,7 +130,7 @@ void Player::InitAnimation(void)
 		, 37.5f, resMng.LoadHandleId(ResourceManager::SRC::ANIM_JUMP));
 
 	animation_->AddExternal(static_cast<int>(ANIM_TYPE::DODGE)
-		, 30.0f, resMng.LoadHandleId(ResourceManager::SRC::ANIM_DODGE)
+		, 40.0f, resMng.LoadHandleId(ResourceManager::SRC::ANIM_DODGE)
 		, UtilityMath::VECTOR_ZERO);
 
 
@@ -215,6 +214,10 @@ void Player::InitPost(void)
 	actionController_->SetAction(3, 0, 0.4f, 0.35f, 0.0f
 								, std::bind(&Player::Jump, this)
 								, 0.075f, 0.2f);
+	// 回避
+	actionController_->SetAction(4, 0, 0.4f, 0.35f, 0.0f
+								, std::bind(&Player::Dodge, this)
+								, 0.075f, 0.2f);
 }
 
 
@@ -222,9 +225,8 @@ void Player::UpdateProcess(void)
 {
 	float delta = TimeManager::GetInstance().GetDeltaTime();
 
+	// 無敵時間導入
 	curInvTime_ = ((curInvTime_ > 0.0f) ? (curInvTime_ - delta) : 0.0f);
-
-	curTimeWaitDodge_ = ((curTimeWaitDodge_ > 0.0f) ? (curTimeWaitDodge_ - delta) : 0.0f);
 
 
 	ProcessJump();
@@ -238,11 +240,8 @@ void Player::UpdateProcess(void)
 
 	UpdateBullets();
 
-	if (CollisionController::GetInstance().IsActorCollidingWithTag(this,ColliderBase::TAG::HIT_WAVE))
-	{
-		SetKnock(VNorm(VGet(1.0f, 0.0f, 1.0f)), 1.0f, false);
-		//SetKnock(CollisionController::GetInstance().衝突位置, 10.0f, false);
-	}
+	// 吹っ飛ばし処理
+	ProcessKnock();
 }
 
 void Player::UpdateProcessPost(void)
@@ -284,6 +283,10 @@ VECTOR Player::CalcAddPosition(void)
 	// 吹っ飛ばし量を加算
 	const VECTOR knockVec = VGet(knockPowXZ_.x, 0.0f, knockPowXZ_.y);
 	ret = VAdd(ret, knockVec);
+
+	// 回避移動量を加算
+	const VECTOR dodgeVec = VGet(dodgePowXZ_.x, 0.0f, dodgePowXZ_.y);
+	ret = VAdd(ret, dodgeVec);
 
 	return ret;
 }
@@ -358,6 +361,7 @@ void Player::ProcessMove(void)
 	}
 
 	if (!isJump_
+		&& curTimeActiveDodge_ <= 0.0f
 		&& actionController_->GetActionState() == PActionController::PACTION_STATE::NONE)
 	{
 		if (!UtilityMath::EqualsVZero(dir))
@@ -393,7 +397,6 @@ void Player::ProcessJump(void)
 		transform_.pos.y = -(LIMIT_POS_Y);
 	}
 }
-
 void Player::Jump(void)
 {
 	isJump_ = true;
@@ -402,43 +405,57 @@ void Player::Jump(void)
 
 void Player::ProcessDodge(void)
 {
-	/* 吹っ飛ばしの重力加算 */
-	if (!UtilityMath::EqualsVZero(knockPowXZ_)
-		&& knockPow_ < 0.0f)
-	{
-		knockPowXZ_ = UtilityMath::VECTOR2F_ZERO;
-	}
-
-	if (curTimeWaitDodge_ <= 0.0f)
+	if (curTimeWaitDodge_ <= 0.0f && !UtilityMath::EqualsVZero(moveDir_))
 	{
 		if (InputManager::GetInstance().IsTrgDown(KEY_INPUT_LSHIFT)
 			|| InputManager::GetInstance().IsPadBtnTrgDown(InputManager::JOYPAD_NO::PAD1, InputManager::JOYPAD_BTN::RB_LEFT))
 		{
-			Dodge();
+			PlayAnimation(ANIM_TYPE::DODGE, false);
+			actionController_->Active(4);
 		}
+	}
+	else
+	{
+		curTimeWaitDodge_ -= TimeManager::GetInstance().GetDeltaTime();
+	}
+
+	if (curTimeActiveDodge_ > 0.0f)
+	{
+		curTimeActiveDodge_ -= TimeManager::GetInstance().GetDeltaTime();
+	}
+	else
+	{
+		dodgePowXZ_ = UtilityMath::VECTOR2F_ZERO;
 	}
 }
 void Player::Dodge(void)
 {
-	VECTOR dir = UtilityMath::VECTOR_ZERO;
+	dodgePowXZ_ = Vector2F(moveDir_.x, moveDir_.z);
+	dodgePowXZ_ *= DODGE_POW;
 
-	InputManager& input = InputManager::GetInstance();
-
-	// 接続されているゲームパッド１の情報を取得
-	InputManager::JOYPAD_IN_STATE padState = input.GetJPadInputState(InputManager::JOYPAD_NO::PAD1);
-
-	// 右スティックの傾き
-	dir = input.GetDirectionXZAKey(padState.AKeyLX, padState.AKeyLY);
-
-	if (input.IsNew(KEY_INPUT_W)) { dir.z += 1.0f; }
-	if (input.IsNew(KEY_INPUT_S)) { dir.z += -1.0f; }
-	if (input.IsNew(KEY_INPUT_A)) { dir.x += -1.0f; }
-	if (input.IsNew(KEY_INPUT_D)) { dir.x += 1.0f; }
-
-	SetKnock(UtilityMath::VNormalize(dir), DODGE_POW, false, 0.75f);
+	curTimeActiveDodge_ = TIME_DODGE;
 
 	curInvTime_ = TIME_DODGE;
-	PlayAnimation(ANIM_TYPE::DODGE, false);
+}
+
+void Player::ProcessKnock(void)
+{
+	/* 吹っ飛ばしの重力加算 */
+	if (!UtilityMath::EqualsVZero(knockPowXZ_)
+		&& jumpPow_ < 0.0f)
+	{
+		knockPowXZ_ = UtilityMath::VECTOR2F_ZERO;
+	}
+
+	if (CollisionController::GetInstance().IsActorCollidingWithTag(this, ColliderBase::TAG::HIT_WAVE))
+	{
+		VECTOR hitPos = CollisionController::GetInstance().IsActorHitPosWithTag(this, ColliderBase::TAG::HIT_WAVE);
+		VECTOR knockDir = VSub(transform_.pos, hitPos);
+		knockDir.y = KNOCK_POW_Y;
+		knockDir = UtilityMath::VNormalize(knockDir);
+
+		SetKnock(knockDir, 10.0f, false);
+	}
 }
 
 void Player::ProcessAttack(void)
