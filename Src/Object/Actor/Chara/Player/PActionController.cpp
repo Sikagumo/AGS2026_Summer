@@ -62,10 +62,18 @@ void PActionController::Active(int _actionNum)
 
 	// s“®‚Ìî•ñ‚ğŠ„‚è“–‚Ä
 	curActionNum_ = _actionNum;
-	curTimeAction_ = actions_[_actionNum].timeActive;
-	curTimeStopActive_ = actions_[_actionNum].timeStopActive;
-	curTimeActionActive_ = actions_[_actionNum].timeActionActive;
-	curTimeInput_  = actions_[_actionNum].timeInput;
+	curTimeAction_ = actions_[curActionNum_].timeActive;
+	curTimeStopActive_ = actions_[curActionNum_].timeStopActive;
+	curTimeActionActive_ = actions_[curActionNum_].timeActionActive;
+	curTimeInput_  = actions_[curActionNum_].timeInput;
+}
+
+bool PActionController::IsActiveInput(void) const
+{
+	// Œ»İ‚Ìs“®‚Ì“ü—ÍŠÔ‚ª–¢Š„“–Afalse
+	if (actions_.at(curActionNum_).timeInput <= 0.0f) { return false; }
+
+	return (curTimeInput_ <= 0.0f && actionState_ == PACTION_STATE::ACTION);
 }
 
 void PActionController::Update(void)

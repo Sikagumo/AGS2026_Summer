@@ -45,7 +45,7 @@ public:
 	void Active(int _actionNum);
 
 	/// @brief ì¸óÕâ¬î\Ç©î€Ç©
-	bool IsActiveInput(void)const { return (curTimeInput_ > 0.0f && actionState_ == PACTION_STATE::ACTION); };
+	bool IsActiveInput(void)const;
 
 	/// @brief çsìÆíÜÇ©î€Ç©
 	bool IsActiveAction(void)const { return (curActionNum_ != -1); };

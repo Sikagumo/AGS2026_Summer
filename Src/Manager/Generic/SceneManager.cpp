@@ -84,7 +84,9 @@ void SceneManager::Init3D(void)
     const float FogEnd = 20000.0f;
 
     // 背景色を設定する
-    SetBackgroundColor(BACK_COLOR.r, BACK_COLOR.g,BACK_COLOR.b);
+    SetBackgroundColor(static_cast<int>(BACK_COLOR.r)
+                       , static_cast<int>(BACK_COLOR.g)
+                       , static_cast<int>(BACK_COLOR.b));
 
     // Zバッファを有効にする
     SetUseZBuffer3D(true);

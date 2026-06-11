@@ -33,6 +33,11 @@ static constexpr float COL_CAPSULE_RADIUS = 10.0f;
 // ジャンプ力
 static constexpr float JUMP_POW = 5.0f;
 
+// 回避力
+static constexpr float DODGE_POW = 25.0f;
+static constexpr float TIME_DODGE = 1.0f;
+static constexpr float TIME_WAIT_DODGE = 1.75f;
+
 
 Player::Player(int _playerNo, BULLET_TYPE _playerType)
 	: PlayerBase::PlayerBase(_playerNo, _playerType)
@@ -42,6 +47,8 @@ Player::Player(int _playerNo, BULLET_TYPE _playerType)
 	, throwPos_(UtilityMath::VECTOR_ZERO), throwDir_(UtilityMath::VECTOR_ZERO)
 	, shotIndex_(-1)
 	, isCameraRotActive_(false)
+	, curTimeWaitDodge_(TIME_WAIT_DODGE)
+	, knockPowXZ_(UtilityMath::VECTOR2F_ZERO)
 {
 	constexpr int BULLET_MAX = 3;
 	attackNumMax_ = BULLET_MAX;
@@ -80,15 +87,10 @@ void Player::DrawDebug(void)
 }
 void Player::SetKnock(const VECTOR& _knockDirXZ, float _knockPowXZ, bool _isStan, float _knockPowY)
 {
-	VECTOR knockVelo = UtilityMath::VECTOR_ONE;
+	Vector2F knockVelo = UtilityMath::VECTOR2F_ZERO;
 
-	knockVelo.x *= (_knockDirXZ.x * _knockPowXZ);
-	knockVelo.z *= (_knockDirXZ.z * _knockPowXZ);
-
-	knockVelo.y *= (_knockPowY);
-
-	// Yの加速度が負の値の時は、Y吹っ飛ばしを０にする
-	if (knockVelo.y < 0.0f) { knockVelo.y = 0.0f; }
+	knockVelo.x = (_knockDirXZ.x * _knockPowXZ);
+	knockVelo.y = (_knockDirXZ.z * _knockPowXZ);
 
 	if (_isStan)
 	{
@@ -96,7 +98,10 @@ void Player::SetKnock(const VECTOR& _knockDirXZ, float _knockPowXZ, bool _isStan
 	}
 
 	// 吹っ飛ばし量に加算
-	knockPow_ = knockVelo;
+	knockPowXZ_ = knockVelo;
+
+	isJump_ = true;
+	jumpPow_ = _knockPowY;
 }
 
 void Player::InitAnimation(void)
@@ -111,10 +116,12 @@ void Player::InitAnimation(void)
 		, 40.0f, resMng.LoadHandleId(ResourceManager::SRC::ANIM_RUN));
 
 	animation_->AddExternal(static_cast<int>(ANIM_TYPE::THROW_LEFT)
-		, 17.5f, resMng.LoadHandleId(ResourceManager::SRC::ANIM_THROW_LEFT), {});
+		, 17.5f, resMng.LoadHandleId(ResourceManager::SRC::ANIM_THROW_LEFT)
+		, UtilityMath::VECTOR_ZERO);
 
 	animation_->AddExternal(static_cast<int>(ANIM_TYPE::THROW_RIGHT)
-		, 17.5f, resMng.LoadHandleId(ResourceManager::SRC::ANIM_THROW_RIGHT), {});
+		, 17.5f, resMng.LoadHandleId(ResourceManager::SRC::ANIM_THROW_RIGHT)
+		, UtilityMath::VECTOR_ZERO);
 
 	animation_->AddExternal(static_cast<int>(ANIM_TYPE::THROW_RUN)
 		, 20.0f, resMng.LoadHandleId(ResourceManager::SRC::ANIM_THROW_RUN));
@@ -122,7 +129,13 @@ void Player::InitAnimation(void)
 	animation_->AddExternal(static_cast<int>(ANIM_TYPE::JUMP)
 		, 37.5f, resMng.LoadHandleId(ResourceManager::SRC::ANIM_JUMP));
 
-	PlayAnimation(ANIM_TYPE::IDLE);
+	animation_->AddExternal(static_cast<int>(ANIM_TYPE::DODGE)
+		, 30.0f, resMng.LoadHandleId(ResourceManager::SRC::ANIM_DODGE)
+		, UtilityMath::VECTOR_ZERO);
+
+
+	animType_ = ANIM_TYPE::IDLE;
+	animation_->Play(static_cast<int>(animType_));
 }
 void Player::InitTransform(void)
 {
@@ -159,10 +172,10 @@ void Player::InitPost(void)
 
 	curAttackNum_ = 0;
 
-	constexpr float SHOT_TIME_INCREMENT = 0.25f; // 行動間隔上昇値
-	constexpr float SHOT_TIME_INC_ACTION = 0.1875f; // 行動間隔上昇値
+	constexpr float SHOT_TIME_INCREMENT = 0.3f; // 行動間隔上昇値
+	constexpr float SHOT_TIME_INC_INPUT = 0.2f; // 行動間隔上昇値
 
-	constexpr float SHOT_TIME_ACTIVE = 2.0f; // 有効時間
+	constexpr float SHOT_TIME_ACTIVE = 2.5f; // 有効時間
 	constexpr float SHOT_TIME_ACTION_ACTIVE = 1.25f; // 有効時間
 	constexpr float SHOT_TIME_ACTIVE_INPUT = 1.725f; // 入力可能時間
 	constexpr float SHOT_TIME_END = 0.25f; // 終了時間
@@ -172,23 +185,27 @@ void Player::InitPost(void)
 
 
 
-	float timeActive, timeActionActive, timeInput;
+	float timeActive, timeActionActive, timeInput, timeEnd;
 	timeActive = SHOT_TIME_ACTIVE;
 	timeActionActive = SHOT_TIME_ACTION_ACTIVE;
 	timeInput = SHOT_TIME_ACTIVE_INPUT;
+	timeEnd = SHOT_TIME_END;
 
-	actionController_->SetAction(0, 50, timeActive, timeActionActive, SHOT_TIME_END
+	actionController_->SetAction(0, 50, timeActive, timeActionActive, timeEnd
 								, std::bind(&Player::ShotBullet, this)
 								, 0.0f, 0.0f, timeInput);
 
 	timeActive += SHOT_TIME_INCREMENT;
-	actionController_->SetAction(1, 75, timeActive, timeActionActive, SHOT_TIME_END
+	timeInput += SHOT_TIME_INC_INPUT;
+	timeEnd += SHOT_TIME_INCREMENT;
+
+	actionController_->SetAction(1, 75, timeActive, timeActionActive, timeEnd
 								, std::bind(&Player::ShotBullet, this)
 								, SHOT_TIME_STOP, SHOT_TIME_STOP_ACTIVE, timeInput);
 
-	timeActive += SHOT_TIME_INCREMENT * 2;
-	timeInput += (SHOT_TIME_INCREMENT / 2);
-	actionController_->SetAction(2, 150, timeActive, timeActionActive, SHOT_TIME_END
+	timeActive += (SHOT_TIME_INCREMENT * 2);
+	timeEnd += (SHOT_TIME_INCREMENT / 2);
+	actionController_->SetAction(2, 150, timeActive, timeActionActive, timeEnd
 								, std::bind(&Player::ShotBullet, this)
 								, SHOT_TIME_STOP, SHOT_TIME_STOP_ACTIVE, 0.0f);
 
@@ -202,23 +219,27 @@ void Player::InitPost(void)
 
 void Player::UpdateProcess(void)
 {
-	if (curInvTime_ > 0.0f)
-	{
-		curInvTime_ -= TimeManager::GetInstance().GetDeltaTime();
-	}
+	float delta = TimeManager::GetInstance().GetDeltaTime();
 
-	ProcessAttack();
+	curInvTime_ = ((curInvTime_ > 0.0f) ? (curInvTime_ - delta) : 0.0f);
+
+	curTimeWaitDodge_ = ((curTimeWaitDodge_ > 0.0f) ? (curTimeWaitDodge_ - delta) : 0.0f);
+
 
 	ProcessJump();
 
 	// 移動操作
 	ProcessMove();
 
+	ProcessAttack();
+
+	ProcessDodge();
+
 	UpdateBullets();
 
 	if (CollisionController::GetInstance().IsActorCollidingWithTag(this,ColliderBase::TAG::HIT_WAVE))
 	{
-		SetKnock(VNorm(VGet(1.0f, 0.0f, 1.0f)), 10.0f, false);
+		SetKnock(VNorm(VGet(1.0f, 0.0f, 1.0f)), 1.0f, false);
 		//SetKnock(CollisionController::GetInstance().衝突位置, 10.0f, false);
 	}
 }
@@ -239,6 +260,7 @@ void Player::DrawLate(void)
 {
 	DrawFormatString(10, Application::SCREEN_HALF_Y + (16 * 5), 0xff0000, "プレイヤーHP：%d"
 		, hp_);
+
 #ifdef _DEBUG
 
 	UtilityMath::DrawLineXYZ(transform_.pos, transform_.quaRot);
@@ -252,6 +274,17 @@ void Player::DrawLate(void)
 		collider.second->Draw();
 	}
 #endif
+}
+
+VECTOR Player::CalcAddPosition(void)
+{
+	VECTOR ret = UtilityMath::VECTOR_ZERO;
+
+	// 吹っ飛ばし量を加算
+	const VECTOR knockVec = VGet(knockPowXZ_.x, 0.0f, knockPowXZ_.y);
+	ret = VAdd(ret, knockVec);
+
+	return ret;
 }
 
 void Player::ReleasePost(void)
@@ -297,7 +330,7 @@ void Player::ProcessMove(void)
 	if (input.IsNew(KEY_INPUT_D)) { dir.x += 1.0f; }
 
 	if (actionController_->IsActiveAction()
-		|| actionController_->GetActionState() != PActionController::PACTION_STATE::NONE)
+		&& actionController_->GetActionState() != PActionController::PACTION_STATE::NONE)
 	{
 		movePow_ = UtilityMath::VECTOR_ZERO;
 		return;
@@ -311,13 +344,6 @@ void Player::ProcessMove(void)
 		dir = UtilityMath::VNormalize(dir);
 		movePow_ = UtilityMath::VECTOR_ZERO;
 
-		if (!isJump_
-			&& animType_ != ANIM_TYPE::THROW_LEFT
-			&& animType_ != ANIM_TYPE::THROW_RIGHT)
-		{
-			PlayAnimation(ANIM_TYPE::RUN);
-		}
-
 		// 移動方向を取得
 		moveDir_ = Quaternion::PosAxis(cameraRot, dir);
 		moveDir_.y = 0.0f;
@@ -328,14 +354,18 @@ void Player::ProcessMove(void)
 	else
 	{
 		movePow_ = UtilityMath::VECTOR_ZERO;
+	}
 
-		if (!isJump_ && animType_ != ANIM_TYPE::IDLE)
+	if (!isJump_
+		&& actionController_->GetActionState() == PActionController::PACTION_STATE::NONE)
+	{
+		if (!UtilityMath::EqualsVZero(dir))
 		{
-			if (animType_ != ANIM_TYPE::THROW_LEFT &&
-				animType_ != ANIM_TYPE::THROW_RIGHT)
-			{
-				PlayAnimation(ANIM_TYPE::IDLE);
-			}
+			PlayAnimation(ANIM_TYPE::RUN);
+		}
+		else
+		{
+			PlayAnimation(ANIM_TYPE::IDLE);
 		}
 	}
 }
@@ -354,10 +384,6 @@ void Player::ProcessJump(void)
 			actionController_->Active(3);
 		}
 	}
-	else if (jumpPow_ > 0.0f)
-	{
-		//jumpPow_.y = 0.0f;
-	}
 
 	// Y軸制限
 	const float LIMIT_POS_Y = -1500.0f;
@@ -373,40 +399,68 @@ void Player::Jump(void)
 	jumpPow_ = JUMP_POW;
 }
 
-void Player::ProcessAttack(void)
+void Player::ProcessDodge(void)
 {
-	// 投げモーション終了時、行動が終了時
-	if (animation_->IsEnd() && !actionController_->IsActiveAction())
+	/* 吹っ飛ばしの重力加算 */
+	if (!UtilityMath::EqualsVZero(knockPowXZ_)
+		&& knockPow_ < 0.0f)
 	{
-		if (animType_ == ANIM_TYPE::THROW_LEFT
-			|| animType_ == ANIM_TYPE::THROW_RIGHT)
-		{
-			curAttackNum_ = 0;
-			PlayAnimation(ANIM_TYPE::IDLE);
-		}
+		knockPowXZ_ = UtilityMath::VECTOR2F_ZERO;
 	}
 
+	if (curTimeWaitDodge_ <= 0.0f)
+	{
+		if (InputManager::GetInstance().IsTrgDown(KEY_INPUT_LSHIFT)
+			|| InputManager::GetInstance().IsPadBtnTrgDown(InputManager::JOYPAD_NO::PAD1, InputManager::JOYPAD_BTN::RB_LEFT))
+		{
+			Dodge();
+		}
+	}
+}
+void Player::Dodge(void)
+{
+	VECTOR dir = UtilityMath::VECTOR_ZERO;
+
+	InputManager& input = InputManager::GetInstance();
+
+	// 接続されているゲームパッド１の情報を取得
+	InputManager::JOYPAD_IN_STATE padState = input.GetJPadInputState(InputManager::JOYPAD_NO::PAD1);
+
+	// 右スティックの傾き
+	dir = input.GetDirectionXZAKey(padState.AKeyLX, padState.AKeyLY);
+
+	if (input.IsNew(KEY_INPUT_W)) { dir.z += 1.0f; }
+	if (input.IsNew(KEY_INPUT_S)) { dir.z += -1.0f; }
+	if (input.IsNew(KEY_INPUT_A)) { dir.x += -1.0f; }
+	if (input.IsNew(KEY_INPUT_D)) { dir.x += 1.0f; }
+
+	SetKnock(UtilityMath::VNormalize(dir), DODGE_POW, false, 0.75f);
+
+	curInvTime_ = TIME_DODGE;
+	PlayAnimation(ANIM_TYPE::DODGE, false);
+}
+
+void Player::ProcessAttack(void)
+{
 	// 行動の更新
 	actionController_->Update();
 
-	// 行動中は処理終了
-	if (actionController_->IsActiveAction()) { return; }
-
 	if (InputManager::GetInstance().IsTrgMouseLeft())
 	{
-		// 行動回数が最大値を超えた場合、０に戻す
-		if (curAttackNum_ >= attackNumMax_)
-		{
-			curAttackNum_ = 0;
-		}
+		const bool canCombo = (actionController_->IsActiveAction() && actionController_->IsActiveInput());
+		const bool canAttack = !actionController_->IsActiveAction();
 
-		if (!actionController_->IsActiveInput())
+		if (canCombo || canAttack)
 		{
+			// 行動回数が最大値を超えた場合、０に戻す
+			if (curAttackNum_ >= attackNumMax_)
+			{
+				curAttackNum_ = 0;
+			}
+
 			CreateBullet();
 
-			actionController_->Active(curAttackNum_);
-
-			curAttackNum_++;
+			actionController_->Active(curAttackNum_++);
 
 			ANIM_TYPE type = ((curAttackNum_ % 2 == 0) ? ANIM_TYPE::THROW_LEFT : ANIM_TYPE::THROW_RIGHT);
 			PlayAnimation(type, false);
@@ -628,6 +682,16 @@ void Player::DrawShadowRound(void)
 
 void Player::PlayAnimation(ANIM_TYPE _type, bool _isLoop)
 {
+	if (_type != ANIM_TYPE::THROW_LEFT
+		&& _type != ANIM_TYPE::THROW_RIGHT)
+	{
+		if (animType_ == ANIM_TYPE::THROW_LEFT
+			|| animType_ == ANIM_TYPE::THROW_RIGHT)
+		{
+			curAttackNum_ = 0;
+		}
+	}
+
 	animType_ = _type;
 
 	animation_->Play(static_cast<int>(_type), _isLoop);

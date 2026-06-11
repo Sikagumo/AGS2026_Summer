@@ -8,7 +8,7 @@ class Player : public PlayerBase
 {
 private:
 
-	static constexpr float KNOCK_POW_Y = 100.0f;
+	static constexpr float KNOCK_POW_Y = 5.0f;
 public:
 
 	enum class ANIM_TYPE
@@ -20,6 +20,7 @@ public:
 		THROW_RIGHT,
 		THROW_RUN,
 		JUMP,
+		DODGE,
 		MAX,
 	};
 
@@ -62,6 +63,7 @@ protected:
 	void DrawPre(void)override;
 	void DrawLate(void)override;
 
+	VECTOR CalcAddPosition(void) override;
 
 private:
 
@@ -77,18 +79,28 @@ private:
 	VECTOR throwPos_;
 	VECTOR throwDir_;
 
+	// 吹っ飛ばし量
+	Vector2F knockPowXZ_;
+	float knockPow_;
+
 	// カメラに応じた回転をするか否か
 	bool isCameraRotActive_;
 
-	std::unique_ptr<PActionController> actionController_;
+	// 回避クールタイム
+	float curTimeWaitDodge_;
 
+	std::unique_ptr<PActionController> actionController_;
 
 	// 操作
 	void ProcessMove(void);
 
-	// ジャンプ
+	/// @brief ジャンプ処理
 	void ProcessJump(void);
 	void Jump(void);
+
+	/// @brief 回避処理
+	void ProcessDodge(void);
+	void Dodge(void);
 
 	void ProcessAttack(void);
 

@@ -432,7 +432,7 @@ void Boss::UpdateIdle(void)
 void Boss::UpdateAttack(void)
 {
 	transformBody_.pos = MV1GetFramePosition(transform_.modelId, JOINT_FEET_BODY);
-	int attackSelect=UtilityMath::RandRangeF(0,3);
+	int attackSelect = static_cast<int>(UtilityMath::RandRangeF(0,3));
 	switch (attackSelect)
 	{
 	case 0:
@@ -460,7 +460,7 @@ void Boss::UpdateJump(void)
 	transformBody_.pos = MV1GetFramePosition(transform_.modelId, JOINT_FEET_BODY);
 	if (!isJump_)
 	{
-		wave_->SetIsAttac(true);
+		wave_->SetIsAttack(true);
 		ChangeState(STATE::IDLE);
 	}
 	

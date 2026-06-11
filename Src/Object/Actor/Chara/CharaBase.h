@@ -1,6 +1,7 @@
 #pragma once
 #include "../ActorBase.h"
 #include "../../Common/AnimationController.h"
+#include "../../../Utility/UtilityMath.h"
 class AnimationController;
 
 class CharaBase : public ActorBase
@@ -48,8 +49,6 @@ protected:
 
 	float jumpPow_;
 
-	VECTOR knockPow_;
-
 	// 移動前の座標
 	VECTOR prevPos_;
 
@@ -69,6 +68,9 @@ protected:
 	virtual  void DelayRotate(void);
 
 	void CalcGravityPow(void);
+
+	/// @brief 位置に加算する値を計算
+	virtual VECTOR CalcAddPosition(void) { return UtilityMath::VECTOR_ZERO; };
 
 	// 衝突判定
 	void Collision(void);

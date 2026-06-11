@@ -32,7 +32,7 @@ void BBulletMG::InitTransform(void)
 void BBulletMG::InitCollider(void)
 {
 	ColliderSphere* colSphere = new ColliderSphere(
-		ColliderBase::TAG::MG_BULLET, &transform_, {0.0f,0.0f,0.0f}, radiuse_);
+		ColliderBase::TAG::MG_BULLET, &transform_, {0.0f,0.0f,0.0f}, radius_);
 	ownColliders_.emplace(static_cast<int>(ColliderBase::SHAPE::SPHERE), colSphere);
 	
 
@@ -92,7 +92,7 @@ void BBulletMG::DrawPre(void)
 {
 	if (isAlive_)
 	{
-		//DrawSphere3D(transform_.pos, radiuse_, 16,0xffff00, 0xffff00, true);
+		//DrawSphere3D(transform_.pos, radius_, 16,0xffff00, 0xffff00, true);
 		for (auto& col : ownColliders_)
 		{
 			col.second->Draw();

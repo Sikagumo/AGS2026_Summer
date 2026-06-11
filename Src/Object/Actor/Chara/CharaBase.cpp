@@ -20,7 +20,6 @@ CharaBase::CharaBase(void)
 	, prevPos_(UtilityMath::VECTOR_ZERO)
 	, moveDir_(UtilityMath::VECTOR_ZERO)
 	, movePow_(UtilityMath::VECTOR_ZERO)
-	, knockPow_(UtilityMath::VECTOR_ZERO)
 	, animation_(nullptr)
 {
 }
@@ -77,39 +76,18 @@ void CharaBase::DrawDebug(void)
 
 void CharaBase::CalcGravityPow(void)
 {
-	// 重力方向
-	const VECTOR DIR_GRAVITY = UtilityMath::DIR_DOWN;
-
 	// 重力の強さ
 	float gravityPow = Application::GetInstance().GetGravityPow() * timeManager_.GetDeltaTime();
+	const VECTOR GRAVITY_POW = VScale(UtilityMath::DIR_DOWN, gravityPow);
 	
 	// 重力
-	VECTOR gravity = VScale(DIR_GRAVITY, gravityPow);
-
-	jumpPow_ += gravity.y;
+	jumpPow_ += GRAVITY_POW.y;
 
 	// 重力制限	
 	jumpPow_ = ((jumpPow_ < MAX_FALL_SPEED) ? MAX_FALL_SPEED : jumpPow_);
-
-
-	/* 吹っ飛ばしの重力加算 */
-	if (!UtilityMath::EqualsVZero(knockPow_))
-	{
-		// 重力加速
-		knockPow_.y -= Application::GRAVITY_SCALE;
-
-		if (knockPow_.y > Application::GRAVITY)
-		{
-			knockPow_.y = Application::GRAVITY;
-		}
-
-		if (knockPow_.y < 0.0f)
-		{
-			knockPow_ = UtilityMath::VECTOR_ZERO;
-		}
-	}
-
 }
+
+
 
 void CharaBase::Collision(void)
 {
@@ -118,8 +96,8 @@ void CharaBase::Collision(void)
 
 	CollisionCapsule();
 
-	// 吹っ飛ばし量を加算
-	transform_.pos = VAdd(transform_.pos, knockPow_);
+	// 任意の値を加算
+	transform_.pos = VAdd(transform_.pos, CalcAddPosition());
 
 	// ジャンプ量を加算
 	transform_.pos.y += jumpPow_;

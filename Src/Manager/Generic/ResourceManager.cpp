@@ -100,6 +100,7 @@ void ResourceManager::Initialize(void)
 	_SetResource(LOAD_TYPE::ANIM, SRC::ANIM_THROW_LEFT, PATH_ANIM + "Throw_Left.mv1");
 	_SetResource(LOAD_TYPE::ANIM, SRC::ANIM_THROW_RIGHT, PATH_ANIM + "Throw_Right.mv1");
 	_SetResource(LOAD_TYPE::ANIM, SRC::ANIM_JUMP, PATH_ANIM + "Jump.mv1");
+	_SetResource(LOAD_TYPE::ANIM, SRC::ANIM_DODGE, PATH_ANIM + "Rolling.mv1");
 
 	/* BGM */
 	_SetResource(LOAD_TYPE::SOUND, SRC::BGM_TITLE, PATH_BGM + "TitleBGM.mp3");
