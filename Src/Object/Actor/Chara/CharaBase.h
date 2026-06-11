@@ -1,6 +1,7 @@
 #pragma once
 #include "../ActorBase.h"
 #include "../../Common/AnimationController.h"
+#include "../../../Utility/UtilityMath.h"
 class AnimationController;
 
 class CharaBase : public ActorBase
@@ -16,10 +17,10 @@ public:
 		MAX,
 	};
 
-	// コンストラクタ
+	/// @brief コンストラクタ
 	CharaBase(void);
 
-	// デストラクタ
+	/// @brief デストラクタ
 	virtual ~CharaBase(void) override = default;
 
 	void Update(void)override final;
@@ -46,13 +47,10 @@ protected:
 
 	VECTOR movePow_;
 
-	VECTOR jumpPow_;
+	float jumpPow_;
 
 	// 移動前の座標
 	VECTOR prevPos_;
-
-	// ジャンプの入力受付時間
-	float stepJump_;
 
 	// ジャンプ判定
 	bool isJump_;
@@ -70,6 +68,9 @@ protected:
 	virtual  void DelayRotate(void);
 
 	void CalcGravityPow(void);
+
+	/// @brief 位置に加算する値を計算
+	virtual VECTOR CalcAddPosition(void) { return UtilityMath::VECTOR_ZERO; };
 
 	// 衝突判定
 	void Collision(void);

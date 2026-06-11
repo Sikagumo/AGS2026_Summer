@@ -110,6 +110,7 @@ private:
 	static constexpr VECTOR BOSS_INIT_POS= { 0.0f, 0.0f, 500.0f };
 	//‰ñ“]
 	static constexpr float INIT_ROT = 180.0f;
+	
 	//ƒWƒƒƒ“ƒv—Í
 	static constexpr float POW_JUMP_INIT = 3000.0f;
 	static constexpr float MOVE_SPEED_INIT = 20.0f;

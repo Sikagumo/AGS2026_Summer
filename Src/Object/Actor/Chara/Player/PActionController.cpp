@@ -13,8 +13,9 @@ PActionController::PActionController(std::unique_ptr<AnimationController>& _anim
 {
 }
 
-void PActionController::SetAction(int _actionNum, int _attackPower, float _timeActive, float _timeEnd
-	, float _timeActionActive, std::function<void(void)> _actionProc, float _timeStop, float _timeStopActive, float _timeInput)
+void PActionController::SetAction(int _actionNum, int _attackPower, float _timeActive, float _timeActionActive
+	, float _timeEnd, std::function<void(void)> _actionProc
+	, float _timeStop, float _timeStopActive, float _timeInput)
 {
 	if (_actionNum < 0)
 	{
@@ -61,10 +62,18 @@ void PActionController::Active(int _actionNum)
 
 	// s“®‚Ìî•ñ‚ðŠ„‚è“–‚Ä
 	curActionNum_ = _actionNum;
-	curTimeAction_ = actions_[_actionNum].timeActive;
-	curTimeStopActive_ = actions_[_actionNum].timeStopActive;
-	curTimeActionActive_ = actions_[_actionNum].timeActionActive;
-	curTimeInput_  = actions_[_actionNum].timeInput;
+	curTimeAction_ = actions_[curActionNum_].timeActive;
+	curTimeStopActive_ = actions_[curActionNum_].timeStopActive;
+	curTimeActionActive_ = actions_[curActionNum_].timeActionActive;
+	curTimeInput_  = actions_[curActionNum_].timeInput;
+}
+
+bool PActionController::IsActiveInput(void) const
+{
+	// Œ»Ý‚Ìs“®‚Ì“ü—ÍŽžŠÔ‚ª–¢Š„“–ŽžAfalse
+	if (actions_.at(curActionNum_).timeInput <= 0.0f) { return false; }
+
+	return (curTimeInput_ <= 0.0f && actionState_ == PACTION_STATE::ACTION);
 }
 
 void PActionController::Update(void)

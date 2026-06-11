@@ -56,7 +56,6 @@ KeyConfInputManager::KeyConfInputManager(void)
 void KeyConfInputManager::InitInputTable(void)
 {
 	inputTable_.clear();
-	XINPUT_STATE input = XINPUT_STATE();
 
 	inputTable_["UP"] =
 	{
@@ -91,7 +90,6 @@ void KeyConfInputManager::InitInputTable(void)
 	inputTable_["ATTACK"] =
 	{
 		{INPUT_TYPE::MOUSE, MOUSE_INPUT_LEFT},
-		{INPUT_TYPE::JOYPAD,input.RightTrigger}
 	};
 
 	inputTable_["OK"] =
@@ -126,35 +124,44 @@ void KeyConfInputManager::Update(void)
 	GetMousePoint(&mousePosition_.x, &mousePosition_.y);
 
 	XINPUT_STATE xInput{};
-	GetJoypadXInputState(usePadNo_, &xInput);
-	stickInfo_.lx = xInput.ThumbLX;
-	stickInfo_.ly = xInput.ThumbLY;
-	stickInfo_.rx = xInput.ThumbRX;
-	stickInfo_.ry = xInput.ThumbRY;
+	if (GetJoypadXInputState(usePadNo_, &xInput) == 0)
+	{
+		// スティック情報の更新
+		stickInfo_.lx = xInput.ThumbLX;
+		stickInfo_.ly = xInput.ThumbLY;
+		stickInfo_.rx = xInput.ThumbRX;
+		stickInfo_.ry = xInput.ThumbRY;
+
+		// RTの判定 (一定押し込みでATTACKをON)
+		if (xInput.RightTrigger > 128)
+		{
+			currentInputState_["ATTACK"] = true;
+		}
+		else
+		{
+			currentInputState_["ATTACK"] = false;
+		}
+	}
 
 	for (const auto& pair : inputTable_)
 	{
 		const auto& eventName = pair.first;
-		bool hit = false;
+		bool hit = currentInputState_[eventName];
 
 		for (const auto& inputInfo : pair.second)
 		{
 			switch (inputInfo.type)
 			{
 			case INPUT_TYPE::KEY_BOARD:
-				hit = (keyState[inputInfo.id] != 0);
+				hit |= (keyState[inputInfo.id] != 0);
 				break;
-
 			case INPUT_TYPE::MOUSE:
-				hit = ((mouseState & inputInfo.id) != 0);
+				hit |= ((mouseState & inputInfo.id) != 0);
 				break;
-
 			case INPUT_TYPE::JOYPAD:
-				hit = ((padState & inputInfo.id) != 0);
+				hit |= ((padState & inputInfo.id) != 0);
 				break;
 			}
-
-			if (hit) { break; }
 		}
 
 		currentInputState_[eventName] = hit;

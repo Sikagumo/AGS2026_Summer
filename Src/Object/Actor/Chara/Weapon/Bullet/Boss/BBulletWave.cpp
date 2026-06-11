@@ -60,7 +60,7 @@ void BBulletWave::InitPost(void)
 void BBulletWave::UpdateProcess(void)
 {
 	
-	if (isAttac_)
+	if (isAttack_)
 	{
 		radius_ += INCREASE_RADIUS;
 		CollisionController::GetInstance().SetActorColliderRadius(this, ColliderBase::TAG::HIT_WAVE, radius_);
@@ -72,7 +72,7 @@ void BBulletWave::UpdateProcess(void)
 
 		CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::HIT_WAVE, false);
 		CollisionController::GetInstance().SetActorColliderRadius(this, ColliderBase::TAG::HIT_WAVE, radius_);
-		isAttac_ = false;		
+		isAttack_ = false;		
 	}
 }
 

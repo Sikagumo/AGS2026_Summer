@@ -51,6 +51,7 @@ public:
 		ANIM_THROW_LEFT,
 		ANIM_THROW_RIGHT,
 		ANIM_JUMP,
+		ANIM_DODGE,
 
 		/* エフェクト */
 

@@ -14,11 +14,11 @@ public:
 
 
 
-	void SetIsAttac(bool _isAttac)override { isAttac_ = _isAttac; }
+	void SetIsAttack(bool _isAttack)override { isAttack_ = _isAttack; }
 
 	void SetPos(VECTOR _pos) {};
 
-	void CreateBullets(VECTOR _pos, VECTOR _dir, float _radiuse)override { transform_.pos = _pos; dir_ = _dir; radiuse_ = _radiuse; }
+	void CreateBullets(VECTOR _pos, VECTOR _dir, float _radius)override { transform_.pos = _pos; dir_ = _dir; radius_ = _radius; }
 
 protected:
 	// ‘å‚«‚³A‰ñ“]AÀ•W‚Ì‰Šú‰»

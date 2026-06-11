@@ -1,10 +1,10 @@
 #include "BBulletBase.h"
 
-BBulletBase::BBulletBase()
+BBulletBase::BBulletBase(void)
 {
 }
 
-BBulletBase::~BBulletBase()
+BBulletBase::~BBulletBase(void)
 {
 }
 

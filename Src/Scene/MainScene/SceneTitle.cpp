@@ -156,7 +156,7 @@ void SceneTitle::Update(void)
     {
         bool isTarget = CollisionController::GetInstance().IsTagCollidingWithTag2D(Collider2DBase::TAG_2D::MOUSE_CURSOR, buttonTags[i]) || (selectedIdx_ == i);
 
-        if (isTarget && keyConfInputManager.isTrigerDown("OK"))
+        if (isTarget && keyConfInputManager.isTrigerDown("ATTACK"))
         {
             switch (static_cast<MENU_ITEM>(i))
             {
