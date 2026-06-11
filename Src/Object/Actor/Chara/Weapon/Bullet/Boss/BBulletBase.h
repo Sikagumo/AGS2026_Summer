@@ -19,6 +19,9 @@ public:
 	
 
 protected:
+
+	static constexpr float INIT_ROT = 180.0f;
+
 	bool isAttack_;
 	bool isAlive_;
 	float speed_;

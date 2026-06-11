@@ -1,4 +1,5 @@
 #include <DxLib.h>
+#include "../../../../../../Utility/UtilityMath.h"
 #include "../../../../../../Manager/Generic/ResourceManager.h"
 #include "../../../../../Collider/ColliderBase.h"
 #include "../../../../../Collider/ColliderSphere.h"
@@ -27,7 +28,7 @@ void BBulletMG::InitTransform(void)
 {
 	transform_.scl = { 0.05f,0.05f,0.05f };
 	transform_.quaRot = Quaternion::Identity();
-	transform_.quaRotLocal = Quaternion::Identity();
+	transform_.quaRotLocal =Quaternion::AngleAxis(UtilityMath::Deg2RadF(INIT_ROT), UtilityMath::AXIS_Y);
 	transform_.Update();
 }
 
@@ -71,6 +72,11 @@ void BBulletMG::UpdateProcess(void)
 		aliveTime_++;
 		// 弾を移動させる
 		// 移動量の計算(方向×スピード)
+		float targetAngle = atan2(dir_.x, dir_.z);
+		transform_.quaRot = Quaternion::AngleAxis(targetAngle, UtilityMath::AXIS_Y);
+			
+		
+
 		VECTOR movePow = VScale(dir_, speed_);
 		// 移動処理
 		transform_.pos = VAdd(transform_.pos, movePow);
@@ -83,6 +89,7 @@ void BBulletMG::UpdateProcess(void)
 	else
 	{
 		CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::MG_BULLET, false);
+		CollisionController::GetInstance().UnregisterActor(this);
 	}
 }
 

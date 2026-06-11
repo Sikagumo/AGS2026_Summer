@@ -39,6 +39,7 @@ Boss::Boss(void) :
 	roadIsAttack_(false),
 	roadAttackTime_(-1),
 	roadLockTime_(-1),
+	attackInterval_(MAX_ATTACK_INTERVAL),
 
 	CharaBase()
 {
@@ -274,7 +275,7 @@ void Boss::InitPost(void)
 	stateChanges_.emplace(static_cast<int>(STATE::END), std::bind(&Boss::ChangeStateEnd, this));
 	ChangeState(STATE::IDLE);
 
-	hp_ = 1000;
+	
 }
 
 void Boss::ChangeState(STATE _state)
@@ -314,7 +315,7 @@ void Boss::ChangeStateJump(void)
 
 	// ÉWÉÉÉìÉvó ÇÃåvéZ
 	float jumpSpeed = POW_JUMP_INIT * TimeManager::GetInstance().GetDeltaTime();
-	jumpPow_ *= jumpSpeed;
+	jumpPow_ = jumpSpeed;
 	isJump_ = true;
 }
 
@@ -418,7 +419,7 @@ void Boss::UpdateIdle(void)
 {
 	transformBody_.pos = MV1GetFramePosition(transform_.modelId, JOINT_FEET_BODY);
 	attackCount_++;
-	if (attackCount_ >= 600)
+	if (attackCount_ >= attackInterval_)
 	{
 		ChangeState(STATE::ATTACK);
 	}
@@ -426,28 +427,31 @@ void Boss::UpdateIdle(void)
 
 void Boss::UpdateAttack(void)
 {
+
 	transformBody_.pos = MV1GetFramePosition(transform_.modelId, JOINT_FEET_BODY);
-	int attackSelect = static_cast<int>(UtilityMath::RandRangeF(0,3));
+	int randomAttack = static_cast<int>(UtilityMath::RandRangeF(0.0f, static_cast<float>(ATTACK_TYPE::MAX)));
+	ATTACK_TYPE attackSelect =  static_cast<ATTACK_TYPE>(randomAttack);
+
 	switch (attackSelect)
 	{
-	case 0:
+	case ATTACK_TYPE::JUMP:
 		ChangeState(STATE::JUMP);
 		break;
-	case 1:
+
+	case ATTACK_TYPE::MG:
 		weaponMGL_->ChangeState(WeaponMGL::STATE::ATTACK);
 		weaponMGR_->ChangeState(WeaponMGR::STATE::ATTACK);
 		ChangeState(STATE::IDLE);
 		break;
-	case 2:
+
+	case ATTACK_TYPE::ROAD:
 		ChangeState(STATE::ROADATTACK);
 		break;
 
 	default:
 		break;
-
 	}
 
-	
 }
 
 void Boss::UpdateJump(void)
@@ -458,17 +462,19 @@ void Boss::UpdateJump(void)
 		wave_->SetIsAttack(true);
 		ChangeState(STATE::IDLE);
 	}
-	
-	if (transform_.pos.y >= 3500)
+	else if (isJump_)
 	{
-		jumpPow_ *= -50.0f;
-	}
-	
-	if(jumpPow_>=-50)
-	{
-		VECTOR movePow = VScale(jumpDir_, speed_);
-		// à⁄ìÆèàóù
-		transform_.pos = VAdd(transform_.pos, movePow);
+		if (transform_.pos.y >= JUMP_MAX_UP)
+		{
+			jumpPow_ = POW_JUMP_DOUN;
+		}
+
+		if (jumpPow_ >= POW_JUMP_DOUN)
+		{
+			VECTOR movePow = VScale(jumpDir_, speed_);
+			// à⁄ìÆèàóù
+			transform_.pos = VAdd(transform_.pos, movePow);
+		}
 	}
 
 
