@@ -28,7 +28,7 @@ void BBulletMG::InitTransform(void)
 {
 	transform_.scl = { 0.05f,0.05f,0.05f };
 	transform_.quaRot = Quaternion::Identity();
-	transform_.quaRotLocal = Quaternion::Identity();
+	transform_.quaRotLocal =Quaternion::AngleAxis(UtilityMath::Deg2RadF(INIT_ROT), UtilityMath::AXIS_Y);
 	transform_.Update();
 }
 

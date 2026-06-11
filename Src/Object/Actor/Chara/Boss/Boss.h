@@ -27,6 +27,14 @@ public:
 		END,
 	};
 
+	enum class ATTACK_TYPE
+	{
+		JUMP,
+		MG,
+		ROAD,
+		MAX,
+	};
+
 	///ウェポンの接続ボーンの名前
 	enum class BONE_NAME
 	{
@@ -110,10 +118,16 @@ private:
 	static constexpr VECTOR BOSS_INIT_POS= { 0.0f, 0.0f, 500.0f };
 	//回転
 	static constexpr float INIT_ROT = 180.0f;
-	
+	//攻撃
+	static constexpr float MAX_ATTACK_INTERVAL = 600;
+	static constexpr float DOUN_ATTACK_INTERVAL = 50;
+
+
 	//ジャンプ力
 	static constexpr float POW_JUMP_INIT = 3000.0f;
+	static constexpr float JUMP_MAX_UP = POW_JUMP_INIT + 500.0f;
 	static constexpr float MOVE_SPEED_INIT = 20.0f;
+	static constexpr float POW_JUMP_DOUN = -50.0f;
 
 	//ロードアッタク
 	static constexpr float WHEEL_ROT = 10.0f;
@@ -159,8 +173,6 @@ private:
 	Transform transformWheelBackFrontR_;
 	Transform transformWheelFrontR_;
 
-	Transform bullet_;
-
 	//ステータス
 	int hp_;						//HP
 	std::array<Bone,7> boneId_;		//各ボーン
@@ -176,6 +188,7 @@ private:
 	//攻撃関連
 	int jumpCount_;
 	int attackCount_;
+	int attackInterval_;
 
 	//攻撃対象情報
 	VECTOR player1Pos_;
