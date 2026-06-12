@@ -35,7 +35,7 @@ static constexpr float JUMP_POW = 5.0f;
 
 // 回避力
 static constexpr float DODGE_POW = 15.0f;
-static constexpr float TIME_DODGE = 1.0f;
+static constexpr float TIME_DODGE = 0.65f;
 static constexpr float TIME_WAIT_DODGE = 1.75f;
 
 
@@ -116,22 +116,20 @@ void Player::InitAnimation(void)
 		, 40.0f, resMng.LoadHandleId(ResourceManager::SRC::ANIM_RUN));
 
 	animation_->AddExternal(static_cast<int>(ANIM_TYPE::THROW_LEFT)
-		, 17.5f, resMng.LoadHandleId(ResourceManager::SRC::ANIM_THROW_LEFT)
-		, UtilityMath::VECTOR_ZERO);
+		, 20.0f, resMng.LoadHandleId(ResourceManager::SRC::ANIM_THROW_LEFT));
 
 	animation_->AddExternal(static_cast<int>(ANIM_TYPE::THROW_RIGHT)
-		, 17.5f, resMng.LoadHandleId(ResourceManager::SRC::ANIM_THROW_RIGHT)
-		, UtilityMath::VECTOR_ZERO);
+		, 20.0f, resMng.LoadHandleId(ResourceManager::SRC::ANIM_THROW_RIGHT));
 
 	animation_->AddExternal(static_cast<int>(ANIM_TYPE::THROW_RUN)
 		, 20.0f, resMng.LoadHandleId(ResourceManager::SRC::ANIM_THROW_RUN));
 
 	animation_->AddExternal(static_cast<int>(ANIM_TYPE::JUMP)
-		, 37.5f, resMng.LoadHandleId(ResourceManager::SRC::ANIM_JUMP));
+		, 45.5f, resMng.LoadHandleId(ResourceManager::SRC::ANIM_JUMP));
 
 	animation_->AddExternal(static_cast<int>(ANIM_TYPE::DODGE)
 		, 40.0f, resMng.LoadHandleId(ResourceManager::SRC::ANIM_DODGE)
-		, UtilityMath::VECTOR_ZERO);
+		, VGet(0.0f, 75.0f, 0.0f));
 
 
 	animType_ = ANIM_TYPE::IDLE;
@@ -176,7 +174,7 @@ void Player::InitPost(void)
 	constexpr float SHOT_TIME_INC_INPUT = 0.2f; // 行動間隔上昇値
 
 	constexpr float SHOT_TIME_ACTIVE = 2.5f; // 有効時間
-	constexpr float SHOT_TIME_ACTION_ACTIVE = 1.25f; // 有効時間
+	constexpr float SHOT_TIME_ACTION_ACTIVE = 1.25f; // 行動有効時間
 	constexpr float SHOT_TIME_ACTIVE_INPUT = 1.725f; // 入力可能時間
 	constexpr float SHOT_TIME_END = 0.25f; // 終了時間
 
@@ -204,18 +202,17 @@ void Player::InitPost(void)
 								, SHOT_TIME_STOP, SHOT_TIME_STOP_ACTIVE, timeInput);
 
 	timeActive += (SHOT_TIME_INCREMENT * 2);
-	timeEnd += (SHOT_TIME_INCREMENT / 2);
 	actionController_->SetAction(2, 150, timeActive, timeActionActive, timeEnd
 								, std::bind(&Player::ShotBullet, this)
 								, SHOT_TIME_STOP, SHOT_TIME_STOP_ACTIVE, 0.0f);
 
 
 	// ジャンプ
-	actionController_->SetAction(3, 0, 0.4f, 0.35f, 0.0f
+	actionController_->SetAction(3, 0, 0.2f, 0.2f, 0.0f
 								, std::bind(&Player::Jump, this)
-								, 0.075f, 0.2f);
+								, 0.05f, 0.2f);
 	// 回避
-	actionController_->SetAction(4, 0, 0.4f, 0.35f, 0.0f
+	actionController_->SetAction(4, 0, 0.275f, 0.2f, 0.0f
 								, std::bind(&Player::Dodge, this)
 								, 0.075f, 0.2f);
 }
@@ -333,12 +330,6 @@ void Player::ProcessMove(void)
 	if (input.IsNew(KEY_INPUT_A)) { dir.x += -1.0f; }
 	if (input.IsNew(KEY_INPUT_D)) { dir.x += 1.0f; }
 
-	if (actionController_->IsActiveAction()
-		&& actionController_->GetActionState() != PActionController::PACTION_STATE::NONE)
-	{
-		movePow_ = UtilityMath::VECTOR_ZERO;
-		return;
-	}
 
 	// カメラの方向で進行
 	Quaternion cameraRot = SceneManager::GetInstance().GetCamera()->GetQuaRotY();
@@ -436,6 +427,7 @@ void Player::Dodge(void)
 	curTimeActiveDodge_ = TIME_DODGE;
 
 	curInvTime_ = TIME_DODGE;
+	curTimeWaitDodge_ = TIME_WAIT_DODGE;
 }
 
 void Player::ProcessKnock(void)

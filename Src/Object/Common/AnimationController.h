@@ -157,5 +157,5 @@ private:
 
 	/// @brief 固定アニメーション処理
 	/// @param _playAnim 再生中のアニメーション
-	void AnimationInPlace(Animation& _playAnim);
+	void AnimationInPlace(Animation& _playAnim, float _blendTime);
 };

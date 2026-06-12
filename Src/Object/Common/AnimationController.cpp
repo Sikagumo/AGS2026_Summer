@@ -141,12 +141,6 @@ void AnimationController::Play(int _type, bool _isLoop, float _playSpeed, float 
 		playAnim.attachNo = MV1AttachAnim(modelId_, animIdx, playAnim.modelId);
 	}
 
-	if (playAnim.isInPlace)
-	{
-		// アニメーション位置固定処理
-		AnimationInPlace(playAnim);
-	}
-
 	// アニメーション総時間の取得
 	playAnim.totalTime = MV1GetAttachAnimTotalTime(modelId_, playAnim.attachNo);
 
@@ -192,13 +186,16 @@ void AnimationController::Update(void)
 		MV1SetAttachAnimTime(modelId_, curAnim.attachNo, curAnim.step);
 	}
 
+	
+	// ブレンド時間が割り当てているときは、現在時間と最大時間の割合を、それ以外はタイマーを終了
+	float time = ((blendTime_ > 0.0f) ? (curBlendTime_ / blendTime_) : 1.0f);
+
 	if (prePlayType_ != -1)
 	{
 		// ブレンドタイマー増加
 		curBlendTime_ += deltaTime;
 		
-		// ブレンド時間が割り当てているときは、現在時間と最大時間の割合を、それ以外はタイマーを終了
-		float time = ((blendTime_ > 0.0f) ? (curBlendTime_ / blendTime_) : 1.0f);
+		
 
 		// 旧・新規アニメーションのブレンド率を割り当て
 		MV1SetAttachAnimBlendRate(modelId_, preAnim.attachNo, (1.0f - time));
@@ -215,6 +212,29 @@ void AnimationController::Update(void)
 			MV1SetAttachAnimBlendRate(modelId_, curAnim.attachNo, 1.0f);
 		}
 	}
+
+	// 対象フレームのローカル行列を初期値にリセットする
+	MV1ResetFrameUserLocalMatrix(modelId_, 1);
+
+	
+
+	
+	if (preAnim.isInPlace || curAnim.isInPlace)
+	{
+		// アニメーション位置固定処理
+		AnimationInPlace(preAnim, time);
+	}
+	if (preAnim.isInPlace)
+	{
+		// アニメーション位置固定処理
+		AnimationInPlace(preAnim, time);
+	}
+	if (curAnim.isInPlace)
+	{
+		// アニメーション位置固定処理
+		//AnimationInPlace(curAnim, time);
+	}
+	
 }
 
 void AnimationController::DrawDebug(void)
@@ -408,28 +428,32 @@ bool AnimationController::IsFindAnimation(int _type)
 	return false;
 }
 
-void AnimationController::AnimationInPlace(Animation& _playAnim)
+void AnimationController::AnimationInPlace(Animation& _playAnim, float _rate)
 {
 	// ROOTフレーム番号
-	constexpr int FRAME_ROOT_NUM = 0;
+	constexpr int FRAME_ROOT_NUM = 1;
 
 	// 対象フレームのローカル行列を初期値にリセットする
-	MV1ResetFrameUserLocalMatrix(_playAnim.modelId, FRAME_ROOT_NUM);
+	MV1ResetFrameUserLocalMatrix(modelId_, FRAME_ROOT_NUM);
 
 	// 対象フレームのローカル行列(大きさ、回転、位置)を取得する
-	MATRIX mat = MV1GetFrameLocalMatrix(_playAnim.modelId, FRAME_ROOT_NUM);
+	MATRIX mat = MV1GetFrameLocalMatrix(modelId_, FRAME_ROOT_NUM);
 	VECTOR scl = MGetSize(mat);
 	MATRIX rot = MGetRotElem(mat);
 	VECTOR pos = MGetTranslateElem(mat);
 
 	// 大きさ、回転、位置をローカル行列に戻す
 	MATRIX mix = MGetIdent();
+
 	mix = MMult(mix, MGetScale(scl));
+
 	mix = MMult(mix, rot);
 
 	// ローカル座標を行列にそのまま戻さず、調整したローカル座標を設定する
-	mix = MMult(mix, MGetTranslate(_playAnim.inPlaceLocalPos));
+	float rate = std::clamp(_rate, 0.0f, 1.0f);
+	VECTOR localPos = VScale(_playAnim.inPlaceLocalPos, rate);
+	mix = MMult(mix, MGetTranslate(localPos));
 
 	// 対象フレームにセットし直し、アニメーションの移動値を無効化
-	MV1SetFrameUserLocalMatrix(_playAnim.modelId, FRAME_ROOT_NUM, mix);
+	MV1SetFrameUserLocalMatrix(modelId_, FRAME_ROOT_NUM, mix);
 }

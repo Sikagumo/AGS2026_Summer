@@ -13,7 +13,7 @@ PActionController::PActionController(std::unique_ptr<AnimationController>& _anim
 {
 }
 
-void PActionController::SetAction(int _actionNum, int _attackPower, float _timeActive, float _timeActionActive
+void PActionController::SetAction(int _actionNum, int _attackPower, float _timeActive, float _timeActiveFunc
 	, float _timeEnd, std::function<void(void)> _actionProc
 	, float _timeStop, float _timeStopActive, float _timeInput)
 {
@@ -36,7 +36,7 @@ void PActionController::SetAction(int _actionNum, int _attackPower, float _timeA
 	param.timeInput = _timeInput;
 	param.timeStop = _timeStop;
 	param.timeStopActive = _timeStopActive;
-	param.timeActionActive = _timeActionActive;
+	param.timeActionActive = _timeActiveFunc;
 	param.actionProcess = _actionProc;
 	
 	actions_.emplace(_actionNum, param);
