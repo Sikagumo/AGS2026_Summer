@@ -59,7 +59,6 @@ void Transform::DrawModelDir(void)
 	const int DRAW_DIM = 10;
 	const unsigned int SPEC_COLOR = 0x555555;
 	VECTOR drawPos;
-	VECTOR drawPosLocal;
 	unsigned int drawColor;
 
 	// XŽ²

@@ -51,12 +51,11 @@ void SceneResult::Draw(void)
 
 	if (isGameOver_)
 	{
-		DrawRotaGraph(Application::SCREEN_HALF_X, IMAGET_TITLE_Y, 2.0f, UtilityMath::DEG2RAD, imageResult_[0], true);
-
+		DrawRotaGraph(Application::SCREEN_HALF_X, IMAGET_TITLE_Y, 2.0f, UtilityMath::DEG2RAD, imageResult_[2], true);
 	}
 	else
 	{
-		DrawRotaGraph(Application::SCREEN_HALF_X, IMAGET_TITLE_Y, 2.0f, UtilityMath::DEG2RAD, imageResult_[2], true);
+		DrawRotaGraph(Application::SCREEN_HALF_X, IMAGET_TITLE_Y, 2.0f, UtilityMath::DEG2RAD, imageResult_[0], true);
 	}
 
 	DrawString(Application::SCREEN_HALF_X, Application::SCREEN_HALF_Y + 10, "クリックしてタイトルへ", 0x000000, true);

@@ -1,6 +1,5 @@
 #pragma once
 #include "./PlayerBase.h"
-#include "../Player/PlayerBase.h"
 #include "./PActionController.h"
 #include <DxLib.h>
 
@@ -24,7 +23,11 @@ public:
 		MAX,
 	};
 
-	Player(int _playerNo, BULLET_TYPE _playerType);
+	/// @brief コンストラクタ
+	/// @param _playerNo プレイヤー番号
+	/// @param _bulletType 攻撃の種類
+	/// @param _startPos 開始位置
+	Player(int _playerNo, BULLET_TYPE _bulletType, const VECTOR& _startPos);
 
 	~Player(void)override = default;
 
@@ -47,6 +50,7 @@ public:
 	void SetKnock(const VECTOR& _knockDirXZ, float _knockPowXZ
 					, bool _isStan, float _knockPowY = KNOCK_POW_Y);
 
+	void SetRespawn(void);
 
 protected:
 
@@ -84,7 +88,7 @@ private:
 	Vector2F knockPowXZ_;
 
 	Vector2F dodgePowXZ_;
-	float curTimeActiveDodge_;
+	float timeActiveDodge_;
 
 	// カメラに応じた回転をするか否か
 	bool isCameraRotActive_;

@@ -23,16 +23,16 @@ DamageController::DamageController():
 	cannon_.type = BOSS_WEPO_TYPE::CANNON;
 
 	mg_.type = BOSS_WEPO_TYPE::MG;
-	mg_.attack = 0.01;
+	mg_.attack = 0.01f;
 
 	mp_.type = BOSS_WEPO_TYPE::MP;
 	
 	rg_.type = BOSS_WEPO_TYPE::RG;
 
 	pressWave_.type = BOSS_WEPO_TYPE::PRESSWAVE;
-	pressWave_.attack = 0.1;
+	pressWave_.attack = 0.1f;
 	rode_.type = BOSS_WEPO_TYPE::RODE;
-	rode_.attack = 0.3;
+	rode_.attack = 0.3f;
 }
 
 DamageController::~DamageController()

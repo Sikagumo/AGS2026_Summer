@@ -159,7 +159,7 @@ void Camera::DrawDebug(void)
 					? "左マシンガン" : "");
 	targetText += ((isLockOn_ && lockOnTarget_ == LOCKON_TARGET::BOSS_WEAPON_MGL_R)
 					? "右マシンガン" : "");
-	DrawString(Application::SCREEN_HALF_X - 50, 0, targetText.c_str(), 0xff0000);
+	DrawString(Application::SCREEN_SIZE_X - 200, 0, targetText.c_str(), 0xff0000);
 }
 
 VECTOR Camera::GetForward(void) const

@@ -4,21 +4,27 @@
 #include "../../Manager/Generic/ResourceManager.h"
 #include "../../Manager/Decoration/SoundManager.h"
 #include "../../Manager/System/TimeManager.h"
-#include "../../Manager/Generic/SceneManager.h"
 #include "../../Common/Loading.h"
 #include "../../Camera/Camera.h"
 #include "../../Utility/UtilityMath.h"
+#include "../../Application.h"
 #include "SceneTitle.h"
 #include "SceneResult.h"
-//#include "SceneScore.h"
+
+
+// ゲーム時間
+constexpr float GAME_TIME = 500.0f;
+constexpr float GAME_TIME_DEFEAT_DEC = 75.0f;
 
 SceneGame::SceneGame(void)
+	: players_()
+	, boss_(std::make_unique<Boss>())
+	, stage_(std::make_unique<Stage>())
+	, damageController_(std::make_unique<DamageController>())
+	, gameTime_(GAME_TIME)
 {
-	player_ = std::make_unique<Player>(0, Player::BULLET_TYPE::BIG);
-	boss_ = std::make_unique<Boss>();
-	stage_ = std::make_unique<Stage>();
-	damageController_ = std::make_unique<DamageController>();
-
+	std::unique_ptr<Player> player = std::make_unique<Player>(0, Player::BULLET_TYPE::BIG, UtilityMath::VECTOR_ZERO);
+	players_.emplace_back(std::move(player));
 }
 
 
@@ -26,7 +32,11 @@ void SceneGame::Load(void)
 {
 	SceneBase::Load();
 
-	player_->Load();
+
+	for (auto& player : players_)
+	{
+		player->Load();
+	}
 
 	boss_->Load();
 
@@ -51,46 +61,48 @@ void SceneGame::Initialize(void)
 	
 	auto& camera = SceneManager::GetInstance().GetCamera();
 	camera->ChangeMode(Camera::MODE::FOLLOW);
-	camera->SetFollow(&player_->GetTransform());
+	camera->SetFollow(&players_.at(0)->GetTransform());
 
-	player_->Init();
+	for (auto& player : players_)
+	{
+		player->Init();
+	}
+
 	boss_->Init();
 	stage_->Init();
-	damageController_->SetPlayerMaxHp(player_->GetMaxHp());
+	damageController_->SetPlayerMaxHp(players_.at(0)->GetMaxHp());
 }
 
 void SceneGame::Update(void)
 {
-	if (Loading::GetInstance()->IsLoading()) { return; }
-
 	auto& sound = SoundManager::GetInstance();
 	auto& input = InputManager::GetInstance();
-	auto& time = TimeManager::GetInstance();
 	auto& camera = SceneManager::GetInstance().GetCamera();
 	auto loader = Loading::GetInstance();
 
-	// 時間を取得
-	float times = time.GetGameTime();
+	if (loader->IsLoading()) { return; }
 
 	SceneManager::GetInstance().GetCamera()->Update();
 
-	player_->Update();
+	players_.at(0)->Update();
 	boss_->Update();
 	stage_->Update();
 	damageController_->Update();
 
 	DamageProcess();
 
-	if (player_->GetCurHp() <= 0 || boss_->GetHP() <= 0)
+	UpdateGameTime();
+
+	// ボスHPが０の時、ゲームクリア
+	if (boss_->GetHP() <= 0 && gameTime_ > 0.0f)
 	{
-		bool isGameOver = (boss_->GetHP() <= 0 && player_->GetCurHp() > 0);
-		SceneManager::GetInstance().ChangeScene(std::make_shared<SceneResult>(isGameOver));
+		SceneManager::GetInstance().ChangeScene(std::make_shared<SceneResult>(false));
 	}
 }
 
 void SceneGame::DamageProcess(void)
 {
-	boss_->SetPlayer1Pos(player_->GetTransform().pos);
+	boss_->SetPlayer1Pos(players_.at(0)->GetTransform().pos);
 	
 	boss_->SetBossDamage(damageController_->GetBossDamage());
 
@@ -106,10 +118,10 @@ void SceneGame::DamageProcess(void)
 	boss_->SetWeaponRGDamage(damageController_->GetWeaponRGDamage());
 
 	// プレイヤーの攻撃
-	damageController_->SetPlayerAttack(player_->GetPower());
+	damageController_->SetPlayerAttack(players_.at(0)->GetPower());
 
 	// プレイヤー被ダメージ処理
-	player_->SetDamage(damageController_->GetPlayerDamage(), true);
+	players_.at(0)->SetDamage(damageController_->GetPlayerDamage(), true);
 }
 
 void SceneGame::CameraLockOn(void)
@@ -121,13 +133,34 @@ void SceneGame::CameraLockOn(void)
 	
 }
 
+void SceneGame::UpdateGameTime(void)
+{
+	// 時間を取得
+	float times = TimeManager::GetInstance().GetDeltaTime();
+
+	gameTime_ -= times;
+
+	for (auto& player : players_)
+	{
+		if (player->GetCurHp() <= 0)
+		{
+			gameTime_ -= GAME_TIME_DEFEAT_DEC;
+			player->SetRespawn();
+		}
+	}
+
+	if (gameTime_ <= 0.0f)
+	{
+		SceneManager::GetInstance().ChangeScene(std::make_shared<SceneResult>(true));
+	}
+}
+
 
 void SceneGame::Draw(void)
 {
-
 	stage_->Draw();
 
-	player_->Draw();
+	players_.at(0)->Draw();
 
 	boss_->Draw();
 
@@ -136,13 +169,22 @@ void SceneGame::Draw(void)
 #endif // _DEBUG
 
 	SceneManager::GetInstance().GetCamera()->DrawDebug();
+
+	std::string textSecond = (((static_cast<int>(gameTime_) % 60) < 10) ? "0" : "");
+	textSecond += std::to_string((static_cast<int>(gameTime_) % 60));
+
+	std::string textMinute = (((static_cast<int>(gameTime_) / 60) < 10) ? "0" : "");
+	textMinute += std::to_string((static_cast<int>(gameTime_) / 60));
+
+	DrawFormatString(Application::SCREEN_HALF_X, 0, 0x000000, "撤退まであと %s:%s"
+					, textMinute.c_str(), textSecond.c_str());
 }
 
 void SceneGame::Release(void)
 {
 	stage_->Release();
 	
-	player_->Release();
+	players_.at(0)->Release();
 
 	boss_->Release();
 }

@@ -2,7 +2,6 @@
 #include "../../Scene/SceneBase.h"
 #include "../../Scene/MainScene/SceneTitle.h"
 #include "../../Scene/MainScene/SceneGame.h"
-#include "../../Scene/MainScene/SceneGamePlayer.h"
 #include "../../Scene/MainScene/SceneGameBoss.h"
 #include "../Decoration/SoundManager.h"
 #include "../../Object/Collision/CollisionController.h"

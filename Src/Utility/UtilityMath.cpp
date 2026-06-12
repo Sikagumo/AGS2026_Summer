@@ -449,7 +449,7 @@ Vector2 UtilityMath::VNormalize(const Vector2& _vec)
 
 	float mag = sqrtf((_vec.x * _vec.x) + (_vec.y * _vec.y));
 
-	return Vector2(_vec.x / mag, _vec.y / mag);
+	return Vector2(static_cast<int>(_vec.x / mag), static_cast<int>(_vec.y / mag));
 }
 Vector2F UtilityMath::VNormalize(const Vector2F& _vec)
 {
