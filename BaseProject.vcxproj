@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Src\Object\Actor\Chara\Weapon\BossWeapon\MG\MGBase.cpp" />
     <ClCompile Include="Src\Object\Collision\CollisionBox.cpp" />
     <ClCompile Include="Src\Object\Collision\CollisionCircle.cpp" />
     <ClCompile Include="Src\Object\Collision\CollisionLine.cpp" />
@@ -84,13 +85,14 @@
     <ClCompile Include="Src\Utility\UtilityCommon.cpp" />
     <ClCompile Include="Src\Manager\System\TimeManager.cpp" />
     <ClCompile Include="Src\Object\Actor\Chara\Weapon\WeaponBase.cpp" />
-    <ClCompile Include="Src\Object\Actor\Chara\Weapon\BossWeapon\WeaponMP.cpp" />
-    <ClCompile Include="Src\Object\Actor\Chara\Weapon\BossWeapon\WeaponRG.cpp" />
-    <ClCompile Include="Src\Object\Actor\Chara\Weapon\BossWeapon\WeaponCannon.cpp" />
-    <ClCompile Include="Src\Object\Actor\Chara\Weapon\BossWeapon\WeaponMGL.cpp" />
-    <ClCompile Include="Src\Object\Actor\Chara\Weapon\BossWeapon\WeaponMGR.cpp" />
+    <ClCompile Include="Src\Object\Actor\Chara\Weapon\BossWeapon\MP\WeaponMP.cpp" />
+    <ClCompile Include="Src\Object\Actor\Chara\Weapon\BossWeapon\RG\WeaponRG.cpp" />
+    <ClCompile Include="Src\Object\Actor\Chara\Weapon\BossWeapon\Cannon\WeaponCannon.cpp" />
+    <ClCompile Include="Src\Object\Actor\Chara\Weapon\BossWeapon\MG\WeaponMGL.cpp" />
+    <ClCompile Include="Src\Object\Actor\Chara\Weapon\BossWeapon\MG\WeaponMGR.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Src\Object\Actor\Chara\Weapon\BossWeapon\MG\MGBase.h" />
     <ClInclude Include="Src\Object\Collision\CollisionBox.h" />
     <ClInclude Include="Src\Object\Collision\CollisionCircle.h" />
     <ClInclude Include="Src\Object\Collision\CollisionLine.h" />
@@ -158,11 +160,11 @@
     <ClInclude Include="Src\Utility\UtilityCommon.h" />
     <ClInclude Include="Src\Manager\System\TimeManager.h" />
     <ClInclude Include="Src\Object\Actor\Chara\Weapon\WeaponBase.h" />
-    <ClInclude Include="Src\Object\Actor\Chara\Weapon\BossWeapon\WeaponMP.h" />
-    <ClInclude Include="Src\Object\Actor\Chara\Weapon\BossWeapon\WeaponRG.h" />
-    <ClInclude Include="Src\Object\Actor\Chara\Weapon\BossWeapon\WeaponCannon.h" />
-    <ClInclude Include="Src\Object\Actor\Chara\Weapon\BossWeapon\WeaponMGL.h" />
-    <ClInclude Include="Src\Object\Actor\Chara\Weapon\BossWeapon\WeaponMGR.h" />
+    <ClInclude Include="Src\Object\Actor\Chara\Weapon\BossWeapon\MP\WeaponMP.h" />
+    <ClInclude Include="Src\Object\Actor\Chara\Weapon\BossWeapon\RG\WeaponRG.h" />
+    <ClInclude Include="Src\Object\Actor\Chara\Weapon\BossWeapon\Cannon\WeaponCannon.h" />
+    <ClInclude Include="Src\Object\Actor\Chara\Weapon\BossWeapon\MG\WeaponMGL.h" />
+    <ClInclude Include="Src\Object\Actor\Chara\Weapon\BossWeapon\MG\WeaponMGR.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

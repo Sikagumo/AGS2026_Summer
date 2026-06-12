@@ -23,6 +23,7 @@ public:
 		IDLE,
 		ATTACK,
 		JUMP,
+		JUMPBEFORE,
 		ROADATTACK,
 		END,
 	};
@@ -45,6 +46,16 @@ public:
 		WEAPON_JOINT_MP_L,
 		WEAPON_JOINT_MP_R,
 		WEAPON_JOINT_RG,
+		MAX,
+	};
+
+
+	enum class ANIM_TYPE
+	{
+		ATTACK,
+		DIR,
+		JUMP,
+		JUMPBEFORE,
 		MAX,
 	};
 
@@ -204,6 +215,7 @@ private:
 	std::unique_ptr<WeaponRG> weaponRG_;
 	std::unique_ptr< BBulletWave> wave_;
 	
+	
 
 	///ボーン初期化
 	void BoneParam(void);
@@ -224,7 +236,8 @@ private:
 	void ChangeStateIdle(void);
 	void ChangeStateAttack(void);
 	void ChangeStateJump(void);
-	void ChangeRoadAttack(void);
+	void ChangeStateJumpBefore(void);
+	void ChangeStateRoadAttack(void);
 	void ChangeStateEnd(void);
 	// 更新系
 	// 状態管理(更新ステップ)
@@ -232,6 +245,7 @@ private:
 	void UpdateIdle(void);
 	void UpdateAttack(void);
 	void UpdateJump(void);
+	void UpdateJumpBefore(void);
 	void UpdateRoadAttack(void);
 	void UpdateEnd(void);
 

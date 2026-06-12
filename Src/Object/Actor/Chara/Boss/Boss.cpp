@@ -6,17 +6,18 @@
 #include "../../../../Utility/MatrixUtility.h"
 #include "../../../../Camera/Camera.h"
 #include "../../../Common/Transform.h"
+#include "../../../Common/AnimationController.h"
 #include "../../../Collider/ColliderBase.h"
 #include "../../../Collider/ColliderCapsule.h"
 #include "../../../Collider/ColliderLine.h"
 #include "../../../Collider/ColliderSphere.h"
 #include "../../../Collision/CollisionController.h"
 #include "../Weapon/WeaponBase.h"
-#include "../Weapon/BossWeapon/WeaponMGL.h"
-#include "../Weapon/BossWeapon/WeaponMGR.h"
-#include "../Weapon/BossWeapon/WeaponMP.h"
-#include "../Weapon/BossWeapon/WeaponRG.h"
-#include "../Weapon/BossWeapon/WeaponCannon.h"
+#include "../Weapon/BossWeapon/MG/WeaponMGL.h"
+#include "../Weapon/BossWeapon/MG/WeaponMGR.h"
+#include "../Weapon/BossWeapon/MP/WeaponMP.h"
+#include "../Weapon/BossWeapon/RG/WeaponRG.h"
+#include "../Weapon/BossWeapon/Cannon/WeaponCannon.h"
 #include "../Weapon/Bullet/Boss/BBulletWave.h"
 #include "Boss.h"
 
@@ -250,6 +251,12 @@ void Boss::InitCollider(void)
 
 void Boss::InitAnimation(void)
 {
+	CharaBase::InitAnimation();
+	for (int i = 0; i < static_cast<int>(ANIM_TYPE::MAX); i++)
+	{
+		animation_->AddInternal(i, 20.0f);
+	}
+	animation_->Play(static_cast<int>(ANIM_TYPE::DIR));
 }
 
 
@@ -271,7 +278,8 @@ void Boss::InitPost(void)
 		std::bind(&Boss::ChangeStateIdle, this));
 	stateChanges_.emplace(static_cast<int>(STATE::ATTACK), std::bind(&Boss::ChangeStateAttack, this));
 	stateChanges_.emplace(static_cast<int>(STATE::JUMP), std::bind(&Boss::ChangeStateJump, this));
-	stateChanges_.emplace(static_cast<int>(STATE::ROADATTACK), std::bind(&Boss::ChangeRoadAttack, this));
+	stateChanges_.emplace(static_cast<int>(STATE::JUMPBEFORE), std::bind(&Boss::ChangeStateJumpBefore, this));
+	stateChanges_.emplace(static_cast<int>(STATE::ROADATTACK), std::bind(&Boss::ChangeStateRoadAttack, this));
 	stateChanges_.emplace(static_cast<int>(STATE::END), std::bind(&Boss::ChangeStateEnd, this));
 	ChangeState(STATE::IDLE);
 
@@ -300,12 +308,14 @@ void Boss::ChangeStateIdle(void)
 {
 	stateUpdate_ = std::bind(&Boss::UpdateIdle, this);
 	attackCount_ = 0;
+	animation_->Play(static_cast<int>(ANIM_TYPE::DIR));
 }
 
 void Boss::ChangeStateAttack(void)
 {
 	stateUpdate_ = std::bind(&Boss::UpdateAttack, this);
 	attackCount_ = 0;
+	animation_->Play(static_cast<int>(ANIM_TYPE::ATTACK));
 	
 }
 
@@ -313,13 +323,20 @@ void Boss::ChangeStateJump(void)
 {
 	stateUpdate_ = std::bind(&Boss::UpdateJump, this);
 
+	animation_->Play(static_cast<int>(ANIM_TYPE::JUMP));
 	// ƒWƒƒƒ“ƒv—Ê‚ÌŒvŽZ
 	float jumpSpeed = POW_JUMP_INIT * TimeManager::GetInstance().GetDeltaTime();
 	jumpPow_ = jumpSpeed;
 	isJump_ = true;
 }
 
-void Boss::ChangeRoadAttack(void)
+void Boss::ChangeStateJumpBefore(void)
+{
+	stateUpdate_ = std::bind(&Boss::UpdateJumpBefore, this);
+	animation_->Play(static_cast<int>(ANIM_TYPE::JUMPBEFORE),false);
+}
+
+void Boss::ChangeStateRoadAttack(void)
 {
 	stateUpdate_ = std::bind(&Boss::UpdateRoadAttack, this);
 	transform_.modelId = transformFeetCar_.modelId;
@@ -430,12 +447,12 @@ void Boss::UpdateAttack(void)
 
 	transformBody_.pos = MV1GetFramePosition(transform_.modelId, JOINT_FEET_BODY);
 	int randomAttack = static_cast<int>(UtilityMath::RandRangeF(0.0f, static_cast<float>(ATTACK_TYPE::MAX)));
-	ATTACK_TYPE attackSelect =  static_cast<ATTACK_TYPE>(randomAttack);
+	ATTACK_TYPE attackSelect =static_cast<ATTACK_TYPE>(randomAttack);
 
 	switch (attackSelect)
 	{
 	case ATTACK_TYPE::JUMP:
-		ChangeState(STATE::JUMP);
+		ChangeState(STATE::JUMPBEFORE);
 		break;
 
 	case ATTACK_TYPE::MG:
@@ -478,6 +495,15 @@ void Boss::UpdateJump(void)
 	}
 
 
+}
+
+void Boss::UpdateJumpBefore(void)
+{
+	transformBody_.pos = MV1GetFramePosition(transform_.modelId, JOINT_FEET_BODY);
+	if (animation_->IsEnd() == true)
+	{
+		ChangeState(STATE::JUMP);
+	}
 }
 
 void Boss::UpdateRoadAttack(void)
