@@ -31,13 +31,13 @@ public:
 	/// @param _actionNum 登録番号
 	/// @param _attackPower 攻撃力
 	/// @param _timeActive 行動有効時間
-	/// @param _timeActionActive 行動までの時間
+	/// @param _timeActiveFunc 行動までの時間
 	/// @param _timeEnd 行動終了時間
 	/// @param _actionProc 行動
 	/// @param _timeStop 停止する時間
 	/// @param _timeStopActive 停止までの時間
 	/// @param _timeInput 次の入力までの時間
-	void SetAction(int _actionNum, int _attackPower, float _timeActive, float _timeActionActive
+	void SetAction(int _actionNum, int _attackPower, float _timeActive, float _timeActiveFunc
 				   , float _timeEnd, std::function<void(void)> _actionProc, float _timeStop = 0.0f, float _timeStopActive = 0.0f, float _timeInput = 0.0f);
 
 	/// @brief 登録した行動を開始する

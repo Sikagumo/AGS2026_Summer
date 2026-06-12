@@ -1,6 +1,6 @@
 #include "PlayerBase.h"
 
-constexpr int HP = 50;
+constexpr int HP = 250;
 
 PlayerBase::PlayerBase(int _playerNo, BULLET_TYPE _bulletType, PLAYER_TYPE _playerType)
 	: CharaBase::CharaBase()

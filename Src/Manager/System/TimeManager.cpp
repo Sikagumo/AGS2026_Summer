@@ -137,5 +137,9 @@ void TimeManager::ResetTimer(const std::string& id)
 
 float TimeManager::GetDeltaTime(void) const
 {
+#ifdef _DEBUG
+	return (1.0f / 60.0f);
+#else
 	return deltaTime_;
+#endif
 }
