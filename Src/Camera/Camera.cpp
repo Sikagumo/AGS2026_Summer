@@ -4,6 +4,7 @@
 #include <EffekseerForDXLib.h>
 #include "../Utility/UtilityMath.h"
 #include "../Manager/Generic/InputManager.h"
+#include "../Manager/System/TimeManager.h"
 #include "../Object/Common/Transform.h"
 #include "../Object/Collider/ColliderBase.h"
 #include "../Object/Collider/ColliderModel.h"
@@ -27,7 +28,7 @@ constexpr float TARGET_POS_MAX_Y = 275.0f;
 
 // 追従有効範囲
 constexpr float POS_SPACE_MIN = 300.0f;
-constexpr float POS_SPACE_MAX = 1350.0f;
+constexpr float POS_SPACE_MAX = 1750.0f;
 
 Camera::Camera(void)
 	: ActorBase::ActorBase()
@@ -94,6 +95,13 @@ void Camera::Update(void)
 		}
 
 		FollowLockOnPosition();
+	}
+
+	// ターゲット対象切替時のイージング進行
+	if (easingTerm_ < 1.0f)
+	{
+		easingTerm_ += TimeManager::GetInstance().GetDeltaTime() / LOCKON_DURATION;
+		easingTerm_ = std::clamp(easingTerm_, 0.0f, 1.0f);
 	}
 }
 
@@ -225,7 +233,9 @@ void Camera::SetLockOnTargets(LOCKON_TARGET _target, const VECTOR& _targetPos, b
 
 void Camera::LockOnChoice(void)
 {
-	float vSize = 10000.0f;
+	/* ロックオン対象選択処理 */
+
+	float vecSize = POS_SPACE_MAX;
 	LOCKON_TARGET lockTarget = LOCKON_TARGET::NONE;
 	
 	if (targetsPos_.empty()) { return; }
@@ -240,10 +250,10 @@ void Camera::LockOnChoice(void)
 		// 最も近い対象範囲内にいる対象を追尾
 		float sizeXZ = std::abs(VSize(VSub(posFollow, posCamera)));
 
-		if (sizeXZ < vSize
+		if (sizeXZ < vecSize
 			&& sizeXZ <= POS_SPACE_MAX && sizeXZ >= POS_SPACE_MIN)
 		{
-			vSize = sizeXZ;
+			vecSize = sizeXZ;
 			lockTarget = target;
 		}
 	}
@@ -255,6 +265,10 @@ void Camera::LockOnChoice(void)
 		return;
 	}
 
+	// ロックオン切り替え時にイージング開始点を記録
+	easingFromPos_ = transform_.pos;
+	easingFromTarget_ = targetPos_;
+	easingTerm_ = 0.0f;
 
 	isLockOn_ = true;
 	lockOnTarget_ = lockTarget;
@@ -274,6 +288,14 @@ void Camera::SetIsLockOn(bool _isLockOn)
 	if (isLockOn_ && !_isLockOn)
 	{
 		SyncAngleYFromRotY();
+	}
+
+	// 切り替え時、現在の位置と注視点をイージング開始点として記録
+	if (isLockOn_ != _isLockOn)
+	{
+		easingFromPos_ = transform_.pos;
+		easingFromTarget_ = targetPos_;
+		easingTerm_ = 0.0f;
 	}
 
 	isLockOn_ = _isLockOn;
@@ -321,19 +343,32 @@ void Camera::SyncFollow(void)
 	
 	// 注視点
 	VECTOR localPos = transform_.quaRot.PosAxis(FOLLOW_TARGET_LOCAL_POS);
-	targetPos_ = VAdd(pos, localPos);
+	VECTOR newTarget = VAdd(pos, localPos);
+
 
 	if (isLockOn_)
 	{
 		VECTOR lockOn = VAdd(pos, VSub(lockOnPos_, pos));
 		lockOn.y = std::clamp(lockOn.y, -TARGET_POS_MAX_Y, TARGET_POS_MAX_Y);
-		targetPos_ = lockOn;
+		newTarget = lockOn;
 	}
 
 	// カメラ位置
 	const VECTOR LOCAL_POS = ((isLockOn_) ? FOLLOW_LOCAL_POS_LOCKON : FOLLOW_LOCAL_POS);
 	localPos = transform_.quaRot.PosAxis(LOCAL_POS);
-	transform_.pos = VAdd(pos, localPos);
+	VECTOR newCamPos = VAdd(pos, localPos);
+
+    // イージング中は EasingChangeTarget() で補間、完了後はそのまま代入
+    if (easingTerm_ < 1.0f)
+    {
+        transform_.pos = EasingChangeTarget(easingFromPos_,    newCamPos, easingTerm_);
+        targetPos_     = EasingChangeTarget(easingFromTarget_, newTarget, easingTerm_);
+    }
+    else
+    {
+        transform_.pos = newCamPos;
+        targetPos_     = newTarget;
+    }
 }
 
 void Camera::SyncAngleYFromRotY(void)

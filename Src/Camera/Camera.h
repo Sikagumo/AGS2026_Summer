@@ -176,10 +176,10 @@ private:
 
 
 	// ロックオン切替イージング用
-	static constexpr float LOCKON_EASING_DURATION = 0.6f; // イージング継続時間(秒)
+	static constexpr float LOCKON_DURATION = 0.6f;
 
 	bool isEasingLockOn_;
-	float easingTimer_;      // イージング経過時間(秒)
+	float easingTerm_;      // イージング経過値
 	VECTOR easingFromPos_;    // カメラ位置イージング開始座標
 	VECTOR easingFromTarget_; // 注視点イージング開始座標
 
