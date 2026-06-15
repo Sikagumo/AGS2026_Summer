@@ -122,4 +122,6 @@ private:
 	void UpdateBullets(void);
 
 	void DelayRotate(void)override;
+
+	void MoveLimit(void);
 };

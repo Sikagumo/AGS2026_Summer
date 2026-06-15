@@ -4,6 +4,7 @@
 #include <EffekseerForDXLib.h>
 #include "../Utility/UtilityMath.h"
 #include "../Manager/Generic/InputManager.h"
+#include "../Manager/Generic/ResourceManager.h"
 #include "../Object/Common/Transform.h"
 #include "../Object/Collider/ColliderBase.h"
 #include "../Object/Collider/ColliderModel.h"
@@ -42,12 +43,15 @@ Camera::Camera(void)
 	, fovRate_(1.0f)
 	, lockOnPos_(UtilityMath::VECTOR_ZERO)
 	, lockOnTarget_(LOCKON_TARGET::NONE)
+	, targetHpImage_(-1)
 {
 	// DxLibの初期設定では、
 	// カメラの位置が x = 320.0f, y = 240.0f, z = (画面のサイズによって変化)、
 	// 注視点の位置は x = 320.0f, y = 240.0f, z = 1.0f
 	// カメラの上方向は x = 0.0f, y = 1.0f, z = 0.0f
 	// 右上位置からZ軸のプラス方向を見るようなカメラ
+
+	targetHpImage_ = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::IMG_HP_TARGET);
 }
 
 void Camera::InitCollider(void)
@@ -126,8 +130,16 @@ void Camera::SetBeforeDraw(void)
 		transform_.GetUp()
 	);
 #ifdef _DEBUG
-	DrawSphere3D(targetPos_, 1.0f, 16, 0xffffff, 0xffffff, true);
+	//DrawSphere3D(targetPos_, 1.0f, 16, 0xffffff, 0xffffff, true);
 #endif
+
+	// ロックオン
+	if (isLockOn_)
+	{
+		
+	}
+	constexpr float CENTER = 0.5f;
+ 	DrawBillboard3D(lockOnPos_, CENTER, CENTER, 5.0f, 0.0f, targetHpImage_, true);
 
 	// DXライブラリのカメラとEffekseerのカメラを同期する。
 	Effekseer_Sync3DSetting();

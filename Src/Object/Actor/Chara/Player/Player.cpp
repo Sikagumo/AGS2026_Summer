@@ -250,7 +250,11 @@ void Player::UpdateProcess(void)
 
 	// 吹っ飛ばし処理
 	ProcessKnock();
+	
+	// 移動位置制限
+	MoveLimit();
 
+	// 胴体位置更新
 	bodyPos_ = transform_.pos;
 	bodyPos_.y += BODY_POS_OFFSET_Y;
 }
@@ -272,9 +276,10 @@ void Player::DrawLate(void)
 	DrawFormatString(10, Application::SCREEN_HALF_Y + (16 * 5), 0xff0000, "プレイヤーHP：%d"
 		, hp_);
 
-	DrawSphere3D(bodyPos_, 10.0f, 16, 0x00ff00, 0xffffff, true);
-
 #ifdef _DEBUG
+
+	// 胴体位置
+	DrawSphere3D(bodyPos_, 10.0f, 10, 0x00ffff, 0xffffff, true);
 
 	UtilityMath::DrawLineXYZ(transform_.pos, transform_.quaRot);
 
@@ -347,6 +352,10 @@ void Player::ProcessMove(void)
 	if (input.IsNew(KEY_INPUT_D)) { dir.x += 1.0f; }
 
 
+	// ジャンプ行動有効時に行動前の時、処理終了
+	if (!actionController_->IsEndActionActive()
+		&& actionController_->GetCurActionNum() == 3) { return; }
+
 	// カメラの方向で進行
 	Quaternion cameraRot = SceneManager::GetInstance().GetCamera()->GetQuaRotY();
 
@@ -379,6 +388,23 @@ void Player::ProcessMove(void)
 		{
 			PlayAnimation(ANIM_TYPE::IDLE);
 		}
+	}
+}
+void Player::MoveLimit(void)
+{
+	/* 範囲外の移動制限 */
+	const float RADIUS = 1750.0f;
+	VECTOR limitPos = transform_.pos;
+	limitPos.y = 0.0f;
+	float curRange = VSize(VSub(limitPos, UtilityMath::VECTOR_ZERO));
+
+	// 範囲外の時、ステージ内に戻す
+	if (curRange > RADIUS)
+	{
+		const float REFLECT_POW = 10.0f;
+		transform_.pos = VAdd(transform_.pos,
+			VScale(VNorm(VSub(UtilityMath::VECTOR_ZERO, limitPos)),
+				REFLECT_POW));
 	}
 }
 
@@ -552,6 +578,8 @@ void Player::DelayRotate(void)
 	// 回転の補間
 	transform_.quaRot = Quaternion::Slerp(transform_.quaRot, goalRot, ROT_TERM);
 }
+
+
 
 void Player::CreateBullet(void)
 {

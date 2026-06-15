@@ -53,6 +53,7 @@ void ResourceManager::Initialize(void)
 	_SetResource(LOAD_TYPE::IMAGE, SRC::IMG_TITLE, PATH_IMAGE + "Title.png");
 	
 	_SetResource(LOAD_TYPE::IMAGE, SRC::IMG_PEACH, PATH_IMAGE + "peach.png");
+	_SetResource(LOAD_TYPE::IMAGE, SRC::IMG_HP_TARGET, PATH_IMAGE + "TargetHpBer.png");
 
 	/* ï°êîâÊëú */
 
