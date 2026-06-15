@@ -50,8 +50,15 @@ public:
 	/// @brief 行動中か否か
 	bool IsActiveAction(void)const { return (curActionNum_ != -1); };
 
+	/// @brief 現在の行動番号を取得
+	int GetCurActionNum(void) { return curActionNum_; }
+
+	/// @brief 行動が終わっているか否か
+	bool IsEndActionActive(void)const { return (curTimeActionActive_ <= 0.0f); };
+
 	PACTION_STATE GetActionState(void)const { return actionState_; };
 
+	/// @brief 指定の行動の攻撃力を取得
 	int GetActionAttackPower(int _type) { return actions_[_type].attackPower; };
 
 

@@ -35,20 +35,23 @@ static constexpr float JUMP_POW = 5.0f;
 
 // 回避力
 static constexpr float DODGE_POW = 15.0f;
-static constexpr float TIME_DODGE = 0.65f;
-static constexpr float TIME_WAIT_DODGE = 1.75f;
+constexpr float TIME_DODGE = 0.65f;
+constexpr float TIME_WAIT_DODGE = 1.75f;
+
+constexpr float BODY_POS_OFFSET_Y = 25.0f;
 
 
-Player::Player(int _playerNo, BULLET_TYPE _playerType)
-	: PlayerBase::PlayerBase(_playerNo, _playerType)
+Player::Player(int _playerNo, BULLET_TYPE _bulletType, const VECTOR& _startPos)
+	: PlayerBase::PlayerBase(_playerNo, _bulletType, _startPos)
 	, shadowHandle_(-1)
 	, animType_(ANIM_TYPE::IDLE)	
-	,  curAttackNum_(0)
+	, curAttackNum_(0)
 	, throwPos_(UtilityMath::VECTOR_ZERO), throwDir_(UtilityMath::VECTOR_ZERO)
 	, shotIndex_(-1)
 	, isCameraRotActive_(false)
-	, curTimeWaitDodge_(0.0f), curTimeActiveDodge_(0.0f)
+	, curTimeWaitDodge_(0.0f), timeActiveDodge_(0.0f)
 	, knockPowXZ_(UtilityMath::VECTOR2F_ZERO)
+	, dodgePowXZ_(UtilityMath::VECTOR2F_ZERO)
 {
 	constexpr int BULLET_MAX = 3;
 	attackNumMax_ = BULLET_MAX;
@@ -66,7 +69,7 @@ void Player::Draw(void)
 {
 	COLOR_F material = COLOR_F();
 
-	if (curInvTime_ > 0.0f)
+	if (timeInv_ > 0.0f)
 	{
 		material = COLOR_F(1.0f, 0.0f, 0.0f, 1.0f);
 	}
@@ -104,6 +107,14 @@ void Player::SetKnock(const VECTOR& _knockDirXZ, float _knockPowXZ, bool _isStan
 	jumpPow_ = _knockPowY;
 }
 
+void Player::SetRespawn(void)
+{
+	hp_ = MAX_HP;
+	transform_.pos = START_POS;
+
+	timeInv_ = TIME_INVINCIBLE;
+}
+
 void Player::InitAnimation(void)
 {
 	ResourceManager& resMng = ResourceManager::GetInstance();
@@ -129,7 +140,7 @@ void Player::InitAnimation(void)
 
 	animation_->AddExternal(static_cast<int>(ANIM_TYPE::DODGE)
 		, 40.0f, resMng.LoadHandleId(ResourceManager::SRC::ANIM_DODGE)
-		, VGet(0.0f, 75.0f, 0.0f));
+		, VGet(0.0f, 0.0f, 0.0f));
 
 
 	animType_ = ANIM_TYPE::IDLE;
@@ -223,7 +234,7 @@ void Player::UpdateProcess(void)
 	float delta = TimeManager::GetInstance().GetDeltaTime();
 
 	// 無敵時間導入
-	curInvTime_ = ((curInvTime_ > 0.0f) ? (curInvTime_ - delta) : 0.0f);
+	timeInv_ = ((timeInv_ > 0.0f) ? (timeInv_ - delta) : 0.0f);
 
 
 	ProcessJump();
@@ -239,6 +250,13 @@ void Player::UpdateProcess(void)
 
 	// 吹っ飛ばし処理
 	ProcessKnock();
+	
+	// 移動位置制限
+	MoveLimit();
+
+	// 胴体位置更新
+	bodyPos_ = transform_.pos;
+	bodyPos_.y += BODY_POS_OFFSET_Y;
 }
 
 void Player::UpdateProcessPost(void)
@@ -259,6 +277,9 @@ void Player::DrawLate(void)
 		, hp_);
 
 #ifdef _DEBUG
+
+	// 胴体位置
+	DrawSphere3D(bodyPos_, 10.0f, 10, 0x00ffff, 0xffffff, true);
 
 	UtilityMath::DrawLineXYZ(transform_.pos, transform_.quaRot);
 
@@ -331,6 +352,10 @@ void Player::ProcessMove(void)
 	if (input.IsNew(KEY_INPUT_D)) { dir.x += 1.0f; }
 
 
+	// ジャンプ行動有効時に行動前の時、処理終了
+	if (!actionController_->IsEndActionActive()
+		&& actionController_->GetCurActionNum() == 3) { return; }
+
 	// カメラの方向で進行
 	Quaternion cameraRot = SceneManager::GetInstance().GetCamera()->GetQuaRotY();
 
@@ -352,7 +377,7 @@ void Player::ProcessMove(void)
 	}
 
 	if (!isJump_
-		&& curTimeActiveDodge_ <= 0.0f
+		&& timeActiveDodge_ <= 0.0f
 		&& actionController_->GetActionState() == PActionController::PACTION_STATE::NONE)
 	{
 		if (!UtilityMath::EqualsVZero(dir))
@@ -363,6 +388,23 @@ void Player::ProcessMove(void)
 		{
 			PlayAnimation(ANIM_TYPE::IDLE);
 		}
+	}
+}
+void Player::MoveLimit(void)
+{
+	/* 範囲外の移動制限 */
+	const float RADIUS = 1750.0f;
+	VECTOR limitPos = transform_.pos;
+	limitPos.y = 0.0f;
+	float curRange = VSize(VSub(limitPos, UtilityMath::VECTOR_ZERO));
+
+	// 範囲外の時、ステージ内に戻す
+	if (curRange > RADIUS)
+	{
+		const float REFLECT_POW = 10.0f;
+		transform_.pos = VAdd(transform_.pos,
+			VScale(VNorm(VSub(UtilityMath::VECTOR_ZERO, limitPos)),
+				REFLECT_POW));
 	}
 }
 
@@ -410,9 +452,9 @@ void Player::ProcessDodge(void)
 		curTimeWaitDodge_ -= TimeManager::GetInstance().GetDeltaTime();
 	}
 
-	if (curTimeActiveDodge_ > 0.0f)
+	if (timeActiveDodge_ > 0.0f)
 	{
-		curTimeActiveDodge_ -= TimeManager::GetInstance().GetDeltaTime();
+		timeActiveDodge_ -= TimeManager::GetInstance().GetDeltaTime();
 	}
 	else
 	{
@@ -424,9 +466,9 @@ void Player::Dodge(void)
 	dodgePowXZ_ = Vector2F(moveDir_.x, moveDir_.z);
 	dodgePowXZ_ *= DODGE_POW;
 
-	curTimeActiveDodge_ = TIME_DODGE;
+	timeActiveDodge_ = TIME_DODGE;
 
-	curInvTime_ = TIME_DODGE;
+	timeInv_ = TIME_DODGE;
 	curTimeWaitDodge_ = TIME_WAIT_DODGE;
 }
 
@@ -536,6 +578,8 @@ void Player::DelayRotate(void)
 	// 回転の補間
 	transform_.quaRot = Quaternion::Slerp(transform_.quaRot, goalRot, ROT_TERM);
 }
+
+
 
 void Player::CreateBullet(void)
 {

@@ -1,6 +1,7 @@
 #pragma once
 #include "../SceneBase.h"
 #include <memory>
+#include <vector>
 #include "../../Object/Actor/Chara/Player/Player.h"
 #include "../../Object/Actor/Chara/Boss/Boss.h"
 #include "../../Object/Actor/Stage/Stage.h"
@@ -38,7 +39,7 @@ public:
 
 private:
 
-    std::unique_ptr<Player> player_;
+    std::vector<std::unique_ptr<Player>> players_;
 
     std::unique_ptr<Boss> boss_;
 
@@ -46,10 +47,15 @@ private:
 
     std::unique_ptr<DamageController> damageController_;
 
+    float gameTime_;
+
+
     /// @brief デバッグ情報の描画
     void DrawDebug(void);
 
     void DamageProcess(void);
 
     void CameraLockOn(void);
+
+    void UpdateGameTime(void);
 };

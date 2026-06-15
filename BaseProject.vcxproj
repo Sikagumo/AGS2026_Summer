@@ -26,6 +26,7 @@
     <ClCompile Include="Src\Object\Collision\CollisionCapsule.cpp" />
     <ClCompile Include="Src\Object\Collision\CollisionSphere.cpp" />
     <ClCompile Include="Src\Manager\Generic\KeyConfInputManager.cpp" />
+    <ClCompile Include="Src\Scene\MainScene\SceneGameBoss.cpp" />
     <ClCompile Include="Src\Scene\MainScene\SceneResult.cpp" />
     <ClCompile Include="Src\Object\Collider2D\Collider2DBox.cpp" />
     <ClCompile Include="Src\Object\Collider2D\Collider2DCircle.cpp" />
@@ -39,14 +40,12 @@
     <ClCompile Include="Src\Object\Actor\Chara\CharaBase.cpp" />
     <ClCompile Include="Src\Object\Actor\Chara\Player\PActionController.cpp" />
     <ClCompile Include="Src\Object\Actor\Chara\Weapon\Bullet\Player\PBulletRapidFire.cpp" />
-    <ClCompile Include="Src\Scene\MainScene\SceneGameBoss.cpp" />
     <ClCompile Include="Src\Object\Collision\CollisionController.cpp" />
     <ClCompile Include="Src\Scene\MainScene\SceneLobby.cpp" />
     <ClCompile Include="Src\Object\Actor\Chara\Player\PlayerBase.cpp" />
     <ClCompile Include="Src\Object\Actor\Chara\Weapon\Bullet\Player\PBulletBase.cpp" />
     <ClCompile Include="Src\Object\Actor\Chara\Weapon\Bullet\Player\PBulletBig.cpp" />
     <ClCompile Include="Src\Scene\MainScene\SceneGame.cpp" />
-    <ClCompile Include="Src\Scene\MainScene\SceneGamePlayer.cpp" />
     <ClCompile Include="Src\Scene\MainScene\SceneTitle.cpp" />
     <ClCompile Include="Src\Scene\SceneBase.cpp" />
     <ClCompile Include="Src\Common\Loading.cpp" />
@@ -99,6 +98,7 @@
     <ClInclude Include="Src\Object\Collision\CollisionCapsule.h" />
     <ClInclude Include="Src\Object\Collision\CollisionSphere.h" />
     <ClInclude Include="Src\Manager\Generic\KeyConfInputManager.h" />
+    <ClInclude Include="Src\Scene\MainScene\SceneGameBoss.h" />
     <ClInclude Include="Src\Scene\MainScene\SceneResult.h" />
     <ClInclude Include="Src\Object\Collider2D\Collider2DBox.h" />
     <ClInclude Include="Src\Object\Collider2D\Collider2DCircle.h" />
@@ -111,14 +111,12 @@
     <ClInclude Include="Src\Object\Actor\Chara\Boss\Boss.h" />
     <ClInclude Include="Src\Object\Actor\Chara\Player\PActionController.h" />
     <ClInclude Include="Src\Object\Actor\Chara\Weapon\Bullet\Player\PBulletRapidFire.h" />
-    <ClInclude Include="Src\Scene\MainScene\SceneGameBoss.h" />
     <ClInclude Include="Src\Object\Collision\CollisionController.h" />
     <ClInclude Include="Src\Scene\MainScene\SceneLobby.h" />
     <ClInclude Include="Src\Object\Actor\Chara\Player\PlayerBase.h" />
     <ClInclude Include="Src\Object\Actor\Chara\Weapon\Bullet\Player\PBulletBig.h" />
     <ClInclude Include="Src\Object\Actor\Chara\Weapon\Bullet\Player\PBulletBase.h" />
     <ClInclude Include="Src\Scene\MainScene\SceneGame.h" />
-    <ClInclude Include="Src\Scene\MainScene\SceneGamePlayer.h" />
     <ClInclude Include="Src\Scene\MainScene\SceneTitle.h" />
     <ClInclude Include="Src\Scene\SceneBase.h" />
     <ClInclude Include="Src\Common\Loading.h" />

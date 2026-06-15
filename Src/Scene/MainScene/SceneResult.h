@@ -11,6 +11,7 @@ public:
 	SceneResult(void) = default;
 
 	/// @brief コンストラクタ
+	/// @param _isGameOver ゲームオーバーにするか否か
 	SceneResult(bool _isGameOver);
 
 	/// @brief デストラクタ

@@ -40,8 +40,9 @@ public:
 	/// @brief コンストラクタ
 	/// @param _playerNo プレイヤー番号
 	/// @param _bulletType 弾の種類
+	/// @param _startPos 初期位置
 	/// @param _playerType プレイヤーの見た目の種類
-	PlayerBase(int _playerNo, BULLET_TYPE _bulletType, PLAYER_TYPE _playerType = PLAYER_TYPE::HYMAN);
+	PlayerBase(int _playerNo, BULLET_TYPE _bulletType, const VECTOR& _startPos, PLAYER_TYPE _playerType = PLAYER_TYPE::HYMAN);
 
 	virtual ~PlayerBase(void)override = default;
 
@@ -60,10 +61,11 @@ public:
 	/// @param _timeInvincible 無敵時間
 	void SetDamage(int _damage, bool _isInvincible = true, float _timeInvincible = TIME_INVINCIBLE);
 
-	int GetCurHp(void) { return hp_; };
-	int GetMaxHp(void) { return MAX_HP; };
+	int GetCurHp(void)const { return hp_; };
+	int GetMaxHp(void)const { return MAX_HP; };
 
 	const VECTOR& GetPos(void)const { return transform_.pos; };
+	VECTOR GetBodyPos(void)const { return bodyPos_; };
 
 
 protected:
@@ -73,8 +75,13 @@ protected:
 
 	const int MAX_HP;
 
+	// 初期位置
+	const VECTOR START_POS;
+
 	// 無敵時間
-	float curInvTime_;
+	float timeInv_;
+
+	VECTOR bodyPos_;
 
 	std::vector<std::unique_ptr<PBulletBase>> bullets_;
 	

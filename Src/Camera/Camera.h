@@ -173,6 +173,7 @@ private:
 	VECTOR lockOnPos_;
 	std::map<LOCKON_TARGET, VECTOR> targetsPos_;
 	LOCKON_TARGET lockOnTarget_;
+	int targetHpImage_;
 
 
 	// ロックオン切替イージング用
