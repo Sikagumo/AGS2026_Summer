@@ -42,6 +42,8 @@ void SceneGame::Load(void)
 
 	stage_->Load();
 
+	SoundManager::GetInstance().Add(SoundManager::TYPE::BGM, SoundManager::SOUND::BGM_GAME, ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::BGM_GAME));
+
 	//時間カウントリセット
 	TimeManager::GetInstance().Reset();
 }
@@ -71,6 +73,7 @@ void SceneGame::Initialize(void)
 	boss_->Init();
 	stage_->Init();
 	damageController_->SetPlayerMaxHp(players_.at(0)->GetMaxHp());
+	SoundManager::GetInstance().Play(SoundManager::SOUND::BGM_GAME);
 }
 
 void SceneGame::Update(void)
@@ -98,6 +101,7 @@ void SceneGame::Update(void)
 	// ボスHPが０の時、ゲームクリア
 	if (boss_->GetHP() <= 0 && gameTime_ > 0.0f)
 	{
+		SoundManager::GetInstance().Stop(SoundManager::SOUND::BGM_GAME);
 		SceneManager::GetInstance().ChangeScene(std::make_shared<SceneResult>(false));
 	}
 }
