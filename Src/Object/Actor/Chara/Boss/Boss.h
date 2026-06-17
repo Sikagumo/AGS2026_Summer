@@ -77,7 +77,11 @@ public:
 	/// <summary>
 	/// ボスの現在座標
 	/// </summary>
-	const VECTOR& GetBossPos(void) const;
+	const VECTOR& GetBossPos(void) const { return transform_.pos; }
+	const float& GetSoundRadius(void)const { return soundRadius_; }
+	const bool& GetLandingFlag(void)const { return isLanging_; }
+	const bool& GetMGFireFlag(void)const { return isMGFire_; }
+	const bool& GetRoadFlag(void)const { return isRoadFire_; }
 
 	//各武器のダメージ受け取り用関数
 	//ガトリング
@@ -130,6 +134,8 @@ private:
 	//攻撃
 	static constexpr float MAX_ATTACK_INTERVAL = 600;
 	static constexpr float DOUN_ATTACK_INTERVAL = 50;
+	//音
+	static constexpr float SOUND_RADIUS = 2000.0f;
 
 
 	//ジャンプ力
@@ -169,7 +175,7 @@ private:
 	static constexpr int JOINT_WAEAPON_CANNON_R = JOINT_FEET_BODY;
 	static constexpr int JOINT_WAEAPON_MP_L = JOINT_CAR_WHEEL_BACK_FRONT_L;
 	static constexpr int JOINT_WAEAPON_MP_R = JOINT_CAR_WHEEL_BACK_R;
-	static constexpr int JOINT_WAEAPON_RG = JOINT_CAR_WHEEL_FRONT_R;
+	static constexpr int JOINT_WAEAPON_RG = JOINT_CAR_WHEEL_BACK_FRONT_R;
 
 	//ボス本体の各トランスフォーム
 	Transform transformFeet_;
@@ -193,6 +199,10 @@ private:
 	int roadAttackTime_;			//体当たりの突進時間
 	int roadLockTime_;				//体当たりのロックオン時間
 	bool roadIsAttack_;				//体当たり攻撃中かのフラグ
+	float soundRadius_;				//音の聞こえる範囲
+	bool isLanging_;				//着地の際の音を鳴らすかのフラグ
+	bool isMGFire_;					//MGの発射音を鳴らすかのフラグ
+	bool isRoadFire_;				//走行音を鳴らすかのフラグ
 
 	//攻撃関連
 	int jumpCount_;

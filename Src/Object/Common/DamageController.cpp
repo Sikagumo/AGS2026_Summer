@@ -50,7 +50,7 @@ void DamageController::Update()
 	weaponRGDamage_ = 0;
 	weaponCannonLDamage_ = 0;
 	weaponCannonRDamage_ = 0;
-
+	isInvincible_ = true;
 	//ボス関連とプレイヤー弾＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝
 	
 	//ボスとプレイヤー弾
@@ -115,6 +115,7 @@ void DamageController::Update()
 		// HP割合ダメージ
 		const float RATE_DAMAGE = (playerHp_ * mg_.attack);
 		playerDamage_ = static_cast<int>(RATE_DAMAGE);
+		isInvincible_ = false;
 	}
 
 	if (CollisionController::GetInstance().IsTagCollidingWithTag(ColliderBase::TAG::ROAD_ATTACK, ColliderBase::TAG::PLAYER))

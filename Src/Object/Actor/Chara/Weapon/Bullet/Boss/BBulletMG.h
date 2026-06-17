@@ -4,7 +4,7 @@ class BBulletMG :
     public BBulletBase
 {
 public:
-	BBulletMG(Transform& _transform);
+	BBulletMG();
 	~BBulletMG(void)override;
 
 	// リソースロード
@@ -19,6 +19,8 @@ public:
 	void SetPos(VECTOR _pos) {};
 
 	void CreateBullets(VECTOR _pos, VECTOR _dir, float _radius)override { transform_.pos = _pos; dir_ = _dir; radius_ = _radius; }
+
+	void SetTransform(Transform trans)override { weaponTrans_ = trans; }
 
 protected:
 	// 大きさ、回転、座標の初期化

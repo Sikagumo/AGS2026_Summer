@@ -66,6 +66,9 @@ public:
 		SE_CLICK,
 		SE_SELECT,
 		SE_DAMAGE,
+		SE_MG_FIRE,
+		SE_BOSS_LANDING,
+		SE_ROAD,
 	};
 
 

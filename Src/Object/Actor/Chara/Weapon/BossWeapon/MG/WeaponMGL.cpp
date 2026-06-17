@@ -1,6 +1,7 @@
 #include <DxLib.h>
 #include <algorithm>
 #include "../../../../../../Manager/Generic/ResourceManager.h"
+#include "../../../../../../Manager/Decoration/SoundManager.h"
 #include "../../../../../../Utility/UtilityMath.h"
 #include "../../../../../Collider/ColliderBase.h"
 #include "../../../../../Collider/ColliderCapsule.h"
@@ -24,6 +25,10 @@ void WeaponMGL::ReleasePost(void)
 void WeaponMGL::Load(void)
 {
 	transform_.SetModel(ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::MODEL_BOSS_WEAPON_MG_L));
+
+	
+
+	SoundManager::GetInstance().Add(SoundManager::TYPE::SE, SoundManager::SOUND::SE_MG_FIRE, ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::SE_MG_FIRE));
 }
 
 void WeaponMGL::InitTransform(void)
@@ -74,6 +79,7 @@ void WeaponMGL::InitPost(void)
 void WeaponMGL::UpdateProcess(void)
 {
 	MGBase::UpdateCommon();
+
 }
 
 void WeaponMGL::UpdateProcessPost(void)
@@ -93,16 +99,7 @@ void WeaponMGL::DrawPre(void)
 		}
 	}
 #ifdef _DEBUG
-	if (isAlive_)
-	{
-
-		for (auto& col : ownColliders_)
-		{
-			col.second->Draw();
-		}
-
-		
-	}
+	
 
 	
 	DrawFormatString(10, 270, 0xffffff, "MG_L_Bullet%d", bullets_.size());

@@ -89,6 +89,8 @@ void SceneGame::Update(void)
 	stage_->Update();
 	damageController_->Update();
 
+	players_.at(0)->SetSoundDate(boss_->GetBossPos(), boss_->GetSoundRadius(), boss_->GetLandingFlag(),boss_->GetMGFireFlag(),boss_->GetRoadFlag());
+
 	DamageProcess();
 
 	UpdateGameTime();
@@ -102,7 +104,7 @@ void SceneGame::Update(void)
 
 void SceneGame::DamageProcess(void)
 {
-	boss_->SetPlayer1Pos(players_.at(0)->GetTransform().pos);
+	boss_->SetPlayer1Pos(players_.at(0)->GetBodyPos());
 	
 	boss_->SetBossDamage(damageController_->GetBossDamage());
 
@@ -121,7 +123,7 @@ void SceneGame::DamageProcess(void)
 	damageController_->SetPlayerAttack(players_.at(0)->GetPower());
 
 	// プレイヤー被ダメージ処理
-	players_.at(0)->SetDamage(damageController_->GetPlayerDamage(), true);
+	players_.at(0)->SetDamage(damageController_->GetPlayerDamage(), damageController_->GetInvincible());
 }
 
 void SceneGame::CameraLockOn(void)

@@ -1,4 +1,5 @@
 #include "MGBase.h"
+#include "../../../../../../Manager/Decoration/SoundManager.h"
 #include "../../../../../../Utility/UtilityMath.h"
 #include "../../../../../Collision/CollisionController.h"
 #include "../../Bullet/Boss/BBulletMG.h"
@@ -8,6 +9,7 @@ MGBase::MGBase(void)
     , bulletCount_(MAX_BULLET_COUNT)
     , muzzlePos_{ 0.0f, 0.0f, 0.0f }
     , muzzleCount_(0)
+    , isAttack_(false)
 {
 }
 
@@ -48,9 +50,10 @@ void MGBase::UpdateCommon(void)
         ChangeState(static_cast<int>(STATE::END));
     }
    
-    for (std::shared_ptr<BBulletBase> shot : bullets_)
+    for (std::shared_ptr<BBulletBase>  bullet : bullets_)
     {
-        shot->Update();
+        bullet->Update();
+        
     }
 
     stateUpdate_();
@@ -107,6 +110,8 @@ void MGBase::ChangeStateIdle(void)
 void MGBase::ChangeStateAttack(void)
 {
     stateUpdate_ = std::bind(&MGBase::UpdateAttack, this);
+    bulletCount_ = MAX_BULLET_COUNT;
+    isAttack_ = true;
 }
 
 void MGBase::ChangeStateEnd(void)
@@ -128,10 +133,13 @@ void MGBase::UpdateAttack(void)
     transform_.pos = MV1GetFramePosition(bone_.transform.modelId, bone_.id);
     LookPlayer();
 
+    SoundManager::GetInstance().Set3DPosition(SoundManager::SOUND::SE_MG_FIRE, transform_.pos);
     if (bulletCount_ >= 0) {
         CreateBullets();
     }
     if (bulletCount_ <= 0) {
+        isAttack_ = false;
+        SoundManager::GetInstance().Stop(SoundManager::SOUND::SE_MG_FIRE);
         ChangeState(STATE::IDLE);
     }
 }
@@ -153,17 +161,18 @@ void MGBase::CreateBullets(void)
     // 位置を加算して最終的なワールド座標にする
     VECTOR bulletpos = VAdd(transform_.pos, localRotPos);
 
-    bullet->CreateBullets(bulletpos, bulletDir_, 2.0f);
+    bullet->CreateBullets(bulletpos, bulletDir_, 3.0f);
     bullet->Init();
+    bullet->SetTransform(transform_);
 }
 
 std::shared_ptr<BBulletBase> MGBase::GetValidBullet(void)
 {
-    // 既存のMGL/MGRにある弾の使い回しロジックをここに一本化
+    
     for (auto& bullet : bullets_) {
         if (!bullet->GetIsAlive()) return bullet;
     }
-    std::shared_ptr<BBulletBase> bullet = std::make_shared<BBulletMG>(transform_); // 必要なら引数を追加
+    std::shared_ptr<BBulletBase> bullet = std::make_shared<BBulletMG>();
     bullets_.emplace_back(bullet);
     bullet->Load();
     return bullet;

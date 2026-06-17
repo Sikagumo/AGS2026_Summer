@@ -113,6 +113,10 @@ void ResourceManager::Initialize(void)
 	_SetResource(LOAD_TYPE::SOUND, SRC::SE_CLICK, PATH_SE + "Click.mp3");
 	_SetResource(LOAD_TYPE::SOUND, SRC::SE_SELECT, PATH_SE + "Select.mp3");
 	_SetResource(LOAD_TYPE::SOUND, SRC::SE_DAMAGE, PATH_SE + "Damage.mp3");
+	_SetResource(LOAD_TYPE::SOUND, SRC::SE_MG_FIRE, PATH_SE + "MGFire.mp3");
+	_SetResource(LOAD_TYPE::SOUND, SRC::SE_BOSS_LANDING, PATH_SE + "BossLanding.mp3");
+	_SetResource(LOAD_TYPE::SOUND, SRC::SE_ROAD, PATH_SE + "Road.mp3");
+
 }
 void ResourceManager::_SetResource(Resource::LOAD_TYPE _loadType, SRC _src, std::string _path
 								   , int _allNum, int _numX, int _numY)

@@ -1,3 +1,4 @@
+#include "../../../../Manager/Decoration/SoundManager.h"
 #include "PlayerBase.h"
 
 constexpr int HP = 250;
@@ -29,4 +30,28 @@ void PlayerBase::SetDamage(int _damage, bool _isInvincible, float _timeInvincibl
 	}
 
 	hp_ -= _damage;
+}
+
+void PlayerBase::SetSoundDate(VECTOR _pos, float _radius,bool _isLanging, bool _isMGFire,bool _isRoad)
+{
+	if (_isLanging)
+	{
+		SoundManager::GetInstance().Play3D(SoundManager::SOUND::SE_BOSS_LANDING, _pos, transform_.pos, _radius);
+	}
+
+	if (_isMGFire)
+	{
+		SoundManager::GetInstance().Play3D(SoundManager::SOUND::SE_MG_FIRE, _pos, transform_.pos, _radius);
+	}
+
+	if (_isRoad)
+	{
+		SoundManager::GetInstance().Play3D(SoundManager::SOUND::SE_ROAD, _pos, transform_.pos, _radius);
+	}
+
+}
+
+void PlayerBase::UpdaetaSound(void)
+{
+	SoundManager::GetInstance().Update3D(transform_.pos);
 }

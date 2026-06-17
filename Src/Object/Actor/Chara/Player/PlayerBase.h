@@ -67,6 +67,7 @@ public:
 	const VECTOR& GetPos(void)const { return transform_.pos; };
 	VECTOR GetBodyPos(void)const { return bodyPos_; };
 
+	virtual void SetSoundDate(VECTOR _pos, float _radius, bool _isLanging,bool _isMGFire, bool _isRoad);
 
 protected:
 
@@ -90,4 +91,7 @@ protected:
 	BULLET_TYPE bulletType_;
 
 	PLAYER_TYPE playerType_;
+
+	
+	void UpdaetaSound(void);
 };

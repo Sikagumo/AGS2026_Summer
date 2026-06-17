@@ -16,7 +16,7 @@ public:
 	virtual void CreateBullets(VECTOR _pos, VECTOR _dir,float _radius)=0;
 	bool GetIsAlive(void) { return isAlive_; }
 
-	
+	virtual void SetTransform(Transform trans) { weaponTrans_ = trans; }
 
 protected:
 
@@ -28,6 +28,7 @@ protected:
 	float radius_;
 	VECTOR dir_;
 
+	Transform weaponTrans_;
 
 	virtual void UpdateProcess(void) = 0;
 	virtual void UpdateProcessPost(void) = 0;

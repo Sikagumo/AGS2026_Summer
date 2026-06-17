@@ -257,6 +257,8 @@ void Player::UpdateProcess(void)
 	// ì∑ëÃà íuçXêV
 	bodyPos_ = transform_.pos;
 	bodyPos_.y += BODY_POS_OFFSET_Y;
+
+	PlayerBase::UpdaetaSound();
 }
 
 void Player::UpdateProcessPost(void)
@@ -307,6 +309,11 @@ VECTOR Player::CalcAddPosition(void)
 	ret = VAdd(ret, dodgeVec);
 
 	return ret;
+}
+
+void Player::SetSoundDate(VECTOR _pos, float _radius, bool _isLanging,bool _isMGFire, bool _isRoad)
+{
+	PlayerBase::SetSoundDate(_pos, _radius, _isLanging, _isMGFire, _isRoad);
 }
 
 void Player::ReleasePost(void)

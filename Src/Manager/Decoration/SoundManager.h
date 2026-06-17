@@ -1,4 +1,5 @@
 #pragma once
+#include <DxLib.h>
 #include <unordered_map>
 #include <mutex>
 
@@ -18,18 +19,26 @@ public:
 	enum class SOUND
 	{
 		NONE = -1,
+		//BGM
 		BGM_TITLE,
 		BGM_GAME,
 
+		//SE
 		SE_DAMAGE_PLAYER, // プレイヤー被ダメージ処理
+		SE_BOSS_LANDING,//ボスの着地
+		SE_MG_FIRE,
+		SE_ROAD,
 	};
 
 	/// @brief サウンドのリソースデータ構造体
 	struct SOUND_DATA
 	{
-		int data;     // DxLibのサウンドハンドル
-		TYPE type;    // BGMかSEか
-		int playMode; // 再生モード（ループか単発か）
+		int data;		// DxLibのサウンドハンドル
+		TYPE type;		// BGMかSEか
+		int playMode;	// 再生モード（ループか単発か）
+		bool is3D;		//3Dの音声ハンドルか
+		VECTOR playPos;	//音の発生源の位置
+		float radius;	//音の届く距離
 	};
 
 	/// @brief インスタンスを明示的に生成
@@ -53,6 +62,22 @@ public:
 	/// @brief サウンドの再生
 	/// @param _sound 再生するサウンドID
 	void Play(const SOUND _sound);
+
+	///	@brief 3Dサウンドの再生
+	/// @param _sound 再生するサウンドID
+	/// @param _playPos 音の発生源
+	/// @param _listenPos 音の聞き取り手
+	/// @param　_radius 音の聞こえる範囲
+	void Play3D(const SOUND _sound, const VECTOR _playPos, const VECTOR _listenPos, const float _radius);
+
+	/// @brief 再生中の3Dサウンドの発生源位置を更新する
+	/// @param _sound 対象のサウンドID
+	/// @param _newPos 新しい発生源の座標
+	void Set3DPosition(const SOUND _sound, const VECTOR _newPos);
+
+	///	@brief　3Dサウンドの更新による音の変化
+	/// @param _listenPos 音の聞き取り手
+	void Update3D(const VECTOR _listenPos);
 
 	/// @brief 指定したサウンドの停止
 	/// @param _sound 停止するサウンドID
@@ -109,7 +134,7 @@ private:
 	static constexpr int DEFAULT_SE_VOLUME = 80;  // SEの初期音量
 
 	static SoundManager* instance_; // シングルトンインスタンス
-	static std::mutex g_soundMutex; // スレッドセーフ用ミューテックス
+	static std::recursive_mutex g_soundMutex; // スレッドセーフ用ミューテックス
 
 	// メンバ変数
 	std::unordered_map<SOUND, SOUND_DATA> sounds_; // サウンドハンドルの管理マップ

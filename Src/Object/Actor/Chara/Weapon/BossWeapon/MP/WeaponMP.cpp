@@ -82,6 +82,7 @@ void WeaponMP::UpdateProcess(void)
 		transform_.pos = MV1GetFramePosition(bone_.transform.modelId, bone_.id);
 		transform_.quaRot = bone_.transform.quaRot;
 	}
+	if(hp_<=0)
 	{
 		isAlive_ = false;
 		CollisionController::GetInstance().SetCollisionActive(this, tag_, false);

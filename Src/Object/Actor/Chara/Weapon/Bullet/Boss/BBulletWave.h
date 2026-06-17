@@ -19,6 +19,8 @@ public:
 	void SetPos(VECTOR _pos);
 
 	void CreateBullets(VECTOR _pos, VECTOR _dir, float _radius)override {}
+
+	void SetTransform(Transform trans)override {}
 protected:
 	// ‘å‚«‚³A‰ñ“]AÀ•W‚Ì‰Šú‰»
 	void InitTransform(void) override;

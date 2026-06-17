@@ -1,6 +1,7 @@
 #include "../../../../Manager/Generic/ResourceManager.h"
 #include "../../../../Manager/Generic/InputManager.h"
 #include "../../../../Manager/Generic/SceneManager.h"
+#include "../../../../Manager/Decoration/SoundManager.h"
 #include "../../../../Manager/System/TimeManager.h"
 #include "../../../../Utility/UtilityMath.h"
 #include "../../../../Utility/MatrixUtility.h"
@@ -41,6 +42,10 @@ Boss::Boss(void) :
 	roadAttackTime_(-1),
 	roadLockTime_(-1),
 	attackInterval_(MAX_ATTACK_INTERVAL),
+	soundRadius_(SOUND_RADIUS),
+	isLanging_(false),
+	isMGFire_(false),
+	isRoadFire_(false),
 
 	CharaBase()
 {
@@ -138,6 +143,10 @@ void Boss::Load(void)
 
 	WeaponLoad();
 	
+	//SE
+	SoundManager::GetInstance().Add(SoundManager::TYPE::SE, SoundManager::SOUND::SE_BOSS_LANDING, ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::SE_BOSS_LANDING));
+
+	SoundManager::GetInstance().Add(SoundManager::TYPE::SE, SoundManager::SOUND::SE_ROAD, ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::SE_ROAD));
 }
 
 void Boss::InitTransform(void)
@@ -372,7 +381,10 @@ void Boss::ChangeStateRoadAttack(void)
 	roadIsAttack_ = true;
 	roadCount_ = 0;
 	roadAttackTime_ = 0;
+
 	CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::ROAD_ATTACK, true);
+
+
 }
 
 void Boss::ChangeStateEnd(void)
@@ -402,13 +414,24 @@ void Boss::BossTransformUpdate(void)
 
 	WeaponUpdate();
 
+	SoundManager::GetInstance().Set3DPosition(SoundManager::SOUND::SE_BOSS_LANDING, transform_.pos);
+	SoundManager::GetInstance().Set3DPosition(SoundManager::SOUND::SE_ROAD, transform_.pos);
 }
 
 void Boss::UpdateProcess(void)
 {	
 	
-		
-	
+
+	isLanging_ = false;
+	isMGFire_ = false;
+	if (weaponMGL_->IsAttack() == true || weaponMGR_->IsAttack() == true)
+	{
+		if (SoundManager::GetInstance().IsPlaying(SoundManager::SOUND::SE_MG_FIRE) == false)
+		{
+			isMGFire_ = true;
+		}
+	}
+	isRoadFire_ = false;
 
 	stateUpdate_();
 
@@ -447,7 +470,7 @@ void Boss::UpdateAttack(void)
 
 	transformBody_.pos = MV1GetFramePosition(transform_.modelId, JOINT_FEET_BODY);
 	int randomAttack = static_cast<int>(UtilityMath::RandRangeF(0.0f, static_cast<float>(ATTACK_TYPE::MAX)));
-	ATTACK_TYPE attackSelect =static_cast<ATTACK_TYPE>(randomAttack);
+	ATTACK_TYPE attackSelect = /*ATTACK_TYPE::ROAD;*/static_cast<ATTACK_TYPE>(randomAttack);
 
 	switch (attackSelect)
 	{
@@ -458,6 +481,7 @@ void Boss::UpdateAttack(void)
 	case ATTACK_TYPE::MG:
 		weaponMGL_->ChangeState(WeaponMGL::STATE::ATTACK);
 		weaponMGR_->ChangeState(WeaponMGR::STATE::ATTACK);
+		isMGFire_ = true;
 		ChangeState(STATE::IDLE);
 		break;
 
@@ -477,6 +501,7 @@ void Boss::UpdateJump(void)
 	if (!isJump_)
 	{
 		wave_->SetIsAttack(true);
+		isLanging_ = true;
 		ChangeState(STATE::IDLE);
 	}
 	else if (isJump_)
@@ -508,7 +533,7 @@ void Boss::UpdateJumpBefore(void)
 
 void Boss::UpdateRoadAttack(void)
 {
-
+	SoundManager::GetInstance().Set3DPosition(SoundManager::SOUND::SE_ROAD, transform_.pos);
 	
 	transformBody_.pos = MV1GetFramePosition(transform_.modelId, JOINT_CAR_BODY);
 	transformWheelFrontL_.pos = MV1GetFramePosition(transform_.modelId, JOINT_CAR_WHEEL_FRONT_L);
@@ -557,6 +582,12 @@ void Boss::UpdateRoadAttack(void)
 	}
 	if (roadIsAttack_)
 	{
+
+		isRoadFire_ = true;
+		if (roadAttackTime_ >= 1)
+		{
+			isRoadFire_ = false;
+		}
 		speed_ = MOVE_SPEED_ROAD;
 		VECTOR movePow = VScale(roadDir_, speed_);
 		// 移動処理
@@ -576,6 +607,7 @@ void Boss::UpdateRoadAttack(void)
 		transform_.modelId = transformFeet_.modelId;
 		transform_.scl = transformFeet_.scl;
 		CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::ROAD_ATTACK, false);
+		SoundManager::GetInstance().Stop(SoundManager::SOUND::SE_ROAD);
 		ChangeState(STATE::IDLE);
 	}
 
@@ -612,10 +644,7 @@ void Boss::DrawPre(void)
 
 
 #ifdef _DEBUG
-	for (auto& col : ownColliders_)
-	{
-		col.second->Draw();
-	}
+
 
 	DrawFormatString(10, 100, 0xffffff, "bossの座標：%f,%f,%f", transform_.pos.x, transform_.pos.y, transform_.pos.z);
 	DrawFormatString(10, 400, 0xffffff, "hp:%d", hp_);
@@ -651,73 +680,59 @@ void Boss::LookPlayer(void)
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 //ウェポンの呼び出し纏めよう＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝
 void Boss::WeaponSet(void)
 {
 	// 各武器にボーン情報を設定（ここはそのまま）
 	weaponMGL_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MGL_L)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MGL_L)].transform, ColliderBase::TAG::WEAPON_MG_L,player1Pos_);
 	weaponMGR_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MGL_R)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MGL_R)].transform, ColliderBase::TAG::WEAPON_MG_R,player1Pos_);
-	//weaponMPL_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MP_L)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MP_L)].transform, ColliderBase::TAG::WEAPON_MP_L,player1Pos_);
-	//weaponMPR_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MP_R)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MP_R)].transform, ColliderBase::TAG::WEAPON_MP_R,player1Pos_);
-	//weaponRG_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_RG)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_RG)].transform, ColliderBase::TAG::WEAPON_RG,player1Pos_);
-	//weaponCannonL_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_CANNON_L)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_CANNON_L)].transform, ColliderBase::TAG::WEAPON_CANNON_L,player1Pos_);
-	//weaponCannonR_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_CANNON_R)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_CANNON_R)].transform, ColliderBase::TAG::WEAPON_CANNON_R,player1Pos_);
+	weaponMPL_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MP_L)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MP_L)].transform, ColliderBase::TAG::WEAPON_MP_L,player1Pos_);
+	weaponMPR_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MP_R)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MP_R)].transform, ColliderBase::TAG::WEAPON_MP_R,player1Pos_);
+	weaponRG_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_RG)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_RG)].transform, ColliderBase::TAG::WEAPON_RG,player1Pos_);
+	weaponCannonL_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_CANNON_L)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_CANNON_L)].transform, ColliderBase::TAG::WEAPON_CANNON_L,player1Pos_);
+	weaponCannonR_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_CANNON_R)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_CANNON_R)].transform, ColliderBase::TAG::WEAPON_CANNON_R,player1Pos_);
 }
 
 void Boss::WeaponLoad(void)
 {
 	weaponMGL_->Load();
 	weaponMGR_->Load();
-	//weaponMPL_->Load();
-	//weaponMPR_->Load();
-	//weaponRG_->Load();
-	//weaponCannonL_->Load();
-	//weaponCannonR_->Load();
+	weaponMPL_->Load();
+	weaponMPR_->Load();
+	weaponRG_->Load();
+	weaponCannonL_->Load();
+	weaponCannonR_->Load();
 }
 
 void Boss::WeaponInit(void)
 {
 	weaponMGL_->Init();
 	weaponMGR_->Init();
-	//weaponMPL_->Init();
-	//weaponMPR_->Init();
-	//weaponRG_->Init();
-	//weaponCannonL_->Init();
-	//weaponCannonR_->Init();
+	weaponMPL_->Init();
+	weaponMPR_->Init();
+	weaponRG_->Init();
+	weaponCannonL_->Init();
+	weaponCannonR_->Init();
 }
 
 void Boss::WeaponUpdate(void)
 {
 	weaponMGL_->Update();
 	weaponMGR_->Update();
-	//weaponMPL_->Update();
-	//weaponMPR_->Update();
-	//weaponRG_->Update();
-	//weaponCannonL_->Update();
-	//weaponCannonR_->Update();
+	weaponMPL_->Update();
+	weaponMPR_->Update();
+	weaponRG_->Update();
+	weaponCannonL_->Update();
+	weaponCannonR_->Update();
 }
 
 void Boss::WeaponDraw(void)
 {
 	weaponMGL_->Draw();
 	weaponMGR_->Draw();
-	//weaponMPL_->Draw();
-	//weaponMPR_->Draw();
-	//weaponRG_->Draw();
-	//weaponCannonL_->Draw();
-	//weaponCannonR_->Draw();
+	weaponMPL_->Draw();
+	weaponMPR_->Draw();
+	weaponRG_->Draw();
+	weaponCannonL_->Draw();
+	weaponCannonR_->Draw();
 }

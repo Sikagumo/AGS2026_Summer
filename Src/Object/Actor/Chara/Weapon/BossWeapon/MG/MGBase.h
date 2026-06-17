@@ -19,6 +19,7 @@ public:
     int GetHp(void) override { return hp_; }
     // 状態遷移
     void ChangeState(STATE _state)override;
+    bool IsAttack(void) { return isAttack_; }
 
 protected:
 
@@ -47,6 +48,7 @@ protected:
     int muzzleCount_;
     std::vector<std::shared_ptr<BBulletBase>> bullets_;
     int look;
+    bool isAttack_;
 
     // 状態（ステート）管理用の関数ポインタと関数群
     std::function<void(void)> stateUpdate_;

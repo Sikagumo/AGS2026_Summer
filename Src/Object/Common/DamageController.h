@@ -48,6 +48,8 @@ public:
 	int GetWeaponCannonLDamage(void) { return weaponCannonLDamage_; }
 	///左キャノンが受けるダメージ
 	int GetWeaponCannonRDamage(void) { return weaponCannonRDamage_; }
+	///無敵付与
+	bool GetInvincible(void) { return isInvincible_;}
 	///プレイヤーの攻撃力受け取り用
 	void SetPlayerAttack(int _attack) { playerAttack_ = _attack; }
 	///プレイヤーの最大HP受け取り用
@@ -70,7 +72,7 @@ private:
 	int weaponCannonRDamage_;	//左キャノンが受けるダメージの保管
 	int playerAttack_;			//プレイヤーが与えるダメージの保管
 	int playerHp_;				//プレイヤーの最大HPの保管
-
+	bool isInvincible_;
 
 	
 	DATA cannon_;

@@ -6,7 +6,7 @@
 #include "../../../../../Collision/CollisionController.h"
 #include "BBulletMG.h"
 
-BBulletMG::BBulletMG(Transform& _transform)
+BBulletMG::BBulletMG()
 {
 }
 
@@ -73,7 +73,7 @@ void BBulletMG::UpdateProcess(void)
 		// ’e‚ðˆÚ“®‚³‚¹‚é
 		// ˆÚ“®—Ê‚ÌŒvŽZ(•ûŒü~ƒXƒs[ƒh)
 		float targetAngle = atan2(dir_.x, dir_.z);
-		transform_.quaRot = Quaternion::AngleAxis(targetAngle, UtilityMath::AXIS_Y);
+		transform_.quaRot = weaponTrans_.quaRot;
 			
 		
 
@@ -83,7 +83,9 @@ void BBulletMG::UpdateProcess(void)
 
 		if (aliveTime_ > MAX_ALIVE_TIME)
 		{
+			aliveTime_ = 0;
 			isAlive_ = false;
+			
 		}
 	}
 	else
