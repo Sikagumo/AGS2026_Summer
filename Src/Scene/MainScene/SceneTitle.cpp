@@ -25,7 +25,7 @@ void SceneTitle::Load(void)
     // ロゴ・操作説明・再生用画像ロード
 
     imageTitle_ = resourceManager.LoadHandleId(ResourceManager::SRC::IMG_TITLE);
-    ResourceManager::GetInstance().LoadHandleIds(ResourceManager::SRC::IMGE_TITLE_TEXT, imageMenu_.data());
+    ResourceManager::GetInstance().LoadHandleIds(ResourceManager::SRC::IMGS_TITLE_TEXT, imageMenu_.data());
 
     // その他画像
 

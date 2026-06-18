@@ -1,4 +1,7 @@
 #include "SceneGame.h"
+#define NOMINMAX
+#include <algorithm>
+#include <math.h>
 #include "../../Manager/Generic/SceneManager.h"
 #include "../../Manager/Generic/InputManager.h"
 #include "../../Manager/Generic/ResourceManager.h"
@@ -22,9 +25,13 @@ SceneGame::SceneGame(void)
 	, stage_(std::make_unique<Stage>())
 	, damageController_(std::make_unique<DamageController>())
 	, gameTime_(GAME_TIME)
+	, targetHpImage_(-1), targetHpBerImage_(-1)
 {
 	std::unique_ptr<Player> player = std::make_unique<Player>(0, Player::BULLET_TYPE::BIG, UtilityMath::VECTOR_ZERO);
 	players_.emplace_back(std::move(player));
+
+	targetHpBerImage_ = ResourceManager::GetInstance().LoadHandleIdsOnce(ResourceManager::SRC::IMGS_HP_TARGET, 0);
+	targetHpImage_ = ResourceManager::GetInstance().LoadHandleIdsOnce(ResourceManager::SRC::IMGS_HP_TARGET, 1);
 }
 
 
@@ -166,6 +173,8 @@ void SceneGame::Draw(void)
 
 	boss_->Draw();
 
+	DrawHpBer();
+
 #ifdef _DEBUG
 	DrawDebug();
 #endif // _DEBUG
@@ -191,7 +200,62 @@ void SceneGame::Release(void)
 	boss_->Release();
 }
 
+void SceneGame::DrawHpBer(void)
+{
+	const std::unique_ptr<Camera>& camera = SceneManager::GetInstance().GetCamera();
+
+	// ロックオン
+	if (camera->GetIsLockOn() && !camera->IsEasingState())
+	{
+		constexpr Vector2F BER_OFFSET = { 0.0f, -125.0f };
+
+		VECTOR viewPos = ConvWorldPosToScreenPos(camera->GetLockOnPos());
+		viewPos.x += BER_OFFSET.x;
+		viewPos.y += BER_OFFSET.y;
+
+		const float DYNAMIC_SCALE = CalcHpBarScale(camera->GetLockOnPos());
+
+		DrawRotaGraph(viewPos.x, viewPos.y, DYNAMIC_SCALE, 0.0f,
+			targetHpBerImage_, true);
+
+
+		Vector2 size, hpSize = Vector2();
+		GetGraphSize(targetHpImage_, &size.x, &size.y);
+
+		// HPゲージ本体（targetHpImage_）も同じスケールで描画
+		hpSize = size;
+		hpSize.x *= std::clamp(camera->GetLockOnHpRate(), 0.0f, 1.0f);
+
+		DrawRectRotaGraph(viewPos.x, viewPos.y
+			, 0.0f, 0.0f
+			, hpSize.x - size.x / 2, hpSize.y, DYNAMIC_SCALE, 0.0f, targetHpImage_, true);
+	}
+}
+float SceneGame::CalcHpBarScale(const VECTOR& _targetPos)
+{
+	// 距離の最小値
+	constexpr float DIST_MIN = 50.0f;
+
+	// スケールの最小/最大
+	constexpr float HP_BAR_MIN_SCALE = 0.375f;
+	constexpr float HP_BAR_MAX_SCALE = 1.5f;
+
+	const VECTOR cameraPos = SceneManager::GetInstance().GetCamera()->GetPos();
+	VECTOR distVec = VSub(_targetPos, cameraPos);
+	distVec.y = 0.0f;
+	const float DIST = VSize(distVec);
+
+	// ベクトルの距離が最小値より小さい場合は最小値にする
+	const float SAFE_DIST = ((DIST < DIST_MIN) ? DIST_MIN : DIST);
+
+	// 遠ければ遠いほどスケールを狭める
+	const float SCALE = (DIST_MIN / SAFE_DIST);
+
+	return std::clamp(SCALE, HP_BAR_MIN_SCALE, HP_BAR_MAX_SCALE);
+}
+
 void SceneGame::DrawDebug(void)
 {
 	SceneManager::GetInstance().GetCamera()->DrawDebug();
 }
+

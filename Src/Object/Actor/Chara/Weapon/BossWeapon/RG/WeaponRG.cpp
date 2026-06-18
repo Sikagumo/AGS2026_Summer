@@ -101,11 +101,12 @@ void WeaponRG::DrawPre(void)
 	if (isAlive_)
 	{
 		
-
+#ifdef _DEBUG
 		for (auto& col : ownColliders_)
 		{
 			col.second->Draw();
 		}
+#endif
 	}
 
 }

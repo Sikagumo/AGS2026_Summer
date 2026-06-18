@@ -3,8 +3,8 @@
 #include "../Common/Quaternion.h"
 #include "../Object/Actor/ActorBase.h"
 #include <map>
+#include <memory>
 class Transform;
-class InputManager;
 
 class Camera : public ActorBase
 {
@@ -98,8 +98,8 @@ public:
 	/// @brief 追従対象割り当て
 	/// @param _target 対象の種類
 	/// @param _targetPos 追従位置
-	/// @param _isActive 追従可能か否か
-	void SetLockOnTargets(LOCKON_TARGET _target,const VECTOR& _targetPos, bool _isActive = true);
+	/// @param _targetHp 追従対象HP
+	void SetLockOnTargets(LOCKON_TARGET _target,const VECTOR& _targetPos, int _targetHp);
 
 	/// @brief 現在の追従対象割り当て
 	LOCKON_TARGET GetLockOnTargetNum(void) { return lockOnTarget_; };
@@ -112,10 +112,16 @@ public:
 	void SetIsLockOn(bool _isLockOn);
 	bool GetIsLockOn(void)const { return isLockOn_; };
 
+	/// @brief ロックオン中の対象の位置を取得
+	const VECTOR& GetLockOnPos(void)const { return lockOnParam_.pos; };
+	float GetLockOnHpRate(void)const { return (static_cast<float>(lockOnParam_.hp) / static_cast<float>(lockOnParam_.maxHp)); };
+
+	/// @brief イージング遷移中か否か
+	bool IsEasingState(void) { return (easingTerm_ < 1.0f); };
+
 	/// @brief 追従対象が範囲内か否か
 	bool IsTargetSpace(void);
 
-	//bool IsTarget
 
 protected:
 
@@ -145,10 +151,6 @@ private:
 	// カメラの補間移動率
 	static constexpr float LERP_RATE_MOVE = 0.1f;
 
-	InputManager& inputManager_;
-
-	// カメラの視野角割合
-	float fovRate_;
 
 	// カメラの更新前位置
 	VECTOR prePos_;
@@ -169,17 +171,17 @@ private:
 	VECTOR targetPos_;
 
 	// ターゲット
+	struct TargetParam
+	{
+		int hp = 0;
+		int maxHp = 0;
+		VECTOR pos;
+	};
+	std::map<LOCKON_TARGET, std::unique_ptr<TargetParam>> targetsParam_;
 	bool isLockOn_;
-	VECTOR lockOnPos_;
-	std::map<LOCKON_TARGET, VECTOR> targetsPos_;
+	TargetParam lockOnParam_;
 	LOCKON_TARGET lockOnTarget_;
-	int targetHpImage_;
 
-
-	// ロックオン切替イージング用
-	static constexpr float LOCKON_DURATION = 0.6f;
-
-	bool isEasingLockOn_;
 	float easingTerm_;      // イージング経過値
 	VECTOR easingFromPos_;    // カメラ位置イージング開始座標
 	VECTOR easingFromTarget_; // 注視点イージング開始座標

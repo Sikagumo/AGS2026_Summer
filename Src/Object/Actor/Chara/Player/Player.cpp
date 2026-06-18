@@ -64,7 +64,147 @@ Player::Player(int _playerNo, BULLET_TYPE _bulletType, const VECTOR& _startPos)
 void Player::Load(void)
 {
 	transform_.modelId = ResourceManager::GetInstance().LoadModelDuplicate(ResourceManager::SRC::MODEL_PLAYER_HUMAN);
+
+	//SetPlayerType(PLAYER_TYPE::BIRD);
+	//SetPlayerType(playerType_);
 }
+void Player::SetPlayerType(PLAYER_TYPE _type)
+{
+	using SRC = ResourceManager::SRC;
+
+	const std::array<SRC, static_cast<int>(PLAYER_TYPE::MAX)> MODEL_RESOURCES
+		= { SRC::MODEL_PLAYER_HUMAN, SRC::MODEL_PLAYER_DOG, SRC::MODEL_PLAYER_MONKEY, SRC::MODEL_PLAYER_BIRD };
+
+	PLAYER_TYPE pType = _type;
+	if (_type == PLAYER_TYPE::MAX)
+	{
+		int rand = GetRand(static_cast<int>(PLAYER_TYPE::MAX));
+		pType = static_cast<PLAYER_TYPE>(rand);
+	}
+
+	playerType_ = pType;
+
+
+	transform_.SetModel(ResourceManager::GetInstance()
+		.LoadModelDuplicate(MODEL_RESOURCES.at(static_cast<int>(playerType_))));
+}
+
+void Player::InitAnimation(void)
+{
+	ResourceManager& resMng = ResourceManager::GetInstance();
+
+	animation_ = std::make_unique<AnimationController>(transform_.modelId);
+
+	animation_->AddExternal(static_cast<int>(ANIM_TYPE::IDLE)
+		, 30.0f, resMng.LoadHandleId(ResourceManager::SRC::ANIM_IDLE));
+
+	animation_->AddExternal(static_cast<int>(ANIM_TYPE::RUN)
+		, 40.0f, resMng.LoadHandleId(ResourceManager::SRC::ANIM_RUN));
+
+	animation_->AddExternal(static_cast<int>(ANIM_TYPE::THROW_LEFT)
+		, 20.0f, resMng.LoadHandleId(ResourceManager::SRC::ANIM_THROW_LEFT));
+
+	animation_->AddExternal(static_cast<int>(ANIM_TYPE::THROW_RIGHT)
+		, 20.0f, resMng.LoadHandleId(ResourceManager::SRC::ANIM_THROW_RIGHT));
+
+	animation_->AddExternal(static_cast<int>(ANIM_TYPE::THROW_RUN)
+		, 20.0f, resMng.LoadHandleId(ResourceManager::SRC::ANIM_THROW_RUN));
+
+	animation_->AddExternal(static_cast<int>(ANIM_TYPE::JUMP)
+		, 50.0f, resMng.LoadHandleId(ResourceManager::SRC::ANIM_JUMP)
+		, true, VGet(0.0f, 50.0f, 0.0f));
+
+	animation_->AddExternal(static_cast<int>(ANIM_TYPE::DODGE)
+		, 40.0f, resMng.LoadHandleId(ResourceManager::SRC::ANIM_DODGE)
+		, true, VGet(0.0f, 22.5f, 0.0f));
+
+
+	animType_ = ANIM_TYPE::IDLE;
+	animation_->Play(static_cast<int>(animType_));
+}
+void Player::InitTransform(void)
+{
+	constexpr float MODEL_SCALE = 0.625f;
+	constexpr float LOCAL_ROT_Y = 180.0f;
+
+	transform_.InitTransform(MODEL_SCALE
+		, Quaternion::Identity()
+		, Quaternion::AngleAxis(UtilityMath::Deg2RadF(LOCAL_ROT_Y), UtilityMath::AXIS_Y)
+		, UtilityMath::VECTOR_ZERO);
+
+	transform_.Update();
+}
+void Player::InitCollider(void)
+{
+	ColliderLine* colLine = new ColliderLine(ColliderBase::TAG::PLAYER, &transform_, COL_LINE_START_LOCAL_POS, COL_LINE_END_LOCAL_POS);
+	ownColliders_.emplace(static_cast<int>(ColliderBase::SHAPE::LINE), colLine);
+	colLine->SetTriger(false);
+
+	ColliderCapsule* colCap = new ColliderCapsule(ColliderBase::TAG::PLAYER
+									, &transform_, COL_CAPSULE_TOP_LOCAL_POS, COL_CAPSULE_DOWN_LOCAL_POS, COL_CAPSULE_RADIUS);
+
+	ownColliders_.emplace(0, colCap);
+
+	ownColliders_.at(0)->SetTriger(false);
+
+	// 衝突判定マネージャに登録
+	CollisionController::GetInstance().RegisterActor(this);
+}
+void Player::InitPost(void)
+{
+	constexpr bool IS_RAPID_FIRE = false;
+	actionController_ = std::make_unique<PActionController>(animation_, IS_RAPID_FIRE);
+
+	curAttackNum_ = 0;
+
+	constexpr float SHOT_TIME_INCREMENT = 0.3f; // 行動間隔上昇値
+	constexpr float SHOT_TIME_INC_INPUT = 0.2f; // 行動間隔上昇値
+
+	constexpr float SHOT_TIME_ACTIVE = 2.5f; // 有効時間
+	constexpr float SHOT_TIME_ACTION_ACTIVE = 1.25f; // 行動有効時間
+	constexpr float SHOT_TIME_ACTIVE_INPUT = 1.725f; // 入力可能時間
+	constexpr float SHOT_TIME_END = 0.25f; // 終了時間
+
+	constexpr float SHOT_TIME_STOP = 0.85f; // 停止時間
+	constexpr float SHOT_TIME_STOP_ACTIVE = 1.15f; // 停止有効化時間
+
+
+
+	float timeActive, timeActionActive, timeInput, timeEnd;
+	timeActive = SHOT_TIME_ACTIVE;
+	timeActionActive = SHOT_TIME_ACTION_ACTIVE;
+	timeInput = SHOT_TIME_ACTIVE_INPUT;
+	timeEnd = SHOT_TIME_END;
+
+	actionController_->SetAction(0, 50, timeActive, timeActionActive, timeEnd
+								 , std::bind(&Player::ShotBullet, this)
+								 , 0.0f, 0.0f, timeInput);
+
+	timeActive += SHOT_TIME_INCREMENT;
+	timeInput += SHOT_TIME_INC_INPUT;
+	timeEnd += SHOT_TIME_INCREMENT;
+
+	actionController_->SetAction(1, 75, timeActive, timeActionActive, timeEnd
+								 , std::bind(&Player::ShotBullet, this)
+								 , SHOT_TIME_STOP, SHOT_TIME_STOP_ACTIVE, timeInput);
+
+	timeActive += (SHOT_TIME_INCREMENT * 2);
+	actionController_->SetAction(2, 150, timeActive, timeActionActive, timeEnd
+								 , std::bind(&Player::ShotBullet, this)
+								 , SHOT_TIME_STOP, SHOT_TIME_STOP_ACTIVE, 0.0f);
+
+
+	// ジャンプ
+	actionController_->SetAction(3, 0, 0.2f, 0.1f, 0.0f
+								 , std::bind(&Player::Jump, this)
+								 , 0.05f, 0.2f);
+
+	// 回避
+	actionController_->SetAction(4, 0, 0.5f, 0.1f, 0.0f
+								 , std::bind(&Player::Dodge, this)
+								 , 0.075f, 0.15f);
+}
+
 void Player::Draw(void)
 {
 	COLOR_F material = COLOR_F();
@@ -115,119 +255,6 @@ void Player::SetRespawn(void)
 	timeInv_ = TIME_INVINCIBLE;
 }
 
-void Player::InitAnimation(void)
-{
-	ResourceManager& resMng = ResourceManager::GetInstance();
-
-	animation_ = std::make_unique<AnimationController>(transform_.modelId);
-	animation_->AddExternal(static_cast<int>(ANIM_TYPE::IDLE)
-		, 30.0f, resMng.LoadHandleId(ResourceManager::SRC::ANIM_IDLE));
-
-	animation_->AddExternal(static_cast<int>(ANIM_TYPE::RUN)
-		, 40.0f, resMng.LoadHandleId(ResourceManager::SRC::ANIM_RUN));
-
-	animation_->AddExternal(static_cast<int>(ANIM_TYPE::THROW_LEFT)
-		, 20.0f, resMng.LoadHandleId(ResourceManager::SRC::ANIM_THROW_LEFT));
-
-	animation_->AddExternal(static_cast<int>(ANIM_TYPE::THROW_RIGHT)
-		, 20.0f, resMng.LoadHandleId(ResourceManager::SRC::ANIM_THROW_RIGHT));
-
-	animation_->AddExternal(static_cast<int>(ANIM_TYPE::THROW_RUN)
-		, 20.0f, resMng.LoadHandleId(ResourceManager::SRC::ANIM_THROW_RUN));
-
-	animation_->AddExternal(static_cast<int>(ANIM_TYPE::JUMP)
-		, 45.5f, resMng.LoadHandleId(ResourceManager::SRC::ANIM_JUMP));
-
-	animation_->AddExternal(static_cast<int>(ANIM_TYPE::DODGE)
-		, 40.0f, resMng.LoadHandleId(ResourceManager::SRC::ANIM_DODGE)
-		, VGet(0.0f, 0.0f, 0.0f));
-
-
-	animType_ = ANIM_TYPE::IDLE;
-	animation_->Play(static_cast<int>(animType_));
-}
-void Player::InitTransform(void)
-{
-	constexpr float MODEL_SCALE = 0.625f;
-	constexpr float LOCAL_ROT_Y = 180.0f;
-
-	transform_.InitTransform(MODEL_SCALE
-		, Quaternion::Identity()
-		, Quaternion::AngleAxis(UtilityMath::Deg2RadF(LOCAL_ROT_Y), UtilityMath::AXIS_Y)
-		, UtilityMath::VECTOR_ZERO);
-
-	transform_.Update();
-}
-void Player::InitCollider(void)
-{
-	ColliderLine* colLine = new ColliderLine(ColliderBase::TAG::PLAYER, &transform_, COL_LINE_START_LOCAL_POS, COL_LINE_END_LOCAL_POS);
-	ownColliders_.emplace(static_cast<int>(ColliderBase::SHAPE::LINE), colLine);
-	colLine->SetTriger(false);
-	
-	ColliderCapsule* colCap = new ColliderCapsule(ColliderBase::TAG::PLAYER
-									, &transform_, COL_CAPSULE_TOP_LOCAL_POS, COL_CAPSULE_DOWN_LOCAL_POS, COL_CAPSULE_RADIUS);
-										
-	ownColliders_.emplace(0, colCap);
-
-	ownColliders_.at(0)->SetTriger(false);
-
-	// 衝突判定マネージャに登録
-	CollisionController::GetInstance().RegisterActor(this);
-}
-void Player::InitPost(void)
-{
-	constexpr bool IS_RAPID_FIRE = false;
-	actionController_ = std::make_unique<PActionController>(animation_, IS_RAPID_FIRE);
-
-	curAttackNum_ = 0;
-
-	constexpr float SHOT_TIME_INCREMENT = 0.3f; // 行動間隔上昇値
-	constexpr float SHOT_TIME_INC_INPUT = 0.2f; // 行動間隔上昇値
-
-	constexpr float SHOT_TIME_ACTIVE = 2.5f; // 有効時間
-	constexpr float SHOT_TIME_ACTION_ACTIVE = 1.25f; // 行動有効時間
-	constexpr float SHOT_TIME_ACTIVE_INPUT = 1.725f; // 入力可能時間
-	constexpr float SHOT_TIME_END = 0.25f; // 終了時間
-
-	constexpr float SHOT_TIME_STOP = 0.85f; // 停止時間
-	constexpr float SHOT_TIME_STOP_ACTIVE = 1.15f; // 停止有効化時間
-
-
-
-	float timeActive, timeActionActive, timeInput, timeEnd;
-	timeActive = SHOT_TIME_ACTIVE;
-	timeActionActive = SHOT_TIME_ACTION_ACTIVE;
-	timeInput = SHOT_TIME_ACTIVE_INPUT;
-	timeEnd = SHOT_TIME_END;
-
-	actionController_->SetAction(0, 50, timeActive, timeActionActive, timeEnd
-								, std::bind(&Player::ShotBullet, this)
-								, 0.0f, 0.0f, timeInput);
-
-	timeActive += SHOT_TIME_INCREMENT;
-	timeInput += SHOT_TIME_INC_INPUT;
-	timeEnd += SHOT_TIME_INCREMENT;
-
-	actionController_->SetAction(1, 75, timeActive, timeActionActive, timeEnd
-								, std::bind(&Player::ShotBullet, this)
-								, SHOT_TIME_STOP, SHOT_TIME_STOP_ACTIVE, timeInput);
-
-	timeActive += (SHOT_TIME_INCREMENT * 2);
-	actionController_->SetAction(2, 150, timeActive, timeActionActive, timeEnd
-								, std::bind(&Player::ShotBullet, this)
-								, SHOT_TIME_STOP, SHOT_TIME_STOP_ACTIVE, 0.0f);
-
-
-	// ジャンプ
-	actionController_->SetAction(3, 0, 0.2f, 0.2f, 0.0f
-								, std::bind(&Player::Jump, this)
-								, 0.05f, 0.2f);
-	// 回避
-	actionController_->SetAction(4, 0, 0.275f, 0.2f, 0.0f
-								, std::bind(&Player::Dodge, this)
-								, 0.075f, 0.2f);
-}
-
 
 void Player::UpdateProcess(void)
 {
@@ -258,7 +285,31 @@ void Player::UpdateProcess(void)
 	bodyPos_ = transform_.pos;
 	bodyPos_.y += BODY_POS_OFFSET_Y;
 
-	PlayerBase::UpdaetaSound();
+
+	UpdaetaSound();
+	
+	/*
+	if (InputManager::GetInstance().IsTrgDown(KEY_INPUT_LEFT)
+		|| InputManager::GetInstance().IsPadBtnTrgDown(InputManager::JOYPAD_NO::PAD1, InputManager::JOYPAD_BTN::CROSS_LEFT))
+	{
+		int type = static_cast<int>(playerType_) - 1;
+		if (type < 0) { type = static_cast<int>(PLAYER_TYPE::MAX) - 1; }
+
+		SetPlayerType(static_cast<PLAYER_TYPE>(type));
+		animation_->SetModelId(transform_.modelId);
+	}
+	
+
+	if (InputManager::GetInstance().IsTrgDown(KEY_INPUT_RIGHT)
+		|| InputManager::GetInstance().IsPadBtnTrgDown(InputManager::JOYPAD_NO::PAD1, InputManager::JOYPAD_BTN::CROSS_RIGHT))
+	{
+		int type = static_cast<int>(playerType_) + 1;
+		if (type >= static_cast<int>(PLAYER_TYPE::MAX)) { type = 0; }
+
+		SetPlayerType(static_cast<PLAYER_TYPE>(type));
+		animation_->SetModelId(transform_.modelId);
+	}
+	*/
 }
 
 void Player::UpdateProcessPost(void)
@@ -361,7 +412,13 @@ void Player::ProcessMove(void)
 
 	// ジャンプ行動有効時に行動前の時、処理終了
 	if (!actionController_->IsEndActionActive()
-		&& actionController_->GetCurActionNum() == 3) { return; }
+		&& actionController_->GetCurActionNum() == 3
+		||!actionController_->IsEndActionActive()
+		&& actionController_->GetCurActionNum() == 4)
+	{
+		movePow_ = UtilityMath::VECTOR_ZERO;
+		return;
+	}
 
 	// カメラの方向で進行
 	Quaternion cameraRot = SceneManager::GetInstance().GetCamera()->GetQuaRotY();
@@ -504,7 +561,8 @@ void Player::ProcessAttack(void)
 	// 行動の更新
 	actionController_->Update();
 
-	if (InputManager::GetInstance().IsTrgMouseLeft())
+	if (InputManager::GetInstance().IsTrgMouseLeft()
+		|| InputManager::GetInstance().IsPadBtnTrgDown(InputManager::JOYPAD_NO::PAD1, InputManager::JOYPAD_BTN::R_TRIGGER))
 	{
 		const bool canCombo = (actionController_->IsActiveAction() && actionController_->IsActiveInput());
 		const bool canAttack = !actionController_->IsActiveAction();

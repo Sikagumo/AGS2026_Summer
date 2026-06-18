@@ -20,6 +20,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\Object\Actor\Chara\Weapon\BossWeapon\MG\MGBase.cpp" />
+    <ClCompile Include="Src\Object\Actor\Chara\Weapon\Bullet\Player\PBulletInterfere.cpp" />
+    <ClCompile Include="Src\Object\Actor\Chara\Weapon\Bullet\Player\PBulletRecovery.cpp" />
     <ClCompile Include="Src\Object\Collision\CollisionBox.cpp" />
     <ClCompile Include="Src\Object\Collision\CollisionCircle.cpp" />
     <ClCompile Include="Src\Object\Collision\CollisionLine.cpp" />
@@ -92,6 +94,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\Object\Actor\Chara\Weapon\BossWeapon\MG\MGBase.h" />
+    <ClInclude Include="Src\Object\Actor\Chara\Weapon\Bullet\Player\PBulletInterfere.h" />
+    <ClInclude Include="Src\Object\Actor\Chara\Weapon\Bullet\Player\PBulletRecovery.h" />
     <ClInclude Include="Src\Object\Collision\CollisionBox.h" />
     <ClInclude Include="Src\Object\Collision\CollisionCircle.h" />
     <ClInclude Include="Src\Object\Collision\CollisionLine.h" />

@@ -195,9 +195,6 @@
     <ClCompile Include="Src\Object\Actor\Chara\Weapon\Bullet\Player\PBulletBig.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Scene\MainScene\SceneGamePlayer.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
     <ClCompile Include="Src\Object\Actor\Chara\Player\Player.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
@@ -268,6 +265,12 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Src\Object\Actor\Chara\Weapon\BossWeapon\MG\MGBase.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Object\Actor\Chara\Weapon\Bullet\Player\PBulletRecovery.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Object\Actor\Chara\Weapon\Bullet\Player\PBulletInterfere.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -413,9 +416,6 @@
     <ClInclude Include="Src\Object\Actor\Chara\Weapon\Bullet\Player\PBulletBase.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Src\Scene\MainScene\SceneGamePlayer.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="Src\Object\Actor\Chara\CharaBase.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
@@ -489,6 +489,12 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Src\Object\Actor\Chara\Weapon\BossWeapon\MG\MGBase.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Object\Actor\Chara\Weapon\Bullet\Player\PBulletRecovery.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Object\Actor\Chara\Weapon\Bullet\Player\PBulletInterfere.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

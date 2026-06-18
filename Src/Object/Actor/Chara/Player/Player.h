@@ -51,8 +51,12 @@ public:
 					, bool _isStan, float _knockPowY = KNOCK_POW_Y);
 
 	void SetRespawn(void);
-
+	
+	void SetPlayerType(PLAYER_TYPE _type = PLAYER_TYPE::MAX);
+	
 	void SetSoundDate(VECTOR _pos, float _radius, bool _isLanging, bool _isMGFire, bool _isRoad)override;
+
+
 protected:
 
 	void InitAnimation(void)override;
@@ -69,7 +73,6 @@ protected:
 	void DrawLate(void)override;
 
 	VECTOR CalcAddPosition(void) override;
-
 
 
 private:

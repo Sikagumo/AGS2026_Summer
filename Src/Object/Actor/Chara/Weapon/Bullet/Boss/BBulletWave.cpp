@@ -82,9 +82,12 @@ void BBulletWave::UpdateProcessPost(void)
 
 void BBulletWave::DrawPre(void)
 {
-	for (auto& col : ownColliders_)
+	if (radius_ != INIT_RADIUS)
 	{
-		col.second->Draw();
+		for (auto& col : ownColliders_)
+		{
+			col.second->Draw();
+		}
 	}
 #ifdef _DEBUG
 	DrawFormatString(10, 200, 0xffffff, "radius:%f", radius_);

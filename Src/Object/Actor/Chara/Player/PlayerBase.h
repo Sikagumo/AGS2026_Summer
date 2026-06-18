@@ -11,10 +11,11 @@ public:
 	enum class BULLET_TYPE
 	{
 		NONE = -1,
-		INTERFERING, // –WŠQ
+		JUMING, // –WŠQ
 		BIG,
 		RAPID_FIRE, // ˜AŽË
 		RECOVERY,	// ‰ñ•œ
+		
 
 		MAX,
 	};
@@ -25,6 +26,8 @@ public:
 		DOG,
 		MONKEY,
 		BIRD,
+
+		MAX
 	};
 
 	enum class PLAYER_STATE
