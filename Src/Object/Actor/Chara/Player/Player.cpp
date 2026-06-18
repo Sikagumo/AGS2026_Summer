@@ -165,7 +165,7 @@ void Player::InitPost(void)
 	constexpr float SHOT_TIME_ACTIVE_INPUT = 1.725f; // “ü—Í‰Â”\ŽžŠÔ
 	constexpr float SHOT_TIME_END = 0.25f; // I—¹ŽžŠÔ
 
-	constexpr float SHOT_TIME_STOP = 0.85f; // ’âŽ~ŽžŠÔ
+	constexpr float SHOT_TIME_STOP = 1.85f; // ’âŽ~ŽžŠÔ
 	constexpr float SHOT_TIME_STOP_ACTIVE = 1.15f; // ’âŽ~—LŒø‰»ŽžŠÔ
 
 
@@ -202,7 +202,7 @@ void Player::InitPost(void)
 	// ‰ñ”ð
 	actionController_->SetAction(4, 0, 0.5f, 0.1f, 0.0f
 								 , std::bind(&Player::Dodge, this)
-								 , 0.075f, 0.15f);
+								 , 0.025f, 0.15f);
 }
 
 void Player::Draw(void)

@@ -114,7 +114,8 @@ public:
 
 	/// @brief ロックオン中の対象の位置を取得
 	const VECTOR& GetLockOnPos(void)const { return lockOnParam_.pos; };
-	float GetLockOnHpRate(void)const { return (static_cast<float>(lockOnParam_.hp) / static_cast<float>(lockOnParam_.maxHp)); };
+	int GetLockOnHp(void)const { return lockOnParam_.hp; };
+	int GetLockOnMaxHp(void)const { return lockOnParam_.maxHp; };
 
 	/// @brief イージング遷移中か否か
 	bool IsEasingState(void) { return (easingTerm_ < 1.0f); };

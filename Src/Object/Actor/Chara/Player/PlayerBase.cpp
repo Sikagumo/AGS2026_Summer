@@ -17,8 +17,8 @@ PlayerBase::PlayerBase(int _playerNo, BULLET_TYPE _bulletType, const VECTOR& _st
 
 void PlayerBase::SetDamage(int _damage, bool _isInvincible, float _timeInvincible)
 {
-	// 無敵可能時に無敵中、HPが０以下、ダメージ量が0以下時、処理終了
-	if (_isInvincible && timeInv_ > 0.0f
+	// 無敵中、HPが０以下、ダメージ量が0以下時、処理終了
+	if (timeInv_ > 0.0f
 		|| hp_ <= 0 || _damage <= 0) {
 		return;
 	}

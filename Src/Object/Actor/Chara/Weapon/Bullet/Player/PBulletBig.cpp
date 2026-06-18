@@ -4,15 +4,19 @@
 #include "../../../../../../Manager/System/TimeManager.h"
 
 constexpr float RADIUS_BIG = 9.0f;
-constexpr float RADIUS_INCREMENT = 22.5f;
+constexpr float RADIUS_INCREMENT = 27.5f;
 constexpr float RADIUS_BIG_BLAST = RADIUS_BIG + (RADIUS_INCREMENT * 4);
 constexpr float SCALE_BIG = 1.5f;
 constexpr float SCALE_BIG_INCREMENT = 2.5f;
-constexpr float SHOT_SPEED_BIG_XZ = 10.0f;
-constexpr float SHOT_SPEED_BIG_Y  = 7.5f;
+constexpr float SHOT_SPEED_BIG_XZ = 5.0f;
+constexpr float SHOT_SPEED_BIG_Y  = 5.0f;
 constexpr float TIME_ALIVE_BIG = 5.0f;
 constexpr int POWER_START = 50;
 constexpr int POWER_INCREMENT = 50;
+
+// Šg‘åŠ®—¹‚Ü‚Å‚ÌŽžŠÔ
+constexpr float RADIUS_DURATION = 4.5f;
+
 
 
 PBulletBig::PBulletBig(void)
@@ -40,7 +44,6 @@ void PBulletBig::UpdatePost(void)
 {
 	if (isScaleUp_ && radius_ < radiusMax_)
 	{
-		constexpr float RADIUS_DURATION = 1.0f;
 		scaleUpTime_ += timeManager_.GetDeltaTime();
 
 		float term = (scaleUpTime_ / RADIUS_DURATION);

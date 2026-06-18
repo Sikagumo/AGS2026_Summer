@@ -204,31 +204,69 @@ void SceneGame::DrawHpBer(void)
 {
 	const std::unique_ptr<Camera>& camera = SceneManager::GetInstance().GetCamera();
 
-	// ロックオン
 	if (camera->GetIsLockOn() && !camera->IsEasingState())
 	{
-		constexpr Vector2F BER_OFFSET = { 0.0f, -125.0f };
+		constexpr float    BER_SIZE = 0.5f;
+		constexpr Vector2F BER_OFFSET = { 0.0f, -100.0f };
 
-		VECTOR viewPos = ConvWorldPosToScreenPos(camera->GetLockOnPos());
+		Vector2 size = Vector2();
+		VECTOR  viewPos = ConvWorldPosToScreenPos(camera->GetTargetPos());
+
+		GetGraphSize(targetHpBerImage_, &size.x, &size.y);
 		viewPos.x += BER_OFFSET.x;
 		viewPos.y += BER_OFFSET.y;
 
-		const float DYNAMIC_SCALE = CalcHpBarScale(camera->GetLockOnPos());
+		DrawRotaGraph(
+			viewPos.x, viewPos.y,
+			BER_SIZE, 0.0f,
+			targetHpBerImage_, true
+		);
+		Vector2 gaugeSize = Vector2();
+		GetGraphSize(targetHpImage_, &gaugeSize.x, &gaugeSize.y);
 
-		DrawRotaGraph(viewPos.x, viewPos.y, DYNAMIC_SCALE, 0.0f,
-			targetHpBerImage_, true);
+		const float hpRatio = (camera->GetLockOnMaxHp() > 0)
+			? static_cast<float>(camera->GetLockOnHp()) / static_cast<float>(camera->GetLockOnMaxHp())
+			: 0.0f;
 
+		const float clampedRatio = (hpRatio < 0.0f)
+				? 0.0f
+				: (hpRatio > 1.0f)
+					? 1.0f
+					: hpRatio;
 
-		Vector2 size, hpSize = Vector2();
-		GetGraphSize(targetHpImage_, &size.x, &size.y);
+		// スクリーン上でのゲージ画像全体のサイズ（BER_SIZE倍）
+		const float scaledW = gaugeSize.x * BER_SIZE;
+		const float scaledH = gaugeSize.y * BER_SIZE;
 
-		// HPゲージ本体（targetHpImage_）も同じスケールで描画
-		hpSize = size;
-		hpSize.x *= std::clamp(camera->GetLockOnHpRate(), 0.0f, 1.0f);
+		// 描画先: 左上座標（viewPos は中心なので半分引く）
+		const int destLeft = static_cast<int>(viewPos.x - scaledW * 0.5f);
+		const int destTop = static_cast<int>(viewPos.y - scaledH * 0.5f);
 
-		DrawRectRotaGraph(viewPos.x, viewPos.y
-			, 0.0f, 0.0f
-			, hpSize.x - size.x / 2, hpSize.y, DYNAMIC_SCALE, 0.0f, targetHpImage_, true);
+		// 描画先: 右下座標（左端固定 → 右端だけHP割合で削る）
+		//   destRight = destLeft + scaledW × hpRatio
+		const int destRight = destLeft + static_cast<int>(scaledW * clampedRatio);
+		const int destBottom = destTop + static_cast<int>(scaledH);
+
+		// 画像内: 切り取り幅（HP割合分）
+		const int srcW = static_cast<int>(gaugeSize.x * clampedRatio);
+
+		if (srcW > 0)
+		{
+			DrawRectExtendGraph(
+				destLeft, destTop,
+				destRight, destBottom,
+				0, 0,
+				srcW, gaugeSize.y,
+				targetHpImage_,
+				true
+			);
+		}
+
+#ifdef _DEBUG
+		DrawFormatString(10, 60, GetColor(255, 255, 255),
+			"Boss HP: %d / %d  Ratio: %.2f",
+			camera->GetLockOnHp(), camera->GetLockOnMaxHp(), clampedRatio);
+#endif
 	}
 }
 float SceneGame::CalcHpBarScale(const VECTOR& _targetPos)
