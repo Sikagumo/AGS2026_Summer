@@ -33,7 +33,7 @@ void SceneResult::Initialize(void)
 		imageResult_[i] = -1;
 	}
 
-	ResourceManager::GetInstance().LoadHandleIds(ResourceManager::SRC::IMAGE_RESULT, imageResult_.data());
+	ResourceManager::GetInstance().LoadHandleIds(ResourceManager::SRC::IMGS_RESULT, imageResult_.data());
 	SceneManager::GetInstance().GetCamera()->ChangeMode(Camera::MODE::NONE);
 }
 

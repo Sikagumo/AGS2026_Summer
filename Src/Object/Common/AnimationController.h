@@ -42,13 +42,6 @@ public:
 	/// @param speed アニメーション速度 
 	void AddInternal(int _type, float _speed = 30.0f);
 
-
-	/// @brief 別の読み込み済みアニメーションモデルから準備
-	/// @param _type アニメーション種類
-	/// @param _speed アニメーション速度 
-	/// @param _handle アニメーションのハンドル
-	void AddExternal(int _type, float _speed, int _handle);
-
 	/// @brief 別の読み込み済みアニメーションモデルから準備し、再生座標固定
 	/// @see 詳細な説明
 	/// @param _type アニメーション種類
@@ -56,7 +49,7 @@ public:
 	/// @param _handle アニメーションのハンドル
 	/// @param _placeLocalPos 固定するアニメーションローカル位置
 	void AddExternal(int _type, float _speed, int _handle
-					, const VECTOR& _inPlaceLocalPos);
+					, bool _isPlace = false, const VECTOR& _localPos = UtilityMath::VECTOR_ZERO);
 
 
 	/// @brief アニメーション再生
@@ -107,6 +100,8 @@ public:
 	/// @param rate 再生位置の割合(0.0f～1.0f)
 	void SetAnimStepRate(float rate);
 
+	void SetModelId(int _modelId);
+
 	/// @brief 再生中のアニメーションの現在時間を取得
 	float GetPlayTime(void);
 
@@ -145,6 +140,13 @@ private:
 	// 停止時間
 	float timeStop_;
 	
+	float term;
+	
+	/// @brief 他アニメーションとのブレンドの影響を受けない単体の素のルート位置を取得
+	/// @param _target 位置を取得したいアニメーション
+	/// @param _other ブレンド対象の相方アニメーション(一時的にブレンド率0%にする)
+	VECTOR GetRawAnimRootPos(Animation& _target, Animation& _other);
+	
 
 	/// @brief アニメーション追加処理
 	/// @param _type アニメーションの種類
@@ -156,6 +158,7 @@ private:
 	bool IsFindAnimation(int _type);
 
 	/// @brief 固定アニメーション処理
-	/// @param _playAnim 再生中のアニメーション
-	void AnimationInPlace(Animation& _playAnim, float _blendTime);
+	/// @param _prePlayAnim 再生中のアニメーション
+	/// @param _curPlayAnim 再生中のアニメーション
+	void AnimationInPlace(Animation& _prePlayAnim, Animation& _curPlayAnim, float _blendTime);
 };

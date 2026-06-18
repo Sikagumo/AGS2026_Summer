@@ -49,9 +49,17 @@ private:
 
     float gameTime_;
 
+    int targetHpImage_;
+    int targetHpBerImage_;
+
+
+    float CalcHpBarScale(const VECTOR& _targetPos);
+
 
     /// @brief デバッグ情報の描画
     void DrawDebug(void);
+
+    void DrawHpBer(void);
 
     void DamageProcess(void);
 

@@ -30,9 +30,11 @@ void Stage::Load(void)
 
 void Stage::InitTransform(void)
 {
-	transform_.InitTransform(1.0f,
+	constexpr float SCALE = 5.0f;
+	constexpr VECTOR LOCAL_POS = { 0.0f, -500.0f, 0.0f };
+	transform_.InitTransform(SCALE,
 							 Quaternion::Identity(), Quaternion::Identity(),
-							 { 0.0f, -100.0f, 0.0f });
+							 LOCAL_POS);
 }
 
 void Stage::InitCollider(void)

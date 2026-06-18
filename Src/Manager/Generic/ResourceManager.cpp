@@ -53,7 +53,6 @@ void ResourceManager::Initialize(void)
 	_SetResource(LOAD_TYPE::IMAGE, SRC::IMG_TITLE, PATH_IMAGE + "Title.png");
 	
 	_SetResource(LOAD_TYPE::IMAGE, SRC::IMG_PEACH, PATH_IMAGE + "peach.png");
-	_SetResource(LOAD_TYPE::IMAGE, SRC::IMG_HP_TARGET, PATH_IMAGE + "TargetHpBer.png");
 
 	/* 複数画像 */
 
@@ -68,20 +67,38 @@ void ResourceManager::Initialize(void)
 	imagesNumX = 1;
 	imagesNumY = 11;
 	_SetResource(LOAD_TYPE::IMAGES, SRC::IMGS_TEXTS, PATH_IMAGE + "Text.png"
-		, imagesAllNum, imagesNumX, imagesNumY);
+				, imagesAllNum, imagesNumX, imagesNumY);
 
-	_SetResource(LOAD_TYPE::IMAGES, SRC::IMGE_TITLE_TEXT, PATH_IMAGE + "txt.png"
-	,8, 1, 8);
+	// ロックオン対象HPバー
+	imagesAllNum = 2;
+	imagesNumX = 1;
+	imagesNumY = 2;
+	_SetResource(LOAD_TYPE::IMAGES, SRC::IMGS_HP_TARGET, PATH_IMAGE + "TargetHpBer.png"
+				, imagesAllNum, imagesNumX, imagesNumY);
 
-	_SetResource(LOAD_TYPE::IMAGES, SRC::IMAGE_RESULT, PATH_IMAGE + "EndTxt.png"
-		, 4, 1, 4);
+
+	// タイトル文字
+	imagesAllNum = 8;
+	imagesNumX = 1;
+	imagesNumY = 8;
+	_SetResource(LOAD_TYPE::IMAGES, SRC::IMGS_TITLE_TEXT, PATH_IMAGE + "txt.png"
+				, imagesAllNum, imagesNumX, imagesNumY);
+
+	imagesAllNum = 4;
+	imagesNumX = 1;
+	imagesNumY = 4;
+	_SetResource(LOAD_TYPE::IMAGES, SRC::IMGS_RESULT, PATH_IMAGE + "EndTxt.png"
+				, imagesAllNum, imagesNumX, imagesNumY);
 
 
 	/* モデル */
 	_SetResource(LOAD_TYPE::MODEL, SRC::MODEL_SKYDOME, PATH_MODEL + "SkyDome/SkyDome.mv1");
-	_SetResource(LOAD_TYPE::MODEL, SRC::MODEL_PLAYER_HUMAN, PATH_MODEL + "Player/Player_Human.mv1");
+	_SetResource(LOAD_TYPE::MODEL, SRC::MODEL_PLAYER_HUMAN, PATH_MODEL + "Player/Chara/Human/Player_Human.mv1");
+	_SetResource(LOAD_TYPE::MODEL, SRC::MODEL_PLAYER_DOG,	PATH_MODEL + "Player/Chara/Dog/PlayerDog.mv1");
+	_SetResource(LOAD_TYPE::MODEL, SRC::MODEL_PLAYER_BIRD,	PATH_MODEL + "Player/Chara/Bird/PlayerBird.mv1");
+	_SetResource(LOAD_TYPE::MODEL, SRC::MODEL_PLAYER_MONKEY,PATH_MODEL + "Player/Chara/Monkey/PlayerMonkey.mv1");
 
-	_SetResource(LOAD_TYPE::MODEL, SRC::MODEL_STAGE, PATH_MODEL + "Stage/MainStage/MainStage.mv1");
+	_SetResource(LOAD_TYPE::MODEL, SRC::MODEL_STAGE, PATH_MODEL + "Stage/FloatingIsland/FloatingIsland02.mv1");
 
 	_SetResource(LOAD_TYPE::MODEL, SRC::MODEL_BOSS_FEET, PATH_MODEL + "Boss/oni_feet.mv1");
 	_SetResource(LOAD_TYPE::MODEL, SRC::MODEL_BOSS_CAR, PATH_MODEL + "Boss/oni_feet_car.mv1");

@@ -52,6 +52,9 @@ public:
 
 	void SetRespawn(void);
 
+	void SetPlayerType(PLAYER_TYPE _type = PLAYER_TYPE::MAX);
+
+
 protected:
 
 	void InitAnimation(void)override;

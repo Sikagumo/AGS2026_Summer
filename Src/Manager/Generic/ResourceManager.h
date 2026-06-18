@@ -16,12 +16,12 @@ public:
 		/* ’Pˆê‰æ‘œ */
 		IMG_TITLE,
 		IMG_PEACH,
-		IMG_HP_TARGET,
 
 		/* •¡”‰æ‘œ */
 		IMGS_TEXTS,
-		IMGE_TITLE_TEXT,
-		IMAGE_RESULT,
+		IMGS_TITLE_TEXT,
+		IMGS_HP_TARGET,
+		IMGS_RESULT,
 
 		/* ƒ‚ƒfƒ‹ */
 		MODEL_SKYDOME,
