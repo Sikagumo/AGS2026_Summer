@@ -19,6 +19,10 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Src\Shader\ShaderManager.cpp" />
+    <ClCompile Include="Src\Shader\ShaderPixel\ShaderNormal.cpp" />
+    <ClCompile Include="Src\Shader\ShaderPixel\ShaderPixelBase.cpp" />
+    <ClCompile Include="Src\Shader\ShaderBase.cpp" />
     <ClCompile Include="Src\Object\Collision\CollisionBox.cpp" />
     <ClCompile Include="Src\Object\Collision\CollisionCircle.cpp" />
     <ClCompile Include="Src\Object\Collision\CollisionLine.cpp" />
@@ -91,6 +95,10 @@
     <ClCompile Include="Src\Object\Actor\Chara\Weapon\BossWeapon\WeaponMGR.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Src\Shader\ShaderManager.h" />
+    <ClInclude Include="Src\Shader\ShaderPixel\ShaderNormal.h" />
+    <ClInclude Include="Src\Shader\ShaderPixel\ShaderPixelBase.h" />
+    <ClInclude Include="Src\Shader\ShaderBase.h" />
     <ClInclude Include="Src\Object\Collision\CollisionBox.h" />
     <ClInclude Include="Src\Object\Collision\CollisionCircle.h" />
     <ClInclude Include="Src\Object\Collision\CollisionLine.h" />
