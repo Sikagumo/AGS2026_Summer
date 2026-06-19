@@ -60,8 +60,6 @@ void SceneTitle::Initialize(void)
 {
     SetMouseDispFlag(true);
 
-    KeyConfInputManager::GetInstance().ClearInputState();
-
     // マウスカーソル用のコライダー生成（半径1の円）
     cursorCollider_ = std::make_unique<Collider2DCircle>(Vector2F(0.0f, 0.0f), 1.0f, Collider2DBase::TAG_2D::MOUSE_CURSOR);
     CollisionController::GetInstance().RegisterCollider2D(cursorCollider_.get());

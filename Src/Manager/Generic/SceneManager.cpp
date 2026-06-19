@@ -118,7 +118,6 @@ void SceneManager::ChangeScene(std::shared_ptr<SceneBase> scene)
 {
     // CollisionControllerをクリア
     CollisionController::GetInstance().Clear();
-    KeyConfInputManager::GetInstance().ClearInputState();
 
     // BGMを停止する
     SoundManager::GetInstance().StopAllBGM();
@@ -137,7 +136,6 @@ void SceneManager::ChangeScene(std::shared_ptr<SceneBase> scene)
 void SceneManager::PushScene(std::shared_ptr<SceneBase> scene)
 {
     scenes_.push_back(scene);
-    KeyConfInputManager::GetInstance().ClearInputState();
 
     // 即時ロード・初期化
     scene->Load();
@@ -147,9 +145,6 @@ void SceneManager::PushScene(std::shared_ptr<SceneBase> scene)
 
 void SceneManager::PopScene(void)
 {
-
-    KeyConfInputManager::GetInstance().ClearInputState();
-
     if (scenes_.size() > 1)
     {
         scenes_.back()->Release();
@@ -163,7 +158,6 @@ void SceneManager::JumpScene(std::shared_ptr<SceneBase> scene)
 
     // CollisionControllerをクリア
     CollisionController::GetInstance().Clear();
-    KeyConfInputManager::GetInstance().ClearInputState();
 
     // BGMを停止する
     SoundManager::GetInstance().StopAllBGM();

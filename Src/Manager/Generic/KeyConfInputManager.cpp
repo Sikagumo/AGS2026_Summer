@@ -1,9 +1,7 @@
 #include "KeyConfInputManager.h"
-
 #include <cmath>
 #include <cstdio>
 #include <array>
-
 #include "../../Utility/UtilityMath.h"
 #include "../../Application.h"
 
@@ -46,6 +44,8 @@ KeyConfInputManager::KeyConfInputManager(void)
 	LoadInputTable();
 	LoadSensitivitySettings();
 
+
+
 	for (const auto& pair : inputTable_)
 	{
 		currentInputState_[pair.first] = false;
@@ -59,49 +59,51 @@ void KeyConfInputManager::InitInputTable(void)
 
 	inputTable_["UP"] =
 	{
-		{INPUT_TYPE::KEY_BOARD, KEY_INPUT_W},
-		{INPUT_TYPE::KEY_BOARD, KEY_INPUT_UP},
+	  {INPUT_TYPE::KEY_BOARD, KEY_INPUT_W},
+	  {INPUT_TYPE::KEY_BOARD, KEY_INPUT_UP},
 	};
 
 	inputTable_["DOWN"] =
 	{
-		{INPUT_TYPE::KEY_BOARD, KEY_INPUT_S},
-		{INPUT_TYPE::KEY_BOARD, KEY_INPUT_DOWN}
+	  {INPUT_TYPE::KEY_BOARD, KEY_INPUT_S},
+	  {INPUT_TYPE::KEY_BOARD, KEY_INPUT_DOWN}
 	};
 
 	inputTable_["LEFT"] =
 	{
-		{INPUT_TYPE::KEY_BOARD, KEY_INPUT_A},
-		{INPUT_TYPE::KEY_BOARD, KEY_INPUT_LEFT},
+	  {INPUT_TYPE::KEY_BOARD, KEY_INPUT_A},
+	  {INPUT_TYPE::KEY_BOARD, KEY_INPUT_LEFT},
 	};
 
-	inputTable_["RGIHT"] =
+	inputTable_["RIGHT"] =
 	{
-		{INPUT_TYPE::KEY_BOARD, KEY_INPUT_D},
-		{INPUT_TYPE::KEY_BOARD, KEY_INPUT_RIGHT}
+	  {INPUT_TYPE::KEY_BOARD, KEY_INPUT_D},
+	  {INPUT_TYPE::KEY_BOARD, KEY_INPUT_RIGHT}
 	};
 
 	inputTable_["JUMP"] =
 	{
-		{INPUT_TYPE::KEY_BOARD, KEY_INPUT_SPACE},
-		{INPUT_TYPE::JOYPAD, PAD_INPUT_A}
+	  {INPUT_TYPE::KEY_BOARD, KEY_INPUT_SPACE},
+	  {INPUT_TYPE::KEY_BOARD, KEY_INPUT_RETURN},
+	  {INPUT_TYPE::JOYPAD, PAD_INPUT_A}
 	};
 
 	inputTable_["ATTACK"] =
 	{
-		{INPUT_TYPE::MOUSE, MOUSE_INPUT_LEFT},
+	  {INPUT_TYPE::MOUSE, MOUSE_INPUT_LEFT},
 	};
 
 	inputTable_["OK"] =
 	{
-		{INPUT_TYPE::KEY_BOARD, KEY_INPUT_SPACE},
-		{INPUT_TYPE::MOUSE, MOUSE_INPUT_LEFT},
-		{INPUT_TYPE::JOYPAD, PAD_INPUT_A}
+	  {INPUT_TYPE::KEY_BOARD, KEY_INPUT_SPACE},
+	  {INPUT_TYPE::MOUSE, MOUSE_INPUT_LEFT},
+	  {INPUT_TYPE::JOYPAD, PAD_INPUT_A}
 	};
 
 	inputTable_["CANCEL"] =
 	{
-		{INPUT_TYPE::KEY_BOARD, KEY_INPUT_ESCAPE}
+	  {INPUT_TYPE::KEY_BOARD, KEY_INPUT_ESCAPE},
+	  {INPUT_TYPE::KEY_BOARD, KEY_INPUT_DELETE}
 	};
 
 	inputTable_["PAUSE"] =
@@ -114,14 +116,22 @@ void KeyConfInputManager::Update(void)
 {
 	previousInputState_ = currentInputState_;
 
+
+
 	// 生データ取得
 	std::array<char, 256> keyState{};
 	GetHitKeyStateAll(keyState.data());
 
+
+
 	int mouseState = GetMouseInput();
 	int padState = GetJoypadInputState(usePadNo_);
 
+
+
 	GetMousePoint(&mousePosition_.x, &mousePosition_.y);
+
+
 
 	XINPUT_STATE xInput{};
 	if (GetJoypadXInputState(usePadNo_, &xInput) == 0)
@@ -143,23 +153,37 @@ void KeyConfInputManager::Update(void)
 		}
 	}
 
+	// 各入力イベントの走査
 	for (const auto& pair : inputTable_)
 	{
 		const auto& eventName = pair.first;
-		bool hit = currentInputState_[eventName];
+
+		//前のフレームの状態は引き継がず、毎フレーム必ずfalse(未入力状態)からチェックする
+		bool hit = false;
 
 		for (const auto& inputInfo : pair.second)
 		{
 			switch (inputInfo.type)
 			{
 			case INPUT_TYPE::KEY_BOARD:
-				hit |= (keyState[inputInfo.id] != 0);
+				if (keyState[inputInfo.id] != 0)
+				{
+					hit = true;
+				}
 				break;
+
 			case INPUT_TYPE::MOUSE:
-				hit |= ((mouseState & inputInfo.id) != 0);
+				if ((mouseState & inputInfo.id) != 0)
+				{
+					hit = true;
+				}
 				break;
+
 			case INPUT_TYPE::JOYPAD:
-				hit |= ((padState & inputInfo.id) != 0);
+				if ((padState & inputInfo.id) != 0)
+				{
+					hit = true;
+				}
 				break;
 			}
 		}
@@ -195,10 +219,14 @@ bool KeyConfInputManager::isTrigerDown(const std::string& _name) const
 	return curInput->second && !(preInput->second);
 }
 
+
+
 Vector2 KeyConfInputManager::GetMousePosition(void) const
 {
 	return mousePosition_;
 }
+
+
 
 Vector2F KeyConfInputManager::GetMouseVelocityAndFixCenter(void)
 {
@@ -227,13 +255,13 @@ void KeyConfInputManager::SetMouseSensitivity(const MouseSensitivity& _sensitivi
 	mouseSensitivity_ = _sensitivity;
 }
 
-const KeyConfInputManager::MouseSensitivity& 
+const KeyConfInputManager::MouseSensitivity&
 KeyConfInputManager::GetMouseSensitivity(void) const
 {
 	return mouseSensitivity_;
 }
 
-void KeyConfInputManager::ApplyRightStickSensitivity(int _x, int _y, 
+void KeyConfInputManager::ApplyRightStickSensitivity(int _x, int _y,
 	float& _outX, float& _outY) const
 {
 	float normalX = static_cast<float>(stickInfo_.lx) / XINPUT_VAL_MAX;
@@ -290,8 +318,7 @@ VECTOR KeyConfInputManager::GetLeftStickDirection(void) const
 
 Vector2F KeyConfInputManager::GetRIghtStick(void) const
 {
-	float x;
-	float y;
+	float x,y = 0.0f;
 
 	ApplyRightStickSensitivity(stickInfo_.rx, stickInfo_.ry, x, y);
 
@@ -308,7 +335,7 @@ Vector2F KeyConfInputManager::GetLeftStickRaw(void) const
 	// デッドゾーン以下なら0を返す
 	if (length < LEFT_STICK_DEAD_ZONE)
 	{
-		return Vector2F(0.0f, 0.0f);
+		return UtilityMath::VECTOR2F_ZERO;
 	}
 
 	// デッドゾーン考慮後の値を返す
@@ -326,7 +353,7 @@ Vector2F KeyConfInputManager::GetRightStickRaw(void) const
 	// (右スティックには個別の設定があるのでそれを使用)
 	if (length < rStickSensitivity_.deadZone)
 	{
-		return Vector2F(0.0f, 0.0f);
+		return UtilityMath::VECTOR2F_ZERO;
 	}
 
 	return Vector2F(normalX, normalY);
@@ -441,13 +468,4 @@ void KeyConfInputManager::LoadSensitivitySettings(void)
 void KeyConfInputManager::SetUsePadNo(int _padNo)
 {
 	usePadNo_ = _padNo;
-}
-
-void KeyConfInputManager::ClearInputState(void)
-{
-	for (auto& pair : currentInputState_) 
-	{
-		pair.second = false;
-	}
-	previousInputState_ = currentInputState_;
 }
