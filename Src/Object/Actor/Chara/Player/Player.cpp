@@ -195,9 +195,14 @@ void Player::InitPost(void)
 
 
 	// ƒWƒƒƒ“ƒv
-	actionController_->SetAction(3, 0, 0.2f, 0.1f, 0.0f
+	timeActive = 0.2f;
+	timeEnd = 0.0f;
+	timeActionActive = 0.1f;
+	timeInput = SHOT_TIME_ACTIVE_INPUT;
+	timeEnd = SHOT_TIME_END;
+	actionController_->SetAction(3, 0, timeActive, timeActionActive, timeEnd
 								 , std::bind(&Player::Jump, this)
-								 , 0.05f, 0.2f);
+								 , 0.035f, 0.175f);
 
 	// ‰ñ”ð
 	actionController_->SetAction(4, 0, 0.5f, 0.1f, 0.0f
