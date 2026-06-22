@@ -80,17 +80,7 @@ void WeaponMGR::InitPost(void)
 void WeaponMGR::UpdateProcess(void)
 {
 	
-	if (hp_ <= 0)
-	{
-		ChangeState(STATE::END);
-	}
-
-	for (std::shared_ptr<BBulletBase> shot : bullets_)
-	{
-		shot->Update();
-	}
-
-	stateUpdate_();
+	MGBase::UpdateCommon();
 }
 
 void WeaponMGR::UpdateProcessPost(void)

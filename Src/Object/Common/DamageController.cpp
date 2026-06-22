@@ -107,14 +107,14 @@ void DamageController::Update()
 	{
 		// HP割合ダメージ
 		const float RATE_DAMAGE = (playerHp_ * pressWave_.attack);
-		playerDamage_ = static_cast<int>(RATE_DAMAGE);
+		//playerDamage_ = static_cast<int>(RATE_DAMAGE);
 	}
 	
 	if (CollisionController::GetInstance().IsTagCollidingWithTag(ColliderBase::TAG::MG_BULLET, ColliderBase::TAG::PLAYER))
 	{
 		// HP割合ダメージ
 		const float RATE_DAMAGE = (playerHp_ * mg_.attack);
-		playerDamage_ = static_cast<int>(RATE_DAMAGE);
+		//playerDamage_ = static_cast<int>(RATE_DAMAGE);
 		isInvincible_ = false;
 	}
 
@@ -122,7 +122,7 @@ void DamageController::Update()
 	{
 		// HP割合ダメージ
 		const float RATE_DAMAGE = (playerHp_ * rode_.attack);
-		playerDamage_ = static_cast<int>(RATE_DAMAGE);
+		//playerDamage_ = static_cast<int>(RATE_DAMAGE);
 	}
 	
 }
