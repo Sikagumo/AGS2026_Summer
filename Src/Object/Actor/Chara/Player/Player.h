@@ -94,6 +94,7 @@ private:
 	Vector2F knockPowXZ_;
 
 	Vector2F dodgePowXZ_;
+	float dodgeDec_;
 	float timeActiveDodge_;
 
 	// ƒJƒƒ‰‚É‰‚¶‚½‰ñ“]‚ğ‚·‚é‚©”Û‚©
@@ -103,6 +104,7 @@ private:
 	float curTimeWaitDodge_;
 
 	std::unique_ptr<PActionController> actionController_;
+
 
 	// ‘€ì
 	void ProcessMove(void);

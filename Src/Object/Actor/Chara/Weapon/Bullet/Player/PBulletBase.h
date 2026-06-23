@@ -48,7 +48,7 @@ public:
 
 	int GetPower(void) { return activePower_; }
 
-	virtual void BlastAction(void);
+	virtual void BlastAction(void) = 0;
 
 
 protected:
@@ -76,6 +76,9 @@ protected:
 
 	bool isFinish_;
 
+	// è¡ñ≈Ç≥ÇπÇÈÇ©î€Ç©
+	bool isActiveDestroy_;
+
 
 	std::function<void(void)> updateProc_;
 
@@ -94,6 +97,11 @@ protected:
 
 	void ReleasePost(void)override;
 
-	virtual void ChangeBulletState(BULLET_STATE _state) = 0;
+	virtual void ChangeBulletStateProc(void) = 0;
+
+
+private:
+
+	void ChangeBulletState(BULLET_STATE _state);
 };
 

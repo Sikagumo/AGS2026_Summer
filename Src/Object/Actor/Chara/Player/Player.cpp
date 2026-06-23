@@ -362,6 +362,13 @@ VECTOR Player::CalcAddPosition(void)
 
 	// ‰ñ”ðˆÚ“®—Ê‚ð‰ÁŽZ
 	const VECTOR dodgeVec = VGet(dodgePowXZ_.x, 0.0f, dodgePowXZ_.y);
+	if (dodgeDec_ > 0.0f)
+	{
+		dodgePowXZ_.x += (dodgePowXZ_.x / dodgePowXZ_.x) * dodgeDec_ * 2;
+		dodgePowXZ_.y += (dodgePowXZ_.y / dodgePowXZ_.y) * dodgeDec_ * 2;
+
+		dodgeDec_ -= TimeManager::GetInstance().GetDeltaTime();
+	}
 	ret = VAdd(ret, dodgeVec);
 
 	return ret;
@@ -534,6 +541,7 @@ void Player::Dodge(void)
 {
 	dodgePowXZ_ = Vector2F(moveDir_.x, moveDir_.z);
 	dodgePowXZ_ *= DODGE_POW;
+	dodgeDec_ = 1.0f;
 
 	timeActiveDodge_ = TIME_DODGE;
 
