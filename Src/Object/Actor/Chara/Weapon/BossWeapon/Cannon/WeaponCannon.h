@@ -1,5 +1,10 @@
 #pragma once
 #include "../../WeaponBase.h"
+#include <algorithm>
+#include <vector>
+
+
+class BBulletBase;
 
 
 class WeaponCannon :
@@ -43,7 +48,11 @@ public:
 	int GetHp(void)override { return hp_; }
 
 
-	void LookPlayer(void) override {};
+	
+
+	// 状態遷移
+	void ChangeState(STATE _state)override;
+
 protected:
 
 	// 大きさ、回転、座標の初期化
@@ -62,13 +71,25 @@ protected:
 	void UpdateProcessPost(void) override;
 
 	
-	
+	void LookPlayer(void) override ;
 
 	// 前描画
 	void DrawPre(void) override;
 
 
 	void CollisionReserve(void) override {};
+
+
+	// 状態（ステート）管理用の関数ポインタと関数群
+	std::function<void(void)> stateUpdate_;
+	void ChangeState(int state) override;
+	void ChangeStateIdle(void) override;
+	void ChangeStateAttack(void) override;
+	void ChangeStateEnd(void) override;
+
+	void UpdateAttack(void) override;
+	void UpdateIdle(void) override;
+	void UpdateEnd(void) override;
 
 private:
 
@@ -77,6 +98,20 @@ private:
 	static constexpr VECTOR CAPSULE_START_POS = { 0.0f,50.0f,160.0f };
 	static constexpr VECTOR CAPSULE_END_POS = { 0.0f,50.0f,-40.0f };
 	static constexpr float CAPSULE_RADIUS = 20.0f;
+
+
+	bool isAttack_;
+	VECTOR bulletDir_;
+	std::vector<std::shared_ptr<BBulletBase>> bullets_;
+
+
+	
+
+	
+
+	// 弾を発射する共通の仕組み（中身は現在のMGL/MGRのものと同じ）
+	virtual void CreateBullets(void);
+	std::shared_ptr<BBulletBase> GetValidBullet(void);
 
 };
 
