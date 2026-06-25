@@ -21,7 +21,7 @@ protected:
 	int constantBuffer_;
 
     /// @brief 定数バッファの値を更新してGPUに送る
-    /// @tparam T 送信する構造体の型
+    /// @param T 送信する構造体の型
     /// @param constantData 定数バッファに書き込むデータ構造体
     /// @param shaderType DxLibのシェーダータイプ（DX_SHADERTYPE_PIXELなど）
     /// @param slotIndex 定数バッファのスロット番号

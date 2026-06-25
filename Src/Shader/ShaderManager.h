@@ -17,7 +17,7 @@ public:
 	static ShaderManager& GetInstance(void);
 
 	/// @brief インスタンスの破棄
-	void DestroyInstance(void);
+	static void DestroyInstance(void);
 
 	/// @brief 初期化処理 
 	void Initialize(void);
@@ -26,7 +26,11 @@ public:
 	void Release(void);
 
 	/// @brief NormalShaderへのアクセス
-	ShaderNormal* GetNormalShader(void) const { return shaderNormal_.get(); }
+	ShaderNormal* GetShaderNormal(void) const { return shaderNormal_.get(); }
+
+	/// @brief  
+	/// @return 
+	int GetScreenHandle(void) const { return screenHandle_; }
 
 private:
 
@@ -35,10 +39,25 @@ private:
 
 	std::unique_ptr<ShaderNormal> shaderNormal_;
 
-	ShaderManager(void);
-	~ShaderManager(void) = default;
+	// スクリーンのハンドル
+	int screenHandle_;
 
+	/// @brief コンストラクタ 
+	ShaderManager(void);
+
+	/// @brief デストラクタ
+	~ShaderManager(void);
+
+	/// @brief コピーコンストラクタを禁止する
 	ShaderManager(const ShaderManager&) = delete;
+
+	/// @brief 代入演算子を禁止する
 	ShaderManager& operator=(const ShaderManager&) = delete;
+
+	/// @brief ムーブコンストラクタを禁止する
+	ShaderManager(ShaderManager&&) = delete;
+
+	/// @brief ムーブ代入演算子を禁止する
+	ShaderManager& operator=(ShaderManager&&) = delete;
 };
 

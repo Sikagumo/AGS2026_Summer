@@ -1,36 +1,45 @@
-#include "../Common/Pixel/PixelShader2DHeader.hlsli"
+SamplerState smp : register(s0);
+Texture2D<float4> tex : register(t0);
+Texture2D<float4> normTex : register(t1); 
 
-Texture2D normalMapTexture : register(t2);
-
-cbuffer LightingParameter : register(b4)
+cbuffer BaseBuffer : register(b4)
 {
-    float3 lightDirection;
-    float specularShininess;
-    float ambientIntensity;
-    float3 padding;
+    float3 lvec;
+    float padding; 
+}
+
+struct PSInput
+{
+    float4 position : SV_POSITION;
+    float4 color : COLOR0;
+    float2 uv : TEXCOORD0;
 };
 
-float4 main(PS_INPUT input) : SV_TARGET
+float4 main(PSInput input) : SV_TARGET
 {
-    // テクスチャから色情報と法線情報を取得
-    float4 baseColor = baseTexture.Sample(textureSampler, input.textureUV);
-    float3 normalVectorRaw = normalMapTexture.Sample(textureSampler, input.textureUV).rgb;
+    float4 color = tex.Sample(smp, input.uv);
     
-    // 法線ベクトルの復元と正規化
-    float3 normalVector = normalize(normalVectorRaw * 2.0 - 1.0);
-    normalVector.z = -normalVector.z;
+    if (color.a <= 0.01f)
+    {
+        discard;
+    }
+
+    // ノーマルマップの計算
+    float4 norm = normTex.Sample(smp, input.uv);
+    norm *= 2.0;
+    norm -= 1.0;
+    norm.z = -norm.z;
+    norm.xyz = normalize(norm.xyz);
     
-    // ライティング計算（拡散反射）
-    float3 normalLightDist = normalize(lightDirection);
-    float diffuseFactor = saturate(dot(-normalLightDist, normalVector));
+    float3 viewVec = float3(0, 0, 1);
+    float3 lightVec = normalize(lvec);
     
-    // スペキュラ計算（鏡面反射）
-    float3 viewDirection = float3(0, 0, 1);
-    float3 reflectVector = reflect(normalLightDist, normalVector);
-    float specularFactor = pow(saturate(dot(reflectVector, -viewDirection)), specularShininess);
+    // 陰影と光沢の計算
+    float diffuse = saturate(dot(-lightVec, norm.xyz));
     
-    // 最終色の合成
-    float3 litColor = baseColor.rgb * (diffuseFactor + ambientIntensity) + specularFactor;
+    float3 refVec = reflect(lightVec, norm.xyz);
+    float spec = pow(saturate(dot(refVec, -viewVec)), 20.0f);
+    spec *= color.a;
     
-    return float4(litColor, baseColor.a);
+    return float4(color.rgb * diffuse + spec, color.a);
 }

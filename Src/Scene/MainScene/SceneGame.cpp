@@ -124,6 +124,7 @@ void SceneGame::CameraLockOn(void)
 
 void SceneGame::Draw(void)
 {
+	if (Loading::GetInstance()->IsLoading()) { return; }
 
 	stage_->Draw();
 

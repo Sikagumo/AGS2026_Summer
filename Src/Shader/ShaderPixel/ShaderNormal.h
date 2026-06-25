@@ -6,13 +6,6 @@ class ShaderNormal : public ShaderPixelBase
 {
 public:
 
-    struct LightingParameter
-    {
-        float lightDirection[3] = { 0.0f, 0.0f, 1.0f };
-        float specularShininess = 32.0f;
-        float ambientIntensity = 0.2f;
-        float padding[3] = { 0.0f, 0.0f, 0.0f };
-    };
 
     ShaderNormal(void);
 
@@ -20,7 +13,21 @@ public:
     
     void Initialize(const char* _shaderPath) override;
 
+    void SetLightDirection(float _x, float _y, float _z);
+
     // ï`âÊä÷êî
-    void Draw(int _x, int _y, int _textureHandle, int _normalMapHandle, const LightingParameter& _param);
+    void Draw(int _x, int _y, int _textureHandle, int _normalMapHandle, float _scale);
+
+private:
+
+    struct alignas(16) LightingParameter
+    {
+        float lightX = 0.6f;
+        float lightY = 0.6f;
+        float lightZ = 1.0f;
+        float padding = 0.0f; 
+    };
+
+    LightingParameter param_;
 };
 

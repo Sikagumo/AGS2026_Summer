@@ -8,6 +8,7 @@ ShaderBase::ShaderBase(void)
 
 void ShaderBase::Release(void)
 {
+
     if (shaderHandle_ != -1)
     {
         DeleteShader(shaderHandle_);
