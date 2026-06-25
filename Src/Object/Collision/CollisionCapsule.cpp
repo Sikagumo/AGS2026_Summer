@@ -24,10 +24,13 @@ bool CollisionCapsule::CheckCapsuleVsCapsule(const ColliderBase* _colliderA,
 	// カプセルAの中点を仮のターゲットにする
 	VECTOR centerA = VScale(VAdd(startPositionA, endPositionA), 0.5f);
 
-	VECTOR nearestPositionB = UtilityMath::GetNearestPointOnSegment(startPositionB, endPositionB, centerA);
+	VECTOR nearestPositionB = UtilityMath::GetNearestPointOnSegment(startPositionB, endPositionB, 
+		centerA);
 	VECTOR nearestPositionA = UtilityMath::GetNearestPointOnSegment(startPositionA, endPositionA,
 		nearestPositionB);
-	nearestPositionB = UtilityMath::GetNearestPointOnSegment(startPositionB, endPositionB, nearestPositionA);
+
+	nearestPositionB = UtilityMath::GetNearestPointOnSegment(startPositionB, endPositionB, 
+		nearestPositionA);
 
 	// 割り出した2点間の距離の2乗を計算する
 	VECTOR distanceVec = VSub(nearestPositionA, nearestPositionB);
@@ -48,7 +51,8 @@ bool CollisionCapsule::CheckCapsuleVsCapsule(const ColliderBase* _colliderA,
 		_outInfo.isActive = true;
 
 		// 衝突位置は、お互いの最近接点の中間地点
-		_outInfo.hitPosition = VAdd(nearestPositionA, VScale(VSub(nearestPositionB, nearestPositionA), 0.5f));
+		_outInfo.hitPosition = VAdd(nearestPositionA, VScale(VSub(nearestPositionB, 
+			nearestPositionA), 0.5f));
 
 		// 法線ベクトル（AからBへ向かう方向）の計算
 		if (distance > 0.0f)
@@ -69,7 +73,8 @@ bool CollisionCapsule::CheckCapsuleVsCapsule(const ColliderBase* _colliderA,
 	return false;
 }
 
-bool CollisionCapsule::CheckCapsuleVsSphere(const ColliderBase* _capsuleCol, const ColliderBase* _sphereCol, CollisionInfo& _outInfo)
+bool CollisionCapsule::CheckCapsuleVsSphere(const ColliderBase* _capsuleCol, 
+	const ColliderBase* _sphereCol, CollisionInfo& _outInfo)
 {
 	return CollisionSphere::CheckSphereVsCapsule(_sphereCol, _capsuleCol, _outInfo);
 }

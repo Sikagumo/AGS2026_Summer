@@ -11,21 +11,33 @@
 #include "../../Manager/System/TimeManager.h"
 #include "../../Common/Loading.h"
 #include "../../Utility/UtilityMath.h"
+#include "../../Shader/ShaderManager.h"
 
 void SceneTitle::Load(void)
 {
     // isLoading_ を true に
     SceneBase::Load();
-    auto& resourceManager = ResourceManager::GetInstance();
 
     // BGM・SEロード
 
     // 音量調整
 
     // ロゴ・操作説明・再生用画像ロード
-
     imageTitle_ = resourceManager.LoadHandleId(ResourceManager::SRC::IMG_TITLE);
     ResourceManager::GetInstance().LoadHandleIds(ResourceManager::SRC::IMGS_TITLE_TEXT, imageMenu_.data());
+    // タイトル画像
+    imageTitle_ = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::IMG_TITLE);
+
+    // メニュー画像
+    ResourceManager::GetInstance().LoadHandleIds
+    (ResourceManager::SRC::IMGE_TITLE_TEXT, imageMenu_.data());
+
+    // 桃の画像
+    peachHandle_ = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::IMG_PEACH);
+
+    // 桃のノーマルマップ画像
+    peachNormalHandle_ = ResourceManager::GetInstance().
+        LoadHandleId(ResourceManager::SRC::IMG_NOMALMAP_PEACH);
 
     // その他画像
 
@@ -40,6 +52,8 @@ void SceneTitle::EndLoad(void)
 
 SceneTitle::SceneTitle(void)
     : imageTitle_(-1)
+    , peachHandle_(-1)
+    , peachNormalHandle_(-1)
     , selectedIdx_(0)
     , cursorCollider_(nullptr)
     , soloPlayButtonCollider_(nullptr)
@@ -49,6 +63,7 @@ SceneTitle::SceneTitle(void)
     , imageMenu_()
     , buttonTags()
     , prevMousePos_(0.0f, 0.0f)
+    , psHandle_(-1)
 {
     for (size_t i = 0; i < imageMenu_.size(); ++i)
     {
@@ -179,6 +194,7 @@ void SceneTitle::Update(void)
 
 void SceneTitle::Draw(void)
 {
+    if (Loading::GetInstance()->IsLoading()) { return; }
 
     DrawString(0, 0, "Title Scene Now!", GetColor(255, 255, 255));
 
@@ -209,15 +225,30 @@ void SceneTitle::Draw(void)
         // 描画
         Vector2F pos = colliders[i]->GetCenterPos();
         DrawRotaGraph(static_cast<int>(pos.x), static_cast<int>(pos.y), DEFAULT_SCALE, UtilityMath::DEG2RAD, imageMenu_[imgIdx], true);
+
     }
+
+    const float PEACH_SCALE = 0.3f;
+
+    auto* normalShader = ShaderManager::GetInstance().GetShaderNormal();
+
+    normalShader->SetLightDirection(0.5f, 0.5f, 0.5f);
+
+    // 描画実行
+    normalShader->Draw(0, 0, peachHandle_, peachNormalHandle_, PEACH_SCALE);
 
 #ifdef _DEBUG
     DrawDebug();
 #endif
 }
+
 void SceneTitle::Release(void)
 {
-
+    if (psHandle_ != -1)
+    {
+        DeleteShader(psHandle_);
+        psHandle_ = -1;
+    }
 }
 
 void SceneTitle::DrawDebug(void)

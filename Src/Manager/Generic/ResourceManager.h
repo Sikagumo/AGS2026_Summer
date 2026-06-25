@@ -16,6 +16,7 @@ public:
 		/* ’Pˆê‰æ‘œ */
 		IMG_TITLE,
 		IMG_PEACH,
+		IMG_NOMALMAP_PEACH,
 
 		/* •¡”‰æ‘œ */
 		IMGS_TEXTS,
