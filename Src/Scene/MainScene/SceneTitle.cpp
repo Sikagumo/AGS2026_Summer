@@ -23,14 +23,14 @@ void SceneTitle::Load(void)
     // 音量調整
 
     // ロゴ・操作説明・再生用画像ロード
-    imageTitle_ = resourceManager.LoadHandleId(ResourceManager::SRC::IMG_TITLE);
+    imageTitle_ = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::IMG_TITLE);
     ResourceManager::GetInstance().LoadHandleIds(ResourceManager::SRC::IMGS_TITLE_TEXT, imageMenu_.data());
     // タイトル画像
     imageTitle_ = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::IMG_TITLE);
 
     // メニュー画像
     ResourceManager::GetInstance().LoadHandleIds
-    (ResourceManager::SRC::IMGE_TITLE_TEXT, imageMenu_.data());
+    (ResourceManager::SRC::IMGS_TITLE_TEXT, imageMenu_.data());
 
     // 桃の画像
     peachHandle_ = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::IMG_PEACH);
