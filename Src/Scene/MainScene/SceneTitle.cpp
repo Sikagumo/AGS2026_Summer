@@ -22,9 +22,6 @@ void SceneTitle::Load(void)
 
     // 音量調整
 
-    // ロゴ・操作説明・再生用画像ロード
-    imageTitle_ = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::IMG_TITLE);
-    ResourceManager::GetInstance().LoadHandleIds(ResourceManager::SRC::IMGS_TITLE_TEXT, imageMenu_.data());
     // タイトル画像
     imageTitle_ = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::IMG_TITLE);
 
@@ -38,6 +35,13 @@ void SceneTitle::Load(void)
     // 桃のノーマルマップ画像
     peachNormalHandle_ = ResourceManager::GetInstance().
         LoadHandleId(ResourceManager::SRC::IMG_NOMALMAP_PEACH);
+
+    // 波の画像
+    waveHandle_ = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::IMG_WAVE);
+
+    // 波のノーマルマップ画像
+    waveNormalHandle_ = ResourceManager::GetInstance().
+        LoadHandleId(ResourceManager::SRC::IMG_NOMALMAP_WAVE);
 
     // その他画像
 
@@ -54,6 +58,8 @@ SceneTitle::SceneTitle(void)
     : imageTitle_(-1)
     , peachHandle_(-1)
     , peachNormalHandle_(-1)
+    , waveHandle_(-1)
+    , waveNormalHandle_(-1)
     , selectedIdx_(0)
     , cursorCollider_(nullptr)
     , soloPlayButtonCollider_(nullptr)
@@ -196,6 +202,27 @@ void SceneTitle::Draw(void)
 {
     if (Loading::GetInstance()->IsLoading()) { return; }
 
+    static float time = 0.0f;
+    time += 0.02f;
+
+    float wavePosY = 20;
+    float wavePosX = 10.0f;
+
+    const float PEACH_SCALE = 0.3f;
+    const float WAVE_SCALE = 1.0f;
+    
+    auto* normalShader = ShaderManager::GetInstance().GetShaderNormal();
+    auto* waveShader = ShaderManager::GetInstance().GetShaderWave();
+
+    normalShader->SetLightDirection(0.5f, 0.5f, 0.5f);
+    normalShader->SetAmbient(0.3f);
+
+    waveShader->SetWaveParam(time, 3.0f, 0.015f);
+
+    normalShader->Draw(0, 0, peachHandle_, peachNormalHandle_, PEACH_SCALE);
+
+    ShaderManager::GetInstance().DrawNormalAndWave(wavePosX, wavePosY, waveHandle_, waveNormalHandle_, WAVE_SCALE);
+
     DrawString(0, 0, "Title Scene Now!", GetColor(255, 255, 255));
 
     const int IMAGET_TITLE_Y = Application::SCREEN_SIZE_Y / 3;
@@ -227,15 +254,6 @@ void SceneTitle::Draw(void)
         DrawRotaGraph(static_cast<int>(pos.x), static_cast<int>(pos.y), DEFAULT_SCALE, UtilityMath::DEG2RAD, imageMenu_[imgIdx], true);
 
     }
-
-    const float PEACH_SCALE = 0.3f;
-
-    auto* normalShader = ShaderManager::GetInstance().GetShaderNormal();
-
-    normalShader->SetLightDirection(0.5f, 0.5f, 0.5f);
-
-    // 描画実行
-    normalShader->Draw(0, 0, peachHandle_, peachNormalHandle_, PEACH_SCALE);
 
 #ifdef _DEBUG
     DrawDebug();

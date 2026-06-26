@@ -17,6 +17,8 @@ public:
 		IMG_TITLE,
 		IMG_PEACH,
 		IMG_NOMALMAP_PEACH,
+		IMG_WAVE,
+		IMG_NOMALMAP_WAVE,
 
 		/* •¡”‰æ‘œ */
 		IMGS_TEXTS,

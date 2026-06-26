@@ -5,6 +5,7 @@
 #include <unordered_map>
 
 #include "ShaderPixel/ShaderNormal.h"
+#include "ShaderPixel/ShaderWave.h"
 
 class ShaderManager
 {
@@ -22,11 +23,15 @@ public:
 	/// @brief 初期化処理 
 	void Initialize(void);
 
+	void DrawNormalAndWave(int _x, int _y, int _textureHandle, int _normalMapHandle, float _scale);
+
 	/// @brief 解放処理 
 	void Release(void);
 
 	/// @brief NormalShaderへのアクセス
 	ShaderNormal* GetShaderNormal(void) const { return shaderNormal_.get(); }
+
+	ShaderWave* GetShaderWave(void) const { return shaderWave_.get(); }
 
 	/// @brief  
 	/// @return 
@@ -38,6 +43,7 @@ private:
 	static ShaderManager* instance_;
 
 	std::unique_ptr<ShaderNormal> shaderNormal_;
+	std::unique_ptr<ShaderWave>   shaderWave_;
 
 	// スクリーンのハンドル
 	int screenHandle_;

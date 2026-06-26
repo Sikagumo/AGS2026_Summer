@@ -11,7 +11,8 @@ class ShaderPixelBase : public ShaderBase
 {
 public:
     ShaderPixelBase(void);
-    virtual ~ShaderPixelBase(void);
+    
+    ~ShaderPixelBase(void) override;
 
     virtual void Initialize(const char* shaderPath) override;
 

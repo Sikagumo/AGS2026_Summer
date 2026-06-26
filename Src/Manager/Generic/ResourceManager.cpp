@@ -60,6 +60,12 @@ void ResourceManager::Initialize(void)
 	// 桃のノーマルマップ画像
 	_SetResource(LOAD_TYPE::IMAGE, SRC::IMG_NOMALMAP_PEACH, PATH_IMAGE + "peach_n.png");
 
+	// 波の画像
+	_SetResource(LOAD_TYPE::IMAGE, SRC::IMG_WAVE, PATH_IMAGE + "Wave.png");
+	
+	// 波のノーマルマップ
+	_SetResource(LOAD_TYPE::IMAGE, SRC::IMG_NOMALMAP_WAVE, PATH_IMAGE + "Wave_n.png");
+
 	/* 複数画像 */
 
 	// 画像枚数

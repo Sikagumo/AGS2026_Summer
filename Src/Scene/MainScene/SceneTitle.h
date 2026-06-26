@@ -57,6 +57,8 @@ private:
 	std::array<int, 8> imageMenu_;    // メニュー項目（4つ）の画像ハンドル
 	int peachHandle_;                 // 桃の画像
 	int peachNormalHandle_;           // 桃のノーマルマップ
+	int waveHandle_;                  // 波の画像
+	int waveNormalHandle_;            // 波のノーマルマップ
 
 	// 選択インデックス（パッド操作用）
 	int selectedIdx_;

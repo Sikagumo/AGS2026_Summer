@@ -8,6 +8,8 @@ public:
 
 	ShaderBase(void);
 
+    virtual ~ShaderBase(void) = default;
+
 	virtual void Initialize(const char* shaderPath) = 0;
 	
 	virtual void Release(void);
