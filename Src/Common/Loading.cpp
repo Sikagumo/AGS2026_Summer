@@ -57,7 +57,7 @@ void Loading::StartAsyncLoad(std::function<void()> loadFunc)
 		return;
 	}
 
-	Initialize();
+	//Initialize();
 	isLoading_ = true;
 
 	if (loadFunc)

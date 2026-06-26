@@ -28,6 +28,7 @@ public:
 	static const std::string PATH_EFFECT;
 	static const std::string PATH_SOUND;
 	static const std::string PATH_CSV;
+	static const std::string PATH_SHADER;
 
 	static const std::string PATH_KEY_CONFIG;
 	static const std::string PATH_KEY_CONFIG_GAMEPAD;

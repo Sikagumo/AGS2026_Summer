@@ -50,9 +50,21 @@ void ResourceManager::Initialize(void)
 	using LOAD_TYPE = Resource::LOAD_TYPE;
 
 	/* 画像 */
+	
+	// タイトル画像
 	_SetResource(LOAD_TYPE::IMAGE, SRC::IMG_TITLE, PATH_IMAGE + "Title.png");
 	
-	_SetResource(LOAD_TYPE::IMAGE, SRC::IMG_PEACH, PATH_IMAGE + "peach.png");
+	// 桃の画像
+	_SetResource(LOAD_TYPE::IMAGE, SRC::IMG_PEACH, PATH_IMAGE + "peach_T.png");
+
+	// 桃のノーマルマップ画像
+	_SetResource(LOAD_TYPE::IMAGE, SRC::IMG_NOMALMAP_PEACH, PATH_IMAGE + "peach_n.png");
+
+	// 波の画像
+	_SetResource(LOAD_TYPE::IMAGE, SRC::IMG_WAVE, PATH_IMAGE + "Wave.png");
+	
+	// 波のノーマルマップ
+	_SetResource(LOAD_TYPE::IMAGE, SRC::IMG_NOMALMAP_WAVE, PATH_IMAGE + "Wave_n.png");
 
 	/* 複数画像 */
 

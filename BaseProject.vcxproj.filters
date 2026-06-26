@@ -1,501 +1,169 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="ソース ファイル">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
-    </Filter>
-    <Filter Include="ヘッダー ファイル">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;hm;inl;inc;ipp;xsd</Extensions>
-    </Filter>
-    <Filter Include="リソース ファイル">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
-    </Filter>
-    <Filter Include="ソース ファイル\_debug">
-      <UniqueIdentifier>{692afc8e-a6d7-4835-84be-0a22e67b516d}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ソース ファイル\Common">
-      <UniqueIdentifier>{17ebc4b5-4894-4fd2-b50b-bd2b8ed18bdb}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ソース ファイル\Manager">
-      <UniqueIdentifier>{7f661b68-2ac1-46f0-a72e-2c5b31d1c61f}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ソース ファイル\Object">
-      <UniqueIdentifier>{600f44ad-e11e-4fc6-b165-fde3b508648d}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ソース ファイル\Scene">
-      <UniqueIdentifier>{1c6f465c-0c6c-4886-b758-f7e0681f0a4a}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ソース ファイル\Utility">
-      <UniqueIdentifier>{e2873e1a-e651-4a1d-9c66-b9823792c6aa}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ヘッダー ファイル\_debug">
-      <UniqueIdentifier>{6cb19f13-f6fc-46e1-87c1-793b7ec640e5}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ヘッダー ファイル\Common">
-      <UniqueIdentifier>{16171512-ac06-49c0-8668-623c501b7833}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ヘッダー ファイル\Manager">
-      <UniqueIdentifier>{c46d3100-17c5-4849-839b-754795e9709b}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ヘッダー ファイル\Object">
-      <UniqueIdentifier>{604e2437-eac4-4057-ad42-8b1af55e7c79}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ヘッダー ファイル\Scene">
-      <UniqueIdentifier>{438a9bb0-9805-48c9-8cb7-8da84d09f24e}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ヘッダー ファイル\Utility">
-      <UniqueIdentifier>{92d9e735-7050-4ee3-b223-779bcd3392de}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ヘッダー ファイル\Object\Common">
-      <UniqueIdentifier>{49d30192-0529-4327-83ba-c4b3342f9c47}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ソース ファイル\Object\Common">
-      <UniqueIdentifier>{e1d2c310-5096-4122-b6f2-acf3b54d243c}</UniqueIdentifier>
-    </Filter>
+    <FxCompile Include="srcGraphics\Pixel\NormalMap.hlsl" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Src\Application.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\main.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Common\Fader.cpp">
-      <Filter>ソース ファイル\Common</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Common\Quaternion.cpp">
-      <Filter>ソース ファイル\Common</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Manager\Generic\Resource.cpp">
-      <Filter>ソース ファイル\Manager</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Manager\Generic\ResourceManager.cpp">
-      <Filter>ソース ファイル\Manager</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Manager\Generic\SceneManager.cpp">
-      <Filter>ソース ファイル\Manager</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Object\Common\AnimationController.cpp">
-      <Filter>ソース ファイル\Object\Common</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Object\Common\Transform.cpp">
-      <Filter>ソース ファイル\Object\Common</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Manager\Generic\InputManager.cpp">
-      <Filter>ソース ファイル\Manager</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Common\Vector2.cpp">
-      <Filter>ソース ファイル\Common</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Object\Actor\ActorBase.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Utility\MatrixUtility.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Object\Collider\ColliderBase.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Object\Collider\ColliderLine.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Object\Collider\ColliderModel.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Object\Collider\ColliderCapsule.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Object\Collider\ColliderSphere.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Manager\Decoration\SoundManager.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Net\NetBase.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Manager\System\NetManager.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Net\NetClient.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Net\NetHost.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Net\NetSend.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Common\InputTextArea.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Utility\UtilityCommon.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\FPS\FpsController.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Manager\InputTextManager.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Common\Loading.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Manager\System\TimeManager.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Scene\SceneBase.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Scene\MainScene\SceneTitle.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Scene\MainScene\SceneGame.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Scene\MainScene\SceneLobby.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Camera\Camera.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Utility\UtilityMath.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Object\Collision\CollisionController.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Common\ParametersIO.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Object\Actor\Chara\Boss\Boss.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Object\Actor\Chara\CharaBase.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Object\Actor\Chara\Player\PActionController.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Object\Actor\Chara\Weapon\Bullet\Player\PBulletRapidFire.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Scene\MainScene\SceneGameBoss.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Object\Actor\Chara\Player\PlayerBase.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Object\Actor\Chara\Weapon\Bullet\Player\PBulletBase.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Object\Actor\Chara\Weapon\Bullet\Player\PBulletBig.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Object\Actor\Chara\Player\Player.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Object\Actor\SkyDome\SkyDome.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Object\Actor\Stage\Stage.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Object\Actor\Chara\Weapon\WeaponBase.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Object\Actor\Chara\Weapon\BossWeapon\MP\WeaponMP.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Object\Actor\Chara\Weapon\BossWeapon\RG\WeaponRG.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Object\Actor\Chara\Weapon\BossWeapon\Cannon\WeaponCannon.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Object\Actor\Chara\Weapon\BossWeapon\MG\WeaponMGL.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Object\Actor\Chara\Weapon\BossWeapon\MG\WeaponMGR.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Object\Common\DamageController.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Object\Actor\Chara\Weapon\Bullet\Boss\BBulletBase.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Object\Actor\Chara\Weapon\Bullet\Boss\BBulletWave.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Object\Collider2D\Collider2DBase.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Object\Collider2D\Collider2DCircle.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Object\Collider2D\Collider2DBox.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Scene\MainScene\SceneResult.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Manager\Generic\KeyConfInputManager.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Object\Collision\CollisionSphere.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Object\Collision\CollisionCapsule.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Object\Actor\Chara\Weapon\Bullet\Boss\BBulletMG.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Object\Collision\CollisionLine.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Object\Collision\CollisionCircle.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Object\Collision\CollisionBox.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Object\Actor\Chara\Weapon\BossWeapon\MG\MGBase.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Object\Actor\Chara\Weapon\Bullet\Player\PBulletRecovery.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Object\Actor\Chara\Weapon\Bullet\Player\PBulletInterfere.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
+    <ClCompile Include="Src\Object\Actor\Chara\Weapon\BossWeapon\MG\MGBase.cpp" />
+    <ClCompile Include="Src\Object\Actor\Chara\Weapon\Bullet\Player\PBulletInterfere.cpp" />
+    <ClCompile Include="Src\Object\Actor\Chara\Weapon\Bullet\Player\PBulletRecovery.cpp" />
+    <ClCompile Include="Src\Shader\ShaderManager.cpp" />
+    <ClCompile Include="Src\Shader\ShaderPixel\ShaderNormal.cpp" />
+    <ClCompile Include="Src\Shader\ShaderPixel\ShaderPixelBase.cpp" />
+    <ClCompile Include="Src\Shader\ShaderBase.cpp" />
+    <ClCompile Include="Src\Object\Collision\CollisionBox.cpp" />
+    <ClCompile Include="Src\Object\Collision\CollisionCircle.cpp" />
+    <ClCompile Include="Src\Object\Collision\CollisionLine.cpp" />
+    <ClCompile Include="Src\Object\Collision\CollisionCapsule.cpp" />
+    <ClCompile Include="Src\Object\Collision\CollisionSphere.cpp" />
+    <ClCompile Include="Src\Manager\Generic\KeyConfInputManager.cpp" />
+    <ClCompile Include="Src\Scene\MainScene\SceneGameBoss.cpp" />
+    <ClCompile Include="Src\Scene\MainScene\SceneResult.cpp" />
+    <ClCompile Include="Src\Object\Collider2D\Collider2DBox.cpp" />
+    <ClCompile Include="Src\Object\Collider2D\Collider2DCircle.cpp" />
+    <ClCompile Include="Src\Object\Actor\Chara\Weapon\Bullet\Boss\BBulletBase.cpp" />
+    <ClCompile Include="Src\Object\Actor\Chara\Weapon\Bullet\Boss\BBulletMG.cpp" />
+    <ClCompile Include="Src\Object\Actor\Chara\Weapon\Bullet\Boss\BBulletWave.cpp" />
+    <ClCompile Include="Src\Object\Collider2D\Collider2DBase.cpp" />
+    <ClCompile Include="Src\Object\Common\DamageController.cpp" />
+    <ClCompile Include="Src\Common\ParametersIO.cpp" />
+    <ClCompile Include="Src\Object\Actor\Chara\Boss\Boss.cpp" />
+    <ClCompile Include="Src\Object\Actor\Chara\CharaBase.cpp" />
+    <ClCompile Include="Src\Object\Actor\Chara\Player\PActionController.cpp" />
+    <ClCompile Include="Src\Object\Actor\Chara\Weapon\Bullet\Player\PBulletRapidFire.cpp" />
+    <ClCompile Include="Src\Object\Collision\CollisionController.cpp" />
+    <ClCompile Include="Src\Scene\MainScene\SceneLobby.cpp" />
+    <ClCompile Include="Src\Object\Actor\Chara\Player\PlayerBase.cpp" />
+    <ClCompile Include="Src\Object\Actor\Chara\Weapon\Bullet\Player\PBulletBase.cpp" />
+    <ClCompile Include="Src\Object\Actor\Chara\Weapon\Bullet\Player\PBulletBig.cpp" />
+    <ClCompile Include="Src\Scene\MainScene\SceneGame.cpp" />
+    <ClCompile Include="Src\Scene\MainScene\SceneTitle.cpp" />
+    <ClCompile Include="Src\Scene\SceneBase.cpp" />
+    <ClCompile Include="Src\Common\Loading.cpp" />
+    <ClCompile Include="Src\FPS\FpsController.cpp" />
+    <ClCompile Include="Src\Manager\InputTextManager.cpp" />
+    <ClCompile Include="Src\Common\InputTextArea.cpp" />
+    <ClCompile Include="Src\Net\NetSend.cpp" />
+    <ClCompile Include="Src\Net\NetHost.cpp" />
+    <ClCompile Include="Src\Net\NetClient.cpp" />
+    <ClCompile Include="Src\Manager\System\NetManager.cpp" />
+    <ClCompile Include="Src\Net\NetBase.cpp" />
+    <ClCompile Include="Src\Manager\Decoration\SoundManager.cpp" />
+    <ClCompile Include="Src\Object\Actor\ActorBase.cpp" />
+    <ClCompile Include="Src\Application.cpp" />
+    <ClCompile Include="Src\Common\Fader.cpp" />
+    <ClCompile Include="Src\Common\Quaternion.cpp" />
+    <ClCompile Include="Src\Common\Vector2.cpp" />
+    <ClCompile Include="Src\main.cpp" />
+    <ClCompile Include="Src\Camera\Camera.cpp" />
+    <ClCompile Include="Src\Manager\Generic\InputManager.cpp" />
+    <ClCompile Include="Src\Manager\Generic\Resource.cpp" />
+    <ClCompile Include="Src\Manager\Generic\ResourceManager.cpp" />
+    <ClCompile Include="Src\Manager\Generic\SceneManager.cpp" />
+    <ClCompile Include="Src\Object\Collider\ColliderBase.cpp" />
+    <ClCompile Include="Src\Object\Collider\ColliderCapsule.cpp" />
+    <ClCompile Include="Src\Object\Collider\ColliderLine.cpp" />
+    <ClCompile Include="Src\Object\Collider\ColliderModel.cpp" />
+    <ClCompile Include="Src\Object\Collider\ColliderSphere.cpp" />
+    <ClCompile Include="Src\Object\Common\AnimationController.cpp" />
+    <ClCompile Include="Src\Object\Common\Transform.cpp" />
+    <ClCompile Include="Src\Object\Actor\Chara\Player\Player.cpp" />
+    <ClCompile Include="Src\Object\Actor\SkyDome\SkyDome.cpp" />
+    <ClCompile Include="Src\Object\Actor\Stage\Stage.cpp" />
+    <ClCompile Include="Src\Utility\UtilityMath.cpp" />
+    <ClCompile Include="Src\Utility\MatrixUtility.cpp" />
+    <ClCompile Include="Src\Utility\UtilityCommon.cpp" />
+    <ClCompile Include="Src\Manager\System\TimeManager.cpp" />
+    <ClCompile Include="Src\Object\Actor\Chara\Weapon\WeaponBase.cpp" />
+    <ClCompile Include="Src\Object\Actor\Chara\Weapon\BossWeapon\MP\WeaponMP.cpp" />
+    <ClCompile Include="Src\Object\Actor\Chara\Weapon\BossWeapon\RG\WeaponRG.cpp" />
+    <ClCompile Include="Src\Object\Actor\Chara\Weapon\BossWeapon\Cannon\WeaponCannon.cpp" />
+    <ClCompile Include="Src\Object\Actor\Chara\Weapon\BossWeapon\MG\WeaponMGL.cpp" />
+    <ClCompile Include="Src\Object\Actor\Chara\Weapon\BossWeapon\MG\WeaponMGR.cpp" />
+    <ClCompile Include="Src\Shader\ShaderPixel\ShaderWave.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Src\Common\Fader.h">
-      <Filter>ヘッダー ファイル\Common</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\Common\Quaternion.h">
-      <Filter>ヘッダー ファイル\Common</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\Manager\Generic\Resource.h">
-      <Filter>ヘッダー ファイル\Manager</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\Manager\Generic\ResourceManager.h">
-      <Filter>ヘッダー ファイル\Manager</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\Manager\Generic\SceneManager.h">
-      <Filter>ヘッダー ファイル\Manager</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\Object\Common\AnimationController.h">
-      <Filter>ヘッダー ファイル\Object\Common</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\Object\Common\Transform.h">
-      <Filter>ヘッダー ファイル\Object\Common</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\Manager\Generic\InputManager.h">
-      <Filter>ヘッダー ファイル\Manager</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\Common\Vector2.h">
-      <Filter>ヘッダー ファイル\Common</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\Application.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\main.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\Object\Actor\ActorBase.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\Utility\MatrixUtility.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\Object\Collider\ColliderBase.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\Object\Collider\ColliderLine.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\Object\Collider\ColliderModel.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\Object\Collider\ColliderCapsule.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\Object\Collider\ColliderSphere.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\Manager\Decoration\SoundManager.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\Net\NetBase.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\Manager\System\NetManager.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\Common\CRC.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\Net\NetClient.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\Net\NetHost.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\Net\NetSend.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\Net\NetStructures.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\Common\InputTextArea.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\Utility\UtilityCommon.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\FPS\FpsController.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\Manager\InputTextManager.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\Common\Loading.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\Manager\System\TimeManager.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\Scene\SceneBase.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\Scene\MainScene\SceneTitle.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\Scene\MainScene\SceneGame.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\Scene\MainScene\SceneLobby.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\Camera\Camera.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\Utility\UtilityMath.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\Object\Collision\CollisionController.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\Common\ParametersIO.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\Object\Actor\Chara\Boss\Boss.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\Object\Actor\Chara\Player\PActionController.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\Object\Actor\Chara\Weapon\Bullet\Player\PBulletRapidFire.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\Scene\MainScene\SceneGameBoss.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\Object\Actor\Chara\Player\PlayerBase.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\Object\Actor\Chara\Weapon\Bullet\Player\PBulletBig.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\Object\Actor\Chara\Weapon\Bullet\Player\PBulletBase.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\Object\Actor\Chara\CharaBase.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\Object\Actor\Chara\Player\Player.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\Object\Actor\SkyDome\SkyDome.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\Object\Actor\Stage\Stage.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\Object\Actor\Chara\Weapon\WeaponBase.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\Object\Actor\Chara\Weapon\BossWeapon\MP\WeaponMP.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\Object\Actor\Chara\Weapon\BossWeapon\RG\WeaponRG.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\Object\Actor\Chara\Weapon\BossWeapon\Cannon\WeaponCannon.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\Object\Actor\Chara\Weapon\BossWeapon\MG\WeaponMGL.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\Object\Actor\Chara\Weapon\BossWeapon\MG\WeaponMGR.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\Object\Common\DamageController.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\Object\Actor\Chara\Weapon\Bullet\Boss\BBulletBase.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\Object\Actor\Chara\Weapon\Bullet\Boss\BBulletWave.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\Object\Collider2D\Collider2DBase.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\Object\Collider2D\Collider2DCircle.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\Object\Collider2D\Collider2DBox.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\Scene\MainScene\SceneResult.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\Manager\Generic\KeyConfInputManager.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\Object\Collision\CollisionSphere.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\Object\Collision\CollisionCapsule.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\Object\Actor\Chara\Weapon\Bullet\Boss\BBulletMG.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\Object\Collision\CollisionLine.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\Object\Collision\CollisionCircle.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\Object\Collision\CollisionBox.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\Object\Actor\Chara\Weapon\BossWeapon\MG\MGBase.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\Object\Actor\Chara\Weapon\Bullet\Player\PBulletRecovery.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\Object\Actor\Chara\Weapon\Bullet\Player\PBulletInterfere.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
+    <ClInclude Include="Src\Object\Actor\Chara\Weapon\BossWeapon\MG\MGBase.h" />
+    <ClInclude Include="Src\Object\Actor\Chara\Weapon\Bullet\Player\PBulletInterfere.h" />
+    <ClInclude Include="Src\Object\Actor\Chara\Weapon\Bullet\Player\PBulletRecovery.h" />
+    <ClInclude Include="Src\Shader\ShaderManager.h" />
+    <ClInclude Include="Src\Shader\ShaderPixel\ShaderNormal.h" />
+    <ClInclude Include="Src\Shader\ShaderPixel\ShaderPixelBase.h" />
+    <ClInclude Include="Src\Shader\ShaderBase.h" />
+    <ClInclude Include="Src\Object\Collision\CollisionBox.h" />
+    <ClInclude Include="Src\Object\Collision\CollisionCircle.h" />
+    <ClInclude Include="Src\Object\Collision\CollisionLine.h" />
+    <ClInclude Include="Src\Object\Collision\CollisionCapsule.h" />
+    <ClInclude Include="Src\Object\Collision\CollisionSphere.h" />
+    <ClInclude Include="Src\Manager\Generic\KeyConfInputManager.h" />
+    <ClInclude Include="Src\Scene\MainScene\SceneGameBoss.h" />
+    <ClInclude Include="Src\Scene\MainScene\SceneResult.h" />
+    <ClInclude Include="Src\Object\Collider2D\Collider2DBox.h" />
+    <ClInclude Include="Src\Object\Collider2D\Collider2DCircle.h" />
+    <ClInclude Include="Src\Object\Actor\Chara\Weapon\Bullet\Boss\BBulletBase.h" />
+    <ClInclude Include="Src\Object\Actor\Chara\Weapon\Bullet\Boss\BBulletMG.h" />
+    <ClInclude Include="Src\Object\Actor\Chara\Weapon\Bullet\Boss\BBulletWave.h" />
+    <ClInclude Include="Src\Object\Collider2D\Collider2DBase.h" />
+    <ClInclude Include="Src\Object\Common\DamageController.h" />
+    <ClInclude Include="Src\Common\ParametersIO.h" />
+    <ClInclude Include="Src\Object\Actor\Chara\Boss\Boss.h" />
+    <ClInclude Include="Src\Object\Actor\Chara\Player\PActionController.h" />
+    <ClInclude Include="Src\Object\Actor\Chara\Weapon\Bullet\Player\PBulletRapidFire.h" />
+    <ClInclude Include="Src\Object\Collision\CollisionController.h" />
+    <ClInclude Include="Src\Scene\MainScene\SceneLobby.h" />
+    <ClInclude Include="Src\Object\Actor\Chara\Player\PlayerBase.h" />
+    <ClInclude Include="Src\Object\Actor\Chara\Weapon\Bullet\Player\PBulletBig.h" />
+    <ClInclude Include="Src\Object\Actor\Chara\Weapon\Bullet\Player\PBulletBase.h" />
+    <ClInclude Include="Src\Scene\MainScene\SceneGame.h" />
+    <ClInclude Include="Src\Scene\MainScene\SceneTitle.h" />
+    <ClInclude Include="Src\Scene\SceneBase.h" />
+    <ClInclude Include="Src\Common\Loading.h" />
+    <ClInclude Include="Src\FPS\FpsController.h" />
+    <ClInclude Include="Src\Manager\InputTextManager.h" />
+    <ClInclude Include="Src\Object\Actor\Chara\CharaBase.h" />
+    <ClInclude Include="Src\Common\InputTextArea.h" />
+    <ClInclude Include="Src\Net\NetSend.h" />
+    <ClInclude Include="Src\Net\NetHost.h" />
+    <ClInclude Include="Src\Net\NetClient.h" />
+    <ClInclude Include="Src\Common\CRC.h" />
+    <ClInclude Include="Src\Manager\System\NetManager.h" />
+    <ClInclude Include="Src\Net\NetBase.h" />
+    <ClInclude Include="Src\Manager\Decoration\SoundManager.h" />
+    <ClInclude Include="Src\Net\NetStructures.h" />
+    <ClInclude Include="Src\Object\Actor\ActorBase.h" />
+    <ClInclude Include="Src\Common\Fader.h" />
+    <ClInclude Include="Src\Common\Quaternion.h" />
+    <ClInclude Include="Src\Common\Vector2.h" />
+    <ClInclude Include="Src\Application.h" />
+    <ClInclude Include="Src\main.h" />
+    <ClInclude Include="Src\Camera\Camera.h" />
+    <ClInclude Include="Src\Manager\Generic\InputManager.h" />
+    <ClInclude Include="Src\Manager\Generic\Resource.h" />
+    <ClInclude Include="Src\Manager\Generic\ResourceManager.h" />
+    <ClInclude Include="Src\Manager\Generic\SceneManager.h" />
+    <ClInclude Include="Src\Object\Collider\ColliderBase.h" />
+    <ClInclude Include="Src\Object\Collider\ColliderCapsule.h" />
+    <ClInclude Include="Src\Object\Collider\ColliderLine.h" />
+    <ClInclude Include="Src\Object\Collider\ColliderModel.h" />
+    <ClInclude Include="Src\Object\Collider\ColliderSphere.h" />
+    <ClInclude Include="Src\Object\Common\AnimationController.h" />
+    <ClInclude Include="Src\Object\Common\Transform.h" />
+    <ClInclude Include="Src\Object\Actor\Chara\Player\Player.h" />
+    <ClInclude Include="Src\Object\Actor\SkyDome\SkyDome.h" />
+    <ClInclude Include="Src\Object\Actor\Stage\Stage.h" />
+    <ClInclude Include="Src\Utility\UtilityMath.h" />
+    <ClInclude Include="Src\Utility\MatrixUtility.h" />
+    <ClInclude Include="Src\Utility\UtilityCommon.h" />
+    <ClInclude Include="Src\Manager\System\TimeManager.h" />
+    <ClInclude Include="Src\Object\Actor\Chara\Weapon\WeaponBase.h" />
+    <ClInclude Include="Src\Object\Actor\Chara\Weapon\BossWeapon\MP\WeaponMP.h" />
+    <ClInclude Include="Src\Object\Actor\Chara\Weapon\BossWeapon\RG\WeaponRG.h" />
+    <ClInclude Include="Src\Object\Actor\Chara\Weapon\BossWeapon\Cannon\WeaponCannon.h" />
+    <ClInclude Include="Src\Object\Actor\Chara\Weapon\BossWeapon\MG\WeaponMGL.h" />
+    <ClInclude Include="Src\Object\Actor\Chara\Weapon\BossWeapon\MG\WeaponMGR.h" />
+    <ClInclude Include="Src\Shader\ShaderPixel\ShaderWave.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="srcGraphics\Common\Pixel\PixelShader2DHeader.hlsli" />
   </ItemGroup>
 </Project>

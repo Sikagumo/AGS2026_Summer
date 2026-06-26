@@ -171,6 +171,7 @@ void SceneGame::UpdateGameTime(void)
 
 void SceneGame::Draw(void)
 {
+	if (Loading::GetInstance()->IsLoading()) { return; }
 	stage_->Draw();
 
 	players_.at(0)->Draw();

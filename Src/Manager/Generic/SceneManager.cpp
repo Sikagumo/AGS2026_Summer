@@ -5,6 +5,7 @@
 #include "../../Scene/MainScene/SceneGameBoss.h"
 #include "../Decoration/SoundManager.h"
 #include "../../Object/Collision/CollisionController.h"
+#include "../../Shader/ShaderManager.h"
 #include "../System/TimeManager.h"
 #include "../../Camera/Camera.h"
 #include "../../Common/Loading.h"
@@ -57,6 +58,8 @@ void SceneManager::Initialize(void)
     SoundManager::CreateInstance();
     SoundManager::GetInstance().Initialize();
     TimeManager::CreateInstance();
+    ShaderManager::CreateInstance();
+    ShaderManager::GetInstance().Initialize();
     Loading::CreateInstance();
     Loading::GetInstance()->Initialize();
     CollisionController::CreateInstance();
@@ -126,10 +129,12 @@ void SceneManager::ChangeScene(std::shared_ptr<SceneBase> scene)
     nextScene_ = scene;
     isSceneChanging_ = true;
 
+   
+
     // 非同期ロード開始（ロード画面付き）
     Loading::GetInstance()->StartAsyncLoad([scene]()
         {
-        scene->Load();
+            scene->Load();
         });
 }
 
@@ -245,7 +250,7 @@ void SceneManager::Draw(void)
         if (camera_) camera_->SetBeforeDraw();
         for (auto& scene : scenes_)
         {
-            if (scene) scene->Draw();
+            if (scene) { scene->Draw(); }
         }
     }
 
@@ -278,8 +283,12 @@ void SceneManager::Release(void)
     // カメラを解放する
     camera_.reset();
 
+    // 解放処理
+    ShaderManager::GetInstance().Release();
+
     // 各マネージャーを破棄する
     SoundManager::GetInstance().DestroyInstance();
+    ShaderManager::GetInstance().DestroyInstance();
     TimeManager::GetInstance().DestroyInstance();
     Loading::GetInstance()->DestroyInstance();
     CollisionController::DestroyInstance();

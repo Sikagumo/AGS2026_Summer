@@ -11,21 +11,37 @@
 #include "../../Manager/System/TimeManager.h"
 #include "../../Common/Loading.h"
 #include "../../Utility/UtilityMath.h"
+#include "../../Shader/ShaderManager.h"
 
 void SceneTitle::Load(void)
 {
     // isLoading_ を true に
     SceneBase::Load();
-    auto& resourceManager = ResourceManager::GetInstance();
 
     // BGM・SEロード
 
     // 音量調整
 
-    // ロゴ・操作説明・再生用画像ロード
+    // タイトル画像
+    imageTitle_ = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::IMG_TITLE);
 
-    imageTitle_ = resourceManager.LoadHandleId(ResourceManager::SRC::IMG_TITLE);
-    ResourceManager::GetInstance().LoadHandleIds(ResourceManager::SRC::IMGS_TITLE_TEXT, imageMenu_.data());
+    // メニュー画像
+    ResourceManager::GetInstance().LoadHandleIds
+    (ResourceManager::SRC::IMGS_TITLE_TEXT, imageMenu_.data());
+
+    // 桃の画像
+    peachHandle_ = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::IMG_PEACH);
+
+    // 桃のノーマルマップ画像
+    peachNormalHandle_ = ResourceManager::GetInstance().
+        LoadHandleId(ResourceManager::SRC::IMG_NOMALMAP_PEACH);
+
+    // 波の画像
+    waveHandle_ = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::IMG_WAVE);
+
+    // 波のノーマルマップ画像
+    waveNormalHandle_ = ResourceManager::GetInstance().
+        LoadHandleId(ResourceManager::SRC::IMG_NOMALMAP_WAVE);
 
     // その他画像
 
@@ -40,6 +56,10 @@ void SceneTitle::EndLoad(void)
 
 SceneTitle::SceneTitle(void)
     : imageTitle_(-1)
+    , peachHandle_(-1)
+    , peachNormalHandle_(-1)
+    , waveHandle_(-1)
+    , waveNormalHandle_(-1)
     , selectedIdx_(0)
     , cursorCollider_(nullptr)
     , soloPlayButtonCollider_(nullptr)
@@ -49,6 +69,7 @@ SceneTitle::SceneTitle(void)
     , imageMenu_()
     , buttonTags()
     , prevMousePos_(0.0f, 0.0f)
+    , psHandle_(-1)
 {
     for (size_t i = 0; i < imageMenu_.size(); ++i)
     {
@@ -179,6 +200,28 @@ void SceneTitle::Update(void)
 
 void SceneTitle::Draw(void)
 {
+    if (Loading::GetInstance()->IsLoading()) { return; }
+
+    static float time = 0.0f;
+    time += 0.02f;
+
+    float wavePosY = 20;
+    float wavePosX = 10.0f;
+
+    const float PEACH_SCALE = 0.3f;
+    const float WAVE_SCALE = 1.0f;
+    
+    auto* normalShader = ShaderManager::GetInstance().GetShaderNormal();
+    auto* waveShader = ShaderManager::GetInstance().GetShaderWave();
+
+    normalShader->SetLightDirection(0.5f, 0.5f, 0.5f);
+    normalShader->SetAmbient(0.3f);
+
+    waveShader->SetWaveParam(time, 3.0f, 0.015f);
+
+    normalShader->Draw(0, 0, peachHandle_, peachNormalHandle_, PEACH_SCALE);
+
+    ShaderManager::GetInstance().DrawNormalAndWave(wavePosX, wavePosY, waveHandle_, waveNormalHandle_, WAVE_SCALE);
 
     DrawString(0, 0, "Title Scene Now!", GetColor(255, 255, 255));
 
@@ -209,15 +252,21 @@ void SceneTitle::Draw(void)
         // 描画
         Vector2F pos = colliders[i]->GetCenterPos();
         DrawRotaGraph(static_cast<int>(pos.x), static_cast<int>(pos.y), DEFAULT_SCALE, UtilityMath::DEG2RAD, imageMenu_[imgIdx], true);
+
     }
 
 #ifdef _DEBUG
     DrawDebug();
 #endif
 }
+
 void SceneTitle::Release(void)
 {
-
+    if (psHandle_ != -1)
+    {
+        DeleteShader(psHandle_);
+        psHandle_ = -1;
+    }
 }
 
 void SceneTitle::DrawDebug(void)

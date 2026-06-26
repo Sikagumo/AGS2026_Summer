@@ -572,7 +572,7 @@ VECTOR UtilityMath::GetNearestPointOnSegment(const VECTOR& _startPos,
 	VECTOR segmentVec = VSub(_endPos, _startPos);
 	VECTOR toTargetVec = VSub(_targetPos, _startPos);
 
-	float lenSquare = static_cast<float>(UtilityMath::SqrMagnitude(segmentVec));
+	float lenSquare = static_cast<float>(SqrMagnitude(segmentVec));
 
 	if (lenSquare < 1e-6)
 	{
