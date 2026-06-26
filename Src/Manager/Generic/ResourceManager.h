@@ -55,7 +55,7 @@ public:
 		ANIM_DODGE,
 
 		/* エフェクト */
-
+		EFFECT_WAVE,
 		/* 映像 */
 
 		/* BGM */

@@ -10,6 +10,7 @@
 #include "Manager/Generic/KeyConfInputManager.h"
 #include "Manager/Decoration/SoundManager.h"
 #include "Manager/System/NetManager.h"
+#include "Manager/Decoration/EffectManager.h"
 #include "FPS/FpsController.h"
 
 
@@ -92,9 +93,12 @@ void Application::Init(void)
 
 	ResourceManager::CreateInstance();
 
-
+	EffectManager::CreateInstance();
+	
+	
 	// ƒV[ƒ“ŠÇ—‰Šú‰»
 	SceneManager::CreateInstance();
+
 
 }
 
