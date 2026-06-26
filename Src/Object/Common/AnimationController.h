@@ -40,7 +40,9 @@ public:
 	/// @brief 同じモデル内のアニメーションを準備
 	/// @param type アニメーション種類
 	/// @param speed アニメーション速度 
-	void AddInternal(int _type, float _speed = 30.0f);
+	void AddInternal(int _type, float _speed = 30.0f
+		, bool _isPlace = false, const VECTOR& _localPos = UtilityMath::VECTOR_ZERO);
+
 
 	/// @brief 別の読み込み済みアニメーションモデルから準備し、再生座標固定
 	/// @see 詳細な説明
