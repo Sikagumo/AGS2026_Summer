@@ -54,7 +54,7 @@ public:
 	
 	void SetPlayerType(PLAYER_TYPE _type = PLAYER_TYPE::MAX);
 	
-	void SetSoundDate(VECTOR _pos, float _radius, bool _isLanging, bool _isMGFire, bool _isRoad)override;
+	void SetSoundData(VECTOR _pos, float _radius, bool _isLanging, bool _isMGFire, bool _isRoad)override;
 
 
 protected:
@@ -94,8 +94,6 @@ private:
 	Vector2F knockPowXZ_;
 
 	Vector2F dodgePowXZ_;
-	float dodgeDec_;
-	float timeActiveDodge_;
 
 	// ƒJƒƒ‰‚É‰‚¶‚½‰ñ“]‚ğ‚·‚é‚©”Û‚©
 	bool isCameraRotActive_;

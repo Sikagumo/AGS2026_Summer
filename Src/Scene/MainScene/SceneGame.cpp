@@ -99,7 +99,7 @@ void SceneGame::Update(void)
 	stage_->Update();
 	damageController_->Update();
 
-	players_.at(0)->SetSoundDate(boss_->GetBossPos(), boss_->GetSoundRadius(), boss_->GetLandingFlag(),boss_->GetMGFireFlag(),boss_->GetRoadFlag());
+	players_.at(0)->SetSoundData(boss_->GetBossPos(), boss_->GetSoundRadius(), boss_->GetLandingFlag(),boss_->GetMGFireFlag(),boss_->GetRoadFlag());
 
 	DamageProcess();
 
