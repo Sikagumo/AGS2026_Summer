@@ -11,7 +11,7 @@ public:
 	enum class BULLET_TYPE
 	{
 		NONE = -1,
-		JUMING, // –WŠQ
+		BOMB,
 		BIG,
 		RAPID_FIRE, // ˜AŽË
 		RECOVERY,	// ‰ñ•œ

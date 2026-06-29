@@ -11,7 +11,7 @@ public:
 
 	void Load(void)override;
 
-	void PreActiveProcess(void)override { isScaleUp_ = true; };
+	void PreActiveProcess(void)override;
 
 	void BlastAction(void)override;
 

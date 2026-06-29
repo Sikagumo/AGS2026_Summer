@@ -40,22 +40,31 @@ public:
 
 	bool GetIsVisible(void)const { return isVisible_; };
 
-	float GetRadius(void)const { return radius_; }
+	/// @brief “–‚½‚è”»’è”¼ŒaŽæ“¾ 
+	float GetRadiusBullet(void)const { return radiusBullet_; }
+	float GetRadiusBlast(void)const { return radiusBlast_; }
 
 	void SetFollow(const VECTOR& _pos, const VECTOR& _offsetDir);
 
 	virtual void PreActiveProcess(void){};
 
-	int GetPower(void) { return activePower_; }
+	int GetPower(void)const { return activePower_; }
 
 	virtual void BlastAction(void) = 0;
 
 
 protected:
 
+	enum class COLLISION_TYPE
+	{
+		BULLET = 0, // ’e
+		BLAST,		// ”š”­
+	};
+
 	BULLET_STATE bulletState_;
 
-	float radius_;
+	float radiusBullet_;
+	float radiusBlast_;
 
 	float curGravityPow_;
 
