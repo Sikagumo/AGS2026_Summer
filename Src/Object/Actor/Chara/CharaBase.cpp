@@ -85,7 +85,9 @@ void CharaBase::CalcGravityPow(void)
 	jumpPow_ += GRAVITY_POW.y;
 
 	// èdóÕêßå¿	
-	jumpPow_ = ((jumpPow_ < MAX_FALL_SPEED) ? MAX_FALL_SPEED : jumpPow_);
+	jumpPow_ = ((jumpPow_ < MAX_FALL_SPEED)
+					? MAX_FALL_SPEED
+					: jumpPow_);
 }
 
 

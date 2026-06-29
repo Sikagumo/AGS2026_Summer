@@ -19,11 +19,16 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Src\Shader\ShaderPixel\ShaderWave.cpp" />
     <ClCompile Include="Src\Manager\Decoration\EffectManager.cpp" />
     <ClCompile Include="Src\Object\Actor\Chara\Weapon\Bullet\Boss\BBulletCannon.cpp" />
     <ClCompile Include="Src\Object\Actor\Chara\Weapon\BossWeapon\MG\MGBase.cpp" />
-    <ClCompile Include="Src\Object\Actor\Chara\Weapon\Bullet\Player\PBulletInterfere.cpp" />
+    <ClCompile Include="Src\Object\Actor\Chara\Weapon\Bullet\Player\PBulletBomb.cpp" />
     <ClCompile Include="Src\Object\Actor\Chara\Weapon\Bullet\Player\PBulletRecovery.cpp" />
+    <ClCompile Include="Src\Shader\ShaderManager.cpp" />
+    <ClCompile Include="Src\Shader\ShaderPixel\ShaderNormal.cpp" />
+    <ClCompile Include="Src\Shader\ShaderPixel\ShaderPixelBase.cpp" />
+    <ClCompile Include="Src\Shader\ShaderBase.cpp" />
     <ClCompile Include="Src\Object\Collision\CollisionBox.cpp" />
     <ClCompile Include="Src\Object\Collision\CollisionCircle.cpp" />
     <ClCompile Include="Src\Object\Collision\CollisionLine.cpp" />
@@ -95,11 +100,17 @@
     <ClCompile Include="Src\Object\Actor\Chara\Weapon\BossWeapon\MG\WeaponMGR.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Src\Shader\ShaderParameters.h" />
+    <ClInclude Include="Src\Shader\ShaderPixel\ShaderWave.h" />
     <ClInclude Include="Src\Manager\Decoration\EffectManager.h" />
     <ClInclude Include="Src\Object\Actor\Chara\Weapon\Bullet\Boss\BBulletCannon.h" />
     <ClInclude Include="Src\Object\Actor\Chara\Weapon\BossWeapon\MG\MGBase.h" />
-    <ClInclude Include="Src\Object\Actor\Chara\Weapon\Bullet\Player\PBulletInterfere.h" />
+    <ClInclude Include="Src\Object\Actor\Chara\Weapon\Bullet\Player\PBulletBomb.h" />
     <ClInclude Include="Src\Object\Actor\Chara\Weapon\Bullet\Player\PBulletRecovery.h" />
+    <ClInclude Include="Src\Shader\ShaderManager.h" />
+    <ClInclude Include="Src\Shader\ShaderPixel\ShaderNormal.h" />
+    <ClInclude Include="Src\Shader\ShaderPixel\ShaderPixelBase.h" />
+    <ClInclude Include="Src\Shader\ShaderBase.h" />
     <ClInclude Include="Src\Object\Collision\CollisionBox.h" />
     <ClInclude Include="Src\Object\Collision\CollisionCircle.h" />
     <ClInclude Include="Src\Object\Collision\CollisionLine.h" />
@@ -172,6 +183,25 @@
     <ClInclude Include="Src\Object\Actor\Chara\Weapon\BossWeapon\MG\WeaponMGL.h" />
     <ClInclude Include="Src\Object\Actor\Chara\Weapon\BossWeapon\MG\WeaponMGR.h" />
   </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="srcGraphics\Pixel\NormalMap.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Data/Shader/%(Filename).cso</ObjectFileOutput>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">5.0</ShaderModel>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">5.0</ShaderModel>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Data/Shader/%(Filename).cso</ObjectFileOutput>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Data/Shader/%(Filename).cso</ObjectFileOutput>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Data/Shader/%(Filename).cso</ObjectFileOutput>
+    </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="srcGraphics\Common\Pixel\PixelShader2DHeader.hlsli" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <ProjectGuid>{EAE8EE94-FD52-4CCB-AF50-ECC1E6485C92}</ProjectGuid>
@@ -230,6 +260,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
     <IntDir>$(Platform)\$(Configuration)\</IntDir>
+    <OutDir>$(ProjectDir)</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -239,6 +270,7 @@
     <IncludePath>$(DXLIB_DIR);$(IncludePath)</IncludePath>
     <LibraryPath>$(DXLIB_DIR);$(LibraryPath)</LibraryPath>
     <IntDir>$(Platform)\$(Configuration)\</IntDir>
+    <OutDir>$(ProjectDir)</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

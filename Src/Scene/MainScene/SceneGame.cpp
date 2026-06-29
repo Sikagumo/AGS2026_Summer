@@ -28,8 +28,22 @@ SceneGame::SceneGame(void)
 	, gameTime_(GAME_TIME)
 	, targetHpImage_(-1), targetHpBerImage_(-1)
 {
-	std::unique_ptr<Player> player = std::make_unique<Player>(0, Player::BULLET_TYPE::BIG, UtilityMath::VECTOR_ZERO);
-	players_.emplace_back(std::move(player));
+	std::unique_ptr<Player> player1
+		= std::make_unique<Player>(0, Player::BULLET_TYPE::BOMB
+								   , PLAYER_INIT_POS[0]);
+	std::unique_ptr<Player> player2
+		= std::make_unique<Player>(1, Player::BULLET_TYPE::BIG
+								   , PLAYER_INIT_POS[1]);
+	std::unique_ptr<Player> player3
+		= std::make_unique<Player>(2, Player::BULLET_TYPE::BIG
+								   , PLAYER_INIT_POS[2]);
+	std::unique_ptr<Player> player4
+		= std::make_unique<Player>(3, Player::BULLET_TYPE::BIG
+								   , PLAYER_INIT_POS[3]);
+	players_.emplace_back(std::move(player1));
+	//players_.emplace_back(std::move(player2));
+	//players_.emplace_back(std::move(player3));
+	//players_.emplace_back(std::move(player4));
 
 	targetHpBerImage_ = ResourceManager::GetInstance().LoadHandleIdsOnce(ResourceManager::SRC::IMGS_HP_TARGET, 0);
 	targetHpImage_ = ResourceManager::GetInstance().LoadHandleIdsOnce(ResourceManager::SRC::IMGS_HP_TARGET, 1);
@@ -104,12 +118,15 @@ void SceneGame::Update(void)
 
 	SceneManager::GetInstance().GetCamera()->Update();
 
-	players_.at(0)->Update();
 	boss_->Update();
 	stage_->Update();
 	damageController_->Update();
 
-	players_.at(0)->SetSoundDate(boss_->GetBossPos(), boss_->GetSoundRadius(), boss_->GetLandingFlag(),boss_->GetMGFireFlag(),boss_->GetRoadFlag());
+	for (auto& player : players_)
+	{
+		player->Update();
+		player->SetSoundData(boss_->GetBossPos(), boss_->GetSoundRadius(), boss_->GetLandingFlag(), boss_->GetMGFireFlag(), boss_->GetRoadFlag());
+	}
 
 	DamageProcess();
 
@@ -148,7 +165,11 @@ void SceneGame::DamageProcess(void)
 	damageController_->SetPlayerAttack(players_.at(0)->GetPower());
 
 	// プレイヤー被ダメージ処理
-	players_.at(0)->SetDamage(damageController_->GetPlayerDamage(), damageController_->GetInvincible());
+	for (auto& player : players_)
+	{
+		player->SetDamage(damageController_->GetPlayerDamage()
+						  , damageController_->GetInvincible());
+	}
 }
 
 void SceneGame::CameraLockOn(void)
@@ -185,11 +206,14 @@ void SceneGame::UpdateGameTime(void)
 
 void SceneGame::Draw(void)
 {
-
 	auto& effect = EffectManager::GetInstance();
+
 	stage_->Draw();
 
-	players_.at(0)->Draw();
+	for (auto& player : players_)
+	{
+		player->Draw();
+	}
 
 	boss_->Draw();
 
@@ -217,7 +241,10 @@ void SceneGame::Release(void)
 {
 	stage_->Release();
 	
-	players_.at(0)->Release();
+	for (auto& player : players_)
+	{
+		player->Release();
+	}
 
 	boss_->Release();
 }

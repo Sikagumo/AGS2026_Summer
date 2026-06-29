@@ -11,7 +11,9 @@ public:
 
 	void Load(void)override;
 
-	void PreActiveProcess(void)override { isScaleUp_ = true; };
+	void PreActiveProcess(void)override;
+
+	void BlastAction(void)override;
 
 
 protected:
@@ -22,7 +24,7 @@ protected:
 
 	void UpdatePost(void)override;
 
-	void ChangeBulletState(BULLET_STATE _state)override;
+	void ChangeBulletStateProc(void)override;
 
 	void SetParam(void)override;
 

@@ -23,6 +23,7 @@ const std::string Application::PATH_ANIM = "Data/Model/";
 const std::string Application::PATH_EFFECT = "Data/Effect/";
 const std::string Application::PATH_SOUND = "Data/Sound/";
 const std::string Application::PATH_CSV = "Data/Csv/";
+const std::string Application::PATH_SHADER = "Data/Shader/";
 
 
 void Application::CreateInstance(void)
@@ -134,7 +135,7 @@ void Application::Run(void)
 
 		sceneManager.Draw();
 		// 平均FPS描画
-		fpsController_->Draw();
+		//fpsController_->Draw();
 
 		// ネットワーク管理更新(フレームの最後)
 		//netManager.UpdateEndOfFrame();

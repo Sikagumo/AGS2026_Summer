@@ -40,7 +40,9 @@ public:
 	/// @brief 同じモデル内のアニメーションを準備
 	/// @param type アニメーション種類
 	/// @param speed アニメーション速度 
-	void AddInternal(int _type, float _speed = 30.0f);
+	void AddInternal(int _type, float _speed = 30.0f
+		, bool _isPlace = false, const VECTOR& _localPos = UtilityMath::VECTOR_ZERO);
+
 
 	/// @brief 別の読み込み済みアニメーションモデルから準備し、再生座標固定
 	/// @see 詳細な説明
@@ -82,7 +84,7 @@ public:
 	float GetPlayPointRate(void);
 
 	/// @brief 再生中のアニメーション番号取得
-	int GetPlayType(void) { return playType_; };
+	int GetPlayType(void)const { return playType_; };
 
 
 	/// @brief アニメーション停止処理
@@ -94,7 +96,7 @@ public:
 	void SetAnimStep(float _step = 0.0f);
 
 	/// @brief 停止しているか否か
-	bool isStop(void) { return isStop_; };
+	bool isStop(void)const { return isStop_; };
 
 	/// @brief 再生位置変更
 	/// @param rate 再生位置の割合(0.0f～1.0f)

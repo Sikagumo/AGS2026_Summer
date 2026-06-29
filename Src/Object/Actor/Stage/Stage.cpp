@@ -18,7 +18,9 @@ void Stage::Draw(void)
 {
 	ActorBase::Draw();
 
+
 #ifdef _DEBUG
+	MV1DrawModel(collisionTrans_.modelId);
 	DrawFormatString(10, 120, 0xffffff, "ステージの座標：%f,%f,%f", transform_.pos.x, transform_.pos.y, transform_.pos.z);
 #endif
 }
@@ -26,31 +28,37 @@ void Stage::Draw(void)
 void Stage::Load(void)
 {
 	transform_.modelId = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::MODEL_STAGE);
+	collisionTrans_.modelId = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::MODEL_STAGE_COLLISION);
 }
 
 void Stage::InitTransform(void)
 {
-	constexpr float SCALE = 5.0f;
-	constexpr VECTOR LOCAL_POS = { 0.0f, -500.0f, 0.0f };
+	//constexpr float SCALE = 5.0f;
+	constexpr float SCALE = 0.425f;
+	constexpr VECTOR LOCAL_POS = { 0.0f, -1.0f, 0.0f };
+	VECTOR localPos = LOCAL_POS;
+
 	transform_.InitTransform(SCALE,
 							 Quaternion::Identity(), Quaternion::Identity(),
-							 LOCAL_POS);
+							 localPos);
+
+	constexpr float COLLISION_POS_Y = 18.5f;
+	localPos.y += COLLISION_POS_Y;
+	collisionTrans_.InitTransform(SCALE,
+								  Quaternion::Identity(), Quaternion::Identity(),
+								  localPos);
 }
 
 void Stage::InitCollider(void)
 {
 	// DxLib側の衝突情報セットアップ
-	MV1SetupCollInfo(transform_.modelId);
+	MV1SetupCollInfo(collisionTrans_.modelId);
 
 	// モデルのコライダ割り当て
-	ColliderModel* colModel = new ColliderModel(ColliderBase::TAG::STAGE, &transform_);
+	ColliderModel* colModel = new ColliderModel(ColliderBase::TAG::STAGE, &collisionTrans_);
 	ownColliders_.emplace(static_cast<int>(ColliderBase::SHAPE::MODEL), colModel);
-	colModel->SetTriger(false);
 
-	for (const std::string& name : EXCLUDE_FRAME_NAMES)
-	{
-		colModel->AddExcludeFrameIds(name);
-	}
+	colModel->SetTriger(false);
 
 	CollisionController::GetInstance().RegisterActor(this);
 }

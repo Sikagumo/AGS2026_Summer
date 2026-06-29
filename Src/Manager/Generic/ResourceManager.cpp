@@ -50,9 +50,27 @@ void ResourceManager::Initialize(void)
 	using LOAD_TYPE = Resource::LOAD_TYPE;
 
 	/* 画像 */
+	
+	// タイトル画像
 	_SetResource(LOAD_TYPE::IMAGE, SRC::IMG_TITLE, PATH_IMAGE + "Title.png");
 	
-	_SetResource(LOAD_TYPE::IMAGE, SRC::IMG_PEACH, PATH_IMAGE + "peach.png");
+	// 桃の画像
+	_SetResource(LOAD_TYPE::IMAGE, SRC::IMG_PEACH, PATH_IMAGE + "peach_T.png");
+
+	// 桃のノーマルマップ画像
+	_SetResource(LOAD_TYPE::IMAGE, SRC::IMG_NOMALMAP_PEACH, PATH_IMAGE + "peach_n.png");
+
+	// 波の画像
+	_SetResource(LOAD_TYPE::IMAGE, SRC::IMG_WAVE, PATH_IMAGE + "Wave.png");
+	
+	// 波のノーマルマップ
+	_SetResource(LOAD_TYPE::IMAGE, SRC::IMG_NOMALMAP_WAVE, PATH_IMAGE + "Wave_n.png");
+
+	// 鬼ヶ島の画像
+	_SetResource(LOAD_TYPE::IMAGE, SRC::IMG_ONIGASIMA, PATH_IMAGE + "OnigaSima.png");
+
+	// 鬼ヶ島のノーマルマップ
+	_SetResource(LOAD_TYPE::IMAGE, SRC::IMG_NOMALMAP_ONIGASIMA, PATH_IMAGE + "OnigaSima_n.png");
 
 	_SetResource(LOAD_TYPE::IMAGE, SRC::IMG_SHADOW, PATH_IMAGE + "Shadow.png");
 
@@ -100,12 +118,18 @@ void ResourceManager::Initialize(void)
 
 	/* モデル */
 	_SetResource(LOAD_TYPE::MODEL, SRC::MODEL_SKYDOME, PATH_MODEL + "SkyDome/SkyDome.mv1");
-	_SetResource(LOAD_TYPE::MODEL, SRC::MODEL_PLAYER_HUMAN, PATH_MODEL + "Player/Chara/Human/Player_Human.mv1");
+
+	// プレイヤーモデル
+	_SetResource(LOAD_TYPE::MODEL, SRC::MODEL_PLAYER_HUMAN, PATH_MODEL + "Player/Chara/Human/PlayerHuman.mv1");
 	_SetResource(LOAD_TYPE::MODEL, SRC::MODEL_PLAYER_DOG,	PATH_MODEL + "Player/Chara/Dog/PlayerDog.mv1");
 	_SetResource(LOAD_TYPE::MODEL, SRC::MODEL_PLAYER_BIRD,	PATH_MODEL + "Player/Chara/Bird/PlayerBird.mv1");
 	_SetResource(LOAD_TYPE::MODEL, SRC::MODEL_PLAYER_MONKEY,PATH_MODEL + "Player/Chara/Monkey/PlayerMonkey.mv1");
 
-	_SetResource(LOAD_TYPE::MODEL, SRC::MODEL_STAGE, PATH_MODEL + "Stage/FloatingIsland/FloatingIsland02.mv1");
+	_SetResource(LOAD_TYPE::MODEL, SRC::MODEL_STAGE, PATH_MODEL + "Stage/Stage/Stage.mv1");
+	_SetResource(LOAD_TYPE::MODEL, SRC::MODEL_STAGE_COLLISION, PATH_MODEL + "Stage/Stage/StageCollision.mv1");
+	//_SetResource(LOAD_TYPE::MODEL, SRC::MODEL_STAGE, PATH_MODEL + "Stage/FloatingIsland/FloatingIsland02.mv1");
+	//_SetResource(LOAD_TYPE::MODEL, SRC::MODEL_STAGE_COLLISION, PATH_MODEL + "Stage/FloatingIsland/FloatingIsland02.mv1");
+	_SetResource(LOAD_TYPE::MODEL, SRC::MODEL_TREE_POSITION, PATH_MODEL + "Stage/Stage/TreePosition.mv1");
 
 	_SetResource(LOAD_TYPE::MODEL, SRC::MODEL_BOSS_FEET, PATH_MODEL + "Boss/oni_feet.mv1");
 	_SetResource(LOAD_TYPE::MODEL, SRC::MODEL_BOSS_CAR, PATH_MODEL + "Boss/oni_feet_car.mv1");

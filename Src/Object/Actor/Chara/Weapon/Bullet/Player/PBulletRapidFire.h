@@ -10,6 +10,9 @@ public:
 
 	void Load(void)override;
 
+	void BlastAction(void)override;
+
+
 protected:
 
 	void InitTransform(void)override;
@@ -18,5 +21,6 @@ protected:
 
 	void SetParam(void)override;
 
+	void ChangeBulletStateProc(void)override;
 };
 

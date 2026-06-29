@@ -1,7 +1,7 @@
 #include "PBulletBig.h"
-#include "PBulletBase.h"
 #include <algorithm>
 #include "../../../../../../Manager/System/TimeManager.h"
+#include "../../../../../Collision/CollisionController.h"
 
 constexpr float RADIUS_BIG = 9.0f;
 constexpr float RADIUS_INCREMENT = 27.5f;
@@ -40,24 +40,33 @@ void PBulletBig::InitPost(void)
 	SetParam();
 }
 
+
 void PBulletBig::UpdatePost(void)
 {
-	if (isScaleUp_ && radius_ < radiusMax_)
+	if (bulletState_ == BULLET_STATE::BLAST)
 	{
+		// ’…’eŽžA‘¦Á–Å‚³‚¹‚é
+		activePower_ = 0;
+		bulletState_ = BULLET_STATE::INACTIVE;
+		return;
+	}
+
+
+	if (isScaleUp_ && radiusBullet_ < radiusMax_)
+	{
+		/* ’eŠÛŠg‘åˆ— */
 		scaleUpTime_ += timeManager_.GetDeltaTime();
 
 		float term = (scaleUpTime_ / RADIUS_DURATION);
 		term = std::clamp(term, 0.0f, 1.0f);
 
-		radius_ += ((radiusMax_ - radius_) * (term * term));
+		radiusBullet_ += ((radiusMax_ - radiusBullet_) * (term * term));
 		transform_.SetScale((scaleMax_ * (term * term)));
 	}
 }
 
-void PBulletBig::ChangeBulletState(BULLET_STATE _state)
+void PBulletBig::ChangeBulletStateProc(void)
 {
-	bulletState_ = _state;
-
 	if (bulletState_ == BULLET_STATE::SHOT)
 	{
 		transform_.SetScale(RADIUS_BIG);
@@ -66,7 +75,7 @@ void PBulletBig::ChangeBulletState(BULLET_STATE _state)
 
 void PBulletBig::SetParam(void)
 {
-	radius_ = RADIUS_BIG;
+	radiusBullet_ = RADIUS_BIG;
 	radiusMax_ = RADIUS_BIG + (RADIUS_INCREMENT * shotCnt_);
 
 	shotSpeedXZ_ = SHOT_SPEED_BIG_XZ;
@@ -81,4 +90,17 @@ void PBulletBig::SetParam(void)
 	power_ = POWER_START + (POWER_INCREMENT * shotCnt_);
 	scaleMax_ = SCALE_BIG + (SCALE_BIG_INCREMENT * shotCnt_);
 	transform_.InitTransform(SCALE_BIG, transform_.quaRot, Quaternion::Identity());
+}
+
+void PBulletBig::BlastAction(void)
+{
+	bulletState_ = BULLET_STATE::BLAST;
+	isVisible_ = false;
+	activePower_ = power_;
+
+	// ’e‚ðÁ–Å‚³‚¹‚é
+	isActiveDestroy_ = true;
+
+	// “–‚½‚è”»’è–³Œø‰»
+	CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::PLAYER_BULLET, false);
 }

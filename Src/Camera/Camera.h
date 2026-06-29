@@ -120,9 +120,6 @@ public:
 	/// @brief イージング遷移中か否か
 	bool IsEasingState(void) { return (easingTerm_ < 1.0f); };
 
-	/// @brief 追従対象が範囲内か否か
-	bool IsTargetSpace(void);
-
 
 protected:
 
