@@ -364,18 +364,12 @@ void CollisionController::ResolveCollision(ActorBase* _actorA, ActorBase* _actor
 
 	if (tagA != TAG::STAGE && tagB == TAG::STAGE)
 	{
-		float overlap = fabsf(_info.penetration);
-		VECTOR stagePush = VGet(0.0f, overlap, 0.0f);
-
-		_actorA->GetTransform().Translate(stagePush);
+		_actorA->GetTransform().Translate(pushVector);
 		return;
 	}
 	else if (tagA == TAG::STAGE && tagB != TAG::STAGE)
 	{
-		float overlap = fabsf(_info.penetration);
-		VECTOR stagePush = VGet(0.0f, overlap, 0.0f);
-
-		_actorB->GetTransform().Translate(stagePush);
+		_actorB->GetTransform().Translate(VScale(pushVector, -1.0f));
 		return;
 	}
 
@@ -572,7 +566,8 @@ bool CollisionController::CanCollide(int _tagA, int _tagB) const
 
 	if (tagHit == TAG::STAGE)
 	{
-		if (tagHurt == TAG::PLAYER || tagHurt == TAG::PLAYER_BULLET || tagHurt == TAG::BOSS || tagHurt == TAG::WEAPON_CANNON_L || tagHurt == TAG::WEAPON_CANNON_R
+		if (tagHurt == TAG::PLAYER || tagHurt == TAG::PLAYER_BULLET || tagHurt == TAG::BOSS 
+			|| tagHurt == TAG::WEAPON_CANNON_L || tagHurt == TAG::WEAPON_CANNON_R
 			|| tagHurt == TAG::WEAPON_MG_L || tagHurt == TAG::WEAPON_MG_R
 			|| tagHurt == TAG::WEAPON_MP_L || tagHurt == TAG::WEAPON_MP_R
 			|| tagHurt == TAG::WEAPON_RG || tagHurt == TAG::MG_BULLET)
