@@ -1,15 +1,10 @@
 #include "ShaderWave.h"
+
 #include <DxLib.h>
 #include <cstring>
 
-struct alignas(16) IntegratedGpuBuffer
-{
-    float unusedPadding[4] = { 0.0f, 0.0f, 0.0f, 0.0f};
-    float time = 0.0f; 
-    float waveSpeed = 0.0f; 
-    float waveForce = 0.0f; 
-    float useNormal = 0.0f;
-};
+#include "../ShaderParameters.h"
+#include "../ShaderManager.h"
 
 ShaderWave::ShaderWave(void)
     : time_(0.0f)
@@ -30,7 +25,7 @@ void ShaderWave::SetWaveParam(float _time, float _speed, float _force)
 
 void ShaderWave::Draw(int _x, int _y, int _textureHandle, float _scale)
 {
-    if (_textureHandle == -1 || shaderHandle_ == -1 || constantBuffer_ == -1)
+    if (_textureHandle == -1 || shaderHandle_ == -1)
     {
         return;
     }
@@ -52,17 +47,18 @@ void ShaderWave::Draw(int _x, int _y, int _textureHandle, float _scale)
     gpuBuffer.time = time_;
     gpuBuffer.waveSpeed = speed_;
     gpuBuffer.waveForce = force_;
+    gpuBuffer.useNormal = 0.0f;
 
-    ShaderPixelBase::UpdateConstantBuffer(gpuBuffer);
-
-    SetShaderConstantBuffer(constantBuffer_, DX_SHADERTYPE_PIXEL, 4);
+    ShaderManager::GetInstance().UpdateAndSetCommonConstantBuffer(gpuBuffer);
 
     SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255);
     SetUseTextureToShader(0, _textureHandle); 
     SetUsePixelShader(shaderHandle_);
 
-    DrawPrimitive2DToShader(vertices_.data(), static_cast<int>(vertices_.size()), DX_PRIMTYPE_TRIANGLESTRIP);
+    DrawPrimitive2DToShader(vertices_.data(), static_cast<int>(vertices_.size()), 
+        DX_PRIMTYPE_TRIANGLESTRIP);
 
     SetUsePixelShader(-1); SetUseTextureToShader(0, -1);
-    SetShaderConstantBuffer(-1, DX_SHADERTYPE_PIXEL, 4); SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+    SetShaderConstantBuffer(-1, DX_SHADERTYPE_PIXEL, 4); 
+    SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 }

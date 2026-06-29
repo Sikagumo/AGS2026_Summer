@@ -162,6 +162,7 @@
     <ClInclude Include="Src\Object\Actor\Chara\Weapon\BossWeapon\MG\WeaponMGL.h" />
     <ClInclude Include="Src\Object\Actor\Chara\Weapon\BossWeapon\MG\WeaponMGR.h" />
     <ClInclude Include="Src\Shader\ShaderPixel\ShaderWave.h" />
+    <ClInclude Include="Src\Shader\ShaderParameters.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="srcGraphics\Common\Pixel\PixelShader2DHeader.hlsli" />
