@@ -72,6 +72,8 @@ void ResourceManager::Initialize(void)
 	// 鬼ヶ島のノーマルマップ
 	_SetResource(LOAD_TYPE::IMAGE, SRC::IMG_NOMALMAP_ONIGASIMA, PATH_IMAGE + "OnigaSima_n.png");
 
+	_SetResource(LOAD_TYPE::IMAGE, SRC::IMG_SHADOW, PATH_IMAGE + "Shadow.png");
+
 	/* 複数画像 */
 
 	// 画像枚数

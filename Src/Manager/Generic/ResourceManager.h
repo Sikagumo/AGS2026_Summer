@@ -21,6 +21,7 @@ public:
 		IMG_NOMALMAP_WAVE,
 		IMG_ONIGASIMA,
 		IMG_NOMALMAP_ONIGASIMA,
+		IMG_SHADOW,
 
 		/* •¡”‰æ‘œ */
 		IMGS_TEXTS,

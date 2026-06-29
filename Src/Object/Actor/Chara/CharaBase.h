@@ -55,6 +55,7 @@ protected:
 	// ƒWƒƒƒ“ƒv”»’è
 	bool isJump_;
 
+	int shadowHandle_;
 	
 	virtual void InitAnimation(void)override;
 
@@ -77,4 +78,7 @@ protected:
 	void CollisionGravity(void);
 	void CollisionCapsule(void);
 	virtual void CollisionReserve(void) {};
+
+	void DrawShadowRound(void);
+
 };

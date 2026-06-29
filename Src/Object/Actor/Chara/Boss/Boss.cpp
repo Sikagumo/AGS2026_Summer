@@ -652,6 +652,7 @@ void Boss::DrawPre(void)
 
 	wave_->Draw();
 
+	CharaBase::DrawPre();
 
 #ifdef _DEBUG
 
