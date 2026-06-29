@@ -54,6 +54,8 @@ void ResourceManager::Initialize(void)
 	
 	_SetResource(LOAD_TYPE::IMAGE, SRC::IMG_PEACH, PATH_IMAGE + "peach.png");
 
+	_SetResource(LOAD_TYPE::IMAGE, SRC::IMG_SHADOW, PATH_IMAGE + "Shadow.png");
+
 	/* •¡”‰æ‘œ */
 
 	// ‰æ‘œ–‡”
