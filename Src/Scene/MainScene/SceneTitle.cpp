@@ -1,4 +1,7 @@
 #include "SceneTitle.h"
+
+#include <cmath>
+
 #include "../../Manager/Generic/SceneManager.h"
 #include "../../Manager/Generic/KeyConfInputManager.h"
 #include "../../Manager/Generic/ResourceManager.h"
@@ -43,6 +46,14 @@ void SceneTitle::Load(void)
     waveNormalHandle_ = ResourceManager::GetInstance().
         LoadHandleId(ResourceManager::SRC::IMG_NOMALMAP_WAVE);
 
+    // 鬼ヶ島の画像
+    oniSimaHandle_ = ResourceManager::GetInstance().
+        LoadHandleId(ResourceManager::SRC::IMG_ONIGASIMA);
+
+    // 鬼ヶ島のノーマルマップ画像
+    oniSimaNormalHandle_ = ResourceManager::GetInstance().
+        LoadHandleId(ResourceManager::SRC::IMG_NOMALMAP_ONIGASIMA);
+
     // その他画像
 
     //時間カウントリセット
@@ -60,6 +71,9 @@ SceneTitle::SceneTitle(void)
     , peachNormalHandle_(-1)
     , waveHandle_(-1)
     , waveNormalHandle_(-1)
+    , oniSimaHandle_(-1)
+    , oniSimaNormalHandle_(-1)
+    , time_(0)
     , selectedIdx_(0)
     , cursorCollider_(nullptr)
     , soloPlayButtonCollider_(nullptr)
@@ -82,39 +96,49 @@ void SceneTitle::Initialize(void)
     SetMouseDispFlag(true);
 
     // マウスカーソル用のコライダー生成（半径1の円）
-    cursorCollider_ = std::make_unique<Collider2DCircle>(Vector2F(0.0f, 0.0f), 1.0f, Collider2DBase::TAG_2D::MOUSE_CURSOR);
+    cursorCollider_ = std::make_unique<Collider2DCircle>
+        (Vector2F(0.0f, 0.0f), 1.0f, Collider2DBase::TAG_2D::MOUSE_CURSOR);
+
     CollisionController::GetInstance().RegisterCollider2D(cursorCollider_.get());
 
     // UIボタンの配置計算設定
     const float BUTTON_WIDTH = 250.0f;
     const float BUTTON_HEIGHT = 50.0f;
-    const float START_Y = Application::SCREEN_HALF_Y + 10;
+    const float START_Y = Application::SCREEN_HALF_Y + 20;
     const float INTERVAL_Y = 100.0f;
     const float CENTER_X = Application::SCREEN_HALF_X;
 
     // ソロプレイボタン
     Vector2F posSolo(CENTER_X, START_Y + (INTERVAL_Y * 0.0f));
-    soloPlayButtonCollider_ = std::make_unique<Collider2DBox>(posSolo, BUTTON_WIDTH, BUTTON_HEIGHT, Collider2DBase::TAG_2D::SOLO_PLAY_BUTTON);
+    soloPlayButtonCollider_ = std::make_unique<Collider2DBox>
+        (posSolo, BUTTON_WIDTH, BUTTON_HEIGHT, Collider2DBase::TAG_2D::SOLO_PLAY_BUTTON);
     CollisionController::GetInstance().RegisterCollider2D(soloPlayButtonCollider_.get());
-    CollisionController::GetInstance().SetCollisionGroup2D(Collider2DBase::TAG_2D::MOUSE_CURSOR, Collider2DBase::TAG_2D::SOLO_PLAY_BUTTON, true);
+    CollisionController::GetInstance().SetCollisionGroup2D(Collider2DBase::TAG_2D::MOUSE_CURSOR,
+        Collider2DBase::TAG_2D::SOLO_PLAY_BUTTON, true);
 
     // マルチプレイボタン
     Vector2F posMulti(CENTER_X, START_Y + (INTERVAL_Y * 1.0f));
-    multiPlayButtonCollider_ = std::make_unique<Collider2DBox>(posMulti, BUTTON_WIDTH, BUTTON_HEIGHT, Collider2DBase::TAG_2D::MULTI_PLAY_BUTTON);
+    multiPlayButtonCollider_ = std::make_unique<Collider2DBox>(posMulti, BUTTON_WIDTH, 
+        BUTTON_HEIGHT, Collider2DBase::TAG_2D::MULTI_PLAY_BUTTON);
     CollisionController::GetInstance().RegisterCollider2D(multiPlayButtonCollider_.get());
-    CollisionController::GetInstance().SetCollisionGroup2D(Collider2DBase::TAG_2D::MOUSE_CURSOR, Collider2DBase::TAG_2D::MULTI_PLAY_BUTTON, true);
+    CollisionController::GetInstance().SetCollisionGroup2D(Collider2DBase::TAG_2D::MOUSE_CURSOR, 
+        Collider2DBase::TAG_2D::MULTI_PLAY_BUTTON, true);
 
     // 設定ボタン
     Vector2F posOption(CENTER_X, START_Y + (INTERVAL_Y * 2.0f));
-    optionButtonCollider_ = std::make_unique<Collider2DBox>(posOption, BUTTON_WIDTH, BUTTON_HEIGHT, Collider2DBase::TAG_2D::OPTION_BUTTON);
+    optionButtonCollider_ = std::make_unique<Collider2DBox>(posOption, BUTTON_WIDTH,
+        BUTTON_HEIGHT, Collider2DBase::TAG_2D::OPTION_BUTTON);
     CollisionController::GetInstance().RegisterCollider2D(optionButtonCollider_.get());
-    CollisionController::GetInstance().SetCollisionGroup2D(Collider2DBase::TAG_2D::MOUSE_CURSOR, Collider2DBase::TAG_2D::OPTION_BUTTON, true);
+    CollisionController::GetInstance().SetCollisionGroup2D(Collider2DBase::TAG_2D::MOUSE_CURSOR,
+        Collider2DBase::TAG_2D::OPTION_BUTTON, true);
 
     // 終了ボタン
     Vector2F posExit(CENTER_X, START_Y + (INTERVAL_Y * 3.0f));
-    exitButtonCollider_ = std::make_unique<Collider2DBox>(posExit, BUTTON_WIDTH, BUTTON_HEIGHT, Collider2DBase::TAG_2D::EXIT_UTTON);
+    exitButtonCollider_ = std::make_unique<Collider2DBox>(posExit, BUTTON_WIDTH, 
+        BUTTON_HEIGHT, Collider2DBase::TAG_2D::EXIT_UTTON);
     CollisionController::GetInstance().RegisterCollider2D(exitButtonCollider_.get());
-    CollisionController::GetInstance().SetCollisionGroup2D(Collider2DBase::TAG_2D::MOUSE_CURSOR, Collider2DBase::TAG_2D::EXIT_UTTON, true);
+    CollisionController::GetInstance().SetCollisionGroup2D(Collider2DBase::TAG_2D::MOUSE_CURSOR, 
+        Collider2DBase::TAG_2D::EXIT_UTTON, true);
 
     SceneManager::GetInstance().GetCamera()->ChangeMode(Camera::MODE::NONE);
 
@@ -202,31 +226,40 @@ void SceneTitle::Draw(void)
 {
     if (Loading::GetInstance()->IsLoading()) { return; }
 
-    static float time = 0.0f;
-    time += 0.02f;
+    time_ += 0.02f;
 
-    float wavePosY = 20;
-    float wavePosX = 10.0f;
-
-    const float PEACH_SCALE = 0.3f;
+    float amplitude = 20.0f;
+    float bobSpeed = 3.0f;
+    float offsetY = std::sinf(time_ * bobSpeed) * amplitude;
+    float peachPosY = Application::SCREEN_HALF_Y + offsetY;
+    int peachPosX = -20;
+    int wavePosY = 20;
+    int oniSimaPosX = Application::SCREEN_HALF_X - 100;
+    int oniSimaPosY = 30;
+    const float PEACH_SCALE = 0.5f;
     const float WAVE_SCALE = 1.0f;
-    
-    auto* normalShader = ShaderManager::GetInstance().GetShaderNormal();
-    auto* waveShader = ShaderManager::GetInstance().GetShaderWave();
+    const float ONISIMA_SCALE = 1.0f;
+    auto* shaderPeach = ShaderManager::GetInstance().GetShaderNormal();
+    auto* shaderOniSima = ShaderManager::GetInstance().GetShaderNormal();
+    auto* shaderWave = ShaderManager::GetInstance().GetShaderWave();
 
-    normalShader->SetLightDirection(0.5f, 0.5f, 0.5f);
-    normalShader->SetAmbient(0.3f);
+    shaderOniSima->SetAmbient(0.8f);
+    shaderOniSima->Draw(oniSimaPosX, oniSimaPosY, oniSimaHandle_, oniSimaNormalHandle_, ONISIMA_SCALE);
 
-    waveShader->SetWaveParam(time, 3.0f, 0.015f);
 
-    normalShader->Draw(0, 0, peachHandle_, peachNormalHandle_, PEACH_SCALE);
+    shaderPeach->SetLightDirection(0.5f, 0.5f, 0.5f);
+    shaderPeach->SetAmbient(0.8f);
 
-    ShaderManager::GetInstance().DrawNormalAndWave(wavePosX, wavePosY, waveHandle_, waveNormalHandle_, WAVE_SCALE);
+    shaderWave->SetWaveParam(time_, 3.0f, 0.015f);
 
-    DrawString(0, 0, "Title Scene Now!", GetColor(255, 255, 255));
+    ShaderManager::GetInstance().DrawNormalAndWave(0, wavePosY, 
+        waveHandle_, waveNormalHandle_, WAVE_SCALE);
 
-    const int IMAGET_TITLE_Y = Application::SCREEN_SIZE_Y / 3;
-    DrawRotaGraph(Application::SCREEN_HALF_X, IMAGET_TITLE_Y, 1.0f, UtilityMath::DEG2RAD, imageTitle_, true);
+    shaderPeach->Draw(peachPosX, static_cast<int>(peachPosY),
+        peachHandle_, peachNormalHandle_, PEACH_SCALE);
+
+    const int IMAGET_TITLE_Y = Application::SCREEN_SIZE_Y / 4;
+    DrawRotaGraph(Application::SCREEN_HALF_X, IMAGET_TITLE_Y, 0.7f, 0.0f, imageTitle_, true);
 
     const float DEFAULT_SCALE = 0.5f;
     using TAG_2D = Collider2DBase::TAG_2D;
@@ -243,7 +276,8 @@ void SceneTitle::Draw(void)
     for (int i = 0; i < MENU_BUTTON_NUM; ++i)
     {
         // マウスホバー OR パッドで選択中
-        bool isSelected = CollisionController::GetInstance().IsTagCollidingWithTag2D(TAG_2D::MOUSE_CURSOR, buttonTags[i])
+        bool isSelected = CollisionController::GetInstance().
+            IsTagCollidingWithTag2D(TAG_2D::MOUSE_CURSOR, buttonTags[i])
             || (selectedIdx_ == i);
 
         // 選択状態に応じて画像インデックスを切り替え
@@ -251,7 +285,8 @@ void SceneTitle::Draw(void)
 
         // 描画
         Vector2F pos = colliders[i]->GetCenterPos();
-        DrawRotaGraph(static_cast<int>(pos.x), static_cast<int>(pos.y), DEFAULT_SCALE, UtilityMath::DEG2RAD, imageMenu_[imgIdx], true);
+        DrawRotaGraph(static_cast<int>(pos.x), static_cast<int>(pos.y), DEFAULT_SCALE,
+            UtilityMath::DEG2RAD, imageMenu_[imgIdx], true);
 
     }
 
