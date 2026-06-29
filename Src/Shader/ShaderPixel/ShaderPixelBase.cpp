@@ -9,9 +9,10 @@ ShaderPixelBase::~ShaderPixelBase(void)
 {
 }
 
-void ShaderPixelBase::Initialize(const char* shaderPath)
+void ShaderPixelBase::Initialize(const char* _shaderPath)
 {
-    shaderHandle_ = LoadPixelShader(shaderPath);
+    // ピクセルシェーダの読み込み
+    shaderHandle_ = LoadPixelShader(_shaderPath);
 }
 
 void ShaderPixelBase::InitBaseVertexes(float w, float h)
@@ -25,6 +26,7 @@ void ShaderPixelBase::InitBaseVertexes(float w, float h)
         vertices_[i].su = 1.0f;
         vertices_[i].sv = 1.0f;
     }
+
     // 左上, 右上, 左下, 右下 の順でセット
     vertices_[0].pos = VGet(0.0f, 0.0f, 0.0f);
     vertices_[0].u = 0.0f; vertices_[0].v = 0.0f;

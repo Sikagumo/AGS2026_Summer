@@ -33,9 +33,27 @@ public:
 
 	ShaderWave* GetShaderWave(void) const { return shaderWave_.get(); }
 
-	/// @brief  
-	/// @return 
+	/// @brief 作ったスクリーンを取得する
+	/// @return 作ったスクリーン
 	int GetScreenHandle(void) const { return screenHandle_; }
+
+	int GetCommonConstantBuffer(void) const { return commonConstantBuffer_; }
+
+	template <typename T>
+	void UpdateAndSetCommonConstantBuffer(const T& _constantData, int _shaderType = DX_SHADERTYPE_PIXEL, int _slotIndex = 4)
+	{
+		if (commonConstantBuffer_ == -1) return;
+
+		// メモリを取得してコピー
+		T* bufferPointer = static_cast<T*>(GetBufferShaderConstantBuffer(commonConstantBuffer_));
+		if (bufferPointer) {
+			*bufferPointer = _constantData;
+		}
+
+		// GPUへ転送＆セット
+		UpdateShaderConstantBuffer(commonConstantBuffer_);
+		SetShaderConstantBuffer(commonConstantBuffer_, _shaderType, _slotIndex);
+	}
 
 private:
 
@@ -47,6 +65,9 @@ private:
 
 	// スクリーンのハンドル
 	int screenHandle_;
+
+	// バッファ変数
+	int commonConstantBuffer_;
 
 	/// @brief コンストラクタ 
 	ShaderManager(void);

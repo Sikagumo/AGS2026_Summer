@@ -2,6 +2,7 @@
 
 #include <DxLib.h>
 
+#include "ShaderParameters.h"
 #include "../Application.h"
 
 // 静的メンバ変数の初期化
@@ -31,6 +32,7 @@ void ShaderManager::DestroyInstance(void)
 
 ShaderManager::ShaderManager(void)
     : screenHandle_(-1)
+    , commonConstantBuffer_(-1)
 {
 }
 
@@ -43,10 +45,10 @@ void ShaderManager::Initialize(void)
 {
     screenHandle_ = MakeScreen(Application::SCREEN_SIZE_X, Application::SCREEN_SIZE_Y, true);
 
-    // NormalShaderのインスタンス化と初期化
+    commonConstantBuffer_ = CreateShaderConstantBuffer(sizeof(IntegratedGpuBuffer));
+
     shaderNormal_ = std::make_unique<ShaderNormal>();
     shaderNormal_->Initialize((Application::PATH_SHADER + "NormalMap.cso").c_str());
-
 
     shaderWave_ = std::make_unique<ShaderWave>();
     shaderWave_->Initialize((Application::PATH_SHADER + "NormalMap.cso").c_str());
@@ -66,18 +68,6 @@ void ShaderManager::DrawNormalAndWave(int _x, int _y, int _textureHandle, int _n
         return;
     }
 
-    struct alignas(16) IntegratedGpuBuffer
-    {
-        float lightX = 1.0f;  
-        float lightY = 1.0f;  
-        float lightZ = 1.0f;  
-        float ambient = 0.0f;
-        float time = 0.0f;   
-        float waveSpeed = 0.0f; 
-        float waveForce = 0.0f; 
-        float useNormal = 1.0f;
-    };
-
     IntegratedGpuBuffer gpuBuffer{};
     gpuBuffer.lightX = shaderNormal_->GetLightX();
     gpuBuffer.lightY = shaderNormal_->GetLightY();
@@ -87,6 +77,8 @@ void ShaderManager::DrawNormalAndWave(int _x, int _y, int _textureHandle, int _n
     gpuBuffer.waveSpeed = shaderWave_->GetSpeed();
     gpuBuffer.waveForce = shaderWave_->GetForce();
     gpuBuffer.useNormal = 1.0f;
+
+    UpdateAndSetCommonConstantBuffer(gpuBuffer);
 
     float texWidth = Application::SCREEN_SIZE_X;
     float texHight = Application::SCREEN_SIZE_Y;
@@ -114,10 +106,7 @@ void ShaderManager::DrawNormalAndWave(int _x, int _y, int _textureHandle, int _n
         v.dif = GetColorU8(255, 255, 255, 255);
     }
 
-    shaderNormal_->UpdateConstantBuffer(gpuBuffer);
-
     SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255);
-    //SetShaderConstantBuffer(shaderNormal_->GetConstantBufferHandle(), DX_SHADERTYPE_PIXEL, 4);
     SetUseTextureToShader(0, _textureHandle);
     SetUseTextureToShader(1, _normalMapHandle);
     SetUsePixelShader(shaderNormal_->GetShaderHandle());
@@ -131,6 +120,12 @@ void ShaderManager::DrawNormalAndWave(int _x, int _y, int _textureHandle, int _n
 
 void ShaderManager::Release(void)
 {
+    if (commonConstantBuffer_ != -1)
+    {
+        DeleteShaderConstantBuffer(commonConstantBuffer_);
+        commonConstantBuffer_ = -1;
+    }
+
     if (shaderNormal_)
     {
         shaderNormal_->Release();
