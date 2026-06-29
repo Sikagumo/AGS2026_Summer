@@ -8,7 +8,7 @@
 #include "../../Bullet/Boss/BBulletCannon.h"
 #include "WeaponCannon.h"
 
-WeaponCannon::WeaponCannon()
+WeaponCannon::WeaponCannon():count_(0)
 {
 	
 }
@@ -110,7 +110,17 @@ void WeaponCannon::UpdateProcessPost(void)
 
 void WeaponCannon::DrawPre(void)
 {
+	for (std::shared_ptr<BBulletBase> bullet : bullets_)
+	{
+		if (bullet->GetIsAlive() == true)
+		{
+			bullet->Draw();
+		}
+	}
 #ifdef _DEBUG
+
+	DrawFormatString(10, 420, 0xffffff, "count:%d", count_);
+
 	for (auto& col : ownColliders_)
 	{
 		col.second->Draw();
@@ -121,16 +131,27 @@ void WeaponCannon::DrawPre(void)
 
 void WeaponCannon::LookPlayer(void)
 {
-	VECTOR moveDir = VSub(bone_.playerPos, transform_.pos);
+	//照準調整
+	VECTOR targetPos = bone_.playerPos;
+	targetPos.y += DOUN_ROCK;
+
+	VECTOR moveDir = VSub(targetPos, transform_.pos);
 	moveDir = VNorm(moveDir);
+	//Y軸計算
+	float targetAngleYRad = atan2(moveDir.x, moveDir.z);
+	Quaternion rotY = Quaternion::AngleAxis(targetAngleYRad, UtilityMath::AXIS_Y);
+	//X軸計算と制限
+	float horizontalDistance = sqrtf(moveDir.z * moveDir.z + moveDir.x * moveDir.x);
+	float targetAngleXRad = atan2(moveDir.y, horizontalDistance);
+	
+	float targetAngleXDeg = UtilityMath::Rad2DegF(targetAngleXRad);
+	targetAngleXDeg = std::clamp(targetAngleXDeg, LIMIT_MIN_ANGLE, LIMIT_MAX_ANGLE);
 
-	float targetAngle = atan2(moveDir.x, moveDir.z);
-
-	// クオータニオンを作成してボスの回転と合成
-	Quaternion quaRot = Quaternion::AngleAxis(targetAngle, UtilityMath::AXIS_Y);
-
-
-	transform_.quaRot =quaRot;
+	float clampedAngleXRad = UtilityMath::Deg2RadF(targetAngleXDeg);
+	Quaternion rotX = Quaternion::AngleAxis(-clampedAngleXRad, UtilityMath::AXIS_X);
+	//合成
+	Quaternion localRot = Quaternion::Mult(rotY, rotX); 
+	transform_.quaRot = localRot;
 
 	Quaternion bulletRot = transform_.quaRot;
 
@@ -184,7 +205,7 @@ void WeaponCannon::UpdateAttack(void)
 	/*SoundManager::GetInstance().Set3DPosition(SoundManager::SOUND::SE_MG_FIRE, transform_.pos);*/
 
 	CreateBullets();
-
+	count_++;
 
 	isAttack_ = false;
 	/*SoundManager::GetInstance().Stop(SoundManager::SOUND::SE_MG_FIRE);*/
@@ -211,7 +232,7 @@ void WeaponCannon::CreateBullets(void)
 	// 位置を加算して最終的なワールド座標にする
 	VECTOR bulletpos = VAdd(transform_.pos, localRotPos);
 
-	bullet->CreateBullets(bulletpos, bulletDir_, 3.0f);
+	bullet->CreateBullets(bulletpos, bulletDir_, 12.0f);
 	bullet->Init();
 	bullet->SetTransform(transform_);
 }

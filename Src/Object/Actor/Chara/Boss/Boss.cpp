@@ -268,6 +268,8 @@ void Boss::InitAnimation(void)
 		animation_->AddInternal(i, 20.0f);
 	}
 	animation_->Play(static_cast<int>(ANIM_TYPE::DIR));
+
+	//EffectManager::GetInstance().Add(EffectManager::EFFECT::EFFECT_WAVE, ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::EFFECT_WAVE));
 }
 
 
@@ -293,9 +295,6 @@ void Boss::InitPost(void)
 	stateChanges_.emplace(static_cast<int>(STATE::ROADATTACK), std::bind(&Boss::ChangeStateRoadAttack, this));
 	stateChanges_.emplace(static_cast<int>(STATE::END), std::bind(&Boss::ChangeStateEnd, this));
 	ChangeState(STATE::IDLE);
-
-
-	EffectManager::GetInstance().Add(EffectManager::EFFECT::EFFECT_WAVE, ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::EFFECT_WAVE));
 	
 }
 
@@ -474,7 +473,7 @@ void Boss::UpdateAttack(void)
 
 	transformBody_.pos = MV1GetFramePosition(transform_.modelId, JOINT_FEET_BODY);
 	int randomAttack = static_cast<int>(UtilityMath::RandRangeF(0.0f, static_cast<float>(ATTACK_TYPE::MAX)));
-	ATTACK_TYPE attackSelect = ATTACK_TYPE::JUMP;//static_cast<ATTACK_TYPE>(randomAttack);
+	ATTACK_TYPE attackSelect = /*ATTACK_TYPE::CANNON;*/static_cast<ATTACK_TYPE>(randomAttack);
 
 	switch (attackSelect)
 	{
@@ -491,6 +490,12 @@ void Boss::UpdateAttack(void)
 
 	case ATTACK_TYPE::ROAD:
 		ChangeState(STATE::ROADATTACK);
+		break;
+
+	case ATTACK_TYPE::CANNON:
+		weaponCannonL_->ChangeState(WeaponCannon::STATE::ATTACK);
+		weaponCannonR_->ChangeState(WeaponCannon::STATE::ATTACK);
+		ChangeState(STATE::IDLE);
 		break;
 
 	default:

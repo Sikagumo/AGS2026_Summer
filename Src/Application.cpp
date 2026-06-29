@@ -93,11 +93,12 @@ void Application::Init(void)
 
 	ResourceManager::CreateInstance();
 
+	// シーン管理初期化
+	SceneManager::CreateInstance();
+
 	EffectManager::CreateInstance();
 	
 	
-	// シーン管理初期化
-	SceneManager::CreateInstance();
 
 
 }
@@ -110,7 +111,7 @@ void Application::Run(void)
 	InputTextManager& inputTextManager = InputTextManager::GetInstance();
 	NetManager& netManager = NetManager::GetInstance();
 
-
+	
 	// ゲームループ
 	while (ProcessMessage() == 0)
 	{

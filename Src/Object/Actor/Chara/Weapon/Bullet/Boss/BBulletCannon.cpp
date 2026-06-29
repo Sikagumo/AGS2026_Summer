@@ -25,7 +25,7 @@ void BBulletCannon::ReleasePost(void)
 
 void BBulletCannon::InitTransform(void)
 {
-	transform_.scl = { 0.5f,0.5f,0.5f };
+	transform_.scl = { 0.2f,0.2f,0.2f };
 	transform_.quaRot = Quaternion::Identity();
 	transform_.quaRotLocal = Quaternion::AngleAxis(UtilityMath::Deg2RadF(INIT_ROT), UtilityMath::AXIS_Y);
 	transform_.Update();

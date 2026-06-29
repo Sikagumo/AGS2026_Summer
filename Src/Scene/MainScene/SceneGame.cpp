@@ -73,6 +73,8 @@ void SceneGame::Initialize(void)
 	camera->ChangeMode(Camera::MODE::FOLLOW);
 	camera->SetFollow(&players_.at(0)->GetTransform());
 
+	//EffectManager::GetInstance().Initialize();
+
 	for (auto& player : players_)
 	{
 		player->Init();

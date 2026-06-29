@@ -97,16 +97,23 @@ private:
 	static constexpr VECTOR LINE_END_POS = { 0.0f,40.0f,60.0f };
 	static constexpr VECTOR CAPSULE_START_POS = { 0.0f,50.0f,160.0f };
 	static constexpr VECTOR CAPSULE_END_POS = { 0.0f,50.0f,-40.0f };
+
+	static constexpr float LIMIT_MIN_ANGLE = -10.0f;
+	static constexpr float LIMIT_MAX_ANGLE = 10.0f;
+
 	static constexpr float CAPSULE_RADIUS = 20.0f;
+
+	static constexpr float DOUN_ROCK = -45.0f;
 
 
 	bool isAttack_;
 	VECTOR bulletDir_;
 	std::vector<std::shared_ptr<BBulletBase>> bullets_;
 
+	int look;
 
 	
-
+	int count_;
 	
 
 	// 弾を発射する共通の仕組み（中身は現在のMGL/MGRのものと同じ）

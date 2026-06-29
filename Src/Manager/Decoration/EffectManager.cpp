@@ -1,4 +1,6 @@
 #include "EffekseerForDXLib.h"
+#include "../../Application.h"
+#include "../Generic/ResourceManager.h"
 #include "EffectManager.h"
 
 // ê√ìIÉÅÉìÉoïœêîÇÃé¿ëÃíËã`
@@ -40,19 +42,28 @@ void EffectManager::Draw(void)
 void EffectManager::Initialize(void)
 {
     effect_.clear();
+    EFFECT_DATA waveData;
+    waveData.Data = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::EFFECT_WAVE);
+    waveData.pos = VGet(0.0f, 0.0f, 0.0f);
+    waveData.rad = VGet(0.0f, 0.0f, 0.0f);
+    waveData.scl = VGet(1.0f, 1.0f, 1.0f);
+    waveData.speed = 1.0f;
+
+    effect_[EFFECT::EFFECT_WAVE] = waveData;
+    
 
 }
 
 void EffectManager::Add(const EFFECT _effect, const int _data)
 {
-    EFFECT_DATA newData;
+  /*  EFFECT_DATA newData;
     newData.Data = _data;
     newData.pos = VGet(0.0f, 0.0f, 0.0f);
     newData.rad = VGet(0.0f, 0.0f, 0.0f);
     newData.scl = VGet(1.0f, 1.0f, 1.0f);
     newData.speed = 1.0f;
 
-    effect_[_effect] = newData;
+    effect_[_effect] = newData;*/
 }
 
 void EffectManager::Play(const EFFECT _effect, const VECTOR _pos, const VECTOR _rot, const VECTOR _scl, float _speed)
