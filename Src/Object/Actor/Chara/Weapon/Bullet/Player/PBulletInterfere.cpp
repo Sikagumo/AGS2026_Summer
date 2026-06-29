@@ -17,7 +17,7 @@ constexpr int POWER_INCREMENT = 50;
 
 PBulletInterfere::PBulletInterfere(void)
 	: PBulletBase::PBulletBase()
-	, radiusMax_(0.0f), scaleMax_(0.0f)
+	, timeEndActive_(0.0f)
 	, scaleUpTime_(0.0f), isScaleUp_(false)
 {
 }
@@ -33,28 +33,17 @@ void PBulletInterfere::InitTransform(void)
 
 void PBulletInterfere::InitPost(void)
 {
-	SetParam();
+	PBulletBase::InitPost();
+
 }
 
 void PBulletInterfere::UpdatePost(void)
 {
-	if (isScaleUp_ && radius_ < radiusMax_)
-	{
-		constexpr float RADIUS_DURATION = 1.0f;
-		scaleUpTime_ += timeManager_.GetDeltaTime();
-
-		float term = (scaleUpTime_ / RADIUS_DURATION);
-		term = std::clamp(term, 0.0f, 1.0f);
-
-		radius_ += ((radiusMax_ - radius_) * (term * term));
-		transform_.SetScale((scaleMax_ * (term * term)));
-	}
+	
 }
 
-void PBulletInterfere::ChangeBulletState(BULLET_STATE _state)
+void PBulletInterfere::ChangeBulletStateProc(void)
 {
-	bulletState_ = _state;
-
 	if (bulletState_ == BULLET_STATE::SHOT)
 	{
 		transform_.SetScale(RADIUS_BIG);
@@ -63,8 +52,6 @@ void PBulletInterfere::ChangeBulletState(BULLET_STATE _state)
 
 void PBulletInterfere::SetParam(void)
 {
-	radius_ = RADIUS_BIG;
-	radiusMax_ = RADIUS_BIG + (RADIUS_INCREMENT * shotCnt_);
 
 	shotSpeedXZ_ = SHOT_SPEED_BIG_XZ;
 	shotSpeedY_ = SHOT_SPEED_BIG_Y;
@@ -76,6 +63,10 @@ void PBulletInterfere::SetParam(void)
 	isScaleUp_ = false;
 
 	power_ = POWER_START + (POWER_INCREMENT * shotCnt_);
-	scaleMax_ = SCALE_BIG + (SCALE_BIG_INCREMENT * shotCnt_);
 	transform_.InitTransform(SCALE_BIG, transform_.quaRot, Quaternion::Identity());
+}
+
+void PBulletInterfere::BlastAction(void)
+{
+
 }

@@ -26,6 +26,10 @@ void PBulletRecovery::Load(void)
 {
 }
 
+void PBulletRecovery::BlastAction(void)
+{
+}
+
 void PBulletRecovery::InitTransform(void)
 {
 	
@@ -51,10 +55,8 @@ void PBulletRecovery::UpdatePost(void)
 	}
 }
 
-void PBulletRecovery::ChangeBulletState(BULLET_STATE _state)
+void PBulletRecovery::ChangeBulletStateProc(void)
 {
-	bulletState_ = _state;
-
 	if (bulletState_ == BULLET_STATE::SHOT)
 	{
 		transform_.SetScale(RADIUS_BIG);

@@ -18,6 +18,7 @@ PBulletBase::PBulletBase(void)
 	, isVisible_(false)
 	, isFinish_(false)
 	, power_(0), activePower_(0)
+	, isActiveDestroy_(false)
 {
 }
 
@@ -35,6 +36,7 @@ void PBulletBase::InitPost(void)
 {
 	isVisible_ = true;
 	bulletState_ = BULLET_STATE::INACTIVE;
+	SetParam();
 }
 
 
@@ -53,7 +55,7 @@ void PBulletBase::Update(void)
 			BlastAction();
 		}
 	}
-	else if (bulletState_ == BULLET_STATE::BLAST)
+	else if (bulletState_ == BULLET_STATE::BLAST && isActiveDestroy_)
 	{
 		activePower_ = 0;
 		bulletState_ = BULLET_STATE::INACTIVE;
@@ -86,7 +88,10 @@ void PBulletBase::Update(void)
 			return;
 		}
 	}
-	if (colMng.IsActorCollidingWithTag(this, ColliderBase::TAG::STAGE) && shotPow_.y < 0.0f)
+
+	// ステージに衝突時、爆発処理
+	if (colMng.IsActorCollidingWithTag(this, ColliderBase::TAG::STAGE)
+		&& shotPow_.y < 0.0f)
 	{
 		BlastAction();
 	}
@@ -108,20 +113,13 @@ void PBulletBase::ReleasePost(void)
 	
 }
 
-void PBulletBase::BlastAction(void)
+void PBulletBase::ChangeBulletState(BULLET_STATE _state)
 {
-	bulletState_ = BULLET_STATE::BLAST;
-	isVisible_ = false;
-	activePower_ = power_;
+	bulletState_ = _state;
 
-	// 当たり判定無効化
-	CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::PLAYER_BULLET, false);
-
-
-	// 衝突判定マネージャに登録
-	//ColliderSphere* blast = new ColliderSphere(ColliderBase::TAG::PLAYER_BULLET, &transform_, UtilityMath::VECTOR_ZERO, radius_);
-	//ownColliders_.emplace(0, blast);
+	ChangeBulletStateProc();
 }
+
 
 void PBulletBase::Create(const VECTOR& _pos, const VECTOR& _throwDir, int _shotCnt, bool _isFinish)
 {

@@ -11,14 +11,14 @@ PlayerBase::PlayerBase(int _playerNo, BULLET_TYPE _bulletType, const VECTOR& _st
 	, hp_(HP), MAX_HP(HP)
 	, START_POS(_startPos)
 	, bodyPos_(UtilityMath::VECTOR_ZERO)
-	, timeInv_(0.0f)
+	, timeInv_(0.0f), timeInvDodge_(0.0f)
 {
 }
 
 void PlayerBase::SetDamage(int _damage, bool _isInvincible, float _timeInvincible)
 {
 	// 無敵中、HPが０以下、ダメージ量が0以下時、処理終了
-	if (timeInv_ > 0.0f
+	if (timeInv_ > 0.0f || timeInvDodge_
 		|| hp_ <= 0 || _damage <= 0) {
 		return;
 	}
@@ -32,26 +32,30 @@ void PlayerBase::SetDamage(int _damage, bool _isInvincible, float _timeInvincibl
 	hp_ -= _damage;
 }
 
-void PlayerBase::SetSoundDate(VECTOR _pos, float _radius,bool _isLanging, bool _isMGFire,bool _isRoad)
+void PlayerBase::SetSoundData(VECTOR _pos, float _radius,bool _isLanging, bool _isMGFire,bool _isRoad)
 {
+	SoundManager& sound = SoundManager::GetInstance();
 	if (_isLanging)
 	{
-		SoundManager::GetInstance().Play3D(SoundManager::SOUND::SE_BOSS_LANDING, _pos, transform_.pos, _radius);
+		sound.Play3D(SoundManager::SOUND::SE_BOSS_LANDING
+					 , _pos, transform_.pos, _radius);
 	}
 
 	if (_isMGFire)
 	{
-		SoundManager::GetInstance().Play3D(SoundManager::SOUND::SE_MG_FIRE, _pos, transform_.pos, _radius);
+		sound.Play3D(SoundManager::SOUND::SE_MG_FIRE
+					 , _pos, transform_.pos, _radius);
 	}
 
 	if (_isRoad)
 	{
-		SoundManager::GetInstance().Play3D(SoundManager::SOUND::SE_ROAD, _pos, transform_.pos, _radius);
+		sound.Play3D(SoundManager::SOUND::SE_ROAD
+					 , _pos, transform_.pos, _radius);
 	}
 
 }
 
-void PlayerBase::UpdaetaSound(void)
+void PlayerBase::UpdateSound(void)
 {
 	SoundManager::GetInstance().Update3D(transform_.pos);
 }

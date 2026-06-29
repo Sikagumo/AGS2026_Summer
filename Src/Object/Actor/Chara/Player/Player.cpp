@@ -18,27 +18,29 @@
 #include "../Weapon/Bullet/Player/PBulletRapidFire.h"
 #include "../../../../Application.h"
 
+namespace
+{
+	// 衝突判定用線分位置
+	static constexpr VECTOR COL_LINE_START_LOCAL_POS = { 0.0f, 50.0f, 0.0f };
+	static constexpr VECTOR COL_LINE_END_LOCAL_POS = { 0.0f, 0.0f, 0.0f };
 
-// 衝突判定用線分位置
-static constexpr VECTOR COL_LINE_START_LOCAL_POS = { 0.0f, 50.0f, 0.0f };
-static constexpr VECTOR COL_LINE_END_LOCAL_POS = { 0.0f, 0.0f, 0.0f };
+	// 衝突判定用カプセル位置
+	static constexpr VECTOR COL_CAPSULE_TOP_LOCAL_POS = { 0.0f, 50.0f, 0.0f };
+	static constexpr VECTOR COL_CAPSULE_DOWN_LOCAL_POS = { 0.0f, 18.0f, 0.0f };
 
-// 衝突判定用カプセル位置
-static constexpr VECTOR COL_CAPSULE_TOP_LOCAL_POS = { 0.0f, 50.0f, 0.0f };
-static constexpr VECTOR COL_CAPSULE_DOWN_LOCAL_POS = { 0.0f, 18.0f, 0.0f };
+	// 衝突判定用カプセル球体半径
+	static constexpr float COL_CAPSULE_RADIUS = 10.0f;
 
-// 衝突判定用カプセル球体半径
-static constexpr float COL_CAPSULE_RADIUS = 10.0f;
+	// ジャンプ力
+	static constexpr float JUMP_POW = 5.0f;
 
-// ジャンプ力
-static constexpr float JUMP_POW = 5.0f;
+	// 回避力
+	static constexpr float DODGE_POW = 10.0f;
+	constexpr float TIME_DODGE = 0.65f;
+	constexpr float TIME_WAIT_DODGE = 1.75f;
 
-// 回避力
-static constexpr float DODGE_POW = 15.0f;
-constexpr float TIME_DODGE = 0.65f;
-constexpr float TIME_WAIT_DODGE = 1.75f;
-
-constexpr float BODY_POS_OFFSET_Y = 25.0f;
+	constexpr float BODY_POS_OFFSET_Y = 25.0f;
+}
 
 
 Player::Player(int _playerNo, BULLET_TYPE _bulletType, const VECTOR& _startPos)
@@ -49,7 +51,7 @@ Player::Player(int _playerNo, BULLET_TYPE _bulletType, const VECTOR& _startPos)
 	, throwPos_(UtilityMath::VECTOR_ZERO), throwDir_(UtilityMath::VECTOR_ZERO)
 	, shotIndex_(-1)
 	, isCameraRotActive_(false)
-	, curTimeWaitDodge_(0.0f), timeActiveDodge_(0.0f)
+	, curTimeWaitDodge_(0.0f)
 	, knockPowXZ_(UtilityMath::VECTOR2F_ZERO)
 	, dodgePowXZ_(UtilityMath::VECTOR2F_ZERO)
 {
@@ -216,7 +218,8 @@ void Player::Draw(void)
 
 	if (timeInv_ > 0.0f)
 	{
-		material = COLOR_F(1.0f, 0.0f, 0.0f, 1.0f);
+		constexpr COLOR_F DAMAGE_COLOR = COLOR_F(1.0f, 0.0f, 0.0f, 1.0f);
+		material = DAMAGE_COLOR;
 	}
 	else
 	{
@@ -284,37 +287,14 @@ void Player::UpdateProcess(void)
 	ProcessKnock();
 	
 	// 移動位置制限
-	MoveLimit();
+	//MoveLimit();
 
 	// 胴体位置更新
 	bodyPos_ = transform_.pos;
 	bodyPos_.y += BODY_POS_OFFSET_Y;
 
 
-	UpdaetaSound();
-	
-	/*
-	if (InputManager::GetInstance().IsTrgDown(KEY_INPUT_LEFT)
-		|| InputManager::GetInstance().IsPadBtnTrgDown(InputManager::JOYPAD_NO::PAD1, InputManager::JOYPAD_BTN::CROSS_LEFT))
-	{
-		int type = static_cast<int>(playerType_) - 1;
-		if (type < 0) { type = static_cast<int>(PLAYER_TYPE::MAX) - 1; }
-
-		SetPlayerType(static_cast<PLAYER_TYPE>(type));
-		animation_->SetModelId(transform_.modelId);
-	}
-	
-
-	if (InputManager::GetInstance().IsTrgDown(KEY_INPUT_RIGHT)
-		|| InputManager::GetInstance().IsPadBtnTrgDown(InputManager::JOYPAD_NO::PAD1, InputManager::JOYPAD_BTN::CROSS_RIGHT))
-	{
-		int type = static_cast<int>(playerType_) + 1;
-		if (type >= static_cast<int>(PLAYER_TYPE::MAX)) { type = 0; }
-
-		SetPlayerType(static_cast<PLAYER_TYPE>(type));
-		animation_->SetModelId(transform_.modelId);
-	}
-	*/
+	UpdateSound();
 }
 
 void Player::UpdateProcessPost(void)
@@ -367,9 +347,9 @@ VECTOR Player::CalcAddPosition(void)
 	return ret;
 }
 
-void Player::SetSoundDate(VECTOR _pos, float _radius, bool _isLanging,bool _isMGFire, bool _isRoad)
+void Player::SetSoundData(VECTOR _pos, float _radius, bool _isLanging,bool _isMGFire, bool _isRoad)
 {
-	PlayerBase::SetSoundDate(_pos, _radius, _isLanging, _isMGFire, _isRoad);
+	PlayerBase::SetSoundData(_pos, _radius, _isLanging, _isMGFire, _isRoad);
 }
 
 void Player::ReleasePost(void)
@@ -425,6 +405,10 @@ void Player::ProcessMove(void)
 		return;
 	}
 
+	// 無敵中、移動無効
+	else if (timeInvDodge_ > 0.0f) { return; }
+
+
 	// カメラの方向で進行
 	Quaternion cameraRot = SceneManager::GetInstance().GetCamera()->GetQuaRotY();
 
@@ -446,7 +430,6 @@ void Player::ProcessMove(void)
 	}
 
 	if (!isJump_
-		&& timeActiveDodge_ <= 0.0f
 		&& actionController_->GetActionState() == PActionController::PACTION_STATE::NONE)
 	{
 		if (!UtilityMath::EqualsVZero(dir))
@@ -507,8 +490,25 @@ void Player::Jump(void)
 
 void Player::ProcessDodge(void)
 {
-	if (curTimeWaitDodge_ <= 0.0f && !UtilityMath::EqualsVZero(moveDir_))
+	if (timeInvDodge_ > 0.0f)
 	{
+		timeInvDodge_ -= TimeManager::GetInstance().GetDeltaTime();
+	}
+	else
+	{
+		dodgePowXZ_ = UtilityMath::VECTOR2F_ZERO;
+	}
+
+
+	if (curTimeWaitDodge_ <= 0.0f
+		&& !UtilityMath::EqualsVZero(moveDir_))
+	{
+		if (!actionController_->IsEndActionActive()
+			&& actionController_->GetActionState() != PActionController::PACTION_STATE::NONE)
+		{
+			return;
+		}
+
 		if (InputManager::GetInstance().IsTrgDown(KEY_INPUT_LSHIFT)
 			|| InputManager::GetInstance().IsPadBtnTrgDown(InputManager::JOYPAD_NO::PAD1, InputManager::JOYPAD_BTN::RB_LEFT))
 		{
@@ -520,24 +520,13 @@ void Player::ProcessDodge(void)
 	{
 		curTimeWaitDodge_ -= TimeManager::GetInstance().GetDeltaTime();
 	}
-
-	if (timeActiveDodge_ > 0.0f)
-	{
-		timeActiveDodge_ -= TimeManager::GetInstance().GetDeltaTime();
-	}
-	else
-	{
-		dodgePowXZ_ = UtilityMath::VECTOR2F_ZERO;
-	}
 }
 void Player::Dodge(void)
 {
 	dodgePowXZ_ = Vector2F(moveDir_.x, moveDir_.z);
 	dodgePowXZ_ *= DODGE_POW;
 
-	timeActiveDodge_ = TIME_DODGE;
-
-	timeInv_ = TIME_DODGE;
+	timeInvDodge_ = TIME_DODGE;
 	curTimeWaitDodge_ = TIME_WAIT_DODGE;
 }
 

@@ -27,7 +27,8 @@ AnimationController::~AnimationController(void)
 }
 
 
-void AnimationController::AddInternal(int _type, float _speed)
+void AnimationController::AddInternal(int _type, float _speed, bool _isPlace
+	, const VECTOR& _localPos)
 {
 	/* 内部のアニメーションの追加 */
 	Animation animation = Animation();
@@ -41,6 +42,13 @@ void AnimationController::AddInternal(int _type, float _speed)
 	animation.type = ANIM_TYPE::INTERNAL;
 
 	animation.step = 0.0f;
+
+	if (!UtilityMath::EqualsVZero(_localPos))
+	{
+		animation.inPlaceLocalPos = _localPos;
+	}
+
+	animation.isInPlace = _isPlace;
 
 	// アニメーション追加処理
 	Add(_type, animation);
