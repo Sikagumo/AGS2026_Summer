@@ -31,6 +31,7 @@ public:
 
     int GetShaderHandle(void) const { return shaderHandle_; }
 
+    int GetConstantBufferHandle(void) const { return constantBuffer_; }
 protected:
 
     std::array<VERTEX2DSHADER, 4> vertices_;

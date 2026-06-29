@@ -59,6 +59,11 @@ private:
 	int peachNormalHandle_;           // 桃のノーマルマップ
 	int waveHandle_;                  // 波の画像
 	int waveNormalHandle_;            // 波のノーマルマップ
+	int oniSimaHandle_;               // 鬼ヶ島の画像
+	int oniSimaNormalHandle_;         // 鬼ヶ島のノーマルマップ
+
+	// 時間
+	float time_;;
 
 	// 選択インデックス（パッド操作用）
 	int selectedIdx_;

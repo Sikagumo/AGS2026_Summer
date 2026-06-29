@@ -88,8 +88,8 @@ void ShaderManager::DrawNormalAndWave(int _x, int _y, int _textureHandle, int _n
     gpuBuffer.waveForce = shaderWave_->GetForce();
     gpuBuffer.useNormal = 1.0f;
 
-    float texWidth, texHight;
-    GetGraphSizeF(_textureHandle, &texWidth, &texHight);
+    float texWidth = Application::SCREEN_SIZE_X;
+    float texHight = Application::SCREEN_SIZE_Y;
 
     float width = texWidth * _scale;
     float high = texHight * _scale;
@@ -117,6 +117,7 @@ void ShaderManager::DrawNormalAndWave(int _x, int _y, int _textureHandle, int _n
     shaderNormal_->UpdateConstantBuffer(gpuBuffer);
 
     SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255);
+    //SetShaderConstantBuffer(shaderNormal_->GetConstantBufferHandle(), DX_SHADERTYPE_PIXEL, 4);
     SetUseTextureToShader(0, _textureHandle);
     SetUseTextureToShader(1, _normalMapHandle);
     SetUsePixelShader(shaderNormal_->GetShaderHandle());
