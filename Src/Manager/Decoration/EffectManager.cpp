@@ -1,7 +1,9 @@
 #include "EffekseerForDXLib.h"
 #include "../../Application.h"
 #include "../Generic/ResourceManager.h"
+#include "../../Utility/UtilityMath.h"
 #include "EffectManager.h"
+#include <algorithm>
 
 // 静的メンバ変数の実体定義
 EffectManager* EffectManager::instance_ = nullptr;
@@ -16,7 +18,6 @@ void EffectManager::CreateInstance(void)
 
 EffectManager& EffectManager::GetInstance(void)
 {
-   
     return *instance_;
 }
 
@@ -29,41 +30,31 @@ void EffectManager::DestroyInstance(void)
     }
 }
 
-void EffectManager::Update(void)
-{
-    UpdateEffekseer3D();
-}
-
-void EffectManager::Draw(void)
-{
-    DrawEffekseer3D();
-}
-
 void EffectManager::Initialize(void)
 {
     effect_.clear();
+    playingList_.clear();
+
     EFFECT_DATA waveData;
     waveData.Data = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::EFFECT_WAVE);
     waveData.pos = VGet(0.0f, 0.0f, 0.0f);
-    waveData.rad = VGet(0.0f, 0.0f, 0.0f);
+    waveData.rot = VGet(0.0f, 0.0f, 0.0f);
     waveData.scl = VGet(1.0f, 1.0f, 1.0f);
     waveData.speed = 1.0f;
-
     effect_[EFFECT::EFFECT_WAVE] = waveData;
-    
 
+    EFFECT_DATA landingData;
+    landingData.Data = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::EFFECT_LANDING);
+    landingData.pos = VGet(0.0f, 0.0f, 0.0f);
+    landingData.rot = VGet(0.0f, 0.0f, 0.0f);
+    landingData.scl = VGet(1.0f, 1.0f, 1.0f);
+    landingData.speed = 1.0f;
+    effect_[EFFECT::EFFECT_LANDING] = landingData;
 }
 
 void EffectManager::Add(const EFFECT _effect, const int _data)
 {
-  /*  EFFECT_DATA newData;
-    newData.Data = _data;
-    newData.pos = VGet(0.0f, 0.0f, 0.0f);
-    newData.rad = VGet(0.0f, 0.0f, 0.0f);
-    newData.scl = VGet(1.0f, 1.0f, 1.0f);
-    newData.speed = 1.0f;
-
-    effect_[_effect] = newData;*/
+    
 }
 
 void EffectManager::Play(const EFFECT _effect, const VECTOR _pos, const VECTOR _rot, const VECTOR _scl, float _speed)
@@ -76,37 +67,105 @@ void EffectManager::Play(const EFFECT _effect, const VECTOR _pos, const VECTOR _
 
     // 引数のパラメータを保持
     it->second.pos = _pos;
-    it->second.rad = _rot;
+    it->second.rot = _rot;
     it->second.scl = _scl;
     it->second.speed = _speed;
 
-   
     int playHandle = PlayEffekseer3DEffect(it->second.Data);
 
-    // 再生成功時各種パラメータを設定する
+    // 再生成功時、各種パラメータを設定する
     if (playHandle != -1)
     {
-        SetPosPlayingEffekseer3DEffect(playHandle, _pos.x, _pos.y, _pos.z);
-        SetRotationPlayingEffekseer3DEffect(playHandle, _rot.x, _rot.y, _rot.z);
-        SetScalePlayingEffekseer3DEffect(playHandle, _scl.x, _scl.y, _scl.z);
-        SetSpeedPlayingEffekseer3DEffect(playHandle, _speed);
+        SetPosPlayingEffekseer3DEffect(playHandle, it->second.pos.x, it->second.pos.y, it->second.pos.z);
+       
+        SetRotationPlayingEffekseer3DEffect(playHandle, UtilityMath::Deg2RadD(it->second.rot.x), UtilityMath::Deg2RadD(it->second.rot.y), UtilityMath::Deg2RadD(it->second.rot.z));
+       
+        SetScalePlayingEffekseer3DEffect(playHandle, it->second.scl.x, it->second.scl.y, it->second.scl.z);
+        SetSpeedPlayingEffekseer3DEffect(playHandle, it->second.speed);
+
+        PLAYING_EFFECT activeEffect;
+        activeEffect.effectId = _effect;
+        activeEffect.playHandle = playHandle;
+        playingList_.push_back(activeEffect);
     }
 }
 
 bool EffectManager::IsPlaying(EFFECT _effect)
 {
-    auto it = effect_.find(_effect);
-    if (it == effect_.end())
+    for (const auto& active : playingList_)
     {
-        return false;
+        if (active.effectId == _effect)
+        {
+            if (IsEffekseer3DEffectPlaying(active.playHandle) == 0)
+            {
+                return true;
+            }
+        }
     }
-
-   
-    // 戻り値は「0:再生中、-1:再生終了」なので、0のときが true になります
-    if (IsEffekseer3DEffectPlaying(it->second.Data) == 0)
-    {
-        return true;
-    }
-
     return false;
+}
+
+void EffectManager::Stop(EFFECT _effect)
+{
+    for (const auto& active : playingList_)
+    {
+        if (active.effectId == _effect)
+        {
+            StopEffekseer3DEffect(active.playHandle);
+        }
+    }
+}
+
+void EffectManager::UpdatePos(const EFFECT _effect, const VECTOR _pos)
+{
+    for (const auto& active : playingList_)
+    {
+        if (active.effectId == _effect)
+        {
+            SetPosPlayingEffekseer3DEffect(active.playHandle, _pos.x, _pos.y, _pos.z);
+        }
+    }
+}
+
+void EffectManager::UpdateRot(const EFFECT _effect, const VECTOR _rot)
+{
+   
+    for (const auto& active : playingList_)
+    {
+        if (active.effectId == _effect)
+        {
+            SetRotationPlayingEffekseer3DEffect(active.playHandle, UtilityMath::Deg2RadD(_rot.x), UtilityMath::Deg2RadD(_rot.y), UtilityMath::Deg2RadD(_rot.z));
+        }
+    }
+}
+
+void EffectManager::UpdateScl(const EFFECT _effect, const VECTOR _scl)
+{
+    for (const auto& active : playingList_)
+    {
+        if (active.effectId == _effect)
+        {
+            SetScalePlayingEffekseer3DEffect(active.playHandle, _scl.x, _scl.y, _scl.z);
+        }
+    }
+}
+
+// =========================================================================
+
+void EffectManager::Update(void)
+{
+    UpdateEffekseer3D();
+
+    
+    playingList_.erase(
+        std::remove_if(playingList_.begin(), playingList_.end(), [](const PLAYING_EFFECT& active) {
+            return IsEffekseer3DEffectPlaying(active.playHandle) != 0;
+            }),
+        playingList_.end()
+    );
+}
+
+void EffectManager::Draw(void)
+{
+    DrawEffekseer3D();
 }

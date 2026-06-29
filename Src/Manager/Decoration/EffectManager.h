@@ -1,6 +1,7 @@
 #pragma once
 #include <DxLib.h>
 #include <unordered_map>
+#include <vector>
 #include <mutex>
 
 class EffectManager
@@ -11,6 +12,7 @@ public:
 	{
 		NONE,
 		EFFECT_WAVE,
+		EFFECT_LANDING,
 
 	};
 	/// @brief エフェクトのリソースデータ構造体
@@ -18,10 +20,17 @@ public:
 	{
 		int Data;
 		VECTOR pos;
-		VECTOR rad;
+		VECTOR rot;
 		VECTOR scl;
 		float speed;
 	};
+	struct PLAYING_EFFECT
+	{
+		EFFECT effectId;
+		int playHandle;
+	};
+
+
 	/// @brief インスタンスを明示的に生成
 	/// @param void 
 	static void CreateInstance(void);
@@ -41,11 +50,11 @@ public:
 
 
 	/// @brief 3Dエフェクトの再生
-	/// @param _effect再生するエフェクトのID
-	/// @param _pos再生させる座標
-	/// @param _rot再生させる角度
-	/// @param _scl再生させる大きさ
-	/// @param _speed再生速度
+	/// @param _effect 再生するエフェクトのID
+	/// @param _pos 再生させる座標
+	/// @param _rot 再生させる角度
+	/// @param _scl 再生させる大きさ
+	/// @param _speed 再生速度
 	void Play(const EFFECT _effect, const VECTOR _pos, const VECTOR _rot, const VECTOR _scl ,float _speed);
 
 	/// @brief エフェクトが再生中か確認
@@ -56,6 +65,21 @@ public:
 	/// @brief インスタンスの破棄
 	/// @param void 
 	void  DestroyInstance(void);
+
+	/// @brief ポジション更新
+	/// @param _pos 変更座標
+	void UpdatePos(const EFFECT _effect, const VECTOR _pos);
+
+	/// @brief 角度更新
+	/// @param _rot 変更角度
+	void UpdateRot(const EFFECT _effect, const VECTOR _rot);
+
+	/// @brief サイズ更新
+	/// @param _scl 変更サイズ
+	void UpdateScl(const EFFECT _effect, const VECTOR _scl);
+
+	/// @brief 指定したエフェクトIDの再生をすべて強制停止する
+	void Stop(EFFECT _effect);
 
 	/// @brief 全エフェクトの時間更新処理
 	void Update(void);
@@ -68,6 +92,8 @@ private:
 	static EffectManager* instance_; // シングルトンインスタンス
 
 	std::unordered_map<EFFECT, EFFECT_DATA> effect_; // サウンドハンドルの管理マップ
+	std::vector<PLAYING_EFFECT> playingList_;
+
 
 	EffectManager(void) = default;
 	~EffectManager(void) = default;

@@ -57,6 +57,7 @@ public:
 
 		/* エフェクト */
 		EFFECT_WAVE,
+		EFFECT_LANDING,
 		/* 映像 */
 
 		/* BGM */

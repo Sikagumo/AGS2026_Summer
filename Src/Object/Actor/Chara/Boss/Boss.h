@@ -144,6 +144,9 @@ private:
 	static constexpr float JUMP_MAX_UP = POW_JUMP_INIT + 500.0f;
 	static constexpr float MOVE_SPEED_INIT = 20.0f;
 	static constexpr float POW_JUMP_DOUN = -50.0f;
+	static constexpr VECTOR WAVE_SCL = { 1.0f,50.0f,1.0f };
+	static constexpr VECTOR WAVE_SCL_UP = { 4.0f,0.0f,4.0f };
+	static constexpr VECTOR LANDING_SCL = { 100.0f,50.0f,100.0f };
 
 	//ロードアッタク
 	static constexpr float WHEEL_ROT = 10.0f;
@@ -204,6 +207,7 @@ private:
 	bool isLanging_;				//着地の際の音を鳴らすかのフラグ
 	bool isMGFire_;					//MGの発射音を鳴らすかのフラグ
 	bool isRoadFire_;				//走行音を鳴らすかのフラグ
+	VECTOR currentWaveScl;
 
 	//攻撃関連
 	int jumpCount_;

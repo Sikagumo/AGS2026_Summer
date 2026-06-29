@@ -438,6 +438,9 @@ void Boss::UpdateProcess(void)
 
 	stateUpdate_();
 
+	currentWaveScl = VAdd(currentWaveScl, WAVE_SCL_UP);
+	EffectManager::GetInstance().UpdateScl(EffectManager::EFFECT::EFFECT_WAVE, currentWaveScl);
+
 	BossTransformUpdate();
 	
 	wave_->SetPos(transform_.pos);
@@ -473,7 +476,7 @@ void Boss::UpdateAttack(void)
 
 	transformBody_.pos = MV1GetFramePosition(transform_.modelId, JOINT_FEET_BODY);
 	int randomAttack = static_cast<int>(UtilityMath::RandRangeF(0.0f, static_cast<float>(ATTACK_TYPE::MAX)));
-	ATTACK_TYPE attackSelect = /*ATTACK_TYPE::CANNON;*/static_cast<ATTACK_TYPE>(randomAttack);
+	ATTACK_TYPE attackSelect = ATTACK_TYPE::JUMP;//static_cast<ATTACK_TYPE>(randomAttack);
 
 	switch (attackSelect)
 	{
@@ -511,7 +514,9 @@ void Boss::UpdateJump(void)
 	{
 		wave_->SetIsAttack(true);
 		isLanging_ = true;
-		EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_WAVE, transform_.pos, { 0.0f,0.0f,0.0f }, { 1.0f,1.0f,1.0f }, 1.0f);
+		currentWaveScl = WAVE_SCL;
+		EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_WAVE, transform_.pos, currentWaveScl, LANDING_SCL, 1.0f);
+		EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_LANDING, transform_.pos, { 0.0f,0.0f,0.0f }, LANDING_SCL, 1.0f);
 		ChangeState(STATE::IDLE);
 	}
 	else if (isJump_)

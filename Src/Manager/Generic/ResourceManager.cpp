@@ -94,7 +94,7 @@ void ResourceManager::Initialize(void)
 
 	/* エフェクト */
 	_SetResource(LOAD_TYPE::EFFECT, SRC::EFFECT_WAVE, PATH_EFFECT + "BossAttack/AttackWave.efkefc");
-
+	_SetResource(LOAD_TYPE::EFFECT, SRC::EFFECT_LANDING, PATH_EFFECT + "BossAttack/Landing.efkefc");
 
 
 
