@@ -215,10 +215,10 @@ void Camera::SetLockOnTargets(LOCKON_TARGET _target, const VECTOR& _targetPos, i
 				targetsParam_.erase(_target);
 			}
 
+			// ターゲット無効時、再抽選
 			if (lockOnTarget_ == _target)
 			{
-				lockOnTarget_ = LOCKON_TARGET::NONE;
-				isLockOn_ = false;
+				LockOnChoice();
 			}
 			return;
 		}
@@ -271,7 +271,6 @@ void Camera::LockOnChoice(void)
 
 	if (lockTarget == LOCKON_TARGET::NONE)
 	{
-		isLockOn_ = false;
 		return;
 	}
 
@@ -439,10 +438,6 @@ void Camera::SetBeforeDrawFollow(void)
 	if (!isLockOn_)
 	{
 		ProcessRot(true);
-	}
-	else if(!IsTargetSpace())
-	{
-		SetIsLockOn(false);
 	}
 
 	// 追従対象との相対位置を同期
@@ -689,20 +684,4 @@ VECTOR Camera::EasingChangeTarget(const VECTOR& _fromVec, const VECTOR& _toVec, 
 	return VGet(_fromVec.x + (_toVec.x - _fromVec.x) * easedT,
 				_fromVec.y + (_toVec.y - _fromVec.y) * easedT,
 				_fromVec.z + (_toVec.z - _fromVec.z) * easedT);
-}
-
-bool Camera::IsTargetSpace(void)
-{
-	if (lockOnTarget_ == LOCKON_TARGET::NONE) { return false; }
-
-	VECTOR posFollow = VGet(targetsParam_.at(lockOnTarget_)->pos.x, 0.0f, targetsParam_.at(lockOnTarget_)->pos.z);
-	VECTOR posCamera = VGet(transform_.pos.x, 0.0f, transform_.pos.z);
-
-	// 最も近い対象範囲内にいる対象を追尾
-	float sizeXZ = std::abs(VSize(VSub(posFollow, posCamera)));
-	if (sizeXZ <= POS_SPACE_MAX && sizeXZ >= POS_SPACE_MIN)
-	{
-		return true;
-	}
-	return false;
 }

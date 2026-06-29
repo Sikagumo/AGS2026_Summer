@@ -51,7 +51,7 @@ public:
 	bool IsActiveAction(void)const { return (curActionNum_ != -1); };
 
 	/// @brief Œ»İ‚Ìs“®”Ô†‚ğæ“¾
-	int GetCurActionNum(void) { return curActionNum_; }
+	int GetCurActionNum(void)const { return curActionNum_; }
 
 	/// @brief s“®‚ªI‚í‚Á‚Ä‚¢‚é‚©”Û‚©
 	bool IsEndActionActive(void)const { return (curTimeActionActive_ <= 0.0f); };

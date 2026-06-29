@@ -43,14 +43,24 @@ void PBulletBig::InitPost(void)
 
 void PBulletBig::UpdatePost(void)
 {
-	if (isScaleUp_ && radius_ < radiusMax_)
+	if (bulletState_ == BULLET_STATE::BLAST)
 	{
+		// ’…’eŽžA‘¦Á–Å‚³‚¹‚é
+		activePower_ = 0;
+		bulletState_ = BULLET_STATE::INACTIVE;
+		return;
+	}
+
+
+	if (isScaleUp_ && radiusBullet_ < radiusMax_)
+	{
+		/* ’eŠÛŠg‘åˆ— */
 		scaleUpTime_ += timeManager_.GetDeltaTime();
 
 		float term = (scaleUpTime_ / RADIUS_DURATION);
 		term = std::clamp(term, 0.0f, 1.0f);
 
-		radius_ += ((radiusMax_ - radius_) * (term * term));
+		radiusBullet_ += ((radiusMax_ - radiusBullet_) * (term * term));
 		transform_.SetScale((scaleMax_ * (term * term)));
 	}
 }
@@ -65,7 +75,7 @@ void PBulletBig::ChangeBulletStateProc(void)
 
 void PBulletBig::SetParam(void)
 {
-	radius_ = RADIUS_BIG;
+	radiusBullet_ = RADIUS_BIG;
 	radiusMax_ = RADIUS_BIG + (RADIUS_INCREMENT * shotCnt_);
 
 	shotSpeedXZ_ = SHOT_SPEED_BIG_XZ;

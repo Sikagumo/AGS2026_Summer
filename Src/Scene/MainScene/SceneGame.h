@@ -1,6 +1,7 @@
 #pragma once
 #include "../SceneBase.h"
 #include <memory>
+#include <DxLib.h>
 #include <vector>
 #include "../../Object/Actor/Chara/Player/Player.h"
 #include "../../Object/Actor/Chara/Boss/Boss.h"
@@ -38,6 +39,9 @@ public:
     void Release(void) override;
 
 private:
+
+    const std::vector<VECTOR> PLAYER_INIT_POS =
+    { { 0,0,-1000.0f },{ 0,0,0 },{ 0,0,0 },{ 0,0,0 } };
 
     std::vector<std::unique_ptr<Player>> players_;
 

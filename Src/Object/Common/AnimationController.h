@@ -84,7 +84,7 @@ public:
 	float GetPlayPointRate(void);
 
 	/// @brief 再生中のアニメーション番号取得
-	int GetPlayType(void) { return playType_; };
+	int GetPlayType(void)const { return playType_; };
 
 
 	/// @brief アニメーション停止処理
@@ -96,7 +96,7 @@ public:
 	void SetAnimStep(float _step = 0.0f);
 
 	/// @brief 停止しているか否か
-	bool isStop(void) { return isStop_; };
+	bool isStop(void)const { return isStop_; };
 
 	/// @brief 再生位置変更
 	/// @param rate 再生位置の割合(0.0f～1.0f)

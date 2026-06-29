@@ -30,6 +30,7 @@ public:
 
 		/* モデル */
 		MODEL_SKYDOME,
+
 		MODEL_PLAYER_HUMAN,
 		MODEL_PLAYER_DOG,
 		MODEL_PLAYER_MONKEY,
@@ -49,6 +50,8 @@ public:
 		MODEL_BOSS_BULLET,
 
 		MODEL_STAGE,
+		MODEL_STAGE_COLLISION,
+		MODEL_TREE_POSITION,
 
 		/* 外部アニメーション */
 		ANIM_IDLE,

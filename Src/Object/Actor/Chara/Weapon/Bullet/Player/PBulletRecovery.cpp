@@ -42,7 +42,7 @@ void PBulletRecovery::InitPost(void)
 
 void PBulletRecovery::UpdatePost(void)
 {
-	if (isScaleUp_ && radius_ < radiusMax_)
+	if (isScaleUp_ && radiusBullet_ < radiusMax_)
 	{
 		constexpr float RADIUS_DURATION = 1.0f;
 		scaleUpTime_ += timeManager_.GetDeltaTime();
@@ -50,9 +50,13 @@ void PBulletRecovery::UpdatePost(void)
 		float term = (scaleUpTime_ / RADIUS_DURATION);
 		term = std::clamp(term, 0.0f, 1.0f);
 
-		radius_ += ((radiusMax_ - radius_) * (term * term));
+		radiusBullet_ += ((radiusMax_ - radiusBullet_) * (term * term));
 		transform_.SetScale((scaleMax_ * (term * term)));
 	}
+}
+
+void PBulletRecovery::PreActiveProcess(void)
+{
 }
 
 void PBulletRecovery::ChangeBulletStateProc(void)
@@ -65,7 +69,7 @@ void PBulletRecovery::ChangeBulletStateProc(void)
 
 void PBulletRecovery::SetParam(void)
 {
-	radius_ = RADIUS_BIG;
+	radiusBullet_ = RADIUS_BIG;
 	radiusMax_ = RADIUS_BIG + (RADIUS_INCREMENT * shotCnt_);
 
 	shotSpeedXZ_ = SHOT_SPEED_BIG_XZ;

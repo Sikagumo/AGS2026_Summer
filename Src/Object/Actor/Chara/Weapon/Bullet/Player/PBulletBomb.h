@@ -1,17 +1,17 @@
 #pragma once
 #include "PBulletBase.h"
 
-class PBulletInterfere : public PBulletBase
+class PBulletBomb : public PBulletBase
 {
 public:
 
-	PBulletInterfere(void);
+	PBulletBomb(void);
 
-	~PBulletInterfere(void)override = default;
+	~PBulletBomb(void)override = default;
 
 	void Load(void)override;
 
-	void PreActiveProcess(void)override { isScaleUp_ = true; };
+	void PreActiveProcess(void)override;
 
 	void BlastAction(void)override;
 
@@ -27,13 +27,5 @@ protected:
 	void ChangeBulletStateProc(void)override;
 
 	void SetParam(void)override;
-
-private:
-
-	float timeEndActive_;
-
-	bool isScaleUp_;
-
-	float scaleUpTime_;
 };
 

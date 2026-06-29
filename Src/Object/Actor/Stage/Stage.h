@@ -37,6 +37,9 @@ protected:
 
 private:
 
+	Transform collisionTrans_;
+
+
 	// œŠOƒtƒŒ[ƒ€–¼Ì
 	const std::vector<std::string> EXCLUDE_FRAME_NAMES = {
 		"Mush", "Grass",
