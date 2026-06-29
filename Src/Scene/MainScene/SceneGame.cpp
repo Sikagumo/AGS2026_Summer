@@ -11,6 +11,7 @@
 #include "../../Camera/Camera.h"
 #include "../../Utility/UtilityMath.h"
 #include "../../Application.h"
+#include "../../Manager/Decoration/EffectManager.h"
 #include "SceneTitle.h"
 #include "SceneResult.h"
 
@@ -72,6 +73,8 @@ void SceneGame::Initialize(void)
 	camera->ChangeMode(Camera::MODE::FOLLOW);
 	camera->SetFollow(&players_.at(0)->GetTransform());
 
+	//EffectManager::GetInstance().Initialize();
+
 	for (auto& player : players_)
 	{
 		player->Init();
@@ -88,6 +91,7 @@ void SceneGame::Update(void)
 	auto& sound = SoundManager::GetInstance();
 	auto& input = InputManager::GetInstance();
 	auto& camera = SceneManager::GetInstance().GetCamera();
+	auto& effect = EffectManager::GetInstance();
 	auto loader = Loading::GetInstance();
 
 	if (loader->IsLoading()) { return; }
@@ -103,7 +107,11 @@ void SceneGame::Update(void)
 
 	DamageProcess();
 
+	
+
 	UpdateGameTime();
+
+	effect.Update();
 
 	// ボスHPが０の時、ゲームクリア
 	if (boss_->GetHP() <= 0 && gameTime_ > 0.0f)
@@ -171,12 +179,15 @@ void SceneGame::UpdateGameTime(void)
 
 void SceneGame::Draw(void)
 {
-	if (Loading::GetInstance()->IsLoading()) { return; }
+	auto& effect = EffectManager::GetInstance();
+
 	stage_->Draw();
 
 	players_.at(0)->Draw();
 
 	boss_->Draw();
+
+	effect.Draw();
 
 	DrawHpBer();
 

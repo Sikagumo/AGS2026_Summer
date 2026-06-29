@@ -55,8 +55,9 @@ void MGBase::UpdateCommon(void)
         bullet->Update();
         
     }
-
-    stateUpdate_();
+    
+        stateUpdate_();
+  
 }
 
 void MGBase::LookPlayer(void)

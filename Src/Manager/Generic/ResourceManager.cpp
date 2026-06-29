@@ -108,6 +108,11 @@ void ResourceManager::Initialize(void)
 	_SetResource(LOAD_TYPE::IMAGES, SRC::IMGS_RESULT, PATH_IMAGE + "EndTxt.png"
 				, imagesAllNum, imagesNumX, imagesNumY);
 
+	/* エフェクト */
+	_SetResource(LOAD_TYPE::EFFECT, SRC::EFFECT_WAVE, PATH_EFFECT + "BossAttack/AttackWave.efkefc");
+
+
+
 
 	/* モデル */
 	_SetResource(LOAD_TYPE::MODEL, SRC::MODEL_SKYDOME, PATH_MODEL + "SkyDome/SkyDome.mv1");

@@ -33,6 +33,7 @@ public:
 		JUMP,
 		MG,
 		ROAD,
+		CANNON,
 		MAX,
 	};
 

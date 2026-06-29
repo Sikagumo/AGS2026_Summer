@@ -10,6 +10,7 @@
 #include "Manager/Generic/KeyConfInputManager.h"
 #include "Manager/Decoration/SoundManager.h"
 #include "Manager/System/NetManager.h"
+#include "Manager/Decoration/EffectManager.h"
 #include "FPS/FpsController.h"
 
 
@@ -93,9 +94,13 @@ void Application::Init(void)
 
 	ResourceManager::CreateInstance();
 
-
 	// シーン管理初期化
 	SceneManager::CreateInstance();
+
+	EffectManager::CreateInstance();
+	
+	
+
 
 }
 
@@ -107,7 +112,7 @@ void Application::Run(void)
 	InputTextManager& inputTextManager = InputTextManager::GetInstance();
 	NetManager& netManager = NetManager::GetInstance();
 
-
+	
 	// ゲームループ
 	while (ProcessMessage() == 0)
 	{

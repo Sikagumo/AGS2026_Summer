@@ -3,6 +3,7 @@
 #include "../../../../Manager/Generic/SceneManager.h"
 #include "../../../../Manager/Decoration/SoundManager.h"
 #include "../../../../Manager/System/TimeManager.h"
+#include "../../../../Manager/Decoration/EffectManager.h"
 #include "../../../../Utility/UtilityMath.h"
 #include "../../../../Utility/MatrixUtility.h"
 #include "../../../../Camera/Camera.h"
@@ -147,6 +148,7 @@ void Boss::Load(void)
 	SoundManager::GetInstance().Add(SoundManager::TYPE::SE, SoundManager::SOUND::SE_BOSS_LANDING, ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::SE_BOSS_LANDING));
 
 	SoundManager::GetInstance().Add(SoundManager::TYPE::SE, SoundManager::SOUND::SE_ROAD, ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::SE_ROAD));
+
 }
 
 void Boss::InitTransform(void)
@@ -266,6 +268,8 @@ void Boss::InitAnimation(void)
 		animation_->AddInternal(i, 20.0f);
 	}
 	animation_->Play(static_cast<int>(ANIM_TYPE::DIR));
+
+	//EffectManager::GetInstance().Add(EffectManager::EFFECT::EFFECT_WAVE, ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::EFFECT_WAVE));
 }
 
 
@@ -291,7 +295,6 @@ void Boss::InitPost(void)
 	stateChanges_.emplace(static_cast<int>(STATE::ROADATTACK), std::bind(&Boss::ChangeStateRoadAttack, this));
 	stateChanges_.emplace(static_cast<int>(STATE::END), std::bind(&Boss::ChangeStateEnd, this));
 	ChangeState(STATE::IDLE);
-
 	
 }
 
@@ -470,7 +473,7 @@ void Boss::UpdateAttack(void)
 
 	transformBody_.pos = MV1GetFramePosition(transform_.modelId, JOINT_FEET_BODY);
 	int randomAttack = static_cast<int>(UtilityMath::RandRangeF(0.0f, static_cast<float>(ATTACK_TYPE::MAX)));
-	ATTACK_TYPE attackSelect = /*ATTACK_TYPE::ROAD;*/static_cast<ATTACK_TYPE>(randomAttack);
+	ATTACK_TYPE attackSelect = /*ATTACK_TYPE::CANNON;*/static_cast<ATTACK_TYPE>(randomAttack);
 
 	switch (attackSelect)
 	{
@@ -489,6 +492,12 @@ void Boss::UpdateAttack(void)
 		ChangeState(STATE::ROADATTACK);
 		break;
 
+	case ATTACK_TYPE::CANNON:
+		weaponCannonL_->ChangeState(WeaponCannon::STATE::ATTACK);
+		weaponCannonR_->ChangeState(WeaponCannon::STATE::ATTACK);
+		ChangeState(STATE::IDLE);
+		break;
+
 	default:
 		break;
 	}
@@ -502,6 +511,7 @@ void Boss::UpdateJump(void)
 	{
 		wave_->SetIsAttack(true);
 		isLanging_ = true;
+		EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_WAVE, transform_.pos, { 0.0f,0.0f,0.0f }, { 1.0f,1.0f,1.0f }, 1.0f);
 		ChangeState(STATE::IDLE);
 	}
 	else if (isJump_)
