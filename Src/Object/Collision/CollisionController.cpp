@@ -188,7 +188,8 @@ bool CollisionController::CheckCollision(const ColliderBase* _colliderA, const C
 	{
 		return CollisionLine::CheckLineVsModel(_colliderB, _colliderA, _outInfo);
 	}
-	else if (shapeA == SHAPE::CAPSULE && shapeB == SHAPE::MODEL)
+	
+	if (shapeA == SHAPE::CAPSULE && shapeB == SHAPE::MODEL)
 	{
 		return CollisionCapsule::CheckCapsuleVsModel(_colliderA, _colliderB, _outInfo);
 	}
@@ -196,7 +197,8 @@ bool CollisionController::CheckCollision(const ColliderBase* _colliderA, const C
 	{
 		return CollisionCapsule::CheckCapsuleVsModel(_colliderB, _colliderA, _outInfo);
 	}
-	else if (shapeA == SHAPE::SPHERE && shapeB == SHAPE::MODEL)
+	
+	if (shapeA == SHAPE::SPHERE && shapeB == SHAPE::MODEL)
 	{
 		return CollisionSphere::CheckSphereVsModel(_colliderA, _colliderB, _outInfo);
 	}
