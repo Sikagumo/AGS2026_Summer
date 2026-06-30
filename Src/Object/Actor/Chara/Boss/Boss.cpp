@@ -657,7 +657,7 @@ void Boss::DrawPre(void)
 
 	wave_->Draw();
 
-	CharaBase::DrawPre();
+	CharaBase::DrawShadowRound(200.0f);
 
 #ifdef _DEBUG
 

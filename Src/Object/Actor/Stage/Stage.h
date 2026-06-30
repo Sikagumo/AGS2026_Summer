@@ -24,6 +24,8 @@ public:
 
 	void Draw(void)override;
 
+	VECTOR GetPos(void) { return transform_.pos; }
+
 protected:
 
 	void InitTransform(void)override;
