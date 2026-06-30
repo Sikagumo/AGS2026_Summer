@@ -19,6 +19,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Src\ImGUI\IParameterEditor.cpp" />
+    <ClCompile Include="Src\ImGUI\ImGuiWrapper.cpp" />
     <ClCompile Include="Src\Shader\ShaderPixel\ShaderWave.cpp" />
     <ClCompile Include="Src\Manager\Decoration\EffectManager.cpp" />
     <ClCompile Include="Src\Object\Actor\Chara\Weapon\Bullet\Boss\BBulletCannon.cpp" />
@@ -100,6 +102,8 @@
     <ClCompile Include="Src\Object\Actor\Chara\Weapon\BossWeapon\MG\WeaponMGR.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Src\ImGUI\IParameterEditor.h" />
+    <ClInclude Include="Src\ImGUI\ImGuiWrapper.h" />
     <ClInclude Include="Src\Shader\ShaderParameters.h" />
     <ClInclude Include="Src\Shader\ShaderPixel\ShaderWave.h" />
     <ClInclude Include="Src\Manager\Decoration\EffectManager.h" />

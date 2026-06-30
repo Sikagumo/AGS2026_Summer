@@ -11,6 +11,7 @@
 #include "Manager/Decoration/SoundManager.h"
 #include "Manager/System/NetManager.h"
 #include "Manager/Decoration/EffectManager.h"
+#include "ImGUI/ImGuiWrapper.h"
 #include "FPS/FpsController.h"
 
 
@@ -98,10 +99,10 @@ void Application::Init(void)
 	SceneManager::CreateInstance();
 
 	EffectManager::CreateInstance();
-	
-	
 
-
+	// ImGUI‚Ì‰Šú‰»
+	ImGuiWrapper::CreateInstance();
+	
 }
 
 void Application::Run(void)
@@ -125,6 +126,8 @@ void Application::Run(void)
 			break;
 		}
 
+		ImGuiWrapper::GetInstance().Update();
+
 		ClearDrawScreen();
 
 		netManager.Update();
@@ -134,6 +137,8 @@ void Application::Run(void)
 		sceneManager.Update();
 
 		sceneManager.Draw();
+
+		ImGuiWrapper::GetInstance().Draw();
 		// •½‹ÏFPS•`‰æ
 		//fpsController_->Draw();
 
@@ -157,6 +162,8 @@ void Application::DestroyInstance(void)
 
 	// ƒV[ƒ“ŠÇ—‰ğ•ú
 	SceneManager::GetInstance().DestroyInstance();
+
+	ImGuiWrapper::GetInstance().Destroy();
 
 	SetUseASyncLoadFlag(false);
 
