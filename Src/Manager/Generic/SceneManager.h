@@ -64,6 +64,7 @@ private:
     std::list<std::shared_ptr<SceneBase>> scenes_; // シーンを保持する（スタック構造）
     std::mutex sceneMutex_;                        // シーンアクセスを保護するミューテックス
     std::shared_ptr<SceneBase> nextScene_;         // 次に遷移するシーン
+    std::shared_ptr<SceneBase> oldScene_;          // 解放対象の古いシーン
     bool isSceneChanging_;                         // シーン切り替え中フラグ
     bool isFirstFrame_;                            // 最初のフレームかどうかのフラグ
 
