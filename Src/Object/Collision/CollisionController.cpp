@@ -412,7 +412,10 @@ void CollisionController::UpdateCollisionPars(void)
 	size_t actorCount = actors_.size();
 
 	// 判定対象が2つ未満なら処理終了
-	if (actorCount < 2) { return; }
+	if (actorCount < 2)
+	{
+		return;
+	}
 
 	// アクター間の総当たり判定
 	for (size_t i = 0; i < actorCount; ++i)
@@ -427,16 +430,24 @@ void CollisionController::UpdateCollisionPars(void)
 			bool isStageCollision = false;
 
 			// アクターAのコライダーの中にSTAGEがあるかチェック
-			for (const auto& [idA, colA] : collidersA) 
+			for (const auto& [idA, colA] : collidersA)
 			{
-				if (colA->GetCollisionTag() == ColliderBase::TAG::STAGE) { isStageCollision = true; break; }
+				if (colA->GetCollisionTag() == ColliderBase::TAG::STAGE)
+				{
+					isStageCollision = true;
+					break;
+				}
 			}
 
 			// アクターBのコライダーの中にSTAGEがあるかチェック
 			const auto& collidersB = actorB->GetOwnColliders();
 			for (const auto& [idB, colB] : collidersB)
 			{
-				if (colB->GetCollisionTag() == ColliderBase::TAG::STAGE) { isStageCollision = true; break; }
+				if (colB->GetCollisionTag() == ColliderBase::TAG::STAGE)
+				{
+					isStageCollision = true;
+					break;
+				}
 			}
 
 			// どちらもステージではない場合のみ、距離によるカリングを行う
@@ -450,17 +461,36 @@ void CollisionController::UpdateCollisionPars(void)
 				float distSquare = (distanceX * distanceX) + (distanceY * distanceY) + (distanceZ * distanceZ);
 
 				// 一定距離以上離れている場合は、詳細な判定をスキップ
-				if (distSquare > cullingDistSquare_) { continue; }
-			}
-			
-			// コライダー同士の詳細判定
-			for (auto& [idA, colA] : collidersA)
-			{
-				if (!colA->IsActive()) { continue; }
-
-				for (auto& [idB, colB] : collidersB)
+				if (distSquare > cullingDistSquare_)
 				{
-					if (!colB->IsActive()) { continue; }
+					continue;
+				}
+			}
+
+			// コライダー同士の詳細判定
+			for (const auto& [idA, colA] : collidersA)
+			{
+				if (colA == nullptr)
+				{
+					continue;
+				}
+
+				if (!colA->IsActive())
+				{
+					continue;
+				}
+
+				for (const auto& [idB, colB] : collidersB)
+				{
+					if (colB == nullptr)
+					{
+						continue;
+					}
+
+					if (!colB->IsActive())
+					{
+						continue;
+					}
 
 					// 衝突タグによる判定可否の確認
 					if (CanCollide(static_cast<int>(colA->GetCollisionTag()),
@@ -493,7 +523,6 @@ void CollisionController::UpdateCollisionPars(void)
 							{
 								ResolveCollision(actorA, actorB, info);
 							}
-
 						}
 					}
 				}

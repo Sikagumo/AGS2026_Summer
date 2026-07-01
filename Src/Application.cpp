@@ -128,13 +128,18 @@ void Application::Run(void)
 
 		ImGuiWrapper::GetInstance().Update();
 
-		ClearDrawScreen();
+		bool isChanging = SceneManager::GetInstance().IsSceneChanging();
 
-		netManager.Update();
+		sceneManager.Update();
+
+		if (!isChanging)
+		{
+			ClearDrawScreen();
+		}
 		inputTextManager.Update();
 		inputManager.Update();
 		KeyConfInputManager::GetInstance().Update();
-		sceneManager.Update();
+
 
 		sceneManager.Draw();
 

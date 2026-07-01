@@ -22,6 +22,7 @@ void Stage::Draw(void)
 #ifdef _DEBUG
 	MV1DrawModel(collisionTrans_.modelId);
 	DrawFormatString(10, 120, 0xffffff, "ステージの座標：%f,%f,%f", transform_.pos.x, transform_.pos.y, transform_.pos.z);
+	
 #endif
 }
 
@@ -59,6 +60,12 @@ void Stage::InitCollider(void)
 	ownColliders_.emplace(static_cast<int>(ColliderBase::SHAPE::MODEL), colModel);
 
 	colModel->SetTriger(false);
+
+	ColliderModel* wallCollider = new ColliderModel(ColliderBase::TAG::WALL, &collisionTrans_);
+
+	// 壁のコライダ割り当て
+	ownColliders_.emplace(static_cast<int>(ColliderBase::TAG::WALL), wallCollider);
+	wallCollider->SetTriger(false);
 
 	CollisionController::GetInstance().RegisterActor(this);
 }
