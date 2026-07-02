@@ -78,7 +78,7 @@ void SceneGame::EndLoad(void)
 void SceneGame::Initialize(void)
 {
 
-	if (Loading::GetInstance()->IsLoading()) { return; }
+	//if (Loading::GetInstance()->IsLoading()) { return; }
 
 	// マウスを表示しない設定にする
 	SetMouseDispFlag(FALSE);

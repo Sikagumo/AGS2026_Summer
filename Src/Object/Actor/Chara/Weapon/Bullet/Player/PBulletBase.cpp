@@ -34,8 +34,7 @@ void PBulletBase::InitCollider(void)
 						  , bullet);
 
 	ColliderSphere* blast = new ColliderSphere(ColliderBase::TAG::PLAYER_BLAST, &transform_
-		, UtilityMath::VECTOR_ZERO, radiusBullet_);
-	CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::PLAYER_BLAST, false);
+									, UtilityMath::VECTOR_ZERO, radiusBullet_);
 	ownColliders_.emplace(static_cast<int>(COLLISION_TYPE::BLAST)
 						  , blast);
 }
@@ -101,20 +100,20 @@ void PBulletBase::Update(void)
 
 void PBulletBase::Draw(void)
 {
-	if (!isVisible_) { return; }
-
 	constexpr int SPHERE_DIV = 16;
 
-	if (transform_.modelId == -1)
+	if (transform_.modelId == -1
+		&& isVisible_)
 	{
 		DrawSphere3D(transform_.pos, radiusBullet_, SPHERE_DIV, 0xffffff, 0xffffff, true);
 	}
-#ifdef DEBUG
-	if (radiusBlast_ > 0.0f)
+
+#ifdef _DEBUG
+	if (bulletState_ == BULLET_STATE::BLAST)
 	{
 		DrawSphere3D(transform_.pos, radiusBlast_, SPHERE_DIV, 0xff0000, 0xffffff, false);
 	}
-	
+
 #endif
 }
 
@@ -164,9 +163,10 @@ void PBulletBase::Shot(const VECTOR& _shotDir)
 	transform_.Update();
 
 	// “–‚½‚è”»’è“o˜^
-	ownColliders_.at(0)->SetRadius(radiusBullet_);
+	ownColliders_.at(static_cast<int>(COLLISION_TYPE::BULLET))->SetRadius(radiusBullet_);
 	CollisionController::GetInstance().RegisterActor(this);
 	CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::PLAYER_BULLET, true);
+	CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::PLAYER_BLAST, false);
 }
 
 bool PBulletBase::IsAlive(void) const
