@@ -83,6 +83,7 @@
     <ClCompile Include="Src\Object\Actor\Chara\Weapon\BossWeapon\Cannon\WeaponCannon.cpp" />
     <ClCompile Include="Src\Object\Actor\Chara\Weapon\BossWeapon\MG\WeaponMGL.cpp" />
     <ClCompile Include="Src\Object\Actor\Chara\Weapon\BossWeapon\MG\WeaponMGR.cpp" />
+    <ClCompile Include="Src\Object\Actor\Chara\Weapon\Bullet\Boss\BBulletMissile.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\Shader\ShaderParameters.h" />
@@ -167,6 +168,7 @@
     <ClInclude Include="Src\Object\Actor\Chara\Weapon\BossWeapon\Cannon\WeaponCannon.h" />
     <ClInclude Include="Src\Object\Actor\Chara\Weapon\BossWeapon\MG\WeaponMGL.h" />
     <ClInclude Include="Src\Object\Actor\Chara\Weapon\BossWeapon\MG\WeaponMGR.h" />
+    <ClInclude Include="Src\Object\Actor\Chara\Weapon\Bullet\Boss\BBulletMissile.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="srcGraphics\Common\Pixel\PixelShader2DHeader.hlsli" />

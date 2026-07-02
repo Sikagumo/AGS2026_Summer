@@ -102,4 +102,5 @@ void BBulletMG::UpdateProcessPost(void)
 void BBulletMG::DrawPre(void)
 {
 	MV1DrawModel(transform_.modelId);
+	
 }

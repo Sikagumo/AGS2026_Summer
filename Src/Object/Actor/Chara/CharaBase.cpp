@@ -145,22 +145,19 @@ void CharaBase::CollisionCapsule(void)
 void CharaBase::DrawShadowRound(float shadowScl)
 {
 	
-	/* 【テスト用】衝突判定を通さず強制描画 */
+	
 	const float SHADOW_SIZE =shadowScl;   // 影の基本サイズ（半径）
 
-	// ステージの表面の高さ（デバッグ表示の -1.0f に合わせる）
-	// チラつき防止で 0.5f 浮かせた値を設定
+	
 	float shadowY = SHADOW_POS_Y;
 
-	// 影の濃さを設定
-	
-	
 	float distance = transform_.pos.y - shadowY;
 	if (distance < 0) distance = 0;
 	if (distance > SHADOW_FADE_HEIGHT) distance = SHADOW_FADE_HEIGHT;
 	int alpha = (int)((1.0f - (distance / SHADOW_FADE_HEIGHT)) * MAX_SHADOW_COL);
 
-	// キャラクターの現在位置（XZ）と影の半径を基に、4つの頂点座標を更新
+
+	// キャラクターの現在位置
 	imageVertex_[LEFT_BACK].pos = VGet(transform_.pos.x - SHADOW_SIZE, shadowY, transform_.pos.z - SHADOW_SIZE);
 	imageVertex_[LEFT_FORWARD].pos = VGet(transform_.pos.x - SHADOW_SIZE, shadowY, transform_.pos.z + SHADOW_SIZE);
 	imageVertex_[RIGHT_BACK].pos = VGet(transform_.pos.x + SHADOW_SIZE, shadowY, transform_.pos.z - SHADOW_SIZE);

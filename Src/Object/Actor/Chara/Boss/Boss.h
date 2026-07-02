@@ -34,6 +34,7 @@ public:
 		MG,
 		ROAD,
 		CANNON,
+		MISSILE,
 		MAX,
 	};
 
@@ -129,7 +130,7 @@ private:
 	//bossの大きさ
 	static constexpr VECTOR BOSS_SIZE = { 3.0f, 3.0f, 3.0f };
 	//bossの初期座標
-	static constexpr VECTOR BOSS_INIT_POS= { 0.0f, 0.0f, 500.0f };
+	static constexpr VECTOR BOSS_INIT_POS= { 500.0f, 0.0f, 200.0f };
 	//回転
 	static constexpr float INIT_ROT = 180.0f;
 	//攻撃
@@ -208,6 +209,8 @@ private:
 	bool isMGFire_;					//MGの発射音を鳴らすかのフラグ
 	bool isRoadFire_;				//走行音を鳴らすかのフラグ
 	VECTOR currentWaveScl;
+
+	int test;
 
 	//攻撃関連
 	int jumpCount_;

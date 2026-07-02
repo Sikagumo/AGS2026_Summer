@@ -22,6 +22,7 @@ public:
 		IMG_ONIGASIMA,
 		IMG_NOMALMAP_ONIGASIMA,
 		IMG_SHADOW,
+		IMG_FALLING_POINT,
 
 		/* •¡”‰æ‘œ */
 		IMGS_TEXTS,
