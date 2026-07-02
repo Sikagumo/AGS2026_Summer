@@ -36,7 +36,7 @@ public:
 
 protected:
     /// @brief デバッグ描画（モデルコライダは描画しない）
-    void DrawDebug(int debugColor) const override {};
+    void DrawDebug(int debugColor) const override;
 
 private:
     // 衝突判定から除外するフレーム番号

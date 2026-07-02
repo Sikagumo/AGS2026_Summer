@@ -82,7 +82,10 @@ bool CollisionCapsule::CheckCapsuleVsSphere(const ColliderBase* _capsuleCol,
 bool CollisionCapsule::CheckCapsuleVsModel(const ColliderBase* _capsuleCol,
 	const ColliderBase* _modelCol, CollisionInfo& _outInfo)
 {
-	if (!_capsuleCol || !_modelCol) { return false; }
+	if (!_capsuleCol || !_modelCol)
+	{
+		return false;
+	}
 
 	const auto* capsule = dynamic_cast<const ColliderCapsule*>(_capsuleCol);
 	const auto* model = dynamic_cast<const ColliderModel*>(_modelCol);
@@ -92,66 +95,80 @@ bool CollisionCapsule::CheckCapsuleVsModel(const ColliderBase* _capsuleCol,
 		return false;
 	}
 
-	// モデルハンドル取得
 	int modelHandle = model->GetModelHandle();
-	if (modelHandle == -1) { return false; }
+	if (modelHandle == -1)
+	{
+		return false;
+	}
 
-	// 判定用パラメータ取得
 	VECTOR startPos = capsule->GetWorldStartPos();
 	VECTOR endPos = capsule->GetWorldEndPos();
 	float radius = capsule->GetRadius();
 
-	// カプセルとモデル全体の衝突判定（触れている全ポリゴンが格納される）
+	// カプセルとモデル全体の衝突判定
 	MV1_COLL_RESULT_POLY_DIM hitResult = MV1CollCheck_Capsule(modelHandle, -1,
 		startPos, endPos, radius);
 
-	// 衝突結果の解析
 	if (hitResult.HitNum > 0)
 	{
-		float maxUpward = -2.0f;
+		float maxPenetration = -1.0f;
 		int bestIndex = -1;
 
 		for (int i = 0; i < hitResult.HitNum; ++i)
 		{
-			// 除外対象のフレームチェック
-			if (model->IsExcludedFrame(hitResult.Dim[i].FrameIndex)) { continue; }
-
-			// 法線の Y 成分（どれだけ真上を向いているか）を比較
-			// 坂道や壁（Yが0に近い）よりも、平らな床（Yが1に近い）を最優先する
-			if (hitResult.Dim[i].Normal.y > maxUpward)
+			if (model->IsExcludedFrame(hitResult.Dim[i].FrameIndex))
 			{
-				maxUpward = hitResult.Dim[i].Normal.y;
+				continue;
+			}
+
+			// 各ポリゴンに対する正しいめり込み量をループ内で仮計算する
+			const auto& poly = hitResult.Dim[i];
+			float polyPenetration = 0.0f;
+
+			if (poly.Normal.y > 0.5f)
+			{
+				// 床の場合は、沈み込みを防ぐための高さを計算
+				float capsuleBottomY = (startPos.y < endPos.y ? startPos.y : endPos.y) - radius;
+				polyPenetration = poly.HitPosition.y - capsuleBottomY;
+			}
+			else
+			{
+				// 壁や急斜面の場合は、芯からの最短距離でめり込みを計算
+				VECTOR nearestPos = UtilityMath::GetNearestPointOnSegment(startPos, endPos, poly.HitPosition);
+				float distance = UtilityMath::MagnitudeF(VSub(poly.HitPosition, nearestPos));
+				polyPenetration = radius - distance;
+			}
+
+			if (polyPenetration > maxPenetration)
+			{
+				maxPenetration = polyPenetration;
 				bestIndex = i;
 			}
 		}
 
-		// 有効なポリゴンが1つも見つからなかった場合
 		if (bestIndex == -1)
 		{
 			MV1CollResultPolyDimTerminate(hitResult);
 			return false;
 		}
 
-		// 最も「床」として適切なポリゴン情報を抽出
 		const auto& bestHit = hitResult.Dim[bestIndex];
 
-		// 衝突情報の設定
+		// 選択された最も適切な衝突情報を格納
 		_outInfo.myCollider = _capsuleCol;
 		_outInfo.hitCollider = _modelCol;
 		_outInfo.hitPosition = bestHit.HitPosition;
 		_outInfo.hitNormal = bestHit.Normal;
 		_outInfo.isActive = true;
 
+		// 決定されたポリゴンのタイプに応じて、正しいめり込み量を確定させる
 		if (bestHit.Normal.y > 0.5f)
 		{
 			float capsuleBottomY = (startPos.y < endPos.y ? startPos.y : endPos.y) - radius;
-
-			// 床の高さ（HitPosition.y）よりも、カプセルの底がどれだけ下にあるか
 			_outInfo.penetration = bestHit.HitPosition.y - capsuleBottomY;
 		}
 		else
 		{
-			// 壁や急斜面の場合は、元の線分最短距離を使う
 			VECTOR nearestPos = UtilityMath::GetNearestPointOnSegment(startPos, endPos, bestHit.HitPosition);
 			float distance = UtilityMath::MagnitudeF(VSub(bestHit.HitPosition, nearestPos));
 			_outInfo.penetration = radius - distance;
@@ -163,15 +180,10 @@ bool CollisionCapsule::CheckCapsuleVsModel(const ColliderBase* _capsuleCol,
 			_outInfo.penetration = 0.0f;
 		}
 
-		// メモリ解放
 		MV1CollResultPolyDimTerminate(hitResult);
-		return true;
-
 		return true;
 	}
 
-	// 衝突しなかった場合のメモリ解放
 	MV1CollResultPolyDimTerminate(hitResult);
-
 	return false;
 }
