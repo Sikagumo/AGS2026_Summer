@@ -36,14 +36,14 @@ void Stage::InitTransform(void)
 {
 	//constexpr float SCALE = 5.0f;
 	constexpr float SCALE = 0.425f;
-	constexpr VECTOR LOCAL_POS = { 0.0f, -1.0f, 0.0f };
+	constexpr VECTOR LOCAL_POS = { 0.0f, -50.0f, 0.0f };
 	VECTOR localPos = LOCAL_POS;
 
 	transform_.InitTransform(SCALE,
 							 Quaternion::Identity(), Quaternion::Identity(),
 							 localPos);
 
-	constexpr float COLLISION_POS_Y = 18.5f;
+	constexpr float COLLISION_POS_Y = -50.0f;
 	localPos.y += COLLISION_POS_Y;
 	collisionTrans_.InitTransform(SCALE,
 								  Quaternion::Identity(), Quaternion::Identity(),

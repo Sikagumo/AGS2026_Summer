@@ -228,10 +228,10 @@ void Player::InitPost(void)
 	}
 	else
 	{
-		constexpr float SHOT_TIME_ACTIVE = 0.75f; // 有効時間
-		constexpr float SHOT_TIME_ACTION_ACTIVE = 1.0f; // 行動有効時間
+		constexpr float SHOT_TIME_ACTIVE = 1.0f; // 有効時間
+		constexpr float SHOT_TIME_ACTION_ACTIVE = 0.75f; // 行動有効時間
 
-		constexpr float SHOT_TIME_STOP = 0.25f; // 停止時間
+		constexpr float SHOT_TIME_STOP = 0.5f; // 停止時間
 		constexpr float SHOT_TIME_STOP_ACTIVE = 0.25f; // 停止有効化時間
 
 		timeActive = SHOT_TIME_ACTIVE;
@@ -646,7 +646,7 @@ void Player::UpdateBullets(void)
 {
 	// 発射時の手のフレームに生成した弾を追従させる
 	constexpr int FRAME_FINGER_LEFT = 23;
-	constexpr int FRAME_FINGER_RIGHT = 47;
+	constexpr int FRAME_FINGER_RIGHT = 39;
 	const int FRAME_FINGER = ((curAttackNum_ % 2 == 0) ? FRAME_FINGER_LEFT : FRAME_FINGER_RIGHT);
 
 	const int FRAME_HAND_PALM = (FRAME_FINGER - 1);
