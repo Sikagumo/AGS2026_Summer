@@ -85,6 +85,13 @@
     <ClCompile Include="Src\Object\Actor\Chara\Weapon\BossWeapon\MG\WeaponMGR.cpp" />
     <ClCompile Include="Src\ImGUI\ImGuiWrapper.cpp" />
     <ClCompile Include="Src\ImGUI\IParameterEditor.cpp" />
+    <ClCompile Include="Lib\ImGUI\backends\imgui_impl_dx11.cpp" />
+    <ClCompile Include="Lib\ImGUI\backends\imgui_impl_win32.cpp" />
+    <ClCompile Include="Lib\ImGUI\imgui.cpp" />
+    <ClCompile Include="Lib\ImGUI\imgui_demo.cpp" />
+    <ClCompile Include="Lib\ImGUI\imgui_draw.cpp" />
+    <ClCompile Include="Lib\ImGUI\imgui_tables.cpp" />
+    <ClCompile Include="Lib\ImGUI\imgui_widgets.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\Shader\ShaderParameters.h" />
@@ -171,6 +178,14 @@
     <ClInclude Include="Src\Object\Actor\Chara\Weapon\BossWeapon\MG\WeaponMGR.h" />
     <ClInclude Include="Src\ImGUI\ImGuiWrapper.h" />
     <ClInclude Include="Src\ImGUI\IParameterEditor.h" />
+    <ClInclude Include="Lib\ImGUI\backends\imgui_impl_dx11.h" />
+    <ClInclude Include="Lib\ImGUI\backends\imgui_impl_win32.h" />
+    <ClInclude Include="Lib\ImGUI\imconfig.h" />
+    <ClInclude Include="Lib\ImGUI\imgui.h" />
+    <ClInclude Include="Lib\ImGUI\imgui_internal.h" />
+    <ClInclude Include="Lib\ImGUI\imstb_rectpack.h" />
+    <ClInclude Include="Lib\ImGUI\imstb_textedit.h" />
+    <ClInclude Include="Lib\ImGUI\imstb_truetype.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="srcGraphics\Common\Pixel\PixelShader2DHeader.hlsli" />
