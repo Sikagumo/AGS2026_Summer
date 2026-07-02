@@ -43,6 +43,8 @@ public:
 		HIT_WAVE,		//衝撃波
 		MG_BULLET,		//マシンガンの弾
 		ROAD_ATTACK,	//体当たり
+		MISSILE_ATTACK,	//ミサイル攻撃
+		MISSILE_PUSH,	//ミサイル吹き飛ばして
 	};
 
 	/// @brief コンストラクタ

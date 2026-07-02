@@ -16,6 +16,10 @@ public:
 	virtual void CreateBullets(VECTOR _pos, VECTOR _dir,float _radius)=0;
 	bool GetIsAlive(void) { return isAlive_; }
 
+	virtual void SetPlayerPos(VECTOR _pos) = 0;
+	
+	virtual void SetUpMaxPos_(float _pos) = 0;
+
 	virtual void SetTransform(Transform trans) { weaponTrans_ = trans; }
 
 protected:

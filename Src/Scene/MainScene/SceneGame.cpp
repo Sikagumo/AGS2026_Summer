@@ -87,7 +87,7 @@ void SceneGame::Initialize(void)
 	camera->ChangeMode(Camera::MODE::FOLLOW);
 	camera->SetFollow(&players_.at(0)->GetTransform());
 
-	//EffectManager::GetInstance().Initialize();
+	EffectManager::GetInstance().Initialize();
 
 	for (auto& player : players_)
 	{
@@ -109,6 +109,12 @@ void SceneGame::Update(void)
 	auto loader = Loading::GetInstance();
 
 	if (loader->IsLoading()) { return; }
+	
+		
+		
+	
+	
+
 
 	SceneManager::GetInstance().GetCamera()->Update();
 

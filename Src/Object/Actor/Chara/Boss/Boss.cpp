@@ -149,6 +149,9 @@ void Boss::Load(void)
 
 	SoundManager::GetInstance().Add(SoundManager::TYPE::SE, SoundManager::SOUND::SE_ROAD, ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::SE_ROAD));
 
+	
+
+
 }
 
 void Boss::InitTransform(void)
@@ -399,7 +402,7 @@ void Boss::ChangeStateEnd(void)
 void Boss::BossTransformUpdate(void)
 {
 
-	LookPlayer();
+	//LookPlayer();
 
 	transform_.Update();
 	transformFeetCar_.Update();
@@ -438,6 +441,9 @@ void Boss::UpdateProcess(void)
 
 	stateUpdate_();
 
+	currentWaveScl = VAdd(currentWaveScl, WAVE_SCL_UP);
+	EffectManager::GetInstance().UpdateScl(EffectManager::EFFECT::EFFECT_WAVE, currentWaveScl);
+
 	BossTransformUpdate();
 	
 	wave_->SetPos(transform_.pos);
@@ -473,7 +479,7 @@ void Boss::UpdateAttack(void)
 
 	transformBody_.pos = MV1GetFramePosition(transform_.modelId, JOINT_FEET_BODY);
 	int randomAttack = static_cast<int>(UtilityMath::RandRangeF(0.0f, static_cast<float>(ATTACK_TYPE::MAX)));
-	ATTACK_TYPE attackSelect = /*ATTACK_TYPE::CANNON;*/static_cast<ATTACK_TYPE>(randomAttack);
+	ATTACK_TYPE attackSelect = ATTACK_TYPE::MISSILE;//static_cast<ATTACK_TYPE>(randomAttack);
 
 	switch (attackSelect)
 	{
@@ -497,7 +503,13 @@ void Boss::UpdateAttack(void)
 		weaponCannonR_->ChangeState(WeaponCannon::STATE::ATTACK);
 		ChangeState(STATE::IDLE);
 		break;
-
+	case ATTACK_TYPE::MISSILE:
+		weaponMPL_->ChangeState(WeaponCannon::STATE::ATTACK);
+		weaponMPL_->IsLR(true);
+		weaponMPR_->ChangeState(WeaponCannon::STATE::ATTACK);
+		weaponMPR_->IsLR(false);
+		ChangeState(STATE::IDLE);
+		break;
 	default:
 		break;
 	}
@@ -511,7 +523,9 @@ void Boss::UpdateJump(void)
 	{
 		wave_->SetIsAttack(true);
 		isLanging_ = true;
-		EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_WAVE, transform_.pos, { 0.0f,0.0f,0.0f }, { 1.0f,1.0f,1.0f }, 1.0f);
+		currentWaveScl = WAVE_SCL;
+		EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_WAVE, transform_.pos, currentWaveScl, LANDING_SCL, 1.0f);
+		EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_LANDING, transform_.pos, { 0.0f,0.0f,0.0f }, LANDING_SCL, 1.0f);
 		ChangeState(STATE::IDLE);
 	}
 	else if (isJump_)
@@ -652,7 +666,7 @@ void Boss::DrawPre(void)
 
 	wave_->Draw();
 
-	CharaBase::DrawPre();
+	CharaBase::DrawShadowRound(200.0f);
 
 #ifdef _DEBUG
 

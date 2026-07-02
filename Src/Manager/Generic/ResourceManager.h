@@ -22,6 +22,7 @@ public:
 		IMG_ONIGASIMA,
 		IMG_NOMALMAP_ONIGASIMA,
 		IMG_SHADOW,
+		IMG_FALLING_POINT,
 
 		/* 複数画像 */
 		IMGS_TEXTS,
@@ -49,6 +50,7 @@ public:
 		MODEL_BOSS_WEAPON_RK,
 
 		MODEL_BOSS_BULLET,
+		MODEL_BOSS_MISSILE,
 
 		MODEL_STAGE,
 		MODEL_STAGE_COLLISION,
@@ -65,6 +67,7 @@ public:
 
 		/* エフェクト */
 		EFFECT_WAVE,
+		EFFECT_LANDING,
 		/* 映像 */
 
 		/* BGM */

@@ -20,6 +20,10 @@ public:
 
 	void CreateBullets(VECTOR _pos, VECTOR _dir, float _radius)override {}
 
+	void SetPlayerPos(VECTOR _pos) {}
+
+	void SetUpMaxPos_(float _pos)override {}
+
 	void SetTransform(Transform trans)override {}
 protected:
 	// ‘å‚«‚³A‰ñ“]AÀ•W‚Ì‰Šú‰»

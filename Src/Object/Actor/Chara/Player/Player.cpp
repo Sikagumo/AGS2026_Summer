@@ -274,7 +274,10 @@ void Player::Draw(void)
 	}
 	MV1SetMaterialDifColor(transform_.modelId, 0, material);
 
+	DrawFormatString(10, 140, 0xffffff, "PleyerÇÃç¿ïWÅF%f,%f,%f", transform_.pos.x, transform_.pos.y, transform_.pos.z);
 	ActorBase::Draw();
+
+	CharaBase::DrawShadowRound(30.0f);
 }
 
 void Player::DrawDebug(void)
