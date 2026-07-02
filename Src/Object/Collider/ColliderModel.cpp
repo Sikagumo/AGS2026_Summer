@@ -49,3 +49,8 @@ bool ColliderModel::IsExcludedFrame(int frameIdx) const
     // ƒZƒbƒg‚É‘¶Ý‚·‚é‚©‚Å”»’è
     return excludedFrameIndices_.count(frameIdx) > 0;
 }
+
+void ColliderModel::DrawDebug(int debugColor) const
+{
+
+}

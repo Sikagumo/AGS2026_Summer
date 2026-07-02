@@ -188,7 +188,8 @@ bool CollisionController::CheckCollision(const ColliderBase* _colliderA, const C
 	{
 		return CollisionLine::CheckLineVsModel(_colliderB, _colliderA, _outInfo);
 	}
-	else if (shapeA == SHAPE::CAPSULE && shapeB == SHAPE::MODEL)
+	
+	if (shapeA == SHAPE::CAPSULE && shapeB == SHAPE::MODEL)
 	{
 		return CollisionCapsule::CheckCapsuleVsModel(_colliderA, _colliderB, _outInfo);
 	}
@@ -196,7 +197,8 @@ bool CollisionController::CheckCollision(const ColliderBase* _colliderA, const C
 	{
 		return CollisionCapsule::CheckCapsuleVsModel(_colliderB, _colliderA, _outInfo);
 	}
-	else if (shapeA == SHAPE::SPHERE && shapeB == SHAPE::MODEL)
+	
+	if (shapeA == SHAPE::SPHERE && shapeB == SHAPE::MODEL)
 	{
 		return CollisionSphere::CheckSphereVsModel(_colliderA, _colliderB, _outInfo);
 	}
@@ -364,18 +366,12 @@ void CollisionController::ResolveCollision(ActorBase* _actorA, ActorBase* _actor
 
 	if (tagA != TAG::STAGE && tagB == TAG::STAGE)
 	{
-		float overlap = fabsf(_info.penetration);
-		VECTOR stagePush = VGet(0.0f, overlap, 0.0f);
-
-		_actorA->GetTransform().Translate(stagePush);
+		_actorA->GetTransform().Translate(pushVector);
 		return;
 	}
 	else if (tagA == TAG::STAGE && tagB != TAG::STAGE)
 	{
-		float overlap = fabsf(_info.penetration);
-		VECTOR stagePush = VGet(0.0f, overlap, 0.0f);
-
-		_actorB->GetTransform().Translate(stagePush);
+		_actorB->GetTransform().Translate(VScale(pushVector, -1.0f));
 		return;
 	}
 
@@ -416,7 +412,10 @@ void CollisionController::UpdateCollisionPars(void)
 	size_t actorCount = actors_.size();
 
 	// 判定対象が2つ未満なら処理終了
-	if (actorCount < 2) { return; }
+	if (actorCount < 2)
+	{
+		return;
+	}
 
 	// アクター間の総当たり判定
 	for (size_t i = 0; i < actorCount; ++i)
@@ -431,16 +430,24 @@ void CollisionController::UpdateCollisionPars(void)
 			bool isStageCollision = false;
 
 			// アクターAのコライダーの中にSTAGEがあるかチェック
-			for (const auto& [idA, colA] : collidersA) 
+			for (const auto& [idA, colA] : collidersA)
 			{
-				if (colA->GetCollisionTag() == ColliderBase::TAG::STAGE) { isStageCollision = true; break; }
+				if (colA->GetCollisionTag() == ColliderBase::TAG::STAGE)
+				{
+					isStageCollision = true;
+					break;
+				}
 			}
 
 			// アクターBのコライダーの中にSTAGEがあるかチェック
 			const auto& collidersB = actorB->GetOwnColliders();
 			for (const auto& [idB, colB] : collidersB)
 			{
-				if (colB->GetCollisionTag() == ColliderBase::TAG::STAGE) { isStageCollision = true; break; }
+				if (colB->GetCollisionTag() == ColliderBase::TAG::STAGE)
+				{
+					isStageCollision = true;
+					break;
+				}
 			}
 
 			// どちらもステージではない場合のみ、距離によるカリングを行う
@@ -454,17 +461,36 @@ void CollisionController::UpdateCollisionPars(void)
 				float distSquare = (distanceX * distanceX) + (distanceY * distanceY) + (distanceZ * distanceZ);
 
 				// 一定距離以上離れている場合は、詳細な判定をスキップ
-				if (distSquare > cullingDistSquare_) { continue; }
-			}
-			
-			// コライダー同士の詳細判定
-			for (auto& [idA, colA] : collidersA)
-			{
-				if (!colA->IsActive()) { continue; }
-
-				for (auto& [idB, colB] : collidersB)
+				if (distSquare > cullingDistSquare_)
 				{
-					if (!colB->IsActive()) { continue; }
+					continue;
+				}
+			}
+
+			// コライダー同士の詳細判定
+			for (const auto& [idA, colA] : collidersA)
+			{
+				if (colA == nullptr)
+				{
+					continue;
+				}
+
+				if (!colA->IsActive())
+				{
+					continue;
+				}
+
+				for (const auto& [idB, colB] : collidersB)
+				{
+					if (colB == nullptr)
+					{
+						continue;
+					}
+
+					if (!colB->IsActive())
+					{
+						continue;
+					}
 
 					// 衝突タグによる判定可否の確認
 					if (CanCollide(static_cast<int>(colA->GetCollisionTag()),
@@ -497,7 +523,6 @@ void CollisionController::UpdateCollisionPars(void)
 							{
 								ResolveCollision(actorA, actorB, info);
 							}
-
 						}
 					}
 				}
@@ -573,7 +598,8 @@ bool CollisionController::CanCollide(int _tagA, int _tagB) const
 
 	if (tagHit == TAG::STAGE)
 	{
-		if (tagHurt == TAG::PLAYER || tagHurt == TAG::PLAYER_BULLET || tagHurt == TAG::BOSS || tagHurt == TAG::WEAPON_CANNON_L || tagHurt == TAG::WEAPON_CANNON_R
+		if (tagHurt == TAG::PLAYER || tagHurt == TAG::PLAYER_BULLET || tagHurt == TAG::BOSS 
+			|| tagHurt == TAG::WEAPON_CANNON_L || tagHurt == TAG::WEAPON_CANNON_R
 			|| tagHurt == TAG::WEAPON_MG_L || tagHurt == TAG::WEAPON_MG_R
 			|| tagHurt == TAG::WEAPON_MP_L || tagHurt == TAG::WEAPON_MP_R
 			|| tagHurt == TAG::WEAPON_RG || tagHurt == TAG::MG_BULLET)

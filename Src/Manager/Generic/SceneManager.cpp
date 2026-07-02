@@ -44,6 +44,7 @@ SceneManager::SceneManager(void)
 {
     camera_ = std::make_unique<Camera>();
     scenes_ = std::list<std::shared_ptr<SceneBase>>();
+    oldScene_ = nullptr;
     nextScene_ = nullptr;
 }
 
@@ -129,8 +130,6 @@ void SceneManager::ChangeScene(std::shared_ptr<SceneBase> scene)
     nextScene_ = scene;
     isSceneChanging_ = true;
 
-   
-
     // 非同期ロード開始（ロード画面付き）
     Loading::GetInstance()->StartAsyncLoad([scene]()
         {
@@ -208,27 +207,31 @@ void SceneManager::Update(void)
         auto loader = Loading::GetInstance();
         loader->Update();
 
+        // Update内の入れ替え処理部分
         if (loader->GetProgress() >= LoadCompleteThreshold && !loader->IsLoading())
         {
-
-            scenes_.push_back(nextScene_);
+            // 新しいシーンを確実に登録
             nextScene_->EndLoad();
             nextScene_->Initialize();
+            scenes_.push_back(nextScene_);
 
-            // 古いシーンを解放
             for (auto& scene : scenes_)
             {
-                if (scene != nextScene_) { scene->Release(); }
+                if (scene != nextScene_) { oldScene_ = scene; }
             }
-            scenes_.remove_if([this](const std::shared_ptr<SceneBase>& scene)
-                {
-                    return scene != nextScene_; 
-                });
+            scenes_.remove_if([this](const auto& s) { return s != nextScene_; });
 
             nextScene_ = nullptr;
             isSceneChanging_ = false;
         }
         return;
+    }
+
+    // 次のフレームの先頭で、前のフレームの描画が終わった後に解放する
+    if (oldScene_)
+    {
+        oldScene_->Release();
+        oldScene_ = nullptr;
     }
 
     if (scenes_.empty()) { return; }
