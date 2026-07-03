@@ -19,14 +19,14 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Src\Shader\ShaderPixel\ShaderWave.cpp" />
+    <ClCompile Include="Src\Shader\ShaderRenderer.cpp" />
+    <ClCompile Include="Src\Shader\ShaderLibrary.cpp" />
+    <ClCompile Include="Src\Shader\ShaderBase.cpp" />
+    <ClCompile Include="Src\Shader\ShaderController.cpp" />
+    <ClCompile Include="Src\Shader\ShaderPixel\ShaderPixel.cpp" />
     <ClCompile Include="Src\Object\Actor\Chara\Weapon\BossWeapon\MG\MGBase.cpp" />
     <ClCompile Include="Src\Object\Actor\Chara\Weapon\Bullet\Player\PBulletInterfere.cpp" />
     <ClCompile Include="Src\Object\Actor\Chara\Weapon\Bullet\Player\PBulletRecovery.cpp" />
-    <ClCompile Include="Src\Shader\ShaderManager.cpp" />
-    <ClCompile Include="Src\Shader\ShaderPixel\ShaderNormal.cpp" />
-    <ClCompile Include="Src\Shader\ShaderPixel\ShaderPixelBase.cpp" />
-    <ClCompile Include="Src\Shader\ShaderBase.cpp" />
     <ClCompile Include="Src\Object\Collision\CollisionBox.cpp" />
     <ClCompile Include="Src\Object\Collision\CollisionCircle.cpp" />
     <ClCompile Include="Src\Object\Collision\CollisionLine.cpp" />
@@ -98,15 +98,15 @@
     <ClCompile Include="Src\Object\Actor\Chara\Weapon\BossWeapon\MG\WeaponMGR.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Src\Shader\ShaderRenderer.h" />
+    <ClInclude Include="Src\Shader\ShaderLibrary.h" />
+    <ClInclude Include="Src\Shader\ShaderBase.h" />
+    <ClInclude Include="Src\Shader\ShaderController.h" />
+    <ClInclude Include="Src\Shader\ShaderPixel\ShaderPixel.h" />
     <ClInclude Include="Src\Shader\ShaderParameters.h" />
-    <ClInclude Include="Src\Shader\ShaderPixel\ShaderWave.h" />
     <ClInclude Include="Src\Object\Actor\Chara\Weapon\BossWeapon\MG\MGBase.h" />
     <ClInclude Include="Src\Object\Actor\Chara\Weapon\Bullet\Player\PBulletInterfere.h" />
     <ClInclude Include="Src\Object\Actor\Chara\Weapon\Bullet\Player\PBulletRecovery.h" />
-    <ClInclude Include="Src\Shader\ShaderManager.h" />
-    <ClInclude Include="Src\Shader\ShaderPixel\ShaderNormal.h" />
-    <ClInclude Include="Src\Shader\ShaderPixel\ShaderPixelBase.h" />
-    <ClInclude Include="Src\Shader\ShaderBase.h" />
     <ClInclude Include="Src\Object\Collision\CollisionBox.h" />
     <ClInclude Include="Src\Object\Collision\CollisionCircle.h" />
     <ClInclude Include="Src\Object\Collision\CollisionLine.h" />

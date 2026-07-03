@@ -14,7 +14,8 @@
 #include "../../Manager/System/TimeManager.h"
 #include "../../Common/Loading.h"
 #include "../../Utility/UtilityMath.h"
-#include "../../Shader/ShaderManager.h"
+#include "../../Shader/ShaderController.h"
+#include "../../Shader/ShaderParameters.h"
 
 void SceneTitle::Load(void)
 {
@@ -230,35 +231,40 @@ void SceneTitle::Draw(void)
 
     time_ += 0.02f;
 
+    const float PEACH_SCALE = 0.5f;
+    const float WAVE_SCALE = 1.0f;
+    const float ONISIMA_SCALE = 1.0f;
+
     float amplitude = 20.0f;
     float bobSpeed = 3.0f;
     float offsetY = std::sinf(time_ * bobSpeed) * amplitude;
     float peachPosY = Application::SCREEN_HALF_Y + offsetY;
-    int peachPosX = -20;
-    int wavePosY = 20;
-    int oniSimaPosX = Application::SCREEN_HALF_X - 100;
-    int oniSimaPosY = 30;
-    const float PEACH_SCALE = 0.5f;
-    const float WAVE_SCALE = 1.0f;
-    const float ONISIMA_SCALE = 1.0f;
-    auto* shaderPeach = ShaderManager::GetInstance().GetShaderNormal();
-    auto* shaderOniSima = ShaderManager::GetInstance().GetShaderNormal();
-    auto* shaderWave = ShaderManager::GetInstance().GetShaderWave();
 
-    shaderOniSima->SetAmbient(0.8f);
-    shaderOniSima->Draw(oniSimaPosX, oniSimaPosY, oniSimaHandle_, oniSimaNormalHandle_, ONISIMA_SCALE);
+    const float ambient = 0.8f;
 
+    const float waveSpeed = 3.0f;
+    const float waveForce = 0.015f;
 
-    shaderPeach->SetLightDirection(0.5f, 0.5f, 0.5f);
-    shaderPeach->SetAmbient(0.8f);
+    // ãSÉñìáÇÃï`âÊ
+    DrawRequest oniReq(Application::SCREEN_HALF_X - 100, 30, oniSimaHandle_, ONISIMA_SCALE);
+    oniReq.normalMapHandle = oniSimaNormalHandle_;
+    oniReq.buffer.ambient = ambient;
+    ShaderController::GetInstance().Draw(SHADER_TYPE::NORMAL, oniReq);
 
-    shaderWave->SetWaveParam(time_, 3.0f, 0.015f);
+    // îgÇÃï`âÊ
+    DrawRequest waveReq(0, 20, waveHandle_, WAVE_SCALE);
+    waveReq.normalMapHandle = waveNormalHandle_;
+    waveReq.buffer.ambient = ambient;
+    waveReq.buffer.time = time_;
+    waveReq.buffer.waveSpeed = waveSpeed;
+    waveReq.buffer.waveForce = waveForce;
+    ShaderController::GetInstance().Draw(SHADER_TYPE::NORMAL_WAVE, waveReq);
 
-    ShaderManager::GetInstance().DrawNormalAndWave(0, wavePosY, 
-        waveHandle_, waveNormalHandle_, WAVE_SCALE);
-
-    shaderPeach->Draw(peachPosX, static_cast<int>(peachPosY),
-        peachHandle_, peachNormalHandle_, PEACH_SCALE);
+    // ìçÇÃï`âÊ
+    DrawRequest peachReq(-20, static_cast<int>(Application::SCREEN_HALF_Y + offsetY), peachHandle_, PEACH_SCALE);
+    peachReq.normalMapHandle = peachNormalHandle_;
+    peachReq.buffer.ambient = ambient;
+    ShaderController::GetInstance().Draw(SHADER_TYPE::NORMAL, peachReq);
 
     const int IMAGET_TITLE_Y = Application::SCREEN_SIZE_Y / 4;
     DrawRotaGraph(Application::SCREEN_HALF_X, IMAGET_TITLE_Y, 0.7f, 0.0f, imageTitle_, true);

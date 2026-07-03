@@ -5,7 +5,7 @@
 #include "../../Scene/MainScene/SceneGameBoss.h"
 #include "../Decoration/SoundManager.h"
 #include "../../Object/Collision/CollisionController.h"
-#include "../../Shader/ShaderManager.h"
+#include "../../Shader/ShaderController.h"
 #include "../System/TimeManager.h"
 #include "../../Camera/Camera.h"
 #include "../../Common/Loading.h"
@@ -59,8 +59,8 @@ void SceneManager::Initialize(void)
     SoundManager::CreateInstance();
     SoundManager::GetInstance().Initialize();
     TimeManager::CreateInstance();
-    ShaderManager::CreateInstance();
-    ShaderManager::GetInstance().Initialize();
+    ShaderController::CreateInstance();
+    ShaderController::GetInstance().Initialize();
     Loading::CreateInstance();
     Loading::GetInstance()->Initialize();
     CollisionController::CreateInstance();
@@ -286,12 +286,9 @@ void SceneManager::Release(void)
     // カメラを解放する
     camera_.reset();
 
-    // 解放処理
-    ShaderManager::GetInstance().Release();
-
     // 各マネージャーを破棄する
     SoundManager::GetInstance().DestroyInstance();
-    ShaderManager::GetInstance().DestroyInstance();
+    ShaderController::GetInstance().DestroyInstance();
     TimeManager::GetInstance().DestroyInstance();
     Loading::GetInstance()->DestroyInstance();
     CollisionController::DestroyInstance();
