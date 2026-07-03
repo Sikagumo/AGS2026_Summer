@@ -139,15 +139,15 @@ void Player::InitTransform(void)
 void Player::InitCollider(void)
 {
 	ColliderLine* colLine = new ColliderLine(ColliderBase::TAG::PLAYER, &transform_, COL_LINE_START_LOCAL_POS, COL_LINE_END_LOCAL_POS);
-	ownColliders_.emplace(static_cast<int>(ColliderBase::SHAPE::LINE), colLine);
+	ownColliders_.emplace(static_cast<int>(ColliderBase::SHAPE::LINE), std::vector<ColliderBase*>{ colLine });
 	colLine->SetTriger(false);
 
 	ColliderCapsule* colCap = new ColliderCapsule(ColliderBase::TAG::PLAYER
 									, &transform_, COL_CAPSULE_TOP_LOCAL_POS, COL_CAPSULE_DOWN_LOCAL_POS, COL_CAPSULE_RADIUS);
 
-	ownColliders_.emplace(0, colCap);
+	ownColliders_.emplace(static_cast<int>(ColliderBase::SHAPE::CAPSULE), std::vector<ColliderBase*>{ colCap });
 
-	ownColliders_.at(0)->SetTriger(false);
+	colCap->SetTriger(false);
 
 	// Õ“Ë”»’èƒ}ƒl[ƒWƒƒ‚É“o˜^
 	CollisionController::GetInstance().RegisterActor(this);
@@ -325,9 +325,17 @@ void Player::DrawLate(void)
 
 	animation_->DrawDebug();
 
-	for (auto& collider : ownColliders_)
+	for (auto& [id, colliderVector] : ownColliders_)
 	{
-		collider.second->Draw();
+		for (auto* collider : colliderVector)
+		{
+			if (collider == nullptr)
+			{
+				continue;
+			}
+
+			collider->Draw();
+		}
 	}
 #endif
 }

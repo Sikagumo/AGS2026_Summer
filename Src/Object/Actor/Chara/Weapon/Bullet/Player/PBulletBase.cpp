@@ -29,7 +29,7 @@ void PBulletBase::InitCollider(void)
 
 	// è’ìÀîªíËÉ}ÉlÅ[ÉWÉÉÇ…ìoò^
 	ColliderSphere* sphere = new ColliderSphere(ColliderBase::TAG::PLAYER_BULLET, &transform_, UtilityMath::VECTOR_ZERO, radius_);
-	ownColliders_.emplace(0, sphere);
+	ownColliders_.emplace(static_cast<int>(ColliderBase::SHAPE::SPHERE), std::vector<ColliderBase*>{ sphere });
 }
 
 void PBulletBase::InitPost(void)
@@ -154,7 +154,7 @@ void PBulletBase::Shot(const VECTOR& _shotDir)
 	transform_.Update();
 
 	// ìñÇΩÇËîªíËìoò^
-	ownColliders_.at(0)->SetRadius(radius_);
+	ownColliders_.at(0).at(0)->SetRadius(radius_);
 	CollisionController::GetInstance().RegisterActor(this);
 	CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::PLAYER_BULLET, true);
 }

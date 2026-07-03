@@ -54,7 +54,7 @@ public:
 	virtual ~ColliderBase(void) = default;
 
 	/// @brief デバッグ描画を行う
-	void Draw(void);
+	void Draw(void) const;
 
 	/// @brief 追従先を取得する
 	/// @return Transformポインタ

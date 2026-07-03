@@ -54,12 +54,12 @@ void WeaponMP::InitTransform(void)
 void WeaponMP::InitCollider(void)
 {
 	ColliderLine* colLine = new ColliderLine(ColliderBase::TAG::STAGE, &transform_, LINE_START_POS, LINE_END_POS);
-	ownColliders_.emplace(static_cast<int>(ColliderBase::SHAPE::LINE), colLine);
+	ownColliders_.emplace(static_cast<int>(ColliderBase::SHAPE::LINE), std::vector<ColliderBase*>{ colLine });
 
 
 	ColliderSphere* colSphere = new ColliderSphere(
 		tag_, &transform_, SPHERE_START_POS, SPHERE_RADIUS);
-	ownColliders_.emplace(static_cast<int>(ColliderBase::SHAPE::SPHERE), colSphere);
+	ownColliders_.emplace(static_cast<int>(ColliderBase::SHAPE::SPHERE), std::vector<ColliderBase*>{ colSphere });
 	colSphere->SetTriger(false);
 
 	CollisionController::GetInstance().RegisterActor(this);
@@ -100,9 +100,16 @@ void WeaponMP::DrawPre(void)
 	if (isAlive_)
 	{
 		
-		for (auto& col : ownColliders_)
+		for (auto& [id, colliderVector] : ownColliders_)
 		{
-			col.second->Draw();
+			for (auto* collider : colliderVector)
+			{
+				if (collider == nullptr)
+				{
+					continue;
+				}
+				collider->Draw();
+			}
 		}
 	}
 }
