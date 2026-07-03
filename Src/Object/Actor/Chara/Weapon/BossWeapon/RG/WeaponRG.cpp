@@ -38,6 +38,7 @@ void WeaponRG::Load(void)
 	transform_.SetModel(ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::MODEL_BOSS_WEAPON_RG));
 }
 
+
 void WeaponRG::InitTransform(void)
 {
 	transform_.scl = WEAPON_SIZE;
@@ -109,4 +110,46 @@ void WeaponRG::DrawPre(void)
 #endif
 	}
 
+}
+
+void WeaponRG::ChangeState(STATE _state)
+{
+	state_ = _state;
+
+	int state = static_cast<int>(state_);
+
+	// Šeó‘Ô‘JˆÚ‚Ì‰Šúˆ—
+	ChangeState(state);
+}
+
+
+void WeaponRG::ChangeState(int state)
+{
+	stateBase_ = state;
+	// Šeó‘Ô‘JˆÚ‚Ì‰Šúˆ—
+	stateChanges_[stateBase_]();
+}
+
+void WeaponRG::ChangeStateIdle(void)
+{
+}
+
+void WeaponRG::ChangeStateAttack(void)
+{
+}
+
+void WeaponRG::ChangeStateEnd(void)
+{
+}
+
+void WeaponRG::UpdateAttack(void)
+{
+}
+
+void WeaponRG::UpdateIdle(void)
+{
+}
+
+void WeaponRG::UpdateEnd(void)
+{
 }

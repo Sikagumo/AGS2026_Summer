@@ -47,6 +47,12 @@ public:
 	/// <param name=""></param>
 	/// <returns>現在HP</returns>
 	int GetHp(void)override { return hp_; }
+
+	// 状態遷移
+	void ChangeState(STATE _state)override;
+
+	
+
 protected:
 
 	// 大きさ、回転、座標の初期化
@@ -71,6 +77,22 @@ protected:
 
 
 	void LookPlayer(void) override {};
+
+
+
+
+
+	// 状態（ステート）管理用の関数ポインタと関数群
+	std::function<void(void)> stateUpdate_;
+	void ChangeState(int state) override;
+	void ChangeStateIdle(void) override;
+	void ChangeStateAttack(void) override;
+	void ChangeStateEnd(void) override;
+
+	void UpdateAttack(void) override;
+	void UpdateIdle(void) override;
+	void UpdateEnd(void) override;
+
 private:
 
 	static constexpr VECTOR LINE_START_POS = { 0.0f,-10.0f,-60.0f };
