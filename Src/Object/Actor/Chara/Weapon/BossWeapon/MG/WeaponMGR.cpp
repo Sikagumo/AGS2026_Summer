@@ -46,12 +46,12 @@ void WeaponMGR::InitTransform(void)
 void WeaponMGR::InitCollider(void)
 {
 	ColliderLine* colLine = new ColliderLine(ColliderBase::TAG::STAGE, &transform_, LINE_START_POS, LINE_END_POS);
-	ownColliders_.emplace(static_cast<int>(ColliderBase::SHAPE::LINE), colLine);
+	ownColliders_.emplace(static_cast<int>(ColliderBase::SHAPE::LINE), std::vector<ColliderBase*>{ colLine });
 
 
 	ColliderCapsule* colCapsule = new ColliderCapsule(
 		tag_, &transform_, CAPSULE_START_POS, CAPSULE_END_POS, CAPSULE_RADIUS);
-	ownColliders_.emplace(static_cast<int>(ColliderBase::SHAPE::CAPSULE), colCapsule);
+	ownColliders_.emplace(static_cast<int>(ColliderBase::SHAPE::CAPSULE), std::vector<ColliderBase*>{ colCapsule });
 	colCapsule->SetTriger(false);
 
 	CollisionController::GetInstance().RegisterActor(this);

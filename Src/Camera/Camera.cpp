@@ -62,9 +62,7 @@ void Camera::InitCollider(void)
 														COL_CAPSULE_SPHERE
 														);
 	ownColliders_.emplace(
-		static_cast<int>(COLLIDER_TYPE::SPHERE), colliderSphere);
-
-
+		static_cast<int>(COLLIDER_TYPE::SPHERE), std::vector<ColliderBase*>{ colliderSphere });
 }
 
 void Camera::InitPost(void)
@@ -654,7 +652,7 @@ void Camera::Collision(void)
 
 		// ‹…‘ÌƒRƒ‰ƒCƒ_î•ñ
 		ColliderSphere* colliderSphere =
-			dynamic_cast<ColliderSphere*>(ownColliders_.at(typeSphere));
+			dynamic_cast<ColliderSphere*>(ownColliders_.at(typeSphere).at(0));
 
 		if (colliderSphere == nullptr) { return; }
 

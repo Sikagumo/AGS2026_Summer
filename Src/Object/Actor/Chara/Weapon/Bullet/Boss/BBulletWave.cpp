@@ -43,7 +43,8 @@ void BBulletWave::InitCollider(void)
 {
 	transform_.pos = bossTransform_.pos;
 	ColliderSphere* colHitSphere = new ColliderSphere(ColliderBase::TAG::HIT_WAVE, &transform_, { 0.0f,0.0f,0.0f }, radius_);
-	ownColliders_.emplace(static_cast<int>(ColliderBase::SHAPE::SPHERE), colHitSphere);
+	ownColliders_.emplace(static_cast<int>(ColliderBase::SHAPE::SPHERE), std::vector<ColliderBase*>{ colHitSphere });
+
 
 	CollisionController::GetInstance().RegisterActor(this);
 	CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::HIT_WAVE, false);
@@ -84,9 +85,17 @@ void BBulletWave::DrawPre(void)
 {
 	if (radius_ != INIT_RADIUS)
 	{
-		for (auto& col : ownColliders_)
+		for (auto& [id, colliderVector] : ownColliders_)
 		{
-			col.second->Draw();
+			for (auto* collider : colliderVector)
+			{
+				if (collider == nullptr)
+				{
+					continue;
+				}
+
+				collider->Draw();
+			}
 		}
 	}
 #ifdef _DEBUG
