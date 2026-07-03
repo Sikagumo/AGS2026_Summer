@@ -74,6 +74,11 @@ void WeaponRG::InitAnimation(void)
 void WeaponRG::InitPost(void)
 {
 	isAlive_ = true;
+	stateChanges_.emplace(static_cast<int>(STATE::IDLE), std::bind(&WeaponRG::ChangeStateIdle, this));
+	stateChanges_.emplace(static_cast<int>(STATE::ATTACK), std::bind(&WeaponRG::ChangeStateAttack, this));
+	stateChanges_.emplace(static_cast<int>(STATE::END), std::bind(&WeaponRG::ChangeStateEnd, this));
+	stateChanges_.emplace(static_cast<int>(STATE::PREPARATION), std::bind(&WeaponRG::ChangePreparation, this));
+
 	localPos_ = LINE_START_POS;
 }
 
@@ -132,13 +137,43 @@ void WeaponRG::ChangeState(int state)
 
 void WeaponRG::ChangeStateIdle(void)
 {
+	stateUpdate_ = std::bind(&WeaponRG::UpdateIdle, this);
 }
+
+void WeaponRG::ChangePreparation(void)
+{
+	stateUpdate_ = std::bind(&WeaponRG::UpdateAttack, this);
+	transform_.quaRot = Quaternion::Mult(transform_.quaRot,
+		Quaternion::AngleAxis(UtilityMath::Deg2RadF(UP_ROT), UtilityMath::AXIS_X));
+	Quaternion rot = Quaternion::AngleAxis(UtilityMath::Deg2RadF(90.0f), UtilityMath::AXIS_X);
+	if (upCount_>= MAX_UP_COUNT)
+	{
+		transform_.quaRot = rot;
+		ChargeCount_++;
+		
+	}
+	else
+	{
+		upCount_++;
+	}
+	if (ChargeCount_ >= MAX_CHARGE_COUNT)
+	{
+		ChangeState(STATE::ATTACK);
+	}
+	
+}
+
 
 void WeaponRG::ChangeStateAttack(void)
 {
+	stateUpdate_ = std::bind(&WeaponRG::UpdateAttack, this);
 }
 
 void WeaponRG::ChangeStateEnd(void)
+{
+}
+
+void WeaponRG::UpdatePreparation(void)
 {
 }
 

@@ -86,9 +86,11 @@ protected:
 	std::function<void(void)> stateUpdate_;
 	void ChangeState(int state) override;
 	void ChangeStateIdle(void) override;
+	void ChangePreparation(void);
 	void ChangeStateAttack(void) override;
 	void ChangeStateEnd(void) override;
 
+	void UpdatePreparation(void);
 	void UpdateAttack(void) override;
 	void UpdateIdle(void) override;
 	void UpdateEnd(void) override;
@@ -100,5 +102,15 @@ private:
 	static constexpr VECTOR CAPSULE_START_POS = { 0.0f,-100.0f,-60.0f };
 	static constexpr VECTOR CAPSULE_END_POS = { 0.0f,80.0f,-60.0f };
 	static constexpr float CAPSULE_RADIUS = 30.0f;
+	static constexpr float UP_ROT = 3.0f;
+	static constexpr float MAX_UP_COUNT = 30.0f;
+	static constexpr float MAX_CHARGE_COUNT = 60.0f;
+
+
+	int upCount_ = 0;		//è„è∏âÒêî
+
+	int ChargeCount_ = 0;	//É`ÉÉÅ[ÉWâÒêî
+
+
 };
 

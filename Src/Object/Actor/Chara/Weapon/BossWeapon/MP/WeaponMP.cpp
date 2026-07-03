@@ -82,8 +82,7 @@ void WeaponMP::InitPost(void)
 {
 	isAlive_ = true;
 	localPos_ = LINE_START_POS;
-	stateChanges_.emplace(static_cast<int>(STATE::IDLE),
-		std::bind(&WeaponMP::ChangeStateIdle, this));
+	stateChanges_.emplace(static_cast<int>(STATE::IDLE),std::bind(&WeaponMP::ChangeStateIdle, this));
 	stateChanges_.emplace(static_cast<int>(STATE::ATTACK), std::bind(&WeaponMP::ChangeStateAttack, this));
 	stateChanges_.emplace(static_cast<int>(STATE::END), std::bind(&WeaponMP::ChangeStateEnd, this));
 	ChangeState(STATE::IDLE);
