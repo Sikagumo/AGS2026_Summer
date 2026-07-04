@@ -68,7 +68,8 @@ public:
 		/* ‰f‘œ */
 
 		/* BGM */
-		BGM_TITLE,
+		BGM_TITLE_SEA,
+		BGM_TITLE_THUNDER,
 		BGM_GAME,
 
 		/* Œø‰Ê‰¹ */

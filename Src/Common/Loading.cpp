@@ -37,6 +37,7 @@ Loading::Loading(void)
 	, progress_(0.0f)
 	, imageHandle_(-1)
 {
+	imageHandle_ = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::IMG_PEACH);
 }
 
 Loading::~Loading(void)
@@ -47,7 +48,6 @@ void Loading::Initialize(void)
 {
 	isLoading_ = false;
 	progress_ = 0.0f;
-	imageHandle_ = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::IMG_PEACH);
 }
 
 void Loading::StartAsyncLoad(std::function<void()> loadFunc)
@@ -57,7 +57,7 @@ void Loading::StartAsyncLoad(std::function<void()> loadFunc)
 		return;
 	}
 
-	//Initialize();
+	Initialize();
 	isLoading_ = true;
 
 	if (loadFunc)
@@ -95,8 +95,6 @@ void Loading::Update(void)
 
 void Loading::Draw(void)
 {
-	ClearDrawScreen();
-
 	// 背景を黒で塗りつぶす
 	DrawBox(0, 0, Application::SCREEN_SIZE_X, Application::SCREEN_SIZE_Y, GetColor(0, 0, 0), true);
 

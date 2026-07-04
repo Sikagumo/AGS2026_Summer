@@ -352,12 +352,12 @@ VECTOR Quaternion::GetDir(VECTOR dir) const
 
 VECTOR Quaternion::GetForward(void) const
 {
-	return GetDir(UtilityMath::DIR_F);
+	return GetDir(UtilityMath::DIR_FORWARD);
 }
 
 VECTOR Quaternion::GetBack(void) const
 {
-	return GetDir(UtilityMath::DIR_B);
+	return GetDir(UtilityMath::DIR_BACK);
 }
 
 VECTOR Quaternion::GetRight(void) const

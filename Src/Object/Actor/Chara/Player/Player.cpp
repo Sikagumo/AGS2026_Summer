@@ -42,6 +42,9 @@ namespace
 	constexpr float TIME_WAIT_DODGE = 1.75f;
 
 	constexpr float BODY_POS_OFFSET_Y = 25.0f;
+
+	constexpr float MOVE_SPEED = 8.5f;
+	constexpr float MOVE_SPEED_SHOT = (MOVE_SPEED * 0.3f);
 }
 
 
@@ -63,8 +66,6 @@ Player::Player(int _playerNo, BULLET_TYPE _bulletType, const VECTOR& _startPos)
 		constexpr int BULLET_MAX = 3;
 		attackNumMax_ = BULLET_MAX;
 	}
-
-	constexpr float MOVE_SPEED = 6.5f;
 	moveSpeed_ = MOVE_SPEED;
 }
 
@@ -263,6 +264,9 @@ void Player::Draw(void)
 {
 	COLOR_F material = COLOR_F();
 
+	// î≠éÀï˚å¸ï`âÊ
+	DrawShotOrbit();
+
 	if (timeInv_ > 0.0f)
 	{
 		constexpr COLOR_F DAMAGE_COLOR = COLOR_F(1.0f, 0.0f, 0.0f, 1.0f);
@@ -304,7 +308,7 @@ void Player::SetKnock(const VECTOR& _knockDirXZ, float _knockPowXZ, bool _isStan
 
 void Player::SetRespawn(void)
 {
-	hp_ = MAX_HP;
+	hp_ = HP_MAX;
 	transform_.pos = START_POS;
 
 	timeInv_ = TIME_INVINCIBLE;
@@ -342,6 +346,15 @@ void Player::UpdateProcess(void)
 
 
 	UpdateSound();
+
+	if (CollisionController::GetInstance()
+			.IsTagCollidingWithTag(ColliderBase::TAG::PLAYER, ColliderBase::TAG::PLAYER_RECOVERY)
+		&& hp_ <= HP_MAX)
+	{
+		float recovery = (static_cast<float>(HP_MAX) * PBulletRecovery::RECOVERY_RATE);
+		hp_ += static_cast<int>(recovery);
+		hp_ = ((hp_ > HP_MAX) ? HP_MAX : hp_);
+	}
 }
 
 void Player::UpdateProcessPost(void)
@@ -403,7 +416,7 @@ void Player::ReleasePost(void)
 {
 }
 
-int Player::GetPower(void)
+int Player::GetPowerBullet(void)
 {
 	/*
 	int power = 0;
@@ -455,12 +468,15 @@ void Player::ProcessMove(void)
 	// ñ≥ìGíÜÅAà⁄ìÆñ≥å¯
 	else if (timeInvDodge_ > 0.0f) { return; }
 
-
 	// ÉJÉÅÉâÇÃï˚å¸Ç≈êiçs
 	Quaternion cameraRot = SceneManager::GetInstance().GetCamera()->GetQuaRotY();
 
 	if (!UtilityMath::EqualsVZero(dir))
 	{
+		// çUåÇíÜÇÕà⁄ìÆë¨ìxÇí·â∫
+		moveSpeed_ = ((shotIndex_ != -1)
+			? MOVE_SPEED_SHOT : MOVE_SPEED);
+
 		dir = UtilityMath::VNormalize(dir);
 		movePow_ = UtilityMath::VECTOR_ZERO;
 
@@ -504,6 +520,78 @@ void Player::MoveLimit(void)
 		transform_.pos = VAdd(transform_.pos,
 			VScale(VNorm(VSub(UtilityMath::VECTOR_ZERO, limitPos)),
 				REFLECT_POW));
+	}
+}
+
+void Player::DrawShotOrbit(void)
+{
+	constexpr float ORBIT_RADIUS = 1.0f;
+	constexpr float ORBIT_RADIUS_UP = 0.65f;
+	constexpr int SPHERE_DIV = 12;
+	constexpr int ORBIT_MAX = 50;
+
+	// ãOìπÇÃêF
+	constexpr COLOR_F ORBIT_COLOR = { 150, 150,150, 0.25f };
+	unsigned int color = GetColor(ORBIT_COLOR.r, ORBIT_COLOR.g, ORBIT_COLOR.b);
+
+
+	// ãOìπÇÃïœâªó 
+	static constexpr float ORBIT_DELTA = 0.1f;
+
+	// ãOìπÇÃä‘äu
+	static constexpr float ORBIT_STEP_SCALE = 10.0f;
+
+	// î≠éÀë¨ìx
+	constexpr std::array<float, static_cast<int>(BULLET_TYPE::MAX)>
+		SHOT_POW_XZ
+			= { PBulletBomb::SHOT_SPEED_BOMB_XZ
+				, PBulletBig::SHOT_SPEED_BIG_XZ
+				, PBulletRapidFire::SHOT_SPEED_RAPID_XZ
+				, PBulletRecovery::SHOT_SPEED_RECOVERY_XZ
+	};
+
+	constexpr std::array<float, static_cast<int>(BULLET_TYPE::MAX)>
+		SHOT_POW_Y
+			= { PBulletBomb::SHOT_SPEED_BOMB_Y
+				, PBulletBig::SHOT_SPEED_BIG_Y
+				, 0.0f
+				, PBulletRecovery::SHOT_SPEED_RECOVERY_Y
+	};
+
+	float powXZ, powY = 0.0f;
+	powXZ = SHOT_POW_XZ[static_cast<int>(bulletType_)];
+	powY = SHOT_POW_Y[static_cast<int>(bulletType_)];
+
+	
+	VECTOR shotDir = UtilityMath::VECTOR_ZERO;
+	shotDir = UtilityMath::VNormalize(CalcShotDir());
+
+	// åoâﬂéûä‘
+	float radius = ORBIT_RADIUS;
+
+	const VECTOR SHOT_LOCAL_POS = { 0.0f, 25.0f, 5.0f};
+	VECTOR viewPos = VAdd(transform_.pos, SHOT_LOCAL_POS);
+
+	VECTOR shotPow = UtilityMath::VECTOR_ZERO;
+	shotPow.x = (shotDir.x * powXZ * ORBIT_STEP_SCALE);
+	shotPow.z = (shotDir.z * powXZ * ORBIT_STEP_SCALE);
+	shotPow.y = (shotDir.y * powY * ORBIT_STEP_SCALE);
+
+	for (int i = 1; i < ORBIT_MAX; ++i)
+	{
+		// Ç±ÇÃÉXÉeÉbÉvÇÃà⁄ìÆó [î≠éÀë¨ìx - èdóÕâ¡éZíl]
+		VECTOR pos = shotPow;
+		pos.y -= (Application::GetInstance().GetGravityPow() * (ORBIT_DELTA * ORBIT_STEP_SCALE * i));
+
+		// î≠éÀà íuÇ©ÇÁÇÃà⁄ìÆó ÇêœéZÇ∑ÇÈ
+		viewPos = VAdd(viewPos, pos);
+
+		if (viewPos.y < 0.0f) { break; }
+
+		
+		DrawSphere3D(viewPos, radius, SPHERE_DIV, color, color, true);
+
+		radius += ORBIT_RADIUS_UP;
 	}
 }
 
@@ -551,7 +639,8 @@ void Player::ProcessDodge(void)
 		&& !UtilityMath::EqualsVZero(moveDir_))
 	{
 		if (!actionController_->IsEndActionActive()
-			&& actionController_->GetActionState() != PActionController::PACTION_STATE::NONE)
+			&& actionController_->GetActionState() != PActionController::PACTION_STATE::NONE
+			|| shotIndex_ != -1)
 		{
 			return;
 		}
@@ -685,7 +774,7 @@ void Player::DelayRotate(void)
 		// ÉJÉÅÉâÇÃYé≤âÒì]ÇâÒì]Ç…ïœä∑Ç∑ÇÈ
 		goalRot = SceneManager::GetInstance().GetCamera()->GetQuaRotY();
 		goalRot.x = 0.0f;
-		moveDir_ = Quaternion::PosAxis(goalRot, UtilityMath::DIR_F);
+		moveDir_ = Quaternion::PosAxis(goalRot, UtilityMath::DIR_FORWARD);
 	}
 	else if (!UtilityMath::EqualsVZero(moveDir_))
 	{
@@ -724,12 +813,14 @@ void Player::CreateBullet(void)
 	{
 		case BULLET_TYPE::BIG:
 			bullet = std::make_unique<PBulletBig>();
-			bullet->Load();
 		break;
 
 		case BULLET_TYPE::BOMB:
 			bullet = std::make_unique<PBulletBomb>();
-			bullet->Load();
+		break;
+
+		case BULLET_TYPE::RECOVERY:
+			bullet = std::make_unique<PBulletRecovery>();
 		break;
 
 		default:
@@ -737,6 +828,7 @@ void Player::CreateBullet(void)
 
 	}
 
+	bullet->Load();
 	bullet->Init();
 	bullet->Create(throwPos_, throwDir_, curAttackNum_, (curAttackNum_ >= (attackNumMax_ - 1)));
 
@@ -745,19 +837,22 @@ void Player::CreateBullet(void)
 
 void Player::ShotBullet(void)
 {
+	// î≠éÀèàóùÇÃóLå¯âª
+	bullets_[shotIndex_]->Shot(CalcShotDir());
+	shotIndex_ = -1;
+}
+VECTOR Player::CalcShotDir(void)
+{
 	VECTOR shotDir = transform_.GetForward();
 
 	if (bulletType_ != BULLET_TYPE::RAPID_FIRE)
 	{
 		// ï˙ï®ê¸èÛÇ…ìäÇ∞ÇÈ
-		const VECTOR UP_VEC = VScale(UtilityMath::DIR_UP, 1.0f);
-
-		shotDir = VAdd(shotDir, UP_VEC);
+		shotDir = VAdd(shotDir, UtilityMath::DIR_UP);
 		shotDir = UtilityMath::VNormalize(shotDir);
 	}
 
-	bullets_[shotIndex_]->Shot(shotDir);
-	shotIndex_ = -1;
+	return shotDir;
 }
 
 

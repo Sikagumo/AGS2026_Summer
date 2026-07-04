@@ -44,7 +44,7 @@ public:
 	//•ûŒü
 
 	/// <summary>‘O•û•ûŒü (Z+)</summary>
-	static constexpr VECTOR DIR_F = { 0.0f, 0.0f, 1.0f };
+	static constexpr VECTOR DIR_FORWARD = { 0.0f, 0.0f, 1.0f };
 
 	/// <summary>Œã•û•ûŒü (Z-)</summary>
 	static constexpr VECTOR DIR_B = { 0.0f, 0.0f, -1.0f };

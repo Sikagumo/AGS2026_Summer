@@ -11,8 +11,8 @@ public:
 	enum class BULLET_TYPE
 	{
 		NONE = -1,
-		BOMB,
-		BIG,
+		BOMB,		// 爆破
+		BIG,		// 巨大
 		RAPID_FIRE, // 連射
 		RECOVERY,	// 回復
 		
@@ -65,19 +65,22 @@ public:
 	void SetDamage(int _damage, bool _isInvincible = true, float _timeInvincible = TIME_INVINCIBLE);
 
 	int GetCurHp(void)const { return hp_; };
-	int GetMaxHp(void)const { return MAX_HP; };
+	int GetMaxHp(void)const { return HP_MAX; };
 
 	const VECTOR& GetPos(void)const { return transform_.pos; };
 	VECTOR GetBodyPos(void)const { return bodyPos_; };
 
 	virtual void SetSoundData(VECTOR _pos, float _radius, bool _isLanging,bool _isMGFire, bool _isRoad);
 
+	const std::vector<std::unique_ptr<PBulletBase>>& GetBullets(void)const { return bullets_; };
+
+
 protected:
 
 	// プレイヤー番号
 	const int playerNo_;
 
-	const int MAX_HP;
+	const int HP_MAX;
 
 	// 初期位置
 	const VECTOR START_POS;

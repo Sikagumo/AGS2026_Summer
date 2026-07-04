@@ -40,7 +40,7 @@ public:
 	void ReleasePost(void)override;
 
 	/// @brief Œ»İUŒ‚—Íæ“¾
-	int GetPower(void);
+	int GetPowerBullet(void);
 
 	/// @brief ‚Á”ò‚Î‚µˆ—
 	/// @param _knockDirXZ ‰¡‚Á”ò‚Î‚µ•ûŒü
@@ -130,4 +130,8 @@ private:
 	void DelayRotate(void)override;
 
 	void MoveLimit(void);
+
+	void DrawShotOrbit(void);
+
+	VECTOR CalcShotDir(void);
 };

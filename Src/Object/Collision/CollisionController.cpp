@@ -535,7 +535,8 @@ bool CollisionController::CanCollide(int _tagA, int _tagB) const
 			|| tagHurt == TAG::WEAPON_RG
 			|| tagHurt == TAG::HIT_WAVE
 			|| tagHurt == TAG::MG_BULLET
-			|| tagHurt == TAG::ROAD_ATTACK)
+			|| tagHurt == TAG::ROAD_ATTACK
+			|| tagHurt == TAG::PLAYER_RECOVERY)
 		{
 			return true;
 		}
@@ -545,9 +546,11 @@ bool CollisionController::CanCollide(int _tagA, int _tagB) const
 		|| tagHit == TAG::WEAPON_CANNON_L || tagHit == TAG::WEAPON_CANNON_R
 		|| tagHit == TAG::WEAPON_MG_L || tagHit == TAG::WEAPON_MG_R
 		|| tagHit == TAG::WEAPON_MP_L || tagHit == TAG::WEAPON_MP_R
-		|| tagHit == TAG::WEAPON_RG)
+		|| tagHit == TAG::WEAPON_RG
+		|| tagHit == TAG::PLAYER_RECOVERY)
 	{
-		if (tagHurt == TAG::PLAYER || tagHurt == TAG::PLAYER_BULLET || tagHurt == TAG::PLAYER_BLAST
+		if (tagHurt == TAG::PLAYER
+			|| tagHurt == TAG::PLAYER_BULLET || tagHurt == TAG::PLAYER_BLAST
 			|| tagHurt == TAG::STAGE)
 		{
 			return true;
@@ -556,14 +559,15 @@ bool CollisionController::CanCollide(int _tagA, int _tagB) const
 
 	if (tagHit == TAG::MG_BULLET)
 	{
-		if (tagHurt == TAG::PLAYER || tagHurt == TAG::STAGE)
+		if (tagHurt == TAG::PLAYER
+			|| tagHurt == TAG::STAGE)
 		{
 			return true;
 		}
 	}
 
 
-	if (tagHit == TAG::HIT_WAVE || tagHit==TAG::ROAD_ATTACK)
+	if (tagHit == TAG::HIT_WAVE || tagHit == TAG::ROAD_ATTACK)
 	{
 		if (tagHurt == TAG::PLAYER)
 		{
@@ -573,8 +577,9 @@ bool CollisionController::CanCollide(int _tagA, int _tagB) const
 
 	if (tagHit == TAG::STAGE)
 	{
-		if (tagHurt == TAG::PLAYER || tagHurt == TAG::PLAYER_BULLET || tagHurt == TAG::PLAYER_BLAST
-			|| tagHurt == TAG::BOSS || tagHurt == TAG::WEAPON_CANNON_L || tagHurt == TAG::WEAPON_CANNON_R
+		if (tagHurt == TAG::PLAYER || tagHurt == TAG::PLAYER_BULLET
+			|| tagHurt == TAG::BOSS
+			|| tagHurt == TAG::WEAPON_CANNON_L || tagHurt == TAG::WEAPON_CANNON_R
 			|| tagHurt == TAG::WEAPON_MG_L || tagHurt == TAG::WEAPON_MG_R
 			|| tagHurt == TAG::WEAPON_MP_L || tagHurt == TAG::WEAPON_MP_R
 			|| tagHurt == TAG::WEAPON_RG || tagHurt == TAG::MG_BULLET)

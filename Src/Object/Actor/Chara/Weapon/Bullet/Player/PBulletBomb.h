@@ -5,6 +5,9 @@ class PBulletBomb : public PBulletBase
 {
 public:
 
+	static constexpr float SHOT_SPEED_BOMB_XZ = 10.0f;
+	static constexpr float SHOT_SPEED_BOMB_Y = 8.5f;
+
 	PBulletBomb(void);
 
 	~PBulletBomb(void)override = default;

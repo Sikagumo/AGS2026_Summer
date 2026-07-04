@@ -125,13 +125,18 @@ void Application::Run(void)
 			break;
 		}
 
-		ClearDrawScreen();
+		bool isChanging = sceneManager.IsSceneChanging();
+
+		sceneManager.Update();
+		if (!isChanging)
+		{
+			ClearDrawScreen();
+		}
 
 		netManager.Update();
 		inputTextManager.Update();
 		inputManager.Update();
 		KeyConfInputManager::GetInstance().Update();
-		sceneManager.Update();
 
 		sceneManager.Draw();
 		// •½‹ÏFPS•`‰æ

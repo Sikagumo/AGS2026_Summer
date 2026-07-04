@@ -4,6 +4,9 @@ class PBulletRapidFire : public PBulletBase
 {
 public:
 
+	static constexpr float SHOT_SPEED_RAPID_XZ = 15.0f;
+
+
 	PBulletRapidFire(void);
 
 	~PBulletRapidFire(void)override = default;

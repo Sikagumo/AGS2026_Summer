@@ -5,6 +5,10 @@ class PBulletBig : public PBulletBase
 {
 public:
 
+	static constexpr float SHOT_SPEED_BIG_XZ = 5.0f;
+	static constexpr float SHOT_SPEED_BIG_Y = 5.0f;
+
+
 	PBulletBig(void);
 
 	~PBulletBig(void)override = default;

@@ -16,13 +16,47 @@
 #include "../../Utility/UtilityMath.h"
 #include "../../Shader/ShaderManager.h"
 
+
+SceneTitle::SceneTitle(void)
+    : imageTitle_(-1)
+    , peachHandle_(-1)
+    , peachNormalHandle_(-1)
+    , waveHandle_(-1)
+    , waveNormalHandle_(-1)
+    , oniSimaHandle_(-1)
+    , oniSimaNormalHandle_(-1)
+    , time_(0)
+    , selectedIdx_(0)
+    , cursorCollider_(nullptr)
+    , soloPlayButtonCollider_(nullptr)
+    , multiPlayButtonCollider_(nullptr)
+    , optionButtonCollider_(nullptr)
+    , exitButtonCollider_(nullptr)
+    , imageMenu_()
+    , buttonTags()
+    , prevMousePos_(0.0f, 0.0f)
+    , psHandle_(-1)
+    , isSelectMenu_(true)
+{
+    for (size_t i = 0; i < imageMenu_.size(); ++i)
+    {
+        imageMenu_[i] = -1;
+    }
+}
+
 void SceneTitle::Load(void)
 {
     // isLoading_ を true に
     SceneBase::Load();
 
     // BGM・SEロード
-
+    SoundManager::GetInstance()
+        .Add(SoundManager::TYPE::BGM, SoundManager::SOUND::BGM_TITLE_SEA
+            , ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::BGM_TITLE_SEA));
+    SoundManager::GetInstance()
+        .Add(SoundManager::TYPE::BGM, SoundManager::SOUND::BGM_TITLE_THUNDER
+            , ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::BGM_TITLE_THUNDER));
+            
     // 音量調整
 
     // タイトル画像
@@ -63,32 +97,6 @@ void SceneTitle::Load(void)
 void SceneTitle::EndLoad(void)
 {
     SceneBase::EndLoad();
-}
-
-SceneTitle::SceneTitle(void)
-    : imageTitle_(-1)
-    , peachHandle_(-1)
-    , peachNormalHandle_(-1)
-    , waveHandle_(-1)
-    , waveNormalHandle_(-1)
-    , oniSimaHandle_(-1)
-    , oniSimaNormalHandle_(-1)
-    , time_(0)
-    , selectedIdx_(0)
-    , cursorCollider_(nullptr)
-    , soloPlayButtonCollider_(nullptr)
-    , multiPlayButtonCollider_(nullptr)
-    , optionButtonCollider_(nullptr)
-    , exitButtonCollider_(nullptr)
-    , imageMenu_()
-    , buttonTags()
-    , prevMousePos_(0.0f, 0.0f)
-    , psHandle_(-1)
-{
-    for (size_t i = 0; i < imageMenu_.size(); ++i)
-    {
-        imageMenu_[i] = -1;
-    }
 }
 
 void SceneTitle::Initialize(void)
@@ -149,13 +157,24 @@ void SceneTitle::Initialize(void)
         Collider2DBase::TAG_2D::OPTION_BUTTON,
         Collider2DBase::TAG_2D::EXIT_UTTON
     };
+
+    // メニュー選択有効化
+    isSelectMenu_ = true;
+
+
+    // BGM
+    SoundManager::GetInstance().Play(SoundManager::SOUND::BGM_TITLE_SEA);
+    SoundManager::GetInstance().Play(SoundManager::SOUND::BGM_TITLE_THUNDER);
+
+    // 効果音
+    SoundManager::GetInstance().Add(SoundManager::TYPE::SE, SoundManager::SOUND::SE_SELECT
+        , ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::SE_SELECT));
 }
 
 void SceneTitle::Update(void)
 {
     if (Loading::GetInstance()->IsLoading()) { return; }
 
-    auto& sceneManager = SceneManager::GetInstance();
     auto& keyConfInputManager = KeyConfInputManager::GetInstance();
 
     // スティック入力による選択インデックスの更新
@@ -164,21 +183,25 @@ void SceneTitle::Update(void)
     const int STICK_TINERVAL = 15;
     static int inputIntervalCounter = 0;
 
-    if (inputIntervalCounter > 0)
+    if (isSelectMenu_)
     {
-        inputIntervalCounter--;
-    }
-    else if (std::abs(stick.y) > THRESHOLD)
-    {
-        if (stick.y < 0.0f) 
-        { 
-            selectedIdx_ = (selectedIdx_ + 1) % MENU_BUTTON_NUM; 
-        }
-        else 
+
+        if (inputIntervalCounter > 0)
         {
-            selectedIdx_ = (selectedIdx_ - 1 + MENU_BUTTON_NUM) % MENU_BUTTON_NUM; 
+            inputIntervalCounter--;
         }
-        inputIntervalCounter = STICK_TINERVAL;
+        else if (std::abs(stick.y) > THRESHOLD)
+        {
+            if (stick.y < 0.0f)
+            {
+                selectedIdx_ = (selectedIdx_ + 1) % MENU_BUTTON_NUM;
+            }
+            else
+            {
+                selectedIdx_ = (selectedIdx_ - 1 + MENU_BUTTON_NUM) % MENU_BUTTON_NUM;
+            }
+            inputIntervalCounter = STICK_TINERVAL;
+        }
     }
 
     // マウス座標の更新
@@ -189,6 +212,9 @@ void SceneTitle::Update(void)
     // マウスが動いたときはパッドの選択カーソルも追従させる
     for (int i = 0; i < MENU_BUTTON_NUM; ++i)
     {
+        // メニュー選択無効中はスキップ
+        if (!isSelectMenu_) { break; }
+
         if (CollisionController::GetInstance().IsTagCollidingWithTag2D(Collider2DBase::TAG_2D::MOUSE_CURSOR, buttonTags[i]))
         {
             selectedIdx_ = i;
@@ -199,25 +225,35 @@ void SceneTitle::Update(void)
     // 決定処理
     for (int i = 0; i < MENU_BUTTON_NUM; ++i)
     {
+        if (!isSelectMenu_) { break; }
+
         bool isTarget = CollisionController::GetInstance().IsTagCollidingWithTag2D(Collider2DBase::TAG_2D::MOUSE_CURSOR, buttonTags[i]) || (selectedIdx_ == i);
 
         if (isTarget && keyConfInputManager.isTrigerDown("OK"))
         {
-            switch (static_cast<MENU_ITEM>(i))
-            {
-            case MENU_ITEM::SOLO:
-                sceneManager.ChangeScene(std::make_shared<SceneGame>());
-                break;
-            case MENU_ITEM::MULTI:
-                // マルチプレイ処理
-                break;
-            case MENU_ITEM::OPTION:
-                // 設定処理
-                break;
-            case MENU_ITEM::EXIT:
-                Application::GetInstance().GameEnd();
-                break;
-            }
+            isSelectMenu_ = false;
+
+            // 効果音再生
+            SoundManager::GetInstance().Play(SoundManager::SOUND::SE_SELECT);
+        }
+    }
+
+    if (!isSelectMenu_)
+    {
+        if (selectedIdx_ == static_cast<int>(MENU_ITEM::OPTION)
+            // ↓マルチプレイ有効時には削除
+            || selectedIdx_ == static_cast<int>(MENU_ITEM::MULTI))
+        {
+            // 設定処理有効化
+            /* (設定有効化処理の追加) */
+
+            // 選択変更有効化
+            isSelectMenu_ = true;
+        }
+        else if (!SoundManager::GetInstance().IsPlaying(SoundManager::SOUND::SE_SELECT))
+        {
+            // 効果音終了時に決定処理を実行
+            ProcessMenuState();
         }
     }
 }
@@ -307,5 +343,27 @@ void SceneTitle::Release(void)
 void SceneTitle::DrawDebug(void)
 {
     CollisionController::GetInstance().DrawDebug2D();
+}
+
+void SceneTitle::ProcessMenuState(void)
+{
+    switch (static_cast<MENU_ITEM>(selectedIdx_))
+    {
+        case MENU_ITEM::SOLO:
+            SceneManager::GetInstance()
+                .ChangeScene(std::make_shared<SceneGame>());
+        break;
+
+        case MENU_ITEM::MULTI:
+            // マルチプレイ処理
+
+        break;
+
+        case MENU_ITEM::EXIT:
+
+            Application::GetInstance().GameEnd();
+        break;
+    }
+
 }
 

@@ -37,7 +37,9 @@ public:
 	/// @brief 解放処理
 	void Release(void) override;
 
+
 private:
+
 	enum class MENU_ITEM 
 	{
 		SOLO,
@@ -63,7 +65,7 @@ private:
 	int oniSimaNormalHandle_;         // 鬼ヶ島のノーマルマップ
 
 	// 時間
-	float time_;;
+	float time_;
 
 	// 選択インデックス（パッド操作用）
 	int selectedIdx_;
@@ -78,8 +80,13 @@ private:
 	std::unique_ptr<Collider2DBox> optionButtonCollider_;     // 設定ボタン用の矩形コライダー
 	std::unique_ptr<Collider2DBox> exitButtonCollider_;       // 終了ボタン用の矩形コライダー
 
+	int psHandle_;
+
+	bool isSelectMenu_;
+
 	/// @brief デバック描画 
 	void DrawDebug(void);
 
-	int psHandle_;
+	/// @brief 
+	void ProcessMenuState(void);
 };

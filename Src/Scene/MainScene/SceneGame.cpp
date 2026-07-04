@@ -29,7 +29,7 @@ SceneGame::SceneGame(void)
 	, targetHpImage_(-1), targetHpBerImage_(-1)
 {
 	std::unique_ptr<Player> player1
-		= std::make_unique<Player>(0, Player::BULLET_TYPE::BOMB
+		= std::make_unique<Player>(0, Player::BULLET_TYPE::RECOVERY
 								   , PLAYER_INIT_POS[0]);
 	std::unique_ptr<Player> player2
 		= std::make_unique<Player>(1, Player::BULLET_TYPE::BIG
@@ -156,7 +156,12 @@ void SceneGame::DamageProcess(void)
 	boss_->SetWeaponRGDamage(damageController_->GetWeaponRGDamage());
 
 	// プレイヤーの攻撃
-	damageController_->SetPlayerAttack(players_.at(0)->GetPower());
+	for (auto& bullet : players_.at(0)->GetBullets())
+	{
+		damageController_->SetPlayerAttack(bullet->GetPowerBullet(), bullet->GetPowerBlast());
+	}
+
+	//damageController_->SetPlayerAttack(players_.at(0)->GetPower());
 
 	// プレイヤー被ダメージ処理
 	for (auto& player : players_)

@@ -48,7 +48,8 @@ public:
 
 	virtual void PreActiveProcess(void){};
 
-	int GetPower(void)const { return activePower_; }
+	int GetPowerBullet(void)const { return activePowerBullet_; }
+	int GetPowerBlast(void)const { return activePowerBlast_; }
 
 	virtual void BlastAction(void) = 0;
 
@@ -59,6 +60,7 @@ protected:
 	{
 		BULLET = 0, // ’e
 		BLAST,		// ”š”­
+		RECOVERY,	// ‰ñ•œ
 	};
 
 	BULLET_STATE bulletState_;
@@ -81,7 +83,8 @@ protected:
 	bool isVisible_;
 
 	int power_;
-	int activePower_;
+	int activePowerBullet_;
+	int activePowerBlast_;
 
 	bool isFinish_;
 
