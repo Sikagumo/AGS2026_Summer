@@ -9,8 +9,8 @@
 bool CollisionCapsule::CheckCapsuleVsCapsule(const ColliderBase* _colliderA,
 	const ColliderBase* _colliderB, CollisionInfo& _outInfo)
 {
-	const auto* capsuleA = dynamic_cast<const ColliderCapsule*>(_colliderA);
-	const auto* capsuleB = dynamic_cast<const ColliderCapsule*>(_colliderB);
+	const auto* capsuleA =  static_cast<const ColliderCapsule*>(_colliderA);
+	const auto* capsuleB =  static_cast<const ColliderCapsule*>(_colliderB);
 
 	if (!capsuleA || !capsuleB) { return false; }
 
@@ -87,8 +87,8 @@ bool CollisionCapsule::CheckCapsuleVsModel(const ColliderBase* _capsuleCol,
 		return false;
 	}
 
-	const auto* capsule = dynamic_cast<const ColliderCapsule*>(_capsuleCol);
-	const auto* model = dynamic_cast<const ColliderModel*>(_modelCol);
+	const auto* capsule =  static_cast<const ColliderCapsule*>(_capsuleCol);
+	const auto* model =  static_cast<const ColliderModel*>(_modelCol);
 
 	if (capsule == nullptr || model == nullptr)
 	{

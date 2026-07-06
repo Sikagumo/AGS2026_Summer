@@ -166,15 +166,15 @@ void Player::InitTransform(void)
 void Player::InitCollider(void)
 {
 	ColliderLine* colLine = new ColliderLine(ColliderBase::TAG::PLAYER, &transform_, COL_LINE_START_LOCAL_POS, COL_LINE_END_LOCAL_POS);
-	ownColliders_.emplace(static_cast<int>(ColliderBase::SHAPE::LINE), colLine);
+	ownColliders_[static_cast<int>(ColliderBase::TAG::PLAYER)].push_back(colLine);
 	colLine->SetTriger(false);
 
 	ColliderCapsule* colCap = new ColliderCapsule(ColliderBase::TAG::PLAYER
 									, &transform_, COL_CAPSULE_TOP_LOCAL_POS, COL_CAPSULE_DOWN_LOCAL_POS, COL_CAPSULE_RADIUS);
 
-	ownColliders_.emplace(0, colCap);
+	ownColliders_[static_cast<int>(ColliderBase::TAG::PLAYER)].push_back(colCap);
 
-	ownColliders_.at(0)->SetTriger(false);
+	colCap->SetTriger(false);
 
 	// 衝突判定マネージャに登録
 	CollisionController::GetInstance().RegisterActor(this);
@@ -274,7 +274,10 @@ void Player::Draw(void)
 	}
 	MV1SetMaterialDifColor(transform_.modelId, 0, material);
 
+	DrawFormatString(10, 140, 0xffffff, "Pleyerの座標：%f,%f,%f", transform_.pos.x, transform_.pos.y, transform_.pos.z);
 	ActorBase::Draw();
+
+	CharaBase::DrawShadowRound(30.0f);
 }
 
 void Player::DrawDebug(void)
@@ -372,9 +375,17 @@ void Player::DrawLate(void)
 
 	animation_->DrawDebug();
 
-	for (auto& collider : ownColliders_)
+	for (auto& [id, colliderVector] : ownColliders_)
 	{
-		collider.second->Draw();
+		for (auto* collider : colliderVector)
+		{
+			if (collider == nullptr)
+			{
+				continue;
+			}
+
+			collider->Draw();
+		}
 	}
 #endif
 }

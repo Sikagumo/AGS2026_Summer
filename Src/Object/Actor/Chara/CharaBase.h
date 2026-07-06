@@ -38,6 +38,13 @@ protected:
 	// 衝突時の押し戻し量
 	static constexpr float COLLISION_BACK_DIS = 1.0f;
 
+	//影の描画する高さ式（前が高さ)(後ろが補正値)
+	static constexpr float SHADOW_POS_Y = -22.0f + 0.5;
+	//影の濃さの最大値
+	static constexpr int MAX_SHADOW_COL = 255;
+	//影を完全に消す高さ
+	static constexpr float SHADOW_FADE_HEIGHT = 3000.0f;
+
 
 	std::unique_ptr<AnimationController> animation_;
 
@@ -57,6 +64,16 @@ protected:
 
 	int shadowHandle_;
 	
+	// 頂点番号の定数
+	static constexpr int LEFT_BACK = 0;
+	static constexpr int LEFT_FORWARD = 1;
+	static constexpr int RIGHT_BACK = 2;
+	static constexpr int RIGHT_FORWARD = 3;
+
+	// 頂点配列
+	VERTEX3D imageVertex_[4];
+
+
 	virtual void InitAnimation(void)override;
 
 	virtual void UpdateProcess(void) = 0;
@@ -79,6 +96,6 @@ protected:
 	void CollisionCapsule(void);
 	virtual void CollisionReserve(void) {};
 
-	void DrawShadowRound(void);
+	void DrawShadowRound(float shadowScl);
 
 };

@@ -10,6 +10,7 @@
 #include "../Collision/CollisionCircle.h"
 #include "../Collision/CollisionBox.h"
 #include "../../Utility/UtilityMath.h"
+#include "../Collider/ColliderCapsule.h"
 
 CollisionController* CollisionController::instance_ = nullptr;
 
@@ -129,39 +130,38 @@ void CollisionController::UnregisterActor(ActorBase* _actor)
 bool CollisionController::CheckCollision(const ColliderBase* _colliderA, const ColliderBase* _colliderB,
 	CollisionInfo& _outInfo)
 {
-	// 有効性チェック
-	if (!_colliderA || !_colliderB)
+	if (_colliderA == nullptr || _colliderB == nullptr)
 	{
 		return false;
 	}
 
-	// 形状タイプ取得
 	using SHAPE = ColliderBase::SHAPE;
 	using TAG = ColliderBase::TAG;
+
+	auto* nonConstColliderA = const_cast<ColliderBase*>(_colliderA);
+	auto* nonConstColliderB = const_cast<ColliderBase*>(_colliderB);
 
 	if (_colliderA->GetCollisionTag() == TAG::HIT_WAVE)
 	{
 		if (_colliderB->GetShapeType() == SHAPE::CAPSULE)
 		{
-			return CollisionSphere::CheckHitWave(_colliderB, const_cast<ColliderBase*>(_colliderA));
+			return CollisionSphere::CheckHitWave(nonConstColliderB, nonConstColliderA);
 		}
 
 		return false;
-			
 	}
 
 	if (_colliderB->GetCollisionTag() == TAG::HIT_WAVE)
 	{
 		if (_colliderA->GetShapeType() == SHAPE::CAPSULE)
 		{
-			return CollisionSphere::CheckHitWave(_colliderA, const_cast<ColliderBase*>(_colliderB));
+			return CollisionSphere::CheckHitWave(nonConstColliderA, nonConstColliderB);
 		}
 	}
 
 	SHAPE shapeA = _colliderA->GetShapeType();
 	SHAPE shapeB = _colliderB->GetShapeType();
 
-	// 形状の組み合わせによる判定の振り分け
 	if (shapeA == SHAPE::SPHERE && shapeB == SHAPE::SPHERE)
 	{
 		return CollisionSphere::CheckSphereVsSphere(_colliderA, _colliderB, _outInfo);
@@ -178,8 +178,7 @@ bool CollisionController::CheckCollision(const ColliderBase* _colliderA, const C
 	{
 		return CollisionCapsule::CheckCapsuleVsSphere(_colliderA, _colliderB, _outInfo);
 	}
-	
-	// 地面（MODEL）との判定
+
 	if (shapeA == SHAPE::LINE && shapeB == SHAPE::MODEL)
 	{
 		return CollisionLine::CheckLineVsModel(_colliderA, _colliderB, _outInfo);
@@ -188,7 +187,7 @@ bool CollisionController::CheckCollision(const ColliderBase* _colliderA, const C
 	{
 		return CollisionLine::CheckLineVsModel(_colliderB, _colliderA, _outInfo);
 	}
-	
+
 	if (shapeA == SHAPE::CAPSULE && shapeB == SHAPE::MODEL)
 	{
 		return CollisionCapsule::CheckCapsuleVsModel(_colliderA, _colliderB, _outInfo);
@@ -197,7 +196,7 @@ bool CollisionController::CheckCollision(const ColliderBase* _colliderA, const C
 	{
 		return CollisionCapsule::CheckCapsuleVsModel(_colliderB, _colliderA, _outInfo);
 	}
-	
+
 	if (shapeA == SHAPE::SPHERE && shapeB == SHAPE::MODEL)
 	{
 		return CollisionSphere::CheckSphereVsModel(_colliderA, _colliderB, _outInfo);
@@ -206,7 +205,7 @@ bool CollisionController::CheckCollision(const ColliderBase* _colliderA, const C
 	{
 		return CollisionSphere::CheckSphereVsModel(_colliderB, _colliderA, _outInfo);
 	}
-	
+
 	return false;
 }
 
@@ -278,7 +277,7 @@ VECTOR CollisionController::IsActorHitPosWithTag(const ActorBase* _actor,
 	return UtilityMath::VECTOR_ZERO;
 }
 
-void CollisionController::SetCollisionActive(ActorBase* _targetActor, 
+void CollisionController::SetCollisionActive(ActorBase* _targetActor,
 	ColliderBase::TAG _targetTag, const bool _isActive)
 {
 	if (_targetActor == nullptr)
@@ -286,15 +285,19 @@ void CollisionController::SetCollisionActive(ActorBase* _targetActor,
 		return;
 	}
 
-	auto& ownColliders = _targetActor->GetOwnColliders();
+	auto& ownCollidersMap = _targetActor->GetOwnColliders();
+	int targetKey = static_cast<int>(_targetTag);
 
-	// コライダーマップ(または配列)をループで回す
-	for (auto& [id, collider] : ownColliders)
+	auto it = const_cast<ActorBase::ColliderMap&>(ownCollidersMap).find(targetKey);
+	if (it != const_cast<ActorBase::ColliderMap&>(ownCollidersMap).end())
 	{
-		if (collider == nullptr) { continue; }
-
-		if (collider->GetCollisionTag() == _targetTag)
+		for (auto* collider : it->second)
 		{
+			if (collider == nullptr)
+			{
+				continue;
+			}
+
 			collider->SetActive(_isActive);
 		}
 	}
@@ -308,17 +311,50 @@ void CollisionController::SetActorColliderRadius(ActorBase* _targetActor,
 		return;
 	}
 
-	auto& ownColliders = _targetActor->GetOwnColliders();
-
-	// コライダーマップ(または配列)をループで回す
-	for (auto& [id, collider] : ownColliders)
+	auto& ownCollidersMap = _targetActor->GetOwnColliders();
+	int targetKey = static_cast<int>(_targetTag);
+	auto it = const_cast<ActorBase::ColliderMap&>(ownCollidersMap).find(targetKey);
+	
+	if (it != const_cast<ActorBase::ColliderMap&>(ownCollidersMap).end())
 	{
-		if (collider == nullptr) { continue; }
-
-		if (collider->GetCollisionTag() == _targetTag)
+		for (auto* collider : it->second)
 		{
+			if (collider == nullptr)
+			{
+				continue;
+			}
+
 			collider->SetRadius(_radius);
 		}
+	}
+}
+
+void CollisionController::SetActorCapsuleShape(ActorBase* _targetActor, ColliderBase::TAG _targetTag, const VECTOR& _localStartPos, const VECTOR& _localEndPos, float _radius)
+{
+	if (_targetActor == nullptr)
+	{
+		return;
+	}
+	
+	auto& ownCollidersMap = _targetActor->GetOwnColliders();
+	int targetKey = static_cast<int>(_targetTag);
+	auto it = const_cast<ActorBase::ColliderMap&>(ownCollidersMap).find(targetKey);
+	
+	for (auto* collider : it->second)
+	{
+		if (collider == nullptr)
+		{
+			continue;
+		}
+
+		auto* capsule =  static_cast<ColliderCapsule*>(collider);
+
+		if (capsule == nullptr)
+		{
+			continue;
+		}
+
+		capsule->SetShape(_localStartPos, _localEndPos, _radius);
 	}
 }
 
@@ -338,17 +374,31 @@ void CollisionController::ResolveCollision(ActorBase* _actorA, ActorBase* _actor
 	TAG tagA = _info.myCollider->GetCollisionTag();
 	TAG tagB = _info.hitCollider->GetCollisionTag();
 
-	if (tagA == TAG::STAGE && tagB == TAG::STAGE)
+	auto isStaticObstacle = [](TAG _tag)
+		{
+			return _tag == TAG::STAGE || _tag == TAG::WALL;
+		};
+
+	// 静的オブジェクト同士の衝突の場合
+	if (isStaticObstacle(tagA) && isStaticObstacle(tagB))
 	{
 		float overlap = fabsf(_info.penetration);
 		VECTOR stagePush = VScale(VGet(0.0f, 1.0f, 0.0f), overlap);
 
 		bool isHaveMyCollider = false;
-		for (const auto& [id, col] : _actorA->GetOwnColliders())
+
+		for (const auto& [id, colliderVector] : _actorA->GetOwnColliders())
 		{
-			if (col == _info.myCollider)
+			for (const auto* collider : colliderVector)
 			{
-				isHaveMyCollider = true;
+				if (collider == _info.myCollider)
+				{
+					isHaveMyCollider = true;
+					break;
+				}
+			}
+			if (isHaveMyCollider)
+			{
 				break;
 			}
 		}
@@ -364,26 +414,35 @@ void CollisionController::ResolveCollision(ActorBase* _actorA, ActorBase* _actor
 		return;
 	}
 
-	if (tagA != TAG::STAGE && tagB == TAG::STAGE)
+	// 片方が動かないオブジェクトで、もう片方が動くオブジェクトの場合
+	if (!isStaticObstacle(tagA) && isStaticObstacle(tagB))
 	{
 		_actorA->GetTransform().Translate(pushVector);
 		return;
 	}
-	else if (tagA == TAG::STAGE && tagB != TAG::STAGE)
+	else if (isStaticObstacle(tagA) && !isStaticObstacle(tagB))
 	{
 		_actorB->GetTransform().Translate(VScale(pushVector, -1.0f));
 		return;
 	}
 
+	// 動くオブジェクト同士の衝突の場合は、Y軸の押し戻しを無視する
 	pushVector.y = 0.0f;
 
 	bool isHaveMyCollider = false;
 
-	for (const auto& [id, col] : _actorA->GetOwnColliders())
+	for (const auto& [id, colliderVector] : _actorA->GetOwnColliders())
 	{
-		if (col == _info.myCollider)
+		for (const auto* collider : colliderVector)
 		{
-			isHaveMyCollider = true;
+			if (collider == _info.myCollider)
+			{
+				isHaveMyCollider = true;
+				break;
+			}
+		}
+		if (isHaveMyCollider)
+		{
 			break;
 		}
 	}
@@ -421,33 +480,41 @@ void CollisionController::UpdateCollisionPars(void)
 	for (size_t i = 0; i < actorCount; ++i)
 	{
 		auto actorA = actors_[i];
-		const auto& collidersA = actorA->GetOwnColliders();
+		const auto& collidersMapA = actorA->GetOwnColliders();
 
 		for (size_t j = i + 1; j < actorCount; ++j)
 		{
 			auto actorB = actors_[j];
+			const auto& collidersMapB = actorB->GetOwnColliders();
 
 			bool isStageCollision = false;
 
 			// アクターAのコライダーの中にSTAGEがあるかチェック
-			for (const auto& [idA, colA] : collidersA)
+			for (const auto& [idA, colliderVectorA] : collidersMapA)
 			{
-				if (colA->GetCollisionTag() == ColliderBase::TAG::STAGE)
+				for (const auto* colA : colliderVectorA)
 				{
-					isStageCollision = true;
-					break;
+					if (colA != nullptr && colA->GetCollisionTag() == ColliderBase::TAG::STAGE)
+					{
+						isStageCollision = true;
+						break;
+					}
 				}
+				if (isStageCollision) { break; }
 			}
 
 			// アクターBのコライダーの中にSTAGEがあるかチェック
-			const auto& collidersB = actorB->GetOwnColliders();
-			for (const auto& [idB, colB] : collidersB)
+			for (const auto& [idB, colliderVectorB] : collidersMapB)
 			{
-				if (colB->GetCollisionTag() == ColliderBase::TAG::STAGE)
+				for (const auto* colB : colliderVectorB)
 				{
-					isStageCollision = true;
-					break;
+					if (colB != nullptr && colB->GetCollisionTag() == ColliderBase::TAG::STAGE)
+					{
+						isStageCollision = true;
+						break;
+					}
 				}
+				if (isStageCollision) { break; }
 			}
 
 			// どちらもステージではない場合のみ、距離によるカリングを行う
@@ -467,61 +534,56 @@ void CollisionController::UpdateCollisionPars(void)
 				}
 			}
 
-			// コライダー同士の詳細判定
-			for (const auto& [idA, colA] : collidersA)
+			// マップから vector を取り出すループ
+			for (const auto& [idA, colliderVectorA] : collidersMapA)
 			{
-				if (colA == nullptr)
+				for (const auto* colA : colliderVectorA)
 				{
-					continue;
-				}
-
-				if (!colA->IsActive())
-				{
-					continue;
-				}
-
-				for (const auto& [idB, colB] : collidersB)
-				{
-					if (colB == nullptr)
+					if (colA == nullptr || !colA->IsActive())
 					{
 						continue;
 					}
 
-					if (!colB->IsActive())
+					// 相手のマップから vector を取り出すループ
+					for (const auto& [idB, colliderVectorB] : collidersMapB)
 					{
-						continue;
-					}
-
-					// 衝突タグによる判定可否の確認
-					if (CanCollide(static_cast<int>(colA->GetCollisionTag()),
-						static_cast<int>(colB->GetCollisionTag())))
-					{
-						CollisionInfo info;
-
-						if (CheckCollision(colA, colB, info))
+						for (const auto* colB : colliderVectorB)
 						{
-							// 衝突した相手を相互に登録
-							actorA->AddHitCollider(colB);
-							actorB->AddHitCollider(colA);
-
-							currentColInfos_[actorA].push_back(info);
-
-							CollisionInfo reorderInfo = info;
-							reorderInfo.myCollider = info.hitCollider;
-							reorderInfo.hitCollider = info.myCollider;
-							reorderInfo.hitNormal = VScale(info.hitNormal, -1.0f);
-							currentColInfos_[actorB].push_back(reorderInfo);
-
-							auto tagA = colA->GetCollisionTag();
-							auto tagB = colB->GetCollisionTag();
-
-							auto pair = (tagA < tagB) ? std::make_pair(tagA, tagB) : std::make_pair(tagB, tagA);
-
-							activeCollisions_.insert(pair);
-
-							if (!colA->IsTrigger() && !colB->IsTrigger())
+							if (colB == nullptr || !colB->IsActive())
 							{
-								ResolveCollision(actorA, actorB, info);
+								continue;
+							}
+
+							// 衝突タグによる判定可否の確認
+							if (CanCollide(static_cast<int>(colA->GetCollisionTag()),
+								static_cast<int>(colB->GetCollisionTag())))
+							{
+								CollisionInfo info;
+
+								if (CheckCollision(colA, colB, info))
+								{
+									actorA->AddHitCollider(colB);
+									actorB->AddHitCollider(colA);
+
+									currentColInfos_[actorA].push_back(info);
+
+									CollisionInfo reorderInfo = info;
+									reorderInfo.myCollider = info.hitCollider;
+									reorderInfo.hitCollider = info.myCollider;
+									reorderInfo.hitNormal = VScale(info.hitNormal, -1.0f);
+									currentColInfos_[actorB].push_back(reorderInfo);
+
+									auto tagA = colA->GetCollisionTag();
+									auto tagB = colB->GetCollisionTag();
+
+									auto pair = (tagA < tagB) ? std::make_pair(tagA, tagB) : std::make_pair(tagB, tagA);
+									activeCollisions_.insert(pair);
+
+									if (!colA->IsTrigger() && !colB->IsTrigger())
+									{
+										ResolveCollision(actorA, actorB, info);
+									}
+								}
 							}
 						}
 					}

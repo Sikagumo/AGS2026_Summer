@@ -88,7 +88,15 @@ void Resource::Load_ModelAndAnim(void)
 void Resource::Load_Effect(void)
 {
 	/* エフェクトの読み込み */
+	// 1. 現在の非同期フラグの状態を一時的に保存しつつ、一時的に「同期読み込み(false)」にする
+	int prevAsyncFlag = GetUseASyncLoadFlag();
+	SetUseASyncLoadFlag(FALSE);
+
+	// 2. 安全にその場でエフェクトを読み込む
 	handleId_ = LoadEffekseerEffect(path_.c_str());
+
+	// 3. 読み込みが終わったら、元の非同期フラグの状態に戻す
+	SetUseASyncLoadFlag(prevAsyncFlag);
 }
 void Resource::Load_Sound(void)
 {

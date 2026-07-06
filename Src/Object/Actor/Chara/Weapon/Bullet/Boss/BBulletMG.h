@@ -20,6 +20,9 @@ public:
 
 	void CreateBullets(VECTOR _pos, VECTOR _dir, float _radius)override { transform_.pos = _pos; dir_ = _dir; radius_ = _radius; }
 
+	void SetPlayerPos(VECTOR _pos) {}
+	void SetUpMaxPos_(float _pos)override {}
+
 	void SetTransform(Transform trans)override { weaponTrans_ = trans; }
 
 protected:

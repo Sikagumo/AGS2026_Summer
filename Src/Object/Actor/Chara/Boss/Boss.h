@@ -25,6 +25,7 @@ public:
 		JUMP,
 		JUMPBEFORE,
 		ROADATTACK,
+		LASER,
 		END,
 	};
 
@@ -34,6 +35,7 @@ public:
 		MG,
 		ROAD,
 		CANNON,
+		MISSILE,
 		MAX,
 	};
 
@@ -129,7 +131,7 @@ private:
 	//bossの大きさ
 	static constexpr VECTOR BOSS_SIZE = { 3.0f, 3.0f, 3.0f };
 	//bossの初期座標
-	static constexpr VECTOR BOSS_INIT_POS= { 0.0f, 0.0f, 500.0f };
+	static constexpr VECTOR BOSS_INIT_POS= { 500.0f, 0.0f, 200.0f };
 	//回転
 	static constexpr float INIT_ROT = 180.0f;
 	//攻撃
@@ -144,6 +146,9 @@ private:
 	static constexpr float JUMP_MAX_UP = POW_JUMP_INIT + 500.0f;
 	static constexpr float MOVE_SPEED_INIT = 20.0f;
 	static constexpr float POW_JUMP_DOUN = -50.0f;
+	static constexpr VECTOR WAVE_SCL = { 1.0f,50.0f,1.0f };
+	static constexpr VECTOR WAVE_SCL_UP = { 4.0f,0.0f,4.0f };
+	static constexpr VECTOR LANDING_SCL = { 100.0f,50.0f,100.0f };
 
 	//ロードアッタク
 	static constexpr float WHEEL_ROT = 10.0f;
@@ -204,6 +209,9 @@ private:
 	bool isLanging_;				//着地の際の音を鳴らすかのフラグ
 	bool isMGFire_;					//MGの発射音を鳴らすかのフラグ
 	bool isRoadFire_;				//走行音を鳴らすかのフラグ
+	VECTOR currentWaveScl;
+
+	int test;
 
 	//攻撃関連
 	int jumpCount_;

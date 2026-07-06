@@ -57,14 +57,15 @@ void WeaponCannon::InitTransform(void)
 
 void WeaponCannon::InitCollider(void)
 {
-	ColliderLine* colLine = new ColliderLine(ColliderBase::TAG::STAGE, &transform_, LINE_START_POS, LINE_END_POS);
-	ownColliders_.emplace(static_cast<int>(ColliderBase::SHAPE::LINE), colLine);
-	
+	ColliderLine* lineCollider = new ColliderLine(ColliderBase::TAG::STAGE, &transform_, LINE_START_POS, LINE_END_POS);
+	ownColliders_[static_cast<int>(ColliderBase::TAG::STAGE)].push_back(lineCollider);
 
-	ColliderCapsule* colCapsule = new ColliderCapsule(
+
+	ColliderCapsule* capsuleCollider = new ColliderCapsule(
 		tag_, &transform_, CAPSULE_START_POS, CAPSULE_END_POS, CAPSULE_RADIUS);
-	ownColliders_.emplace(static_cast<int>(ColliderBase::SHAPE::CAPSULE), colCapsule);
-	colCapsule->SetTriger(false);
+	capsuleCollider->SetTriger(false);
+	ownColliders_[static_cast<int>(tag_)].push_back(capsuleCollider);
+
 
 	CollisionController::GetInstance().RegisterActor(this);
 }
@@ -121,9 +122,17 @@ void WeaponCannon::DrawPre(void)
 
 	DrawFormatString(10, 420, 0xffffff, "count:%d", count_);
 
-	for (auto& col : ownColliders_)
+	for (auto& [id, colliderVector] : ownColliders_)
 	{
-		col.second->Draw();
+		for (auto* collider : colliderVector)
+		{
+			if (collider == nullptr)
+			{
+				continue;
+			}
+
+			collider->Draw();
+		}
 	}
 #endif
 }
