@@ -9,8 +9,8 @@ bool CollisionLine::CheckLineVsModel(const ColliderBase* _lineCol,
 {
 	if (!_lineCol || !_modelCol) { return false; }
 
-	const auto* line = dynamic_cast<const ColliderLine*>(_lineCol);
-	const auto* model = dynamic_cast<const ColliderModel*>(_modelCol);
+	const auto* line =  static_cast<const ColliderLine*>(_lineCol);
+	const auto* model =  static_cast<const ColliderModel*>(_modelCol);
 
 	if (!line || !model) { return false; }
 

@@ -12,8 +12,8 @@ bool CollisionCircle::CheckCircleVsCircle(const Collider2DBase* _circleA, const 
 {
 	if (!_circleA || !_circleB) { return false; }
 
-	const auto* circleA = dynamic_cast<const Collider2DCircle*>(_circleA);
-	const auto* circleB = dynamic_cast<const Collider2DCircle*>(_circleB);
+	const auto* circleA =  static_cast<const Collider2DCircle*>(_circleA);
+	const auto* circleB =  static_cast<const Collider2DCircle*>(_circleB);
 
 	if (circleA == nullptr || circleB == nullptr) { return false; }
 
@@ -39,16 +39,16 @@ bool CollisionCircle::CheckCircleVsBox(const Collider2DBase* _circle, const Coll
 {
 	if (!_circle || !_box) { return false; }
 
-	const auto* circle = dynamic_cast<const Collider2DCircle*>(_circle);
+	const auto* circle =  static_cast<const Collider2DCircle*>(_circle);
 	if (circle == nullptr)
 	{
-		circle = dynamic_cast<const Collider2DCircle*>(_box);
+		circle =  static_cast<const Collider2DCircle*>(_box);
 	}
 
-	const auto* box = dynamic_cast<const Collider2DBox*>(_box);
+	const auto* box =  static_cast<const Collider2DBox*>(_box);
 	if (box == nullptr)
 	{
-		box = dynamic_cast<const Collider2DBox*>(_circle);
+		box =  static_cast<const Collider2DBox*>(_circle);
 	}
 
 	if (circle == nullptr || box == nullptr) { return false; }

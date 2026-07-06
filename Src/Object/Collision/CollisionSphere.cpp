@@ -11,8 +11,8 @@ bool CollisionSphere::CheckSphereVsSphere(const ColliderBase* _colliderA,
 {
 	if (!_colliderA || !_colliderB) { return false; }
 
-	const auto* sphereA = dynamic_cast<const ColliderSphere*>(_colliderA);
-	const auto* sphereB = dynamic_cast<const ColliderSphere*>(_colliderB);
+	const auto* sphereA =  static_cast<const ColliderSphere*>(_colliderA);
+	const auto* sphereB =  static_cast<const ColliderSphere*>(_colliderB);
 
 	if (sphereA == nullptr || sphereB == nullptr)
 	{
@@ -66,8 +66,8 @@ bool CollisionSphere::CheckSphereVsCapsule(const ColliderBase* _sphereCol,
 {
 	if (!_sphereCol || !_capsuleCol) { return false; }
 
-	const auto* sphereHit = dynamic_cast<const ColliderSphere*>(_sphereCol);
-	const auto* capsuleHit = dynamic_cast<const ColliderCapsule*>(_capsuleCol);
+	const auto* sphereHit =  static_cast<const ColliderSphere*>(_sphereCol);
+	const auto* capsuleHit =  static_cast<const ColliderCapsule*>(_capsuleCol);
 
 	if (sphereHit == nullptr || capsuleHit == nullptr)
 	{
@@ -119,8 +119,8 @@ bool CollisionSphere::CheckSphereVsModel(const ColliderBase* _sphereCol, const C
 {
 	if (!_sphereCol || !_modelCol) { return false; }
 
-	const auto* sphere = dynamic_cast<const ColliderSphere*>(_sphereCol);
-	const auto* model = dynamic_cast<const ColliderModel*>(_modelCol);
+	const auto* sphere =  static_cast<const ColliderSphere*>(_sphereCol);
+	const auto* model =  static_cast<const ColliderModel*>(_modelCol);
 
 	if (sphere == nullptr || model == nullptr)
 	{
@@ -208,8 +208,8 @@ bool CollisionSphere::CheckHitWave(const ColliderBase* _hitCapsuleCol, ColliderB
 		return false;
 	}
 
-	const auto* capsule = dynamic_cast <const ColliderCapsule*>(_hitCapsuleCol);
-	const auto* wave = dynamic_cast<const ColliderSphere*>(_waveCol);
+	const auto* capsule =  static_cast <const ColliderCapsule*>(_hitCapsuleCol);
+	const auto* wave =  static_cast<const ColliderSphere*>(_waveCol);
 
 	if (capsule == nullptr || wave == nullptr)
 	{

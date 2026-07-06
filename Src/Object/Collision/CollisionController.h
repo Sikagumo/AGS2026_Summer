@@ -100,6 +100,15 @@ public:
 	void SetActorColliderRadius(ActorBase* _targetActor, ColliderBase::TAG _targetTag, 
 		float _radius);
 
+	/// @brief 指定したタグのカプセルコライダーの始点・終点・半径を一括で変更する
+	/// @param _targetActor 変更したいアクター
+	/// @param _targetTag 変更したいコライダーのタグ
+	/// @param _localStartPos 新しい始点（ローカル座標）
+	/// @param _localEndPos 新しい終点（ローカル座標）
+	/// @param _radius 新しい半径
+	void SetActorCapsuleShape(ActorBase* _targetActor, ColliderBase::TAG _targetTag,
+		const VECTOR& _localStartPos, const VECTOR& _localEndPos, float _radius);
+
 	/// @brief 衝突したアクター同士の押し戻し処理を行う
 	/// @param actorA 動かす対象のアクターA
 	/// @param actorB 動かす対象のアクターB

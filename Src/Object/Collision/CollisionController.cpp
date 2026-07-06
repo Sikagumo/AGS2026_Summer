@@ -10,6 +10,7 @@
 #include "../Collision/CollisionCircle.h"
 #include "../Collision/CollisionBox.h"
 #include "../../Utility/UtilityMath.h"
+#include "../Collider/ColliderCapsule.h"
 
 CollisionController* CollisionController::instance_ = nullptr;
 
@@ -312,8 +313,8 @@ void CollisionController::SetActorColliderRadius(ActorBase* _targetActor,
 
 	auto& ownCollidersMap = _targetActor->GetOwnColliders();
 	int targetKey = static_cast<int>(_targetTag);
-
 	auto it = const_cast<ActorBase::ColliderMap&>(ownCollidersMap).find(targetKey);
+	
 	if (it != const_cast<ActorBase::ColliderMap&>(ownCollidersMap).end())
 	{
 		for (auto* collider : it->second)
@@ -325,6 +326,35 @@ void CollisionController::SetActorColliderRadius(ActorBase* _targetActor,
 
 			collider->SetRadius(_radius);
 		}
+	}
+}
+
+void CollisionController::SetActorCapsuleShape(ActorBase* _targetActor, ColliderBase::TAG _targetTag, const VECTOR& _localStartPos, const VECTOR& _localEndPos, float _radius)
+{
+	if (_targetActor == nullptr)
+	{
+		return;
+	}
+	
+	auto& ownCollidersMap = _targetActor->GetOwnColliders();
+	int targetKey = static_cast<int>(_targetTag);
+	auto it = const_cast<ActorBase::ColliderMap&>(ownCollidersMap).find(targetKey);
+	
+	for (auto* collider : it->second)
+	{
+		if (collider == nullptr)
+		{
+			continue;
+		}
+
+		auto* capsule =  static_cast<ColliderCapsule*>(collider);
+
+		if (capsule == nullptr)
+		{
+			continue;
+		}
+
+		capsule->SetShape(_localStartPos, _localEndPos, _radius);
 	}
 }
 
