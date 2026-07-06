@@ -51,6 +51,8 @@ public:
 	// ó‘Ô‘JˆÚ
 	void ChangeState(STATE _state)override;
 
+	bool GetIsAttack(void) { return isAttack_; }
+
 	
 
 protected:
@@ -111,6 +113,6 @@ private:
 
 	int ChargeCount_ = 0;	//ƒ`ƒƒ[ƒW‰ñ”
 
-
+	bool isAttack_;
 };
 

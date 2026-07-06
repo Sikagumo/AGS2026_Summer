@@ -47,6 +47,9 @@ Boss::Boss(void) :
 	isLanging_(false),
 	isMGFire_(false),
 	isRoadFire_(false),
+	laserShotHp_(hp_/2),
+	laserAttackRot_(0.0f),
+
 
 	CharaBase()
 {
@@ -296,6 +299,7 @@ void Boss::InitPost(void)
 	stateChanges_.emplace(static_cast<int>(STATE::JUMP), std::bind(&Boss::ChangeStateJump, this));
 	stateChanges_.emplace(static_cast<int>(STATE::JUMPBEFORE), std::bind(&Boss::ChangeStateJumpBefore, this));
 	stateChanges_.emplace(static_cast<int>(STATE::ROADATTACK), std::bind(&Boss::ChangeStateRoadAttack, this));
+	stateChanges_.emplace(static_cast<int>(STATE::ROADATTACK), std::bind(&Boss::ChangeStateLaserAttack, this));
 	stateChanges_.emplace(static_cast<int>(STATE::END), std::bind(&Boss::ChangeStateEnd, this));
 	ChangeState(STATE::IDLE);
 	
@@ -393,6 +397,14 @@ void Boss::ChangeStateRoadAttack(void)
 
 }
 
+void Boss::ChangeStateLaserAttack(void)
+{
+	stateUpdate_ = std::bind(&Boss::UpdateStateLaserAttack , this);
+	weaponRG_->ChangeState(WeaponRG::STATE::PREPARATION);
+
+	animation_->Play(static_cast<int>(ANIM_TYPE::JUMPBEFORE), false);
+}
+
 void Boss::ChangeStateEnd(void)
 {
 	stateUpdate_ = std::bind(&Boss::UpdateEnd, this);
@@ -468,7 +480,11 @@ void Boss::UpdateIdle(void)
 {
 	transformBody_.pos = MV1GetFramePosition(transform_.modelId, JOINT_FEET_BODY);
 	attackCount_++;
-	if (attackCount_ >= attackInterval_)
+	if (hp_ <= laserShotHp_ || attackCount_ >= attackInterval_)
+	{
+		ChangeState(STATE::LASER);
+	}
+	else if (attackCount_ >= attackInterval_)
 	{
 		ChangeState(STATE::ATTACK);
 	}
@@ -637,6 +653,22 @@ void Boss::UpdateRoadAttack(void)
 
 
 
+}
+
+void Boss::UpdateStateLaserAttack(void)
+{
+	if (weaponRG_->GetIsAttack() == true)
+	{
+		transformBody_.quaRot = Quaternion::Mult(transformBody_.quaRot, Quaternion::AngleAxis(UtilityMath::Deg2RadF(UtilityMath::Deg2RadF(3.0f)), UtilityMath::AXIS_Y));
+		laserAttackRot_ += UtilityMath::Deg2RadF(3.0f);
+		if (laserAttackRot_ >= UtilityMath::Deg2RadF(360.0f))
+		{
+			laserAttackRot_ = 0.0f;
+			weaponRG_->ChangeState(WeaponRG::STATE::IDLE);
+			ChangeState(STATE::IDLE);
+		}
+	}
+	
 }
 
 void Boss::UpdateEnd(void)

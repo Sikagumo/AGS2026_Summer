@@ -36,6 +36,7 @@ public:
 		ROAD,
 		CANNON,
 		MISSILE,
+		LASER,
 		MAX,
 	};
 
@@ -210,6 +211,8 @@ private:
 	bool isMGFire_;					//MGの発射音を鳴らすかのフラグ
 	bool isRoadFire_;				//走行音を鳴らすかのフラグ
 	VECTOR currentWaveScl;
+	float laserAttackRot_;
+	float laserShotHp_;
 
 	int test;
 
@@ -257,6 +260,7 @@ private:
 	void ChangeStateJump(void);
 	void ChangeStateJumpBefore(void);
 	void ChangeStateRoadAttack(void);
+	void ChangeStateLaserAttack(void);
 	void ChangeStateEnd(void);
 	// 更新系
 	// 状態管理(更新ステップ)
@@ -266,6 +270,7 @@ private:
 	void UpdateJump(void);
 	void UpdateJumpBefore(void);
 	void UpdateRoadAttack(void);
+	void UpdateStateLaserAttack(void);
 	void UpdateEnd(void);
 
 	//機能関数

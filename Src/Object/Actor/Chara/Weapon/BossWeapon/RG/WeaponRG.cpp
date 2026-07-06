@@ -8,6 +8,10 @@
 #include "WeaponRG.h"
 
 WeaponRG::WeaponRG(void)
+	: WeaponBase()
+	, upCount_(0)
+	, ChargeCount_(0)
+	, isAttack_(false)
 {
 		
 }
@@ -158,6 +162,7 @@ void WeaponRG::ChangePreparation(void)
 	}
 	if (ChargeCount_ >= MAX_CHARGE_COUNT)
 	{
+		isAttack_ = true;
 		ChangeState(STATE::ATTACK);
 	}
 	
