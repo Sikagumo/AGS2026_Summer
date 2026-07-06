@@ -16,6 +16,11 @@ public:
 
 	void SetUpMaxPos_(float _pos)override {}
 
+	void SetTransform(Transform trans)override { weaponTrans_ = trans; }
+
+	void Shot(void);
+
+
 protected:
 	// 大きさ、回転、座標の初期化
 	void InitTransform(void) override;
@@ -36,6 +41,10 @@ protected:
 
 	// 前描画
 	void DrawPre(void) override;
+
+private:
+
+
 
 };
 

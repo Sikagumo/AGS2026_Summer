@@ -141,6 +141,9 @@ private:
 	//‰¹
 	static constexpr float SOUND_RADIUS = 2000.0f;
 
+	//MAXHP
+	static constexpr int MAX_HP = 2000;
+
 
 	//ƒWƒƒƒ“ƒv—Í
 	static constexpr float POW_JUMP_INIT = 3000.0f;

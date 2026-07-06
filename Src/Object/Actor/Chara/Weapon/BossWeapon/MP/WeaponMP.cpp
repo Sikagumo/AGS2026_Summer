@@ -97,6 +97,7 @@ void WeaponMP::InitPost(void)
 
 void WeaponMP::UpdateProcess(void)
 {
+	LookPlayer();
 	// HP‚ª‚È‚­‚È‚Á‚½‚ç€–Sˆ—i¶‰E‹¤’Êj
 	if (hp_ <= 0 && isAlive_)
 	{
@@ -145,6 +146,11 @@ void WeaponMP::DrawPre(void)
 	}
 	
 	
+}
+
+void WeaponMP::LookPlayer(void)
+{
+	transform_.quaRot = bone_.transform.quaRot;
 }
 
 void WeaponMP::ChangeState(STATE _state)

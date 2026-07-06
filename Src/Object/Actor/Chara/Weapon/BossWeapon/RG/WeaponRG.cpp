@@ -9,7 +9,6 @@
 
 WeaponRG::WeaponRG(void)
 	: WeaponBase()
-	, upCount_(0)
 	, ChargeCount_(0)
 	, isAttack_(false)
 {
@@ -83,21 +82,21 @@ void WeaponRG::InitPost(void)
 	stateChanges_.emplace(static_cast<int>(STATE::END), std::bind(&WeaponRG::ChangeStateEnd, this));
 	stateChanges_.emplace(static_cast<int>(STATE::PREPARATION), std::bind(&WeaponRG::ChangePreparation, this));
 
+	ChangeState(STATE::IDLE);
+
 	localPos_ = LINE_START_POS;
 }
 
 void WeaponRG::UpdateProcess(void)
 {
-	if (isAlive_)
+	
+	if (hp_ <= 0 && isAlive_)
 	{
-		transform_.pos = MV1GetFramePosition(bone_.transform.modelId, bone_.id);
-		transform_.quaRot = bone_.transform.quaRot;
+		ChangeState(static_cast<int>(STATE::END));
 	}
-	if (hp_ <= 0)
-	{
-		isAlive_ = false;
-		//CollisionController::GetInstance().SetCollisionActive(this, tag_, false);
-	}
+
+	stateUpdate_();
+
 }
 
 void WeaponRG::UpdateProcessPost(void)
@@ -110,23 +109,30 @@ void WeaponRG::DrawPre(void)
 {
 	if (isAlive_)
 	{
-		
-#ifdef _DEBUG
-		for (auto& [id, colliderVector] : ownColliders_)
-		{
-			for (auto* collider : colliderVector)
-			{
-				if (collider == nullptr)
-				{
-					continue;
-				}
 
-				collider->Draw();
-			}
-		}
-#endif
 	}
 
+#ifdef _DEBUG
+	for (auto& [id, colliderVector] : ownColliders_)
+	{
+		for (auto* collider : colliderVector)
+		{
+			if (collider == nullptr)
+			{
+				continue;
+			}
+
+			collider->Draw();
+		}
+	}
+#endif
+
+
+}
+
+void WeaponRG::LookPlayer(void)
+{
+	transform_.quaRot = bone_.transform.quaRot;
 }
 
 void WeaponRG::ChangeState(STATE _state)
@@ -150,30 +156,15 @@ void WeaponRG::ChangeState(int state)
 void WeaponRG::ChangeStateIdle(void)
 {
 	stateUpdate_ = std::bind(&WeaponRG::UpdateIdle, this);
+	isAttack_ = false;
+	ChargeCount_ = 0;
+	localUpRot_ = 0.0f;
 }
 
 void WeaponRG::ChangePreparation(void)
 {
-	stateUpdate_ = std::bind(&WeaponRG::UpdateAttack, this);
-	transform_.quaRot = Quaternion::Mult(transform_.quaRot,
-		Quaternion::AngleAxis(UtilityMath::Deg2RadF(UP_ROT), UtilityMath::AXIS_X));
-	Quaternion rot = Quaternion::AngleAxis(UtilityMath::Deg2RadF(90.0f), UtilityMath::AXIS_X);
-	if (upCount_>= MAX_UP_COUNT)
-	{
-		transform_.quaRot = rot;
-		ChargeCount_++;
-		
-	}
-	else
-	{
-		upCount_++;
-	}
-	if (ChargeCount_ >= MAX_CHARGE_COUNT)
-	{
-		isAttack_ = true;
-		ChangeState(STATE::ATTACK);
-	}
-	
+	stateUpdate_ = std::bind(&WeaponRG::UpdatePreparation, this);
+
 }
 
 
@@ -184,18 +175,48 @@ void WeaponRG::ChangeStateAttack(void)
 
 void WeaponRG::ChangeStateEnd(void)
 {
+	stateUpdate_ = std::bind(&WeaponRG::UpdateEnd, this);
+	isAlive_ = false;
+	CollisionController::GetInstance().SetCollisionActive(this, tag_, false);
 }
 
 void WeaponRG::UpdatePreparation(void)
 {
+	transform_.pos = MV1GetFramePosition(bone_.transform.modelId, bone_.id);
+
+	if (localUpRot_ < MAX_UP_ROT)
+	{
+		localUpRot_ += UP_ROT;
+		if (localUpRot_ > MAX_UP_ROT)
+		{
+			localUpRot_ = MAX_UP_ROT;
+		}
+	}
+	else
+	{
+		ChargeCount_++;
+		if (ChargeCount_ >= MAX_CHARGE_COUNT)
+		{
+			isAttack_ = true;
+			ChangeState(static_cast<int>(STATE::ATTACK));
+		}
+	}
+
+	transform_.quaRot = Quaternion::Mult(bone_.transform.quaRot, Quaternion::AngleAxis(UtilityMath::Deg2RadF(localUpRot_), UtilityMath::AXIS_X));
+
 }
 
 void WeaponRG::UpdateAttack(void)
 {
+	transform_.pos = MV1GetFramePosition(bone_.transform.modelId, bone_.id);
+
+	transform_.quaRot = Quaternion::Mult(transform_.quaRot,bone_.transform.quaRot);
 }
 
 void WeaponRG::UpdateIdle(void)
 {
+	LookPlayer();
+	transform_.pos = MV1GetFramePosition(bone_.transform.modelId, bone_.id);
 }
 
 void WeaponRG::UpdateEnd(void)

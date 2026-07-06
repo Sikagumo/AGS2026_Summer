@@ -78,7 +78,7 @@ protected:
 	void CollisionReserve(void) override {};
 
 
-	void LookPlayer(void) override {};
+	void LookPlayer(void) override ;
 
 
 
@@ -104,14 +104,14 @@ private:
 	static constexpr VECTOR CAPSULE_START_POS = { 0.0f,-100.0f,-60.0f };
 	static constexpr VECTOR CAPSULE_END_POS = { 0.0f,80.0f,-60.0f };
 	static constexpr float CAPSULE_RADIUS = 30.0f;
-	static constexpr float UP_ROT = 3.0f;
-	static constexpr float MAX_UP_COUNT = 30.0f;
-	static constexpr float MAX_CHARGE_COUNT = 60.0f;
+	static constexpr float UP_ROT = 0.3f;
+	static constexpr float MAX_UP_ROT = 90.0f;
+	static constexpr float MAX_CHARGE_COUNT = 120.0f;
 
 
-	int upCount_ = 0;		//上昇回数
-
-	int ChargeCount_ = 0;	//チャージ回数
+	
+	float localUpRot_;	//上昇角度
+	int ChargeCount_;	//チャージ回数
 
 	bool isAttack_;
 };
