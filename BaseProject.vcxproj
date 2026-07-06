@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+<<<<<<< HEAD
     <ClCompile Include="Lib\ImGUI\backends\imgui_impl_dx11.cpp" />
     <ClCompile Include="Lib\ImGUI\backends\imgui_impl_win32.cpp" />
     <ClCompile Include="Lib\ImGUI\imgui.cpp" />
@@ -32,11 +33,21 @@
     <ClCompile Include="Src\Shader\ShaderPixel\ShaderWave.cpp" />
     <ClCompile Include="Src\Manager\Decoration\EffectManager.cpp" />
     <ClCompile Include="Src\Object\Actor\Chara\Weapon\Bullet\Boss\BBulletCannon.cpp" />
+=======
+    <ClCompile Include="Src\Shader\ShaderRenderer.cpp" />
+    <ClCompile Include="Src\Shader\ShaderLibrary.cpp" />
+    <ClCompile Include="Src\Shader\ShaderBase.cpp" />
+    <ClCompile Include="Src\Shader\ShaderController.cpp" />
+    <ClCompile Include="Src\Shader\ShaderPixel\ShaderPixel.cpp" />
+>>>>>>> shader
     <ClCompile Include="Src\Object\Actor\Chara\Weapon\BossWeapon\MG\MGBase.cpp" />
     <ClCompile Include="Src\Object\Actor\Chara\Weapon\Bullet\Player\PBulletBomb.cpp" />
     <ClCompile Include="Src\Object\Actor\Chara\Weapon\Bullet\Player\PBulletRecovery.cpp" />
+<<<<<<< HEAD
     <ClCompile Include="Src\Shader\ShaderPixel\ShaderPixelBase.cpp" />
     <ClCompile Include="Src\Shader\ShaderBase.cpp" />
+=======
+>>>>>>> shader
     <ClCompile Include="Src\Object\Collision\CollisionBox.cpp" />
     <ClCompile Include="Src\Object\Collision\CollisionCircle.cpp" />
     <ClCompile Include="Src\Object\Collision\CollisionLine.cpp" />
@@ -108,6 +119,7 @@
     <ClCompile Include="Src\Object\Actor\Chara\Weapon\BossWeapon\MG\WeaponMGR.cpp" />
   </ItemGroup>
   <ItemGroup>
+<<<<<<< HEAD
     <ClInclude Include="Lib\ImGUI\backends\imgui_impl_dx11.h" />
     <ClInclude Include="Lib\ImGUI\backends\imgui_impl_win32.h" />
     <ClInclude Include="Lib\ImGUI\imconfig.h" />
@@ -121,11 +133,22 @@
     <ClInclude Include="Src\Object\Actor\Chara\Weapon\Bullet\Boss\BBulletMissile.h" />
     <ClInclude Include="Src\Shader\ShaderParameters.h" />
     <ClInclude Include="Src\Object\Actor\Chara\Weapon\Bullet\Boss\BBulletCannon.h" />
+=======
+    <ClInclude Include="Src\Shader\ShaderRenderer.h" />
+    <ClInclude Include="Src\Shader\ShaderLibrary.h" />
+    <ClInclude Include="Src\Shader\ShaderBase.h" />
+    <ClInclude Include="Src\Shader\ShaderController.h" />
+    <ClInclude Include="Src\Shader\ShaderPixel\ShaderPixel.h" />
+    <ClInclude Include="Src\Shader\ShaderParameters.h" />
+>>>>>>> shader
     <ClInclude Include="Src\Object\Actor\Chara\Weapon\BossWeapon\MG\MGBase.h" />
     <ClInclude Include="Src\Object\Actor\Chara\Weapon\Bullet\Player\PBulletBomb.h" />
     <ClInclude Include="Src\Object\Actor\Chara\Weapon\Bullet\Player\PBulletRecovery.h" />
+<<<<<<< HEAD
     <ClInclude Include="Src\Shader\ShaderPixel\ShaderPixelBase.h" />
     <ClInclude Include="Src\Shader\ShaderBase.h" />
+=======
+>>>>>>> shader
     <ClInclude Include="Src\Object\Collision\CollisionBox.h" />
     <ClInclude Include="Src\Object\Collision\CollisionCircle.h" />
     <ClInclude Include="Src\Object\Collision\CollisionLine.h" />
