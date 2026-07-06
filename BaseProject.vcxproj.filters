@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <FxCompile Include="srcGraphics\Pixel\NormalMap.hlsl" />
@@ -83,7 +83,6 @@
     <ClCompile Include="Src\Object\Actor\Chara\Weapon\BossWeapon\Cannon\WeaponCannon.cpp" />
     <ClCompile Include="Src\Object\Actor\Chara\Weapon\BossWeapon\MG\WeaponMGL.cpp" />
     <ClCompile Include="Src\Object\Actor\Chara\Weapon\BossWeapon\MG\WeaponMGR.cpp" />
-<<<<<<< HEAD
     <ClCompile Include="Src\ImGUI\ImGuiWrapper.cpp" />
     <ClCompile Include="Src\ImGUI\IParameterEditor.cpp" />
     <ClCompile Include="Lib\ImGUI\backends\imgui_impl_dx11.cpp" />
@@ -93,9 +92,7 @@
     <ClCompile Include="Lib\ImGUI\imgui_draw.cpp" />
     <ClCompile Include="Lib\ImGUI\imgui_tables.cpp" />
     <ClCompile Include="Lib\ImGUI\imgui_widgets.cpp" />
-=======
     <ClCompile Include="Src\Object\Actor\Chara\Weapon\Bullet\Boss\BBulletMissile.cpp" />
->>>>>>> Collision
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\Shader\ShaderParameters.h" />
@@ -180,7 +177,6 @@
     <ClInclude Include="Src\Object\Actor\Chara\Weapon\BossWeapon\Cannon\WeaponCannon.h" />
     <ClInclude Include="Src\Object\Actor\Chara\Weapon\BossWeapon\MG\WeaponMGL.h" />
     <ClInclude Include="Src\Object\Actor\Chara\Weapon\BossWeapon\MG\WeaponMGR.h" />
-<<<<<<< HEAD
     <ClInclude Include="Src\ImGUI\ImGuiWrapper.h" />
     <ClInclude Include="Src\ImGUI\IParameterEditor.h" />
     <ClInclude Include="Lib\ImGUI\backends\imgui_impl_dx11.h" />
@@ -191,9 +187,7 @@
     <ClInclude Include="Lib\ImGUI\imstb_rectpack.h" />
     <ClInclude Include="Lib\ImGUI\imstb_textedit.h" />
     <ClInclude Include="Lib\ImGUI\imstb_truetype.h" />
-=======
     <ClInclude Include="Src\Object\Actor\Chara\Weapon\Bullet\Boss\BBulletMissile.h" />
->>>>>>> Collision
   </ItemGroup>
   <ItemGroup>
     <None Include="srcGraphics\Common\Pixel\PixelShader2DHeader.hlsli" />
