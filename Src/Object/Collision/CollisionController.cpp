@@ -129,39 +129,38 @@ void CollisionController::UnregisterActor(ActorBase* _actor)
 bool CollisionController::CheckCollision(const ColliderBase* _colliderA, const ColliderBase* _colliderB,
 	CollisionInfo& _outInfo)
 {
-	// 有効性チェック
-	if (!_colliderA || !_colliderB)
+	if (_colliderA == nullptr || _colliderB == nullptr)
 	{
 		return false;
 	}
 
-	// 形状タイプ取得
 	using SHAPE = ColliderBase::SHAPE;
 	using TAG = ColliderBase::TAG;
+
+	auto* nonConstColliderA = const_cast<ColliderBase*>(_colliderA);
+	auto* nonConstColliderB = const_cast<ColliderBase*>(_colliderB);
 
 	if (_colliderA->GetCollisionTag() == TAG::HIT_WAVE)
 	{
 		if (_colliderB->GetShapeType() == SHAPE::CAPSULE)
 		{
-			return CollisionSphere::CheckHitWave(_colliderB, const_cast<ColliderBase*>(_colliderA));
+			return CollisionSphere::CheckHitWave(nonConstColliderB, nonConstColliderA);
 		}
 
 		return false;
-			
 	}
 
 	if (_colliderB->GetCollisionTag() == TAG::HIT_WAVE)
 	{
 		if (_colliderA->GetShapeType() == SHAPE::CAPSULE)
 		{
-			return CollisionSphere::CheckHitWave(_colliderA, const_cast<ColliderBase*>(_colliderB));
+			return CollisionSphere::CheckHitWave(nonConstColliderA, nonConstColliderB);
 		}
 	}
 
 	SHAPE shapeA = _colliderA->GetShapeType();
 	SHAPE shapeB = _colliderB->GetShapeType();
 
-	// 形状の組み合わせによる判定の振り分け
 	if (shapeA == SHAPE::SPHERE && shapeB == SHAPE::SPHERE)
 	{
 		return CollisionSphere::CheckSphereVsSphere(_colliderA, _colliderB, _outInfo);
@@ -178,8 +177,7 @@ bool CollisionController::CheckCollision(const ColliderBase* _colliderA, const C
 	{
 		return CollisionCapsule::CheckCapsuleVsSphere(_colliderA, _colliderB, _outInfo);
 	}
-	
-	// 地面（MODEL）との判定
+
 	if (shapeA == SHAPE::LINE && shapeB == SHAPE::MODEL)
 	{
 		return CollisionLine::CheckLineVsModel(_colliderA, _colliderB, _outInfo);
@@ -188,7 +186,7 @@ bool CollisionController::CheckCollision(const ColliderBase* _colliderA, const C
 	{
 		return CollisionLine::CheckLineVsModel(_colliderB, _colliderA, _outInfo);
 	}
-	
+
 	if (shapeA == SHAPE::CAPSULE && shapeB == SHAPE::MODEL)
 	{
 		return CollisionCapsule::CheckCapsuleVsModel(_colliderA, _colliderB, _outInfo);
@@ -197,7 +195,7 @@ bool CollisionController::CheckCollision(const ColliderBase* _colliderA, const C
 	{
 		return CollisionCapsule::CheckCapsuleVsModel(_colliderB, _colliderA, _outInfo);
 	}
-	
+
 	if (shapeA == SHAPE::SPHERE && shapeB == SHAPE::MODEL)
 	{
 		return CollisionSphere::CheckSphereVsModel(_colliderA, _colliderB, _outInfo);
@@ -206,7 +204,7 @@ bool CollisionController::CheckCollision(const ColliderBase* _colliderA, const C
 	{
 		return CollisionSphere::CheckSphereVsModel(_colliderB, _colliderA, _outInfo);
 	}
-	
+
 	return false;
 }
 

@@ -166,13 +166,13 @@ void Player::InitTransform(void)
 void Player::InitCollider(void)
 {
 	ColliderLine* colLine = new ColliderLine(ColliderBase::TAG::PLAYER, &transform_, COL_LINE_START_LOCAL_POS, COL_LINE_END_LOCAL_POS);
-	ownColliders_.emplace(static_cast<int>(ColliderBase::SHAPE::LINE), std::vector<ColliderBase*>{ colLine });
+	ownColliders_[static_cast<int>(ColliderBase::TAG::PLAYER)].push_back(colLine);
 	colLine->SetTriger(false);
 
 	ColliderCapsule* colCap = new ColliderCapsule(ColliderBase::TAG::PLAYER
 									, &transform_, COL_CAPSULE_TOP_LOCAL_POS, COL_CAPSULE_DOWN_LOCAL_POS, COL_CAPSULE_RADIUS);
 
-	ownColliders_.emplace(static_cast<int>(ColliderBase::SHAPE::CAPSULE), std::vector<ColliderBase*>{ colCap });
+	ownColliders_[static_cast<int>(ColliderBase::TAG::PLAYER)].push_back(colCap);
 
 	colCap->SetTriger(false);
 

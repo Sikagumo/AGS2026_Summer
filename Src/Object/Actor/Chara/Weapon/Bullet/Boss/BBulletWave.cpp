@@ -43,7 +43,7 @@ void BBulletWave::InitCollider(void)
 {
 	transform_.pos = bossTransform_.pos;
 	ColliderSphere* colHitSphere = new ColliderSphere(ColliderBase::TAG::HIT_WAVE, &transform_, { 0.0f,0.0f,0.0f }, radius_);
-	ownColliders_.emplace(static_cast<int>(ColliderBase::SHAPE::SPHERE), std::vector<ColliderBase*>{ colHitSphere });
+	ownColliders_[static_cast<int>(ColliderBase::TAG::HIT_WAVE)].push_back(colHitSphere);
 
 
 	CollisionController::GetInstance().RegisterActor(this);

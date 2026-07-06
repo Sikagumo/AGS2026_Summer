@@ -58,13 +58,13 @@ void WeaponCannon::InitTransform(void)
 void WeaponCannon::InitCollider(void)
 {
 	ColliderLine* lineCollider = new ColliderLine(ColliderBase::TAG::STAGE, &transform_, LINE_START_POS, LINE_END_POS);
-	ownColliders_.emplace(static_cast<int>(ColliderBase::TAG::STAGE), std::vector<ColliderBase*>{ lineCollider });
+	ownColliders_[static_cast<int>(ColliderBase::TAG::STAGE)].push_back(lineCollider);
 
 
 	ColliderCapsule* capsuleCollider = new ColliderCapsule(
 		tag_, &transform_, CAPSULE_START_POS, CAPSULE_END_POS, CAPSULE_RADIUS);
 	capsuleCollider->SetTriger(false);
-	ownColliders_.emplace(static_cast<int>(tag_), std::vector<ColliderBase*>{ capsuleCollider });
+	ownColliders_[static_cast<int>(tag_)].push_back(capsuleCollider);
 
 
 	CollisionController::GetInstance().RegisterActor(this);
@@ -119,14 +119,10 @@ void WeaponCannon::DrawPre(void)
 		}
 	}
 #ifdef _DEBUG
-<<<<<<< HEAD
 
 	DrawFormatString(10, 420, 0xffffff, "count:%d", count_);
 
-	for (auto& col : ownColliders_)
-=======
 	for (auto& [id, colliderVector] : ownColliders_)
->>>>>>> Scene
 	{
 		for (auto* collider : colliderVector)
 		{

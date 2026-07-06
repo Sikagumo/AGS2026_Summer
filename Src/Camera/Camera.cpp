@@ -61,8 +61,7 @@ void Camera::InitCollider(void)
 														UtilityMath::VECTOR_ZERO,
 														COL_CAPSULE_SPHERE
 														);
-	ownColliders_.emplace(
-		static_cast<int>(COLLIDER_TYPE::SPHERE), std::vector<ColliderBase*>{ colliderSphere });
+		ownColliders_[static_cast<int>(ColliderBase::TAG::CAMERA)].push_back(colliderSphere);
 }
 
 void Camera::InitPost(void)
