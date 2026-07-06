@@ -36,7 +36,7 @@ void BBulletMG::InitCollider(void)
 {
 	ColliderSphere* colSphere = new ColliderSphere(
 		ColliderBase::TAG::MG_BULLET, &transform_, {0.0f,0.0f,0.0f}, radius_);
-	ownColliders_.emplace(static_cast<int>(ColliderBase::SHAPE::SPHERE), colSphere);
+	ownColliders_[static_cast<int>(ColliderBase::TAG::MG_BULLET)].push_back(colSphere);
 	
 
 	CollisionController::GetInstance().RegisterActor(this);

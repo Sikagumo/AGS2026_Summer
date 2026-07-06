@@ -57,14 +57,14 @@ void Stage::InitCollider(void)
 
 	// モデルのコライダ割り当て
 	ColliderModel* colModel = new ColliderModel(ColliderBase::TAG::STAGE, &collisionTrans_);
-	ownColliders_.emplace(static_cast<int>(ColliderBase::SHAPE::MODEL), colModel);
+	ownColliders_[static_cast<int>(ColliderBase::TAG::STAGE)].push_back(colModel);
 
 	colModel->SetTriger(false);
 
 	ColliderModel* wallCollider = new ColliderModel(ColliderBase::TAG::WALL, &collisionTrans_);
 
 	// 壁のコライダ割り当て
-	ownColliders_.emplace(static_cast<int>(ColliderBase::TAG::WALL), wallCollider);
+	ownColliders_[static_cast<int>(ColliderBase::TAG::WALL)].push_back(wallCollider);
 	wallCollider->SetTriger(false);
 
 	CollisionController::GetInstance().RegisterActor(this);

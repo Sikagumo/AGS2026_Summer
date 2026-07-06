@@ -93,6 +93,9 @@ SceneTitle::SceneTitle(void)
 
 void SceneTitle::Initialize(void)
 {
+
+    if (Loading::GetInstance()->IsLoading()) { return; }
+
     SetMouseDispFlag(true);
 
     // マウスカーソル用のコライダー生成（半径1の円）
@@ -224,7 +227,6 @@ void SceneTitle::Update(void)
 
 void SceneTitle::Draw(void)
 {
-    if (Loading::GetInstance()->IsLoading()) { return; }
 
     time_ += 0.02f;
 
@@ -297,11 +299,6 @@ void SceneTitle::Draw(void)
 
 void SceneTitle::Release(void)
 {
-    if (psHandle_ != -1)
-    {
-        DeleteShader(psHandle_);
-        psHandle_ = -1;
-    }
 }
 
 void SceneTitle::DrawDebug(void)

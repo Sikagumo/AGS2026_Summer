@@ -30,14 +30,15 @@ void PBulletBase::InitCollider(void)
 	// è’ìÀîªíËÉ}ÉlÅ[ÉWÉÉÇ…ìoò^
 	ColliderSphere* bullet = new ColliderSphere(ColliderBase::TAG::PLAYER_BULLET, &transform_
 									, UtilityMath::VECTOR_ZERO, radiusBullet_);
-	ownColliders_.emplace(static_cast<int>(COLLISION_TYPE::BULLET)
-						  , bullet);
+	ownColliders_[static_cast<int>(ColliderBase::TAG::PLAYER_BULLET)].push_back(bullet);
 
 	ColliderSphere* blast = new ColliderSphere(ColliderBase::TAG::PLAYER_BLAST, &transform_
 		, UtilityMath::VECTOR_ZERO, radiusBullet_);
 	CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::PLAYER_BLAST, false);
-	ownColliders_.emplace(static_cast<int>(COLLISION_TYPE::BLAST)
-						  , blast);
+	ownColliders_[static_cast<int>(ColliderBase::TAG::PLAYER_BLAST)].push_back(blast);
+
+	ColliderSphere* sphere = new ColliderSphere(ColliderBase::TAG::PLAYER_BULLET, &transform_, UtilityMath::VECTOR_ZERO, radiusBullet_);
+	ownColliders_[static_cast<int>(ColliderBase::TAG::PLAYER_BULLET)].push_back(sphere);
 }
 
 void PBulletBase::InitPost(void)
@@ -164,7 +165,7 @@ void PBulletBase::Shot(const VECTOR& _shotDir)
 	transform_.Update();
 
 	// ìñÇΩÇËîªíËìoò^
-	ownColliders_.at(0)->SetRadius(radiusBullet_);
+	ownColliders_.at(0).at(0)->SetRadius(radiusBullet_);
 	CollisionController::GetInstance().RegisterActor(this);
 	CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::PLAYER_BULLET, true);
 }

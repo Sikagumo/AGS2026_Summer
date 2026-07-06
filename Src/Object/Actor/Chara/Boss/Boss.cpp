@@ -245,20 +245,17 @@ void Boss::InitCollider(void)
 {
 
 	ColliderLine* colLine = new ColliderLine(ColliderBase::TAG::BOSS, &transform_, COL_LINE_START_POS, COL_LINE_END_POS);
-	ownColliders_.emplace(static_cast<int>(ColliderBase::SHAPE::LINE), colLine);
+	ownColliders_[static_cast<int>(ColliderBase::TAG::BOSS)].push_back(colLine);
 	colLine->SetTriger(false);
 
 	ColliderCapsule* colCapsule = new ColliderCapsule(
 		ColliderBase::TAG::BOSS, &transform_, COL_CAPSULE_START_POS, COL_CAPSULE_END_POS, COL_CAPSULE_END_RADIUS);
-	ownColliders_.emplace(static_cast<int>(ColliderBase::SHAPE::CAPSULE), colCapsule);
+	ownColliders_[static_cast<int>(ColliderBase::TAG::BOSS)].push_back(colCapsule);
 	colCapsule->SetTriger(false);
 
 	ColliderSphere* colSphere = new ColliderSphere(ColliderBase::TAG::ROAD_ATTACK, &transform_, { 0.0f,0.0f,0.0f }, 200.0f);
-	ownColliders_.emplace(static_cast<int>(ColliderBase::SHAPE::SPHERE), colSphere);
+	ownColliders_[static_cast<int>(ColliderBase::TAG::ROAD_ATTACK)].push_back(colSphere);
 	
-
-	
-
 	CollisionController::GetInstance().RegisterActor(this);
 
 	CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::ROAD_ATTACK, false);

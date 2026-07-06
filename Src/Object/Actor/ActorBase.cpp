@@ -55,14 +55,18 @@ void ActorBase::Release(void)
 
 	transform_.Release();
 
-	// 自身のコライダ解放
-	if (!ownColliders_.empty())
+	CollisionController::GetInstance().UnregisterActor(this);
+
+	// 自身のコライダーの解放
+	for (auto& [key, colliders] : ownColliders_)
 	{
-		for (auto& own : ownColliders_)
+		for (auto* collider : colliders)
 		{
-			delete own.second;
+			delete collider;
 		}
+		colliders.clear();
 	}
+	ownColliders_.clear();
 }
 
 const Transform& ActorBase::GetTransform(void) const
@@ -75,15 +79,16 @@ Transform& ActorBase::GetTransform(void)
 	return transform_;
 }
 
-const ColliderBase* ActorBase::GetOwnCollider(int key) const
+const std::vector<ColliderBase*>* ActorBase::GetOwnCollider(int _key) const
 {
-	if (ownColliders_.count(key) == 0)
+	auto it = ownColliders_.find(_key);
+	if (it == ownColliders_.end())
 	{
 		return nullptr;
 	}
-	return ownColliders_.at(key);
-}
 
+	return &it->second;
+}
 
 void ActorBase::AddHitCollider(const ColliderBase* hitCollider)
 {
