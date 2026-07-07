@@ -9,7 +9,13 @@ public:
 
 	virtual ~BBulletLaser(void);
 
+	// リソースロード
+	void Load(void) override;
+
+	void ReleasePost(void)override;
+
 	void SetIsAttack(bool _isAttack)override { isAttack_ = _isAttack; }
+	 
 	void CreateBullets(VECTOR _pos, VECTOR _dir, float _radius)override { transform_.pos = _pos; dir_ = _dir; radius_ = _radius; }
 
 	void SetPlayerPos(VECTOR _pos)override {}

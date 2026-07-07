@@ -50,6 +50,32 @@ void EffectManager::Initialize(void)
     landingData.scl = VGet(1.0f, 1.0f, 1.0f);
     landingData.speed = 1.0f;
     effect_[EFFECT::EFFECT_LANDING] = landingData;
+
+    EFFECT_DATA mgData;
+    mgData.Data = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::EFFECT_MG);
+    mgData.pos = VGet(0.0f, 0.0f, 0.0f);
+    mgData.rot = VGet(0.0f, 0.0f, 0.0f);
+    mgData.scl = VGet(1.0f, 1.0f, 1.0f);
+    mgData.speed = 1.0f;
+    effect_[EFFECT::EFFECT_MG] = mgData;
+
+    EFFECT_DATA hitData;
+    hitData.Data = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::EFFECT_BOSS_HIT);
+    hitData.pos = VGet(0.0f, 0.0f, 0.0f);
+    hitData.rot = VGet(0.0f, 0.0f, 0.0f);
+    hitData.scl = VGet(1.0f, 1.0f, 1.0f);
+    hitData.speed = 1.0f;
+    effect_[EFFECT::EFFECT_BOSS_HIT] = hitData;
+
+    EFFECT_DATA laserData;
+    laserData.Data = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::EFFECT_LASER);
+    laserData.pos = VGet(0.0f, 0.0f, 0.0f);
+    laserData.rot = VGet(0.0f, 0.0f, 0.0f);
+    laserData.scl = VGet(1.0f, 1.0f, 1.0f);
+    laserData.speed = 1.0f;
+    effect_[EFFECT::EFFECT_LASER] = laserData;
+
+
 }
 
 void EffectManager::Add(const EFFECT _effect, const int _data)

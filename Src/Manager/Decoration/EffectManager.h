@@ -13,6 +13,9 @@ public:
 		NONE,
 		EFFECT_WAVE,
 		EFFECT_LANDING,
+		EFFECT_MG,
+		EFFECT_BOSS_HIT,
+		EFFECT_LASER,
 
 	};
 	/// @brief エフェクトのリソースデータ構造体

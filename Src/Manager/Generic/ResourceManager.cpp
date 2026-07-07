@@ -116,6 +116,9 @@ void ResourceManager::Initialize(void)
 	/* エフェクト */
 	_SetResource(LOAD_TYPE::EFFECT, SRC::EFFECT_WAVE, PATH_EFFECT + "BossAttack/AttackWave.efkefc");
 	_SetResource(LOAD_TYPE::EFFECT, SRC::EFFECT_LANDING, PATH_EFFECT + "BossAttack/Landing.efkefc");
+	_SetResource(LOAD_TYPE::EFFECT, SRC::EFFECT_MG, PATH_EFFECT + "BossAttack/MGRotation.efkefc");
+	_SetResource(LOAD_TYPE::EFFECT, SRC::EFFECT_BOSS_HIT, PATH_EFFECT + "BossAttack/Hit.efkefc");
+	_SetResource(LOAD_TYPE::EFFECT, SRC::EFFECT_LASER, PATH_EFFECT + "BossAttack/Laser.efkefc");
 
 
 

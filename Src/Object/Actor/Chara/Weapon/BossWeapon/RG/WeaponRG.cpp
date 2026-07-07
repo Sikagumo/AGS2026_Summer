@@ -5,12 +5,15 @@
 #include "../../../../../Collider/ColliderCapsule.h"
 #include "../../../../../Collider/ColliderLine.h"
 #include "../../../../../Collision/CollisionController.h"
+#include "../../Bullet/Boss/BBulletLaser.h"
 #include "WeaponRG.h"
 
 WeaponRG::WeaponRG(void)
 	: WeaponBase()
 	, ChargeCount_(0)
 	, isAttack_(false)
+	, localUpRot_(0.0f)
+	, bulletLaser_(nullptr)
 {
 		
 }
@@ -76,6 +79,12 @@ void WeaponRG::InitAnimation(void)
 
 void WeaponRG::InitPost(void)
 {
+	
+	bulletLaser_ = std::make_unique<BBulletLaser>();
+	bulletLaser_->Init();
+
+
+
 	isAlive_ = true;
 	stateChanges_.emplace(static_cast<int>(STATE::IDLE), std::bind(&WeaponRG::ChangeStateIdle, this));
 	stateChanges_.emplace(static_cast<int>(STATE::ATTACK), std::bind(&WeaponRG::ChangeStateAttack, this));
@@ -85,6 +94,9 @@ void WeaponRG::InitPost(void)
 	ChangeState(STATE::IDLE);
 
 	localPos_ = LINE_START_POS;
+
+
+
 }
 
 void WeaponRG::UpdateProcess(void)
@@ -97,6 +109,7 @@ void WeaponRG::UpdateProcess(void)
 
 	stateUpdate_();
 
+	bulletLaser_->Update();
 }
 
 void WeaponRG::UpdateProcessPost(void)
@@ -109,7 +122,7 @@ void WeaponRG::DrawPre(void)
 {
 	if (isAlive_)
 	{
-
+		bulletLaser_->Draw();
 	}
 
 #ifdef _DEBUG
@@ -151,6 +164,7 @@ void WeaponRG::ChangeState(int state)
 	stateBase_ = state;
 	// 各状態遷移の初期処理
 	stateChanges_[stateBase_]();
+
 }
 
 void WeaponRG::ChangeStateIdle(void)
@@ -159,6 +173,7 @@ void WeaponRG::ChangeStateIdle(void)
 	isAttack_ = false;
 	ChargeCount_ = 0;
 	localUpRot_ = 0.0f;
+	bulletLaser_->SetIsAttack(false);
 }
 
 void WeaponRG::ChangePreparation(void)
@@ -171,6 +186,8 @@ void WeaponRG::ChangePreparation(void)
 void WeaponRG::ChangeStateAttack(void)
 {
 	stateUpdate_ = std::bind(&WeaponRG::UpdateAttack, this);
+	bulletLaser_->SetIsAttack(true);
+	
 }
 
 void WeaponRG::ChangeStateEnd(void)
@@ -209,8 +226,16 @@ void WeaponRG::UpdatePreparation(void)
 void WeaponRG::UpdateAttack(void)
 {
 	transform_.pos = MV1GetFramePosition(bone_.transform.modelId, bone_.id);
+	transform_.quaRot = Quaternion::Mult(bone_.transform.quaRot, Quaternion::AngleAxis(UtilityMath::Deg2RadF(localUpRot_), UtilityMath::AXIS_X));
 
-	transform_.quaRot = Quaternion::Mult(transform_.quaRot,bone_.transform.quaRot);
+	// ローカル座標を回転させてワールド座標へ変換
+	VECTOR localRotPos = transform_.quaRot.PosAxis({ 0.0f,400.0f,-60.0f });
+
+	// 位置を加算して最終的なワールド座標にする
+	VECTOR localPos = VAdd(transform_.pos, localRotPos);
+
+	bulletLaser_->CreateBullets(localPos, transform_.quaRot.GetForward(), 0.0f);
+	bulletLaser_->SetTransform(transform_);
 }
 
 void WeaponRG::UpdateIdle(void)

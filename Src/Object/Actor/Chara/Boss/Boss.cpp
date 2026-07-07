@@ -272,7 +272,7 @@ void Boss::InitAnimation(void)
 	}
 	animation_->Play(static_cast<int>(ANIM_TYPE::DIR));
 
-	//EffectManager::GetInstance().Add(EffectManager::EFFECT::EFFECT_WAVE, ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::EFFECT_WAVE));
+	
 }
 
 
@@ -662,14 +662,14 @@ void Boss::UpdateStateLaserAttack(void)
 	transformBody_.pos = MV1GetFramePosition(transform_.modelId, JOINT_FEET_BODY);
 	if (weaponRG_->GetIsAttack() == true)
 	{
-		transformBody_.quaRot = Quaternion::Mult(transformBody_.quaRot, Quaternion::AngleAxis(UtilityMath::Deg2RadF(UtilityMath::Deg2RadF(3.0f)), UtilityMath::AXIS_Y));
-		laserAttackRot_ += UtilityMath::Deg2RadF(3.0f);
-		if (laserAttackRot_ >= UtilityMath::Deg2RadF(360.0f))
+		laserAttackRot_ += 0.5f;
+		if (laserAttackRot_ >= 360.0f)
 		{
 			laserAttackRot_ = 0.0f;
 			weaponRG_->ChangeState(WeaponRG::STATE::IDLE);
 			ChangeState(STATE::IDLE);
 		}
+		transformBody_.quaRot = Quaternion::Mult(transformBody_.quaRot, Quaternion::AngleAxis(UtilityMath::Deg2RadF(0.5f), UtilityMath::AXIS_Y));
 	}
 	
 }

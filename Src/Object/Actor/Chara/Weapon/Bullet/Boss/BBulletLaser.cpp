@@ -15,6 +15,14 @@ BBulletLaser::~BBulletLaser(void)
 {
 }
 
+void BBulletLaser::Load(void)
+{
+}
+
+void BBulletLaser::ReleasePost(void)
+{
+}
+
 void BBulletLaser::Shot(void)
 {
 }
@@ -29,7 +37,7 @@ void BBulletLaser::InitTransform(void)
 void BBulletLaser::InitCollider(void)
 {
 	ColliderCapsule* colCapsule = new ColliderCapsule(
-		ColliderBase::TAG::LASER, &transform_, { 0.0f,0.0f,0.0f }, { 0.0f,8000.0f,0.0f }, 200.0f);
+		ColliderBase::TAG::LASER, &transform_, { 0.0f,0.0f,0.0f }, { 0.0f,8000.0f,0.0f }, 300.0f);
 	ownColliders_[static_cast<int>(ColliderBase::TAG::LASER)].push_back(colCapsule);
 
 
@@ -47,6 +55,9 @@ void BBulletLaser::InitPost(void)
 void BBulletLaser::UpdateProcess(void)
 {
 	transform_.quaRot = weaponTrans_.quaRot;
+
+	
+
 }
 
 void BBulletLaser::UpdateProcessPost(void)
@@ -55,6 +66,7 @@ void BBulletLaser::UpdateProcessPost(void)
 
 void BBulletLaser::DrawPre(void)
 {
+
 	for (auto& [id, colliderVector] : ownColliders_)
 	{
 		for (auto* collider : colliderVector)
@@ -67,4 +79,5 @@ void BBulletLaser::DrawPre(void)
 			collider->Draw();
 		}
 	}
+
 }

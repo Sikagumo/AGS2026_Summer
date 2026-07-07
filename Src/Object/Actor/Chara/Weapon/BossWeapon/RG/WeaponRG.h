@@ -1,5 +1,8 @@
 #pragma once
+#include <memory>
 #include "../../WeaponBase.h"
+
+class BBulletLaser;
 
 /// <summary>
 /// レールガンクラス
@@ -108,7 +111,8 @@ private:
 	static constexpr float MAX_UP_ROT = 90.0f;
 	static constexpr float MAX_CHARGE_COUNT = 120.0f;
 
-
+	
+	std::unique_ptr<BBulletLaser> bulletLaser_;
 	
 	float localUpRot_;	//上昇角度
 	int ChargeCount_;	//チャージ回数

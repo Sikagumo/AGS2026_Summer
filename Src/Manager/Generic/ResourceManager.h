@@ -68,6 +68,9 @@ public:
 		/* エフェクト */
 		EFFECT_WAVE,
 		EFFECT_LANDING,
+		EFFECT_BOSS_HIT,
+		EFFECT_MG,
+		EFFECT_LASER,
 		/* 映像 */
 
 		/* BGM */

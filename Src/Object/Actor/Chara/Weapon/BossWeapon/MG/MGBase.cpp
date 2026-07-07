@@ -1,5 +1,6 @@
 #include "MGBase.h"
 #include "../../../../../../Manager/Decoration/SoundManager.h"
+#include "../../../../../../Manager/Decoration/EffectManager.h"
 #include "../../../../../../Utility/UtilityMath.h"
 #include "../../../../../Collision/CollisionController.h"
 #include "../../Bullet/Boss/BBulletMG.h"
@@ -113,6 +114,7 @@ void MGBase::ChangeStateAttack(void)
     stateUpdate_ = std::bind(&MGBase::UpdateAttack, this);
     bulletCount_ = MAX_BULLET_COUNT;
     isAttack_ = true;
+    EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_MG,)
 }
 
 void MGBase::ChangeStateEnd(void)
