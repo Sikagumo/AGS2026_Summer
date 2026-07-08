@@ -94,5 +94,6 @@ private:
 	/// @brief デバック描画 
 	void DrawDebug(void);
 
-	int psHandle_;
+	/// @brief Gui用の更新処理
+	void UpdateGui(void) override;
 };

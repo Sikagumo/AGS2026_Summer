@@ -85,7 +85,6 @@ SceneTitle::SceneTitle(void)
     , imageMenu_()
     , buttonTags()
     , prevMousePos_(0.0f, 0.0f)
-    , psHandle_(-1)
 {
     for (size_t i = 0; i < imageMenu_.size(); ++i)
     {
@@ -190,6 +189,34 @@ void SceneTitle::Update(void)
     auto& sceneManager = SceneManager::GetInstance();
     auto& keyConfInputManager = KeyConfInputManager::GetInstance();
 
+    // マウス座標の更新
+    Vector2 mousePos = keyConfInputManager.GetMousePosition();
+    Vector2F mousePosF(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y));
+    cursorCollider_->SetCenterPos(mousePosF);
+
+#ifdef _DEBUG
+
+    if (KeyConfInputManager::GetInstance().isTrigerDown("APPLY_DEBUG"))
+    {
+        isDebugMode_ = true;
+    }
+
+    
+
+    if (isDebugMode_ == true)
+    {
+
+        if (KeyConfInputManager::GetInstance().isTrigerDown("UNAPPLY_DEBUG"))
+        {
+            isDebugMode_ = false;
+        }
+
+        UpdateGui();
+
+        return; 
+    }
+#endif
+
     // スティック入力による選択インデックスの更新
     Vector2F stick = keyConfInputManager.GetLeftStickRaw();
     const float THRESHOLD = 0.5f;
@@ -213,10 +240,7 @@ void SceneTitle::Update(void)
         inputIntervalCounter = STICK_TINERVAL;
     }
 
-    // マウス座標の更新
-    Vector2 mousePos = keyConfInputManager.GetMousePosition();
-    Vector2F mousePosF(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y));
-    cursorCollider_->SetCenterPos(mousePosF);
+   
 
     // マウスが動いたときはパッドの選択カーソルも追従させる
     for (int i = 0; i < MENU_BUTTON_NUM; ++i)
@@ -253,24 +277,6 @@ void SceneTitle::Update(void)
         }
     }
 
-#ifdef _DEBUG
-    // クリックされたら、対象のGUIをコントローラに渡す
-    if (keyConfInputManager.isTrigerDown("OK"))
-    {
-        auto& colCtrl = CollisionController::GetInstance();
-        using TAG = Collider2DBase::TAG_2D;
-
-        if (colCtrl.IsTagCollidingWithTag2D(TAG::MOUSE_CURSOR, TAG::PEACH)) {
-            GuiController::GetInstance().SetActiveGui(peachGui_);
-        }
-        else if (colCtrl.IsTagCollidingWithTag2D(TAG::MOUSE_CURSOR, TAG::WAVE)) {
-            GuiController::GetInstance().SetActiveGui(waveGui_);
-        }
-        else if (colCtrl.IsTagCollidingWithTag2D(TAG::MOUSE_CURSOR, TAG::ONI_GASHIMA)) {
-            GuiController::GetInstance().SetActiveGui(oniSimaGui_);
-        }
-    }
-#endif
 }
 
 void SceneTitle::Draw(void)
@@ -349,5 +355,25 @@ void SceneTitle::Release(void)
 void SceneTitle::DrawDebug(void)
 {
     CollisionController::GetInstance().DrawDebug2D();
+}
+
+void SceneTitle::UpdateGui(void)
+{
+    // クリックされたら、対象のGUIをコントローラに渡す
+    if (KeyConfInputManager::GetInstance().isTrigerDown("OK"))
+    {
+        auto& colCtrl = CollisionController::GetInstance();
+        using TAG = Collider2DBase::TAG_2D;
+
+        if (colCtrl.IsTagCollidingWithTag2D(TAG::MOUSE_CURSOR, TAG::PEACH)) {
+            GuiController::GetInstance().SetActiveGui(peachGui_);
+        }
+        else if (colCtrl.IsTagCollidingWithTag2D(TAG::MOUSE_CURSOR, TAG::WAVE)) {
+            GuiController::GetInstance().SetActiveGui(waveGui_);
+        }
+        else if (colCtrl.IsTagCollidingWithTag2D(TAG::MOUSE_CURSOR, TAG::ONI_GASHIMA)) {
+            GuiController::GetInstance().SetActiveGui(oniSimaGui_);
+        }
+    }
 }
 

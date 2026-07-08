@@ -260,7 +260,16 @@ void SceneManager::Draw(void)
     }
 
 #ifdef _DEBUG
-    GuiController::GetInstance().DrawUI();
+    for (auto& scene : scenes_)
+    {
+        if (scene)
+        {
+            if (scene->GetDebugMode() == true)
+            {
+                GuiController::GetInstance().DrawUI();
+            }
+        }
+    }
 #endif 
 
 

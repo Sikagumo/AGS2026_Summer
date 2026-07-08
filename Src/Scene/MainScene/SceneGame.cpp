@@ -203,7 +203,6 @@ void SceneGame::UpdateGameTime(void)
 	}
 }
 
-
 void SceneGame::Draw(void)
 {
 	auto& effect = EffectManager::GetInstance();
@@ -345,4 +344,9 @@ void SceneGame::DrawDebug(void)
 {
 	SceneManager::GetInstance().GetCamera()->DrawDebug();
 }
+
+void SceneGame::UpdateGui(void)
+{
+}
+
 
