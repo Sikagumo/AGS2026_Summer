@@ -31,6 +31,8 @@ public:
 	{
 		EFFECT effectId;
 		int playHandle;
+		const void* owner; 
+		int tag;           
 	};
 
 
@@ -58,7 +60,9 @@ public:
 	/// @param _rot 再生させる角度
 	/// @param _scl 再生させる大きさ
 	/// @param _speed 再生速度
-	void Play(const EFFECT _effect, const VECTOR _pos, const VECTOR _rot, const VECTOR _scl ,float _speed);
+	/// @param _owner 生成者の識別用（this)
+	/// @param _tag 複数生成時用のタグ何もなければ１
+	void Play(const EFFECT _effect, const VECTOR _pos, const VECTOR _rot, const VECTOR _scl, float _speed, const void* _owner, int _tag = 1);
 
 	/// @brief エフェクトが再生中か確認
 	/// @param _effect 対象のエフェクトID
@@ -70,16 +74,22 @@ public:
 	void  DestroyInstance(void);
 
 	/// @brief ポジション更新
+	/// @param _owner 生成者の識別用（this)
+	/// @param _tag 複数生成時用のタグ何もなければ１
 	/// @param _pos 変更座標
-	void UpdatePos(const EFFECT _effect, const VECTOR _pos);
+	void UpdatePos(const EFFECT _effect, const void* _owner, const VECTOR _pos, int _tag = 1);
 
 	/// @brief 角度更新
+	/// @param _owner 生成者の識別用（this)
+	/// @param _tag 複数生成時用のタグ何もなければ１
 	/// @param _rot 変更角度
-	void UpdateRot(const EFFECT _effect, const VECTOR _rot);
+	void UpdateRot(const EFFECT _effect, const void* _owner, const VECTOR _rot, int _tag = 1);
 
 	/// @brief サイズ更新
+	/// @param _owner 生成者の識別用（this)
+	/// @param _tag 複数生成時用のタグ何もなければ１
 	/// @param _scl 変更サイズ
-	void UpdateScl(const EFFECT _effect, const VECTOR _scl);
+	void UpdateScl(const EFFECT _effect, const void* _owner, const VECTOR _scl, int _tag = 1);
 
 	/// @brief 指定したエフェクトIDの再生をすべて強制停止する
 	void Stop(EFFECT _effect);

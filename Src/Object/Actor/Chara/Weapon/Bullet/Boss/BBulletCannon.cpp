@@ -55,6 +55,15 @@ void BBulletCannon::InitPost(void)
 
 void BBulletCannon::UpdateProcess(void)
 {
+	if (CollisionController::GetInstance().IsActorCollidingWithTag(this, ColliderBase::TAG::PLAYER))
+	{
+		isAlive_ = false;
+	}
+	if (CollisionController::GetInstance().IsActorCollidingWithTag(this, ColliderBase::TAG::STAGE))
+	{
+		isAlive_ = false;
+	}
+
 	if (isAlive_)
 	{
 		aliveTime_++;
@@ -89,5 +98,8 @@ void BBulletCannon::UpdateProcessPost(void)
 
 void BBulletCannon::DrawPre(void)
 {
-	MV1DrawModel(transform_.modelId);
+	if (isAlive_)
+	{
+		MV1DrawModel(transform_.modelId);
+	}
 }

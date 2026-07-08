@@ -25,7 +25,7 @@
 
 Boss::Boss(void) :
 	               
-	hp_(900),
+	hp_(MAX_HP/2),
 	boneName_(BONE_NAME::WEAPON_JOINT_MGL_L), 
 	jumpDir_({ 0.0f, 0.0f, 0.0f }),          
 	speed_(MOVE_SPEED_INIT),
@@ -450,7 +450,7 @@ void Boss::UpdateProcess(void)
 	stateUpdate_();
 
 	currentWaveScl = VAdd(currentWaveScl, WAVE_SCL_UP);
-	EffectManager::GetInstance().UpdateScl(EffectManager::EFFECT::EFFECT_WAVE, currentWaveScl);
+	EffectManager::GetInstance().UpdateScl(EffectManager::EFFECT::EFFECT_WAVE,this, currentWaveScl);
 
 	BossTransformUpdate();
 	
@@ -480,6 +480,7 @@ void Boss::UpdateIdle(void)
 	if (hp_ <= laserShotHp_ && attackCount_ >= attackInterval_)
 	{
 		ChangeState(STATE::LASER);
+		//laserShotHp_ = MAX_HP * 0.2;
 	}
 	else if (attackCount_ >= attackInterval_)
 	{
@@ -492,7 +493,7 @@ void Boss::UpdateAttack(void)
 	LookPlayer();
 	transformBody_.pos = MV1GetFramePosition(transform_.modelId, JOINT_FEET_BODY);
 	int randomAttack = static_cast<int>(UtilityMath::RandRangeF(0.0f, static_cast<float>(ATTACK_TYPE::MAX)));
-	ATTACK_TYPE attackSelect = /*ATTACK_TYPE::MG;/*/static_cast<ATTACK_TYPE>(randomAttack);
+	ATTACK_TYPE attackSelect = /**/ATTACK_TYPE::MG;//static_cast<ATTACK_TYPE>(randomAttack);
 
 	switch (attackSelect)
 	{
@@ -538,8 +539,8 @@ void Boss::UpdateJump(void)
 		wave_->SetIsAttack(true);
 		isLanging_ = true;
 		currentWaveScl = WAVE_SCL;
-		EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_WAVE, transform_.pos, currentWaveScl, LANDING_SCL, 1.0f);
-		EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_LANDING, transform_.pos, { 0.0f,0.0f,0.0f }, LANDING_SCL, 1.0f);
+		EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_WAVE, transform_.pos, currentWaveScl, LANDING_SCL, 1.0f,this);
+		EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_LANDING, transform_.pos, { 0.0f,0.0f,0.0f }, LANDING_SCL, 1.0f,this);
 		ChangeState(STATE::IDLE);
 	}
 	else if (isJump_)

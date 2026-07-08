@@ -1,6 +1,7 @@
 #include <DxLib.h>
 #include "../../../../../../Manager/Generic/ResourceManager.h"
 #include "../../../../../../Utility/UtilityMath.h"
+#include "../../../../../../Manager/Decoration/EffectManager.h"
 #include "../../../../../Collider/ColliderBase.h"
 #include "../../../../../Collider/ColliderCapsule.h"
 #include "../../../../../Collider/ColliderLine.h"
@@ -125,21 +126,6 @@ void WeaponRG::DrawPre(void)
 		bulletLaser_->Draw();
 	}
 
-#ifdef _DEBUG
-	for (auto& [id, colliderVector] : ownColliders_)
-	{
-		for (auto* collider : colliderVector)
-		{
-			if (collider == nullptr)
-			{
-				continue;
-			}
-
-			collider->Draw();
-		}
-	}
-#endif
-
 
 }
 
@@ -187,6 +173,7 @@ void WeaponRG::ChangeStateAttack(void)
 {
 	stateUpdate_ = std::bind(&WeaponRG::UpdateAttack, this);
 	bulletLaser_->SetIsAttack(true);
+	EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_LASER, { 0.0f,0.0f,0.0f }, { 0.0f,0.0f,0.0f }, { 300.0f,300.0f,300.0f }, 0.2f, this);
 	
 }
 
@@ -221,6 +208,8 @@ void WeaponRG::UpdatePreparation(void)
 
 	transform_.quaRot = Quaternion::Mult(bone_.transform.quaRot, Quaternion::AngleAxis(UtilityMath::Deg2RadF(localUpRot_), UtilityMath::AXIS_X));
 
+
+	
 }
 
 void WeaponRG::UpdateAttack(void)
@@ -233,6 +222,16 @@ void WeaponRG::UpdateAttack(void)
 
 	// 位置を加算して最終的なワールド座標にする
 	VECTOR localPos = VAdd(transform_.pos, localRotPos);
+
+
+	EffectManager::GetInstance().UpdatePos(EffectManager::EFFECT::EFFECT_LASER, this, localPos);
+	Quaternion effectQuaRot = Quaternion::Mult(transform_.quaRot, Quaternion::AngleAxis(UtilityMath::Deg2RadF(90.0f), UtilityMath::AXIS_X));
+	VECTOR effectRot = effectQuaRot.ToEuler();
+	effectRot.x = UtilityMath::Rad2DegF(effectRot.x);
+	effectRot.y = UtilityMath::Rad2DegF(effectRot.y);
+	effectRot.z = UtilityMath::Rad2DegF(effectRot.z);
+
+	EffectManager::GetInstance().UpdateRot(EffectManager::EFFECT::EFFECT_LASER, this, effectRot);
 
 	bulletLaser_->CreateBullets(localPos, transform_.quaRot.GetForward(), 0.0f);
 	bulletLaser_->SetTransform(transform_);

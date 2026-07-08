@@ -167,7 +167,7 @@ void BBulletMissile::MoveDown(void)
 void BBulletMissile::Attack(void)
 {
 	attackCount_++;
-	if (attackCount_ >= 3)
+	if (attackCount_ >= 10)
 	{
 		attackCount_ = 0;
 		isAttack_ = false;

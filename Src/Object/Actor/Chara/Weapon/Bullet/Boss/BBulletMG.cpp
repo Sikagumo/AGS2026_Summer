@@ -67,6 +67,11 @@ void BBulletMG::UpdateProcess(void)
 		isAlive_ = false;
 	}
 
+	if (transform_.pos.y <= -30)
+	{
+		isAlive_ = false;
+	}
+
 	if (isAlive_)
 	{
 		aliveTime_++;
@@ -101,6 +106,8 @@ void BBulletMG::UpdateProcessPost(void)
 
 void BBulletMG::DrawPre(void)
 {
-	MV1DrawModel(transform_.modelId);
-	
+	if (isAlive_)
+	{
+		MV1DrawModel(transform_.modelId);
+	}
 }

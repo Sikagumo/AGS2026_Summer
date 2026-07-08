@@ -114,7 +114,11 @@ void MGBase::ChangeStateAttack(void)
     stateUpdate_ = std::bind(&MGBase::UpdateAttack, this);
     bulletCount_ = MAX_BULLET_COUNT;
     isAttack_ = true;
-    EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_MG,)
+    
+
+    VECTOR effectRot=transform_.quaRot.GetForward();
+
+    EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_MG, effectPos_, effectRot, { 10.0f,10.0f,10.0f }, 1.0f,this);
 }
 
 void MGBase::ChangeStateEnd(void)
@@ -135,6 +139,25 @@ void MGBase::UpdateAttack(void)
     bulletCount_--;
     transform_.pos = MV1GetFramePosition(bone_.transform.modelId, bone_.id);
     LookPlayer();
+
+    // ローカル座標を回転させてワールド座標へ変換
+    VECTOR localRotPos = transform_.quaRot.PosAxis(muzzlePos_[1]);
+    // 位置を加算して最終的なワールド座標にする
+    effectPos_ = VAdd(transform_.pos, localRotPos);
+    EffectManager::GetInstance().UpdatePos(EffectManager::EFFECT::EFFECT_MG, this, effectPos_);
+    Quaternion effectquaRot = Quaternion::Mult(transform_.quaRot, Quaternion::AngleAxis(UtilityMath::Deg2RadF(-90.0f), UtilityMath::AXIS_X));
+
+    VECTOR effectRot = effectquaRot.ToEuler();
+    effectRot.x = UtilityMath::Rad2DegF(effectRot.x);
+    effectRot.y = UtilityMath::Rad2DegF(effectRot.y);
+    effectRot.z = UtilityMath::Rad2DegF(effectRot.z);
+    EffectManager::GetInstance().UpdateRot(EffectManager::EFFECT::EFFECT_MG, this, effectRot);
+
+    if (EffectManager::GetInstance().IsPlaying(EffectManager::EFFECT::EFFECT_MG) == false)
+    {
+        EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_MG, effectPos_, effectRot, { 10.0f,10.0f,10.0f }, 1.0f, this);
+    }
+    
 
     SoundManager::GetInstance().Set3DPosition(SoundManager::SOUND::SE_MG_FIRE, transform_.pos);
     if (bulletCount_ >= 0) {

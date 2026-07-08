@@ -83,7 +83,7 @@ void EffectManager::Add(const EFFECT _effect, const int _data)
     
 }
 
-void EffectManager::Play(const EFFECT _effect, const VECTOR _pos, const VECTOR _rot, const VECTOR _scl, float _speed)
+void EffectManager::Play(const EFFECT _effect, const VECTOR _pos, const VECTOR _rot, const VECTOR _scl, float _speed, const void* _owner, int _tag)
 {
     auto it = effect_.find(_effect);
     if (it == effect_.end())
@@ -111,6 +111,8 @@ void EffectManager::Play(const EFFECT _effect, const VECTOR _pos, const VECTOR _
 
         PLAYING_EFFECT activeEffect;
         activeEffect.effectId = _effect;
+        activeEffect.owner = _owner;
+        activeEffect.tag = _tag;
         activeEffect.playHandle = playHandle;
         playingList_.push_back(activeEffect);
     }
@@ -142,36 +144,45 @@ void EffectManager::Stop(EFFECT _effect)
     }
 }
 
-void EffectManager::UpdatePos(const EFFECT _effect, const VECTOR _pos)
+void EffectManager::UpdatePos(const EFFECT _effect, const void* _owner, const VECTOR _pos, int _tag)
 {
     for (const auto& active : playingList_)
     {
-        if (active.effectId == _effect)
+        if (active.owner == _owner && active.tag == _tag)
         {
-            SetPosPlayingEffekseer3DEffect(active.playHandle, _pos.x, _pos.y, _pos.z);
+            if (active.effectId == _effect)
+            {
+                SetPosPlayingEffekseer3DEffect(active.playHandle, _pos.x, _pos.y, _pos.z);
+            }
         }
     }
 }
 
-void EffectManager::UpdateRot(const EFFECT _effect, const VECTOR _rot)
+void EffectManager::UpdateRot(const EFFECT _effect, const void* _owner, const VECTOR _rot, int _tag)
 {
    
     for (const auto& active : playingList_)
     {
-        if (active.effectId == _effect)
+        if (active.owner == _owner && active.tag == _tag)
         {
-            SetRotationPlayingEffekseer3DEffect(active.playHandle, UtilityMath::Deg2RadD(_rot.x), UtilityMath::Deg2RadD(_rot.y), UtilityMath::Deg2RadD(_rot.z));
+            if (active.effectId == _effect)
+            {
+                SetRotationPlayingEffekseer3DEffect(active.playHandle, UtilityMath::Deg2RadD(_rot.x), UtilityMath::Deg2RadD(_rot.y), UtilityMath::Deg2RadD(_rot.z));
+            }
         }
     }
 }
 
-void EffectManager::UpdateScl(const EFFECT _effect, const VECTOR _scl)
+void EffectManager::UpdateScl(const EFFECT _effect, const void* _owner, const VECTOR _scl, int _tag)
 {
     for (const auto& active : playingList_)
     {
-        if (active.effectId == _effect)
+        if (active.owner == _owner && active.tag == _tag)
         {
-            SetScalePlayingEffekseer3DEffect(active.playHandle, _scl.x, _scl.y, _scl.z);
+            if (active.effectId == _effect)
+            {
+                SetScalePlayingEffekseer3DEffect(active.playHandle, _scl.x, _scl.y, _scl.z);
+            }
         }
     }
 }

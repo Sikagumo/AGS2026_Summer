@@ -129,22 +129,7 @@ void WeaponMP::DrawPre(void)
 		bullet->Draw();
 
 	}
-	if (isAlive_)
-	{
 		
-		for (auto& [id, colliderVector] : ownColliders_)
-		{
-			for (auto* collider : colliderVector)
-			{
-				if (collider == nullptr)
-				{
-					continue;
-				}
-				collider->Draw();
-			}
-		}
-	}
-	
 	
 }
 
