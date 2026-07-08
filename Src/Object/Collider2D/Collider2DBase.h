@@ -20,6 +20,9 @@ public:
 		OPTION_BUTTON,
 		EXIT_UTTON,
 		MOUSE_CURSOR,
+		PEACH,
+		WAVE,
+		ONI_GASHIMA
 	};
 
 	/// @brief コンストラクタ

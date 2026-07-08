@@ -16,6 +16,7 @@
 #include "../../Utility/UtilityMath.h"
 #include "../../Shader/ShaderController.h"
 #include "../../Shader/ShaderParameters.h"
+#include "../../ImGUI/GuiController.h"
 
 void SceneTitle::Load(void)
 {
@@ -153,6 +154,33 @@ void SceneTitle::Initialize(void)
         Collider2DBase::TAG_2D::OPTION_BUTTON,
         Collider2DBase::TAG_2D::EXIT_UTTON
     };
+
+    // 定数バッファの初期化
+    peachBuffer_.ambient = 0.8f;
+    waveBuffer_.ambient = 0.8f;
+    oniSimaBuffer_.ambient = 0.8f;
+    waveBuffer_.waveSpeed = 3.0f;
+    waveBuffer_.waveForce = 0.015f;
+
+    // GUIの初期化
+    peachGui_ = std::make_shared<ShaderEditorComponent>("Peach", &peachBuffer_);
+    waveGui_ = std::make_shared<ShaderEditorComponent>("Wave", &waveBuffer_);
+    oniSimaGui_ = std::make_shared<ShaderEditorComponent>("OniGashima", &oniSimaBuffer_);
+
+    peachCollider_ = std::make_unique<Collider2DBox>(
+        Vector2F(-20.0f, Application::SCREEN_HALF_Y), 100.0f, 100.0f, Collider2DBase::TAG_2D::PEACH);
+    waveCollider_ = std::make_unique<Collider2DBox>(
+        Vector2F(0.0f, 20.0f), Application::SCREEN_SIZE_X, 100.0f, Collider2DBase::TAG_2D::WAVE);
+    oniSimaCollider_ = std::make_unique<Collider2DBox>(
+        Vector2F(Application::SCREEN_HALF_X - 100.0f, 30.0f), 200.0f, 150.0f, Collider2DBase::TAG_2D::ONI_GASHIMA);
+
+    CollisionController::GetInstance().RegisterCollider2D(peachCollider_.get());
+    CollisionController::GetInstance().RegisterCollider2D(waveCollider_.get());
+    CollisionController::GetInstance().RegisterCollider2D(oniSimaCollider_.get());
+
+    CollisionController::GetInstance().SetCollisionGroup2D(Collider2DBase::TAG_2D::MOUSE_CURSOR, Collider2DBase::TAG_2D::PEACH, true);
+    CollisionController::GetInstance().SetCollisionGroup2D(Collider2DBase::TAG_2D::MOUSE_CURSOR, Collider2DBase::TAG_2D::WAVE, true);
+    CollisionController::GetInstance().SetCollisionGroup2D(Collider2DBase::TAG_2D::MOUSE_CURSOR, Collider2DBase::TAG_2D::ONI_GASHIMA, true);
 }
 
 void SceneTitle::Update(void)
@@ -224,12 +252,32 @@ void SceneTitle::Update(void)
             }
         }
     }
+
+#ifdef _DEBUG
+    // クリックされたら、対象のGUIをコントローラに渡す
+    if (keyConfInputManager.isTrigerDown("OK"))
+    {
+        auto& colCtrl = CollisionController::GetInstance();
+        using TAG = Collider2DBase::TAG_2D;
+
+        if (colCtrl.IsTagCollidingWithTag2D(TAG::MOUSE_CURSOR, TAG::PEACH)) {
+            GuiController::GetInstance().SetActiveGui(peachGui_);
+        }
+        else if (colCtrl.IsTagCollidingWithTag2D(TAG::MOUSE_CURSOR, TAG::WAVE)) {
+            GuiController::GetInstance().SetActiveGui(waveGui_);
+        }
+        else if (colCtrl.IsTagCollidingWithTag2D(TAG::MOUSE_CURSOR, TAG::ONI_GASHIMA)) {
+            GuiController::GetInstance().SetActiveGui(oniSimaGui_);
+        }
+    }
+#endif
 }
 
 void SceneTitle::Draw(void)
 {
 
     time_ += 0.02f;
+    waveBuffer_.time = time_;
 
     const float PEACH_SCALE = 0.5f;
     const float WAVE_SCALE = 1.0f;
@@ -238,32 +286,23 @@ void SceneTitle::Draw(void)
     float amplitude = 20.0f;
     float bobSpeed = 3.0f;
     float offsetY = std::sinf(time_ * bobSpeed) * amplitude;
-    float peachPosY = Application::SCREEN_HALF_Y + offsetY;
-
-    const float ambient = 0.8f;
-
-    const float waveSpeed = 3.0f;
-    const float waveForce = 0.015f;
 
     // 鬼ヶ島の描画
     DrawRequest oniReq(Application::SCREEN_HALF_X - 100, 30, oniSimaHandle_, ONISIMA_SCALE);
     oniReq.normalMapHandle = oniSimaNormalHandle_;
-    oniReq.buffer.ambient = ambient;
+    oniReq.buffer = oniSimaBuffer_;
     ShaderController::GetInstance().Draw(SHADER_TYPE::NORMAL, oniReq);
 
     // 波の描画
     DrawRequest waveReq(0, 20, waveHandle_, WAVE_SCALE);
     waveReq.normalMapHandle = waveNormalHandle_;
-    waveReq.buffer.ambient = ambient;
-    waveReq.buffer.time = time_;
-    waveReq.buffer.waveSpeed = waveSpeed;
-    waveReq.buffer.waveForce = waveForce;
+    waveReq.buffer = waveBuffer_;
     ShaderController::GetInstance().Draw(SHADER_TYPE::NORMAL_WAVE, waveReq);
 
     // 桃の描画
     DrawRequest peachReq(-20, static_cast<int>(Application::SCREEN_HALF_Y + offsetY), peachHandle_, PEACH_SCALE);
     peachReq.normalMapHandle = peachNormalHandle_;
-    peachReq.buffer.ambient = ambient;
+    peachReq.buffer = peachBuffer_;
     ShaderController::GetInstance().Draw(SHADER_TYPE::NORMAL, peachReq);
 
     const int IMAGET_TITLE_Y = Application::SCREEN_SIZE_Y / 4;

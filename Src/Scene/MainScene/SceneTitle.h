@@ -8,6 +8,7 @@
 #include "../../Object/Collider2D/Collider2DBase.h"
 #include "../../Object/Collider2D/Collider2DCircle.h"
 #include "../../Object/Collider2D/Collider2DBox.h"
+#include "../../ImGUI/ShaderEditorComponent.h"
 
 class SceneTitle : public SceneBase
 {
@@ -71,12 +72,24 @@ private:
 	// 前回のマウス座標
 	Vector2F prevMousePos_;
 
+	IntegratedGpuBuffer peachBuffer_;
+	IntegratedGpuBuffer waveBuffer_;
+	IntegratedGpuBuffer oniSimaBuffer_;
+
+	// 2. GUIコンポーネント
+	std::shared_ptr<ShaderEditorComponent> peachGui_;
+	std::shared_ptr<ShaderEditorComponent> waveGui_;
+	std::shared_ptr<ShaderEditorComponent> oniSimaGui_;
+
 	// 2D衝突判定関連
 	std::unique_ptr<Collider2DCircle> cursorCollider_;        // マウスカーソル用の円コライダー
 	std::unique_ptr<Collider2DBox> soloPlayButtonCollider_;   // ソロプレイボタン用の矩形コライダー
 	std::unique_ptr<Collider2DBox> multiPlayButtonCollider_;  // マルチプレイボタン用の矩形コライダー
 	std::unique_ptr<Collider2DBox> optionButtonCollider_;     // 設定ボタン用の矩形コライダー
 	std::unique_ptr<Collider2DBox> exitButtonCollider_;       // 終了ボタン用の矩形コライダー
+	std::unique_ptr<Collider2DBox> peachCollider_;
+	std::unique_ptr<Collider2DBox> waveCollider_;
+	std::unique_ptr<Collider2DBox> oniSimaCollider_;
 
 	/// @brief デバック描画 
 	void DrawDebug(void);

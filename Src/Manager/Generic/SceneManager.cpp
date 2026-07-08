@@ -11,6 +11,7 @@
 #include "../../Common/Loading.h"
 #include "../../Application.h"
 #include "KeyConfInputManager.h"
+#include "../../ImGUI/GuiController.h"
 
 SceneManager* SceneManager::instance_ = nullptr;
 
@@ -65,6 +66,7 @@ void SceneManager::Initialize(void)
     Loading::GetInstance()->Initialize();
     CollisionController::CreateInstance();
     CollisionController::GetInstance().Initialize();
+    GuiController::CreateInstance();
 }
 
 void SceneManager::Init3D(void)
@@ -257,6 +259,11 @@ void SceneManager::Draw(void)
         }
     }
 
+#ifdef _DEBUG
+    GuiController::GetInstance().DrawUI();
+#endif 
+
+
     // ロード中ならその上にロード画面を重ねる
     auto loader = Loading::GetInstance();
 
@@ -292,6 +299,7 @@ void SceneManager::Release(void)
     TimeManager::GetInstance().DestroyInstance();
     Loading::GetInstance()->DestroyInstance();
     CollisionController::DestroyInstance();
+    GuiController::DestroyInstance();
 }
 
 const std::unique_ptr<Camera>& SceneManager::GetCamera(void) const

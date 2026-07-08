@@ -4,7 +4,6 @@
     <FxCompile Include="srcGraphics\Pixel\NormalMap.hlsl" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Src\Shader\ShaderPixel\ShaderWave.cpp" />
     <ClCompile Include="Src\Manager\Decoration\EffectManager.cpp" />
     <ClCompile Include="Src\Object\Actor\Chara\Weapon\Bullet\Boss\BBulletCannon.cpp" />
     <ClCompile Include="Src\Object\Actor\Chara\Weapon\BossWeapon\MG\MGBase.cpp" />
@@ -79,9 +78,7 @@
     <ClCompile Include="Src\Object\Actor\Chara\Weapon\BossWeapon\Cannon\WeaponCannon.cpp" />
     <ClCompile Include="Src\Object\Actor\Chara\Weapon\BossWeapon\MG\WeaponMGL.cpp" />
     <ClCompile Include="Src\Object\Actor\Chara\Weapon\BossWeapon\MG\WeaponMGR.cpp" />
-<<<<<<< HEAD
     <ClCompile Include="Src\ImGUI\ImGuiWrapper.cpp" />
-    <ClCompile Include="Src\ImGUI\IParameterEditor.cpp" />
     <ClCompile Include="Lib\ImGUI\backends\imgui_impl_dx11.cpp" />
     <ClCompile Include="Lib\ImGUI\backends\imgui_impl_win32.cpp" />
     <ClCompile Include="Lib\ImGUI\imgui.cpp" />
@@ -90,18 +87,17 @@
     <ClCompile Include="Lib\ImGUI\imgui_tables.cpp" />
     <ClCompile Include="Lib\ImGUI\imgui_widgets.cpp" />
     <ClCompile Include="Src\Object\Actor\Chara\Weapon\Bullet\Boss\BBulletMissile.cpp" />
-=======
     <ClCompile Include="Src\Shader\ShaderPixel\ShaderPixel.cpp" />
     <ClCompile Include="Src\Shader\ShaderController.cpp" />
     <ClCompile Include="Src\Shader\ShaderBase.cpp" />
     <ClCompile Include="Src\Shader\ShaderLibrary.cpp" />
     <ClCompile Include="Src\Shader\ShaderRenderer.cpp" />
->>>>>>> shader
+    <ClCompile Include="Src\ImGUI\ShaderEditorComponent.cpp" />
+    <ClCompile Include="Src\Shader\ShaderPixel\ShaderPixelBase.cpp" />
+    <ClCompile Include="Src\ImGUI\GuiController.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\Shader\ShaderParameters.h" />
-    <ClInclude Include="Src\Shader\ShaderPixel\ShaderWave.h" />
-    <ClInclude Include="Src\Manager\Decoration\EffectManager.h" />
     <ClInclude Include="Src\Object\Actor\Chara\Weapon\Bullet\Boss\BBulletCannon.h" />
     <ClInclude Include="Src\Object\Actor\Chara\Weapon\BossWeapon\MG\MGBase.h" />
     <ClInclude Include="Src\Object\Actor\Chara\Weapon\Bullet\Player\PBulletBomb.h" />
@@ -177,9 +173,8 @@
     <ClInclude Include="Src\Object\Actor\Chara\Weapon\BossWeapon\Cannon\WeaponCannon.h" />
     <ClInclude Include="Src\Object\Actor\Chara\Weapon\BossWeapon\MG\WeaponMGL.h" />
     <ClInclude Include="Src\Object\Actor\Chara\Weapon\BossWeapon\MG\WeaponMGR.h" />
-<<<<<<< HEAD
     <ClInclude Include="Src\ImGUI\ImGuiWrapper.h" />
-    <ClInclude Include="Src\ImGUI\IParameterEditor.h" />
+    <ClInclude Include="Src\ImGUI\IGuiComponent.h" />
     <ClInclude Include="Lib\ImGUI\backends\imgui_impl_dx11.h" />
     <ClInclude Include="Lib\ImGUI\backends\imgui_impl_win32.h" />
     <ClInclude Include="Lib\ImGUI\imconfig.h" />
@@ -189,14 +184,15 @@
     <ClInclude Include="Lib\ImGUI\imstb_textedit.h" />
     <ClInclude Include="Lib\ImGUI\imstb_truetype.h" />
     <ClInclude Include="Src\Object\Actor\Chara\Weapon\Bullet\Boss\BBulletMissile.h" />
-=======
     <ClInclude Include="Src\Shader\ShaderParameters.h" />
     <ClInclude Include="Src\Shader\ShaderPixel\ShaderPixel.h" />
     <ClInclude Include="Src\Shader\ShaderController.h" />
     <ClInclude Include="Src\Shader\ShaderBase.h" />
     <ClInclude Include="Src\Shader\ShaderLibrary.h" />
     <ClInclude Include="Src\Shader\ShaderRenderer.h" />
->>>>>>> shader
+    <ClInclude Include="Src\ImGUI\ShaderEditorComponent.h" />
+    <ClInclude Include="Src\Shader\ShaderPixel\ShaderPixelBase.h" />
+    <ClInclude Include="Src\ImGUI\GuiController.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="srcGraphics\Common\Pixel\PixelShader2DHeader.hlsli" />
