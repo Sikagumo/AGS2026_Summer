@@ -163,7 +163,7 @@ void PBulletBase::Shot(const VECTOR& _shotDir)
 	transform_.Update();
 
 	// “–‚½‚è”»’è“o˜^
-	ownColliders_.at(static_cast<int>(COLLISION_TYPE::BULLET))->SetRadius(radiusBullet_);
+	ownColliders_.at(static_cast<int>(COLLISION_TYPE::BULLET)).at(0)->SetRadius(radiusBullet_);
 	CollisionController::GetInstance().RegisterActor(this);
 	CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::PLAYER_BULLET, true);
 	CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::PLAYER_BLAST, false);

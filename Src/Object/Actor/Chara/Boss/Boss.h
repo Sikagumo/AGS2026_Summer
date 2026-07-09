@@ -25,6 +25,7 @@ public:
 		JUMP,
 		JUMPBEFORE,
 		ROADATTACK,
+		LASER,
 		END,
 	};
 

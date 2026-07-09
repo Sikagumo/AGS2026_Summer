@@ -57,13 +57,13 @@ void BBulletMissile::InitTransform(void)
 
 void BBulletMissile::InitCollider(void)
 {
-	ColliderCapsule* colCapsule = new ColliderCapsule(
-		ColliderBase::TAG::MISSILE_PUSH, &transform_, { 0.0f,0.0f,0.0f }, { 0.0f,1.0f,0.0f }, radius_*0.8);
-	ownColliders_.emplace(static_cast<int>(ColliderBase::SHAPE::CAPSULE), colCapsule);
+	ColliderSphere* colHitSphere = new ColliderSphere(
+		ColliderBase::TAG::MISSILE_ATTACK, &transform_, { 0.0f,0.0f,0.0f }, radius_ * 0.8f);
+	ownColliders_[static_cast<int>(ColliderBase::TAG::MISSILE_ATTACK)].push_back(colHitSphere);
 
-	ColliderSphere* colSphere = new ColliderSphere(
+	ColliderSphere* colPushSphere = new ColliderSphere(
 		ColliderBase::TAG::MISSILE_PUSH, &transform_, { 0.0f,0.0f,0.0f }, radius_);
-	ownColliders_.emplace(static_cast<int>(ColliderBase::SHAPE::SPHERE), colSphere);
+	ownColliders_[static_cast<int>(ColliderBase::TAG::MISSILE_PUSH)].push_back(colPushSphere);
 
 	CollisionController::GetInstance().RegisterActor(this);
 	CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::MISSILE_ATTACK, false);
@@ -115,9 +115,17 @@ void BBulletMissile::DrawPre(void)
 	{
 		MV1DrawModel(transform_.modelId);
 
-		for (auto& col : ownColliders_)
+		for (auto& [id, colliderVector] : ownColliders_)
 		{
-			col.second->Draw();
+			for (auto* collider : colliderVector)
+			{
+				if (collider == nullptr)
+				{
+					continue;
+				}
+
+				collider->Draw();
+			}
 		}
 		
 	}
@@ -145,7 +153,7 @@ void BBulletMissile::MoveUp(void)
 void BBulletMissile::MoveDown(void)
 {
 	
-	transform_.pos.y -= 40.0f;
+	transform_.pos.y -= 5.0f;
 
 	// ínñ ÇÃîªíËÅi-23.0f à»â∫Ç…Ç»Ç¡ÇΩÇÁíÖíeÅj
 	if (transform_.pos.y <= -23.0f)

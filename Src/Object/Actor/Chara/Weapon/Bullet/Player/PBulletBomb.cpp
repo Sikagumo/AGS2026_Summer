@@ -84,7 +84,7 @@ void PBulletBomb::BlastAction(void)
 	// ”š”­—LŒø‰»
 	radiusBlast_ = RADIUS_BLAST;
 
-	ownColliders_.at(static_cast<int>(COLLISION_TYPE::BLAST))->SetRadius(radiusBlast_);
+	ownColliders_.at(static_cast<int>(COLLISION_TYPE::BLAST)).at(0)->SetRadius(radiusBlast_);
 
 	CollisionController::GetInstance()
 		.SetCollisionActive(this, ColliderBase::TAG::PLAYER_BLAST, true);

@@ -54,6 +54,12 @@ public:
    /// @return カプセルの半径
     float GetRadius(void) const;
 
+    /// @brief 始点、終点、半径をまとめて設定する
+    /// @param _localStartPos 新しい始点 (ローカル座標)
+    /// @param _localEndPos 新しい終点 (ローカル座標)
+    /// @param _radius 新しい半径
+    void SetShape(const VECTOR& _localStartPos, const VECTOR& _localEndPos, float _radius);
+
 protected:
     /// @brief デバッグ描画
     /// @param debugColor 描画色

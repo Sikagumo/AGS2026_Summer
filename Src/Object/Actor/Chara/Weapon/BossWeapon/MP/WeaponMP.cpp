@@ -63,12 +63,12 @@ void WeaponMP::InitTransform(void)
 void WeaponMP::InitCollider(void)
 {
 	ColliderLine* colLine = new ColliderLine(ColliderBase::TAG::STAGE, &transform_, LINE_START_POS, LINE_END_POS);
-	ownColliders_.emplace(static_cast<int>(ColliderBase::SHAPE::LINE), std::vector<ColliderBase*>{ colLine });
+	ownColliders_[static_cast<int>(ColliderBase::TAG::STAGE)].push_back(colLine);
 
 
 	ColliderSphere* colSphere = new ColliderSphere(
 		tag_, &transform_, SPHERE_START_POS, SPHERE_RADIUS);
-	ownColliders_.emplace(static_cast<int>(ColliderBase::SHAPE::SPHERE), std::vector<ColliderBase*>{ colSphere });
+	ownColliders_[static_cast<int>(tag_)].push_back(colSphere);
 	colSphere->SetTriger(false);
 
 	CollisionController::GetInstance().RegisterActor(this);

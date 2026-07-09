@@ -55,6 +55,8 @@ void ActorBase::Release(void)
 
 	transform_.Release();
 
+	CollisionController::GetInstance().UnregisterActor(this);
+
 	// 自身のコライダーの解放
 	for (auto& [key, colliders] : ownColliders_)
 	{

@@ -38,6 +38,7 @@ void WeaponRG::Load(void)
 	transform_.SetModel(ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::MODEL_BOSS_WEAPON_RG));
 }
 
+
 void WeaponRG::InitTransform(void)
 {
 	transform_.scl = WEAPON_SIZE;
@@ -56,11 +57,11 @@ void WeaponRG::InitTransform(void)
 void WeaponRG::InitCollider(void)
 {
 	ColliderLine* colLine = new ColliderLine(ColliderBase::TAG::STAGE, &transform_, LINE_START_POS, LINE_END_POS);
-	ownColliders_.emplace(static_cast<int>(ColliderBase::SHAPE::LINE), std::vector<ColliderBase*>{ colLine });
+	ownColliders_[static_cast<int>(ColliderBase::TAG::STAGE)].push_back(colLine);
 
 	ColliderCapsule* colCapsule = new ColliderCapsule(
 		tag_, &transform_, CAPSULE_START_POS, CAPSULE_END_POS, CAPSULE_RADIUS);
-	ownColliders_.emplace(static_cast<int>(ColliderBase::SHAPE::CAPSULE), std::vector<ColliderBase*>{ colCapsule });
+	ownColliders_[static_cast<int>(tag_)].push_back(colCapsule);
 	colCapsule->SetTriger(false);
 
 	CollisionController::GetInstance().RegisterActor(this);
@@ -117,4 +118,46 @@ void WeaponRG::DrawPre(void)
 #endif
 	}
 
+}
+
+void WeaponRG::ChangeState(STATE _state)
+{
+	state_ = _state;
+
+	int state = static_cast<int>(state_);
+
+	// Šeó‘Ô‘JˆÚ‚Ì‰Šúˆ—
+	ChangeState(state);
+}
+
+
+void WeaponRG::ChangeState(int state)
+{
+	stateBase_ = state;
+	// Šeó‘Ô‘JˆÚ‚Ì‰Šúˆ—
+	stateChanges_[stateBase_]();
+}
+
+void WeaponRG::ChangeStateIdle(void)
+{
+}
+
+void WeaponRG::ChangeStateAttack(void)
+{
+}
+
+void WeaponRG::ChangeStateEnd(void)
+{
+}
+
+void WeaponRG::UpdateAttack(void)
+{
+}
+
+void WeaponRG::UpdateIdle(void)
+{
+}
+
+void WeaponRG::UpdateEnd(void)
+{
 }
