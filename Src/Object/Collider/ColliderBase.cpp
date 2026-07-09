@@ -9,7 +9,7 @@ ColliderBase::ColliderBase(SHAPE shapeType, TAG collisionTag, const Transform* f
 {
 }
 
-void ColliderBase::Draw(void)
+void ColliderBase::Draw(void) const
 {
 	int color = DEBUG_COLOR_INACTIVE;
 

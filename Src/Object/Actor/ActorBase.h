@@ -10,7 +10,7 @@ class ActorBase
 {
 public:
 
-	using ColliderMap = std::map<int, ColliderBase*>;
+	using ColliderMap = std::map<int, std::vector<ColliderBase*>>;
 
 	// コンストラクタ
 	ActorBase(void);
@@ -43,8 +43,9 @@ public:
 	{
 		return ownColliders_;
 	}
+
 	// 特定の自身の衝突情報取得
-	const ColliderBase* GetOwnCollider(int key) const;
+	const std::vector<ColliderBase*>* GetOwnCollider(int _key) const;
 
 	// 衝突対象となるコライダを登録
 	void AddHitCollider(const ColliderBase* hitCollider);
