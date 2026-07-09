@@ -30,9 +30,9 @@ public:
 	/// @brief 生成処理
 	/// @param _pos 発射位置
 	/// @param _throwDir 投げる位置の調整角度 
-	/// @param _shotCnt 
+	/// @param _shotCnt 発射数
 	/// @param isFinish 最終弾か否か
-	void Create(const VECTOR& _pos, const VECTOR& _throwDir, int _shotCnt, bool isFinish);
+	void Create(const VECTOR& _pos, const VECTOR& _throwDir, int _shotCnt = 0, bool isFinish = false);
 
 	void Shot(const VECTOR& _shotDir);
 

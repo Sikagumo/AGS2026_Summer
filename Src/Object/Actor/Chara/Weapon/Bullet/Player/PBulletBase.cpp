@@ -44,8 +44,9 @@ void PBulletBase::InitPost(void)
 {
 	isVisible_ = true;
 	bulletState_ = BULLET_STATE::INACTIVE;
-	activePowerBullet_ = 0.0f;
-	activePowerBlast_ = 0.0f;
+	activePowerBullet_ = 0;
+	activePowerBlast_ = 0;
+	isActiveDestroy_ = false;
 
 	SetParam();
 }
@@ -146,14 +147,14 @@ void PBulletBase::Create(const VECTOR& _pos, const VECTOR& _throwDir, int _shotC
 
 	bulletState_ = BULLET_STATE::INACTIVE;
 
-	isVisible_ = true;
-
 	curGravityPow_ = 0.0f;
 	transform_.pos = VAdd(_pos, VScale(_throwDir, radiusBullet_));
 
 	isFinish_ = _isFinish;
 
 	transform_.Update();
+
+	isVisible_ = true;
 }
 
 void PBulletBase::Shot(const VECTOR& _shotDir)
@@ -180,8 +181,7 @@ void PBulletBase::Shot(const VECTOR& _shotDir)
 bool PBulletBase::IsAlive(void) const
 {
 	return(bulletState_ != BULLET_STATE::INACTIVE
-			|| aliveTime_ <= 0.0f
-			|| isVisible_);
+			&& !isActiveDestroy_);
 }
 void PBulletBase::SetFollow(const VECTOR& _pos, const VECTOR& _offsetDir)
 {

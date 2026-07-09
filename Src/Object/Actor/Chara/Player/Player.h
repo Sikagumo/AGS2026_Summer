@@ -24,6 +24,15 @@ public:
 		MAX,
 	};
 
+	enum class ACTION_TYPE
+	{
+		NONE = -1,
+		JUMP,
+		DODGE,
+		ATTACK_SPECIAL,
+		ATTACK,
+	};
+
 	/// @brief コンストラクタ
 	/// @param _playerNo プレイヤー番号
 	/// @param _jobType 攻撃の種類
@@ -122,12 +131,6 @@ private:
 	static constexpr float SHOT_RAPID_TERM = 0.5f;
 	float shotTerm_;
 
-	//static constexpr float THROW_SPEED_RAPID_START = 30.0f;
-	//static constexpr float THROW_SPEED_RAPID_MAX = 75.0f;
-	//static constexpr float THROW_SPEED_RAPID_INC = (THROW_SPEED_RAPID_MAX - THROW_SPEED_RAPID_START) / 30;
-
-	//float animSpeedRapid_;
-
 
 	// 操作
 	void ProcessMove(void);
@@ -156,6 +159,10 @@ private:
 	void CreateBullet(void);
 	void ShotBullet(void);
 	void UpdateBullets(void);
+
+	/* 拡散弾処理 */
+	void CreateCluster(void);
+	std::unique_ptr<PBulletNormal> _CreateClusterBullet(const VECTOR& _throwDir);
 
 	void DelayRotate(void)override;
 
