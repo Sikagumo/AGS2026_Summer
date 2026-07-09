@@ -65,7 +65,7 @@ private:
 	int oniSimaNormalHandle_;         // 鬼ヶ島のノーマルマップ
 
 	// 時間
-	float time_;;
+	float time_;
 
 	// 選択インデックス（パッド操作用）
 	int selectedIdx_;

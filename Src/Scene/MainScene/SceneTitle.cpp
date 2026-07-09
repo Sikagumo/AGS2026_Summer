@@ -16,6 +16,7 @@
 #include "../../Utility/UtilityMath.h"
 #include "../../Shader/ShaderController.h"
 #include "../../ImGUI/GuiController.h"
+#include "../../Shader/ShaderLibrary.h"
 
 void SceneTitle::Load(void)
 {
@@ -165,12 +166,22 @@ void SceneTitle::Initialize(void)
     waveGui_ = std::make_shared<ShaderEditorComponent>("Wave", &waveMaterial_);
     oniSimaGui_ = std::make_shared<ShaderEditorComponent>("OniGashima", &oniSimaMaterial_);
 
-    peachCollider_ = std::make_unique<Collider2DBox>(Vector2F(-20.0f, Application::SCREEN_HALF_Y),
-        100.0f, 100.0f, Collider2DBase::TAG_2D::PEACH);
-    waveCollider_ = std::make_unique<Collider2DBox>(Vector2F(0.0f, 20.0f), 
-        0, Application::SCREEN_SIZE_Y, Collider2DBase::TAG_2D::WAVE);
-    oniSimaCollider_ = std::make_unique<Collider2DBox>(Vector2F(Application::SCREEN_SIZE_X - 100.0f,
-        30.0f), 200.0f, 150.0f, Collider2DBase::TAG_2D::ONI_GASHIMA);
+    // ç¿ïWÇÃèâä˙âª
+    Vector2F peachPos = Vector2F(100.0f, Application::SCREEN_HALF_Y + 100);
+    Vector2F wavePos = Vector2F(0.0f, Application::SCREEN_HALF_Y + 100);
+    Vector2F oniSimaPos = Vector2F(Application::SCREEN_SIZE_X - 100.0f, Application::SCREEN_HALF_Y - 50);
+
+    // ìçÇÃìñÇΩÇËîªíË
+    peachCollider_ = std::make_unique<Collider2DBox>(peachPos, 300.0f, 300.0f, 
+        Collider2DBase::TAG_2D::PEACH);
+    
+    // îgÇÃìñÇΩÇËîªíË
+    waveCollider_ = std::make_unique<Collider2DBox>(wavePos, Application::SCREEN_SIZE_X, 
+        Application::SCREEN_HALF_Y, Collider2DBase::TAG_2D::WAVE);
+    
+    // ãSÉñìáÇÃìñÇΩÇËîªíË
+    oniSimaCollider_ = std::make_unique<Collider2DBox>(oniSimaPos, 200.0f, 
+        150.0f, Collider2DBase::TAG_2D::ONI_GASHIMA);
 
     CollisionController::GetInstance().RegisterCollider2D(peachCollider_.get());
     CollisionController::GetInstance().RegisterCollider2D(waveCollider_.get());
