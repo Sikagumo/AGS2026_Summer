@@ -5,6 +5,7 @@
 #include "ShaderParameters.h"
 #include "ShaderRenderer.h"
 #include "ShaderLibrary.h"
+#include "ShaderMaterial.h"
 
 class ShaderController
 {
@@ -24,8 +25,15 @@ public:
 	void Initialize(void);
 
 	/// @brief 描画処理
-	/// @param _request 描画のリクエスト情報 
-	void Draw(SHADER_TYPE _shaderType, const DrawRequest& _request) const;
+	/// @param _shaderType シェーダの種類
+	/// @param _x X座標
+	/// @param _y Y座標
+	/// @param _textureHandle 画像ハンドル
+	/// @param _scale 拡大率
+	/// @param _material 使用するマテリアル
+	/// @param _normalMapHandle ノーマルマップ
+	void CreateShaderDraw(SHADER_TYPE _shaderType, int _x, int _y, int _textureHandle,
+		float _scale, const ShaderMaterial& _material, int _normalMapHandle = -1) const;
 
 	/// @brief 解放処理 
 	void Release(void);

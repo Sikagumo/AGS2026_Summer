@@ -93,8 +93,8 @@
     <ClCompile Include="Src\Shader\ShaderLibrary.cpp" />
     <ClCompile Include="Src\Shader\ShaderRenderer.cpp" />
     <ClCompile Include="Src\ImGUI\ShaderEditorComponent.cpp" />
-    <ClCompile Include="Src\Shader\ShaderPixel\ShaderPixelBase.cpp" />
     <ClCompile Include="Src\ImGUI\GuiController.cpp" />
+    <ClCompile Include="Src\Shader\ShaderMaterial.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\Shader\ShaderParameters.h" />
@@ -191,8 +191,8 @@
     <ClInclude Include="Src\Shader\ShaderLibrary.h" />
     <ClInclude Include="Src\Shader\ShaderRenderer.h" />
     <ClInclude Include="Src\ImGUI\ShaderEditorComponent.h" />
-    <ClInclude Include="Src\Shader\ShaderPixel\ShaderPixelBase.h" />
     <ClInclude Include="Src\ImGUI\GuiController.h" />
+    <ClInclude Include="Src\Shader\ShaderMaterial.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="srcGraphics\Common\Pixel\PixelShader2DHeader.hlsli" />

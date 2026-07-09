@@ -1,18 +1,17 @@
 #include "ShaderEditorComponent.h"
 #include "../../Lib/ImGUI/imgui.h"
 
-ShaderEditorComponent::ShaderEditorComponent(const std::string& _name,
-	IntegratedGpuBuffer* _targetBuffer)
+ShaderEditorComponent::ShaderEditorComponent(const std::string& _name, 
+	ShaderMaterial* _material)
 	: name_(_name)
-	, targetBuffer_(_targetBuffer)
+	, material_(_material)
 {
-
 }
 
 void ShaderEditorComponent::DrawUI(void)
 {
-	// 編集対象のデータが存在しない場合は処理を抜ける
-	if (targetBuffer_ == nullptr)
+	// マテリアルが存在しない場合は安全のために処理を抜ける
+	if (material_ == nullptr)
 	{
 		return;
 	}
@@ -20,34 +19,58 @@ void ShaderEditorComponent::DrawUI(void)
 	// 登録された名前でウィンドウを作成
 	ImGui::Begin(name_.c_str());
 
+	// ライティング設定
 	if (ImGui::CollapsingHeader("Lighting", ImGuiTreeNodeFlags_DefaultOpen))
 	{
-		ImGui::Text("Light Direction");
-		ImGui::SliderFloat("Light X", &targetBuffer_->lightX, -1.0f, 1.0f);
-		ImGui::SliderFloat("Light Y", &targetBuffer_->lightY, -1.0f, 1.0f);
-		ImGui::SliderFloat("Light Z", &targetBuffer_->lightZ, -1.0f, 1.0f);
+		float lightDir[3] = {
+			material_->GetLightDirX(),
+			material_->GetLightDirY(),
+			material_->GetLightDirZ()
+		};
 
-		ImGui::Text("Ambient");
-		ImGui::SliderFloat("Ambient", &targetBuffer_->ambient, 0.0f, 1.0f);
+		if (ImGui::SliderFloat3("Light Direction", lightDir, -1.0f, 1.0f))
+		{
+			// 変更があればマテリアルにセットする
+			material_->SetLightDirection(lightDir[0], lightDir[1], lightDir[2]);
+		}
+
+		// 環境光
+		float ambient = material_->GetAmbient();
+		if (ImGui::SliderFloat("Ambient", &ambient, 0.0f, 1.0f))
+		{
+			material_->SetAmbient(ambient);
+		}
 	}
 
+	// 波エフェクト設定
 	if (ImGui::CollapsingHeader("Wave Effect", ImGuiTreeNodeFlags_DefaultOpen))
 	{
-		ImGui::Text("Wave Settings");
-		ImGui::SliderFloat("Wave Speed", &targetBuffer_->waveSpeed, 0.0f, 5.0f);
-		ImGui::SliderFloat("Wave Force", &targetBuffer_->waveForce, 0.0f, 0.1f);
+		// 波の速さ
+		float speed = material_->GetWaveSpeed();
+		if (ImGui::SliderFloat("Wave Speed", &speed, 0.0f, 5.0f))
+		{
+			material_->SetWaveSpeed(speed);
+		}
 
-		ImGui::Text("Time");
-		ImGui::InputFloat("Time", &targetBuffer_->time);
+		// 波の強さ
+		float force = material_->GetWaveForce();
+		if (ImGui::SliderFloat("Wave Force", &force, 0.0f, 0.1f))
+		{
+			material_->SetWaveForce(force);
+		}
+
+		float currentTime = material_->GetTime();
+		ImGui::Text("Current Time: %.3f", currentTime);
 	}
 
+	// フラグ設定
 	if (ImGui::CollapsingHeader("Flags"))
 	{
-		bool useNormal = (targetBuffer_->useNormal > 0.5f);
-
+		// ノーマルマップのON/OFF
+		bool useNormal = material_->IsUseNormalMap();
 		if (ImGui::Checkbox("Use NormalMap", &useNormal))
 		{
-			targetBuffer_->useNormal = useNormal ? 1.0f : 0.0f;
+			material_->SetUseNormalMap(useNormal);
 		}
 	}
 

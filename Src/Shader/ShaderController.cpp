@@ -44,16 +44,29 @@ void ShaderController::Initialize(void)
     shaderRenderer_->Initialize();
 }
 
-void ShaderController::Draw(SHADER_TYPE _shaderType, const DrawRequest& _request) const
+void ShaderController::CreateShaderDraw(SHADER_TYPE _shaderType, int _x, int _y, int _textureHandle,
+    float _scale, const ShaderMaterial& _material, int _normalMapHandle) const
 {
+    // 描画リクエストのベースを作る
+    DrawRequest req(_x, _y, _textureHandle, _scale);
+    req.normalMapHandle = _normalMapHandle;
+
+    req.buffer.lightX = _material.GetLightDirX();
+    req.buffer.lightY = _material.GetLightDirY();
+    req.buffer.lightZ = _material.GetLightDirZ();
+    req.buffer.ambient = _material.GetAmbient();
+    req.buffer.time = _material.GetTime();
+    req.buffer.waveSpeed = _material.GetWaveSpeed();
+    req.buffer.waveForce = _material.GetWaveForce();
+    req.buffer.useNormal = _material.IsUseNormalMap() ? 1.0f : 0.0f;
+
+    // 職人に渡す
     ShaderBase* shader = shaderLibrary_->GetShader(_shaderType);
-    
     if (shader)
     {
-        shaderRenderer_->PixelShaderDraw(shader, _request);
+        shaderRenderer_->PixelShaderDraw(shader, req);
     }
 }
-
 void ShaderController::Release(void)
 {
     shaderRenderer_->Release();

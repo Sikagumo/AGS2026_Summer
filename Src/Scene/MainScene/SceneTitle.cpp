@@ -15,7 +15,6 @@
 #include "../../Common/Loading.h"
 #include "../../Utility/UtilityMath.h"
 #include "../../Shader/ShaderController.h"
-#include "../../Shader/ShaderParameters.h"
 #include "../../ImGUI/GuiController.h"
 
 void SceneTitle::Load(void)
@@ -155,31 +154,34 @@ void SceneTitle::Initialize(void)
     };
 
     // íËêîÉoÉbÉtÉ@ÇÃèâä˙âª
-    peachBuffer_.ambient = 0.8f;
-    waveBuffer_.ambient = 0.8f;
-    oniSimaBuffer_.ambient = 0.8f;
-    waveBuffer_.waveSpeed = 3.0f;
-    waveBuffer_.waveForce = 0.015f;
+    peachMaterial_.SetAmbient(0.8f);
+    waveMaterial_.SetAmbient(0.8f);
+    oniSimaMaterial_.SetAmbient(0.8f);
+    waveMaterial_.SetWaveSpeed(3.0f);
+    waveMaterial_.SetWaveForce(0.015f);
 
     // GUIÇÃèâä˙âª
-    peachGui_ = std::make_shared<ShaderEditorComponent>("Peach", &peachBuffer_);
-    waveGui_ = std::make_shared<ShaderEditorComponent>("Wave", &waveBuffer_);
-    oniSimaGui_ = std::make_shared<ShaderEditorComponent>("OniGashima", &oniSimaBuffer_);
+    peachGui_ = std::make_shared<ShaderEditorComponent>("Peach", &peachMaterial_);
+    waveGui_ = std::make_shared<ShaderEditorComponent>("Wave", &waveMaterial_);
+    oniSimaGui_ = std::make_shared<ShaderEditorComponent>("OniGashima", &oniSimaMaterial_);
 
-    peachCollider_ = std::make_unique<Collider2DBox>(
-        Vector2F(-20.0f, Application::SCREEN_HALF_Y), 100.0f, 100.0f, Collider2DBase::TAG_2D::PEACH);
-    waveCollider_ = std::make_unique<Collider2DBox>(
-        Vector2F(0.0f, 20.0f), Application::SCREEN_SIZE_X, 100.0f, Collider2DBase::TAG_2D::WAVE);
-    oniSimaCollider_ = std::make_unique<Collider2DBox>(
-        Vector2F(Application::SCREEN_HALF_X - 100.0f, 30.0f), 200.0f, 150.0f, Collider2DBase::TAG_2D::ONI_GASHIMA);
+    peachCollider_ = std::make_unique<Collider2DBox>(Vector2F(-20.0f, Application::SCREEN_HALF_Y),
+        100.0f, 100.0f, Collider2DBase::TAG_2D::PEACH);
+    waveCollider_ = std::make_unique<Collider2DBox>(Vector2F(0.0f, 20.0f), 
+        0, Application::SCREEN_SIZE_Y, Collider2DBase::TAG_2D::WAVE);
+    oniSimaCollider_ = std::make_unique<Collider2DBox>(Vector2F(Application::SCREEN_SIZE_X - 100.0f,
+        30.0f), 200.0f, 150.0f, Collider2DBase::TAG_2D::ONI_GASHIMA);
 
     CollisionController::GetInstance().RegisterCollider2D(peachCollider_.get());
     CollisionController::GetInstance().RegisterCollider2D(waveCollider_.get());
     CollisionController::GetInstance().RegisterCollider2D(oniSimaCollider_.get());
 
-    CollisionController::GetInstance().SetCollisionGroup2D(Collider2DBase::TAG_2D::MOUSE_CURSOR, Collider2DBase::TAG_2D::PEACH, true);
-    CollisionController::GetInstance().SetCollisionGroup2D(Collider2DBase::TAG_2D::MOUSE_CURSOR, Collider2DBase::TAG_2D::WAVE, true);
-    CollisionController::GetInstance().SetCollisionGroup2D(Collider2DBase::TAG_2D::MOUSE_CURSOR, Collider2DBase::TAG_2D::ONI_GASHIMA, true);
+    CollisionController::GetInstance().SetCollisionGroup2D(Collider2DBase::TAG_2D::MOUSE_CURSOR,
+        Collider2DBase::TAG_2D::PEACH, true);
+    CollisionController::GetInstance().SetCollisionGroup2D(Collider2DBase::TAG_2D::MOUSE_CURSOR,
+        Collider2DBase::TAG_2D::WAVE, true);
+    CollisionController::GetInstance().SetCollisionGroup2D(Collider2DBase::TAG_2D::MOUSE_CURSOR,
+        Collider2DBase::TAG_2D::ONI_GASHIMA, true);
 }
 
 void SceneTitle::Update(void)
@@ -283,7 +285,7 @@ void SceneTitle::Draw(void)
 {
 
     time_ += 0.02f;
-    waveBuffer_.time = time_;
+    waveMaterial_.SetTime(time_);
 
     const float PEACH_SCALE = 0.5f;
     const float WAVE_SCALE = 1.0f;
@@ -293,23 +295,19 @@ void SceneTitle::Draw(void)
     float bobSpeed = 3.0f;
     float offsetY = std::sinf(time_ * bobSpeed) * amplitude;
 
+    auto& shaderCtrl = ShaderController::GetInstance();
+
     // ãSÉñìáÇÃï`âÊ
-    DrawRequest oniReq(Application::SCREEN_HALF_X - 100, 30, oniSimaHandle_, ONISIMA_SCALE);
-    oniReq.normalMapHandle = oniSimaNormalHandle_;
-    oniReq.buffer = oniSimaBuffer_;
-    ShaderController::GetInstance().Draw(SHADER_TYPE::NORMAL, oniReq);
+    shaderCtrl.CreateShaderDraw(SHADER_TYPE::NORMAL, Application::SCREEN_HALF_X - 100, 30,
+        oniSimaHandle_, ONISIMA_SCALE, oniSimaMaterial_, oniSimaNormalHandle_);
 
     // îgÇÃï`âÊ
-    DrawRequest waveReq(0, 20, waveHandle_, WAVE_SCALE);
-    waveReq.normalMapHandle = waveNormalHandle_;
-    waveReq.buffer = waveBuffer_;
-    ShaderController::GetInstance().Draw(SHADER_TYPE::NORMAL_WAVE, waveReq);
+    shaderCtrl.CreateShaderDraw(SHADER_TYPE::NORMAL_WAVE,
+        0, 20, waveHandle_, WAVE_SCALE, waveMaterial_, waveNormalHandle_);
 
     // ìçÇÃï`âÊ
-    DrawRequest peachReq(-20, static_cast<int>(Application::SCREEN_HALF_Y + offsetY), peachHandle_, PEACH_SCALE);
-    peachReq.normalMapHandle = peachNormalHandle_;
-    peachReq.buffer = peachBuffer_;
-    ShaderController::GetInstance().Draw(SHADER_TYPE::NORMAL, peachReq);
+    shaderCtrl.CreateShaderDraw(SHADER_TYPE::NORMAL, -20, static_cast<int>(Application::SCREEN_HALF_Y + offsetY),
+        peachHandle_, PEACH_SCALE, peachMaterial_, peachNormalHandle_);
 
     const int IMAGET_TITLE_Y = Application::SCREEN_SIZE_Y / 4;
     DrawRotaGraph(Application::SCREEN_HALF_X, IMAGET_TITLE_Y, 0.7f, 0.0f, imageTitle_, true);

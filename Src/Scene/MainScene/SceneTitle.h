@@ -9,6 +9,7 @@
 #include "../../Object/Collider2D/Collider2DCircle.h"
 #include "../../Object/Collider2D/Collider2DBox.h"
 #include "../../ImGUI/ShaderEditorComponent.h"
+#include "../../Shader/ShaderMaterial.h"
 
 class SceneTitle : public SceneBase
 {
@@ -72,9 +73,10 @@ private:
 	// 前回のマウス座標
 	Vector2F prevMousePos_;
 
-	IntegratedGpuBuffer peachBuffer_;
-	IntegratedGpuBuffer waveBuffer_;
-	IntegratedGpuBuffer oniSimaBuffer_;
+	// マテリアル関連
+	ShaderMaterial peachMaterial_;   // 桃のマテリアル
+	ShaderMaterial waveMaterial_;    // 波のマテリアル
+	ShaderMaterial oniSimaMaterial_; // 鬼ヶ島のマテリアル
 
 	// 2. GUIコンポーネント
 	std::shared_ptr<ShaderEditorComponent> peachGui_;

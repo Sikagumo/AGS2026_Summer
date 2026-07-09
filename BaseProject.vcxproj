@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Src\Shader\ShaderMaterial.cpp" />
     <ClCompile Include="Src\ImGUI\GuiController.cpp" />
     <ClCompile Include="Lib\ImGUI\backends\imgui_impl_dx11.cpp" />
     <ClCompile Include="Lib\ImGUI\backends\imgui_impl_win32.cpp" />
@@ -111,6 +112,7 @@
     <ClCompile Include="Src\Object\Actor\Chara\Weapon\BossWeapon\MG\WeaponMGR.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Src\Shader\ShaderMaterial.h" />
     <ClInclude Include="Src\ImGUI\GuiController.h" />
     <ClInclude Include="Lib\ImGUI\backends\imgui_impl_dx11.h" />
     <ClInclude Include="Lib\ImGUI\backends\imgui_impl_win32.h" />
