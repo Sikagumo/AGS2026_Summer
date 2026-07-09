@@ -130,11 +130,13 @@ void CollisionController::UnregisterActor(ActorBase* _actor)
 bool CollisionController::CheckCollision(const ColliderBase* _colliderA, const ColliderBase* _colliderB,
 	CollisionInfo& _outInfo)
 {
+	// 有効性チェック
 	if (_colliderA == nullptr || _colliderB == nullptr)
 	{
 		return false;
 	}
 
+	// 形状タイプ取得
 	using SHAPE = ColliderBase::SHAPE;
 	using TAG = ColliderBase::TAG;
 
@@ -162,6 +164,7 @@ bool CollisionController::CheckCollision(const ColliderBase* _colliderA, const C
 	SHAPE shapeA = _colliderA->GetShapeType();
 	SHAPE shapeB = _colliderB->GetShapeType();
 
+	// 形状の組み合わせによる判定の振り分け
 	if (shapeA == SHAPE::SPHERE && shapeB == SHAPE::SPHERE)
 	{
 		return CollisionSphere::CheckSphereVsSphere(_colliderA, _colliderB, _outInfo);
@@ -179,6 +182,7 @@ bool CollisionController::CheckCollision(const ColliderBase* _colliderA, const C
 		return CollisionCapsule::CheckCapsuleVsSphere(_colliderA, _colliderB, _outInfo);
 	}
 
+	// 地面（MODEL）との判定
 	if (shapeA == SHAPE::LINE && shapeB == SHAPE::MODEL)
 	{
 		return CollisionLine::CheckLineVsModel(_colliderA, _colliderB, _outInfo);
@@ -622,35 +626,48 @@ bool CollisionController::CanCollide(int _tagA, int _tagB) const
 			|| tagHurt == TAG::WEAPON_RG
 			|| tagHurt == TAG::HIT_WAVE
 			|| tagHurt == TAG::MG_BULLET
-			|| tagHurt == TAG::ROAD_ATTACK)
+			|| tagHurt == TAG::ROAD_ATTACK
+			|| tagHurt == TAG::CANNON_BULLET
+			|| tagHurt == TAG::LASER
+			|| tagHurt == TAG::MISSILE_ATTACK
+			|| tagHurt == TAG::MISSILE_PUSH
+			|| tagHurt == TAG::PLAYER_RECOVERY)
 		{
 			return true;
 		}
 	}
-	
+
 	if (tagHit == TAG::BOSS
 		|| tagHit == TAG::WEAPON_CANNON_L || tagHit == TAG::WEAPON_CANNON_R
 		|| tagHit == TAG::WEAPON_MG_L || tagHit == TAG::WEAPON_MG_R
 		|| tagHit == TAG::WEAPON_MP_L || tagHit == TAG::WEAPON_MP_R
-		|| tagHit == TAG::WEAPON_RG)
+		|| tagHit == TAG::WEAPON_RG
+		|| tagHit == TAG::PLAYER_RECOVERY)
 	{
-		if (tagHurt == TAG::PLAYER || tagHurt == TAG::PLAYER_BULLET
+		if (tagHurt == TAG::PLAYER
+			|| tagHurt == TAG::PLAYER_BULLET || tagHurt == TAG::PLAYER_BLAST
 			|| tagHurt == TAG::STAGE)
 		{
 			return true;
 		}
 	}
 
-	if (tagHit == TAG::MG_BULLET)
+	if (tagHit == TAG::MG_BULLET 
+		|| tagHit==TAG::CANNON_BULLET)
 	{
-		if (tagHurt == TAG::PLAYER || tagHurt == TAG::STAGE)
+		if (tagHurt == TAG::PLAYER
+			|| tagHurt == TAG::STAGE)
 		{
 			return true;
 		}
 	}
 
 
-	if (tagHit == TAG::HIT_WAVE || tagHit==TAG::ROAD_ATTACK)
+	if (tagHit == TAG::HIT_WAVE
+		|| tagHit == TAG::ROAD_ATTACK
+		|| tagHit == TAG::LASER
+		|| tagHit == TAG::MISSILE_ATTACK
+		|| tagHit == TAG::MISSILE_PUSH)
 	{
 		if (tagHurt == TAG::PLAYER)
 		{
@@ -660,7 +677,8 @@ bool CollisionController::CanCollide(int _tagA, int _tagB) const
 
 	if (tagHit == TAG::STAGE)
 	{
-		if (tagHurt == TAG::PLAYER || tagHurt == TAG::PLAYER_BULLET || tagHurt == TAG::BOSS 
+		if (tagHurt == TAG::PLAYER || tagHurt == TAG::PLAYER_BULLET || tagHurt == TAG::PLAYER_BLAST
+			|| tagHurt == TAG::BOSS 
 			|| tagHurt == TAG::WEAPON_CANNON_L || tagHurt == TAG::WEAPON_CANNON_R
 			|| tagHurt == TAG::WEAPON_MG_L || tagHurt == TAG::WEAPON_MG_R
 			|| tagHurt == TAG::WEAPON_MP_L || tagHurt == TAG::WEAPON_MP_R

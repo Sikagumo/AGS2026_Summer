@@ -83,23 +83,5 @@ void BBulletWave::UpdateProcessPost(void)
 
 void BBulletWave::DrawPre(void)
 {
-	if (radius_ != INIT_RADIUS)
-	{
-		for (auto& [id, colliderVector] : ownColliders_)
-		{
-			for (auto* collider : colliderVector)
-			{
-				if (collider == nullptr)
-				{
-					continue;
-				}
-
-				collider->Draw();
-			}
-		}
-	}
-#ifdef _DEBUG
-	DrawFormatString(10, 200, 0xffffff, "radius:%f", radius_);
-	DrawFormatString(10, 230, 0xffffff, "pos:%f,%f,%f", transform_.pos.x, transform_.pos.y, transform_.pos.z);
-#endif
+	
 }

@@ -79,7 +79,7 @@ protected:
 
 	void CollisionReserve(void) override {};
 
-	void LookPlayer(void) override {};
+	void LookPlayer(void) override ;
 
 
 

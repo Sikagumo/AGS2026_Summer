@@ -34,7 +34,7 @@ void BBulletCannon::InitTransform(void)
 void BBulletCannon::InitCollider(void)
 {
 	ColliderSphere* colSphere = new ColliderSphere(
-		ColliderBase::TAG::MG_BULLET, &transform_, { 0.0f,0.0f,0.0f }, radius_);
+		ColliderBase::TAG::CANNON_BULLET, &transform_, { 0.0f,0.0f,0.0f }, radius_);
 	ownColliders_[static_cast<int>(ColliderBase::TAG::MG_BULLET)].push_back(colSphere);
 
 
@@ -55,6 +55,15 @@ void BBulletCannon::InitPost(void)
 
 void BBulletCannon::UpdateProcess(void)
 {
+	if (CollisionController::GetInstance().IsActorCollidingWithTag(this, ColliderBase::TAG::PLAYER))
+	{
+		isAlive_ = false;
+	}
+	if (CollisionController::GetInstance().IsActorCollidingWithTag(this, ColliderBase::TAG::STAGE))
+	{
+		isAlive_ = false;
+	}
+
 	if (isAlive_)
 	{
 		aliveTime_++;
@@ -89,5 +98,8 @@ void BBulletCannon::UpdateProcessPost(void)
 
 void BBulletCannon::DrawPre(void)
 {
-	MV1DrawModel(transform_.modelId);
+	if (isAlive_)
+	{
+		MV1DrawModel(transform_.modelId);
+	}
 }

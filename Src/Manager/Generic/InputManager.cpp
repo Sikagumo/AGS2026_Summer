@@ -7,6 +7,7 @@ InputManager* InputManager::instance_ = nullptr;
 
 InputManager::InputManager(void)
 	: mouseInput_(-1)
+	, mouseWheel_(0)
 	, infoEmpty_(Info::Info())
 	, mousePos_(UtilityMath::VECTOR2_ZERO)
 {
@@ -93,6 +94,9 @@ void InputManager::Update(void)
 	// マウス検知
 	mouseInput_ = GetMouseInput();
 	GetMousePoint(&mousePos_.x, &mousePos_.y);
+	mouseWheelOld_ = mouseWheel_;
+	mouseWheel_ = GetMouseWheelRotVol();
+
 
 	for (auto& mouse : mouseInfos_)
 	{
@@ -176,6 +180,11 @@ bool InputManager::IsTrgMouseLeft(void) const
 bool InputManager::IsTrgMouseRight(void) const
 {
 	return FindMouse(MOUSE_INPUT_RIGHT).keyTrgDown;
+}
+
+int InputManager::IsTrgMouseWheel(void) const
+{
+	return (mouseWheelOld_ - mouseWheel_);
 }
 
 

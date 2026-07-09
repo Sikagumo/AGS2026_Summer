@@ -44,6 +44,7 @@ protected:
     // ¶‰E‚Å‹¤’Ê‚µ‚Äg‚¤•Ï”ƒƒ“ƒo
     VECTOR bulletDir_;
     int bulletCount_;
+    VECTOR effectPos_;
     VECTOR muzzlePos_[MUZZLE_MAX_COUNT];
     int muzzleCount_;
     std::vector<std::shared_ptr<BBulletBase>> bullets_;

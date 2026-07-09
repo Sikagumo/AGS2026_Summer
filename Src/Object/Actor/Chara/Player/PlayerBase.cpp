@@ -1,26 +1,31 @@
 #include "../../../../Manager/Decoration/SoundManager.h"
 #include "PlayerBase.h"
 
-constexpr int HP = 250;
+constexpr int HP_MAX_PLAYER = 250;
 
-PlayerBase::PlayerBase(int _playerNo, BULLET_TYPE _bulletType, const VECTOR& _startPos, PLAYER_TYPE _playerType)
+PlayerBase::PlayerBase(int _playerNo, JOB_TYPE _jobType, const VECTOR& _startPos, PLAYER_TYPE _playerType)
 	: CharaBase::CharaBase()
 	, playerNo_(_playerNo)
-	, bulletType_(_bulletType)
+	, jobType_(_jobType)
 	, playerType_(_playerType)
-	, hp_(HP), MAX_HP(HP)
+	, hp_(HP_MAX_PLAYER), HP_MAX(HP_MAX_PLAYER)
 	, START_POS(_startPos)
 	, bodyPos_(UtilityMath::VECTOR_ZERO)
 	, timeInv_(0.0f), timeInvDodge_(0.0f)
 {
 }
 
-void PlayerBase::SetDamage(int _damage, bool _isInvincible, float _timeInvincible)
+void PlayerBase::SetDamage(int _damage, bool _isInvincible
+						  , float _timeInvincible, bool _isIgnoreInvincible)
 {
-	// 無敵中、HPが０以下、ダメージ量が0以下時、処理終了
-	if (timeInv_ > 0.0f || timeInvDodge_
-		|| hp_ <= 0 || _damage <= 0) {
-		return;
+	if (!_isIgnoreInvincible)
+	{
+		// 無敵を無視して攻撃しないときに、
+		// 無敵中、HPが０以下、ダメージ量が0以下時、処理終了
+		if (timeInv_ > 0.0f || timeInvDodge_ > 0.0f
+			|| hp_ <= 0 || _damage <= 0) {
+			return;
+		}
 	}
 
 	if (_isInvincible)

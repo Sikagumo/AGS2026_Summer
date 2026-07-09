@@ -26,8 +26,11 @@ public:
 
 		/* 複数画像 */
 		IMGS_TEXTS,
+		IMGS_TIMER,
 		IMGS_TITLE_TEXT,
+		IMGS_GAME_TEXT,
 		IMGS_HP_TARGET,
+		IMGS_HP_PLAYER,
 		IMGS_RESULT,
 
 		/* モデル */
@@ -68,10 +71,15 @@ public:
 		/* エフェクト */
 		EFFECT_WAVE,
 		EFFECT_LANDING,
+		EFFECT_BOSS_HIT,
+		EFFECT_MG,
+		EFFECT_LASER,
+		EFFECT_MISSILE,
 		/* 映像 */
 
 		/* BGM */
-		BGM_TITLE,
+		BGM_TITLE_SEA,
+		BGM_TITLE_THUNDER,
 		BGM_GAME,
 
 		/* 効果音 */

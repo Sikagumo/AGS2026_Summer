@@ -160,12 +160,12 @@ void Transform::SetScale(float _scaleX, float _scaleY, float _scaleZ)
 
 VECTOR Transform::GetForward(void) const
 {
-	return GetDir(UtilityMath::DIR_F);
+	return GetDir(UtilityMath::DIR_FORWARD);
 }
 
 VECTOR Transform::GetBack(void) const
 {
-	return GetDir(UtilityMath::DIR_B);
+	return GetDir(UtilityMath::DIR_BACK);
 }
 
 VECTOR Transform::GetRight(void) const

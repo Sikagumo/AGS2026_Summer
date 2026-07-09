@@ -19,11 +19,14 @@ public:
 	enum class SOUND
 	{
 		NONE = -1,
-		//BGM
-		BGM_TITLE,
+
+		// BGM
+		BGM_TITLE_SEA,
+		BGM_TITLE_THUNDER,
 		BGM_GAME,
 
-		//SE
+		// SE
+		SE_SELECT,
 		SE_DAMAGE_PLAYER, // プレイヤー被ダメージ処理
 		SE_BOSS_LANDING,//ボスの着地
 		SE_MG_FIRE,
@@ -126,20 +129,43 @@ public:
 	void ApplyMasterVolumes(void);
 
 private:
-	// 定数関連
-	static constexpr int MAX_PERCENT = 100;       // パーセントの最大値
-	static constexpr int MIN_PERCENT = 0;         // パーセントの最小値
-	static constexpr int DX_MAX_VOLUME = 255;     // DxLibの最大音量設定値
-	static constexpr int DEFAULT_BGM_VOLUME = 70; // BGMの初期音量
-	static constexpr int DEFAULT_SE_VOLUME = 80;  // SEの初期音量
 
-	static SoundManager* instance_; // シングルトンインスタンス
-	static std::recursive_mutex g_soundMutex; // スレッドセーフ用ミューテックス
+	// 定数関連
+	
+	// パーセントの最大値
+	static constexpr int MAX_PERCENT = 100;
+
+	// パーセントの最小値
+	static constexpr int MIN_PERCENT = 0;
+
+	// DxLibの最大音量設定値
+	static constexpr int DX_MAX_VOLUME = 255;
+
+	// BGMの初期音量(0～100)
+	static constexpr int DEFAULT_BGM_VOLUME = 65;
+
+	// SEの初期音量(0～100)
+	static constexpr int DEFAULT_SE_VOLUME  = 85;
+
+
+	// シングルトンインスタンス
+	static SoundManager* instance_;
+
+	// スレッドセーフ用ミューテックス
+	static std::recursive_mutex g_soundMutex;
+
 
 	// メンバ変数
-	std::unordered_map<SOUND, SOUND_DATA> sounds_; // サウンドハンドルの管理マップ
-	int masterVolumeBGM_;                          // BGMの主音量（0-100）
-	int masterVolumeSE_;                           // SEの主音量（0-100）
+	
+	// サウンドハンドルの管理マップ
+	std::unordered_map<SOUND, SOUND_DATA> sounds_;
+
+	// BGMの主音量(0～100)
+	int masterVolumeBGM_;
+
+	// SEの主音量(0～100)
+	int masterVolumeSE_;
+
 
 	/// @brief コンストラクタ
 	/// @param void 
@@ -154,6 +180,7 @@ private:
 	SoundManager& operator=(const SoundManager&) = delete;
 	SoundManager(SoundManager&&)			= delete;
 	SoundManager& operator=(SoundManager&&) = delete;
+
 
 	/// @brief 音量パーセントをDxLib用の値(0-255)に変換するヘルパー
 	/// @param percent 変換前のパーセント値

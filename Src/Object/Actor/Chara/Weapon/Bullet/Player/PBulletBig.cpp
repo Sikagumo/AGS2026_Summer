@@ -8,11 +8,11 @@ constexpr float RADIUS_INCREMENT = 27.5f;
 constexpr float RADIUS_BIG_BLAST = RADIUS_BIG + (RADIUS_INCREMENT * 4);
 constexpr float SCALE_BIG = 1.5f;
 constexpr float SCALE_BIG_INCREMENT = 2.5f;
-constexpr float SHOT_SPEED_BIG_XZ = 5.0f;
-constexpr float SHOT_SPEED_BIG_Y  = 5.0f;
 constexpr float TIME_ALIVE_BIG = 5.0f;
+
+// çUåÇóÕ
 constexpr int POWER_START = 50;
-constexpr int POWER_INCREMENT = 50;
+constexpr int POWER_INCREMENT = 75;
 
 // ägëÂäÆóπÇ‹Ç≈ÇÃéûä‘
 constexpr float RADIUS_DURATION = 4.5f;
@@ -46,8 +46,11 @@ void PBulletBig::UpdatePost(void)
 	if (bulletState_ == BULLET_STATE::BLAST)
 	{
 		// íÖíeéûÅAë¶è¡ñ≈Ç≥ÇπÇÈ
-		activePower_ = 0;
+		activePowerBullet_ = 0;
 		bulletState_ = BULLET_STATE::INACTIVE;
+
+		// ìñÇΩÇËîªíËñ≥å¯âª
+		CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::PLAYER_BULLET, false);
 		return;
 	}
 
@@ -96,11 +99,8 @@ void PBulletBig::BlastAction(void)
 {
 	bulletState_ = BULLET_STATE::BLAST;
 	isVisible_ = false;
-	activePower_ = power_;
+	activePowerBullet_ = power_;
 
 	// íeÇè¡ñ≈Ç≥ÇπÇÈ
 	isActiveDestroy_ = true;
-
-	// ìñÇΩÇËîªíËñ≥å¯âª
-	CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::PLAYER_BULLET, false);
 }

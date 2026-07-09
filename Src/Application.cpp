@@ -99,6 +99,7 @@ void Application::Init(void)
 	SceneManager::CreateInstance();
 
 	EffectManager::CreateInstance();
+	EffectManager::GetInstance().Initialize();
 
 	// ImGUI‚Ì‰Šú‰»
 	ImGuiWrapper::CreateInstance();
@@ -125,13 +126,11 @@ void Application::Run(void)
 		{
 			break;
 		}
-
 		ImGuiWrapper::GetInstance().Update();
 
 		bool isChanging = SceneManager::GetInstance().IsSceneChanging();
 
 		sceneManager.Update();
-
 		if (!isChanging)
 		{
 			ClearDrawScreen();
@@ -142,8 +141,8 @@ void Application::Run(void)
 
 
 		sceneManager.Draw();
-
 		ImGuiWrapper::GetInstance().Draw();
+
 		// •½‹ÏFPS•`‰æ
 		//fpsController_->Draw();
 

@@ -1,5 +1,8 @@
 #pragma once
+#include <memory>
 #include "../../WeaponBase.h"
+
+class BBulletLaser;
 
 /// <summary>
 /// レールガンクラス
@@ -51,6 +54,8 @@ public:
 	// 状態遷移
 	void ChangeState(STATE _state)override;
 
+	bool GetIsAttack(void) { return isAttack_; }
+
 	
 
 protected:
@@ -76,7 +81,7 @@ protected:
 	void CollisionReserve(void) override {};
 
 
-	void LookPlayer(void) override {};
+	void LookPlayer(void) override ;
 
 
 
@@ -86,9 +91,11 @@ protected:
 	std::function<void(void)> stateUpdate_;
 	void ChangeState(int state) override;
 	void ChangeStateIdle(void) override;
+	void ChangePreparation(void);
 	void ChangeStateAttack(void) override;
 	void ChangeStateEnd(void) override;
 
+	void UpdatePreparation(void);
 	void UpdateAttack(void) override;
 	void UpdateIdle(void) override;
 	void UpdateEnd(void) override;
@@ -100,5 +107,16 @@ private:
 	static constexpr VECTOR CAPSULE_START_POS = { 0.0f,-100.0f,-60.0f };
 	static constexpr VECTOR CAPSULE_END_POS = { 0.0f,80.0f,-60.0f };
 	static constexpr float CAPSULE_RADIUS = 30.0f;
+	static constexpr float UP_ROT = 0.3f;
+	static constexpr float MAX_UP_ROT = 90.0f;
+	static constexpr float MAX_CHARGE_COUNT = 120.0f;
+
+	
+	std::unique_ptr<BBulletLaser> bulletLaser_;
+	
+	float localUpRot_;	//上昇角度
+	int ChargeCount_;	//チャージ回数
+
+	bool isAttack_;
 };
 

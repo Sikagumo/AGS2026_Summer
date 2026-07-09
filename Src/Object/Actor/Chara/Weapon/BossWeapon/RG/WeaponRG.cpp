@@ -1,13 +1,20 @@
 #include <DxLib.h>
 #include "../../../../../../Manager/Generic/ResourceManager.h"
 #include "../../../../../../Utility/UtilityMath.h"
+#include "../../../../../../Manager/Decoration/EffectManager.h"
 #include "../../../../../Collider/ColliderBase.h"
 #include "../../../../../Collider/ColliderCapsule.h"
 #include "../../../../../Collider/ColliderLine.h"
 #include "../../../../../Collision/CollisionController.h"
+#include "../../Bullet/Boss/BBulletLaser.h"
 #include "WeaponRG.h"
 
 WeaponRG::WeaponRG(void)
+	: WeaponBase()
+	, ChargeCount_(0)
+	, isAttack_(false)
+	, localUpRot_(0.0f)
+	, bulletLaser_(nullptr)
 {
 		
 }
@@ -73,22 +80,37 @@ void WeaponRG::InitAnimation(void)
 
 void WeaponRG::InitPost(void)
 {
+	
+	bulletLaser_ = std::make_unique<BBulletLaser>();
+	bulletLaser_->Init();
+
+
+
 	isAlive_ = true;
+	stateChanges_.emplace(static_cast<int>(STATE::IDLE), std::bind(&WeaponRG::ChangeStateIdle, this));
+	stateChanges_.emplace(static_cast<int>(STATE::ATTACK), std::bind(&WeaponRG::ChangeStateAttack, this));
+	stateChanges_.emplace(static_cast<int>(STATE::END), std::bind(&WeaponRG::ChangeStateEnd, this));
+	stateChanges_.emplace(static_cast<int>(STATE::PREPARATION), std::bind(&WeaponRG::ChangePreparation, this));
+
+	ChangeState(STATE::IDLE);
+
 	localPos_ = LINE_START_POS;
+
+
+
 }
 
 void WeaponRG::UpdateProcess(void)
 {
-	if (isAlive_)
+	
+	if (hp_ <= 0 && isAlive_)
 	{
-		transform_.pos = MV1GetFramePosition(bone_.transform.modelId, bone_.id);
-		transform_.quaRot = bone_.transform.quaRot;
+		ChangeState(static_cast<int>(STATE::END));
 	}
-	if (hp_ <= 0)
-	{
-		isAlive_ = false;
-		//CollisionController::GetInstance().SetCollisionActive(this, tag_, false);
-	}
+
+	stateUpdate_();
+
+	bulletLaser_->Update();
 }
 
 void WeaponRG::UpdateProcessPost(void)
@@ -101,23 +123,15 @@ void WeaponRG::DrawPre(void)
 {
 	if (isAlive_)
 	{
-		
-#ifdef _DEBUG
-		for (auto& [id, colliderVector] : ownColliders_)
-		{
-			for (auto* collider : colliderVector)
-			{
-				if (collider == nullptr)
-				{
-					continue;
-				}
-
-				collider->Draw();
-			}
-		}
-#endif
+		bulletLaser_->Draw();
 	}
 
+
+}
+
+void WeaponRG::LookPlayer(void)
+{
+	transform_.quaRot = bone_.transform.quaRot;
 }
 
 void WeaponRG::ChangeState(STATE _state)
@@ -136,26 +150,99 @@ void WeaponRG::ChangeState(int state)
 	stateBase_ = state;
 	// 各状態遷移の初期処理
 	stateChanges_[stateBase_]();
+
 }
 
 void WeaponRG::ChangeStateIdle(void)
 {
+	stateUpdate_ = std::bind(&WeaponRG::UpdateIdle, this);
+	isAttack_ = false;
+	ChargeCount_ = 0;
+	localUpRot_ = 0.0f;
+	bulletLaser_->SetIsAttack(false);
+	EffectManager::GetInstance().Stop(EffectManager::EFFECT::EFFECT_LASER, this);
 }
+
+void WeaponRG::ChangePreparation(void)
+{
+	stateUpdate_ = std::bind(&WeaponRG::UpdatePreparation, this);
+
+}
+
 
 void WeaponRG::ChangeStateAttack(void)
 {
+	stateUpdate_ = std::bind(&WeaponRG::UpdateAttack, this);
+	bulletLaser_->SetIsAttack(true);
+	EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_LASER, { 0.0f,0.0f,0.0f }, { 0.0f,0.0f,0.0f }, { 300.0f,300.0f,300.0f }, 1.0f, this);
+	
 }
 
 void WeaponRG::ChangeStateEnd(void)
 {
+	stateUpdate_ = std::bind(&WeaponRG::UpdateEnd, this);
+	isAlive_ = false;
+	CollisionController::GetInstance().SetCollisionActive(this, tag_, false);
+}
+
+void WeaponRG::UpdatePreparation(void)
+{
+	transform_.pos = MV1GetFramePosition(bone_.transform.modelId, bone_.id);
+
+	if (localUpRot_ < MAX_UP_ROT)
+	{
+		localUpRot_ += UP_ROT;
+		if (localUpRot_ > MAX_UP_ROT)
+		{
+			localUpRot_ = MAX_UP_ROT;
+		}
+	}
+	else
+	{
+		ChargeCount_++;
+		if (ChargeCount_ >= MAX_CHARGE_COUNT)
+		{
+			isAttack_ = true;
+			ChangeState(static_cast<int>(STATE::ATTACK));
+		}
+	}
+
+	transform_.quaRot = Quaternion::Mult(bone_.transform.quaRot, Quaternion::AngleAxis(UtilityMath::Deg2RadF(localUpRot_), UtilityMath::AXIS_X));
+
+
+	
 }
 
 void WeaponRG::UpdateAttack(void)
 {
+	transform_.pos = MV1GetFramePosition(bone_.transform.modelId, bone_.id);
+	transform_.quaRot = Quaternion::Mult(bone_.transform.quaRot, Quaternion::AngleAxis(UtilityMath::Deg2RadF(localUpRot_), UtilityMath::AXIS_X));
+
+	// ローカル座標を回転させてワールド座標へ変換
+	VECTOR localRotPos = transform_.quaRot.PosAxis({ 0.0f,400.0f,-60.0f });
+
+	// 位置を加算して最終的なワールド座標にする
+	VECTOR localPos = VAdd(transform_.pos, localRotPos);
+
+
+	EffectManager::GetInstance().UpdatePos(EffectManager::EFFECT::EFFECT_LASER, this, localPos);
+	Quaternion effectQuaRot = Quaternion::Mult(transform_.quaRot, Quaternion::AngleAxis(UtilityMath::Deg2RadF(90.0f), UtilityMath::AXIS_X));
+	VECTOR effectRot = effectQuaRot.ToEuler();
+	effectRot.x = UtilityMath::Rad2DegF(effectRot.x);
+	effectRot.y = UtilityMath::Rad2DegF(effectRot.y);
+	effectRot.z = UtilityMath::Rad2DegF(effectRot.z);
+
+	EffectManager::GetInstance().UpdateRot(EffectManager::EFFECT::EFFECT_LASER, this, effectRot);
+
+	bulletLaser_->CreateBullets(localPos, transform_.quaRot.GetForward(), 0.0f);
+	bulletLaser_->SetIsAttack(true);
+	bulletLaser_->SetTransform(transform_);
 }
 
 void WeaponRG::UpdateIdle(void)
 {
+	LookPlayer();
+	transform_.pos = MV1GetFramePosition(bone_.transform.modelId, bone_.id);
 }
 
 void WeaponRG::UpdateEnd(void)

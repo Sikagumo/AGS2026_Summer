@@ -6,7 +6,7 @@
 #include "../../../../../Collider/ColliderSphere.h"
 #include "../../../../../Collision/CollisionController.h"
 
-PBulletBase::PBulletBase(void)
+PBulletBase::PBulletBase(bool _isGravity)
 	: ActorBase::ActorBase()
 	, bulletState_(BULLET_STATE::INACTIVE)
 	, radiusBullet_(0.0f) , radiusBlast_(0.0f)
@@ -17,8 +17,9 @@ PBulletBase::PBulletBase(void)
 	, shotCnt_(0)
 	, isVisible_(false)
 	, isFinish_(false)
-	, power_(0), activePower_(0)
+	, power_(0), activePowerBullet_(0), activePowerBlast_(0)
 	, isActiveDestroy_(false)
+	, IS_GRAVITY(_isGravity)
 {
 }
 
@@ -30,21 +31,22 @@ void PBulletBase::InitCollider(void)
 	// 衝突判定マネージャに登録
 	ColliderSphere* bullet = new ColliderSphere(ColliderBase::TAG::PLAYER_BULLET, &transform_
 									, UtilityMath::VECTOR_ZERO, radiusBullet_);
-	ownColliders_[static_cast<int>(ColliderBase::TAG::PLAYER_BULLET)].push_back(bullet);
+	ownColliders_[static_cast<int>(COLLISION_TYPE::BULLET)]
+		.emplace_back(bullet);
 
 	ColliderSphere* blast = new ColliderSphere(ColliderBase::TAG::PLAYER_BLAST, &transform_
-		, UtilityMath::VECTOR_ZERO, radiusBullet_);
-	CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::PLAYER_BLAST, false);
-	ownColliders_[static_cast<int>(ColliderBase::TAG::PLAYER_BLAST)].push_back(blast);
-
-	ColliderSphere* sphere = new ColliderSphere(ColliderBase::TAG::PLAYER_BULLET, &transform_, UtilityMath::VECTOR_ZERO, radiusBullet_);
-	ownColliders_[static_cast<int>(ColliderBase::TAG::PLAYER_BULLET)].push_back(sphere);
+									, UtilityMath::VECTOR_ZERO, radiusBullet_);
+	ownColliders_[static_cast<int>(COLLISION_TYPE::BLAST)]
+		.emplace_back(blast);
 }
 
 void PBulletBase::InitPost(void)
 {
 	isVisible_ = true;
 	bulletState_ = BULLET_STATE::INACTIVE;
+	activePowerBullet_ = 0.0f;
+	activePowerBlast_ = 0.0f;
+
 	SetParam();
 }
 
@@ -54,12 +56,16 @@ void PBulletBase::Update(void)
 	if (bulletState_ == BULLET_STATE::SHOT)
 	{
 		VECTOR pos = shotPow_;
-		curGravityPow_ += (Application::GRAVITY * timeManager_.GetDeltaTime());
-		pos.y -= curGravityPow_;
+
+		if (IS_GRAVITY)
+		{
+			curGravityPow_ += (Application::GetInstance().GetGravityPow() * timeManager_.GetDeltaTime());
+			pos.y -= curGravityPow_;
+		}
 
 		transform_.Translate(pos);
 
-		if (aliveTime_ <= 0)
+		if (aliveTime_ <= 0.0f)
 		{
 			BlastAction();
 		}
@@ -94,7 +100,7 @@ void PBulletBase::Update(void)
 
 	// ステージに衝突時、爆発処理
 	if (colMng.IsActorCollidingWithTag(this, ColliderBase::TAG::STAGE)
-		&& shotPow_.y < 0.0f)
+		|| shotPow_.y < 0.0f)
 	{
 		BlastAction();
 	}
@@ -102,20 +108,20 @@ void PBulletBase::Update(void)
 
 void PBulletBase::Draw(void)
 {
-	if (!isVisible_) { return; }
-
 	constexpr int SPHERE_DIV = 16;
 
-	if (transform_.modelId == -1)
+	if (transform_.modelId == -1
+		&& isVisible_)
 	{
 		DrawSphere3D(transform_.pos, radiusBullet_, SPHERE_DIV, 0xffffff, 0xffffff, true);
 	}
-#ifdef DEBUG
-	if (radiusBlast_ > 0.0f)
+
+#ifdef _DEBUG
+	if (bulletState_ == BULLET_STATE::BLAST)
 	{
 		DrawSphere3D(transform_.pos, radiusBlast_, SPHERE_DIV, 0xff0000, 0xffffff, false);
 	}
-	
+
 #endif
 }
 
@@ -165,9 +171,10 @@ void PBulletBase::Shot(const VECTOR& _shotDir)
 	transform_.Update();
 
 	// 当たり判定登録
-	ownColliders_.at(0).at(0)->SetRadius(radiusBullet_);
+	ownColliders_.at(static_cast<int>(COLLISION_TYPE::BULLET)).at(0)->SetRadius(radiusBullet_);
 	CollisionController::GetInstance().RegisterActor(this);
 	CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::PLAYER_BULLET, true);
+	CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::PLAYER_BLAST, false);
 }
 
 bool PBulletBase::IsAlive(void) const

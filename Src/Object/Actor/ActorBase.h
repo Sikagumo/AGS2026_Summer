@@ -10,6 +10,7 @@ class ActorBase
 {
 public:
 
+	// 当たり判定配列(タグ / 複数の当たり判定)
 	using ColliderMap = std::map<int, std::vector<ColliderBase*>>;
 
 	// コンストラクタ

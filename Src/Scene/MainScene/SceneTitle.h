@@ -39,7 +39,9 @@ public:
 	/// @brief 解放処理
 	void Release(void) override;
 
+
 private:
+
 	enum class MENU_ITEM 
 	{
 		SOLO,
@@ -93,9 +95,16 @@ private:
 	std::unique_ptr<Collider2DBox> waveCollider_;
 	std::unique_ptr<Collider2DBox> oniSimaCollider_;
 
+	int psHandle_;
+
+	bool isSelectMenu_;
+
 	/// @brief デバック描画 
 	void DrawDebug(void);
 
 	/// @brief Gui用の更新処理
 	void UpdateGui(void) override;
+
+	/// @brief 
+	void ProcessMenuState(void);
 };

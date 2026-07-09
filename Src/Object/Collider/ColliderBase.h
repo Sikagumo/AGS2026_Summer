@@ -28,7 +28,8 @@ public:
 		STAGE,			// ステージ
 		PLAYER,			// プレイヤー
 		PLAYER_BULLET,	// プレイヤー弾爆弾
-		PLAYER_BLAST,	// プレイヤー
+		PLAYER_BLAST,	// プレイヤー爆発
+		PLAYER_RECOVERY,// プレイヤー回復
 		ENEMY,          // 敵
 		BOSS,			// ボス
 		WEAPON_MG_L,	//マシンガン（左
@@ -45,6 +46,8 @@ public:
 		ROAD_ATTACK,	//体当たり
 		MISSILE_ATTACK,	//ミサイル攻撃
 		MISSILE_PUSH,	//ミサイル吹き飛ばして
+		LASER,			//レーザー攻撃
+		CANNON_BULLET,	//キャノン弾
 	};
 
 	/// @brief コンストラクタ

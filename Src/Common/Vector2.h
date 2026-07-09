@@ -26,6 +26,7 @@ public:
 	Vector2 operator*(const Vector2& _vec)const;
 	void operator*=(const Vector2& _vec);
 	void operator*=(int _value);
+	void operator*=(float _value);
 
 	// œZˆ—
 	Vector2 operator/(const Vector2& _vec)const;

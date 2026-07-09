@@ -118,23 +118,7 @@ void WeaponCannon::DrawPre(void)
 			bullet->Draw();
 		}
 	}
-#ifdef _DEBUG
 
-	DrawFormatString(10, 420, 0xffffff, "count:%d", count_);
-
-	for (auto& [id, colliderVector] : ownColliders_)
-	{
-		for (auto* collider : colliderVector)
-		{
-			if (collider == nullptr)
-			{
-				continue;
-			}
-
-			collider->Draw();
-		}
-	}
-#endif
 }
 
 

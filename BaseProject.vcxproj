@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+<<<<<<< HEAD
     <ClCompile Include="Src\Shader\ShaderMaterial.cpp" />
     <ClCompile Include="Src\ImGUI\GuiController.cpp" />
     <ClCompile Include="Lib\ImGUI\backends\imgui_impl_dx11.cpp" />
@@ -31,6 +32,14 @@
     <ClCompile Include="Src\ImGUI\ShaderEditorComponent.cpp" />
     <ClCompile Include="Src\ImGUI\ImGuiWrapper.cpp" />
     <ClCompile Include="Src\Object\Actor\Chara\Weapon\Bullet\Boss\BBulletMissile.cpp" />
+=======
+  
+    <ClCompile Include="Src\Object\Actor\Chara\Weapon\Bullet\Boss\BBulletLaser.cpp" />
+    <ClCompile Include="Src\Object\Actor\Chara\Weapon\Bullet\Boss\BBulletMissile.cpp" />
+    <ClCompile Include="Src\Common\GameTimer.cpp" />
+    <ClCompile Include="Src\Object\Actor\Chara\Weapon\Bullet\Player\PBulletPoison.cpp" />
+    <ClCompile Include="Src\Shader\ShaderPixel\ShaderWave.cpp" />
+>>>>>>> Collision
     <ClCompile Include="Src\Manager\Decoration\EffectManager.cpp" />
     <ClCompile Include="Src\Object\Actor\Chara\Weapon\Bullet\Boss\BBulletCannon.cpp" />
     <ClCompile Include="Src\Shader\ShaderRenderer.cpp" />
@@ -60,7 +69,7 @@
     <ClCompile Include="Src\Object\Actor\Chara\Boss\Boss.cpp" />
     <ClCompile Include="Src\Object\Actor\Chara\CharaBase.cpp" />
     <ClCompile Include="Src\Object\Actor\Chara\Player\PActionController.cpp" />
-    <ClCompile Include="Src\Object\Actor\Chara\Weapon\Bullet\Player\PBulletRapidFire.cpp" />
+    <ClCompile Include="Src\Object\Actor\Chara\Weapon\Bullet\Player\PBulletNormal.cpp" />
     <ClCompile Include="Src\Object\Collision\CollisionController.cpp" />
     <ClCompile Include="Src\Scene\MainScene\SceneLobby.cpp" />
     <ClCompile Include="Src\Object\Actor\Chara\Player\PlayerBase.cpp" />
@@ -111,7 +120,9 @@
     <ClCompile Include="Src\Object\Actor\Chara\Weapon\BossWeapon\MG\WeaponMGL.cpp" />
     <ClCompile Include="Src\Object\Actor\Chara\Weapon\BossWeapon\MG\WeaponMGR.cpp" />
   </ItemGroup>
+  
   <ItemGroup>
+<<<<<<< HEAD
     <ClInclude Include="Src\Shader\ShaderMaterial.h" />
     <ClInclude Include="Src\ImGUI\GuiController.h" />
     <ClInclude Include="Lib\ImGUI\backends\imgui_impl_dx11.h" />
@@ -125,7 +136,12 @@
     <ClInclude Include="Src\ImGUI\ShaderEditorComponent.h" />
     <ClInclude Include="Src\ImGUI\IGuiComponent.h" />
     <ClInclude Include="Src\ImGUI\ImGuiWrapper.h" />
+=======
+    <ClInclude Include="Src\Object\Actor\Chara\Weapon\Bullet\Boss\BBulletLaser.h" />
+>>>>>>> Collision
     <ClInclude Include="Src\Object\Actor\Chara\Weapon\Bullet\Boss\BBulletMissile.h" />
+    <ClInclude Include="Src\Common\GameTimer.h" />
+    <ClInclude Include="Src\Object\Actor\Chara\Weapon\Bullet\Player\PBulletPoison.h" />
     <ClInclude Include="Src\Shader\ShaderParameters.h" />
     <ClInclude Include="Src\Object\Actor\Chara\Weapon\Bullet\Boss\BBulletCannon.h" />
     <ClInclude Include="Src\Shader\ShaderRenderer.h" />
@@ -154,7 +170,7 @@
     <ClInclude Include="Src\Common\ParametersIO.h" />
     <ClInclude Include="Src\Object\Actor\Chara\Boss\Boss.h" />
     <ClInclude Include="Src\Object\Actor\Chara\Player\PActionController.h" />
-    <ClInclude Include="Src\Object\Actor\Chara\Weapon\Bullet\Player\PBulletRapidFire.h" />
+    <ClInclude Include="Src\Object\Actor\Chara\Weapon\Bullet\Player\PBulletNormal.h" />
     <ClInclude Include="Src\Object\Collision\CollisionController.h" />
     <ClInclude Include="Src\Scene\MainScene\SceneLobby.h" />
     <ClInclude Include="Src\Object\Actor\Chara\Player\PlayerBase.h" />

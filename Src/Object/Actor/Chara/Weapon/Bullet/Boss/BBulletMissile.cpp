@@ -5,6 +5,7 @@
 #include "../../../../../Collider/ColliderSphere.h"
 #include "../../../../../Collider/ColliderCapsule.h"
 #include "../../../../../Collision/CollisionController.h"
+#include "../../../../../../Manager/Decoration/EffectManager.h"
 #include "../../../../ActorBase.h"
 #include "BBulletMissile.h"
 
@@ -46,7 +47,7 @@ void BBulletMissile::ReleasePost(void)
 
 void BBulletMissile::InitTransform(void)
 {
-	transform_.scl = { 0.05f,0.05f,0.05f };
+	transform_.scl = { 0.07f,0.07f,0.07f };
 	transform_.quaRot = Quaternion::Identity();
 	transform_.quaRotLocal = Quaternion::AngleAxis(UtilityMath::Deg2RadF(INIT_ROT), UtilityMath::AXIS_Y);
 	transform_.quaRotLocal = Quaternion::Mult(transform_.quaRotLocal, Quaternion::AngleAxis(UtilityMath::Deg2RadF(-90.0f), UtilityMath::AXIS_X));
@@ -62,7 +63,7 @@ void BBulletMissile::InitCollider(void)
 	ownColliders_[static_cast<int>(ColliderBase::TAG::MISSILE_ATTACK)].push_back(colHitSphere);
 
 	ColliderSphere* colPushSphere = new ColliderSphere(
-		ColliderBase::TAG::MISSILE_PUSH, &transform_, { 0.0f,0.0f,0.0f }, radius_);
+		ColliderBase::TAG::MISSILE_PUSH, &transform_, { 0.0f,0.0f,0.0f }, radius_*1.1);
 	ownColliders_[static_cast<int>(ColliderBase::TAG::MISSILE_PUSH)].push_back(colPushSphere);
 
 	CollisionController::GetInstance().RegisterActor(this);
@@ -115,19 +116,6 @@ void BBulletMissile::DrawPre(void)
 	{
 		MV1DrawModel(transform_.modelId);
 
-		for (auto& [id, colliderVector] : ownColliders_)
-		{
-			for (auto* collider : colliderVector)
-			{
-				if (collider == nullptr)
-				{
-					continue;
-				}
-
-				collider->Draw();
-			}
-		}
-		
 	}
 	if (!isUp_)
 	{
@@ -153,26 +141,27 @@ void BBulletMissile::MoveUp(void)
 void BBulletMissile::MoveDown(void)
 {
 	
-	transform_.pos.y -= 5.0f;
+	transform_.pos.y -= 30.0f;
 
-	// 地面の判定（-23.0f 以下になったら着弾）
 	if (transform_.pos.y <= -23.0f)
 	{
 		transform_.pos.y = -23.0f; // 位置を固定
 		CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::MISSILE_ATTACK, true);
 		CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::MISSILE_PUSH, true);
+		EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_MISSILE, transform_.pos, { 0.0f,0.0f,0.0f }, { 90.0f,90.0f,90.0f }, 20.0f, this);
 		isAttack_ = true;
 	}
 }
 void BBulletMissile::Attack(void)
 {
 	attackCount_++;
-	if (attackCount_ >= 3)
+	if (attackCount_>=40)
 	{
 		attackCount_ = 0;
 		isAttack_ = false;
 		isAlive_ = false;
 		isUp_ = true;
+		EffectManager::GetInstance().Stop(EffectManager::EFFECT::EFFECT_MISSILE, this);
 		CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::MISSILE_ATTACK, false);
 		CollisionController::GetInstance().UnregisterActor(this);
 		CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::MISSILE_PUSH, false);

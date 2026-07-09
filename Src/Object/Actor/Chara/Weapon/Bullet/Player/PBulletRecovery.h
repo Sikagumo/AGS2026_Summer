@@ -5,6 +5,13 @@ class PBulletRecovery : public PBulletBase
 {
 public:
 
+	static constexpr float SHOT_SPEED_RECOVERY_XZ = 5.0f;
+	static constexpr float SHOT_SPEED_RECOVERY_Y = 5.0f;
+
+	// âÒïúäÑçá(0.0Å`1.0)
+	static constexpr float RECOVERY_RATE = 0.25f;
+
+
 	PBulletRecovery(void);
 
 	~PBulletRecovery(void)override = default;
@@ -27,14 +34,5 @@ protected:
 	void ChangeBulletStateProc(void)override;
 
 	void SetParam(void)override;
-
-private:
-
-	float radiusMax_;
-	float scaleMax_;
-
-	bool isScaleUp_;
-
-	float scaleUpTime_;
 };
 
