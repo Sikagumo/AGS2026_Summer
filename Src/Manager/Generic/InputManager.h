@@ -92,6 +92,7 @@ public:
 	// リソースの破棄
 	void DestroyInstance(void);
 
+
 	// 判定を行うキーを追加
 	void Add(int key);
 
@@ -106,6 +107,7 @@ public:
 
 	// キーを離した時の判定
 	bool IsTrgUp(int key) const;
+
 
 	// マウス座標の取得
 	Vector2 GetMousePos(void) const;
@@ -124,6 +126,10 @@ public:
 
 	// マウスが右クリックされたか(押しっぱなしはNG)
 	bool IsTrgMouseRight(void) const;
+
+	/// @brief マウスホイールの移動量を取得
+	int IsTrgMouseWheel(void) const;
+
 
 	// コントローラの入力情報を取得する
 	JOYPAD_IN_STATE GetJPadInputState(JOYPAD_NO no);
@@ -185,6 +191,10 @@ private:
 
 	// マウスボタンの入力状態
 	int mouseInput_;
+
+	// マウスホイールの入力状態
+	int mouseWheel_;
+	int mouseWheelOld_;
 
 	// パッド情報
 	JOYPAD_IN_STATE padInfos_[5];

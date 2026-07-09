@@ -3,10 +3,12 @@
 #include <memory>
 #include <DxLib.h>
 #include <vector>
+#include <array>
 #include "../../Object/Actor/Chara/Player/Player.h"
 #include "../../Object/Actor/Chara/Boss/Boss.h"
 #include "../../Object/Actor/Stage/Stage.h"
 #include "../../Object/Common/DamageController.h"
+#include "../../Common/GameTimer.h"
 
 
 /// @brief ゲーム本編のメインロジックを管理するシーンクラス
@@ -51,10 +53,21 @@ private:
 
     std::unique_ptr<DamageController> damageController_;
 
-    float gameTime_;
+    std::unique_ptr<GameTimer> gameTimer_;
 
     int targetHpImage_;
     int targetHpBerImage_;
+
+
+    enum class UI_GAME
+    {
+
+        MAX
+    };
+    std::array<int, static_cast<int>(UI_GAME::MAX)> uiGame_;
+
+    int playerHpImage_;
+    int playerHpImageBack_;
 
 
     float CalcHpBarScale(const VECTOR& _targetPos);
@@ -63,11 +76,10 @@ private:
     /// @brief デバッグ情報の描画
     void DrawDebug(void);
 
-    void DrawHpBer(void);
+    void DrawHpBerPlayer(void);
+    void DrawHpBerBoss(void);
 
     void DamageProcess(void);
-
-    void CameraLockOn(void);
 
     void UpdateGameTime(void);
 };

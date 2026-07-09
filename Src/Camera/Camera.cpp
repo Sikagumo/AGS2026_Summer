@@ -380,7 +380,7 @@ void Camera::SyncFollow(void)
 void Camera::SyncAngleYFromRotY(void)
 {
 	// rotY_が示す前方ベクトルをXZ平面上で求める
-	VECTOR forward = rotY_.PosAxis(UtilityMath::DIR_F);
+	VECTOR forward = rotY_.PosAxis(UtilityMath::DIR_FORWARD);
 
 	// atan2でY軸角度を逆算してangles_.yに書き戻す
 	angles_.y = atan2f(forward.x, forward.z);
@@ -452,15 +452,7 @@ void Camera::ProcessMove(void)
 	VECTOR moveDir = UtilityMath::VECTOR_ZERO;
 
 
-	if (GetJoypadNum() == 0)
-	{
-		/*
-		if (inputManager.IsNew(KEY_INPUT_UP)) { moveDir = UtilityMath::DIR_F; }
-		if (inputManager.IsNew(KEY_INPUT_DOWN)) { moveDir = UtilityMath::DIR_B; }
-		if (inputManager.IsNew(KEY_INPUT_LEFT)) { moveDir = UtilityMath::DIR_L; }
-		if (inputManager.IsNew(KEY_INPUT_RIGHT)) { moveDir = UtilityMath::DIR_R; }*/
-	}
-	else
+	if (GetJoypadNum() != 0)
 	{
 		InputManager::JOYPAD_IN_STATE padState = inputManager.GetJPadInputState(InputManager::JOYPAD_NO::PAD1);
 

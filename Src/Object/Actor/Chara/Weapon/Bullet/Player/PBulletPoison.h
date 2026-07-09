@@ -1,16 +1,16 @@
 #pragma once
 #include "PBulletBase.h"
 
-class PBulletBomb : public PBulletBase
+class PBulletPoison : public PBulletBase
 {
 public:
 
-	static constexpr float SHOT_SPEED_BOMB_XZ = 10.0f;
-	static constexpr float SHOT_SPEED_BOMB_Y = 8.5f;
+	static constexpr float SHOT_SPEED_POISON_XZ = 10.0f;
+	static constexpr float SHOT_SPEED_POISON_Y = 8.5f;
 
-	PBulletBomb(void);
+	PBulletPoison(void);
 
-	~PBulletBomb(void)override = default;
+	~PBulletPoison(void)override = default;
 
 	void Load(void)override;
 
@@ -30,5 +30,9 @@ protected:
 	void ChangeBulletStateProc(void)override;
 
 	void SetParam(void)override;
+
+private:
+
+	float activeTime_;
 };
 

@@ -2,6 +2,7 @@
 #include "./PlayerBase.h"
 #include "./PActionController.h"
 #include <DxLib.h>
+#include <array>
 
 class Player : public PlayerBase
 {
@@ -25,9 +26,9 @@ public:
 
 	/// @brief コンストラクタ
 	/// @param _playerNo プレイヤー番号
-	/// @param _bulletType 攻撃の種類
+	/// @param _jobType 攻撃の種類
 	/// @param _startPos 開始位置
-	Player(int _playerNo, BULLET_TYPE _bulletType, const VECTOR& _startPos);
+	Player(int _playerNo, JOB_TYPE _jobType, const VECTOR& _startPos);
 
 	~Player(void)override = default;
 
@@ -38,9 +39,6 @@ public:
 	void DrawDebug(void)override;
 
 	void ReleasePost(void)override;
-
-	/// @brief 現在攻撃力取得
-	int GetPower(void);
 
 	/// @brief 吹っ飛ばし処理
 	/// @param _knockDirXZ 横吹っ飛ばし方向
@@ -77,6 +75,24 @@ protected:
 
 private:
 
+	static constexpr std::array<SHOT_TYPE, static_cast<int>(JOB_TYPE::MAX)>
+		SHOT_TYPE_NORMAL
+		= { SHOT_TYPE::BOMB, SHOT_TYPE::BIG, SHOT_TYPE::RAPID_FIRE, SHOT_TYPE::RECOVERY };
+
+	static constexpr std::array<SHOT_TYPE, static_cast<int>(JOB_TYPE::MAX)>
+		SHOT_TYPE_SPECIAL
+		= { SHOT_TYPE::BOMB_FINISH, SHOT_TYPE::NONE, SHOT_TYPE::CLUSTER, SHOT_TYPE::POISON };
+
+
+	// 連射パラメータ
+	static constexpr float SCALE_RAPID = 1.0f;
+	static constexpr float RADIUS_RAPID = 10.0f;
+	static constexpr int POWER_RAPID = 1;
+	static constexpr float SHOT_SPEED_XZ_RAPID = 17.5f;
+	static constexpr float SHOT_SPEED_Y_RAPID = 2.5f;
+	static constexpr float ALIVE_TIME_RAPID = 3.0f;
+
+
 	// 攻撃回数
 	int attackNumMax_;
 	int curAttackNum_;
@@ -103,6 +119,15 @@ private:
 
 	std::unique_ptr<PActionController> actionController_;
 
+	static constexpr float SHOT_RAPID_TERM = 0.5f;
+	float shotTerm_;
+
+	//static constexpr float THROW_SPEED_RAPID_START = 30.0f;
+	//static constexpr float THROW_SPEED_RAPID_MAX = 75.0f;
+	//static constexpr float THROW_SPEED_RAPID_INC = (THROW_SPEED_RAPID_MAX - THROW_SPEED_RAPID_START) / 30;
+
+	//float animSpeedRapid_;
+
 
 	// 操作
 	void ProcessMove(void);
@@ -121,7 +146,12 @@ private:
 
 
 	void DrawShadowRound(void);
-	void PlayAnimation(ANIM_TYPE _type, bool _isLoop = true);
+
+	/// @brief アニメーション再生
+	/// @param _type アニメーションの種類
+	/// @param _isLoop ループ再生するか否か
+	/// @param _animSpeed 再生速度指定(任意)
+	void PlayAnimation(ANIM_TYPE _type, bool _isLoop = true, float _animSpeed = -1.0f);
 
 	void CreateBullet(void);
 	void ShotBullet(void);
@@ -130,4 +160,11 @@ private:
 	void DelayRotate(void)override;
 
 	void MoveLimit(void);
+
+	void DrawShotOrbit(void);
+
+	VECTOR CalcShotDir(void);
+
+	void ProcShotNormal(void);
+	void ProcShotSpecial(void);
 };

@@ -64,7 +64,7 @@ public:
 	bool GetInvincible(void) { return isInvincible_;}
 
 	/// @brief プレイヤーの攻撃力受け取り用
-	void SetPlayerAttack(int _attacks) { playerAttack_ = _attacks; }
+	void SetPlayerAttack(int _bulletAttack, int _blastAttack = 0.0f);
 
 	/// @brief プレイヤーの最大HP受け取り用
 	void SetPlayerMaxHp(int _maxHp) { playerHpMax_ = _maxHp; }
@@ -107,7 +107,8 @@ private:
 
 
 	// プレイヤーが与えるダメージの保管
-	int playerAttack_;
+	int playerAttackBullet_;
+	int playerAttackBlast_;
 
 	// プレイヤーの最大HPの保管
 	int playerHpMax_;
@@ -115,7 +116,7 @@ private:
 
 	bool isInvincible_;
 
-	int DamageData_;
+	int damageData_;
 	
 	BOSS_DATA cannon_;
 	BOSS_DATA mg_;

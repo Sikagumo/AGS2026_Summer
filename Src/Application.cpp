@@ -126,10 +126,9 @@ void Application::Run(void)
 			break;
 		}
 
-		bool isChanging = SceneManager::GetInstance().IsSceneChanging();
+		bool isChanging = sceneManager.IsSceneChanging();
 
 		sceneManager.Update();
-
 		if (!isChanging)
 		{
 			ClearDrawScreen();
@@ -142,6 +141,7 @@ void Application::Run(void)
 
 
 		sceneManager.Draw();
+		
 		// •½‹ÏFPS•`‰æ
 		//fpsController_->Draw();
 

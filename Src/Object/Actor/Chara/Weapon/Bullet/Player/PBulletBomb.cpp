@@ -4,12 +4,10 @@
 #include "../../../../../Collision/CollisionController.h"
 
 constexpr float RADIUS_BULLET = 9.0f;
-constexpr float RADIUS_BLAST = 100.0f;
-constexpr float SCALE_BOMB = 1.5f;
-constexpr float SHOT_SPEED_BOMB_XZ = 10.0f;
-constexpr float SHOT_SPEED_BOMB_Y  = 8.5f;
+constexpr float RADIUS_RECOVERY = 150.0f;
+constexpr float SCALE_BOMB = 1.0f;
 constexpr float TIME_ALIVE_BOMB = 15.0f;
-constexpr int POWER = 10;
+constexpr int POWER_BOMB = 10;
 
 
 PBulletBomb::PBulletBomb(void)
@@ -39,9 +37,9 @@ void PBulletBomb::UpdatePost(void)
 		if (isActiveDestroy_) 
 		{
 			// “–‚½‚è”»’è–³Œø‰»
-			CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::PLAYER_BULLET, false);
+			CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::PLAYER_BLAST, false);
 			bulletState_ = BULLET_STATE::INACTIVE;
-			activePower_ = 0;
+			activePowerBullet_ = 0;
 			return;
 		}
 
@@ -67,7 +65,7 @@ void PBulletBomb::SetParam(void)
 
 	radiusBullet_ = RADIUS_BULLET;
 	radiusBlast_ = 0.0f;
-	power_ = POWER;
+	power_ = POWER_BOMB;
 	transform_.InitTransform(SCALE_BOMB, transform_.quaRot, Quaternion::Identity());
 }
 
@@ -75,16 +73,17 @@ void PBulletBomb::BlastAction(void)
 {
 	bulletState_ = BULLET_STATE::BLAST;
 	isVisible_ = false;
-	activePower_ = power_;
+	activePowerBlast_ = power_;
 
 	// “–‚½‚è”»’è–³Œø‰»
 	CollisionController::GetInstance()
 		.SetCollisionActive(this, ColliderBase::TAG::PLAYER_BULLET, false);
 
 	// ”š”­—LŒø‰»
-	radiusBlast_ = RADIUS_BLAST;
+	radiusBlast_ = RADIUS_RECOVERY;
 
-	ownColliders_.at(static_cast<int>(COLLISION_TYPE::BLAST)).at(0)->SetRadius(radiusBlast_);
+	ownColliders_[static_cast<int>(COLLISION_TYPE::BLAST)]
+		.at(0)->SetRadius(radiusBlast_);
 
 	CollisionController::GetInstance()
 		.SetCollisionActive(this, ColliderBase::TAG::PLAYER_BLAST, true);

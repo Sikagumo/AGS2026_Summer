@@ -16,7 +16,7 @@ public:
 	};
 
 
-	PBulletBase(void);
+	PBulletBase(bool _isGravity = true);
 
 	virtual ~PBulletBase(void)override = default;
 
@@ -28,8 +28,8 @@ public:
 
 
 	/// @brief ê∂ê¨èàóù
-	/// @param _pos 
-	/// @param _throwDir 
+	/// @param _pos î≠éÀà íu
+	/// @param _throwDir ìäÇ∞ÇÈà íuÇÃí≤êÆäpìx 
 	/// @param _shotCnt 
 	/// @param isFinish ç≈èIíeÇ©î€Ç©
 	void Create(const VECTOR& _pos, const VECTOR& _throwDir, int _shotCnt, bool isFinish);
@@ -48,7 +48,8 @@ public:
 
 	virtual void PreActiveProcess(void){};
 
-	int GetPower(void)const { return activePower_; }
+	int GetPowerBullet(void)const { return activePowerBullet_; }
+	int GetPowerBlast(void)const { return activePowerBlast_; }
 
 	virtual void BlastAction(void) = 0;
 
@@ -59,9 +60,12 @@ protected:
 	{
 		BULLET = 0, // íe
 		BLAST,		// îöî≠
+		SUPPORT,	// âÒïú
 	};
 
 	BULLET_STATE bulletState_;
+
+	const bool IS_GRAVITY;
 
 	float radiusBullet_;
 	float radiusBlast_;
@@ -81,7 +85,8 @@ protected:
 	bool isVisible_;
 
 	int power_;
-	int activePower_;
+	int activePowerBullet_;
+	int activePowerBlast_;
 
 	bool isFinish_;
 

@@ -5,6 +5,11 @@ class FpsController;
 
 class Application
 {
+private:
+
+	// 重力
+	static constexpr float GRAVITY = 9.81f;
+	static constexpr float GRAVITY_SCALE = 0.7f;
 
 public:
 
@@ -34,10 +39,6 @@ public:
 	static const std::string PATH_KEY_CONFIG_GAMEPAD;
 	static const std::string PATH_KEY_CONFIG_KEYBOARD;
 	//-------------------------------------------
-
-	// 重力
-	static constexpr float GRAVITY = 9.81f;
-	static constexpr float GRAVITY_SCALE = 0.7f;
 
 	// インスタンスを明示的に生成
 	static void CreateInstance(void);
@@ -71,6 +72,8 @@ public:
 	bool GetGameEnd(void);
 
 private:
+
+	
 
 	// 静的インスタンス
 	static Application* instance_;

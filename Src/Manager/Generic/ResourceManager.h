@@ -26,8 +26,11 @@ public:
 
 		/* ï°êîâÊëú */
 		IMGS_TEXTS,
+		IMGS_TIMER,
 		IMGS_TITLE_TEXT,
+		IMGS_GAME_TEXT,
 		IMGS_HP_TARGET,
+		IMGS_HP_PLAYER,
 		IMGS_RESULT,
 
 		/* ÉÇÉfÉã */
@@ -75,7 +78,8 @@ public:
 		/* âfëú */
 
 		/* BGM */
-		BGM_TITLE,
+		BGM_TITLE_SEA,
+		BGM_TITLE_THUNDER,
 		BGM_GAME,
 
 		/* å¯â âπ */

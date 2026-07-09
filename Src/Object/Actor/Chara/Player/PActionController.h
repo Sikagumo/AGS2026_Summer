@@ -29,7 +29,6 @@ public:
 
 	/// @brief s“®Š„‚è“–‚Äˆ—
 	/// @param _actionNum “o˜^”Ô†
-	/// @param _attackPower UŒ‚—Í
 	/// @param _timeActive s“®—LŒøŠÔ
 	/// @param _timeActiveFunc s“®‚Ü‚Å‚ÌŠÔ
 	/// @param _timeEnd s“®I—¹ŠÔ
@@ -37,7 +36,7 @@ public:
 	/// @param _timeStop ’â~‚·‚éŠÔ
 	/// @param _timeStopActive ’â~‚Ü‚Å‚ÌŠÔ
 	/// @param _timeInput Ÿ‚Ì“ü—Í‚Ü‚Å‚ÌŠÔ
-	void SetAction(int _actionNum, int _attackPower, float _timeActive, float _timeActiveFunc
+	void SetAction(int _actionNum, float _timeActive, float _timeActiveFunc
 				   , float _timeEnd, std::function<void(void)> _actionProc, float _timeStop = 0.0f, float _timeStopActive = 0.0f, float _timeInput = 0.0f);
 
 	/// @brief “o˜^‚µ‚½s“®‚ğŠJn‚·‚é
@@ -57,9 +56,6 @@ public:
 	bool IsEndActionActive(void)const { return (curTimeActionActive_ <= 0.0f); };
 
 	PACTION_STATE GetActionState(void)const { return actionState_; };
-
-	/// @brief w’è‚Ìs“®‚ÌUŒ‚—Í‚ğæ“¾
-	int GetActionAttackPower(int _type) { return actions_[_type].attackPower; };
 
 
 private:
@@ -83,9 +79,6 @@ private:
 
 		// ’â~‚Ü‚Å‚ÌŠÔ
 		float timeStopActive = 0.0f;
-
-		// UŒ‚—Í
-		int attackPower = 0;
 
 		std::function<void(void)> actionProcess;
 		

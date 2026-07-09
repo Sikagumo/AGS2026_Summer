@@ -14,6 +14,7 @@
 
 SceneManager* SceneManager::instance_ = nullptr;
 
+
 void SceneManager::CreateInstance(void)
 {
     if (instance_ == nullptr)
@@ -190,7 +191,7 @@ void SceneManager::Update(void)
             camera_->Init();
         }
 
-        ChangeScene(std::make_shared<SceneTitle>());
+        ChangeScene(std::make_shared<SceneGame>());
 
         return;
     }
