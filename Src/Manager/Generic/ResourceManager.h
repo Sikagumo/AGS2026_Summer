@@ -25,8 +25,11 @@ public:
 
 		/* •¡”‰æ‘œ */
 		IMGS_TEXTS,
+		IMGS_TIMER,
 		IMGS_TITLE_TEXT,
+		IMGS_GAME_TEXT,
 		IMGS_HP_TARGET,
+		IMGS_HP_PLAYER,
 		IMGS_RESULT,
 
 		/* ƒ‚ƒfƒ‹ */

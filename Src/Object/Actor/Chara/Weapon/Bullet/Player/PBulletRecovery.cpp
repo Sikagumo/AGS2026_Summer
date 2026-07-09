@@ -31,7 +31,7 @@ void PBulletRecovery::InitPost(void)
 
 	ColliderSphere* recovery = new ColliderSphere(ColliderBase::TAG::PLAYER_RECOVERY, &transform_
 								, UtilityMath::VECTOR_ZERO, radiusBlast_);
-	ownColliders_.emplace(static_cast<int>(COLLISION_TYPE::RECOVERY)
+	ownColliders_.emplace(static_cast<int>(COLLISION_TYPE::SUPPORT)
 		, recovery);
 
 	CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::PLAYER_BULLET, true);
@@ -89,7 +89,7 @@ void PBulletRecovery::BlastAction(void)
 	// ”š”­—LŒø‰»
 	radiusBlast_ = RADIUS_RECOVERY;
 
-	ownColliders_.at(static_cast<int>(COLLISION_TYPE::RECOVERY))->SetRadius(radiusBlast_);
+	ownColliders_.at(static_cast<int>(COLLISION_TYPE::SUPPORT))->SetRadius(radiusBlast_);
 
 	CollisionController::GetInstance()
 		.SetCollisionActive(this, ColliderBase::TAG::PLAYER_RECOVERY, true);

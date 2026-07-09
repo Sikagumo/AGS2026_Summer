@@ -96,7 +96,7 @@ public:
 	void SetAnimStep(float _step = 0.0f);
 
 	/// @brief ’â~‚µ‚Ä‚¢‚é‚©”Û‚©
-	bool isStop(void)const { return isStop_; };
+	bool IsStop(void)const { return isStop_; };
 
 	/// @brief Ä¶ˆÊ’u•ÏX
 	/// @param rate Ä¶ˆÊ’u‚ÌŠ„‡(0.0f`1.0f)

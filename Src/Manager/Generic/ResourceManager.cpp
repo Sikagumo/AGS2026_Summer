@@ -80,14 +80,20 @@ void ResourceManager::Initialize(void)
 	int imagesAllNum = 0;
 
 	// １画像の横枚数
-	int imagesNumX = 0;
-	int imagesNumY = 0;
+	int imagesNumX = 0, imagesNumY = 0;
 
 	imagesAllNum = 11;
 	imagesNumX = 1;
 	imagesNumY = 11;
 	_SetResource(LOAD_TYPE::IMAGES, SRC::IMGS_TEXTS, PATH_IMAGE + "Text.png"
 				, imagesAllNum, imagesNumX, imagesNumY);
+
+	// タイマーテキスト
+	imagesAllNum = 11;
+	imagesNumX = 11;
+	imagesNumY = 1;
+	_SetResource(LOAD_TYPE::IMAGES, SRC::IMGS_TIMER, PATH_IMAGE + "TextsTime.png"
+		, imagesAllNum, imagesNumX, imagesNumY);
 
 	// ロックオン対象HPバー
 	imagesAllNum = 2;
@@ -96,12 +102,26 @@ void ResourceManager::Initialize(void)
 	_SetResource(LOAD_TYPE::IMAGES, SRC::IMGS_HP_TARGET, PATH_IMAGE + "TargetHpBer.png"
 				, imagesAllNum, imagesNumX, imagesNumY);
 
+	// プレイヤー対象HPバー
+	imagesAllNum = 2;
+	imagesNumX = 1;
+	imagesNumY = 2;
+	_SetResource(LOAD_TYPE::IMAGES, SRC::IMGS_HP_PLAYER, PATH_IMAGE + "PlayerHpBer.png"
+				, imagesAllNum, imagesNumX, imagesNumY);
+
 
 	// タイトル文字
 	imagesAllNum = 8;
 	imagesNumX = 1;
 	imagesNumY = 8;
-	_SetResource(LOAD_TYPE::IMAGES, SRC::IMGS_TITLE_TEXT, PATH_IMAGE + "txt.png"
+	_SetResource(LOAD_TYPE::IMAGES, SRC::IMGS_TITLE_TEXT, PATH_IMAGE + "TextsTitle.png"
+				, imagesAllNum, imagesNumX, imagesNumY);
+
+	// ゲームシーンの文字
+	imagesAllNum = 1;
+	imagesNumX = 1;
+	imagesNumY = 1;
+	_SetResource(LOAD_TYPE::IMAGES, SRC::IMGS_GAME_TEXT, PATH_IMAGE + "TextsGame.png"
 				, imagesAllNum, imagesNumX, imagesNumY);
 
 	imagesAllNum = 4;

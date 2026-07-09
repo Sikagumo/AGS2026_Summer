@@ -16,7 +16,7 @@ public:
 	};
 
 
-	PBulletBase(void);
+	PBulletBase(bool _isGravity = true);
 
 	virtual ~PBulletBase(void)override = default;
 
@@ -28,8 +28,8 @@ public:
 
 
 	/// @brief 生成処理
-	/// @param _pos 
-	/// @param _throwDir 
+	/// @param _pos 発射位置
+	/// @param _throwDir 投げる位置の調整角度 
 	/// @param _shotCnt 
 	/// @param isFinish 最終弾か否か
 	void Create(const VECTOR& _pos, const VECTOR& _throwDir, int _shotCnt, bool isFinish);
@@ -60,10 +60,12 @@ protected:
 	{
 		BULLET = 0, // 弾
 		BLAST,		// 爆発
-		RECOVERY,	// 回復
+		SUPPORT,	// 回復
 	};
 
 	BULLET_STATE bulletState_;
+
+	const bool IS_GRAVITY;
 
 	float radiusBullet_;
 	float radiusBlast_;

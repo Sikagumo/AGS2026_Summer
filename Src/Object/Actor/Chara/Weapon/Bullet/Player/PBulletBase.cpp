@@ -6,7 +6,7 @@
 #include "../../../../../Collider/ColliderSphere.h"
 #include "../../../../../Collision/CollisionController.h"
 
-PBulletBase::PBulletBase(void)
+PBulletBase::PBulletBase(bool _isGravity)
 	: ActorBase::ActorBase()
 	, bulletState_(BULLET_STATE::INACTIVE)
 	, radiusBullet_(0.0f) , radiusBlast_(0.0f)
@@ -19,6 +19,7 @@ PBulletBase::PBulletBase(void)
 	, isFinish_(false)
 	, power_(0), activePowerBullet_(0), activePowerBlast_(0)
 	, isActiveDestroy_(false)
+	, IS_GRAVITY(_isGravity)
 {
 }
 
@@ -55,8 +56,12 @@ void PBulletBase::Update(void)
 	if (bulletState_ == BULLET_STATE::SHOT)
 	{
 		VECTOR pos = shotPow_;
-		curGravityPow_ += (Application::GetInstance().GetGravityPow() * timeManager_.GetDeltaTime());
-		pos.y -= curGravityPow_;
+
+		if (IS_GRAVITY)
+		{
+			curGravityPow_ += (Application::GetInstance().GetGravityPow() * timeManager_.GetDeltaTime());
+			pos.y -= curGravityPow_;
+		}
 
 		transform_.Translate(pos);
 

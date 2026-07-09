@@ -165,7 +165,7 @@ VECTOR Transform::GetForward(void) const
 
 VECTOR Transform::GetBack(void) const
 {
-	return GetDir(UtilityMath::DIR_B);
+	return GetDir(UtilityMath::DIR_BACK);
 }
 
 VECTOR Transform::GetRight(void) const

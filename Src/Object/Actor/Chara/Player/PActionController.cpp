@@ -13,7 +13,7 @@ PActionController::PActionController(std::unique_ptr<AnimationController>& _anim
 {
 }
 
-void PActionController::SetAction(int _actionNum, int _attackPower, float _timeActive, float _timeActiveFunc
+void PActionController::SetAction(int _actionNum, float _timeActive, float _timeActiveFunc
 	, float _timeEnd, std::function<void(void)> _actionProc
 	, float _timeStop, float _timeStopActive, float _timeInput)
 {
@@ -30,7 +30,6 @@ void PActionController::SetAction(int _actionNum, int _attackPower, float _timeA
 	}
 
 	ActionParam param = ActionParam();
-	param.attackPower = _attackPower;
 	param.timeActive = _timeActive;
 	param.timeEnd = _timeEnd;
 	param.timeInput = _timeInput;
@@ -81,7 +80,7 @@ void PActionController::Update(void)
 	// s“®–¼‚ª–¢Š„“–ŽžAˆ—I—¹
 	if (curActionNum_ == -1 || actionState_ == PACTION_STATE::NONE) { return; }
 
-	if (!animation_->isStop())
+	if (!animation_->IsStop())
 	{
 		curTimeAction_ -= TimeManager::GetInstance().GetDeltaTime();
 	}
@@ -109,7 +108,7 @@ void PActionController::Update_Action(void)
 		}
 	}
 
-	if (animation_->isStop()) { return; }
+	if (animation_->IsStop()) { return; }
 	
 
 	curTimeInput_ = ((curTimeInput_ > 0) ? curTimeInput_ - TimeManager::GetInstance().GetDeltaTime() : 0.0f);

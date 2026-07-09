@@ -25,25 +25,31 @@ SceneGame::SceneGame(void)
 	, boss_(std::make_unique<Boss>())
 	, stage_(std::make_unique<Stage>())
 	, damageController_(std::make_unique<DamageController>())
-	, gameTime_(GAME_TIME)
 	, targetHpImage_(-1), targetHpBerImage_(-1)
+	, gameTimer_(nullptr)
 {
 	std::unique_ptr<Player> player1
-		= std::make_unique<Player>(0, Player::BULLET_TYPE::RECOVERY
+		= std::make_unique<Player>(0, Player::JOB_TYPE::BOMB
 								   , PLAYER_INIT_POS[0]);
+	/*
 	std::unique_ptr<Player> player2
-		= std::make_unique<Player>(1, Player::BULLET_TYPE::BIG
+		= std::make_unique<Player>(1, Player::JOB_TYPE::CANNON
 								   , PLAYER_INIT_POS[1]);
 	std::unique_ptr<Player> player3
-		= std::make_unique<Player>(2, Player::BULLET_TYPE::BIG
+		= std::make_unique<Player>(2, Player::JOB_TYPE::CANNON
 								   , PLAYER_INIT_POS[2]);
 	std::unique_ptr<Player> player4
-		= std::make_unique<Player>(3, Player::BULLET_TYPE::BIG
+		= std::make_unique<Player>(3, Player::JOB_TYPE::BOMB
 								   , PLAYER_INIT_POS[3]);
+	*/
+
 	players_.emplace_back(std::move(player1));
 	//players_.emplace_back(std::move(player2));
 	//players_.emplace_back(std::move(player3));
 	//players_.emplace_back(std::move(player4));
+
+	playerHpImageBack_ = ResourceManager::GetInstance().LoadHandleIdsOnce(ResourceManager::SRC::IMGS_HP_PLAYER, 0);
+	playerHpImage_ = ResourceManager::GetInstance().LoadHandleIdsOnce(ResourceManager::SRC::IMGS_HP_PLAYER, 1);
 
 	targetHpBerImage_ = ResourceManager::GetInstance().LoadHandleIdsOnce(ResourceManager::SRC::IMGS_HP_TARGET, 0);
 	targetHpImage_ = ResourceManager::GetInstance().LoadHandleIdsOnce(ResourceManager::SRC::IMGS_HP_TARGET, 1);
@@ -63,6 +69,8 @@ void SceneGame::Load(void)
 	boss_->Load();
 
 	stage_->Load();
+
+	gameTimer_ = std::make_unique<GameTimer>(GAME_TIME);
 
 	SoundManager::GetInstance().Add(SoundManager::TYPE::BGM, SoundManager::SOUND::BGM_GAME, ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::BGM_GAME));
 
@@ -96,6 +104,10 @@ void SceneGame::Initialize(void)
 
 	boss_->Init();
 	stage_->Init();
+
+	// タイマー有効化
+	gameTimer_->SetIsTimeActive(true);
+
 	damageController_->SetPlayerMaxHp(players_.at(0)->GetMaxHp());
 	SoundManager::GetInstance().Play(SoundManager::SOUND::BGM_GAME);
 }
@@ -105,10 +117,8 @@ void SceneGame::Update(void)
 	auto& sound = SoundManager::GetInstance();
 	auto& input = InputManager::GetInstance();
 	auto& camera = SceneManager::GetInstance().GetCamera();
-	auto& effect = EffectManager::GetInstance();
-	auto loader = Loading::GetInstance();
 
-	if (loader->IsLoading()) { return; }
+	if (Loading::GetInstance()->IsLoading()) { return; }
 
 	SceneManager::GetInstance().GetCamera()->Update();
 
@@ -124,14 +134,12 @@ void SceneGame::Update(void)
 
 	DamageProcess();
 
-	
-
 	UpdateGameTime();
 
-	effect.Update();
+	EffectManager::GetInstance().Update();
 
 	// ボスHPが０の時、ゲームクリア
-	if (boss_->GetHP() <= 0 && gameTime_ > 0.0f)
+	if (boss_->GetHP() <= 0 && gameTimer_->GetTime() > 0.0f)
 	{
 		SoundManager::GetInstance().Stop(SoundManager::SOUND::BGM_GAME);
 		SceneManager::GetInstance().ChangeScene(std::make_shared<SceneResult>(false));
@@ -156,12 +164,13 @@ void SceneGame::DamageProcess(void)
 	boss_->SetWeaponRGDamage(damageController_->GetWeaponRGDamage());
 
 	// プレイヤーの攻撃
-	for (auto& bullet : players_.at(0)->GetBullets())
+	for (auto& player : players_)
 	{
-		damageController_->SetPlayerAttack(bullet->GetPowerBullet(), bullet->GetPowerBlast());
+		for (auto& bullet : player->GetBullets())
+		{
+			damageController_->SetPlayerAttack(bullet->GetPowerBullet(), bullet->GetPowerBlast());
+		}
 	}
-
-	//damageController_->SetPlayerAttack(players_.at(0)->GetPower());
 
 	// プレイヤー被ダメージ処理
 	for (auto& player : players_)
@@ -171,32 +180,21 @@ void SceneGame::DamageProcess(void)
 	}
 }
 
-void SceneGame::CameraLockOn(void)
-{
-	
-
-	
-
-	
-}
-
 void SceneGame::UpdateGameTime(void)
 {
-	// 時間を取得
-	float times = TimeManager::GetInstance().GetDeltaTime();
-
-	gameTime_ -= times;
+	gameTimer_->Update();
 
 	for (auto& player : players_)
 	{
+		// プレイヤー撃破時、制限時間を減少させる
 		if (player->GetCurHp() <= 0)
 		{
-			gameTime_ -= GAME_TIME_DEFEAT_DEC;
+			gameTimer_->SetTime(gameTimer_->GetTime() - GAME_TIME_DEFEAT_DEC);
 			player->SetRespawn();
 		}
 	}
 
-	if (gameTime_ <= 0.0f)
+	if (gameTimer_->GetTime() <= 0.0f)
 	{
 		SceneManager::GetInstance().ChangeScene(std::make_shared<SceneResult>(true));
 	}
@@ -218,22 +216,17 @@ void SceneGame::Draw(void)
 
 	effect.Draw();
 
-	DrawHpBer();
+	DrawHpBerBoss();
+
+	gameTimer_->Draw();
+
+	DrawHpBerPlayer();
 
 #ifdef _DEBUG
 	DrawDebug();
 #endif // _DEBUG
 
 	SceneManager::GetInstance().GetCamera()->DrawDebug();
-
-	std::string textSecond = (((static_cast<int>(gameTime_) % 60) < 10) ? "0" : "");
-	textSecond += std::to_string((static_cast<int>(gameTime_) % 60));
-
-	std::string textMinute = (((static_cast<int>(gameTime_) / 60) < 10) ? "0" : "");
-	textMinute += std::to_string((static_cast<int>(gameTime_) / 60));
-
-	DrawFormatString(Application::SCREEN_HALF_X, 0, 0x000000, "撤退まであと %s:%s"
-					, textMinute.c_str(), textSecond.c_str());
 }
 
 void SceneGame::Release(void)
@@ -248,63 +241,153 @@ void SceneGame::Release(void)
 	boss_->Release();
 }
 
-void SceneGame::DrawHpBer(void)
+void SceneGame::DrawHpBerPlayer(void)
+{
+	constexpr float BER_SCALE = 0.275f;
+
+	Vector2 backSize = Vector2();
+	GetGraphSize(playerHpImageBack_, &backSize.x, &backSize.y);
+	backSize *= BER_SCALE;
+
+	Vector2 imageSize = Vector2();
+	GetGraphSize(playerHpImage_, &imageSize.x, &imageSize.y);
+
+	// 中央位置
+	constexpr Vector2 BER_POS_MIDDLE = { 200, 500 };
+	Vector2 berPos = BER_POS_MIDDLE;
+
+	// 表示幅としてのRATIOのリマップ範囲（数値で調整可能）
+	constexpr float DISPLAY_RATIO_MIN = 0.1f;
+	constexpr float DISPLAY_RATIO_MAX = 0.815f;
+
+	const int PLAYER_NUM = static_cast<int>(players_.size() + 1);
+	for (int i = 1; i < PLAYER_NUM; i++)
+	{
+		// バー背景描画
+		DrawRotaGraph(
+			berPos.x, berPos.y,
+			BER_SCALE, 0.0f,
+			playerHpImageBack_, true
+		);
+
+		const float hpRatio
+			= (static_cast<float>(players_.at(i - 1)->GetCurHp()) / static_cast<float>(players_.at(i - 1)->GetMaxHp()));
+		const float RATIO = std::clamp(hpRatio, 0.0f, 1.0f);
+
+
+		// 減少範囲にリマップ
+		const float DISPLAY_RATIO = std::lerp(DISPLAY_RATIO_MIN, DISPLAY_RATIO_MAX, RATIO);
+
+		constexpr float HP_POS_X = 48;
+		berPos.x += HP_POS_X;
+
+		// 左上座標
+		const Vector2 POS_UPPER_LEFT
+			= { static_cast<int>(berPos.x - (backSize.x / 2)),
+				static_cast<int>(berPos.y - (backSize.y / 2)) };
+
+		// 右下座標
+		const Vector2 POS_LOWER_RIGHT
+			= { (POS_UPPER_LEFT.x + (backSize.x * DISPLAY_RATIO)),
+				(POS_UPPER_LEFT.y + backSize.y) };
+
+
+		// 切り取り幅
+		const int IMAGE_WIDTH = static_cast<int>(imageSize.x * DISPLAY_RATIO);
+
+		if (IMAGE_WIDTH > 0)
+		{
+			// UV描画位置
+			const Vector2 HP_UV_POS = { 175, 0 };
+			DrawRectExtendGraph(
+				POS_UPPER_LEFT.x , POS_UPPER_LEFT.y,
+				POS_LOWER_RIGHT.x, POS_LOWER_RIGHT.y,
+				HP_UV_POS.x, HP_UV_POS.y,
+				IMAGE_WIDTH, imageSize.y,
+				playerHpImage_,
+				true
+			);
+		}
+
+		constexpr int BER_OFFSET_Y = 100;
+		berPos.y += (backSize.y + BER_OFFSET_Y);
+
+#ifdef _DEBUG
+		DrawFormatString(10, Application::SCREEN_SIZE_Y - (16 * (PLAYER_NUM - i)), 0xff0000, "プレイヤーHP：%d"
+			, players_.at(i - 1)->GetCurHp());
+#endif
+	}
+}
+void SceneGame::DrawHpBerBoss(void)
 {
 	const std::unique_ptr<Camera>& camera = SceneManager::GetInstance().GetCamera();
+	constexpr float    BER_SCALE = 0.5f;
+	constexpr Vector2F BER_OFFSET = { 0.0f, -100.0f };
+
+	// 表示幅としてのRATIOのリマップ範囲（数値で調整可能）
+	constexpr float DISPLAY_RATIO_MIN = 0.3f;
+	constexpr float DISPLAY_RATIO_MAX = 0.9f;
+
+	Vector2 backSize = Vector2();
+	GetGraphSize(targetHpBerImage_, &backSize.x, &backSize.y);
 
 	if (camera->GetIsLockOn() && !camera->IsEasingState())
 	{
-		constexpr float    BER_SIZE = 0.5f;
-		constexpr Vector2F BER_OFFSET = { 0.0f, -100.0f };
-
-		Vector2 size = Vector2();
 		VECTOR  viewPos = ConvWorldPosToScreenPos(camera->GetTargetPos());
-
-		GetGraphSize(targetHpBerImage_, &size.x, &size.y);
 		viewPos.x += BER_OFFSET.x;
 		viewPos.y += BER_OFFSET.y;
 
+		// 背景
 		DrawRotaGraph(
 			viewPos.x, viewPos.y,
-			BER_SIZE, 0.0f,
+			BER_SCALE, 0.0f,
 			targetHpBerImage_, true
 		);
-		Vector2 gaugeSize = Vector2();
-		GetGraphSize(targetHpImage_, &gaugeSize.x, &gaugeSize.y);
 
+
+		Vector2 imageSize = Vector2();
+		GetGraphSize(targetHpImage_, &imageSize.x, &imageSize.y);
+
+
+		// スクリーン上でのゲージ画像全体のサイズ（BER_SIZE倍）
+		const Vector2F BER_SIZE = { (imageSize.x * BER_SCALE), (imageSize.y * BER_SCALE) };
+
+		// 追従先のHPが残っている場合に割合を計算
 		const float hpRatio = (camera->GetLockOnMaxHp() > 0)
 			? static_cast<float>(camera->GetLockOnHp()) / static_cast<float>(camera->GetLockOnMaxHp())
 			: 0.0f;
 
-		const float clampedRatio = (hpRatio < 0.0f)
-				? 0.0f
-				: (hpRatio > 1.0f)
-					? 1.0f
-					: hpRatio;
+		const float RATIO = std::clamp(hpRatio, 0.0f, 1.0f);
 
-		// スクリーン上でのゲージ画像全体のサイズ（BER_SIZE倍）
-		const float scaledW = gaugeSize.x * BER_SIZE;
-		const float scaledH = gaugeSize.y * BER_SIZE;
+		// HP割合を範囲にリマップ
+		const float DISPLAY_RATIO = std::lerp(DISPLAY_RATIO_MIN, DISPLAY_RATIO_MAX, RATIO);
 
-		// 描画先: 左上座標（viewPos は中心なので半分引く）
-		const int destLeft = static_cast<int>(viewPos.x - scaledW * 0.5f);
-		const int destTop = static_cast<int>(viewPos.y - scaledH * 0.5f);
 
-		// 描画先: 右下座標（左端固定 → 右端だけHP割合で削る）
-		//   destRight = destLeft + scaledW × hpRatio
-		const int destRight = destLeft + static_cast<int>(scaledW * clampedRatio);
-		const int destBottom = destTop + static_cast<int>(scaledH);
+		// スクリーン上でのゲージ画像全体のサイズ
+		const float scaledW = (imageSize.x * BER_SIZE.x);
+		const float scaledH = (imageSize.y * BER_SIZE.y);
 
-		// 画像内: 切り取り幅（HP割合分）
-		const int srcW = static_cast<int>(gaugeSize.x * clampedRatio);
+		// 左上座標
+		const Vector2 POS_UPPER_LEFT
+			= { static_cast<int>(viewPos.x - (BER_SIZE.x / 2)),
+				static_cast<int>(viewPos.y - (BER_SIZE.y / 2)) };
 
-		if (srcW > 0)
+		// 右下座標
+		constexpr int OFFSET_X = -10;
+		const Vector2 POS_LOWER_RIGHT
+			= { (POS_UPPER_LEFT.x + (BER_SIZE.x * RATIO) + OFFSET_X),
+				(POS_UPPER_LEFT.y + BER_SIZE.y) };
+
+		// 切り取り幅 (HP割合分)
+		const int IMAGE_WIDTH = static_cast<int>(imageSize.x * RATIO);
+
+		if (IMAGE_WIDTH > 0)
 		{
 			DrawRectExtendGraph(
-				destLeft, destTop,
-				destRight, destBottom,
+				POS_UPPER_LEFT.x, POS_UPPER_LEFT.y,
+				POS_LOWER_RIGHT.x, POS_LOWER_RIGHT.y,
 				0, 0,
-				srcW, gaugeSize.y,
+				IMAGE_WIDTH, imageSize.y,
 				targetHpImage_,
 				true
 			);
@@ -313,7 +396,7 @@ void SceneGame::DrawHpBer(void)
 #ifdef _DEBUG
 		DrawFormatString(10, 60, GetColor(255, 255, 255),
 			"Boss HP: %d / %d  Ratio: %.2f",
-			camera->GetLockOnHp(), camera->GetLockOnMaxHp(), clampedRatio);
+			camera->GetLockOnHp(), camera->GetLockOnMaxHp(), RATIO);
 #endif
 	}
 }

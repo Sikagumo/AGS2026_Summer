@@ -12,7 +12,7 @@ constexpr float TIME_ALIVE_BIG = 5.0f;
 
 // UŒ‚—Í
 constexpr int POWER_START = 50;
-constexpr int POWER_INCREMENT = 50;
+constexpr int POWER_INCREMENT = 75;
 
 // Šg‘åŠ®—¹‚Ü‚Å‚ÌŠÔ
 constexpr float RADIUS_DURATION = 4.5f;
@@ -48,6 +48,9 @@ void PBulletBig::UpdatePost(void)
 		// ’…’eA‘¦Á–Å‚³‚¹‚é
 		activePowerBullet_ = 0;
 		bulletState_ = BULLET_STATE::INACTIVE;
+
+		// “–‚½‚è”»’è–³Œø‰»
+		CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::PLAYER_BULLET, false);
 		return;
 	}
 
@@ -100,7 +103,4 @@ void PBulletBig::BlastAction(void)
 
 	// ’e‚ğÁ–Å‚³‚¹‚é
 	isActiveDestroy_ = true;
-
-	// “–‚½‚è”»’è–³Œø‰»
-	CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::PLAYER_BULLET, false);
 }

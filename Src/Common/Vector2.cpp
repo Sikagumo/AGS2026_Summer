@@ -1,4 +1,5 @@
 #include "Vector2.h"
+#include <DxLib.h>
 
 /* int型Vector2 */
 
@@ -44,8 +45,27 @@ void Vector2::operator*=(const Vector2& vec)
 }
 void Vector2::operator*=(int _value)
 {
+	if (_value == 0)
+	{
+		OutputDebugString("\n数値が0になっています。\n");
+	}
 	x *= _value;
 	y *= _value;
+}
+void Vector2::operator*=(float _value)
+{
+	if (_value == 0.0f)
+	{
+		OutputDebugString("\n数値が0になっています。\n");
+	}
+	float xF = static_cast<float>(x);
+	float yF = static_cast<float>(y);
+
+	xF *= _value;
+	yF *= _value;
+
+	x = static_cast<int>(xF);
+	y = static_cast<int>(yF);
 }
 
 Vector2 Vector2::operator/(const Vector2& _vec)const
@@ -68,6 +88,11 @@ void Vector2::operator/=(const Vector2& _vec)
 
 void Vector2::operator/=(int _value)
 {
+	if (_value == 0)
+	{
+		OutputDebugString("\n数値が0になっています。\n");
+	}
+
 	// ゼロ除算対策
 	x = ((_value != 0) ? (x / _value) : 0);
 	y = ((_value != 0) ? (y / _value) : 0);
