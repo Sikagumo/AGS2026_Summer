@@ -203,7 +203,32 @@ void Player::InitPost(void)
 	constexpr float SHOT_TIME_END = 0.25f; // 終了時間
 
 	float timeActive = 0.0f, timeActionActive = 0.0f, timeInput = 0.0f, timeEnd = 0.0f, timeStop = 0.0f, timeStopActive = 0.0f;
+	int actionNum = 0;
 
+	// ジャンプ
+	actionNum = static_cast<int>(ACTION_TYPE::JUMP);
+	timeActive = 0.2f;
+	timeEnd = 0.0f;
+	timeActionActive = 0.1f;
+	timeEnd = SHOT_TIME_END;
+	timeStop = 0.035f;
+	timeStopActive = 0.175f;
+	actionController_->SetAction(actionNum, timeActive, timeActionActive, timeEnd
+		, std::bind(&Player::Jump, this)
+		, timeStop, timeStopActive);
+
+	// 回避
+	actionNum = static_cast<int>(ACTION_TYPE::DODGE);
+	timeActive = 0.5f;
+	timeActionActive = 0.1f;
+	timeEnd = 0.0f;
+	timeStop = 0.025f;
+	timeStopActive = 0.15f;
+	actionController_->SetAction(actionNum, timeActive, timeActionActive, timeEnd
+		, std::bind(&Player::Dodge, this)
+		, timeStop, timeStopActive);
+
+	// 攻撃処理
 	timeInput = SHOT_TIME_ACTIVE_INPUT;
 	timeEnd = SHOT_TIME_END;
 
@@ -211,6 +236,7 @@ void Player::InitPost(void)
 
 	if (jobType_ == JOB_TYPE::CANNON)
 	{
+		actionNum = static_cast<int>(ACTION_TYPE::ATTACK);
 		constexpr float SHOT_TIME_INCREMENT = 0.3f; // 行動間隔上昇値
 		constexpr float SHOT_TIME_INC_INPUT = 0.2f; // 行動間隔上昇値
 
@@ -223,38 +249,40 @@ void Player::InitPost(void)
 		timeActive = SHOT_TIME_ACTIVE;
 		timeActionActive = SHOT_TIME_ACTION_ACTIVE;
 
-		actionController_->SetAction(0, timeActive, timeActionActive, timeEnd
+		actionController_->SetAction(actionNum, timeActive, timeActionActive, timeEnd
 			, std::bind(&Player::ShotBullet, this)
 			, timeStop, timeStopActive, timeInput);
 
-
+		actionNum++;
 		timeActive += SHOT_TIME_INCREMENT;
 		timeInput += SHOT_TIME_INC_INPUT;
 		timeEnd += SHOT_TIME_INCREMENT;
 		timeStop = SHOT_TIME_STOP;
 		timeStopActive = SHOT_TIME_STOP_ACTIVE;
 
-		actionController_->SetAction(1, timeActive, timeActionActive, timeEnd
+		actionController_->SetAction(actionNum, timeActive, timeActionActive, timeEnd
 			, std::bind(&Player::ShotBullet, this)
 			, timeStop, timeStopActive, timeInput);
 
 
+		actionNum++;
 		timeActive += (SHOT_TIME_INCREMENT * 2);
 		timeInput = 0.0f;
 
-		actionController_->SetAction(2, timeActive, timeActionActive, timeEnd
+		actionController_->SetAction(actionNum, timeActive, timeActionActive, timeEnd
 			, std::bind(&Player::ShotBullet, this)
 			, timeStop, timeStopActive, timeInput);
 	}
 	else if (jobType_ == JOB_TYPE::RAPID_FIRE)
 	{
+		actionNum = static_cast<int>(ACTION_TYPE::ATTACK);
 		constexpr float SHOT_TIME_ACTIVE = 0.4f; // 有効時間
 		constexpr float SHOT_TIME_ACTION_ACTIVE = 0.325f;
 		timeEnd = 0.0f;
 		timeActive = SHOT_TIME_ACTIVE;
 		timeActionActive = SHOT_TIME_ACTION_ACTIVE;
 
-		actionController_->SetAction(0, timeActive, timeActionActive, timeEnd
+		actionController_->SetAction(actionNum, timeActive, timeActionActive, timeEnd
 			, std::bind(&Player::ShotBullet, this));
 	}
 	else
@@ -265,33 +293,13 @@ void Player::InitPost(void)
 		constexpr float SHOT_TIME_STOP = 0.5f; // 停止時間
 		constexpr float SHOT_TIME_STOP_ACTIVE = 0.25f; // 停止有効化時間
 
+		actionNum = static_cast<int>(ACTION_TYPE::ATTACK);
 		timeActive = SHOT_TIME_ACTIVE;
 		timeActionActive = SHOT_TIME_ACTION_ACTIVE;
 
-		actionController_->SetAction(0, timeActive, timeActionActive, timeEnd
+		actionController_->SetAction(actionNum, timeActive, timeActionActive, timeEnd
 			, std::bind(&Player::ShotBullet, this));
 	}
-
-	// ジャンプ
-	timeActive = 0.2f;
-	timeEnd = 0.0f;
-	timeActionActive = 0.1f;
-	timeEnd = SHOT_TIME_END;
-	timeStop = 0.035f;
-	timeStopActive = 0.175f;
-	actionController_->SetAction(3, timeActive, timeActionActive, timeEnd
-								 , std::bind(&Player::Jump, this)
-								 , timeStop, timeStopActive);
-
-	// 回避
-	timeActive = 0.5f;
-	timeActionActive = 0.1f;
-	timeEnd = 0.0f;
-	timeStop = 0.025f;
-	timeStopActive = 0.15f;
-	actionController_->SetAction(4, timeActive, timeActionActive, timeEnd
-								 , std::bind(&Player::Dodge, this)
-								 , timeStop, timeStopActive);
 }
 
 void Player::Draw(void)
@@ -590,7 +598,7 @@ void Player::DrawShotOrbit(void)
 	// 経過時間
 	float radius = ORBIT_RADIUS;
 
-	const VECTOR SHOT_LOCAL_POS = { 0.0f, 25.0f, 0.0f};
+	const VECTOR SHOT_LOCAL_POS = VGet(0.0f, 25.0f, 0.0f);
 	VECTOR viewPos = VAdd(transform_.pos, SHOT_LOCAL_POS);
 
 	VECTOR shotPow = UtilityMath::VECTOR_ZERO;
@@ -632,7 +640,7 @@ void Player::ProcessJump(void)
 		if (isHitTrg && !isJump_)
 		{
 			PlayAnimation(ANIM_TYPE::JUMP, false);
-			actionController_->Active(3);
+			actionController_->Active(static_cast<int>(ACTION_TYPE::JUMP));
 		}
 	}
 
@@ -675,7 +683,7 @@ void Player::ProcessDodge(void)
 			|| InputManager::GetInstance().IsPadBtnTrgDown(InputManager::JOYPAD_NO::PAD1, InputManager::JOYPAD_BTN::RB_LEFT))
 		{
 			PlayAnimation(ANIM_TYPE::DODGE, false);
-			actionController_->Active(4);
+			actionController_->Active(static_cast<int>(ACTION_TYPE::DODGE));
 		}
 	}
 	else
@@ -792,7 +800,7 @@ void Player::ProcShotNormal(void)
 		CreateBullet();
 
 		// コンボ時、登録した攻撃コンボアクションを呼び出す
-		int actionNum = ((IS_COMBO) ? curAttackNum_ : 0);
+		int actionNum = static_cast<int>(ACTION_TYPE::ATTACK) + ((IS_COMBO) ? curAttackNum_ : 0);
 		actionController_->Active(actionNum);
 
 		curAttackNum_++;
@@ -804,6 +812,25 @@ void Player::ProcShotNormal(void)
 }
 void Player::ProcShotSpecial(void)
 {
+	// 攻撃可能か否か
+	const bool canAttack = !actionController_->IsActiveAction();
+
+	if (canAttack)
+	{
+		shotType_ = SHOT_TYPE_SPECIAL[static_cast<int>(jobType_)];
+
+		CreateBullet();
+
+		// 登録した攻撃アクションを呼び出す
+		int actionNum = static_cast<int>(ACTION_TYPE::ATTACK_SPECIAL);
+		actionController_->Active(actionNum);
+
+		curAttackNum_++;
+
+		// 攻撃時に左右交互に弾を投げるアニメーション
+		ANIM_TYPE type = ((curAttackNum_ % 2 == 0) ? ANIM_TYPE::THROW_LEFT : ANIM_TYPE::THROW_RIGHT);
+		PlayAnimation(type, false);
+	}
 }
 
 void Player::UpdateBullets(void)
@@ -875,12 +902,15 @@ void Player::CreateBullet(void)
 
 	shotIndex_ = 0;
 
+	// 弾の再利用処理
 	for (auto& bullet : bullets_)
 	{
+		// 拡散弾では再利用生成を行わない
+		if (shotType_ == SHOT_TYPE::CLUSTER) { break; }
+
 		if (!bullet->IsAlive())
 		{
 			bullet->Init();
-
 			bullet->Create(transform_.pos, throwDir_, curAttackNum_, (curAttackNum_ >= (attackNumMax_ - 1)));
 			return;
 		}
@@ -901,12 +931,21 @@ void Player::CreateBullet(void)
 			bullet = std::make_unique<PBulletRecovery>();
 		break;
 
+		// 連射
 		case SHOT_TYPE::RAPID_FIRE:
 		{
 			bullet = std::make_unique<PBulletNormal>
 						(SCALE_RAPID, RADIUS_RAPID, POWER_RAPID
 						, SHOT_SPEED_XZ_RAPID, SHOT_SPEED_Y_RAPID, ALIVE_TIME_RAPID
 						, false);
+		}
+		break;
+
+		// 拡散弾
+		case SHOT_TYPE::CLUSTER:
+		{
+			CreateCluster();
+			return;
 		}
 		break;
 
@@ -920,6 +959,73 @@ void Player::CreateBullet(void)
 	bullet->Create(throwPos_, throwDir_, curAttackNum_, (curAttackNum_ >= (attackNumMax_ - 1)));
 
 	bullets_.emplace_back(std::move(bullet));
+}
+
+void Player::CreateCluster(void)
+{
+	// 円の分割数
+	constexpr float ANGLE = (360.0f / CLUSTER_SPLIT);
+
+	const float RANGE = 50;
+
+	float angle = 0;
+	int cnt = 0, listCnt = -1;
+	Quaternion rot = Quaternion::Identity();
+
+	VECTOR createPos = throwPos_;
+
+	// 弾を生成
+	std::unique_ptr<PBulletNormal> bullet;
+
+	// 中心の弾を生成
+	clusterBullets_.at(cnt) = _CreateClusterBullet(throwDir_);
+
+	createPos.y += 1.0f;
+
+	const int MAX = (CLUSTER_NUM_MAX / CLUSTER_SPLIT) + 1;
+	int spawnMax;
+
+	for (int i = 1; i < MAX; i++)
+	{
+		rot = Quaternion::Identity();
+
+		// 生成最大数
+		spawnMax = (CLUSTER_SPLIT * i);
+
+		for (int circle = 0; circle < spawnMax; circle++)
+		{
+			// 円状に一定の範囲間隔で生成位置を設定
+			angle = ((ANGLE / i) * (circle + 1));
+			rot = rot.Mult(Quaternion::AngleAxis(UtilityMath::Deg2RadF(angle), UtilityMath::AXIS_Y));
+
+			//VECTOR shotDir = rot.GetForward();
+			VECTOR shotDir = UtilityMath::VNormalize(VAdd(transform_.GetForward(), rot.GetForward()));
+			createPos = VScale(shotDir, RANGE * i);
+
+			// 円状に敵生成処理
+			// 中心の弾を生成
+			std::unique_ptr bullet = _CreateClusterBullet(throwDir_);
+
+			bullet->Load();
+			bullet->Init();
+			bullet->Create(createPos, shotDir);
+			clusterBullets_.at(++cnt) = std::move(bullet);
+
+			// 生成数が一定を超えたら終了
+			if (cnt > CLUSTER_NUM_MAX) { break; }
+		}
+	}
+
+}
+std::unique_ptr<PBulletNormal> Player::_CreateClusterBullet(const VECTOR& _throwDir)
+{
+	constexpr float SCALE = 0.25f;
+	constexpr float RADIUS = 10.0f;
+	constexpr int POWER = 2;
+	constexpr float SHOT_SPEED = 7.5f;
+	constexpr float ALIVE_TIME = 1.25f;
+	
+	return std::make_unique<PBulletNormal>(SCALE, RADIUS, POWER, SHOT_SPEED, 0.0f, ALIVE_TIME, false);
 }
 
 void Player::ShotBullet(void)

@@ -2,7 +2,10 @@
 #include "../CharaBase.h"
 #include <memory>
 #include <vector>
+#include <array>
 #include "../Weapon/Bullet/Player/PBulletBase.h"
+#include "../Weapon/Bullet/Player/PBulletNormal.h"
+class PBulletNormal;
 
 class PlayerBase : public CharaBase
 {
@@ -56,6 +59,13 @@ public:
 
 	static constexpr float TIME_INVINCIBLE = 1.0f;
 
+	// ŠgU’e‚Ì•ªŠ„”
+	static constexpr int CLUSTER_SPLIT = 8;
+
+	// ŠgU’e¶¬ˆÊ’u’†‰›‚Ì’e‚ğœ‚­Aˆê“x‚É¶¬‚³‚ê‚é”
+	static constexpr int CLUSTER_NUM_MAX = (3 * CLUSTER_SPLIT) - 1;
+
+
 	/// @brief ƒRƒ“ƒXƒgƒ‰ƒNƒ^
 	/// @param _playerNo ƒvƒŒƒCƒ„[”Ô†
 	/// @param _jobType ’e‚Ìí—Ş
@@ -89,7 +99,12 @@ public:
 	virtual void SetSoundData(VECTOR _pos, float _radius, bool _isLanging,bool _isMGFire, bool _isRoad);
 
 	/// @brief ’e‚ğæ“¾
-	const std::vector<std::unique_ptr<PBulletBase>>& GetBullets(void)const { return bullets_; };
+	const std::vector<std::unique_ptr<PBulletBase>>&
+		GetBullets(void)const { return bullets_; };
+
+	/// @brief ŠgU’e‚ğæ“¾
+	std::array<std::unique_ptr<PBulletNormal>, (CLUSTER_NUM_MAX + 1)>&
+		GetBulletsCluster(void) { return clusterBullets_; };
 
 
 protected:
@@ -108,8 +123,14 @@ protected:
 
 	VECTOR bodyPos_;
 
-	std::vector<std::unique_ptr<PBulletBase>> bullets_;
-	
+	// ’Êí’e
+	std::vector<std::unique_ptr<PBulletBase>>
+		bullets_;
+
+	// ŠgU’e
+	std::array<std::unique_ptr<PBulletNormal>, (CLUSTER_NUM_MAX + 1)>
+		clusterBullets_;
+
 	int hp_;
 
 	JOB_TYPE jobType_;
