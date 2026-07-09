@@ -15,6 +15,7 @@ WeaponMP::WeaponMP(void)
 	,bulletDir_({ 0.0f,0.0f,1.0f })
 	,attackCount_(0)
 	, outCount_(0)
+
 {
 	
 }
