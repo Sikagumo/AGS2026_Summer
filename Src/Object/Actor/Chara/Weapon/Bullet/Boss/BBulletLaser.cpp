@@ -42,6 +42,7 @@ void BBulletLaser::InitCollider(void)
 
 
 	CollisionController::GetInstance().RegisterActor(this);
+	CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::LASER, false);
 }
 
 void BBulletLaser::InitAnimation(void)
@@ -54,8 +55,16 @@ void BBulletLaser::InitPost(void)
 
 void BBulletLaser::UpdateProcess(void)
 {
-	transform_.quaRot = weaponTrans_.quaRot;
 
+	transform_.quaRot = weaponTrans_.quaRot;
+	if (isAttack_)
+	{
+		CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::LASER, true);
+	}
+	else
+	{
+		CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::LASER, false);
+	}
 	
 
 }
@@ -66,18 +75,5 @@ void BBulletLaser::UpdateProcessPost(void)
 
 void BBulletLaser::DrawPre(void)
 {
-
-	for (auto& [id, colliderVector] : ownColliders_)
-	{
-		for (auto* collider : colliderVector)
-		{
-			if (collider == nullptr)
-			{
-				continue;
-			}
-
-			collider->Draw();
-		}
-	}
 
 }

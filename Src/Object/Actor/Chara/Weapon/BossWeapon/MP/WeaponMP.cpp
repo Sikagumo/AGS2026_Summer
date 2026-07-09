@@ -209,7 +209,6 @@ void WeaponMP::CreateBullets(void)
 {
 	std::shared_ptr<BBulletBase> bullet = GetValidBullet();
 
-	// ★ 1. まず現在の muzzleCount_ (0, 1, 2) を使って位置を決定する
 	VECTOR localRotPos = transform_.quaRot.PosAxis(muzzlePos_[muzzleCount_]);
 	VECTOR bulletpos = VAdd(transform_.pos, localRotPos);
 
@@ -218,7 +217,6 @@ void WeaponMP::CreateBullets(void)
 	bullet->SetTransform(transform_);
 	bullet->SetPlayerPos(bone_.playerPos);
 
-	// ★ 2. 現在の muzzleCount_ (0, 1, 2) を使って高さを計算する
 	if (isLR_)
 	{
 		float maxPos = MIN_FALL_POS + (UP_FALL_POS * (muzzleCount_ * 2));
@@ -230,9 +228,9 @@ void WeaponMP::CreateBullets(void)
 		bullet->SetUpMaxPos_(maxPos);
 	}
 
-	// ★ 3. すべての処理が終わった後に、次の発射のためにカウントを進める
 	muzzleCount_++;
-	if (muzzleCount_ > MUZZLE_MAX_COUNT / 2 - 1) { // 2 を超えたら 0 に戻す
+	if (muzzleCount_ > MUZZLE_MAX_COUNT / 2 - 1)
+	{ 
 		muzzleCount_ = 0;
 	}
 }

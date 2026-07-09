@@ -98,7 +98,8 @@ void Application::Init(void)
 	SceneManager::CreateInstance();
 
 	EffectManager::CreateInstance();
-	
+	EffectManager::GetInstance().Initialize();
+
 	
 
 

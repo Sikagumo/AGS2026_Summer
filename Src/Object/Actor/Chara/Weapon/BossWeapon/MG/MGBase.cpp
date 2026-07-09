@@ -152,8 +152,9 @@ void MGBase::UpdateAttack(void)
     effectRot.y = UtilityMath::Rad2DegF(effectRot.y);
     effectRot.z = UtilityMath::Rad2DegF(effectRot.z);
     EffectManager::GetInstance().UpdateRot(EffectManager::EFFECT::EFFECT_MG, this, effectRot);
+    bool isPlay = EffectManager::GetInstance().IsPlaying(EffectManager::EFFECT::EFFECT_MG, this);
 
-    if (EffectManager::GetInstance().IsPlaying(EffectManager::EFFECT::EFFECT_MG) == false)
+    if (!isPlay)
     {
         EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_MG, effectPos_, effectRot, { 10.0f,10.0f,10.0f }, 1.0f, this);
     }

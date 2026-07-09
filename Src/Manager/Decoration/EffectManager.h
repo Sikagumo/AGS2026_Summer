@@ -16,6 +16,7 @@ public:
 		EFFECT_MG,
 		EFFECT_BOSS_HIT,
 		EFFECT_LASER,
+		EFFECT_MISSILE,
 
 	};
 	/// @brief エフェクトのリソースデータ構造体
@@ -48,12 +49,6 @@ public:
 	/// @param void 
 	void Initialize(void);
 
-	/// @brief Effectリソースの登録
-	/// @param effect 識別用ID
-	/// @param _data DxLibエフェクトハンドル
-	void Add(const EFFECT _effect, const int _data);
-
-
 	/// @brief 3Dエフェクトの再生
 	/// @param _effect 再生するエフェクトのID
 	/// @param _pos 再生させる座標
@@ -67,7 +62,7 @@ public:
 	/// @brief エフェクトが再生中か確認
 	/// @param _effect 対象のエフェクトID
 	/// @return 再生中ならtrue
-	bool IsPlaying(EFFECT _effect);
+	bool IsPlaying(EFFECT _effect, void* _owner, int _tag = 1);
 
 	/// @brief インスタンスの破棄
 	/// @param void 
@@ -92,7 +87,7 @@ public:
 	void UpdateScl(const EFFECT _effect, const void* _owner, const VECTOR _scl, int _tag = 1);
 
 	/// @brief 指定したエフェクトIDの再生をすべて強制停止する
-	void Stop(EFFECT _effect);
+	void Stop(EFFECT _effect, void* _owner, int _tag = 1);
 
 	/// @brief 全エフェクトの時間更新処理
 	void Update(void);
@@ -101,6 +96,11 @@ public:
 	void Draw(void);
 
 private:
+
+	static constexpr VECTOR INIT_POS = { 0.0f,0.0f,0.0f };
+	static constexpr VECTOR INIT_ROT = { 0.0f,0.0f,0.0f };
+	static constexpr VECTOR INIT_SCL = { 1.0f,1.0f,1.0f };
+	static constexpr float INIT_SPEED = 1.0f;
 
 	static EffectManager* instance_; // シングルトンインスタンス
 

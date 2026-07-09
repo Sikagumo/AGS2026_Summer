@@ -37,50 +37,52 @@ void EffectManager::Initialize(void)
 
     EFFECT_DATA waveData;
     waveData.Data = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::EFFECT_WAVE);
-    waveData.pos = VGet(0.0f, 0.0f, 0.0f);
-    waveData.rot = VGet(0.0f, 0.0f, 0.0f);
-    waveData.scl = VGet(1.0f, 1.0f, 1.0f);
-    waveData.speed = 1.0f;
+    waveData.pos = INIT_POS;
+    waveData.rot = INIT_ROT;
+    waveData.scl = INIT_SCL;
+    waveData.speed = INIT_SPEED;
     effect_[EFFECT::EFFECT_WAVE] = waveData;
 
     EFFECT_DATA landingData;
     landingData.Data = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::EFFECT_LANDING);
-    landingData.pos = VGet(0.0f, 0.0f, 0.0f);
-    landingData.rot = VGet(0.0f, 0.0f, 0.0f);
-    landingData.scl = VGet(1.0f, 1.0f, 1.0f);
-    landingData.speed = 1.0f;
+    landingData.pos = INIT_POS;
+    landingData.rot = INIT_ROT;
+    landingData.scl = INIT_SCL;
+    landingData.speed = INIT_SPEED;
     effect_[EFFECT::EFFECT_LANDING] = landingData;
 
     EFFECT_DATA mgData;
     mgData.Data = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::EFFECT_MG);
-    mgData.pos = VGet(0.0f, 0.0f, 0.0f);
-    mgData.rot = VGet(0.0f, 0.0f, 0.0f);
-    mgData.scl = VGet(1.0f, 1.0f, 1.0f);
-    mgData.speed = 1.0f;
+    mgData.pos = INIT_POS;
+    mgData.rot = INIT_ROT;
+    mgData.scl = INIT_SCL;
+    mgData.speed = INIT_SPEED;
     effect_[EFFECT::EFFECT_MG] = mgData;
 
     EFFECT_DATA hitData;
     hitData.Data = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::EFFECT_BOSS_HIT);
-    hitData.pos = VGet(0.0f, 0.0f, 0.0f);
-    hitData.rot = VGet(0.0f, 0.0f, 0.0f);
-    hitData.scl = VGet(1.0f, 1.0f, 1.0f);
-    hitData.speed = 1.0f;
+    hitData.pos = INIT_POS;
+    hitData.rot = INIT_ROT;
+    hitData.scl = INIT_SCL;
+    hitData.speed = INIT_SPEED;
     effect_[EFFECT::EFFECT_BOSS_HIT] = hitData;
 
     EFFECT_DATA laserData;
     laserData.Data = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::EFFECT_LASER);
-    laserData.pos = VGet(0.0f, 0.0f, 0.0f);
-    laserData.rot = VGet(0.0f, 0.0f, 0.0f);
-    laserData.scl = VGet(1.0f, 1.0f, 1.0f);
-    laserData.speed = 1.0f;
+    laserData.pos = INIT_POS;
+    laserData.rot = INIT_ROT;
+    laserData.scl = INIT_SCL;
+    laserData.speed = INIT_SPEED;
     effect_[EFFECT::EFFECT_LASER] = laserData;
 
+    EFFECT_DATA missileData;
+    missileData.Data = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::EFFECT_MISSILE);
+    missileData.pos = INIT_POS;
+    missileData.rot = INIT_ROT;
+    missileData.scl = INIT_SCL;
+    missileData.speed = INIT_SPEED;
+    effect_[EFFECT::EFFECT_MISSILE] = missileData;
 
-}
-
-void EffectManager::Add(const EFFECT _effect, const int _data)
-{
-    
 }
 
 void EffectManager::Play(const EFFECT _effect, const VECTOR _pos, const VECTOR _rot, const VECTOR _scl, float _speed, const void* _owner, int _tag)
@@ -118,28 +120,34 @@ void EffectManager::Play(const EFFECT _effect, const VECTOR _pos, const VECTOR _
     }
 }
 
-bool EffectManager::IsPlaying(EFFECT _effect)
+bool EffectManager::IsPlaying(EFFECT _effect, void* _owner, int _tag)
 {
     for (const auto& active : playingList_)
     {
-        if (active.effectId == _effect)
+        if (active.owner == _owner && active.tag == _tag)
         {
-            if (IsEffekseer3DEffectPlaying(active.playHandle) == 0)
+            if (active.effectId == _effect)
             {
-                return true;
+                if (IsEffekseer3DEffectPlaying(active.playHandle) == 0)
+                {
+                    return true;
+                }
             }
         }
     }
     return false;
 }
 
-void EffectManager::Stop(EFFECT _effect)
+void EffectManager::Stop(EFFECT _effect, void* _owner, int _tag)
 {
     for (const auto& active : playingList_)
     {
-        if (active.effectId == _effect)
+        if (active.owner == _owner && active.tag == _tag)
         {
-            StopEffekseer3DEffect(active.playHandle);
+            if (active.effectId == _effect)
+            {
+                StopEffekseer3DEffect(active.playHandle);
+            }
         }
     }
 }

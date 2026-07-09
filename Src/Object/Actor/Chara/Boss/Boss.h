@@ -213,16 +213,19 @@ private:
 	bool isLanging_;				//着地の際の音を鳴らすかのフラグ
 	bool isMGFire_;					//MGの発射音を鳴らすかのフラグ
 	bool isRoadFire_;				//走行音を鳴らすかのフラグ
-	VECTOR currentWaveScl;
-	float laserAttackRot_;
-	float laserShotHp_;
-
+	
 	int test;
 
 	//攻撃関連
 	int jumpCount_;
 	int attackCount_;
 	int attackInterval_;
+	VECTOR currentWaveScl;
+	float laserAttackRot_;
+	float laserShotHp_;
+	float laserRotSpeed_;
+	ATTACK_TYPE lastAttackType_;
+	ATTACK_TYPE attackSelect_;
 
 	//攻撃対象情報
 	VECTOR player1Pos_;

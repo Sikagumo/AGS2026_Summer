@@ -71,6 +71,7 @@ public:
 		EFFECT_BOSS_HIT,
 		EFFECT_MG,
 		EFFECT_LASER,
+		EFFECT_MISSILE,
 		/* ‰f‘œ */
 
 		/* BGM */

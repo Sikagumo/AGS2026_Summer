@@ -34,7 +34,7 @@ void BBulletCannon::InitTransform(void)
 void BBulletCannon::InitCollider(void)
 {
 	ColliderSphere* colSphere = new ColliderSphere(
-		ColliderBase::TAG::MG_BULLET, &transform_, { 0.0f,0.0f,0.0f }, radius_);
+		ColliderBase::TAG::CANNON_BULLET, &transform_, { 0.0f,0.0f,0.0f }, radius_);
 	ownColliders_[static_cast<int>(ColliderBase::TAG::MG_BULLET)].push_back(colSphere);
 
 

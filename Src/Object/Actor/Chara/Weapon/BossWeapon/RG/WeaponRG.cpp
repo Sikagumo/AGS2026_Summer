@@ -160,6 +160,7 @@ void WeaponRG::ChangeStateIdle(void)
 	ChargeCount_ = 0;
 	localUpRot_ = 0.0f;
 	bulletLaser_->SetIsAttack(false);
+	EffectManager::GetInstance().Stop(EffectManager::EFFECT::EFFECT_LASER, this);
 }
 
 void WeaponRG::ChangePreparation(void)
@@ -173,7 +174,7 @@ void WeaponRG::ChangeStateAttack(void)
 {
 	stateUpdate_ = std::bind(&WeaponRG::UpdateAttack, this);
 	bulletLaser_->SetIsAttack(true);
-	EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_LASER, { 0.0f,0.0f,0.0f }, { 0.0f,0.0f,0.0f }, { 300.0f,300.0f,300.0f }, 0.2f, this);
+	EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_LASER, { 0.0f,0.0f,0.0f }, { 0.0f,0.0f,0.0f }, { 300.0f,300.0f,300.0f }, 1.0f, this);
 	
 }
 
@@ -234,6 +235,7 @@ void WeaponRG::UpdateAttack(void)
 	EffectManager::GetInstance().UpdateRot(EffectManager::EFFECT::EFFECT_LASER, this, effectRot);
 
 	bulletLaser_->CreateBullets(localPos, transform_.quaRot.GetForward(), 0.0f);
+	bulletLaser_->SetIsAttack(true);
 	bulletLaser_->SetTransform(transform_);
 }
 

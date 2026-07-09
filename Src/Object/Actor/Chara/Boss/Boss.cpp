@@ -25,7 +25,7 @@
 
 Boss::Boss(void) :
 	               
-	hp_(MAX_HP/2),
+	hp_(MAX_HP),
 	boneName_(BONE_NAME::WEAPON_JOINT_MGL_L), 
 	jumpDir_({ 0.0f, 0.0f, 0.0f }),          
 	speed_(MOVE_SPEED_INIT),
@@ -47,8 +47,10 @@ Boss::Boss(void) :
 	isLanging_(false),
 	isMGFire_(false),
 	isRoadFire_(false),
-	laserShotHp_(MAX_HP/2),
+	laserShotHp_(MAX_HP),
 	laserAttackRot_(0.0f),
+	laserRotSpeed_(2.0f),
+	lastAttackType_ (ATTACK_TYPE::MAX),
 
 
 	CharaBase()
@@ -330,6 +332,10 @@ void Boss::ChangeStateAttack(void)
 {
 	stateUpdate_ = std::bind(&Boss::UpdateAttack, this);
 	attackCount_ = 0;
+	if (laserShotHp_ == MAX_HP)
+	{
+		attackCount_ = 580;
+	}
 	animation_->Play(static_cast<int>(ANIM_TYPE::ATTACK));
 	
 }
@@ -399,6 +405,10 @@ void Boss::ChangeStateLaserAttack(void)
 	weaponRG_->ChangeState(WeaponRG::STATE::PREPARATION);
 
 	animation_->Play(static_cast<int>(ANIM_TYPE::JUMPBEFORE), false);
+	if (laserShotHp_ != MAX_HP)
+	{
+		laserRotSpeed_ = 0.5;
+	}
 }
 
 void Boss::ChangeStateEnd(void)
@@ -480,7 +490,21 @@ void Boss::UpdateIdle(void)
 	if (hp_ <= laserShotHp_ && attackCount_ >= attackInterval_)
 	{
 		ChangeState(STATE::LASER);
-		//laserShotHp_ = MAX_HP * 0.2;
+		if (laserShotHp_== MAX_HP)
+		{
+			laserShotHp_ = MAX_HP/2;
+			
+		}
+		else if (laserShotHp_ == (MAX_HP / 2))
+		{
+			laserShotHp_ = MAX_HP * 0.2;
+			
+		}
+		else
+		{
+			laserShotHp_ = -1000;
+		}
+		
 	}
 	else if (attackCount_ >= attackInterval_)
 	{
@@ -492,10 +516,21 @@ void Boss::UpdateAttack(void)
 {
 	LookPlayer();
 	transformBody_.pos = MV1GetFramePosition(transform_.modelId, JOINT_FEET_BODY);
-	int randomAttack = static_cast<int>(UtilityMath::RandRangeF(0.0f, static_cast<float>(ATTACK_TYPE::MAX)));
-	ATTACK_TYPE attackSelect = /**/ATTACK_TYPE::MG;//static_cast<ATTACK_TYPE>(randomAttack);
 
-	switch (attackSelect)
+	if (static_cast<int>(ATTACK_TYPE::MAX) > 1)
+	{
+		do
+		{
+			int randomAttack = static_cast<int>(UtilityMath::RandRangeF(0.0f, static_cast<float>(ATTACK_TYPE::MAX)));
+			 attackSelect_ = static_cast<ATTACK_TYPE>(randomAttack);
+		} 
+		while (attackSelect_ == lastAttackType_); // ‘O‰ñ‚Æ“¯‚¶UŒ‚‚È‚ç‚à‚¤ˆê“xU‚è’¼‚·I
+	}
+
+	// ¡‰ñ‘I‚Î‚ê‚½UŒ‚‚ðu‘O‰ñ‚ÌUŒ‚v‚Æ‚µ‚Ä•Û‘¶‚µ‚Ä‚¨‚­
+	lastAttackType_ = attackSelect_;
+
+	switch (attackSelect_)
 	{
 	case ATTACK_TYPE::JUMP:
 		ChangeState(STATE::JUMPBEFORE);
@@ -518,9 +553,9 @@ void Boss::UpdateAttack(void)
 		ChangeState(STATE::IDLE);
 		break;
 	case ATTACK_TYPE::MISSILE:
-		weaponMPL_->ChangeState(WeaponCannon::STATE::ATTACK);
+		weaponMPL_->ChangeState(WeaponMP::STATE::ATTACK);
 		weaponMPL_->IsLR(true);
-		weaponMPR_->ChangeState(WeaponCannon::STATE::ATTACK);
+		weaponMPR_->ChangeState(WeaponMP::STATE::ATTACK);
 		weaponMPR_->IsLR(false);
 		ChangeState(STATE::IDLE);
 		break;
@@ -663,14 +698,15 @@ void Boss::UpdateStateLaserAttack(void)
 	transformBody_.pos = MV1GetFramePosition(transform_.modelId, JOINT_FEET_BODY);
 	if (weaponRG_->GetIsAttack() == true)
 	{
-		laserAttackRot_ += 0.5f;
+		laserAttackRot_ += laserRotSpeed_;
 		if (laserAttackRot_ >= 360.0f)
 		{
 			laserAttackRot_ = 0.0f;
 			weaponRG_->ChangeState(WeaponRG::STATE::IDLE);
+			
 			ChangeState(STATE::IDLE);
 		}
-		transformBody_.quaRot = Quaternion::Mult(transformBody_.quaRot, Quaternion::AngleAxis(UtilityMath::Deg2RadF(0.5f), UtilityMath::AXIS_Y));
+		transformBody_.quaRot = Quaternion::Mult(transformBody_.quaRot, Quaternion::AngleAxis(UtilityMath::Deg2RadF(laserRotSpeed_), UtilityMath::AXIS_Y));
 	}
 	
 }

@@ -119,7 +119,7 @@ void ResourceManager::Initialize(void)
 	_SetResource(LOAD_TYPE::EFFECT, SRC::EFFECT_MG, PATH_EFFECT + "BossAttack/MGRotation.efkefc");
 	_SetResource(LOAD_TYPE::EFFECT, SRC::EFFECT_BOSS_HIT, PATH_EFFECT + "BossAttack/Hit.efkefc");
 	_SetResource(LOAD_TYPE::EFFECT, SRC::EFFECT_LASER, PATH_EFFECT + "BossAttack/Laser.efkefc");
-
+	_SetResource(LOAD_TYPE::EFFECT, SRC::EFFECT_MISSILE, PATH_EFFECT + "BossAttack/MissileExplosion.efkefc");
 
 
 	/* ƒ‚ƒfƒ‹ */

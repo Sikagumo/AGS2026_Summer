@@ -16,19 +16,19 @@ DamageController::DamageController():
 	weaponRGDamage_(0),
 	weaponCannonLDamage_(0),
 	weaponCannonRDamage_(0),
-	playerHp_(0)
+	playerHp_(0),
+	DamageData_(0)
 
 {
 
 	cannon_.type = BOSS_WEPO_TYPE::CANNON;
-
+	cannon_.attack = 0.2;
 	mg_.type = BOSS_WEPO_TYPE::MG;
 	mg_.attack = 0.01f;
-
 	mp_.type = BOSS_WEPO_TYPE::MP;
-	
+	mp_.attack = 0.7f;
 	rg_.type = BOSS_WEPO_TYPE::RG;
-
+	rg_.attack = 0.2;
 	pressWave_.type = BOSS_WEPO_TYPE::PRESSWAVE;
 	pressWave_.attack = 0.1f;
 	rode_.type = BOSS_WEPO_TYPE::RODE;
@@ -107,22 +107,49 @@ void DamageController::Update()
 	{
 		// HP割合ダメージ
 		const float RATE_DAMAGE = (playerHp_ * pressWave_.attack);
-		//playerDamage_ = static_cast<int>(RATE_DAMAGE);
+		playerDamage_ = static_cast<int>(RATE_DAMAGE);
+		DamageData_ = playerDamage_;
 	}
-	
-	if (CollisionController::GetInstance().IsTagCollidingWithTag(ColliderBase::TAG::MG_BULLET, ColliderBase::TAG::PLAYER))
+	else if (CollisionController::GetInstance().IsTagCollidingWithTag(ColliderBase::TAG::MG_BULLET, ColliderBase::TAG::PLAYER))
 	{
 		// HP割合ダメージ
 		const float RATE_DAMAGE = (playerHp_ * mg_.attack);
-		//playerDamage_ = static_cast<int>(RATE_DAMAGE);
+		playerDamage_ = static_cast<int>(RATE_DAMAGE);
 		isInvincible_ = false;
+		DamageData_ = playerDamage_;
 	}
-
-	if (CollisionController::GetInstance().IsTagCollidingWithTag(ColliderBase::TAG::ROAD_ATTACK, ColliderBase::TAG::PLAYER))
+	else if (CollisionController::GetInstance().IsTagCollidingWithTag(ColliderBase::TAG::ROAD_ATTACK, ColliderBase::TAG::PLAYER))
 	{
 		// HP割合ダメージ
 		const float RATE_DAMAGE = (playerHp_ * rode_.attack);
-		//playerDamage_ = static_cast<int>(RATE_DAMAGE);
+		playerDamage_ = static_cast<int>(RATE_DAMAGE);
+		DamageData_ = playerDamage_;
 	}
-	
+	else if (CollisionController::GetInstance().IsTagCollidingWithTag(ColliderBase::TAG::MISSILE_ATTACK, ColliderBase::TAG::PLAYER))
+	{
+		// HP割合ダメージ
+		const float RATE_DAMAGE = (playerHp_ * mp_.attack);
+		playerDamage_ = static_cast<int>(RATE_DAMAGE);
+		DamageData_ = playerDamage_;
+	}
+	else if (CollisionController::GetInstance().IsTagCollidingWithTag(ColliderBase::TAG::LASER, ColliderBase::TAG::PLAYER))
+	{
+		// HP割合ダメージ
+		const float RATE_DAMAGE = (playerHp_ * rg_.attack);
+		playerDamage_ = static_cast<int>(RATE_DAMAGE);
+		isInvincible_ = false;
+		DamageData_ = playerDamage_;
+	}
+	else if (CollisionController::GetInstance().IsTagCollidingWithTag(ColliderBase::TAG::CANNON_BULLET, ColliderBase::TAG::PLAYER))
+	{
+		// HP割合ダメージ
+		const float RATE_DAMAGE = (playerHp_ * cannon_.attack);
+		playerDamage_ = static_cast<int>(RATE_DAMAGE);
+		DamageData_ = playerDamage_;
+	}
+}
+
+void DamageController::DebugDraw(void)
+{
+	DrawFormatString(10, 150, 0xffffff, "PlayerDamage_:%d", DamageData_);
 }
