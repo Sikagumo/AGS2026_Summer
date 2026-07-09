@@ -1,12 +1,5 @@
 #pragma once
 
-enum class SHADER_TYPE
-{
-    NORMAL,
-    WAVE,
-    NORMAL_WAVE,
-};
-
 struct alignas(16) IntegratedGpuBuffer
 {
     // ライティング

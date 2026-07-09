@@ -44,7 +44,7 @@ void ShaderController::Initialize(void)
     shaderRenderer_->Initialize();
 }
 
-void ShaderController::CreateShaderDraw(SHADER_TYPE _shaderType, int _x, int _y, int _textureHandle,
+void ShaderController::CreateShaderDraw(ShaderLibrary::SHADER_TYPE _shaderType, int _x, int _y, int _textureHandle,
     float _scale, const ShaderMaterial& _material, int _normalMapHandle) const
 {
     // 描画リクエストのベースを作る

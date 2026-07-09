@@ -4,12 +4,19 @@
 #include <unordered_map>
 
 #include "ShaderBase.h"
-#include "ShaderParameters.h"
 #include "ShaderPixel/ShaderPixel.h"
 
 class ShaderLibrary
 {
 public:
+
+	enum class SHADER_TYPE
+	{
+		NORMAL,
+		WAVE,
+		NORMAL_WAVE,
+	};
+
 	/// @brief コンストラクタ
 	ShaderLibrary(void);
 

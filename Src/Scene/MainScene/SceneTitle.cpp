@@ -298,15 +298,15 @@ void SceneTitle::Draw(void)
     auto& shaderCtrl = ShaderController::GetInstance();
 
     // ãSÉñìáÇÃï`âÊ
-    shaderCtrl.CreateShaderDraw(SHADER_TYPE::NORMAL, Application::SCREEN_HALF_X - 100, 30,
+    shaderCtrl.CreateShaderDraw(ShaderLibrary::SHADER_TYPE::NORMAL, Application::SCREEN_HALF_X - 100, 30,
         oniSimaHandle_, ONISIMA_SCALE, oniSimaMaterial_, oniSimaNormalHandle_);
 
     // îgÇÃï`âÊ
-    shaderCtrl.CreateShaderDraw(SHADER_TYPE::NORMAL_WAVE,
+    shaderCtrl.CreateShaderDraw(ShaderLibrary::SHADER_TYPE::NORMAL_WAVE,
         0, 20, waveHandle_, WAVE_SCALE, waveMaterial_, waveNormalHandle_);
 
     // ìçÇÃï`âÊ
-    shaderCtrl.CreateShaderDraw(SHADER_TYPE::NORMAL, -20, static_cast<int>(Application::SCREEN_HALF_Y + offsetY),
+    shaderCtrl.CreateShaderDraw(ShaderLibrary::SHADER_TYPE::NORMAL, -20, static_cast<int>(Application::SCREEN_HALF_Y + offsetY),
         peachHandle_, PEACH_SCALE, peachMaterial_, peachNormalHandle_);
 
     const int IMAGET_TITLE_Y = Application::SCREEN_SIZE_Y / 4;

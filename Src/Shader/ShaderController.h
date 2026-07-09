@@ -32,7 +32,7 @@ public:
 	/// @param _scale 拡大率
 	/// @param _material 使用するマテリアル
 	/// @param _normalMapHandle ノーマルマップ
-	void CreateShaderDraw(SHADER_TYPE _shaderType, int _x, int _y, int _textureHandle,
+	void CreateShaderDraw(ShaderLibrary::SHADER_TYPE _shaderType, int _x, int _y, int _textureHandle,
 		float _scale, const ShaderMaterial& _material, int _normalMapHandle = -1) const;
 
 	/// @brief 解放処理 
