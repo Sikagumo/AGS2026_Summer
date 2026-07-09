@@ -17,6 +17,7 @@ public:
 		IDLE,
 		ATTACK,
 		END,
+		PREPARATION,
 	};
 
 	//ƒ{[ƒ“î•ñ‚ÌŽó‚¯Žæ‚è—p

@@ -36,6 +36,7 @@ public:
 		ROAD,
 		CANNON,
 		MISSILE,
+		LASER,
 		MAX,
 	};
 
@@ -140,6 +141,9 @@ private:
 	//音
 	static constexpr float SOUND_RADIUS = 2000.0f;
 
+	//MAXHP
+	static constexpr int MAX_HP = 2000;
+
 
 	//ジャンプ力
 	static constexpr float POW_JUMP_INIT = 3000.0f;
@@ -209,14 +213,19 @@ private:
 	bool isLanging_;				//着地の際の音を鳴らすかのフラグ
 	bool isMGFire_;					//MGの発射音を鳴らすかのフラグ
 	bool isRoadFire_;				//走行音を鳴らすかのフラグ
-	VECTOR currentWaveScl;
-
+	
 	int test;
 
 	//攻撃関連
 	int jumpCount_;
 	int attackCount_;
 	int attackInterval_;
+	VECTOR currentWaveScl;
+	float laserAttackRot_;
+	float laserShotHp_;
+	float laserRotSpeed_;
+	ATTACK_TYPE lastAttackType_;
+	ATTACK_TYPE attackSelect_;
 
 	//攻撃対象情報
 	VECTOR player1Pos_;
@@ -257,6 +266,7 @@ private:
 	void ChangeStateJump(void);
 	void ChangeStateJumpBefore(void);
 	void ChangeStateRoadAttack(void);
+	void ChangeStateLaserAttack(void);
 	void ChangeStateEnd(void);
 	// 更新系
 	// 状態管理(更新ステップ)
@@ -266,6 +276,7 @@ private:
 	void UpdateJump(void);
 	void UpdateJumpBefore(void);
 	void UpdateRoadAttack(void);
+	void UpdateStateLaserAttack(void);
 	void UpdateEnd(void);
 
 	//機能関数

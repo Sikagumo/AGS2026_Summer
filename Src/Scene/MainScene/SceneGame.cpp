@@ -87,8 +87,7 @@ void SceneGame::Initialize(void)
 	camera->ChangeMode(Camera::MODE::FOLLOW);
 	camera->SetFollow(&players_.at(0)->GetTransform());
 
-	EffectManager::GetInstance().Initialize();
-
+	
 	for (auto& player : players_)
 	{
 		player->Init();
@@ -118,17 +117,19 @@ void SceneGame::Update(void)
 
 	SceneManager::GetInstance().GetCamera()->Update();
 
+	damageController_->Update();
+	DamageProcess();
+
 	boss_->Update();
 	stage_->Update();
-	damageController_->Update();
-
+	
 	for (auto& player : players_)
 	{
 		player->Update();
 		player->SetSoundData(boss_->GetBossPos(), boss_->GetSoundRadius(), boss_->GetLandingFlag(), boss_->GetMGFireFlag(), boss_->GetRoadFlag());
 	}
 
-	DamageProcess();
+	
 
 	
 
@@ -344,5 +345,6 @@ float SceneGame::CalcHpBarScale(const VECTOR& _targetPos)
 void SceneGame::DrawDebug(void)
 {
 	SceneManager::GetInstance().GetCamera()->DrawDebug();
+	damageController_->DebugDraw();
 }
 

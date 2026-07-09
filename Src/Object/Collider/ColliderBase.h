@@ -45,6 +45,8 @@ public:
 		ROAD_ATTACK,	//体当たり
 		MISSILE_ATTACK,	//ミサイル攻撃
 		MISSILE_PUSH,	//ミサイル吹き飛ばして
+		LASER,			//レーザー攻撃
+		CANNON_BULLET,	//キャノン弾
 	};
 
 	/// @brief コンストラクタ

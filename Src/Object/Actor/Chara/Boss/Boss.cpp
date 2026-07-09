@@ -25,7 +25,7 @@
 
 Boss::Boss(void) :
 	               
-	hp_(1000),
+	hp_(MAX_HP),
 	boneName_(BONE_NAME::WEAPON_JOINT_MGL_L), 
 	jumpDir_({ 0.0f, 0.0f, 0.0f }),          
 	speed_(MOVE_SPEED_INIT),
@@ -47,6 +47,11 @@ Boss::Boss(void) :
 	isLanging_(false),
 	isMGFire_(false),
 	isRoadFire_(false),
+	laserShotHp_(MAX_HP),
+	laserAttackRot_(0.0f),
+	laserRotSpeed_(2.0f),
+	lastAttackType_ (ATTACK_TYPE::MAX),
+
 
 	CharaBase()
 {
@@ -269,7 +274,7 @@ void Boss::InitAnimation(void)
 	}
 	animation_->Play(static_cast<int>(ANIM_TYPE::DIR));
 
-	//EffectManager::GetInstance().Add(EffectManager::EFFECT::EFFECT_WAVE, ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::EFFECT_WAVE));
+	
 }
 
 
@@ -287,12 +292,12 @@ void Boss::InitPost(void)
 	
 	wave_->Init();
 
-	stateChanges_.emplace(static_cast<int>(STATE::IDLE),
-		std::bind(&Boss::ChangeStateIdle, this));
+	stateChanges_.emplace(static_cast<int>(STATE::IDLE),std::bind(&Boss::ChangeStateIdle, this));
 	stateChanges_.emplace(static_cast<int>(STATE::ATTACK), std::bind(&Boss::ChangeStateAttack, this));
 	stateChanges_.emplace(static_cast<int>(STATE::JUMP), std::bind(&Boss::ChangeStateJump, this));
 	stateChanges_.emplace(static_cast<int>(STATE::JUMPBEFORE), std::bind(&Boss::ChangeStateJumpBefore, this));
 	stateChanges_.emplace(static_cast<int>(STATE::ROADATTACK), std::bind(&Boss::ChangeStateRoadAttack, this));
+	stateChanges_.emplace(static_cast<int>(STATE::LASER), std::bind(&Boss::ChangeStateLaserAttack, this));
 	stateChanges_.emplace(static_cast<int>(STATE::END), std::bind(&Boss::ChangeStateEnd, this));
 	ChangeState(STATE::IDLE);
 	
@@ -327,6 +332,10 @@ void Boss::ChangeStateAttack(void)
 {
 	stateUpdate_ = std::bind(&Boss::UpdateAttack, this);
 	attackCount_ = 0;
+	if (laserShotHp_ == MAX_HP)
+	{
+		attackCount_ = 580;
+	}
 	animation_->Play(static_cast<int>(ANIM_TYPE::ATTACK));
 	
 }
@@ -390,6 +399,18 @@ void Boss::ChangeStateRoadAttack(void)
 
 }
 
+void Boss::ChangeStateLaserAttack(void)
+{
+	stateUpdate_ = std::bind(&Boss::UpdateStateLaserAttack , this);
+	weaponRG_->ChangeState(WeaponRG::STATE::PREPARATION);
+
+	animation_->Play(static_cast<int>(ANIM_TYPE::JUMPBEFORE), false);
+	if (laserShotHp_ != MAX_HP)
+	{
+		laserRotSpeed_ = 0.5;
+	}
+}
+
 void Boss::ChangeStateEnd(void)
 {
 	stateUpdate_ = std::bind(&Boss::UpdateEnd, this);
@@ -399,7 +420,7 @@ void Boss::ChangeStateEnd(void)
 void Boss::BossTransformUpdate(void)
 {
 
-	//LookPlayer();
+	
 
 	transform_.Update();
 	transformFeetCar_.Update();
@@ -439,7 +460,7 @@ void Boss::UpdateProcess(void)
 	stateUpdate_();
 
 	currentWaveScl = VAdd(currentWaveScl, WAVE_SCL_UP);
-	EffectManager::GetInstance().UpdateScl(EffectManager::EFFECT::EFFECT_WAVE, currentWaveScl);
+	EffectManager::GetInstance().UpdateScl(EffectManager::EFFECT::EFFECT_WAVE,this, currentWaveScl);
 
 	BossTransformUpdate();
 	
@@ -464,8 +485,28 @@ void Boss::UpdateProcessPost(void)
 void Boss::UpdateIdle(void)
 {
 	transformBody_.pos = MV1GetFramePosition(transform_.modelId, JOINT_FEET_BODY);
+	LookPlayer();
 	attackCount_++;
-	if (attackCount_ >= attackInterval_)
+	if (hp_ <= laserShotHp_ && attackCount_ >= attackInterval_)
+	{
+		ChangeState(STATE::LASER);
+		if (laserShotHp_== MAX_HP)
+		{
+			laserShotHp_ = MAX_HP/2;
+			
+		}
+		else if (laserShotHp_ == (MAX_HP / 2))
+		{
+			laserShotHp_ = MAX_HP * 0.2;
+			
+		}
+		else
+		{
+			laserShotHp_ = -1000;
+		}
+		
+	}
+	else if (attackCount_ >= attackInterval_)
 	{
 		ChangeState(STATE::ATTACK);
 	}
@@ -473,12 +514,23 @@ void Boss::UpdateIdle(void)
 
 void Boss::UpdateAttack(void)
 {
-
+	LookPlayer();
 	transformBody_.pos = MV1GetFramePosition(transform_.modelId, JOINT_FEET_BODY);
-	int randomAttack = static_cast<int>(UtilityMath::RandRangeF(0.0f, static_cast<float>(ATTACK_TYPE::MAX)));
-	ATTACK_TYPE attackSelect = ATTACK_TYPE::MISSILE;//static_cast<ATTACK_TYPE>(randomAttack);
 
-	switch (attackSelect)
+	if (static_cast<int>(ATTACK_TYPE::MAX) > 1)
+	{
+		do
+		{
+			int randomAttack = static_cast<int>(UtilityMath::RandRangeF(0.0f, static_cast<float>(ATTACK_TYPE::MAX)));
+			 attackSelect_ = static_cast<ATTACK_TYPE>(randomAttack);
+		} 
+		while (attackSelect_ == lastAttackType_); // ‘O‰ñ‚Æ“¯‚¶UŒ‚‚È‚ç‚à‚¤ˆê“xU‚è’¼‚·I
+	}
+
+	// ¡‰ñ‘I‚Î‚ê‚½UŒ‚‚ðu‘O‰ñ‚ÌUŒ‚v‚Æ‚µ‚Ä•Û‘¶‚µ‚Ä‚¨‚­
+	lastAttackType_ = attackSelect_;
+
+	switch (attackSelect_)
 	{
 	case ATTACK_TYPE::JUMP:
 		ChangeState(STATE::JUMPBEFORE);
@@ -501,9 +553,9 @@ void Boss::UpdateAttack(void)
 		ChangeState(STATE::IDLE);
 		break;
 	case ATTACK_TYPE::MISSILE:
-		weaponMPL_->ChangeState(WeaponCannon::STATE::ATTACK);
+		weaponMPL_->ChangeState(WeaponMP::STATE::ATTACK);
 		weaponMPL_->IsLR(true);
-		weaponMPR_->ChangeState(WeaponCannon::STATE::ATTACK);
+		weaponMPR_->ChangeState(WeaponMP::STATE::ATTACK);
 		weaponMPR_->IsLR(false);
 		ChangeState(STATE::IDLE);
 		break;
@@ -515,14 +567,15 @@ void Boss::UpdateAttack(void)
 
 void Boss::UpdateJump(void)
 {
+	LookPlayer();
 	transformBody_.pos = MV1GetFramePosition(transform_.modelId, JOINT_FEET_BODY);
 	if (!isJump_)
 	{
 		wave_->SetIsAttack(true);
 		isLanging_ = true;
 		currentWaveScl = WAVE_SCL;
-		EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_WAVE, transform_.pos, currentWaveScl, LANDING_SCL, 1.0f);
-		EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_LANDING, transform_.pos, { 0.0f,0.0f,0.0f }, LANDING_SCL, 1.0f);
+		EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_WAVE, transform_.pos, currentWaveScl, LANDING_SCL, 1.0f,this);
+		EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_LANDING, transform_.pos, { 0.0f,0.0f,0.0f }, LANDING_SCL, 1.0f,this);
 		ChangeState(STATE::IDLE);
 	}
 	else if (isJump_)
@@ -545,6 +598,7 @@ void Boss::UpdateJump(void)
 
 void Boss::UpdateJumpBefore(void)
 {
+	LookPlayer();
 	transformBody_.pos = MV1GetFramePosition(transform_.modelId, JOINT_FEET_BODY);
 	if (animation_->IsEnd() == true)
 	{
@@ -580,6 +634,8 @@ void Boss::UpdateRoadAttack(void)
 
 	if (!roadIsAttack_)
 	{
+		LookPlayer();
+
 		roadLockTime_++;
 		
 		transform_.quaRot = transformFeetCar_.quaRot;
@@ -634,6 +690,25 @@ void Boss::UpdateRoadAttack(void)
 
 
 
+}
+
+void Boss::UpdateStateLaserAttack(void)
+{
+
+	transformBody_.pos = MV1GetFramePosition(transform_.modelId, JOINT_FEET_BODY);
+	if (weaponRG_->GetIsAttack() == true)
+	{
+		laserAttackRot_ += laserRotSpeed_;
+		if (laserAttackRot_ >= 360.0f)
+		{
+			laserAttackRot_ = 0.0f;
+			weaponRG_->ChangeState(WeaponRG::STATE::IDLE);
+			
+			ChangeState(STATE::IDLE);
+		}
+		transformBody_.quaRot = Quaternion::Mult(transformBody_.quaRot, Quaternion::AngleAxis(UtilityMath::Deg2RadF(laserRotSpeed_), UtilityMath::AXIS_Y));
+	}
+	
 }
 
 void Boss::UpdateEnd(void)

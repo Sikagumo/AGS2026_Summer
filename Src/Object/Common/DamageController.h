@@ -70,6 +70,8 @@ public:
 	void SetPlayerMaxHp(int _maxHp) { playerHpMax_ = _maxHp; }
 	
 
+	void DebugDraw(void);
+
 private:
 
 	// ダメージの軽減数値
@@ -113,6 +115,7 @@ private:
 
 	bool isInvincible_;
 
+	int DamageData_;
 	
 	BOSS_DATA cannon_;
 	BOSS_DATA mg_;

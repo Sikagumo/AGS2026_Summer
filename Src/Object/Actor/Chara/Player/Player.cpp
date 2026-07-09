@@ -606,6 +606,16 @@ void Player::ProcessKnock(void)
 
 		SetKnock(knockDir, 10.0f, false);
 	}
+
+	if (CollisionController::GetInstance().IsActorCollidingWithTag(this, ColliderBase::TAG::MISSILE_PUSH))
+	{
+		VECTOR hitPos = CollisionController::GetInstance().IsActorHitPosWithTag(this, ColliderBase::TAG::MISSILE_PUSH);
+		VECTOR knockDir = VSub(transform_.pos, hitPos);
+		knockDir.y = KNOCK_POW_Y;
+		knockDir = UtilityMath::VNormalize(knockDir);
+
+		SetKnock(knockDir, 10.0f, false);
+	}
 }
 
 void Player::ProcessAttack(void)
