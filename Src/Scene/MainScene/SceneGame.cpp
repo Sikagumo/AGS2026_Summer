@@ -216,7 +216,7 @@ void SceneGame::Draw(void)
 	}
 
 	boss_->Draw();
-	enemyRobo_->Draw();
+	//enemyRobo_->Draw();
 	effect.Draw();
 
 	DrawHpBerBoss();
