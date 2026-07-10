@@ -14,9 +14,9 @@ public:
 	enum class JOB_TYPE
 	{
 		NONE = -1
-		, SELECT_BOMB		  // ”š”j
+		, BOMB		  // ”š”j
 		, CANNON	  // ‹‘å
-		, SELECT_RAPID_FIRE  // ˜AŽË
+		, RAPID_FIRE  // ˜AŽË
 		, SUPPORT	  // ‰ñ•œ
 		, MAX
 	};

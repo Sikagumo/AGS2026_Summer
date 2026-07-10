@@ -79,6 +79,8 @@ public:
 		EFFECT_MG,
 		EFFECT_LASER,
 		EFFECT_MISSILE,
+		EFFECT_PLAYER_BLAST,
+
 		/* ‰f‘œ */
 
 		/* BGM */
@@ -92,6 +94,7 @@ public:
 		SE_BOSS_MG_FIRE,
 		SE_BOSS_LANDING,
 		SE_BOSS_ROAD,
+		SE_BOSS_HIT,
 	};
 
 

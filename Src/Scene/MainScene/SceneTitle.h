@@ -70,6 +70,7 @@ private:
 
 	// 選択インデックス（パッド操作用）
 	int selectedIdx_;
+	int inputIntervalCounter_;
 
 	// 前回のマウス座標
 	Vector2F prevMousePos_;

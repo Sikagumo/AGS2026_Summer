@@ -2,6 +2,7 @@
 #include <DxLib.h>
 #include "../../../../../../Utility/UtilityMath.h"
 #include "../../../../../../Manager/System/TimeManager.h"
+#include "../../../../../../Manager/Decoration/EffectManager.h"
 #include "../../../../../../Application.h"
 #include "../../../../../Collider/ColliderSphere.h"
 #include "../../../../../Collision/CollisionController.h"
@@ -117,13 +118,16 @@ void PBulletBase::Draw(void)
 		DrawSphere3D(transform_.pos, radiusBullet_, SPHERE_DIV, 0xffffff, 0xffffff, true);
 	}
 
-#ifdef _DEBUG
+
 	if (bulletState_ == BULLET_STATE::BLAST)
 	{
+		EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_PLAYER_BLAST,
+			transform_.pos, {},
+			{ 35.0f , 35.0f, 35.0f }, 1.0f, this);
+#ifdef _DEBUG
 		DrawSphere3D(transform_.pos, radiusBlast_, SPHERE_DIV, 0xff0000, 0xffffff, false);
-	}
-
 #endif
+	}
 }
 
 void PBulletBase::ReleasePost(void)

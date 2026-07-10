@@ -39,6 +39,7 @@ SceneTitle::SceneTitle(void)
     , prevMousePos_(0.0f, 0.0f)
     , psHandle_(-1)
     , isSelectMenu_(true)
+    , inputIntervalCounter_(0)
 {
     for (size_t i = 0; i < imageMenu_.size(); ++i)
     {
@@ -191,7 +192,6 @@ void SceneTitle::Update(void)
     Vector2F stick = keyConfInputManager.GetLeftStickRaw();
     constexpr float THRESHOLD = 0.5f;
     constexpr int STICK_TINERVAL = 15;
-    int inputIntervalCounter = 0;
 
     // マウス座標の更新
     Vector2 mousePos = keyConfInputManager.GetMousePosition();
@@ -201,9 +201,9 @@ void SceneTitle::Update(void)
     if (isSelectMenu_)
     {
 
-        if (inputIntervalCounter > 0)
+        if (inputIntervalCounter_ > 0)
         {
-            inputIntervalCounter--;
+            inputIntervalCounter_--;
         }
         else if (std::abs(stick.y) > THRESHOLD)
         {
@@ -215,7 +215,7 @@ void SceneTitle::Update(void)
             {
                 selectedIdx_ = (selectedIdx_ - 1 + MENU_BUTTON_NUM) % MENU_BUTTON_NUM;
             }
-            inputIntervalCounter = STICK_TINERVAL;
+            inputIntervalCounter_ = STICK_TINERVAL;
         }
 
         // マウスが動いたときはパッドの選択カーソルも追従させる
@@ -349,12 +349,13 @@ void SceneTitle::ProcessMenuState(void)
     switch (static_cast<MENU_ITEM>(selectedIdx_))
     {
         case MENU_ITEM::SOLO:
-        {  
-            auto playerJob = { PlayerBase::JOB_TYPE::SELECT_BOMB };
-        SceneManager::GetInstance()
+        {
+            auto playerJob = { PlayerBase::JOB_TYPE::BOMB };
+            SceneManager::GetInstance()
                .ChangeScene(std::make_shared<SceneGame>(playerJob));
+               
             //SceneManager::GetInstance()
-               //.ChangeScene(std::make_shared<SceneLobby>(false));
+              // .ChangeScene(std::make_shared<SceneLobby>(false));
         }
         break;
 

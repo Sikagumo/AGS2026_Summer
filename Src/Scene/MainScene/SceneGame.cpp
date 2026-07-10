@@ -65,6 +65,12 @@ void SceneGame::Load(void)
 
 	SoundManager::GetInstance().Add(SoundManager::TYPE::BGM, SoundManager::SOUND::BGM_GAME, ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::BGM_GAME));
 
+	SoundManager::GetInstance().Add(SoundManager::TYPE::SE, SoundManager::SOUND::SE_DAMAGE_PLAYER
+		, ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::SE_PLAYER_DAMAGE));
+
+	SoundManager::GetInstance().Add(SoundManager::TYPE::SE, SoundManager::SOUND::SE_DAMAGE_BOSS
+		, ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::SE_BOSS_HIT));
+
 	//時間カウントリセット
 	TimeManager::GetInstance().Reset();
 }
@@ -101,9 +107,6 @@ void SceneGame::Initialize(void)
 
 	damageController_->SetPlayerMaxHp(players_.at(0)->GetMaxHp());
 	SoundManager::GetInstance().Play(SoundManager::SOUND::BGM_GAME);
-
-	SoundManager::GetInstance().Add(SoundManager::TYPE::SE, SoundManager::SOUND::SE_DAMAGE_PLAYER
-		, ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::SE_PLAYER_DAMAGE));
 }
 
 void SceneGame::Update(void)
@@ -157,6 +160,20 @@ void SceneGame::DamageProcess(void)
 	boss_->SetWeaponMPRDamage(damageController_->GetWeaponMPRDamage());
 
 	boss_->SetWeaponRGDamage(damageController_->GetWeaponRGDamage());
+
+
+	if (damageController_->GetBossDamage() > 0
+		|| damageController_->GetWeaponCannonLDamage() > 0
+		|| damageController_->GetWeaponCannonRDamage() > 0
+		|| damageController_->GetWeaponMGLDamage() > 0
+		|| damageController_->GetWeaponMGRDamage() > 0
+		|| damageController_->GetWeaponMPLDamage() > 0
+		|| damageController_->GetWeaponMPRDamage() > 0
+		|| damageController_->GetWeaponRGDamage() > 0)
+	{
+		SoundManager::GetInstance().Play(SoundManager::SOUND::SE_DAMAGE_BOSS);
+	}
+
 
 	// プレイヤーの攻撃
 	for (auto& player : players_)
