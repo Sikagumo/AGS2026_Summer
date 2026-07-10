@@ -160,13 +160,13 @@ void MGBase::UpdateAttack(void)
     }
     
 
-    SoundManager::GetInstance().Set3DPosition(SoundManager::SOUND::SE_MG_FIRE, transform_.pos);
+    SoundManager::GetInstance().Set3DPosition(SoundManager::SOUND::SE_BOSS_MG_FIRE, transform_.pos);
     if (bulletCount_ >= 0) {
         CreateBullets();
     }
     if (bulletCount_ <= 0) {
         isAttack_ = false;
-        SoundManager::GetInstance().Stop(SoundManager::SOUND::SE_MG_FIRE);
+        SoundManager::GetInstance().Stop(SoundManager::SOUND::SE_BOSS_MG_FIRE);
         ChangeState(STATE::IDLE);
     }
 }

@@ -9,6 +9,7 @@
 #include "../../Object/Collision/CollisionController.h"
 #include "../../Camera/Camera.h"
 #include "SceneGame.h"
+#include "SceneLobby.h"
 #include "SceneResult.h"
 #include "../../Object/Actor/Chara/Player/PlayerBase.h"
 #include "../../Application.h"
@@ -352,6 +353,8 @@ void SceneTitle::ProcessMenuState(void)
             auto playerJob = { PlayerBase::JOB_TYPE::CANNON };
         SceneManager::GetInstance()
                .ChangeScene(std::make_shared<SceneGame>(playerJob));
+            //SceneManager::GetInstance()
+               //.ChangeScene(std::make_shared<SceneLobby>(false));
         }
         break;
 

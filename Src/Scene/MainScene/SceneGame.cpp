@@ -101,6 +101,9 @@ void SceneGame::Initialize(void)
 
 	damageController_->SetPlayerMaxHp(players_.at(0)->GetMaxHp());
 	SoundManager::GetInstance().Play(SoundManager::SOUND::BGM_GAME);
+
+	SoundManager::GetInstance().Add(SoundManager::TYPE::SE, SoundManager::SOUND::SE_DAMAGE_PLAYER
+		, ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::SE_PLAYER_DAMAGE));
 }
 
 void SceneGame::Update(void)

@@ -74,7 +74,7 @@ void Camera::InitPost(void)
 void Camera::Update(void)
 {
 	if (InputManager::GetInstance().IsTrgDown(KEY_INPUT_E)
-		|| InputManager::GetInstance().IsPadBtnTrgDown(InputManager::JOYPAD_NO::PAD1, InputManager::JOYPAD_BTN::L_TRIGGER))
+		|| InputManager::GetInstance().IsPadBtnTrgDown(InputManager::JOYPAD_NO::PAD1, InputManager::JOYPAD_BTN::R_STICK))
 	{
 		if (!isLockOn_)
 		{
@@ -158,7 +158,6 @@ void Camera::DrawDebug(void)
 		, transform_.pos.x, transform_.pos.y, transform_.pos.z
 		, UtilityMath::Rad2DegF(angles_.x), UtilityMath::Rad2DegF(angles_.y), UtilityMath::Rad2DegF(angles_.z)
 		, UtilityMath::Rad2DegF(rotY.x), UtilityMath::Rad2DegF(rotY.y), UtilityMath::Rad2DegF(rotY.z));
-#endif
 
 	std::string targetText = "追従対象：";
 
@@ -171,6 +170,7 @@ void Camera::DrawDebug(void)
 	targetText += ((isLockOn_ && lockOnTarget_ == LOCKON_TARGET::BOSS_WEAPON_MGL_R)
 					? "右マシンガン" : "");
 	DrawString(Application::SCREEN_SIZE_X - 200, 0, targetText.c_str(), 0xff0000);
+#endif
 }
 
 VECTOR Camera::GetForward(void) const

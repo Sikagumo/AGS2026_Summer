@@ -28,7 +28,7 @@ void WeaponMGL::Load(void)
 
 	
 
-	SoundManager::GetInstance().Add(SoundManager::TYPE::SE, SoundManager::SOUND::SE_MG_FIRE, ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::SE_MG_FIRE));
+	SoundManager::GetInstance().Add(SoundManager::TYPE::SE, SoundManager::SOUND::SE_BOSS_MG_FIRE, ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::SE_BOSS_MG_FIRE));
 }
 
 void WeaponMGL::InitTransform(void)
