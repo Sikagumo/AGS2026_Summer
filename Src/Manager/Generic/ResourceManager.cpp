@@ -206,7 +206,6 @@ void ResourceManager::Initialize(void)
 	_SetResource(LOAD_TYPE::SOUND, SRC::SE_BOSS_LANDING, PATH_SE + "BossLanding.mp3");
 	_SetResource(LOAD_TYPE::SOUND, SRC::SE_BOSS_ROAD, PATH_SE + "Road.mp3");
 	_SetResource(LOAD_TYPE::SOUND, SRC::SE_BOSS_HIT, PATH_SE + "BossHit.mp3");
-	_SetResource(LOAD_TYPE::SOUND, SRC::SE_BOSS_HIT, PATH_SE + "BossHit.mp3");
 
 }
 void ResourceManager::_SetResource(Resource::LOAD_TYPE _loadType, SRC _src, std::string _path

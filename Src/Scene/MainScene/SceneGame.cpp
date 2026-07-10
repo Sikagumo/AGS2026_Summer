@@ -43,6 +43,8 @@ SceneGame::SceneGame(std::vector<PlayerBase::JOB_TYPE> _playerJob)
 
 	targetHpBerImage_ = ResourceManager::GetInstance().LoadHandleIdsOnce(ResourceManager::SRC::IMGS_HP_TARGET, 0);
 	targetHpImage_ = ResourceManager::GetInstance().LoadHandleIdsOnce(ResourceManager::SRC::IMGS_HP_TARGET, 1);
+
+	ResourceManager::GetInstance().LoadHandleIds(ResourceManager::SRC::IMGS_GAME_TEXT, uiGame_.data());
 }
 
 
@@ -239,6 +241,8 @@ void SceneGame::Draw(void)
 	DrawHpBerBoss();
 
 	gameTimer_->Draw();
+
+	DrawRotaGraph((Application::SCREEN_HALF_X - 300), 35, 0.5, 0.0, uiGame_.at(0), true);
 
 	DrawHpBerPlayer();
 

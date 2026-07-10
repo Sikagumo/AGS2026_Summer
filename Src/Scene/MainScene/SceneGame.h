@@ -69,10 +69,11 @@ private:
 
     int targetHpImage_;
     int targetHpBerImage_;
+    int gameTexts_;
 
     enum class UI_GAME
     {
-
+        TIMER_LABEL,
         MAX
     };
     std::array<int, static_cast<int>(UI_GAME::MAX)> uiGame_;
