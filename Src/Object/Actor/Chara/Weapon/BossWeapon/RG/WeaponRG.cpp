@@ -81,7 +81,7 @@ void WeaponRG::InitAnimation(void)
 void WeaponRG::InitPost(void)
 {
 	
-	ho_ = 2000;
+	hp_ = 2000;
 
 	bulletLaser_ = std::make_unique<BBulletLaser>();
 	bulletLaser_->Init();

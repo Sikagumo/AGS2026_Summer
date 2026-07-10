@@ -76,7 +76,7 @@ void WeaponCannon::InitAnimation(void)
 
 void WeaponCannon::InitPost(void)
 {
-	hp = 1000;
+	hp_ = 1000;
 	isAlive_ = true;
 	localPos_ = LINE_START_POS;
 	stateChanges_.emplace(static_cast<int>(STATE::IDLE),
