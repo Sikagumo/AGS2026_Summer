@@ -18,34 +18,6 @@
 #include "../../ImGUI/GuiController.h"
 #include "../../Shader/ShaderLibrary.h"
 
-
-SceneTitle::SceneTitle(void)
-    : imageTitle_(-1)
-    , peachHandle_(-1)
-    , peachNormalHandle_(-1)
-    , waveHandle_(-1)
-    , waveNormalHandle_(-1)
-    , oniSimaHandle_(-1)
-    , oniSimaNormalHandle_(-1)
-    , time_(0)
-    , selectedIdx_(0)
-    , cursorCollider_(nullptr)
-    , soloPlayButtonCollider_(nullptr)
-    , multiPlayButtonCollider_(nullptr)
-    , optionButtonCollider_(nullptr)
-    , exitButtonCollider_(nullptr)
-    , imageMenu_()
-    , buttonTags()
-    , prevMousePos_(0.0f, 0.0f)
-    , psHandle_(-1)
-    , isSelectMenu_(true)
-{
-    for (size_t i = 0; i < imageMenu_.size(); ++i)
-    {
-        imageMenu_[i] = -1;
-    }
-}
-
 void SceneTitle::Load(void)
 {
     // isLoading_ を true に
@@ -63,6 +35,9 @@ void SceneTitle::Load(void)
 
     // タイトル画像
     imageTitle_ = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::IMG_TITLE);
+
+    // タイトルのノーマルマップ画像
+    titleNormalHandle_ = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::IMG_NOTMALMAP_TITLE);
 
     // メニュー画像
     ResourceManager::GetInstance().LoadHandleIds
@@ -90,6 +65,10 @@ void SceneTitle::Load(void)
     oniSimaNormalHandle_ = ResourceManager::GetInstance().
         LoadHandleId(ResourceManager::SRC::IMG_NOMALMAP_ONIGASIMA);
 
+    // 背景画像
+    backgroundHandle_ = ResourceManager::GetInstance().
+        LoadHandleId(ResourceManager::SRC::IMG_BUCGROUND_TITLE);
+
     // その他画像
 
     //時間カウントリセット
@@ -103,12 +82,14 @@ void SceneTitle::EndLoad(void)
 
 SceneTitle::SceneTitle(void)
     : imageTitle_(-1)
+    , titleNormalHandle_(-1)
     , peachHandle_(-1)
     , peachNormalHandle_(-1)
     , waveHandle_(-1)
     , waveNormalHandle_(-1)
     , oniSimaHandle_(-1)
     , oniSimaNormalHandle_(-1)
+    , backgroundHandle_(-1)
     , time_(0)
     , selectedIdx_(0)
     , cursorCollider_(nullptr)
@@ -191,6 +172,10 @@ void SceneTitle::Initialize(void)
     // 定数バッファの初期化
     peachMaterial_.SetAmbient(0.8f);
     waveMaterial_.SetAmbient(0.8f);
+    titleMaterial_.SetAmbient(0.8f);
+    titleMaterial_.SetLightDirection(0.0f, 0.0f, 0.0f);
+    titleMaterial_.SetWaveSpeed(0.0f);
+    titleMaterial_.SetWaveForce(0.0f);
     oniSimaMaterial_.SetAmbient(0.8f);
     waveMaterial_.SetWaveSpeed(3.0f);
     waveMaterial_.SetWaveForce(0.015f);
@@ -199,10 +184,11 @@ void SceneTitle::Initialize(void)
     peachGui_ = std::make_shared<ShaderEditorComponent>("Peach", &peachMaterial_);
     waveGui_ = std::make_shared<ShaderEditorComponent>("Wave", &waveMaterial_);
     oniSimaGui_ = std::make_shared<ShaderEditorComponent>("OniGashima", &oniSimaMaterial_);
+    titleGui_ = std::make_shared<ShaderEditorComponent>("Title", &titleMaterial_);
 
     // 座標の初期化
     Vector2F peachPos = Vector2F(100.0f, Application::SCREEN_HALF_Y + 100);
-    Vector2F wavePos = Vector2F(0.0f, Application::SCREEN_HALF_Y + 100);
+    Vector2F wavePos = Vector2F(800.0f, Application::SCREEN_HALF_Y + 250);
     Vector2F oniSimaPos = Vector2F(Application::SCREEN_SIZE_X - 100.0f, Application::SCREEN_HALF_Y - 50);
 
     // 桃の当たり判定
@@ -369,6 +355,9 @@ void SceneTitle::Draw(void)
 
     auto& shaderCtrl = ShaderController::GetInstance();
 
+
+    DrawRotaGraph(0, 0, 1.0f, 0.0f, backgroundHandle_, true);
+
     // 鬼ヶ島の描画
     shaderCtrl.CreateShaderDraw(ShaderLibrary::SHADER_TYPE::NORMAL, Application::SCREEN_HALF_X - 100, 30,
         oniSimaHandle_, ONISIMA_SCALE, oniSimaMaterial_, oniSimaNormalHandle_);
@@ -381,8 +370,12 @@ void SceneTitle::Draw(void)
     shaderCtrl.CreateShaderDraw(ShaderLibrary::SHADER_TYPE::NORMAL, -20, static_cast<int>(Application::SCREEN_HALF_Y + offsetY),
         peachHandle_, PEACH_SCALE, peachMaterial_, peachNormalHandle_);
 
-    const int IMAGET_TITLE_Y = Application::SCREEN_SIZE_Y / 4;
-    DrawRotaGraph(Application::SCREEN_HALF_X, IMAGET_TITLE_Y, 0.7f, 0.0f, imageTitle_, true);
+    const int IMAGET_TITLE_Y = 0;
+    const int IMAGET_TITLE_X = (Application::SCREEN_HALF_X / 2) + 20;
+
+    // タイトル画像の描画
+    shaderCtrl.CreateShaderDraw(ShaderLibrary::SHADER_TYPE::NORMAL, IMAGET_TITLE_X,
+        IMAGET_TITLE_Y, imageTitle_, PEACH_SCALE, titleMaterial_, titleNormalHandle_);
 
     const float DEFAULT_SCALE = 0.5f;
     using TAG_2D = Collider2DBase::TAG_2D;

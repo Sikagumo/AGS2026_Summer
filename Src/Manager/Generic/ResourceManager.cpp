@@ -53,6 +53,9 @@ void ResourceManager::Initialize(void)
 	
 	// タイトル画像
 	_SetResource(LOAD_TYPE::IMAGE, SRC::IMG_TITLE, PATH_IMAGE + "Title.png");
+
+	// タイトルのノーマルマップ
+	_SetResource(LOAD_TYPE::IMAGE, SRC::IMG_NOTMALMAP_TITLE, PATH_IMAGE + "Title_n.png");
 	
 	// 桃の画像
 	_SetResource(LOAD_TYPE::IMAGE, SRC::IMG_PEACH, PATH_IMAGE + "peach_T.png");
@@ -68,6 +71,9 @@ void ResourceManager::Initialize(void)
 
 	// 鬼ヶ島の画像
 	_SetResource(LOAD_TYPE::IMAGE, SRC::IMG_ONIGASIMA, PATH_IMAGE + "OnigaSima.png");
+
+	// タイトル背景の画像
+	_SetResource(LOAD_TYPE::IMAGE, SRC::IMG_BUCGROUND_TITLE, PATH_MODEL + "SkyDome/Skydome.png");
 
 	// 鬼ヶ島のノーマルマップ
 	_SetResource(LOAD_TYPE::IMAGE, SRC::IMG_NOMALMAP_ONIGASIMA, PATH_IMAGE + "OnigaSima_n.png");
