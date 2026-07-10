@@ -561,20 +561,20 @@ void Boss::UpdateAttack(void)
 	LookPlayer();
 	transformBody_.pos = MV1GetFramePosition(transform_.modelId, JOINT_FEET_BODY);
 
-	//if (static_cast<int>(ATTACK_TYPE::MAX) > 1)
-	//{
-	//	do
-	//	{
-	//		int randomAttack = static_cast<int>(UtilityMath::RandRangeF(0.0f, static_cast<float>(ATTACK_TYPE::MAX)));
-	//		 attackSelect_ = static_cast<ATTACK_TYPE>(randomAttack);
-	//	} 
-	//	while (attackSelect_ == lastAttackType_); // 前回と同じ攻撃ならもう一度振り直す！
-	//}
+	if (static_cast<int>(ATTACK_TYPE::MAX) > 1)
+	{
+		do
+		{
+			int randomAttack = static_cast<int>(UtilityMath::RandRangeF(0.0f, static_cast<float>(ATTACK_TYPE::MAX)));
+			 attackSelect_ = static_cast<ATTACK_TYPE>(randomAttack);
+		} 
+		while (attackSelect_ == lastAttackType_); // 前回と同じ攻撃ならもう一度振り直す！
+	}
 
-	//// 今回選ばれた攻撃を「前回の攻撃」として保存しておく
-	//lastAttackType_ = attackSelect_;
+	// 今回選ばれた攻撃を「前回の攻撃」として保存しておく
+	lastAttackType_ = attackSelect_;
 
-	 attackSelect_ = ATTACK_TYPE::ROAD;
+	 //attackSelect_ = ATTACK_TYPE::ROAD;
 
 	switch (attackSelect_)
 	{
