@@ -164,21 +164,21 @@ void SceneGame::DamageProcess(void)
 
 	boss_->SetWeaponRGDamage(damageController_->GetWeaponRGDamage());
 
-	// ƒvƒŒƒCƒ„[‚ÌUŒ‚
-	for (auto& player : players_)
-	{
-		// ’e
-		for (auto& bullet : player->GetBullets())
-		{
-			damageController_->SetPlayerAttack(bullet->GetPowerBullet(), bullet->GetPowerBlast());
-		}
+	//// ƒvƒŒƒCƒ„[‚ÌUŒ‚
+	//for (auto& player : players_)
+	//{
+	//	// ’e
+	//	for (auto& bullet : player->GetBullets())
+	//	{
+	//		damageController_->SetPlayerAttack(bullet->GetPowerBullet(), bullet->GetPowerBlast());
+	//	}
 
-		// ŠgU’e
-		for (auto& bullet : player->GetBulletsCluster())
-		{
-			damageController_->SetPlayerAttack(bullet->GetPowerBullet(), bullet->GetPowerBlast());
-		}
-	}
+	//	// ŠgU’e
+	//	for (auto& bullet : player->GetBulletsCluster())
+	//	{
+	//		damageController_->SetPlayerAttack(bullet->GetPowerBullet(), bullet->GetPowerBlast());
+	//	}
+	//}
 
 	// ƒvƒŒƒCƒ„[”íƒ_ƒ[ƒWˆ—
 	for (auto& player : players_)

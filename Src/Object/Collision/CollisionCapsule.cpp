@@ -87,8 +87,8 @@ bool CollisionCapsule::CheckCapsuleVsModel(const ColliderBase* _capsuleCol,
 		return false;
 	}
 
-	const auto* capsule =  static_cast<const ColliderCapsule*>(_capsuleCol);
-	const auto* model =  static_cast<const ColliderModel*>(_modelCol);
+	const auto* capsule = static_cast<const ColliderCapsule*>(_capsuleCol);
+	const auto* model = static_cast<const ColliderModel*>(_modelCol);
 
 	if (capsule == nullptr || model == nullptr)
 	{
@@ -114,6 +114,8 @@ bool CollisionCapsule::CheckCapsuleVsModel(const ColliderBase* _capsuleCol,
 		float maxPenetration = -1.0f;
 		int bestIndex = -1;
 
+		ColliderBase::TAG modelTag = _modelCol->GetCollisionTag();
+
 		for (int i = 0; i < hitResult.HitNum; ++i)
 		{
 			if (model->IsExcludedFrame(hitResult.Dim[i].FrameIndex))
@@ -121,23 +123,17 @@ bool CollisionCapsule::CheckCapsuleVsModel(const ColliderBase* _capsuleCol,
 				continue;
 			}
 
-			// 各ポリゴンに対する正しいめり込み量をループ内で仮計算する
 			const auto& poly = hitResult.Dim[i];
-			float polyPenetration = 0.0f;
 
-			if (poly.Normal.y > 0.5f)
-			{
-				// 床の場合は、沈み込みを防ぐための高さを計算
-				float capsuleBottomY = (startPos.y < endPos.y ? startPos.y : endPos.y) - radius;
-				polyPenetration = poly.HitPosition.y - capsuleBottomY;
-			}
-			else
-			{
-				// 壁や急斜面の場合は、芯からの最短距離でめり込みを計算
-				VECTOR nearestPos = UtilityMath::GetNearestPointOnSegment(startPos, endPos, poly.HitPosition);
-				float distance = UtilityMath::MagnitudeF(VSub(poly.HitPosition, nearestPos));
-				polyPenetration = radius - distance;
-			}
+			if (modelTag == ColliderBase::TAG::STAGE && poly.Normal.y <= 0.5f) { continue; }
+			if (modelTag == ColliderBase::TAG::WALL && poly.Normal.y > 0.5f) { continue; }
+
+			VECTOR polyPoint = poly.Position[0];
+
+			VECTOR nearestOnAxis = UtilityMath::GetNearestPointOnSegment(startPos, endPos, polyPoint);
+			VECTOR toHit = VSub(polyPoint, nearestOnAxis);
+			float distAlongNormal = VDot(toHit, poly.Normal);
+			float polyPenetration = radius - distAlongNormal;
 
 			if (polyPenetration > maxPenetration)
 			{
@@ -145,6 +141,7 @@ bool CollisionCapsule::CheckCapsuleVsModel(const ColliderBase* _capsuleCol,
 				bestIndex = i;
 			}
 		}
+
 
 		if (bestIndex == -1)
 		{
@@ -154,27 +151,22 @@ bool CollisionCapsule::CheckCapsuleVsModel(const ColliderBase* _capsuleCol,
 
 		const auto& bestHit = hitResult.Dim[bestIndex];
 
-		// 選択された最も適切な衝突情報を格納
 		_outInfo.myCollider = _capsuleCol;
 		_outInfo.hitCollider = _modelCol;
-		_outInfo.hitPosition = bestHit.HitPosition;
+
+		VECTOR bestPolyPoint = VScale(
+			VAdd(VAdd(bestHit.Position[0], bestHit.Position[1]), bestHit.Position[2]),
+			1.0f / 3.0f);
+
+		_outInfo.hitPosition = bestPolyPoint;
 		_outInfo.hitNormal = bestHit.Normal;
 		_outInfo.isActive = true;
 
-		// 決定されたポリゴンのタイプに応じて、正しいめり込み量を確定させる
-		if (bestHit.Normal.y > 0.5f)
-		{
-			float capsuleBottomY = (startPos.y < endPos.y ? startPos.y : endPos.y) - radius;
-			_outInfo.penetration = bestHit.HitPosition.y - capsuleBottomY;
-		}
-		else
-		{
-			VECTOR nearestPos = UtilityMath::GetNearestPointOnSegment(startPos, endPos, bestHit.HitPosition);
-			float distance = UtilityMath::MagnitudeF(VSub(bestHit.HitPosition, nearestPos));
-			_outInfo.penetration = radius - distance;
-		}
+		VECTOR nearestOnAxis = UtilityMath::GetNearestPointOnSegment(startPos, endPos, bestPolyPoint);
+		VECTOR toHit = VSub(bestPolyPoint, nearestOnAxis);
+		float distAlongNormal = VDot(toHit, bestHit.Normal);
+		_outInfo.penetration = radius - distAlongNormal;
 
-		// めり込み量が極端にマイナスにならないように安全弁をかける
 		if (_outInfo.penetration < 0.0f)
 		{
 			_outInfo.penetration = 0.0f;

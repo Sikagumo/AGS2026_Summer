@@ -20,9 +20,29 @@ void Stage::Draw(void)
 
 
 #ifdef _DEBUG
-	MV1DrawModel(collisionTrans_.modelId);
+	// 以前の MV1DrawModel(collisionTrans_.modelId); はこれと被るので消すかコメントアウト
+
+	// 自分が持っているすべてのコライダーを描画する
+	for (const auto& [tagId, colliderList] : ownColliders_)
+	{
+		for (auto* collider : colliderList)
+		{
+			if (collider != nullptr)
+			{
+				// 例として緑色を指定（タグごとに色を変えてもOKです）
+				collider->Draw();
+			}
+		}
+	}
+
+	bool isHit = CollisionController::GetInstance().IsTagCollidingWithTag(ColliderBase::TAG::WALL, ColliderBase::TAG::PLAYER);
+
+	if (isHit)
+	{
+		DrawString(0, 600, "当たってる", 0x000000);
+	}
+
 	DrawFormatString(10, 120, 0xffffff, "ステージの座標：%f,%f,%f", transform_.pos.x, transform_.pos.y, transform_.pos.z);
-	
 #endif
 }
 
@@ -61,13 +81,32 @@ void Stage::InitCollider(void)
 
 	colModel->SetTriger(false);
 
+	for (const auto& excludeName : EXCLUDE_STAGE_NAMES)
+	{
+		colModel->AddExcludeFrameIds(excludeName);
+	}
+
+
 	ColliderModel* wallCollider = new ColliderModel(ColliderBase::TAG::WALL, &collisionTrans_);
 
 	// 壁のコライダ割り当て
 	ownColliders_[static_cast<int>(ColliderBase::TAG::WALL)].push_back(wallCollider);
 	wallCollider->SetTriger(false);
 
+	for (const auto& excludeName : EXCLUDE_WALL_NAMES)
+	{
+		wallCollider->AddExcludeFrameIds(excludeName);
+	}
+
 	CollisionController::GetInstance().RegisterActor(this);
+
+	int frameNum = MV1GetFrameNum(collisionTrans_.modelId);
+	for (int i = 0; i < frameNum; i++)
+	{
+		const char* name = MV1GetFrameName(collisionTrans_.modelId, i);
+		printfDx((std::string(name) + "\n").c_str());
+		// または printfDx や DrawFormatString でi番目のフレーム名を確認
+	}
 }
 
 

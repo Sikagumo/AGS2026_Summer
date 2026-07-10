@@ -52,5 +52,13 @@ bool ColliderModel::IsExcludedFrame(int frameIdx) const
 
 void ColliderModel::DrawDebug(int debugColor) const
 {
+    int modelHandle = GetModelHandle();
+    if (modelHandle == -1) return;
 
+    // ”¼“§–¾‚É‚µ‚Ä•`‰æ‚·‚é
+    SetDrawBlendMode(DX_BLENDMODE_ALPHA, 1); 
+
+    MV1DrawModel(modelHandle);
+
+    SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0); 
 }

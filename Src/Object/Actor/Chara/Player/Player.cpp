@@ -534,6 +534,7 @@ void Player::ProcessMove(void)
 		}
 	}
 }
+
 void Player::MoveLimit(void)
 {
 	/* ”ÍˆÍŠO‚ÌˆÚ“®§ŒÀ */
