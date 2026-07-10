@@ -20,7 +20,7 @@
 constexpr float GAME_TIME = 500.0f;
 constexpr float GAME_TIME_DEFEAT_DEC = 75.0f;
 
-SceneGame::SceneGame(void)
+SceneGame::SceneGame(std::vector<PlayerBase::JOB_TYPE> _playerJob)
 	: players_()
 	, boss_(std::make_unique<Boss>())
 	, stage_(std::make_unique<Stage>())
@@ -28,26 +28,15 @@ SceneGame::SceneGame(void)
 	, targetHpImage_(-1), targetHpBerImage_(-1)
 	, gameTimer_(nullptr)
 {
-	std::unique_ptr<Player> player1
-		= std::make_unique<Player>(0, Player::JOB_TYPE::BOMB
-								   , PLAYER_INIT_POS[0]);
-	/*
-	std::unique_ptr<Player> player2
-		= std::make_unique<Player>(1, Player::JOB_TYPE::CANNON
-								   , PLAYER_INIT_POS[1]);
-	std::unique_ptr<Player> player3
-		= std::make_unique<Player>(2, Player::JOB_TYPE::CANNON
-								   , PLAYER_INIT_POS[2]);
-	std::unique_ptr<Player> player4
-		= std::make_unique<Player>(3, Player::JOB_TYPE::BOMB
-								   , PLAYER_INIT_POS[3]);
-	*/
+	for (int i = 0; i < _playerJob.size(); i++)
+	{
+		std::unique_ptr<Player> player
+			= std::make_unique<Player>(i, _playerJob.at(i)
+				, PLAYER_INIT_POS[i]);
 
-	players_.emplace_back(std::move(player1));
-	//players_.emplace_back(std::move(player2));
-	//players_.emplace_back(std::move(player3));
-	//players_.emplace_back(std::move(player4));
-
+		players_.emplace_back(std::move(player));
+	}
+	
 	playerHpImageBack_ = ResourceManager::GetInstance().LoadHandleIdsOnce(ResourceManager::SRC::IMGS_HP_PLAYER, 0);
 	playerHpImage_ = ResourceManager::GetInstance().LoadHandleIdsOnce(ResourceManager::SRC::IMGS_HP_PLAYER, 1);
 
@@ -133,8 +122,6 @@ void SceneGame::Update(void)
 		player->SetSoundData(boss_->GetBossPos(), boss_->GetSoundRadius(), boss_->GetLandingFlag(), boss_->GetMGFireFlag(), boss_->GetRoadFlag());
 	}
 
-	DamageProcess();
-
 	UpdateGameTime();
 
 	EffectManager::GetInstance().Update();
@@ -176,6 +163,7 @@ void SceneGame::DamageProcess(void)
 		// ŠgŽU’e
 		for (auto& bullet : player->GetBulletsCluster())
 		{
+			if (bullet == nullptr) { continue; }
 			damageController_->SetPlayerAttack(bullet->GetPowerBullet(), bullet->GetPowerBlast());
 		}
 	}

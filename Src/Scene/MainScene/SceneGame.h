@@ -5,6 +5,7 @@
 #include <vector>
 #include <array>
 #include "../../Object/Actor/Chara/Player/Player.h"
+#include "../../Object/Actor/Chara/Player/PlayerBase.h"
 #include "../../Object/Actor/Chara/Boss/Boss.h"
 #include "../../Object/Actor/Stage/Stage.h"
 #include "../../Object/Common/DamageController.h"
@@ -17,7 +18,7 @@ class SceneGame : public SceneBase
 public:
 
     /// @brief コンストラクタ
-    SceneGame(void);
+    SceneGame(std::vector<PlayerBase::JOB_TYPE> _playerJob);
 
     /// @brief デストラクタ
     ~SceneGame(void) = default;

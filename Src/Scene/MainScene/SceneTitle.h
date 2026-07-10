@@ -57,6 +57,7 @@ private:
 	// 画像関連
 	int imageTitle_;                  // タイトルロゴの画像ハンドル
 	std::array<int, 8> imageMenu_;    // メニュー項目（4つ）の画像ハンドル
+
 	int peachHandle_;                 // 桃の画像
 	int peachNormalHandle_;           // 桃のノーマルマップ
 	int waveHandle_;                  // 波の画像
@@ -83,6 +84,9 @@ private:
 	int psHandle_;
 
 	bool isSelectMenu_;
+
+	/// @brief UI初期化処理
+	void InitUI(void);
 
 	/// @brief デバック描画 
 	void DrawDebug(void);

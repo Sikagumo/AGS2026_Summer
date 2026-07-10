@@ -191,7 +191,7 @@ void SceneManager::Update(void)
             camera_->Init();
         }
 
-        ChangeScene(std::make_shared<SceneGame>());
+        ChangeScene(std::make_shared<SceneTitle>());
 
         return;
     }

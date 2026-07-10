@@ -10,6 +10,7 @@
 #include "../../Camera/Camera.h"
 #include "SceneGame.h"
 #include "SceneResult.h"
+#include "../../Object/Actor/Chara/Player/PlayerBase.h"
 #include "../../Application.h"
 #include "../../Manager/System/TimeManager.h"
 #include "../../Common/Loading.h"
@@ -112,6 +113,25 @@ void SceneTitle::Initialize(void)
 
     CollisionController::GetInstance().RegisterCollider2D(cursorCollider_.get());
 
+    // UI初期化処理
+    InitUI();
+
+    SceneManager::GetInstance().GetCamera()->ChangeMode(Camera::MODE::NONE);
+
+    // メニュー選択有効化
+    isSelectMenu_ = true;
+
+
+    // BGM
+    SoundManager::GetInstance().Play(SoundManager::SOUND::BGM_TITLE_SEA);
+    SoundManager::GetInstance().Play(SoundManager::SOUND::BGM_TITLE_THUNDER);
+
+    // 効果音
+    SoundManager::GetInstance().Add(SoundManager::TYPE::SE, SoundManager::SOUND::SE_SELECT
+        , ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::SE_SELECT));
+}
+void SceneTitle::InitUI(void)
+{
     // UIボタンの配置計算設定
     const float BUTTON_WIDTH = 250.0f;
     const float BUTTON_HEIGHT = 50.0f;
@@ -129,10 +149,10 @@ void SceneTitle::Initialize(void)
 
     // マルチプレイボタン
     Vector2F posMulti(CENTER_X, START_Y + (INTERVAL_Y * 1.0f));
-    multiPlayButtonCollider_ = std::make_unique<Collider2DBox>(posMulti, BUTTON_WIDTH, 
+    multiPlayButtonCollider_ = std::make_unique<Collider2DBox>(posMulti, BUTTON_WIDTH,
         BUTTON_HEIGHT, Collider2DBase::TAG_2D::MULTI_PLAY_BUTTON);
     CollisionController::GetInstance().RegisterCollider2D(multiPlayButtonCollider_.get());
-    CollisionController::GetInstance().SetCollisionGroup2D(Collider2DBase::TAG_2D::MOUSE_CURSOR, 
+    CollisionController::GetInstance().SetCollisionGroup2D(Collider2DBase::TAG_2D::MOUSE_CURSOR,
         Collider2DBase::TAG_2D::MULTI_PLAY_BUTTON, true);
 
     // 設定ボタン
@@ -145,13 +165,11 @@ void SceneTitle::Initialize(void)
 
     // 終了ボタン
     Vector2F posExit(CENTER_X, START_Y + (INTERVAL_Y * 3.0f));
-    exitButtonCollider_ = std::make_unique<Collider2DBox>(posExit, BUTTON_WIDTH, 
+    exitButtonCollider_ = std::make_unique<Collider2DBox>(posExit, BUTTON_WIDTH,
         BUTTON_HEIGHT, Collider2DBase::TAG_2D::EXIT_UTTON);
     CollisionController::GetInstance().RegisterCollider2D(exitButtonCollider_.get());
-    CollisionController::GetInstance().SetCollisionGroup2D(Collider2DBase::TAG_2D::MOUSE_CURSOR, 
+    CollisionController::GetInstance().SetCollisionGroup2D(Collider2DBase::TAG_2D::MOUSE_CURSOR,
         Collider2DBase::TAG_2D::EXIT_UTTON, true);
-
-    SceneManager::GetInstance().GetCamera()->ChangeMode(Camera::MODE::NONE);
 
     buttonTags =
     {
@@ -160,18 +178,6 @@ void SceneTitle::Initialize(void)
         Collider2DBase::TAG_2D::OPTION_BUTTON,
         Collider2DBase::TAG_2D::EXIT_UTTON
     };
-
-    // メニュー選択有効化
-    isSelectMenu_ = true;
-
-
-    // BGM
-    SoundManager::GetInstance().Play(SoundManager::SOUND::BGM_TITLE_SEA);
-    SoundManager::GetInstance().Play(SoundManager::SOUND::BGM_TITLE_THUNDER);
-
-    // 効果音
-    SoundManager::GetInstance().Add(SoundManager::TYPE::SE, SoundManager::SOUND::SE_SELECT
-        , ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::SE_SELECT));
 }
 
 void SceneTitle::Update(void)
@@ -182,9 +188,14 @@ void SceneTitle::Update(void)
 
     // スティック入力による選択インデックスの更新
     Vector2F stick = keyConfInputManager.GetLeftStickRaw();
-    const float THRESHOLD = 0.5f;
-    const int STICK_TINERVAL = 15;
-    static int inputIntervalCounter = 0;
+    constexpr float THRESHOLD = 0.5f;
+    constexpr int STICK_TINERVAL = 15;
+    int inputIntervalCounter = 0;
+
+    // マウス座標の更新
+    Vector2 mousePos = keyConfInputManager.GetMousePosition();
+    Vector2F mousePosF(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y));
+    cursorCollider_->SetCenterPos(mousePosF);
 
     if (isSelectMenu_)
     {
@@ -205,43 +216,32 @@ void SceneTitle::Update(void)
             }
             inputIntervalCounter = STICK_TINERVAL;
         }
-    }
 
-    // マウス座標の更新
-    Vector2 mousePos = keyConfInputManager.GetMousePosition();
-    Vector2F mousePosF(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y));
-    cursorCollider_->SetCenterPos(mousePosF);
-
-    // マウスが動いたときはパッドの選択カーソルも追従させる
-    for (int i = 0; i < MENU_BUTTON_NUM; ++i)
-    {
-        // メニュー選択無効中はスキップ
-        if (!isSelectMenu_) { break; }
-
-        if (CollisionController::GetInstance().IsTagCollidingWithTag2D(Collider2DBase::TAG_2D::MOUSE_CURSOR, buttonTags[i]))
+        // マウスが動いたときはパッドの選択カーソルも追従させる
+        for (int i = 0; i < MENU_BUTTON_NUM; ++i)
         {
-            selectedIdx_ = i;
-            break;
+            if (CollisionController::GetInstance().IsTagCollidingWithTag2D(Collider2DBase::TAG_2D::MOUSE_CURSOR, buttonTags[i]))
+            {
+                selectedIdx_ = i;
+                break;
+            }
+        }
+
+        // 決定処理
+        for (int i = 0; i < MENU_BUTTON_NUM; ++i)
+        {
+            bool isTarget = CollisionController::GetInstance().IsTagCollidingWithTag2D(Collider2DBase::TAG_2D::MOUSE_CURSOR, buttonTags[i]) || (selectedIdx_ == i);
+
+            if (isTarget && keyConfInputManager.isTrigerDown("OK"))
+            {
+                isSelectMenu_ = false;
+
+                // 効果音再生
+                SoundManager::GetInstance().Play(SoundManager::SOUND::SE_SELECT);
+            }
         }
     }
-
-    // 決定処理
-    for (int i = 0; i < MENU_BUTTON_NUM; ++i)
-    {
-        if (!isSelectMenu_) { break; }
-
-        bool isTarget = CollisionController::GetInstance().IsTagCollidingWithTag2D(Collider2DBase::TAG_2D::MOUSE_CURSOR, buttonTags[i]) || (selectedIdx_ == i);
-
-        if (isTarget && keyConfInputManager.isTrigerDown("OK"))
-        {
-            isSelectMenu_ = false;
-
-            // 効果音再生
-            SoundManager::GetInstance().Play(SoundManager::SOUND::SE_SELECT);
-        }
-    }
-
-    if (!isSelectMenu_)
+    else
     {
         if (selectedIdx_ == static_cast<int>(MENU_ITEM::OPTION)
             // ↓マルチプレイ有効時には削除
@@ -337,6 +337,7 @@ void SceneTitle::Release(void)
 {
 }
 
+
 void SceneTitle::DrawDebug(void)
 {
     CollisionController::GetInstance().DrawDebug2D();
@@ -347,8 +348,11 @@ void SceneTitle::ProcessMenuState(void)
     switch (static_cast<MENU_ITEM>(selectedIdx_))
     {
         case MENU_ITEM::SOLO:
-            SceneManager::GetInstance()
-                .ChangeScene(std::make_shared<SceneGame>());
+        {  
+            auto playerJob = { PlayerBase::JOB_TYPE::BOMB };
+        SceneManager::GetInstance()
+               .ChangeScene(std::make_shared<SceneGame>(playerJob));
+        }
         break;
 
         case MENU_ITEM::MULTI:
