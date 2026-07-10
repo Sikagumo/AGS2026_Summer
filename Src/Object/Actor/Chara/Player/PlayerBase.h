@@ -14,9 +14,9 @@ public:
 	enum class JOB_TYPE
 	{
 		NONE = -1
-		, BOMB		  // 爆破
+		, SELECT_BOMB		  // 爆破
 		, CANNON	  // 巨大
-		, RAPID_FIRE  // 連射
+		, SELECT_RAPID_FIRE  // 連射
 		, SUPPORT	  // 回復
 		, MAX
 	};
@@ -25,16 +25,16 @@ public:
 	{
 		NONE = -1
 
-		, BOMB		// 爆破
+		, SELECT_BOMB		// 爆破
 		, BOMB_FINISH
 
-		, BIG // 巨大
+		, SELECT_BIG // 巨大
 
-		, RAPID_FIRE // 連射
+		, SELECT_RAPID_FIRE // 連射
 		, CLUSTER	 // 拡散
 
 
-		, RECOVERY	// 回復
+		, SELECT_RECOVERY	// 回復
 		, POISON	// 毒
 		, MAX
 	};

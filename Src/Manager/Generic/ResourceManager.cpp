@@ -120,6 +120,13 @@ void ResourceManager::Initialize(void)
 	_SetResource(LOAD_TYPE::IMAGES, SRC::IMGS_TITLE_TEXT, PATH_IMAGE + "TextsTitle.png"
 				, imagesAllNum, imagesNumX, imagesNumY);
 
+	// 選択文字
+	imagesAllNum = 9;
+	imagesNumX = 1;
+	imagesNumY = 9;
+	_SetResource(LOAD_TYPE::IMAGES, SRC::IMGS_SELECT, PATH_IMAGE + "SelectImages.png"
+				, imagesAllNum, imagesNumX, imagesNumY);
+
 	// ゲームシーンの文字
 	imagesAllNum = 1;
 	imagesNumX = 1;
@@ -130,7 +137,7 @@ void ResourceManager::Initialize(void)
 	imagesAllNum = 4;
 	imagesNumX = 1;
 	imagesNumY = 4;
-	_SetResource(LOAD_TYPE::IMAGES, SRC::IMGS_RESULT, PATH_IMAGE + "EndTxt.png"
+	_SetResource(LOAD_TYPE::IMAGES, SRC::IMGS_RESULT, PATH_IMAGE + "EndText.png"
 				, imagesAllNum, imagesNumX, imagesNumY);
 
 	/* エフェクト */
@@ -179,6 +186,7 @@ void ResourceManager::Initialize(void)
 	_SetResource(LOAD_TYPE::ANIM, SRC::ANIM_THROW_RIGHT, PATH_ANIM + "Throw_Right.mv1");
 	_SetResource(LOAD_TYPE::ANIM, SRC::ANIM_JUMP, PATH_ANIM + "Jump.mv1");
 	_SetResource(LOAD_TYPE::ANIM, SRC::ANIM_DODGE, PATH_ANIM + "Rolling.mv1");
+	_SetResource(LOAD_TYPE::ANIM, SRC::ANIM_DEFEAT, PATH_ANIM + "Defeat.mv1");
 
 	/* BGM */
 	_SetResource(LOAD_TYPE::SOUND, SRC::BGM_TITLE_SEA, PATH_BGM + "Sea.mp3");
@@ -186,12 +194,11 @@ void ResourceManager::Initialize(void)
 	_SetResource(LOAD_TYPE::SOUND, SRC::BGM_GAME, PATH_BGM + "GameBGM.mp3");
 
 	/* 効果音 */
-	_SetResource(LOAD_TYPE::SOUND, SRC::SE_CLICK, PATH_SE + "Click.mp3");
 	_SetResource(LOAD_TYPE::SOUND, SRC::SE_SELECT, PATH_SE + "Select.mp3");
-	_SetResource(LOAD_TYPE::SOUND, SRC::SE_DAMAGE, PATH_SE + "Damage.mp3");
-	_SetResource(LOAD_TYPE::SOUND, SRC::SE_MG_FIRE, PATH_SE + "MGFire.mp3");
+	_SetResource(LOAD_TYPE::SOUND, SRC::SE_PLAYER_DAMAGE, PATH_SE + "PlayerDamage.mp3");
+	_SetResource(LOAD_TYPE::SOUND, SRC::SE_BOSS_MG_FIRE, PATH_SE + "MGFire.mp3");
 	_SetResource(LOAD_TYPE::SOUND, SRC::SE_BOSS_LANDING, PATH_SE + "BossLanding.mp3");
-	_SetResource(LOAD_TYPE::SOUND, SRC::SE_ROAD, PATH_SE + "Road.mp3");
+	_SetResource(LOAD_TYPE::SOUND, SRC::SE_BOSS_ROAD, PATH_SE + "Road.mp3");
 
 }
 void ResourceManager::_SetResource(Resource::LOAD_TYPE _loadType, SRC _src, std::string _path

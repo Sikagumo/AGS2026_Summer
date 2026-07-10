@@ -642,7 +642,8 @@ bool CollisionController::CanCollide(int _tagA, int _tagB) const
 		|| tagHit == TAG::WEAPON_MG_L || tagHit == TAG::WEAPON_MG_R
 		|| tagHit == TAG::WEAPON_MP_L || tagHit == TAG::WEAPON_MP_R
 		|| tagHit == TAG::WEAPON_RG
-		|| tagHit == TAG::PLAYER_RECOVERY)
+		|| tagHit == TAG::PLAYER_RECOVERY
+		|| tagHit == TAG::WALL)
 	{
 		if (tagHurt == TAG::PLAYER
 			|| tagHurt == TAG::PLAYER_BULLET || tagHurt == TAG::PLAYER_BLAST

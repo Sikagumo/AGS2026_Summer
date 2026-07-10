@@ -86,7 +86,7 @@ private:
 
 	static constexpr std::array<SHOT_TYPE, static_cast<int>(JOB_TYPE::MAX)>
 		SHOT_TYPE_NORMAL
-		= { SHOT_TYPE::BOMB, SHOT_TYPE::BIG, SHOT_TYPE::RAPID_FIRE, SHOT_TYPE::RECOVERY };
+		= { SHOT_TYPE::SELECT_BOMB, SHOT_TYPE::SELECT_BIG, SHOT_TYPE::SELECT_RAPID_FIRE, SHOT_TYPE::SELECT_RECOVERY };
 
 	static constexpr std::array<SHOT_TYPE, static_cast<int>(JOB_TYPE::MAX)>
 		SHOT_TYPE_SPECIAL

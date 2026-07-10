@@ -43,8 +43,16 @@ public:
 
 private:
 
+    enum class GAME_STATE
+    {
+        NONE = -1,
+        MOVIE,
+        MOVIE_BOSS,
+        GAME,
+    };
+    
     const std::vector<VECTOR> PLAYER_INIT_POS =
-    { { 0,0,-1000.0f },{ 0,0,0 },{ 0,0,0 },{ 0,0,0 } };
+    { { 0,0,-2000.0f },{ 0,0,0 },{ 0,0,0 },{ 0,0,0 } };
 
     std::vector<std::unique_ptr<Player>> players_;
 

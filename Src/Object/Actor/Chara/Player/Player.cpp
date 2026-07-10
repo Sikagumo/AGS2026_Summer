@@ -70,7 +70,7 @@ Player::Player(int _playerNo, JOB_TYPE _jobType, const VECTOR& _startPos)
 
 	std::array< SHOT_TYPE, static_cast<int>(JOB_TYPE::MAX)>
 		JOB_SHOT_TYPE
-	{ SHOT_TYPE::BOMB, SHOT_TYPE::BIG, SHOT_TYPE::RAPID_FIRE, SHOT_TYPE::RECOVERY };
+	{ SHOT_TYPE::SELECT_BOMB, SHOT_TYPE::SELECT_BIG, SHOT_TYPE::SELECT_RAPID_FIRE, SHOT_TYPE::SELECT_RECOVERY };
 
 	shotType_ = JOB_SHOT_TYPE[static_cast<int>(jobType_)];
 
@@ -127,7 +127,7 @@ void Player::InitAnimation(void)
 		constexpr float THROW_SPEED_BIG = 20.0f;
 		throwSpeed = THROW_SPEED_BIG;
 	}
-	else if (jobType_ == JOB_TYPE::RAPID_FIRE)
+	else if (jobType_ == JOB_TYPE::SELECT_RAPID_FIRE)
 	{
 		constexpr float THROW_SPEED_RAPID = 75.0f;
 		 throwSpeed = THROW_SPEED_RAPID;
@@ -273,7 +273,7 @@ void Player::InitPost(void)
 			, std::bind(&Player::ShotBullet, this)
 			, timeStop, timeStopActive, timeInput);
 	}
-	else if (jobType_ == JOB_TYPE::RAPID_FIRE)
+	else if (jobType_ == JOB_TYPE::SELECT_RAPID_FIRE)
 	{
 		actionNum = static_cast<int>(ACTION_TYPE::ATTACK);
 		constexpr float SHOT_TIME_ACTIVE = 0.4f; // 有効時間
@@ -320,7 +320,9 @@ void Player::Draw(void)
 	}
 	MV1SetMaterialDifColor(transform_.modelId, 0, material);
 
-	DrawFormatString(10, 140, 0xffffff, "Pleyerの座標：%f,%f,%f", transform_.pos.x, transform_.pos.y, transform_.pos.z);
+#ifdef _DEBUG
+	DrawFormatString(10, 140, 0xffffff, "Playerの座標：%f,%f,%f", transform_.pos.x, transform_.pos.y, transform_.pos.z);
+#endif
 	ActorBase::Draw();
 
 	CharaBase::DrawShadowRound(30.0f);
@@ -611,7 +613,7 @@ void Player::DrawShotOrbit(void)
 		// このステップの移動量[発射速度 - 重力加算値]
 		VECTOR pos = shotPow;
 
-		if (shotType_ != SHOT_TYPE::RAPID_FIRE && shotType_ != SHOT_TYPE::CLUSTER)
+		if (shotType_ != SHOT_TYPE::SELECT_RAPID_FIRE && shotType_ != SHOT_TYPE::CLUSTER)
 		{
 			pos.y -= (Application::GetInstance().GetGravityPow() * (ORBIT_DELTA * ORBIT_STEP_SCALE * i));
 		}
@@ -735,7 +737,7 @@ void Player::ProcessAttack(void)
 	// 行動の更新
 	actionController_->Update();
 
-	if (jobType_ == JOB_TYPE::RAPID_FIRE)
+	if (jobType_ == JOB_TYPE::SELECT_RAPID_FIRE)
 	{
 		if (shotTerm_ <= 0.0f)
 		{
@@ -919,20 +921,20 @@ void Player::CreateBullet(void)
 
 	switch (shotType_)
 	{
-		case SHOT_TYPE::BIG:
+		case SHOT_TYPE::SELECT_BIG:
 			bullet = std::make_unique<PBulletBig>();
 		break;
 
-		case SHOT_TYPE::BOMB:
+		case SHOT_TYPE::SELECT_BOMB:
 			bullet = std::make_unique<PBulletBomb>();
 		break;
 
-		case SHOT_TYPE::RECOVERY:
+		case SHOT_TYPE::SELECT_RECOVERY:
 			bullet = std::make_unique<PBulletRecovery>();
 		break;
 
 		// 連射
-		case SHOT_TYPE::RAPID_FIRE:
+		case SHOT_TYPE::SELECT_RAPID_FIRE:
 		{
 			bullet = std::make_unique<PBulletNormal>
 						(SCALE_RAPID, RADIUS_RAPID, POWER_RAPID
@@ -1038,7 +1040,7 @@ VECTOR Player::CalcShotDir(void)
 {
 	VECTOR shotDir = transform_.GetForward();
 
-	if (shotType_ != SHOT_TYPE::RAPID_FIRE)
+	if (shotType_ != SHOT_TYPE::SELECT_RAPID_FIRE)
 	{
 		// 放物線状に投げる
 		shotDir = VAdd(shotDir, UtilityMath::DIR_UP);

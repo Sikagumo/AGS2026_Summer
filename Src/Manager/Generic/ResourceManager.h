@@ -28,6 +28,7 @@ public:
 		IMGS_TEXTS,
 		IMGS_TIMER,
 		IMGS_TITLE_TEXT,
+		IMGS_SELECT,
 		IMGS_GAME_TEXT,
 		IMGS_HP_TARGET,
 		IMGS_HP_PLAYER,
@@ -67,6 +68,7 @@ public:
 		ANIM_THROW_RIGHT,
 		ANIM_JUMP,
 		ANIM_DODGE,
+		ANIM_DEFEAT,
 
 		/* エフェクト */
 		EFFECT_WAVE,
@@ -83,12 +85,11 @@ public:
 		BGM_GAME,
 
 		/* 効果音 */
-		SE_CLICK,
 		SE_SELECT,
-		SE_DAMAGE,
-		SE_MG_FIRE,
+		SE_PLAYER_DAMAGE,
+		SE_BOSS_MG_FIRE,
 		SE_BOSS_LANDING,
-		SE_ROAD,
+		SE_BOSS_ROAD,
 	};
 
 

@@ -29,8 +29,8 @@ public:
 		SE_SELECT,
 		SE_DAMAGE_PLAYER, // プレイヤー被ダメージ処理
 		SE_BOSS_LANDING,//ボスの着地
-		SE_MG_FIRE,
-		SE_ROAD,
+		SE_BOSS_MG_FIRE,
+		SE_BOSS_ROAD,
 	};
 
 	/// @brief サウンドのリソースデータ構造体

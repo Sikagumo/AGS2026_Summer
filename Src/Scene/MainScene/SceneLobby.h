@@ -41,23 +41,37 @@ public:
 
 private:
 
-    bool isMulti_;
+    const bool IS_MULTI;
+
     bool isSelectMenu_;
     int selectedIdx_;
 
     enum class UI_SINGLE
     {
         NONE = -1,
-        BOMB,
-        BIG,
-        RECOVERY,
-        RAPID_FIRE,
+        SELECT_BOMB,
+        NOT_SELECT_BOMB,
+        SELECT_BIG,
+        NOT_SELECT_BIG,
+        SELECT_RECOVERY,
+        NOT_SELECT_RECOVERY,
+        SELECT_RAPID_FIRE,
+        NOT_SELECT_RAPID_FIRE,
+        GAME_START,
+
         MAX
     };
-    std::array<std::unique_ptr<Collider2DBase>, static_cast<int>(UI_SINGLE::MAX)>
+    std::array<int, static_cast<int>(UI_SINGLE::MAX)>
+        uiHandles_;
+
+
+    // マウスカーソル用の円コライダー
+    std::unique_ptr<Collider2DCircle> cursorCollider_;
+
+    std::array<std::unique_ptr<Collider2DBase>, 4>
         uiCollisions_;
 
-    std::array<Collider2DBase::TAG_2D, static_cast<int>(UI_SINGLE::MAX)>
+    std::array<Collider2DBase::TAG_2D, 4>
         uiCollisionTags_;
     
     void InitUISingle(void);

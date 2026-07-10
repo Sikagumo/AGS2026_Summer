@@ -152,7 +152,7 @@ void Boss::Load(void)
 	//SE
 	SoundManager::GetInstance().Add(SoundManager::TYPE::SE, SoundManager::SOUND::SE_BOSS_LANDING, ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::SE_BOSS_LANDING));
 
-	SoundManager::GetInstance().Add(SoundManager::TYPE::SE, SoundManager::SOUND::SE_ROAD, ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::SE_ROAD));
+	SoundManager::GetInstance().Add(SoundManager::TYPE::SE, SoundManager::SOUND::SE_BOSS_ROAD, ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::SE_BOSS_ROAD));
 
 	
 
@@ -439,7 +439,7 @@ void Boss::BossTransformUpdate(void)
 	WeaponUpdate();
 
 	SoundManager::GetInstance().Set3DPosition(SoundManager::SOUND::SE_BOSS_LANDING, transform_.pos);
-	SoundManager::GetInstance().Set3DPosition(SoundManager::SOUND::SE_ROAD, transform_.pos);
+	SoundManager::GetInstance().Set3DPosition(SoundManager::SOUND::SE_BOSS_ROAD, transform_.pos);
 }
 
 void Boss::UpdateProcess(void)
@@ -450,7 +450,7 @@ void Boss::UpdateProcess(void)
 	isMGFire_ = false;
 	if (weaponMGL_->IsAttack() == true || weaponMGR_->IsAttack() == true)
 	{
-		if (SoundManager::GetInstance().IsPlaying(SoundManager::SOUND::SE_MG_FIRE) == false)
+		if (SoundManager::GetInstance().IsPlaying(SoundManager::SOUND::SE_BOSS_MG_FIRE) == false)
 		{
 			isMGFire_ = true;
 		}
@@ -608,7 +608,7 @@ void Boss::UpdateJumpBefore(void)
 
 void Boss::UpdateRoadAttack(void)
 {
-	SoundManager::GetInstance().Set3DPosition(SoundManager::SOUND::SE_ROAD, transform_.pos);
+	SoundManager::GetInstance().Set3DPosition(SoundManager::SOUND::SE_BOSS_ROAD, transform_.pos);
 	
 	transformBody_.pos = MV1GetFramePosition(transform_.modelId, JOINT_CAR_BODY);
 	transformWheelFrontL_.pos = MV1GetFramePosition(transform_.modelId, JOINT_CAR_WHEEL_FRONT_L);
@@ -684,7 +684,7 @@ void Boss::UpdateRoadAttack(void)
 		transform_.modelId = transformFeet_.modelId;
 		transform_.scl = transformFeet_.scl;
 		CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::ROAD_ATTACK, false);
-		SoundManager::GetInstance().Stop(SoundManager::SOUND::SE_ROAD);
+		SoundManager::GetInstance().Stop(SoundManager::SOUND::SE_BOSS_ROAD);
 		ChangeState(STATE::IDLE);
 	}
 

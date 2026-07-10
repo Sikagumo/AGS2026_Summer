@@ -4,10 +4,10 @@
 #include "../../../../../Collision/CollisionController.h"
 
 constexpr float RADIUS_BULLET = 9.0f;
-constexpr float RADIUS_RECOVERY = 150.0f;
+constexpr float RADIUS_BLAST = 225.0f;
 constexpr float SCALE_BOMB = 1.0f;
-constexpr float TIME_ALIVE_BOMB = 15.0f;
-constexpr int POWER_BOMB = 10;
+constexpr float TIME_ALIVE_BOMB = 10.0f;
+constexpr int POWER_BOMB = 25;
 
 
 PBulletBomb::PBulletBomb(void)
@@ -41,6 +41,7 @@ void PBulletBomb::UpdatePost(void)
 				.SetCollisionActive(this, ColliderBase::TAG::PLAYER_BLAST, false);
 			bulletState_ = BULLET_STATE::INACTIVE;
 			activePowerBullet_ = 0;
+			activePowerBlast_ = 0;
 			return;
 		}
 
@@ -84,7 +85,7 @@ void PBulletBomb::BlastAction(void)
 		.SetCollisionActive(this, ColliderBase::TAG::PLAYER_BULLET, false);
 
 	// ”š”­—LŒø‰»
-	radiusBlast_ = RADIUS_RECOVERY;
+	radiusBlast_ = RADIUS_BLAST;
 
 	ownColliders_[static_cast<int>(COLLISION_TYPE::BLAST)]
 		.at(0)->SetRadius(radiusBlast_);
