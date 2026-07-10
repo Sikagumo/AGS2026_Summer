@@ -48,8 +48,8 @@ public:
 
 	virtual void PreActiveProcess(void){};
 
-	//int GetPowerBullet(void)const { return activePowerBullet_; }
-	//int GetPowerBlast(void)const { return activePowerBlast_; }
+	int GetPowerBullet(void)const { return activePowerBullet_; }
+	int GetPowerBlast(void)const { return activePowerBlast_; }
 
 	virtual void BlastAction(void) = 0;
 
