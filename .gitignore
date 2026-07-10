@@ -32,6 +32,7 @@
 *.pdb
 *.out
 *.app
+*.dxa
 
 # New addition
 .vs/

@@ -62,7 +62,7 @@ void WeaponMGL::InitAnimation(void)
 
 void WeaponMGL::InitPost(void)
 {
-	hp = 1250;
+	hp_ = 1250;
 	isAlive_ = true;
 	localPos_ = LINE_START_POS;
 	look = -1;

@@ -81,7 +81,7 @@ void WeaponMP::InitAnimation(void)
 void WeaponMP::InitPost(void)
 {
 
-	hp = 750;
+	hp_ = 750;
 	isAlive_ = true;
 	localPos_ = LINE_START_POS;
 	stateChanges_.emplace(static_cast<int>(STATE::IDLE),std::bind(&WeaponMP::ChangeStateIdle, this));
