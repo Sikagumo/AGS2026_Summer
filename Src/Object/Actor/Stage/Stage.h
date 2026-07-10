@@ -42,13 +42,15 @@ private:
 	Transform collisionTrans_;
 
 
-	// 除外フレーム名称
-	const std::vector<std::string> EXCLUDE_FRAME_NAMES = {
-		"Mush", "Grass",
+	// 壁の除外フレーム名称
+	const std::vector<std::string> EXCLUDE_WALL_NAMES =
+	{
+		"Collision_Ground",
 	};
 
-	// 対象フレーム
-	const std::vector<std::string> TARGET_FRAME_NAMES = {
-		"Ground",
+	// ステージの除外フレーム名称
+	const std::vector<std::string> EXCLUDE_STAGE_NAMES = 
+	{
+		"Collision_Wall",
 	};
 };

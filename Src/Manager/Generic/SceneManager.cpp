@@ -249,6 +249,7 @@ void SceneManager::Update(void)
 
 void SceneManager::Draw(void)
 {
+    ClearDrawScreen();
     if (!scenes_.empty())
     {
         if (camera_) camera_->SetBeforeDraw();

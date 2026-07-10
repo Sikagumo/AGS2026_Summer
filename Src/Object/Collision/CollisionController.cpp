@@ -421,11 +421,21 @@ void CollisionController::ResolveCollision(ActorBase* _actorA, ActorBase* _actor
 	// 片方が動かないオブジェクトで、もう片方が動くオブジェクトの場合
 	if (!isStaticObstacle(tagA) && isStaticObstacle(tagB))
 	{
+		if (fabsf(_info.hitNormal.y) < 0.5f)
+		{
+			pushVector.y = 0.0f;
+		}
+
 		_actorA->GetTransform().Translate(pushVector);
 		return;
 	}
 	else if (isStaticObstacle(tagA) && !isStaticObstacle(tagB))
 	{
+		if (fabsf(_info.hitNormal.y) < 0.5f)
+		{
+			pushVector.y = 0.0f;
+		}
+
 		_actorB->GetTransform().Translate(VScale(pushVector, -1.0f));
 		return;
 	}
@@ -498,7 +508,8 @@ void CollisionController::UpdateCollisionPars(void)
 			{
 				for (const auto* colA : colliderVectorA)
 				{
-					if (colA != nullptr && colA->GetCollisionTag() == ColliderBase::TAG::STAGE)
+					if (colA != nullptr && colA->GetCollisionTag() == ColliderBase::TAG::STAGE
+						|| colA->GetCollisionTag() == ColliderBase::TAG::WALL)
 					{
 						isStageCollision = true;
 						break;
@@ -512,7 +523,8 @@ void CollisionController::UpdateCollisionPars(void)
 			{
 				for (const auto* colB : colliderVectorB)
 				{
-					if (colB != nullptr && colB->GetCollisionTag() == ColliderBase::TAG::STAGE)
+					if (colB != nullptr && colB->GetCollisionTag() == ColliderBase::TAG::STAGE
+						|| colB->GetCollisionTag() == ColliderBase::TAG::WALL)
 					{
 						isStageCollision = true;
 						break;
@@ -631,7 +643,8 @@ bool CollisionController::CanCollide(int _tagA, int _tagB) const
 			|| tagHurt == TAG::LASER
 			|| tagHurt == TAG::MISSILE_ATTACK
 			|| tagHurt == TAG::MISSILE_PUSH
-			|| tagHurt == TAG::PLAYER_RECOVERY)
+			|| tagHurt == TAG::PLAYER_RECOVERY
+			|| tagHurt == TAG::WALL)
 		{
 			return true;
 		}
@@ -642,7 +655,8 @@ bool CollisionController::CanCollide(int _tagA, int _tagB) const
 		|| tagHit == TAG::WEAPON_MG_L || tagHit == TAG::WEAPON_MG_R
 		|| tagHit == TAG::WEAPON_MP_L || tagHit == TAG::WEAPON_MP_R
 		|| tagHit == TAG::WEAPON_RG
-		|| tagHit == TAG::PLAYER_RECOVERY)
+		|| tagHit == TAG::PLAYER_RECOVERY
+		|| tagHit == TAG::WALL)
 	{
 		if (tagHurt == TAG::PLAYER
 			|| tagHurt == TAG::PLAYER_BULLET || tagHurt == TAG::PLAYER_BLAST
@@ -687,6 +701,17 @@ bool CollisionController::CanCollide(int _tagA, int _tagB) const
 			return true;
 		}
 		
+	}
+
+	if (tagHit == TAG::WALL)
+	{
+		if (tagHurt == TAG::PLAYER 
+			|| tagHurt == TAG::PLAYER_BULLET 
+			|| tagHurt == TAG::PLAYER_BLAST
+			|| tagHurt == TAG::BOSS)
+		{
+			return true;
+		}
 	}
 
 	return false;

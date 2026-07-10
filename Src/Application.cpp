@@ -126,13 +126,7 @@ void Application::Run(void)
 			break;
 		}
 
-		bool isChanging = sceneManager.IsSceneChanging();
-
 		sceneManager.Update();
-		if (!isChanging)
-		{
-			ClearDrawScreen();
-		}
 
 		netManager.Update();
 		inputTextManager.Update();
