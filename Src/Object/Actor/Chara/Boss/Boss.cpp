@@ -51,6 +51,7 @@ Boss::Boss(void) :
 	laserAttackRot_(0.0f),
 	laserRotSpeed_(2.0f),
 	lastAttackType_ (ATTACK_TYPE::MAX),
+	wallStopPos_({0,0,0}),
 
 
 	CharaBase()
@@ -573,6 +574,8 @@ void Boss::UpdateAttack(void)
 	// ¡‰ñ‘I‚Î‚ê‚½UŒ‚‚ðu‘O‰ñ‚ÌUŒ‚v‚Æ‚µ‚Ä•Û‘¶‚µ‚Ä‚¨‚­
 	lastAttackType_ = attackSelect_;
 
+	 //attackSelect_ = ATTACK_TYPE::ROAD;
+
 	switch (attackSelect_)
 	{
 	case ATTACK_TYPE::JUMP:
@@ -720,6 +723,17 @@ void Boss::UpdateRoadAttack(void)
 		VECTOR movePow = VScale(roadDir_, speed_);
 		// ˆÚ“®ˆ—
 		transform_.pos = VAdd(transform_.pos, movePow);
+		transform_.Update();
+		bool hitWall = CollisionController::GetInstance().IsTagCollidingWithTag(ColliderBase::TAG::ROAD_ATTACK, ColliderBase::TAG::WALL);
+		if (hitWall==true)
+		{
+			roadAttackTime_ = 0;
+			roadIsAttack_ = false;
+			CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::ROAD_ATTACK, false);
+		}
+
+		wallStopPos_ = transform_.pos;
+		
 		roadAttackTime_++;
 		if (roadAttackTime_ >= MAX_ROAD_ATTACK_TIME)
 		{
