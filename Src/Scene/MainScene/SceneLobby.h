@@ -45,6 +45,7 @@ private:
 
     bool isSelectMenu_;
     int selectedIdx_;
+    int inputIntervalCounter_;
 
     enum class UI_SINGLE
     {

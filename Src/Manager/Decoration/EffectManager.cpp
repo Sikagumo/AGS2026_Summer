@@ -83,6 +83,22 @@ void EffectManager::Initialize(void)
     missileData.speed = INIT_SPEED;
     effect_[EFFECT::EFFECT_MISSILE] = missileData;
 
+    EFFECT_DATA playerBulletData;
+    playerBulletData.Data = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::EFFECT_PLAYER_BLAST);
+    playerBulletData.pos = INIT_POS;
+    playerBulletData.rot = INIT_ROT;
+    playerBulletData.scl = INIT_SCL;
+    playerBulletData.speed = INIT_SPEED;
+    effect_[EFFECT::EFFECT_PLAYER_BULLET] = playerBulletData;
+
+    EFFECT_DATA playerBlastData;
+    playerBlastData.Data = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::EFFECT_PLAYER_BLAST);
+    playerBlastData.pos = INIT_POS;
+    playerBlastData.rot = INIT_ROT;
+    playerBlastData.scl = INIT_SCL;
+    playerBlastData.speed = INIT_SPEED;
+    effect_[EFFECT::EFFECT_PLAYER_BLAST] = playerBlastData;
+
 }
 
 void EffectManager::Play(const EFFECT _effect, const VECTOR _pos, const VECTOR _rot, const VECTOR _scl, float _speed, const void* _owner, int _tag)

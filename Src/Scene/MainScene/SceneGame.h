@@ -70,7 +70,6 @@ private:
     int targetHpImage_;
     int targetHpBerImage_;
 
-
     enum class UI_GAME
     {
 

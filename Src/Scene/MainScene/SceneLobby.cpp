@@ -27,6 +27,7 @@ SceneLobby::SceneLobby(bool _isMulti)
 	: SceneBase::SceneBase()
 	, IS_MULTI(_isMulti)
     , cursorCollider_(nullptr)
+    , inputIntervalCounter_(0)
 {
 }
 
@@ -143,9 +144,7 @@ void SceneLobby::Draw(void)
             0.0, uiHandles_.at(imageNum), true);
 
 #ifdef _DEBUG
-        DrawBox(UI_POS.at(i).x - (BUTTON_SIZE.x / 2), UI_POS.at(i).y - (BUTTON_SIZE.y / 2)
-            , UI_POS.at(i).x + (BUTTON_SIZE.x / 2), UI_POS.at(i).y + (BUTTON_SIZE.y / 2)
-            , 0xff0000, false);
+        CollisionController::GetInstance().DrawDebug2D();
 #endif
     }
 
@@ -164,7 +163,6 @@ void SceneLobby::UpdateSingle(void)
 	Vector2F stick = keyConfInputManager.GetLeftStickRaw();
 
     // スティック入力による選択インデックスの更新
-    int inputIntervalCounter = 0;
     constexpr float THRESHOLD = 0.5f;
     constexpr int STICK_TINERVAL = 15;
     constexpr int MENU_MAX = static_cast<int>(PlayerBase::JOB_TYPE::MAX);
@@ -177,9 +175,9 @@ void SceneLobby::UpdateSingle(void)
     if (isSelectMenu_)
     {
 
-        if (inputIntervalCounter > 0)
+        if (inputIntervalCounter_ > 0)
         {
-            inputIntervalCounter--;
+            inputIntervalCounter_--;
         }
         else if (std::abs(stick.y) > THRESHOLD)
         {
@@ -191,7 +189,7 @@ void SceneLobby::UpdateSingle(void)
             {
                 selectedIdx_ = ((selectedIdx_ - 1 + MENU_MAX) % MENU_MAX);
             }
-            inputIntervalCounter = STICK_TINERVAL;
+            inputIntervalCounter_ = STICK_TINERVAL;
         }
         
         // マウスが動いたときはパッドの選択カーソルも追従させる
