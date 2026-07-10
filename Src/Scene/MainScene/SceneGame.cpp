@@ -167,7 +167,14 @@ void SceneGame::DamageProcess(void)
 	// プレイヤーの攻撃
 	for (auto& player : players_)
 	{
+		// 弾
 		for (auto& bullet : player->GetBullets())
+		{
+			damageController_->SetPlayerAttack(bullet->GetPowerBullet(), bullet->GetPowerBlast());
+		}
+
+		// 拡散弾
+		for (auto& bullet : player->GetBulletsCluster())
 		{
 			damageController_->SetPlayerAttack(bullet->GetPowerBullet(), bullet->GetPowerBlast());
 		}
@@ -279,7 +286,7 @@ void SceneGame::DrawHpBerPlayer(void)
 		// 減少範囲にリマップ
 		const float DISPLAY_RATIO = std::lerp(DISPLAY_RATIO_MIN, DISPLAY_RATIO_MAX, RATIO);
 
-		constexpr float HP_POS_X = 48;
+		constexpr int HP_POS_X = 48;
 		berPos.x += HP_POS_X;
 
 		// 左上座標
@@ -289,7 +296,7 @@ void SceneGame::DrawHpBerPlayer(void)
 
 		// 右下座標
 		const Vector2 POS_LOWER_RIGHT
-			= { (POS_UPPER_LEFT.x + (backSize.x * DISPLAY_RATIO)),
+			= { (POS_UPPER_LEFT.x + static_cast<int>(backSize.x * DISPLAY_RATIO)),
 				(POS_UPPER_LEFT.y + backSize.y) };
 
 
@@ -340,7 +347,7 @@ void SceneGame::DrawHpBerBoss(void)
 
 		// 背景
 		DrawRotaGraph(
-			viewPos.x, viewPos.y,
+			static_cast<int>(viewPos.x), static_cast<int>(viewPos.y),
 			BER_SCALE, 0.0f,
 			targetHpBerImage_, true
 		);
@@ -376,8 +383,8 @@ void SceneGame::DrawHpBerBoss(void)
 		// 右下座標
 		constexpr int OFFSET_X = -10;
 		const Vector2 POS_LOWER_RIGHT
-			= { (POS_UPPER_LEFT.x + (BER_SIZE.x * RATIO) + OFFSET_X),
-				(POS_UPPER_LEFT.y + BER_SIZE.y) };
+			= { (POS_UPPER_LEFT.x + static_cast<int>(BER_SIZE.x * RATIO) + OFFSET_X),
+				(POS_UPPER_LEFT.y + static_cast<int>(BER_SIZE.y)) };
 
 		// 切り取り幅 (HP割合分)
 		const int IMAGE_WIDTH = static_cast<int>(imageSize.x * RATIO);

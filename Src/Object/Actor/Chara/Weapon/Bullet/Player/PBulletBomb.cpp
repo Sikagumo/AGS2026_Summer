@@ -37,7 +37,8 @@ void PBulletBomb::UpdatePost(void)
 		if (isActiveDestroy_) 
 		{
 			// “–‚½‚è”»’è–³Œø‰»
-			CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::PLAYER_BLAST, false);
+			CollisionController::GetInstance()
+				.SetCollisionActive(this, ColliderBase::TAG::PLAYER_BLAST, false);
 			bulletState_ = BULLET_STATE::INACTIVE;
 			activePowerBullet_ = 0;
 			return;
@@ -65,6 +66,9 @@ void PBulletBomb::SetParam(void)
 
 	radiusBullet_ = RADIUS_BULLET;
 	radiusBlast_ = 0.0f;
+	ownColliders_[static_cast<int>(COLLISION_TYPE::BLAST)]
+		.at(0)->SetRadius(radiusBlast_);
+
 	power_ = POWER_BOMB;
 	transform_.InitTransform(SCALE_BOMB, transform_.quaRot, Quaternion::Identity());
 }

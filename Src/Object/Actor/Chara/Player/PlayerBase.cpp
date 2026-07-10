@@ -12,6 +12,8 @@ PlayerBase::PlayerBase(int _playerNo, JOB_TYPE _jobType, const VECTOR& _startPos
 	, START_POS(_startPos)
 	, bodyPos_(UtilityMath::VECTOR_ZERO)
 	, timeInv_(0.0f), timeInvDodge_(0.0f)
+	, shotType_(SHOT_TYPE::NONE)
+	, bullets_{}, clusterBullets_{}
 {
 }
 
