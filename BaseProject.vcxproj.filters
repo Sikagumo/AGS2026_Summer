@@ -87,6 +87,8 @@
     <ClCompile Include="Src\Object\Actor\Chara\Weapon\Bullet\Boss\BBulletLaser.cpp" />
     <ClCompile Include="Src\Object\Actor\Chara\Weapon\Bullet\Player\PBulletPoison.cpp" />
     <ClCompile Include="Src\Common\GameTimer.cpp" />
+    <ClCompile Include="Src\Object\Actor\Chara\Enemy\EnemyBase.cpp" />
+    <ClCompile Include="Src\Object\Actor\Chara\Enemy\EnemyRobo.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\Shader\ShaderParameters.h" />
@@ -175,6 +177,8 @@
     <ClInclude Include="Src\Object\Actor\Chara\Weapon\Bullet\Boss\BBulletLaser.h" />
     <ClInclude Include="Src\Object\Actor\Chara\Weapon\Bullet\Player\PBulletPoison.h" />
     <ClInclude Include="Src\Common\GameTimer.h" />
+    <ClInclude Include="Src\Object\Actor\Chara\Enemy\EnemyBase.h" />
+    <ClInclude Include="Src\Object\Actor\Chara\Enemy\EnemyRobo.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="srcGraphics\Common\Pixel\PixelShader2DHeader.hlsli" />

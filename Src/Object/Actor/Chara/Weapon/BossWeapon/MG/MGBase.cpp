@@ -118,7 +118,7 @@ void MGBase::ChangeStateAttack(void)
 
     VECTOR effectRot=transform_.quaRot.GetForward();
 
-    EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_MG, effectPos_, effectRot, { 10.0f,10.0f,10.0f }, 1.0f,this);
+   // EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_MG, effectPos_, effectRot, { 10.0f,10.0f,10.0f }, 1.0f,this);
 }
 
 void MGBase::ChangeStateEnd(void)

@@ -23,6 +23,7 @@ constexpr float GAME_TIME_DEFEAT_DEC = 75.0f;
 SceneGame::SceneGame(std::vector<PlayerBase::JOB_TYPE> _playerJob)
 	: players_()
 	, boss_(std::make_unique<Boss>())
+	, enemyRobo_(std::make_unique<EnemyRobo>())
 	, stage_(std::make_unique<Stage>())
 	, damageController_(std::make_unique<DamageController>())
 	, targetHpImage_(-1), targetHpBerImage_(-1)
@@ -56,6 +57,7 @@ void SceneGame::Load(void)
 	}
 
 	boss_->Load();
+	enemyRobo_->Load();
 
 	stage_->Load();
 
@@ -92,6 +94,7 @@ void SceneGame::Initialize(void)
 
 	boss_->Init();
 	stage_->Init();
+	enemyRobo_->Init();
 
 	// タイマー有効化
 	gameTimer_->SetIsTimeActive(true);
@@ -114,6 +117,7 @@ void SceneGame::Update(void)
 	DamageProcess();
 
 	boss_->Update();
+	enemyRobo_->Update();
 	stage_->Update();
 	
 	for (auto& player : players_)
@@ -209,7 +213,7 @@ void SceneGame::Draw(void)
 	}
 
 	boss_->Draw();
-
+	enemyRobo_->Draw();
 	effect.Draw();
 
 	DrawHpBerBoss();

@@ -282,6 +282,10 @@ private:
 	//ã@î\ä÷êî
 	void LookPlayer(void);
 
+	//effect
+	void PlayEffect(void);
+	void UpdateEffect(void);
+
 
 protected:
 
