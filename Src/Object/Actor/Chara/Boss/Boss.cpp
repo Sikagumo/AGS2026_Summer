@@ -114,6 +114,13 @@ void Boss::SetWeaponRGDamage(int _damage)
 void Boss::SetBossDamage(int _damage)
 {
 	hp_ -= _damage;
+	if (_damage > 0)
+	{
+
+		PlayEffect();
+	}
+
+
 }
 //＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝
 
@@ -155,6 +162,42 @@ void Boss::Load(void)
 	SoundManager::GetInstance().Add(SoundManager::TYPE::SE, SoundManager::SOUND::SE_ROAD, ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::SE_ROAD));
 
 	
+
+
+}
+
+void Boss::PlayEffect(void)
+{
+	
+	EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_BOSS_HIT, { 0,0,0 }, { 90,0,0 }, { 10,10,10 }, 1.0f, this, 1);
+	EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_BOSS_HIT, { 0,0,0 }, { 0,0,0 }, { 10,10,10 }, 1.0f, this, 2);
+	EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_BOSS_HIT, { 0,0,0 }, { 0,0,0 }, { 10,10,10 }, 1.0f, this, 3);
+}
+
+void Boss::UpdateEffect(void)
+{
+	VECTOR hitEffectPos1= MV1GetFramePosition(transform_.modelId, JOINT_FEET_BODY);
+	EffectManager::GetInstance().UpdatePos(EffectManager::EFFECT::EFFECT_BOSS_HIT, this, hitEffectPos1, 1);
+	VECTOR hitEffectPos2 = MV1GetFramePosition(transformBody_.modelId, JOINT_WAEAPON_MP_L);
+	EffectManager::GetInstance().UpdatePos(EffectManager::EFFECT::EFFECT_BOSS_HIT, this, hitEffectPos2, 2);
+	VECTOR hitEffectPos3 = MV1GetFramePosition(transformBody_.modelId, JOINT_WAEAPON_MP_R);
+	EffectManager::GetInstance().UpdatePos(EffectManager::EFFECT::EFFECT_BOSS_HIT, this, hitEffectPos3, 3);
+
+	VECTOR hitEffectRot1 = Quaternion::Mult(transformBody_.quaRot, Quaternion::AngleAxis(UtilityMath::Deg2RadF(90.0f), UtilityMath::AXIS_X)).ToEuler();
+	hitEffectRot1.x = UtilityMath::Rad2DegF(hitEffectRot1.x);
+	hitEffectRot1.y = UtilityMath::Rad2DegF(hitEffectRot1.y);
+	hitEffectRot1.z = UtilityMath::Rad2DegF(hitEffectRot1.z);
+	EffectManager::GetInstance().UpdateRot(EffectManager::EFFECT::EFFECT_BOSS_HIT, this, hitEffectRot1, 1);
+	VECTOR hitEffectRot2 = Quaternion::Mult(transformBody_.quaRot, Quaternion::AngleAxis(UtilityMath::Deg2RadF(180.0f), UtilityMath::AXIS_Y)).ToEuler();
+	hitEffectRot2.x = UtilityMath::Rad2DegF(hitEffectRot2.x);
+	hitEffectRot2.y = UtilityMath::Rad2DegF(hitEffectRot2.y);
+	hitEffectRot2.z = UtilityMath::Rad2DegF(hitEffectRot2.z);
+	EffectManager::GetInstance().UpdateRot(EffectManager::EFFECT::EFFECT_BOSS_HIT, this, hitEffectRot2, 2);
+	VECTOR hitEffectRot3 = Quaternion::Mult(transformBody_.quaRot, Quaternion::AngleAxis(UtilityMath::Deg2RadF(0.0f), UtilityMath::AXIS_X)).ToEuler();
+	hitEffectRot3.x = UtilityMath::Rad2DegF(hitEffectRot3.x);
+	hitEffectRot3.y = UtilityMath::Rad2DegF(hitEffectRot3.y);
+	hitEffectRot3.z = UtilityMath::Rad2DegF(hitEffectRot3.z);
+	EffectManager::GetInstance().UpdateRot(EffectManager::EFFECT::EFFECT_BOSS_HIT, this, hitEffectRot3, 3);
 
 
 }
@@ -478,7 +521,7 @@ void Boss::UpdateProcess(void)
 
 void Boss::UpdateProcessPost(void)
 {
-	
+	UpdateEffect();
 }
 
 //各ステイトのアップデート関数＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝－
@@ -537,8 +580,10 @@ void Boss::UpdateAttack(void)
 		break;
 
 	case ATTACK_TYPE::MG:
-		weaponMGL_->ChangeState(WeaponMGL::STATE::ATTACK);
-		weaponMGR_->ChangeState(WeaponMGR::STATE::ATTACK);
+		if (weaponMGL_->GetIsAlive()==true)weaponMGL_->ChangeState(WeaponMGL::STATE::ATTACK);
+		
+		if (weaponMGR_->GetIsAlive() == true)weaponMGR_->ChangeState(WeaponMGR::STATE::ATTACK);
+		
 		isMGFire_ = true;
 		ChangeState(STATE::IDLE);
 		break;
@@ -548,15 +593,21 @@ void Boss::UpdateAttack(void)
 		break;
 
 	case ATTACK_TYPE::CANNON:
-		weaponCannonL_->ChangeState(WeaponCannon::STATE::ATTACK);
-		weaponCannonR_->ChangeState(WeaponCannon::STATE::ATTACK);
+		if(weaponCannonL_->GetIsAlive()==true)weaponCannonL_->ChangeState(WeaponCannon::STATE::ATTACK);
+		if (weaponCannonR_->GetIsAlive() == true)weaponCannonR_->ChangeState(WeaponCannon::STATE::ATTACK);
 		ChangeState(STATE::IDLE);
 		break;
 	case ATTACK_TYPE::MISSILE:
-		weaponMPL_->ChangeState(WeaponMP::STATE::ATTACK);
-		weaponMPL_->IsLR(true);
-		weaponMPR_->ChangeState(WeaponMP::STATE::ATTACK);
-		weaponMPR_->IsLR(false);
+		if (weaponMPL_->GetIsAlive() == true)
+		{
+			weaponMPL_->ChangeState(WeaponMP::STATE::ATTACK);
+			weaponMPL_->IsLR(true);
+		}
+		if (weaponMPR_->GetIsAlive() == true)
+		{
+			weaponMPR_->ChangeState(WeaponMP::STATE::ATTACK);
+			weaponMPR_->IsLR(false);
+		}
 		ChangeState(STATE::IDLE);
 		break;
 	default:

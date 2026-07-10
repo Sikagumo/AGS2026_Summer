@@ -7,6 +7,7 @@
 #include "../../Object/Actor/Chara/Player/Player.h"
 #include "../../Object/Actor/Chara/Player/PlayerBase.h"
 #include "../../Object/Actor/Chara/Boss/Boss.h"
+#include "../../Object/Actor/Chara/Enemy/EnemyRobo.h"
 #include "../../Object/Actor/Stage/Stage.h"
 #include "../../Object/Common/DamageController.h"
 #include "../../Common/GameTimer.h"
@@ -49,6 +50,8 @@ private:
     std::vector<std::unique_ptr<Player>> players_;
 
     std::unique_ptr<Boss> boss_;
+
+    std::unique_ptr<EnemyRobo>enemyRobo_;
 
     std::unique_ptr<Stage> stage_;
 

@@ -19,7 +19,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-  
+    <ClCompile Include="Src\Object\Actor\Chara\Enemy\EnemyRobo.cpp" />
+    <ClCompile Include="Src\Object\Actor\Chara\Enemy\EnemyBase.cpp" />
     <ClCompile Include="Src\Object\Actor\Chara\Weapon\Bullet\Boss\BBulletLaser.cpp" />
     <ClCompile Include="Src\Object\Actor\Chara\Weapon\Bullet\Boss\BBulletMissile.cpp" />
     <ClCompile Include="Src\Common\GameTimer.cpp" />
@@ -104,8 +105,9 @@
     <ClCompile Include="Src\Object\Actor\Chara\Weapon\BossWeapon\MG\WeaponMGL.cpp" />
     <ClCompile Include="Src\Object\Actor\Chara\Weapon\BossWeapon\MG\WeaponMGR.cpp" />
   </ItemGroup>
-  
   <ItemGroup>
+    <ClInclude Include="Src\Object\Actor\Chara\Enemy\EnemyRobo.h" />
+    <ClInclude Include="Src\Object\Actor\Chara\Enemy\EnemyBase.h" />
     <ClInclude Include="Src\Object\Actor\Chara\Weapon\Bullet\Boss\BBulletLaser.h" />
     <ClInclude Include="Src\Object\Actor\Chara\Weapon\Bullet\Boss\BBulletMissile.h" />
     <ClInclude Include="Src\Common\GameTimer.h" />
