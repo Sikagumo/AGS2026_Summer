@@ -4,10 +4,10 @@
 #include "../../../../../Collision/CollisionController.h"
 
 constexpr float RADIUS_BULLET = 9.0f;
-constexpr float RADIUS_BLAST = 150.0f;
+constexpr float RADIUS_BLAST = 250.0f;
 constexpr float SCALE_BOMB = 1.0f;
 constexpr float TIME_ALIVE_BOMB = 10.0f;
-constexpr int POWER_BOMB = 20;
+constexpr int POWER_BOMB = 250;
 
 
 PBulletBomb::PBulletBomb(void)
@@ -78,7 +78,7 @@ void PBulletBomb::BlastAction(void)
 {
 	bulletState_ = BULLET_STATE::BLAST;
 	isVisible_ = false;
-	activePowerBlast_ = power_;
+	activePowerBlast_ = POWER_BOMB;
 
 	// “–‚½‚è”»’è–³Œø‰»
 	CollisionController::GetInstance()

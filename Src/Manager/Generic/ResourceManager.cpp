@@ -15,7 +15,8 @@ const std::string PATH_DATA = "Data/";
 // 暗号化済みのリソースフォルダパス
 #else
 
-const std::string PATH_DATA = "_ResourceData/";
+//const std::string PATH_DATA = "_ResourceData/";
+const std::string PATH_DATA = "Data/";
 #endif
 
 

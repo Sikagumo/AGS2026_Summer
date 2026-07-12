@@ -128,7 +128,7 @@ public:
 	bool IsTrgMouseRight(void) const;
 
 	/// @brief マウスホイールの移動量を取得
-	int IsTrgMouseWheel(void) const;
+	int GetMouseWheel(void) const;
 
 
 	// コントローラの入力情報を取得する

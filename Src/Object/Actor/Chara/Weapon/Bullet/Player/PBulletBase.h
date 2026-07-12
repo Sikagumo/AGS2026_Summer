@@ -3,6 +3,7 @@
 #include <DxLib.h>
 #include <functional>
 #include "../../../../../../Common/Quaternion.h"
+#include "../../../../../../Utility/UtilityMath.h"
 
 class PBulletBase : public ActorBase
 {
@@ -34,7 +35,9 @@ public:
 	/// @param isFinish ÅI’e‚©”Û‚©
 	void Create(const VECTOR& _pos, const VECTOR& _throwDir, int _shotCnt = 0, bool isFinish = false);
 
-	void Shot(const VECTOR& _shotDir);
+	/// @brief ”­Ëˆ—
+	/// @param _shotDir ”­Ë•ûŒü(–¢Š„“–A“Š‚°‚é•ûŒü‚ğ—˜—p)
+	void Shot(const VECTOR& _shotDir = UtilityMath::VECTOR_ZERO);
 
 	bool IsAlive(void)const;
 
@@ -76,7 +79,8 @@ protected:
 	float shotSpeedY_;
 
 	// ”­Ë•ûŒü
-	VECTOR shotPow_;
+	VECTOR throwPow_;
+	VECTOR throwDir_;
 
 	float aliveTime_;
 

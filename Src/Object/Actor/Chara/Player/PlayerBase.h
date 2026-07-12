@@ -25,16 +25,16 @@ public:
 	{
 		NONE = -1
 
-		, SELECT_BOMB		// ”š”j
+		, BOMB		// ”š”j
 		, BOMB_FINISH
 
 		, SELECT_BIG // ‹‘å
 
-		, SELECT_RAPID_FIRE // ˜AŽË
+		, RAPID_FIRE // ˜AŽË
 		, CLUSTER	 // ŠgŽU
 
 
-		, SELECT_RECOVERY	// ‰ñ•œ
+		, RECOVERY	// ‰ñ•œ
 		, POISON	// “Å
 		, MAX
 	};

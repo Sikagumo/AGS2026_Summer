@@ -54,6 +54,7 @@ public:
 		BOSS_WEAPON_MP_L,
 		BOSS_WEAPON_MP_R,
 		BOSS_WEAPON_RG,
+		MAX,
 	};
 
 

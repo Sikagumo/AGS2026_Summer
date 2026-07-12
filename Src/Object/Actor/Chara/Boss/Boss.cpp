@@ -518,6 +518,11 @@ void Boss::UpdateProcess(void)
 	camera->SetLockOnTargets(Camera::LOCKON_TARGET::BOSS_BODY, transformBody_.pos, hp_);
 	camera->SetLockOnTargets(Camera::LOCKON_TARGET::BOSS_WEAPON_MGL_L, weaponMGL_->GetPos(), weaponMGL_->GetHp());
 	camera->SetLockOnTargets(Camera::LOCKON_TARGET::BOSS_WEAPON_MGL_R, weaponMGR_->GetPos(), weaponMGR_->GetHp());
+	camera->SetLockOnTargets(Camera::LOCKON_TARGET::BOSS_WEAPON_CANNON_L, weaponCannonL_->GetPos(), weaponCannonL_->GetHp());
+	camera->SetLockOnTargets(Camera::LOCKON_TARGET::BOSS_WEAPON_CANNON_R, weaponCannonR_->GetPos(), weaponCannonR_->GetHp());
+	camera->SetLockOnTargets(Camera::LOCKON_TARGET::BOSS_WEAPON_MP_L, weaponMPL_->GetPos(), weaponMPL_->GetHp());
+	camera->SetLockOnTargets(Camera::LOCKON_TARGET::BOSS_WEAPON_MP_R, weaponMPR_->GetPos(), weaponMPR_->GetHp());
+	camera->SetLockOnTargets(Camera::LOCKON_TARGET::BOSS_WEAPON_RG, weaponRG_->GetPos(), weaponRG_->GetHp());
 }
 
 void Boss::UpdateProcessPost(void)

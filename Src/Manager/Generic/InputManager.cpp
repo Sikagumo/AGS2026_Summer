@@ -182,7 +182,7 @@ bool InputManager::IsTrgMouseRight(void) const
 	return FindMouse(MOUSE_INPUT_RIGHT).keyTrgDown;
 }
 
-int InputManager::IsTrgMouseWheel(void) const
+int InputManager::GetMouseWheel(void) const
 {
 	return (mouseWheelOld_ - mouseWheel_);
 }

@@ -86,7 +86,7 @@ private:
 
 	static constexpr std::array<SHOT_TYPE, static_cast<int>(JOB_TYPE::MAX)>
 		SHOT_TYPE_NORMAL
-		= { SHOT_TYPE::SELECT_BOMB, SHOT_TYPE::SELECT_BIG, SHOT_TYPE::SELECT_RAPID_FIRE, SHOT_TYPE::SELECT_RECOVERY };
+		= { SHOT_TYPE::BOMB, SHOT_TYPE::SELECT_BIG, SHOT_TYPE::RAPID_FIRE, SHOT_TYPE::RECOVERY };
 
 	static constexpr std::array<SHOT_TYPE, static_cast<int>(JOB_TYPE::MAX)>
 		SHOT_TYPE_SPECIAL
@@ -148,8 +148,6 @@ private:
 	void ProcessAttack(void);
 
 
-	void DrawShadowRound(void);
-
 	/// @brief アニメーション再生
 	/// @param _type アニメーションの種類
 	/// @param _isLoop ループ再生するか否か
@@ -162,11 +160,10 @@ private:
 
 	/* 拡散弾処理 */
 	void CreateCluster(void);
+	void ShotCluster(void);
 	std::unique_ptr<PBulletNormal> _CreateClusterBullet(const VECTOR& _throwDir);
 
 	void DelayRotate(void)override;
-
-	void MoveLimit(void);
 
 	void DrawShotOrbit(void);
 

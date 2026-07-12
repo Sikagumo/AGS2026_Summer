@@ -70,7 +70,7 @@ Player::Player(int _playerNo, JOB_TYPE _jobType, const VECTOR& _startPos)
 
 	std::array< SHOT_TYPE, static_cast<int>(JOB_TYPE::MAX)>
 		JOB_SHOT_TYPE
-	{ SHOT_TYPE::SELECT_BOMB, SHOT_TYPE::SELECT_BIG, SHOT_TYPE::SELECT_RAPID_FIRE, SHOT_TYPE::SELECT_RECOVERY };
+	{ SHOT_TYPE::BOMB, SHOT_TYPE::SELECT_BIG, SHOT_TYPE::RAPID_FIRE, SHOT_TYPE::RECOVERY };
 
 	shotType_ = JOB_SHOT_TYPE[static_cast<int>(jobType_)];
 
@@ -282,12 +282,21 @@ void Player::InitPost(void)
 	}
 	else if (jobType_ == JOB_TYPE::RAPID_FIRE)
 	{
-		actionNum = static_cast<int>(ACTION_TYPE::ATTACK);
+		actionNum = static_cast<int>(ACTION_TYPE::ATTACK_SPECIAL);
 		constexpr float SHOT_TIME_ACTIVE = 0.4f; // 有効時間
 		constexpr float SHOT_TIME_ACTION_ACTIVE = 0.325f;
 		timeEnd = 0.0f;
 		timeActive = SHOT_TIME_ACTIVE;
 		timeActionActive = SHOT_TIME_ACTION_ACTIVE;
+
+		actionController_->SetAction(actionNum, timeActive, timeActionActive, timeEnd
+			, std::bind(&Player::ShotCluster, this));
+
+
+		actionNum = static_cast<int>(ACTION_TYPE::ATTACK);
+		timeEnd = 0.0f;
+		timeActive = 0.4f;
+		timeActionActive = 0.325f;
 
 		actionController_->SetAction(actionNum, timeActive, timeActionActive, timeEnd
 			, std::bind(&Player::ShotBullet, this));
@@ -390,8 +399,6 @@ void Player::UpdateProcess(void)
 	// 吹っ飛ばし処理
 	ProcessKnock();
 	
-	// 移動位置制限
-	//MoveLimit();
 
 	// 胴体位置更新
 	bodyPos_ = transform_.pos;
@@ -555,23 +562,6 @@ void Player::ProcessMove(void)
 		}
 	}
 }
-void Player::MoveLimit(void)
-{
-	/* 範囲外の移動制限 */
-	const float RADIUS = 1750.0f;
-	VECTOR limitPos = transform_.pos;
-	limitPos.y = 0.0f;
-	float curRange = VSize(VSub(limitPos, UtilityMath::VECTOR_ZERO));
-
-	// 範囲外の時、ステージ内に戻す
-	if (curRange > RADIUS)
-	{
-		const float REFLECT_POW = 10.0f;
-		transform_.pos = VAdd(transform_.pos,
-			VScale(VNorm(VSub(UtilityMath::VECTOR_ZERO, limitPos)),
-				REFLECT_POW));
-	}
-}
 
 void Player::DrawShotOrbit(void)
 {
@@ -632,7 +622,7 @@ void Player::DrawShotOrbit(void)
 		// このステップの移動量[発射速度 - 重力加算値]
 		VECTOR pos = shotPow;
 
-		if (shotType_ != SHOT_TYPE::SELECT_RAPID_FIRE && shotType_ != SHOT_TYPE::CLUSTER)
+		if (shotType_ != SHOT_TYPE::RAPID_FIRE && shotType_ != SHOT_TYPE::CLUSTER)
 		{
 			pos.y -= (Application::GetInstance().GetGravityPow() * (ORBIT_DELTA * ORBIT_STEP_SCALE * i));
 		}
@@ -770,8 +760,8 @@ void Player::ProcessAttack(void)
 			if (InputManager::GetInstance().IsClickMouseLeft()
 				|| InputManager::GetInstance().IsPadBtnNew(InputManager::JOYPAD_NO::PAD1, InputManager::JOYPAD_BTN::L_TRIGGER))
 			{
-				//ProcShotSpecial();
-				//shotTerm_ = SHOT_RAPID_TERM;
+				ProcShotSpecial();
+				shotTerm_ = SHOT_RAPID_TERM;
 			}
 		}
 		else
@@ -790,7 +780,7 @@ void Player::ProcessAttack(void)
 		if (InputManager::GetInstance().IsTrgMouseRight()
 			|| InputManager::GetInstance().IsPadBtnTrgDown(InputManager::JOYPAD_NO::PAD1, InputManager::JOYPAD_BTN::L_TRIGGER))
 		{
-			//ProcShotSpecial();
+			ProcShotSpecial();
 		}
 	}
 }
@@ -944,16 +934,16 @@ void Player::CreateBullet(void)
 			bullet = std::make_unique<PBulletBig>();
 		break;
 
-		case SHOT_TYPE::SELECT_BOMB:
+		case SHOT_TYPE::BOMB:
 			bullet = std::make_unique<PBulletBomb>();
 		break;
 
-		case SHOT_TYPE::SELECT_RECOVERY:
+		case SHOT_TYPE::RECOVERY:
 			bullet = std::make_unique<PBulletRecovery>();
 		break;
 
 		// 連射
-		case SHOT_TYPE::SELECT_RAPID_FIRE:
+		case SHOT_TYPE::RAPID_FIRE:
 		{
 			bullet = std::make_unique<PBulletNormal>
 						(SCALE_RAPID, RADIUS_RAPID, POWER_RAPID
@@ -1038,6 +1028,16 @@ void Player::CreateCluster(void)
 	}
 
 }
+void Player::ShotCluster(void)
+{
+	// 発射処理の有効化
+	for (auto& bullet : clusterBullets_)
+	{
+		bullet->Shot();
+	}
+
+	shotIndex_ = -1;
+}
 std::unique_ptr<PBulletNormal> Player::_CreateClusterBullet(const VECTOR& _throwDir)
 {
 	constexpr float SCALE = 0.25f;
@@ -1059,7 +1059,7 @@ VECTOR Player::CalcShotDir(void)
 {
 	VECTOR shotDir = transform_.GetForward();
 
-	if (shotType_ != SHOT_TYPE::SELECT_RAPID_FIRE)
+	if (shotType_ != SHOT_TYPE::RAPID_FIRE)
 	{
 		// 放物線状に投げる
 		shotDir = VAdd(shotDir, UtilityMath::DIR_UP);
