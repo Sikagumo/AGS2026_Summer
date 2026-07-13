@@ -5,7 +5,7 @@ class SceneBase
 public:
 
 	/// @brief コンストラクタ
-	SceneBase(void) = default;
+	SceneBase(void);
 
 	/// @brief デストラクタ
 	virtual ~SceneBase(void) = 0;
@@ -32,7 +32,18 @@ public:
 	/// @brief ロード中か
 	bool IsLoading(void) const;
 
+	/// @brief デバックモードフラグの取得 
+	/// @return デバックモードフラグ
+	bool GetDebugMode(void) const { return isDebugMode_; }
+
+protected:
+	// デバックモードかどうか
+	bool isDebugMode_;
+
+	/// @brief Gui用の更新処理
+	virtual void UpdateGui(void) = 0;
+
 private:
-	//ロード中かどうか
+	// ロード中かどうか
 	bool isLoading_;
 };

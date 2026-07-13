@@ -6,18 +6,15 @@ class ShaderBase
 {
 public:
 
-	ShaderBase(void);
+	/// @brief コンストラクタ 
+	ShaderBase(void) = default;
 
+    /// @brief デストラクタ 
     virtual ~ShaderBase(void) = default;
 
-	virtual void Initialize(const char* _shaderPath) = 0;
-	
-	virtual void Release(void);
+	/// @brief シェーダをGPUに適用する 
+	virtual void Apply(void) = 0;
 
-    int GetShaderHandle() const { return shaderHandle_; }
-
-protected:
-
-	// シェーダーのハンドル
-	int shaderHandle_;
+	/// @brief シェーダの適用を解除する 
+	virtual void UnApply(void) = 0;
 };

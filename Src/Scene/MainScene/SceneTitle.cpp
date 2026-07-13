@@ -16,7 +16,9 @@
 #include "../../Manager/System/TimeManager.h"
 #include "../../Common/Loading.h"
 #include "../../Utility/UtilityMath.h"
-#include "../../Shader/ShaderManager.h"
+#include "../../Shader/ShaderController.h"
+#include "../../ImGUI/GuiController.h"
+#include "../../Shader/ShaderLibrary.h"
 
 
 SceneTitle::SceneTitle(void)
@@ -180,6 +182,46 @@ void SceneTitle::InitUI(void)
         Collider2DBase::TAG_2D::OPTION_BUTTON,
         Collider2DBase::TAG_2D::EXIT_UTTON
     };
+
+    // 定数バッファの初期化
+    peachMaterial_.SetAmbient(0.8f);
+    waveMaterial_.SetAmbient(0.8f);
+    oniSimaMaterial_.SetAmbient(0.8f);
+    waveMaterial_.SetWaveSpeed(3.0f);
+    waveMaterial_.SetWaveForce(0.015f);
+
+    // GUIの初期化
+    peachGui_ = std::make_shared<ShaderEditorComponent>("Peach", &peachMaterial_);
+    waveGui_ = std::make_shared<ShaderEditorComponent>("Wave", &waveMaterial_);
+    oniSimaGui_ = std::make_shared<ShaderEditorComponent>("OniGashima", &oniSimaMaterial_);
+
+    // 座標の初期化
+    Vector2F peachPos = Vector2F(100.0f, Application::SCREEN_HALF_Y + 100);
+    Vector2F wavePos = Vector2F(0.0f, Application::SCREEN_HALF_Y + 100);
+    Vector2F oniSimaPos = Vector2F(Application::SCREEN_SIZE_X - 100.0f, Application::SCREEN_HALF_Y - 50);
+
+    // 桃の当たり判定
+    peachCollider_ = std::make_unique<Collider2DBox>(peachPos, 300.0f, 300.0f, 
+        Collider2DBase::TAG_2D::PEACH);
+    
+    // 波の当たり判定
+    waveCollider_ = std::make_unique<Collider2DBox>(wavePos, Application::SCREEN_SIZE_X, 
+        Application::SCREEN_HALF_Y, Collider2DBase::TAG_2D::WAVE);
+    
+    // 鬼ヶ島の当たり判定
+    oniSimaCollider_ = std::make_unique<Collider2DBox>(oniSimaPos, 200.0f, 
+        150.0f, Collider2DBase::TAG_2D::ONI_GASHIMA);
+
+    CollisionController::GetInstance().RegisterCollider2D(peachCollider_.get());
+    CollisionController::GetInstance().RegisterCollider2D(waveCollider_.get());
+    CollisionController::GetInstance().RegisterCollider2D(oniSimaCollider_.get());
+
+    CollisionController::GetInstance().SetCollisionGroup2D(Collider2DBase::TAG_2D::MOUSE_CURSOR,
+        Collider2DBase::TAG_2D::PEACH, true);
+    CollisionController::GetInstance().SetCollisionGroup2D(Collider2DBase::TAG_2D::MOUSE_CURSOR,
+        Collider2DBase::TAG_2D::WAVE, true);
+    CollisionController::GetInstance().SetCollisionGroup2D(Collider2DBase::TAG_2D::MOUSE_CURSOR,
+        Collider2DBase::TAG_2D::ONI_GASHIMA, true);
 }
 
 void SceneTitle::Update(void)
@@ -188,15 +230,40 @@ void SceneTitle::Update(void)
 
     auto& keyConfInputManager = KeyConfInputManager::GetInstance();
 
+    // マウス座標の更新
+    Vector2 mousePos = keyConfInputManager.GetMousePosition();
+    Vector2F mousePosF(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y));
+    cursorCollider_->SetCenterPos(mousePosF);
+
+#ifdef _DEBUG
+
+    if (KeyConfInputManager::GetInstance().isTrigerDown("APPLY_DEBUG"))
+    {
+        isDebugMode_ = true;
+    }
+
+    
+
+    if (isDebugMode_ == true)
+    {
+
+        if (KeyConfInputManager::GetInstance().isTrigerDown("UNAPPLY_DEBUG"))
+        {
+            isDebugMode_ = false;
+        }
+
+        UpdateGui();
+
+        return; 
+    }
+#endif
+
     // スティック入力による選択インデックスの更新
     Vector2F stick = keyConfInputManager.GetLeftStickRaw();
     constexpr float THRESHOLD = 0.5f;
     constexpr int STICK_TINERVAL = 15;
 
-    // マウス座標の更新
-    Vector2 mousePos = keyConfInputManager.GetMousePosition();
-    Vector2F mousePosF(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y));
-    cursorCollider_->SetCenterPos(mousePosF);
+   
 
     if (isSelectMenu_)
     {
@@ -260,42 +327,36 @@ void SceneTitle::Update(void)
             ProcessMenuState();
         }
     }
+
 }
 
 void SceneTitle::Draw(void)
 {
 
     time_ += 0.02f;
+    waveMaterial_.SetTime(time_);
+
+    const float PEACH_SCALE = 0.5f;
+    const float WAVE_SCALE = 1.0f;
+    const float ONISIMA_SCALE = 1.0f;
 
     float amplitude = 20.0f;
     float bobSpeed = 3.0f;
     float offsetY = std::sinf(time_ * bobSpeed) * amplitude;
-    float peachPosY = Application::SCREEN_HALF_Y + offsetY;
-    int peachPosX = -20;
-    int wavePosY = 20;
-    int oniSimaPosX = Application::SCREEN_HALF_X - 100;
-    int oniSimaPosY = 30;
-    const float PEACH_SCALE = 0.5f;
-    const float WAVE_SCALE = 1.0f;
-    const float ONISIMA_SCALE = 1.0f;
-    auto* shaderPeach = ShaderManager::GetInstance().GetShaderNormal();
-    auto* shaderOniSima = ShaderManager::GetInstance().GetShaderNormal();
-    auto* shaderWave = ShaderManager::GetInstance().GetShaderWave();
 
-    shaderOniSima->SetAmbient(0.8f);
-    shaderOniSima->Draw(oniSimaPosX, oniSimaPosY, oniSimaHandle_, oniSimaNormalHandle_, ONISIMA_SCALE);
+    auto& shaderCtrl = ShaderController::GetInstance();
 
+    // 鬼ヶ島の描画
+    shaderCtrl.CreateShaderDraw(ShaderLibrary::SHADER_TYPE::NORMAL, Application::SCREEN_HALF_X - 100, 30,
+        oniSimaHandle_, ONISIMA_SCALE, oniSimaMaterial_, oniSimaNormalHandle_);
 
-    shaderPeach->SetLightDirection(0.5f, 0.5f, 0.5f);
-    shaderPeach->SetAmbient(0.8f);
+    // 波の描画
+    shaderCtrl.CreateShaderDraw(ShaderLibrary::SHADER_TYPE::NORMAL_WAVE,
+        0, 20, waveHandle_, WAVE_SCALE, waveMaterial_, waveNormalHandle_);
 
-    shaderWave->SetWaveParam(time_, 3.0f, 0.015f);
-
-    ShaderManager::GetInstance().DrawNormalAndWave(0, wavePosY, 
-        waveHandle_, waveNormalHandle_, WAVE_SCALE);
-
-    shaderPeach->Draw(peachPosX, static_cast<int>(peachPosY),
-        peachHandle_, peachNormalHandle_, PEACH_SCALE);
+    // 桃の描画
+    shaderCtrl.CreateShaderDraw(ShaderLibrary::SHADER_TYPE::NORMAL, -20, static_cast<int>(Application::SCREEN_HALF_Y + offsetY),
+        peachHandle_, PEACH_SCALE, peachMaterial_, peachNormalHandle_);
 
     const int IMAGET_TITLE_Y = Application::SCREEN_SIZE_Y / 4;
     DrawRotaGraph(Application::SCREEN_HALF_X, IMAGET_TITLE_Y, 0.7f, 0.0f, imageTitle_, true);
@@ -369,6 +430,25 @@ void SceneTitle::ProcessMenuState(void)
             Application::GetInstance().GameEnd();
         break;
     }
+}
 
+void SceneTitle::UpdateGui(void)
+{
+    // クリックされたら、対象のGUIをコントローラに渡す
+    if (KeyConfInputManager::GetInstance().isTrigerDown("OK"))
+    {
+        auto& colCtrl = CollisionController::GetInstance();
+        using TAG = Collider2DBase::TAG_2D;
+
+        if (colCtrl.IsTagCollidingWithTag2D(TAG::MOUSE_CURSOR, TAG::PEACH)) {
+            GuiController::GetInstance().SetActiveGui(peachGui_);
+        }
+        else if (colCtrl.IsTagCollidingWithTag2D(TAG::MOUSE_CURSOR, TAG::WAVE)) {
+            GuiController::GetInstance().SetActiveGui(waveGui_);
+        }
+        else if (colCtrl.IsTagCollidingWithTag2D(TAG::MOUSE_CURSOR, TAG::ONI_GASHIMA)) {
+            GuiController::GetInstance().SetActiveGui(oniSimaGui_);
+        }
+    }
 }
 

@@ -37,14 +37,6 @@ SceneGame::SceneGame(std::vector<PlayerBase::JOB_TYPE> _playerJob)
 
 		players_.emplace_back(std::move(player));
 	}
-	
-	playerHpImageBack_ = ResourceManager::GetInstance().LoadHandleIdsOnce(ResourceManager::SRC::IMGS_HP_PLAYER, 0);
-	playerHpImage_ = ResourceManager::GetInstance().LoadHandleIdsOnce(ResourceManager::SRC::IMGS_HP_PLAYER, 1);
-
-	targetHpBerImage_ = ResourceManager::GetInstance().LoadHandleIdsOnce(ResourceManager::SRC::IMGS_HP_TARGET, 0);
-	targetHpImage_ = ResourceManager::GetInstance().LoadHandleIdsOnce(ResourceManager::SRC::IMGS_HP_TARGET, 1);
-
-	ResourceManager::GetInstance().LoadHandleIds(ResourceManager::SRC::IMGS_GAME_TEXT, uiGame_.data());
 }
 
 
@@ -57,6 +49,14 @@ void SceneGame::Load(void)
 	{
 		player->Load();
 	}
+	playerHpImageBack_ = ResourceManager::GetInstance().LoadHandleIdsOnce(ResourceManager::SRC::IMGS_HP_PLAYER, 0);
+	playerHpImage_ = ResourceManager::GetInstance().LoadHandleIdsOnce(ResourceManager::SRC::IMGS_HP_PLAYER, 1);
+
+	targetHpBerImage_ = ResourceManager::GetInstance().LoadHandleIdsOnce(ResourceManager::SRC::IMGS_HP_TARGET, 0);
+	targetHpImage_ = ResourceManager::GetInstance().LoadHandleIdsOnce(ResourceManager::SRC::IMGS_HP_TARGET, 1);
+
+	ResourceManager::GetInstance().LoadHandleIds(ResourceManager::SRC::IMGS_GAME_TEXT, uiGame_.data());
+
 
 	boss_->Load();
 	enemyRobo_->Load();
@@ -221,7 +221,6 @@ void SceneGame::UpdateGameTime(void)
 		SceneManager::GetInstance().ChangeScene(std::make_shared<SceneResult>(true));
 	}
 }
-
 
 void SceneGame::Draw(void)
 {
@@ -452,4 +451,9 @@ void SceneGame::DrawDebug(void)
 	SceneManager::GetInstance().GetCamera()->DrawDebug();
 	damageController_->DebugDraw();
 }
+
+void SceneGame::UpdateGui(void)
+{
+}
+
 
