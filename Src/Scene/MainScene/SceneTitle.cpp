@@ -16,7 +16,6 @@
 #include "../../Manager/System/TimeManager.h"
 #include "../../Common/Loading.h"
 #include "../../Utility/UtilityMath.h"
-#include "../../Shader/ShaderManager.h"
 #include "../../Shader/ShaderController.h"
 #include "../../ImGUI/GuiController.h"
 #include "../../Shader/ShaderLibrary.h"
@@ -311,6 +310,24 @@ void SceneTitle::Update(void)
             inputIntervalCounter_ = STICK_TINERVAL;
         }
     }
+    else
+    {
+        if (selectedIdx_ == static_cast<int>(MENU_ITEM::OPTION)
+            // ↓マルチプレイ有効時には削除
+            || selectedIdx_ == static_cast<int>(MENU_ITEM::MULTI))
+        {
+            // 設定処理有効化
+            /* (設定有効化処理の追加) */
+
+            // 選択変更有効化
+            isSelectMenu_ = true;
+        }
+        else if (!SoundManager::GetInstance().IsPlaying(SoundManager::SOUND::SE_SELECT))
+        {
+            // 効果音終了時に決定処理を実行
+            ProcessMenuState();
+        }
+    }
    
 
     // マウスが動いたときはパッドの選択カーソルも追従させる
@@ -337,24 +354,6 @@ void SceneTitle::Update(void)
                 // 効果音再生
                 SoundManager::GetInstance().Play(SoundManager::SOUND::SE_SELECT);
             }
-        }
-    }
-    else
-    {
-        if (selectedIdx_ == static_cast<int>(MENU_ITEM::OPTION)
-            // ↓マルチプレイ有効時には削除
-            || selectedIdx_ == static_cast<int>(MENU_ITEM::MULTI))
-        {
-            // 設定処理有効化
-            /* (設定有効化処理の追加) */
-
-            // 選択変更有効化
-            isSelectMenu_ = true;
-        }
-        else if (!SoundManager::GetInstance().IsPlaying(SoundManager::SOUND::SE_SELECT))
-        {
-            // 効果音終了時に決定処理を実行
-            ProcessMenuState();
         }
     }
 
