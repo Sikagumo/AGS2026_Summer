@@ -5,13 +5,14 @@
 #include "../../Scene/MainScene/SceneGameBoss.h"
 #include "../Decoration/SoundManager.h"
 #include "../../Object/Collision/CollisionController.h"
-#include "../../Shader/ShaderManager.h"
+#include "../../Shader/ShaderController.h"
 #include "../System/TimeManager.h"
 #include "../../Camera/Camera.h"
 #include "../../Common/Loading.h"
 #include "../../Common/Fader.h"
 #include "../../Application.h"
 #include "KeyConfInputManager.h"
+#include "../../ImGUI/GuiController.h"
 
 SceneManager* SceneManager::instance_ = nullptr;
 
@@ -62,12 +63,13 @@ void SceneManager::Initialize(void)
     SoundManager::CreateInstance();
     SoundManager::GetInstance().Initialize();
     TimeManager::CreateInstance();
-    ShaderManager::CreateInstance();
-    ShaderManager::GetInstance().Initialize();
+    ShaderController::CreateInstance();
+    ShaderController::GetInstance().Initialize();
     Loading::CreateInstance();
     Loading::GetInstance()->Initialize();
     CollisionController::CreateInstance();
     CollisionController::GetInstance().Initialize();
+    GuiController::CreateInstance();
 }
 
 void SceneManager::Init3D(void)
@@ -265,6 +267,20 @@ void SceneManager::Draw(void)
         }
     }
 
+#ifdef _DEBUG
+    for (auto& scene : scenes_)
+    {
+        if (scene)
+        {
+            if (scene->GetDebugMode() == true)
+            {
+                GuiController::GetInstance().DrawUI();
+            }
+        }
+    }
+#endif 
+
+
     // ロード中ならその上にロード画面を重ねる
     auto loader = Loading::GetInstance();
 
@@ -296,15 +312,13 @@ void SceneManager::Release(void)
     // カメラを解放する
     camera_.reset();
 
-    // 解放処理
-    ShaderManager::GetInstance().Release();
-
     // 各マネージャーを破棄する
     SoundManager::GetInstance().DestroyInstance();
-    ShaderManager::GetInstance().DestroyInstance();
+    ShaderController::GetInstance().DestroyInstance();
     TimeManager::GetInstance().DestroyInstance();
     Loading::GetInstance()->DestroyInstance();
     CollisionController::DestroyInstance();
+    GuiController::DestroyInstance();
 }
 
 const std::unique_ptr<Camera>& SceneManager::GetCamera(void) const

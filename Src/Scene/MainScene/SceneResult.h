@@ -41,5 +41,8 @@ private:
 
 	bool isGameOver_;
 
+	/// @brief Gui—p‚ÌXVˆ—
+	void UpdateGui(void) override;
+
 };
 

@@ -8,6 +8,8 @@
 #include "../../Object/Collider2D/Collider2DBase.h"
 #include "../../Object/Collider2D/Collider2DCircle.h"
 #include "../../Object/Collider2D/Collider2DBox.h"
+#include "../../ImGUI/ShaderEditorComponent.h"
+#include "../../Shader/ShaderMaterial.h"
 
 class SceneTitle : public SceneBase
 {
@@ -56,6 +58,7 @@ private:
 
 	// 画像関連
 	int imageTitle_;                  // タイトルロゴの画像ハンドル
+	int titleNormalHandle_;           // タイトルのノーマルマップ
 	std::array<int, 8> imageMenu_;    // メニュー項目（4つ）の画像ハンドル
 
 	int peachHandle_;                 // 桃の画像
@@ -64,6 +67,7 @@ private:
 	int waveNormalHandle_;            // 波のノーマルマップ
 	int oniSimaHandle_;               // 鬼ヶ島の画像
 	int oniSimaNormalHandle_;         // 鬼ヶ島のノーマルマップ
+	int backgroundHandle_;            // 背景画像のハンドル
 
 	// 時間
 	float time_;
@@ -75,14 +79,27 @@ private:
 	// 前回のマウス座標
 	Vector2F prevMousePos_;
 
+	// マテリアル関連
+	ShaderMaterial peachMaterial_;   // 桃のマテリアル
+	ShaderMaterial waveMaterial_;    // 波のマテリアル
+	ShaderMaterial oniSimaMaterial_; // 鬼ヶ島のマテリアル
+	ShaderMaterial titleMaterial_;   // タイトルのマテリアル
+
+	// 2. GUIコンポーネント
+	std::shared_ptr<ShaderEditorComponent> peachGui_;
+	std::shared_ptr<ShaderEditorComponent> waveGui_;
+	std::shared_ptr<ShaderEditorComponent> oniSimaGui_;
+	std::shared_ptr<ShaderEditorComponent> titleGui_;
+
 	// 2D衝突判定関連
 	std::unique_ptr<Collider2DCircle> cursorCollider_;        // マウスカーソル用の円コライダー
 	std::unique_ptr<Collider2DBox> soloPlayButtonCollider_;   // ソロプレイボタン用の矩形コライダー
 	std::unique_ptr<Collider2DBox> multiPlayButtonCollider_;  // マルチプレイボタン用の矩形コライダー
 	std::unique_ptr<Collider2DBox> optionButtonCollider_;     // 設定ボタン用の矩形コライダー
 	std::unique_ptr<Collider2DBox> exitButtonCollider_;       // 終了ボタン用の矩形コライダー
-
-	int psHandle_;
+	std::unique_ptr<Collider2DBox> peachCollider_;
+	std::unique_ptr<Collider2DBox> waveCollider_;
+	std::unique_ptr<Collider2DBox> oniSimaCollider_;
 
 	bool isSelectMenu_;
 
@@ -91,6 +108,9 @@ private:
 
 	/// @brief デバック描画 
 	void DrawDebug(void);
+
+	/// @brief Gui用の更新処理
+	void UpdateGui(void) override;
 
 	/// @brief 
 	void ProcessMenuState(void);

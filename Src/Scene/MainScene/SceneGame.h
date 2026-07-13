@@ -94,4 +94,7 @@ private:
     void DamageProcess(void);
 
     void UpdateGameTime(void);
+
+    /// @brief Gui—p‚ÌXVˆ—
+    void UpdateGui(void) override;
 };
