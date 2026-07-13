@@ -75,6 +75,8 @@ void SceneGame::Load(void)
 
 	//時間カウントリセット
 	TimeManager::GetInstance().Reset();
+
+	Loading::GetInstance()->SetProgress(100.0f);
 }
 
 void SceneGame::EndLoad(void)

@@ -52,6 +52,8 @@ void SceneTitle::Load(void)
     // isLoading_ を true に
     SceneBase::Load();
 
+    Loading::GetInstance()->SetProgress(10.0f);
+
     // BGM・SEロード
     SoundManager::GetInstance()
         .Add(SoundManager::TYPE::BGM, SoundManager::SOUND::BGM_TITLE_SEA
@@ -95,6 +97,8 @@ void SceneTitle::Load(void)
 
     //時間カウントリセット
     TimeManager::GetInstance().Reset();
+
+    Loading::GetInstance()->SetProgress(100.0f);
 }
 
 void SceneTitle::EndLoad(void)
