@@ -644,6 +644,20 @@ bool CollisionController::CanCollide(int _tagA, int _tagB) const
 			|| tagHurt == TAG::MISSILE_ATTACK
 			|| tagHurt == TAG::MISSILE_PUSH
 			|| tagHurt == TAG::PLAYER_RECOVERY
+			|| tagHurt == TAG::WALL
+			|| tagHurt == TAG::ENEMYROBO
+			|| tagHurt == TAG::ENEMY_ATTACK)
+		{
+			return true;
+		}
+	}
+
+	if (tagHit == TAG::ENEMYROBO || tagHit == TAG::ENEMY_ATTACK)
+	{
+		if (tagHurt == TAG::STAGE
+			|| tagHurt == TAG::PLAYER_BULLET || tagHurt == TAG::PLAYER_BLAST
+			|| tagHurt == TAG::LASER
+			|| tagHurt == TAG::PLAYER
 			|| tagHurt == TAG::WALL)
 		{
 			return true;
@@ -684,7 +698,9 @@ bool CollisionController::CanCollide(int _tagA, int _tagB) const
 		|| tagHit == TAG::MISSILE_ATTACK
 		|| tagHit == TAG::MISSILE_PUSH)
 	{
-		if (tagHurt == TAG::PLAYER || tagHurt == TAG::WALL)
+		if (tagHurt == TAG::PLAYER 
+			|| tagHurt == TAG::WALL 
+			|| tagHurt == TAG::ENEMYROBO)
 		{
 			return true;
 		}
@@ -693,7 +709,7 @@ bool CollisionController::CanCollide(int _tagA, int _tagB) const
 	if (tagHit == TAG::STAGE)
 	{
 		if (tagHurt == TAG::PLAYER || tagHurt == TAG::PLAYER_BULLET || tagHurt == TAG::PLAYER_BLAST
-			|| tagHurt == TAG::BOSS || tagHurt == TAG::ENEMY
+			|| tagHurt == TAG::BOSS || tagHurt == TAG::ENEMYROBO
 			|| tagHurt == TAG::WEAPON_CANNON_L || tagHurt == TAG::WEAPON_CANNON_R
 			|| tagHurt == TAG::WEAPON_MG_L || tagHurt == TAG::WEAPON_MG_R
 			|| tagHurt == TAG::WEAPON_MP_L || tagHurt == TAG::WEAPON_MP_R
@@ -710,7 +726,8 @@ bool CollisionController::CanCollide(int _tagA, int _tagB) const
 			|| tagHurt == TAG::PLAYER_BULLET 
 			|| tagHurt == TAG::PLAYER_BLAST
 			|| tagHurt == TAG::BOSS
-			|| tagHurt == TAG::ROAD_ATTACK)
+			|| tagHurt == TAG::ROAD_ATTACK
+			|| tagHurt == TAG::ENEMYROBO)
 		{
 			return true;
 		}

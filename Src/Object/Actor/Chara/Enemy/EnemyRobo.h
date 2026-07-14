@@ -3,17 +3,41 @@
 #include <memory>
 #include <array>
 #include <functional>
-#include "EnemyBase.h"
+#include "../CharaBase.h"
 class EnemyRobo :
-    public EnemyBase
+	public CharaBase
 {
 public:
+
+	///ステートパターン
+	enum class STATE
+	{
+		IDLE,
+		ATTACK,
+		MOVE,
+		END,
+	};
+
+
+	enum class ANIM_TYPE
+	{
+		ATTACKA,
+		ATTACKB,
+		DIR,
+		WARK,
+		MAX,
+	};
+
+
+
     EnemyRobo();
     ~EnemyRobo()override;
 
 
     // リソースロード
     void Load(void) override;
+
+	void SetPlayerPos(VECTOR _pos) { playerPos_ = _pos; }
 
 protected:
 
@@ -38,19 +62,29 @@ protected:
 
 	void CollisionReserve(void) override {};
 
+
+	/// 状態
+	STATE state_;
+	/// 状態管理
+	int stateBase_;
+
+	// 状態管理(状態遷移時初期処理)
+	std::map<int, std::function<void(void)>> stateChanges_;
 	// 状態遷移
-	void ChangeState(STATE _state) override;
+	void ChangeState(STATE _state);
 	// 状態遷移
-	void ChangeState(int state) override;
-	void ChangeStateIdle(void) override;
-	void ChangeStateAttack(void) override;
-	void ChangeStateMOVE(void) override;
-	void ChangeStateEnd(void) override;
+	void ChangeState(int state);
+	void ChangeStateIdle(void);
+	void ChangeStateAttack(void);
+	void ChangeStateMove(void);
+	void ChangeStateEnd(void);
 	// 更新系
-	void UpdateIdle(void) override;
-	void UpdateAttack(void) override;
-	void UpdateStateMOVE(void) override;
-	void UpdateEnd(void) override;
+	// 状態管理(更新ステップ)
+	std::function<void(void)> stateUpdate_;
+	void UpdateIdle(void);
+	void UpdateAttack(void);
+	void UpdateStateMove(void);
+	void UpdateEnd(void);
 
 private:
 
@@ -59,9 +93,17 @@ private:
 	static constexpr VECTOR COL_LINE_START_POS = { 0.0f,60.0f,0.0f };
 	static constexpr VECTOR COL_LINE_END_POS = { 0.0f,-1.0f,0.0f };
 	//カプセル
-	static constexpr VECTOR COL_CAPSULE_START_POS = { 0.0f,130.0f,0.0f };
-	static constexpr VECTOR COL_CAPSULE_END_POS = { 0.0f,80.0f,0.0f };
-	static constexpr float COL_CAPSULE_END_RADIUS = 80.0f;
+	static constexpr VECTOR COL_CAPSULE_START_POS = { 0.0f,90.0f,0.0f };
+	static constexpr VECTOR COL_CAPSULE_END_POS = { 0.0f,30.0f,0.0f };
+	static constexpr float COL_CAPSULE_END_RADIUS = 30.0f;
+
+
+
+	VECTOR playerPos_;
+
+
+	void LockPlayer(void);
+
 
 };
 

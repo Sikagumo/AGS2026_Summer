@@ -148,6 +148,7 @@ void SceneGame::Update(void)
 
 void SceneGame::DamageProcess(void)
 {
+	enemyRobo_->SetPlayerPos(players_.at(0)->GetBodyPos());
 	boss_->SetPlayer1Pos(players_.at(0)->GetBodyPos());
 	
 	boss_->SetBossDamage(damageController_->GetBossDamage());
@@ -235,7 +236,7 @@ void SceneGame::Draw(void)
 	}
 
 	boss_->Draw();
-	//enemyRobo_->Draw();
+	enemyRobo_->Draw();
 	effect.Draw();
 
 	DrawHpBerBoss();

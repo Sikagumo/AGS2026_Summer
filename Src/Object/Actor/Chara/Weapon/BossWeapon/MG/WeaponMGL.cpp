@@ -103,8 +103,6 @@ void WeaponMGL::DrawPre(void)
 	
 
 	
-	DrawFormatString(10, 270, 0xffffff, "MG_L_Bullet%d", bullets_.size());
-	DrawFormatString(10, 300, 0xffffff, "MG_L_ROT%f,%f,%f", transform_.quaRot.x, transform_.quaRot.y, transform_.quaRot.z);
 
 #endif
 }
