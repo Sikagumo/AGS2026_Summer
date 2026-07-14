@@ -100,6 +100,13 @@ public:
 	void SetActorColliderRadius(ActorBase* _targetActor, ColliderBase::TAG _targetTag, 
 		float _radius);
 
+	/// @brief 指定したタグの球コライダーのローカル座標を変更する
+	/// @param _targetActor 変更したいアクター
+	/// @param _targetTag 変更したいコライダータグ
+	/// @param _localPosition 新しい座標(ローカル座標)
+	void SetActorSphereLocalPos(ActorBase* _targetActor, ColliderBase::TAG _targetTag,
+		const VECTOR& _localPosition);
+
 	/// @brief 指定したタグのカプセルコライダーの始点・終点・半径を一括で変更する
 	/// @param _targetActor 変更したいアクター
 	/// @param _targetTag 変更したいコライダーのタグ
