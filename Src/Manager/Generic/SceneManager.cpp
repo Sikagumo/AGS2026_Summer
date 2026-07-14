@@ -258,6 +258,7 @@ void SceneManager::Update(void)
 void SceneManager::Draw(void)
 {
     ClearDrawScreen();
+
     if (!scenes_.empty())
     {
         if (camera_) camera_->SetBeforeDraw();
@@ -297,8 +298,6 @@ void SceneManager::Release(void)
     // ƒ[ƒhŠ®—¹‚ð‘Ò‹@‚·‚é
     if (Loading::GetInstance()->IsLoading())
     {
-        SetUseASyncLoadFlag(false);
-
         Loading::GetInstance()->EndAsyncLoad();
     }
 

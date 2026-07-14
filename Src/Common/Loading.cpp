@@ -75,12 +75,12 @@ void Loading::Update(void)
 
 	const int LOAD_COUNT = GetASyncLoadNum(); 
 
-	/*if (progress_ < 100.0f)
+	if (progress_ < 100.0f)
 	{
 		progress_ += 0.5f;
-	}*/
+	}
 
-	/*if (progress_ >= 100.0f)
+	if (progress_ >= 100.0f)
 	{
 		if (LOAD_COUNT == 0)
 		{
@@ -90,12 +90,12 @@ void Loading::Update(void)
 		{
 			progress_ = 99.9f;
 		}
-	}*/
-
-	if (progress_ >= 100.0f && LOAD_COUNT == 0)
-	{
-		EndAsyncLoad();
 	}
+
+	//if (progress_ >= 100.0f && LOAD_COUNT == 0)
+	//{
+	//	EndAsyncLoad();
+	//}
 }
 
 void Loading::Draw(void)
