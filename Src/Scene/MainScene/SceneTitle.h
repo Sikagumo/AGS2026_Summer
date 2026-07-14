@@ -82,6 +82,10 @@ private:
 	// 鬼ヶ島のノーマルマップ
 	int oniSimaNormalHandle_;
 
+	int titleNormalHandle_;
+	int backgroundHandle_;
+
+
 
 	// 時間
 	float time_;
@@ -97,11 +101,13 @@ private:
 	ShaderMaterial peachMaterial_;   // 桃のマテリアル
 	ShaderMaterial waveMaterial_;    // 波のマテリアル
 	ShaderMaterial oniSimaMaterial_; // 鬼ヶ島のマテリアル
+	ShaderMaterial titleMaterial_;   // タイトルのマテリアル
 
 	// 2. GUIコンポーネント
 	std::shared_ptr<ShaderEditorComponent> peachGui_;
 	std::shared_ptr<ShaderEditorComponent> waveGui_;
 	std::shared_ptr<ShaderEditorComponent> oniSimaGui_;
+	std::shared_ptr<ShaderEditorComponent> titleGui_;
 
 
 	/* 2D衝突判定関連 */
@@ -124,8 +130,6 @@ private:
 	std::unique_ptr<Collider2DBox> waveCollider_;
 	std::unique_ptr<Collider2DBox> oniSimaCollider_;
 
-	int psHandle_;
-
 	bool isSelectMenu_;
 
 	/// @brief UI初期化処理
@@ -139,5 +143,4 @@ private:
 
 	/// @brief Gui用の更新処理
 	void UpdateGui(void) override;
-
 };
