@@ -198,7 +198,9 @@ void SceneManager::Update(void)
             camera_->Init();
         }
 
-        ChangeScene(std::make_shared<SceneTitle>());
+        //ChangeScene(std::make_shared<SceneTitle>());
+        auto bomb = { PlayerBase::JOB_TYPE::BOMB };
+        ChangeScene(std::make_shared<SceneGame>(bomb));
 
         return;
     }

@@ -1,3 +1,4 @@
+
 #pragma once
 #include <unordered_map>
 #include <string>
@@ -27,7 +28,10 @@ public:
 		bool isLoadPath = false; // パスで読み込んでいるか否か
 		bool isInPlace = false; // アニメーションの位置を固定するか否か
 		VECTOR inPlaceLocalPos = UtilityMath::VECTOR_ZERO; // 固定するアニメーションローカル位置
+		VECTOR inPlaceLocalPosEnd = UtilityMath::VECTOR_ZERO; // 固定するアニメーションローカル位置
 	};
+
+	static constexpr float ANIM_SPEED_DEFAULT = 30.0f;
 
 
 	/// @brief コンストラクタ
@@ -37,21 +41,41 @@ public:
 	/// @brief デストラクタ
 	~AnimationController(void);
 
-	/// @brief 同じモデル内のアニメーションを準備
-	/// @param type アニメーション種類
-	/// @param speed アニメーション速度 
-	void AddInternal(int _type, float _speed = 30.0f
-		, bool _isPlace = false, const VECTOR& _localPos = UtilityMath::VECTOR_ZERO);
 
+	/// @brief 同じモデル内のアニメーションを準備
+	/// @param _type アニメーション種類
+	/// @param _speed アニメーション速度 
+	void AddInternal(int _type, float _speed = ANIM_SPEED_DEFAULT);
+
+	/// @brief 同じモデル内のアニメーションを準備し、再生座標固定
+	/// @param _type アニメーション種類
+	/// @param _speed アニメーション速度 
+	void AddInternal(int _type, const VECTOR& _localPos, float _speed = ANIM_SPEED_DEFAULT);
+
+
+	/// @brief 別の読み込み済みアニメーションモデルから準備
+	/// @param _type アニメーション種類
+	/// @param _handle アニメーションのハンドル
+	/// @param _speed アニメーション速度 
+	void AddExternal(int _type, int _handle, float _speed = ANIM_SPEED_DEFAULT);
 
 	/// @brief 別の読み込み済みアニメーションモデルから準備し、再生座標固定
-	/// @see 詳細な説明
 	/// @param _type アニメーション種類
 	/// @param _speed アニメーション速度 
 	/// @param _handle アニメーションのハンドル
 	/// @param _placeLocalPos 固定するアニメーションローカル位置
-	void AddExternal(int _type, float _speed, int _handle
-					, bool _isPlace = false, const VECTOR& _localPos = UtilityMath::VECTOR_ZERO);
+	void AddExternal(int _type, int _handle
+					, const VECTOR& _localPos
+					, float _speed = ANIM_SPEED_DEFAULT);
+
+	/// @brief 別の読み込み済みアニメーションモデルから準備し、再生座標固定
+	/// @param _type アニメーション種類
+	/// @param _speed アニメーション速度 
+	/// @param _handle アニメーションのハンドル
+	/// @param _placeLocalPos 固定するアニメーションローカル位置
+	void AddExternal(int _type, int _handle
+					, const VECTOR& _localPos
+					, const VECTOR& _localPosEnd, float _speed = ANIM_SPEED_DEFAULT);
 
 
 	/// @brief アニメーション再生
@@ -143,6 +167,9 @@ private:
 	float timeStop_;
 	
 	float term;
+	
+	// ブレンドアニメーションの前アニメーションのローカル位置
+	VECTOR preAnimLocalPos_;
 	
 	/// @brief 他アニメーションとのブレンドの影響を受けない単体の素のルート位置を取得
 	/// @param _target 位置を取得したいアニメーション

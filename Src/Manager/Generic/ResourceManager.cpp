@@ -166,11 +166,9 @@ void ResourceManager::Initialize(void)
 	_SetResource(LOAD_TYPE::MODEL, SRC::MODEL_PLAYER_BIRD,	PATH_MODEL + "Player/Chara/Bird/PlayerBird.mv1");
 	_SetResource(LOAD_TYPE::MODEL, SRC::MODEL_PLAYER_MONKEY,PATH_MODEL + "Player/Chara/Monkey/PlayerMonkey.mv1");
 
-	_SetResource(LOAD_TYPE::MODEL, SRC::MODEL_STAGE, PATH_MODEL + "Stage/Stage/Stage.mv1");
-	_SetResource(LOAD_TYPE::MODEL, SRC::MODEL_STAGE_COLLISION, PATH_MODEL + "Stage/Stage/StageCollision.mv1");
-	//_SetResource(LOAD_TYPE::MODEL, SRC::MODEL_STAGE, PATH_MODEL + "Stage/FloatingIsland/FloatingIsland02.mv1");
-	//_SetResource(LOAD_TYPE::MODEL, SRC::MODEL_STAGE_COLLISION, PATH_MODEL + "Stage/FloatingIsland/FloatingIsland02.mv1");
-	_SetResource(LOAD_TYPE::MODEL, SRC::MODEL_TREE_POSITION, PATH_MODEL + "Stage/Stage/TreePosition.mv1");
+	_SetResource(LOAD_TYPE::MODEL, SRC::MODEL_STAGE, PATH_MODEL + "Stage/Stage.mv1");
+	_SetResource(LOAD_TYPE::MODEL, SRC::MODEL_STAGE_COLLISION, PATH_MODEL + "Stage/StageCollision.mv1");
+	_SetResource(LOAD_TYPE::MODEL, SRC::MODEL_TREE_POSITION, PATH_MODEL + "Stage/TreePosition.mv1");
 
 	//É{ÉXÇÃïêäÌñ{ëÃån
 	_SetResource(LOAD_TYPE::MODEL, SRC::MODEL_BOSS_FEET, PATH_MODEL + "Boss/oni_feet.mv1");

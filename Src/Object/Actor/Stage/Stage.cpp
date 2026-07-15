@@ -54,7 +54,6 @@ void Stage::Load(void)
 
 void Stage::InitTransform(void)
 {
-	//constexpr float SCALE = 5.0f;
 	constexpr float SCALE = 0.425f;
 	constexpr VECTOR LOCAL_POS = { 0.0f, -50.0f, 0.0f };
 	VECTOR localPos = LOCAL_POS;
