@@ -107,9 +107,6 @@ void WeaponMGR::DrawPre(void)
 #ifdef _DEBUG
 
 
-	DrawFormatString(10, 250, 0xffffff, "MG_L_Bullet%d", bullets_.size());
-
-
 	
 
 #endif

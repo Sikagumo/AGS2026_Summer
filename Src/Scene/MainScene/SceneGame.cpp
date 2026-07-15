@@ -97,28 +97,28 @@ void SceneGame::Initialize(void)
 
 	if (Loading::GetInstance()->IsLoading()) { return; }
 
-		// マウスを表示しない設定にする
-		SetMouseDispFlag(false);
-		
-		auto& camera = SceneManager::GetInstance().GetCamera();
-		camera->ChangeMode(Camera::MODE::FOLLOW);
-		camera->SetFollow(&players_.at(0)->GetTransform());
+	// マウスを表示しない設定にする
+	SetMouseDispFlag(false);
 	
-		
-		for (auto& player : players_)
-		{
-			player->Init();
-		}
+	auto& camera = SceneManager::GetInstance().GetCamera();
+	camera->ChangeMode(Camera::MODE::FOLLOW);
+	camera->SetFollow(&players_.at(0)->GetTransform());
+
 	
-		boss_->Init();
-		stage_->Init();
-		enemyRobo_->Init();
-	
-		// タイマー有効化
-		gameTimer_->SetIsTimeActive(true);
-	
-		damageController_->SetPlayerMaxHp(players_.at(0)->GetMaxHp());
-		SoundManager::GetInstance().Play(SoundManager::SOUND::BGM_GAME);
+	for (auto& player : players_)
+	{
+		player->Init();
+	}
+
+	boss_->Init();
+	stage_->Init();
+	enemyRobo_->Init();
+
+	// タイマー有効化
+	gameTimer_->SetIsTimeActive(true);
+
+	damageController_->SetPlayerMaxHp(players_.at(0)->GetMaxHp());
+	SoundManager::GetInstance().Play(SoundManager::SOUND::BGM_GAME);
 }
 
 void SceneGame::Update(void)
@@ -158,6 +158,7 @@ void SceneGame::Update(void)
 
 void SceneGame::DamageProcess(void)
 {
+	enemyRobo_->SetPlayerPos(players_.at(0)->GetBodyPos());
 	boss_->SetPlayer1Pos(players_.at(0)->GetBodyPos());
 	
 	boss_->SetBossDamage(damageController_->GetBossDamage());
@@ -244,7 +245,7 @@ void SceneGame::Draw(void)
 	}
 
 	boss_->Draw();
-	
+
 	enemyRobo_->Draw();
 	
 	effect.Draw();
