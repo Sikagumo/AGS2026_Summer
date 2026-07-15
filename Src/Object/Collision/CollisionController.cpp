@@ -11,6 +11,7 @@
 #include "../Collision/CollisionBox.h"
 #include "../../Utility/UtilityMath.h"
 #include "../Collider/ColliderCapsule.h"
+#include "../Collider/ColliderSphere.h"
 
 CollisionController* CollisionController::instance_ = nullptr;
 
@@ -333,17 +334,24 @@ void CollisionController::SetActorColliderRadius(ActorBase* _targetActor,
 	}
 }
 
-void CollisionController::SetActorCapsuleShape(ActorBase* _targetActor, ColliderBase::TAG _targetTag, const VECTOR& _localStartPos, const VECTOR& _localEndPos, float _radius)
+void CollisionController::SetActorSphereLocalPos(ActorBase* _targetActor,
+	ColliderBase::TAG _targetTag, const VECTOR& _localPosition)
 {
 	if (_targetActor == nullptr)
 	{
 		return;
 	}
-	
+
 	auto& ownCollidersMap = _targetActor->GetOwnColliders();
 	int targetKey = static_cast<int>(_targetTag);
 	auto it = const_cast<ActorBase::ColliderMap&>(ownCollidersMap).find(targetKey);
-	
+
+	// そもそも指定したタグが存在するかチェック
+	if (it == const_cast<ActorBase::ColliderMap&>(ownCollidersMap).end())
+	{
+		return;
+	}
+
 	for (auto* collider : it->second)
 	{
 		if (collider == nullptr)
@@ -351,14 +359,55 @@ void CollisionController::SetActorCapsuleShape(ActorBase* _targetActor, Collider
 			continue;
 		}
 
-		auto* capsule =  static_cast<ColliderCapsule*>(collider);
+		// 形状が球である場合のみキャストして位置を変更する
+		if (collider->GetShapeType() == ColliderBase::SHAPE::SPHERE)
+		{
+			auto* sphereCollider = static_cast<ColliderSphere*>(collider);
+			if (sphereCollider != nullptr)
+			{
+				sphereCollider->SetLocalPosition(_localPosition);
+			}
+		}
+	}
+}
 
-		if (capsule == nullptr)
+void CollisionController::SetActorCapsuleShape(ActorBase* _targetActor, 
+	ColliderBase::TAG _targetTag, const VECTOR& _localStartPos, const VECTOR& _localEndPos, 
+	float _radius)
+{
+	if (_targetActor == nullptr)
+	{
+		return;
+	}
+
+	auto& ownCollidersMap = _targetActor->GetOwnColliders();
+	int targetKey = static_cast<int>(_targetTag);
+	auto it = const_cast<ActorBase::ColliderMap&>(ownCollidersMap).find(targetKey);
+
+	// そもそも指定したタグが存在するかチェック
+	if (it == const_cast<ActorBase::ColliderMap&>(ownCollidersMap).end())
+	{
+		return;
+	}
+
+	for (auto* collider : it->second)
+	{
+		if (collider == nullptr)
 		{
 			continue;
 		}
 
-		capsule->SetShape(_localStartPos, _localEndPos, _radius);
+		// 形状が球である場合のみキャストして位置を変更する
+		if (collider->GetShapeType() == ColliderBase::SHAPE::CAPSULE)
+		{
+			auto* CapsuleCollider = static_cast<ColliderCapsule*>(collider);
+			if (CapsuleCollider != nullptr)
+			{
+				CapsuleCollider->SetLocalStartPos(_localStartPos);
+				CapsuleCollider->SetLocalEndPos(_localEndPos);
+				CapsuleCollider->SetRadius(_radius);
+			}
+		}
 	}
 }
 
