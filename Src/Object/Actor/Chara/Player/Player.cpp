@@ -121,11 +121,11 @@ void Player::InitAnimation(void)
 
 	constexpr float SPEED_IDLE = 30.0f;
 	animation_->AddExternal(static_cast<int>(ANIM_TYPE::IDLE)
-		, SPEED_IDLE, resMng.LoadHandleId(ResourceManager::SRC::ANIM_IDLE));
+		, resMng.LoadHandleId(ResourceManager::SRC::ANIM_IDLE), SPEED_IDLE);
 
 	constexpr float SPEED_RUN = 32.5f;
 	animation_->AddExternal(static_cast<int>(ANIM_TYPE::RUN)
-		, SPEED_RUN, resMng.LoadHandleId(ResourceManager::SRC::ANIM_RUN));
+		, resMng.LoadHandleId(ResourceManager::SRC::ANIM_RUN), SPEED_RUN);
 
 	float throwSpeed = 0.0f;
 
@@ -147,26 +147,27 @@ void Player::InitAnimation(void)
 	}
 
 	animation_->AddExternal(static_cast<int>(ANIM_TYPE::THROW_LEFT)
-		, throwSpeed, resMng.LoadHandleId(ResourceManager::SRC::ANIM_THROW_LEFT));
+		, resMng.LoadHandleId(ResourceManager::SRC::ANIM_THROW_LEFT), throwSpeed);
 
 	animation_->AddExternal(static_cast<int>(ANIM_TYPE::THROW_RIGHT)
-		, throwSpeed, resMng.LoadHandleId(ResourceManager::SRC::ANIM_THROW_RIGHT));
+		, resMng.LoadHandleId(ResourceManager::SRC::ANIM_THROW_RIGHT), throwSpeed);
 
 	animation_->AddExternal(static_cast<int>(ANIM_TYPE::THROW_RUN)
-		, 20.0f, resMng.LoadHandleId(ResourceManager::SRC::ANIM_THROW_RUN));
+		, resMng.LoadHandleId(ResourceManager::SRC::ANIM_THROW_RUN), 20.0f);
 
 
 	constexpr float SPEED_JUMP = 50.0f;
 	constexpr VECTOR LOCAL_POS_JUMP = { 0.0f, 50.0f, 0.0f };
 	animation_->AddExternal(static_cast<int>(ANIM_TYPE::JUMP)
-		, SPEED_JUMP, resMng.LoadHandleId(ResourceManager::SRC::ANIM_JUMP)
-		, true, LOCAL_POS_JUMP);
+		, resMng.LoadHandleId(ResourceManager::SRC::ANIM_JUMP)
+		, LOCAL_POS_JUMP, SPEED_JUMP);
 
 	constexpr float SPEED_DODGE = 50.0f;
-	constexpr VECTOR LOCAL_POS_DODGE = { 0.0f, 22.5f, 0.0f };
+	constexpr VECTOR LOCAL_POS_DODGE = { 0.0f, 25.0f, 0.0f };
+	constexpr VECTOR LOCAL_POS_DODGE_END = { 0.0f, 0.0f, 0.0f };
 	animation_->AddExternal(static_cast<int>(ANIM_TYPE::DODGE)
-		, SPEED_DODGE, resMng.LoadHandleId(ResourceManager::SRC::ANIM_DODGE)
-		, true, LOCAL_POS_DODGE);
+		, resMng.LoadHandleId(ResourceManager::SRC::ANIM_DODGE)
+		, LOCAL_POS_DODGE, LOCAL_POS_DODGE_END, SPEED_DODGE);
 
 
 	animType_ = ANIM_TYPE::IDLE;
@@ -1093,6 +1094,6 @@ void Player::PlayAnimation(ANIM_TYPE _type, bool _isLoop, float _animSpeed)
 
 	animType_ = _type;
 
-	animation_->Play(static_cast<int>(_type), _isLoop, _animSpeed);
+	animation_->Play(static_cast<int>(_type), _isLoop, _animSpeed, 0.0f);
 }
 
