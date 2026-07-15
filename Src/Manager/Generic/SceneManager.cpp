@@ -9,6 +9,7 @@
 #include "../System/TimeManager.h"
 #include "../../Camera/Camera.h"
 #include "../../Common/Loading.h"
+#include "../../Common/Fader.h"
 #include "../../Application.h"
 #include "KeyConfInputManager.h"
 #include "../../ImGUI/GuiController.h"
@@ -45,6 +46,7 @@ SceneManager::SceneManager(void)
     , sceneMutex_()
 {
     camera_ = std::make_unique<Camera>();
+    fader_ = std::make_unique<Fader>();
     scenes_ = std::list<std::shared_ptr<SceneBase>>();
     oldScene_ = nullptr;
     nextScene_ = nullptr;
@@ -133,6 +135,9 @@ void SceneManager::ChangeScene(std::shared_ptr<SceneBase> scene)
     nextScene_ = scene;
     isSceneChanging_ = true;
 
+    fader_->SetFade(Fader::STATE::FADE_IN);
+
+
     // 非同期ロード開始（ロード画面付き）
     Loading::GetInstance()->StartAsyncLoad([scene]()
         {
@@ -207,6 +212,7 @@ void SceneManager::Update(void)
     // ロード中の処理を完全に分離する
     if (isSceneChanging_)
     {
+        fader_->Update();
         auto loader = Loading::GetInstance();
         loader->Update();
 
@@ -252,6 +258,7 @@ void SceneManager::Update(void)
 void SceneManager::Draw(void)
 {
     ClearDrawScreen();
+
     if (!scenes_.empty())
     {
         if (camera_) camera_->SetBeforeDraw();
@@ -282,6 +289,8 @@ void SceneManager::Draw(void)
     {
         if (loader) loader->Draw();
     }
+
+    fader_->Draw();
 }
 
 void SceneManager::Release(void)
@@ -289,8 +298,6 @@ void SceneManager::Release(void)
     // ロード完了を待機する
     if (Loading::GetInstance()->IsLoading())
     {
-        SetUseASyncLoadFlag(false);
-
         Loading::GetInstance()->EndAsyncLoad();
     }
 

@@ -282,11 +282,9 @@ void ResourceManager::LoadHandleIds(SRC _src, int* _target)
 {
 	// 複数画像ではない場合、処理終了
 	if (resourcesMap_[_src].GetLoadType() != Resource::LOAD_TYPE::IMAGES) { return; }
-	SetUseASyncLoadFlag(false);
 
 	// 複数画像の対象にコピー
 	Load(_src).CopyHandle(_target);
-	SetUseASyncLoadFlag(true);
 
 #ifdef _DEBUG
 	if (*_target == -1)

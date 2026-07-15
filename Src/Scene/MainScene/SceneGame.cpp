@@ -26,7 +26,8 @@ SceneGame::SceneGame(std::vector<PlayerBase::JOB_TYPE> _playerJob)
 	, enemyRobo_(std::make_unique<EnemyRobo>())
 	, stage_(std::make_unique<Stage>())
 	, damageController_(std::make_unique<DamageController>())
-	, targetHpImage_(-1), targetHpBerImage_(-1)
+	, targetHpImage_(-1)
+	, targetHpBerImage_(-1)
 	, gameTimer_(nullptr)
 {
 	for (int i = 0; i < _playerJob.size(); i++)
@@ -44,11 +45,6 @@ void SceneGame::Load(void)
 {
 	SceneBase::Load();
 
-
-	for (auto& player : players_)
-	{
-		player->Load();
-	}
 	playerHpImageBack_ = ResourceManager::GetInstance().LoadHandleIdsOnce(ResourceManager::SRC::IMGS_HP_PLAYER, 0);
 	playerHpImage_ = ResourceManager::GetInstance().LoadHandleIdsOnce(ResourceManager::SRC::IMGS_HP_PLAYER, 1);
 
@@ -57,6 +53,19 @@ void SceneGame::Load(void)
 
 	ResourceManager::GetInstance().LoadHandleIds(ResourceManager::SRC::IMGS_GAME_TEXT, uiGame_.data());
 
+
+	for (auto& player : players_)
+	{
+		player->Load();
+	}
+	
+	playerHpImageBack_ = ResourceManager::GetInstance().LoadHandleIdsOnce(ResourceManager::SRC::IMGS_HP_PLAYER, 0);
+	playerHpImage_ = ResourceManager::GetInstance().LoadHandleIdsOnce(ResourceManager::SRC::IMGS_HP_PLAYER, 1);
+
+	targetHpBerImage_ = ResourceManager::GetInstance().LoadHandleIdsOnce(ResourceManager::SRC::IMGS_HP_TARGET, 0);
+	targetHpImage_ = ResourceManager::GetInstance().LoadHandleIdsOnce(ResourceManager::SRC::IMGS_HP_TARGET, 1);
+
+	ResourceManager::GetInstance().LoadHandleIds(ResourceManager::SRC::IMGS_GAME_TEXT, uiGame_.data());
 
 	boss_->Load();
 	enemyRobo_->Load();
@@ -75,6 +84,7 @@ void SceneGame::Load(void)
 
 	//時間カウントリセット
 	TimeManager::GetInstance().Reset();
+
 }
 
 void SceneGame::EndLoad(void)
@@ -85,30 +95,30 @@ void SceneGame::EndLoad(void)
 void SceneGame::Initialize(void)
 {
 
-	//if (Loading::GetInstance()->IsLoading()) { return; }
+	if (Loading::GetInstance()->IsLoading()) { return; }
 
-	// マウスを表示しない設定にする
-	SetMouseDispFlag(FALSE);
+		// マウスを表示しない設定にする
+		SetMouseDispFlag(false);
+		
+		auto& camera = SceneManager::GetInstance().GetCamera();
+		camera->ChangeMode(Camera::MODE::FOLLOW);
+		camera->SetFollow(&players_.at(0)->GetTransform());
 	
-	auto& camera = SceneManager::GetInstance().GetCamera();
-	camera->ChangeMode(Camera::MODE::FOLLOW);
-	camera->SetFollow(&players_.at(0)->GetTransform());
-
+		
+		for (auto& player : players_)
+		{
+			player->Init();
+		}
 	
-	for (auto& player : players_)
-	{
-		player->Init();
-	}
-
-	boss_->Init();
-	stage_->Init();
-	enemyRobo_->Init();
-
-	// タイマー有効化
-	gameTimer_->SetIsTimeActive(true);
-
-	damageController_->SetPlayerMaxHp(players_.at(0)->GetMaxHp());
-	SoundManager::GetInstance().Play(SoundManager::SOUND::BGM_GAME);
+		boss_->Init();
+		stage_->Init();
+		enemyRobo_->Init();
+	
+		// タイマー有効化
+		gameTimer_->SetIsTimeActive(true);
+	
+		damageController_->SetPlayerMaxHp(players_.at(0)->GetMaxHp());
+		SoundManager::GetInstance().Play(SoundManager::SOUND::BGM_GAME);
 }
 
 void SceneGame::Update(void)
@@ -234,7 +244,9 @@ void SceneGame::Draw(void)
 	}
 
 	boss_->Draw();
-	//enemyRobo_->Draw();
+	
+	enemyRobo_->Draw();
+	
 	effect.Draw();
 
 	DrawHpBerBoss();
@@ -423,6 +435,7 @@ void SceneGame::DrawHpBerBoss(void)
 #endif
 	}
 }
+
 float SceneGame::CalcHpBarScale(const VECTOR& _targetPos)
 {
 	// 距離の最小値
