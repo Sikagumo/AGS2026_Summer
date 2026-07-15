@@ -31,6 +31,11 @@ SceneLobby::SceneLobby(bool _isMulti)
 {
 }
 
+SceneLobby::~SceneLobby(void)
+{
+
+}
+
 
 void SceneLobby::Load(void)
 {

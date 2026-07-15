@@ -13,12 +13,12 @@ class SceneLobby : public SceneBase
 {
 public:
 
-	/// @brief コンストラクタ
-	/// @param _isMulti マルチプレイか否か
-	SceneLobby(bool _isMulti);
+    /// @brief コンストラクタ
+    /// @param _isMulti マルチプレイか否か
+    SceneLobby(bool _isMulti);
 
-	/// @brief デストラクタ
-    ~SceneLobby(void) = default;
+    /// @brief デストラクタ
+    ~SceneLobby(void) override;
 
     /// @brief リソースの読み込み開始
     void Load(void) override;
@@ -38,11 +38,16 @@ public:
     /// @brief 解放処理
     void Release(void) override;
 
+    /// @brief GUI更新処理 
+    void UpdateGui(void) override {};
+
 
 private:
 
     const bool IS_MULTI;
 
+
+    // シングルプレイ用
     bool isSelectMenu_;
     int selectedIdx_;
     int inputIntervalCounter_;
@@ -65,7 +70,6 @@ private:
     std::array<int, static_cast<int>(UI_SINGLE::MAX)>
         uiHandles_;
 
-
     // マウスカーソル用の円コライダー
     std::unique_ptr<Collider2DCircle> cursorCollider_;
 
@@ -74,10 +78,35 @@ private:
 
     std::array<Collider2DBase::TAG_2D, 4>
         uiCollisionTags_;
-    
+
     void InitUISingle(void);
 
     void UpdateSingle(void);
+
+    // マルチプレイ用
+    enum class LOBBY_STATE
+    {
+        SELECT_MODE,
+        CONNECTING,
+        IN_ROOM
+    };
+
+    LOBBY_STATE state_;
+
+    int buttonSelectIndex_;
+    int ipParts_[4];
+    int selectOctet_;
+    bool isEditing_;
+    bool myReadyState_;
+    unsigned int COLOR_WHITE; 
+    unsigned int COLOR_YELLOW;
+    unsigned int COLOR_GRAY;
+    unsigned int COLOR_GREEN;
+    
     void UpdateMulti(void);
+    void UpdateSelectMode(void);
+    void UpdateConnecting(void);
+    void UpdateInRoom(void);
+
 };
 

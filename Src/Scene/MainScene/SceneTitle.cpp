@@ -10,7 +10,6 @@
 #include "../../Camera/Camera.h"
 #include "SceneGame.h"
 #include "SceneLobby.h"
-#include "SceneResult.h"
 #include "../../Object/Actor/Chara/Player/PlayerBase.h"
 #include "../../Application.h"
 #include "../../Manager/System/TimeManager.h"
@@ -452,6 +451,7 @@ void SceneTitle::ProcessMenuState(void)
 
         case MENU_ITEM::MULTI:
             // マルチプレイ処理
+            SceneManager::GetInstance().ChangeScene(std::make_shared<SceneLobby>(false));
 
         break;
 

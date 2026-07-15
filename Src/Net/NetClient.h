@@ -1,17 +1,14 @@
 #pragma once
-
-#include "Netbase.h"
+#include "NetBase.h"
 
 class NetClient : public NetBase
 {
-	using NetBase::NetBase;
+public:
+    using NetBase::NetBase;
 
-	void UpdateConnecting(void) override;
+    void UpdateConnecting(void) override;
 
-	void UpdateGotoGame(void) override;
+    void UpdateGotoGame(void) override;
 
-	void UpdateGamePlaying(void) override;
-
-	void OnReceiveBossAction(const NET_BOSS_ACTION& bossAciton) override;
+    void UpdateGamePlaying(void) override {}
 };
-

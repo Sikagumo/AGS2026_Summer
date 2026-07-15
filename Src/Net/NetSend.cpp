@@ -1,114 +1,131 @@
 #include "NetSend.h"
+
+#include <cstring>
+#include <Dxlib.h>
+
 #include "../Manager/System/NetManager.h"
+#include "../Common/CRC.h" 
 
-std::uint32_t CalculateCRC(const void* data, size_t size)
+NetSend::NetSend(int _sendSocketId)
+	: sendSocketId_(_sendSocketId)
 {
-	return 0;
 }
 
-NetSend::NetSend(NetManager& netManager, int& sendSocketId)
-	: netManager_(netManager)
-	, sendSocketId_(sendSocketId)
+void NetSend::Send(NET_DATA_TYPE _type)
 {
-
-}
-
-void NetSend::Send(NET_DATA_TYPE type)
-{
-	switch (type)
+	switch (_type)
 	{
 	case NET_DATA_TYPE::USER:
-
 		SendUser();
-
 		break;
 
 	case NET_DATA_TYPE::USERS:
-
 		SendUsers();
-
 		break;
 
 	case NET_DATA_TYPE::ACTION_HIST_ALL:
-
 		SendActionHisAll();
-
 		break;
 
 	case NET_DATA_TYPE::BOSS_ACTOION:
-
 		SendBossAction();
-
 		break;
 	}
 }
 
-NET_BASIC_DATA NetSend::MakeBasicData(NET_DATA_TYPE type, std::uint32_t crc)
+NET_BASIC_DATA NetSend::MakeBasicData(NET_DATA_TYPE _type, std::uint32_t _crc)
 {
 	NET_BASIC_DATA data;
 
-	data.type = type;
-
-	data.key = 0;
-
+	data.type = _type;
+	data.key = NetManager::GetInstance().GetMyKey();
 	data.gameTime = 0.0f;
-
-	data.crc = crc;
+	data.crc = _crc;
 
 	return data;
 }
 
 void NetSend::SendUser(void)
 {
+	// 【クライアント用】自分の情報をホストへ送る
+	NET_JOIN_USER self = NetManager::GetInstance().GetSelfUser();
+	NET_BASIC_DATA basicData = MakeBasicData(NET_DATA_TYPE::USER, 0);
+
+	char buffer[MAX_SEND_BYTES];
+	memcpy(buffer, &basicData, sizeof(NET_BASIC_DATA));
+	memcpy(buffer + sizeof(NET_BASIC_DATA), &self, sizeof(NET_JOIN_USER));
+
+	int sendSize = sizeof(NET_BASIC_DATA) + sizeof(NET_JOIN_USER);
+
+	// ホストへ向けて発射
+	SendUDP_Host(buffer, sendSize);
 }
 
 void NetSend::SendUsers(void)
 {
-	NET_JOINT_USER myInfo = {};
+	// 【ホスト用】全員のリストを各クライアントへ送る
+	NET_JOIN_USERS usersData;
 
-	NET_BASIC_DATA basicData = MakeBasicData(NET_DATA_TYPE::USER, 0);
-	char buffer[sizeof(NET_BASIC_DATA) + sizeof(NET_JOINT_USER)];
+	// 配列を一旦初期化
+	for (int i = 0; i < MAX_PLAYERS; ++i) {
+		usersData.users[i].mode = NET_MODE::NONE;
+	}
 
-	memcpy(buffer, &basicData, sizeof(basicData));
-	memcpy(buffer + sizeof(basicData), &myInfo, sizeof(myInfo));
+	// 自分の情報（ホスト）を配列にセット
+	NET_JOIN_USER self = NetManager::GetInstance().GetSelfUser();
+	usersData.users[0] = self;
 
-	SendUDP_Client(buffer, sizeof(buffer));
+	// 接続してきているクライアント達を配列にセット
+	auto users = NetManager::GetInstance().GetNetUsers();
+	int idx = 1;
+	for (const auto& pair : users)
+	{
+		if (idx >= MAX_PLAYERS) break;
+		usersData.users[idx] = pair.second;
+		idx++;
+	}
+
+	NET_BASIC_DATA basicData = MakeBasicData(NET_DATA_TYPE::USERS, 0);
+
+	char buffer[MAX_SEND_BYTES];
+	memcpy(buffer, &basicData, sizeof(NET_BASIC_DATA));
+	memcpy(buffer + sizeof(NET_BASIC_DATA), &usersData, sizeof(NET_JOIN_USERS));
+
+	int sendSize = sizeof(NET_BASIC_DATA) + sizeof(NET_JOIN_USERS);
+
+	// 接続済みクライアント全員へ向けて発射
+	SendUDP_Client(buffer, sendSize);
 }
 
 void NetSend::SendActionHisAll(void)
 {
-
 }
 
 void NetSend::SendBossAction(void)
 {
-	NET_BOSS_ACTION BossAction = {};
-
-	std::uint32_t crc = CalculateCRC(&BossAction, sizeof(BossAction));
-
-	NET_BASIC_DATA basicData = MakeBasicData(NET_DATA_TYPE::BOSS_ACTOION, 0);
-
-	char buffer[sizeof(NET_BASIC_DATA) + sizeof(NET_BOSS_ACTION)];
-
-	memcpy(buffer, &basicData, sizeof(basicData));
-
-	memcpy(buffer + sizeof(basicData), &BossAction, sizeof(BossAction));
-
-	SendUDP_Host(buffer, sizeof(buffer));
 }
 
 void NetSend::SendAction(void)
 {
 }
 
-void NetSend::SendUDP_Host(const void* bufptr, int size)
+void NetSend::SendUDP_Host(const void* _bufferPointer, int _dataSize)
 {
-
+	IPDATA hostIp = NetManager::GetInstance().GetHostIp();
+	NetWorkSendUDP(sendSocketId_, hostIp, HOST_PORT, _bufferPointer, _dataSize);
 }
 
-void NetSend::SendUDP_Client(const void* bufptr, int size)
+void NetSend::SendUDP_Client(const void* _bufferPointer, int _dataSize)
 {
-	IPDATA targetIp = netManager_.GetHostIp();
+	// ホストは接続済みの全クライアントへ送信する
+	int myKey = NetManager::GetInstance().GetMyKey();
+	auto users = NetManager::GetInstance().GetNetUsers();
 
-	NetWorkSendUDP(sendSocketId_, targetIp, 65000, bufptr, size);
+	for (const auto& userPair : users)
+	{
+		const NET_JOIN_USER& remoteUser = userPair.second;
+		if (remoteUser.mode == NET_MODE::NONE || remoteUser.key == myKey) continue;
+
+		NetWorkSendUDP(sendSocketId_, remoteUser.ip, remoteUser.port, _bufferPointer, _dataSize);
+	}
 }

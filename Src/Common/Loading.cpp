@@ -52,6 +52,7 @@ void Loading::Initialize(void)
 
 void Loading::StartAsyncLoad(std::function<void()> loadFunc)
 {
+	SetUseASyncLoadFlag(true);
 	if (isLoading_)
 	{
 		return;
@@ -64,6 +65,7 @@ void Loading::StartAsyncLoad(std::function<void()> loadFunc)
 	{
 		loadFunc();
 	}
+	SetUseASyncLoadFlag(false);
 }
 
 void Loading::Update(void)
