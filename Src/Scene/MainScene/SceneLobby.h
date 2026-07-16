@@ -91,7 +91,7 @@ private:
         IN_ROOM
     };
 
-    LOBBY_STATE lobbyState_;
+    LOBBY_STATE multiState_;
 
     int buttonSelectIndex_;
     int ipParts_[4];

@@ -5,6 +5,7 @@
 #include "../../Manager/Generic/ResourceManager.h"
 #include "../../Manager/Decoration/SoundManager.h"
 #include "../../Manager/Generic/SceneManager.h"
+#include "../../Manager/System/NetManager.h"
 #include "../../Object/Collision/CollisionController.h"
 #include "../../Camera/Camera.h"
 #include "../../Application.h"
@@ -30,7 +31,6 @@ SceneLobby::SceneLobby(bool _isMulti)
     , inputIntervalCounter_(0)
     , selectOctet_(0)
     , isEditing_(false)
-    , ipParts_(0)
 {
 }
 
@@ -56,6 +56,14 @@ void SceneLobby::Initialize(void)
 
     if (IS_MULTI)
     {
+        IPDATA ip = NetManager::GetInstance().GetHostIp();
+        ipParts_[0] = ip.d1; 
+        ipParts_[1] = ip.d2;
+        ipParts_[2] = ip.d3;
+        ipParts_[3] = ip.d4;
+        multiState_ = LOBBY_STATE::SELECT_MODE;
+        buttonSelectIndex_ = 0; 
+        isEditing_ = false;
     }
     else
     {
@@ -248,7 +256,7 @@ void SceneLobby::UpdateSingle(void)
 
 void SceneLobby::UpdateMulti(void)
 {
-    switch (lobbyState_)
+    switch (multiState_)
     {
     case SceneLobby::LOBBY_STATE::SELECT_MODE:
         UpdateSelectMode();
@@ -321,23 +329,74 @@ void SceneLobby::UpdateSelectMode(void)
     }
 
     // 決定キーで通信開始
-    if(if)
+    if (KeyConfInputManager::GetInstance().isTrigerDown("OK"))
+    {
+        // ホスト
+        if (buttonSelectIndex_ == 0)
+        {
+            NetManager::GetInstance().Run(NET_MODE::HOST);
+            multiState_ = LOBBY_STATE::CONNECTING;
+        }
+        //クライアント
+        else if (buttonSelectIndex_ == 1)
+        {
+            IPDATA hostIp;
+            hostIp.d1 = ipParts_[0];
+            hostIp.d2 = ipParts_[1];
+            hostIp.d3 = ipParts_[2];
+            hostIp.d4 = ipParts_[3];
+
+            NetManager::GetInstance().SetHostIp(hostIp);
+            NetManager::GetInstance().Run(NET_MODE::CLIENT);
+            multiState_ = LOBBY_STATE::CONNECTING;
+        }
+    }
 
 }
 
 void SceneLobby::UpdateConnecting(void)
 {
+    // ホストなら即時遷移
+    if (NetManager::GetInstance().IsHost())
+    {
+        multiState_ = LOBBY_STATE::IN_ROOM;
+        return;
+    }
 
+    auto users = NetManager::GetInstance().GetNetUsers();
+    
+    if (!users.empty())
+    {
+        multiState_ = LOBBY_STATE::IN_ROOM;
+    }
 }
 
 void SceneLobby::UpdateInRoom(void)
 {
+    // キャンセルキーで退出
+    if (KeyConfInputManager::GetInstance().isTrigerDown("CANCEL"))
+    {
+        NetManager::GetInstance().Stop();
+        Initialize();
+        return;
+    }
 
+    // OKキーで準備完了切り替え
+    if (KeyConfInputManager::GetInstance().isTrigerDown("OK"))
+    {
+        myReadyState_ = !myReadyState_;
+
+        NET_JOIN_USER self = NetManager::GetInstance().GetSelfUser();
+        
+        self.gameState = myReadyState_ ? GAME_STATE::GOTO_GAME : GAME_STATE::CONNECTING;
+        
+        NetManager::GetInstance().SetSelfInfo(self);
+    }
 }
 
 void SceneLobby::DrawMulti(void)
 {
-    switch (lobbyState_)
+    switch (multiState_)
     {
     case SceneLobby::LOBBY_STATE::SELECT_MODE:
         DrawSelectMode();
@@ -358,15 +417,92 @@ void SceneLobby::DrawMulti(void)
 
 void SceneLobby::DrawSelectMode(void)
 {
+    int screenWidth = Application::SCREEN_SIZE_X;
+    int ipBoxX = (screenWidth - 400) / 2;
+    int btnStartX = (screenWidth - (180 * 2 + 20)) / 2;
 
+    // IPアドレスボックス
+    DrawBox(ipBoxX, 250, ipBoxX + 400, 310, GetColor(30, 30, 30), true);
+    DrawBox(ipBoxX, 250, ipBoxX + 400, 310, isEditing_ ? COLOR_YELLOW : COLOR_WHITE, false);
+    std::string ipStr = std::to_string(ipParts_[0]) + "." + std::to_string(ipParts_[1]) + 
+        "." + std::to_string(ipParts_[2]) + "." + std::to_string(ipParts_[3]);
+    DrawString(ipBoxX + 20, 272, ("Target IP: " + ipStr).c_str(), COLOR_WHITE);
+
+    if (isEditing_) DrawFormatString(ipBoxX + 20, 320, COLOR_YELLOW, "編集中: 第%dセグメント",
+        selectOctet_ + 1);
+
+    // HOSTボタン
+    DrawBox(btnStartX, 400, btnStartX + 180, 460, GetColor(0, 100, 0), TRUE);
+    DrawBox(btnStartX, 400, btnStartX + 180, 460, (!isEditing_ && buttonSelectIndex_ == 0) ? 
+        COLOR_YELLOW : COLOR_WHITE, false);
+    DrawString(btnStartX + 70, 422, "HOST", COLOR_WHITE);
+
+    // CLIENTボタン
+    int clientX = btnStartX + 200;
+    DrawBox(clientX, 400, clientX + 180, 460, GetColor(0, 0, 150), true);
+    DrawBox(clientX, 400, clientX + 180, 460, (!isEditing_ && buttonSelectIndex_ == 1)
+        ? COLOR_YELLOW : COLOR_WHITE, false);
+    DrawString(clientX + 65, 422, "CLIENT", COLOR_WHITE);
 }
 
 void SceneLobby::DrawConnecting(void)
 {
-
+    DrawBox(0, 0, Application::SCREEN_SIZE_X, Application::SCREEN_SIZE_Y, GetColor(10, 10, 15), true);
+    DrawString(100, 100, "ホストへの接続を待機しています...", COLOR_YELLOW);
+    DrawString(100, 130, "[BackSpace] キャンセル", COLOR_WHITE);
 }
 
 void SceneLobby::DrawInRoom(void)
 {
+    DrawBox(0, 0, Application::SCREEN_SIZE_X, Application::SCREEN_SIZE_Y, GetColor(10, 10, 15), true);
+    DrawString(100, 50, "■ ルーム内プレイヤー一覧", COLOR_GREEN);
 
+    int drawCount = 0;
+
+    // まず「自分」を一番上に描画する
+    NET_JOIN_USER self = NetManager::GetInstance().GetSelfUser();
+    std::string myRole = NetManager::GetInstance().IsHost() ? "HOST" : "CLIENT";
+    std::string myStatus = (self.gameState >= GAME_STATE::GOTO_GAME) ? "READY!!" : "Waiting...";
+    unsigned int myStatusCol = (self.gameState >= GAME_STATE::GOTO_GAME) ? COLOR_GREEN : COLOR_WHITE;
+
+    // ポート番号が -1 なら AUTO にする処理
+    std::string myPortStr = (self.port == -1) ? "AUTO" : std::to_string(self.port);
+
+    int y = 120 + drawCount * 40;
+    DrawFormatString(100, y, COLOR_WHITE, "Player %d : IP = %d.%d.%d.%d:%s",
+        drawCount + 1, self.ip.d1, self.ip.d2, self.ip.d3, self.ip.d4, myPortStr.c_str());
+    DrawFormatString(500, y, COLOR_YELLOW, "[%s] (YOU)", myRole.c_str());
+    DrawFormatString(650, y, myStatusCol, myStatus.c_str());
+    drawCount++;
+
+    // 続いて「接続してきた相手」を描画する
+    for (const auto& pair : NetManager::GetInstance().GetNetUsers())
+    {
+        if (drawCount >= MAX_PLAYERS) break;
+
+        const NET_JOIN_USER& user = pair.second;
+        std::string role = (user.mode == NET_MODE::HOST) ? "HOST" : "CLIENT";
+        std::string status = (user.gameState >= GAME_STATE::GOTO_GAME) ? "READY!!" : "Waiting...";
+        unsigned int statusCol = (user.gameState >= GAME_STATE::GOTO_GAME) ? COLOR_GREEN : COLOR_WHITE;
+
+        // ポート番号が -1 なら AUTO にする処理
+        std::string userPortStr = (user.port == -1) ? "AUTO" : std::to_string(user.port);
+
+        y = 120 + drawCount * 40;
+        DrawFormatString(100, y, COLOR_WHITE, "Player %d : IP = %d.%d.%d.%d:%s",
+            drawCount + 1, user.ip.d1, user.ip.d2, user.ip.d3, user.ip.d4, userPortStr.c_str());
+        DrawFormatString(500, y, COLOR_YELLOW, "[%s]", role.c_str());
+        DrawFormatString(650, y, statusCol, status.c_str());
+        drawCount++;
+    }
+
+    // 余ったスロットを「空き」として描画する
+    for (int i = drawCount; i < MAX_PLAYERS; ++i)
+    {
+        int emptyY = 120 + i * 40;
+        DrawFormatString(100, emptyY, COLOR_GRAY, "Player %d : ---- Empty ----", i + 1);
+    }
+
+    DrawString(100, 400, "[Enter] 準備完了(READY)を切り替え", COLOR_YELLOW);
+    DrawString(100, 430, "[BackSpace] 退出する", COLOR_WHITE);
 }

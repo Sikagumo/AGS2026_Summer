@@ -200,14 +200,15 @@ void SceneManager::Update(void)
             camera_->Init();
         }
 
-        //ChangeScene(std::make_shared<SceneTitle>());
+        ChangeScene(std::make_shared<SceneTitle>());
         auto bomb = { PlayerBase::JOB_TYPE::BOMB };
-        ChangeScene(std::make_shared<SceneGame>(bomb));
+        //ChangeScene(std::make_shared<SceneGame>(bomb));
 
         return;
     }
 
     TimeManager::GetInstance().Update();
+    NetManager::GetInstance().Update();
 
     if (Application::GetInstance().GetGameEnd()) { return; }
 
@@ -319,8 +320,9 @@ void SceneManager::Release(void)
     ShaderController::GetInstance().DestroyInstance();
     TimeManager::GetInstance().DestroyInstance();
     Loading::GetInstance()->DestroyInstance();
-    CollisionController::DestroyInstance();
+    CollisionController::GetInstance().DestroyInstance();
     GuiController::DestroyInstance();
+    NetManager::GetInstance().DestroyInstance();
 }
 
 const std::unique_ptr<Camera>& SceneManager::GetCamera(void) const

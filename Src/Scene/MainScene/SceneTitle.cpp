@@ -339,9 +339,7 @@ void SceneTitle::Update(void)
     }
     else
     {
-        if (selectedIdx_ == static_cast<int>(MENU_ITEM::OPTION)
-            // ↓マルチプレイ有効時には削除
-            || selectedIdx_ == static_cast<int>(MENU_ITEM::MULTI))
+        if (selectedIdx_ == static_cast<int>(MENU_ITEM::OPTION))
         {
             // 設定処理有効化
             /* (設定有効化処理の追加) */
@@ -457,7 +455,7 @@ void SceneTitle::ProcessMenuState(void)
 
         case MENU_ITEM::MULTI:
             // マルチプレイ処理
-            SceneManager::GetInstance().ChangeScene(std::make_shared<SceneLobby>(false));
+            SceneManager::GetInstance().ChangeScene(std::make_shared<SceneLobby>(true));
 
         break;
 
