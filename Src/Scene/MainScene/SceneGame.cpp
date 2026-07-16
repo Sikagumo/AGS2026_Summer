@@ -1,5 +1,4 @@
 #include "SceneGame.h"
-#define NOMINMAX
 #include <algorithm>
 #include <math.h>
 #include "../../Manager/Generic/SceneManager.h"

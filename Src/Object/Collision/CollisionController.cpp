@@ -17,7 +17,6 @@ CollisionController* CollisionController::instance_ = nullptr;
 
 CollisionController::CollisionController(void)
 	: cullingDistSquare_(0.0f)
-	, updateTimer_(0.0f)
 {
 }
 
@@ -71,17 +70,12 @@ void CollisionController::Initialize(void)
 
 void CollisionController::Update(void)
 {
-	updateTimer_ += TimeManager::GetInstance().GetDeltaTime();
+	updateTimer_ = 0.0f;
 
-	// 一定間隔ごとに衝突判定を実行
-	if (updateTimer_ >= UPDATE_INTERVAL)
-	{
-		updateTimer_ = 0.0f;
+	UpdateCollisionPars();
 
-		UpdateCollisionPars();
+	UpdateCollision2D();
 
-		UpdateCollision2D();
-	}
 }
 
 void CollisionController::Clear(void)
@@ -557,7 +551,7 @@ void CollisionController::UpdateCollisionPars(void)
 			{
 				for (const auto* colA : colliderVectorA)
 				{
-					if (colA != nullptr && colA->GetCollisionTag() == ColliderBase::TAG::STAGE
+					if (colA->GetCollisionTag() == ColliderBase::TAG::STAGE
 						|| colA->GetCollisionTag() == ColliderBase::TAG::WALL)
 					{
 						isStageCollision = true;
@@ -572,7 +566,7 @@ void CollisionController::UpdateCollisionPars(void)
 			{
 				for (const auto* colB : colliderVectorB)
 				{
-					if (colB != nullptr && colB->GetCollisionTag() == ColliderBase::TAG::STAGE
+					if (colB->GetCollisionTag() == ColliderBase::TAG::STAGE
 						|| colB->GetCollisionTag() == ColliderBase::TAG::WALL)
 					{
 						isStageCollision = true;

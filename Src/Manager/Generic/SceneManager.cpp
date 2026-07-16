@@ -252,9 +252,8 @@ void SceneManager::Update(void)
     {
         current->Update();
     }
-
+    
     CollisionController::GetInstance().Update();
-
 }
 
 void SceneManager::Draw(void)

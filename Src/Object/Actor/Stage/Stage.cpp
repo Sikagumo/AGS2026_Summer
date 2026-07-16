@@ -20,9 +20,9 @@ void Stage::Draw(void)
 
 
 #ifdef _DEBUG
-	// 以前の MV1DrawModel(collisionTrans_.modelId); はこれと被るので消すかコメントアウト
 
-	// 自分が持っているすべてのコライダーを描画する
+	// 以前の MV1DrawModel(collisionTrans_.modelId); はこれと被るので消すかコメントアウト
+	// // 自分が持っているすべてのコライダーを描画する
 	for (const auto& [tagId, colliderList] : ownColliders_)
 	{
 		for (auto* collider : colliderList)
