@@ -99,14 +99,6 @@ void Stage::InitCollider(void)
 	}
 
 	CollisionController::GetInstance().RegisterActor(this);
-
-	int frameNum = MV1GetFrameNum(collisionTrans_.modelId);
-	for (int i = 0; i < frameNum; i++)
-	{
-		const char* name = MV1GetFrameName(collisionTrans_.modelId, i);
-		printfDx((std::string(name) + "\n").c_str());
-		// または printfDx や DrawFormatString でi番目のフレーム名を確認
-	}
 }
 
 
