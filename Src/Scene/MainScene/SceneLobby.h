@@ -91,22 +91,26 @@ private:
         IN_ROOM
     };
 
-    LOBBY_STATE state_;
+    LOBBY_STATE lobbyState_;
 
     int buttonSelectIndex_;
     int ipParts_[4];
     int selectOctet_;
     bool isEditing_;
     bool myReadyState_;
-    unsigned int COLOR_WHITE; 
-    unsigned int COLOR_YELLOW;
-    unsigned int COLOR_GRAY;
-    unsigned int COLOR_GREEN;
+   const unsigned int COLOR_WHITE = GetColor(255, 255, 255);
+   const unsigned int COLOR_YELLOW = GetColor(255, 255, 0);
+   const unsigned int COLOR_GRAY = GetColor(100, 100, 100);
+   const unsigned int COLOR_GREEN = GetColor(0, 255, 0);
     
     void UpdateMulti(void);
     void UpdateSelectMode(void);
     void UpdateConnecting(void);
     void UpdateInRoom(void);
+    void DrawMulti(void);
+    void DrawSelectMode(void);
+    void DrawConnecting(void);
+    void DrawInRoom(void);
 
 };
 

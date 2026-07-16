@@ -28,6 +28,9 @@ SceneLobby::SceneLobby(bool _isMulti)
 	, IS_MULTI(_isMulti)
     , cursorCollider_(nullptr)
     , inputIntervalCounter_(0)
+    , selectOctet_(0)
+    , isEditing_(false)
+    , ipParts_(0)
 {
 }
 
@@ -136,26 +139,34 @@ void SceneLobby::Update(void)
 
 void SceneLobby::Draw(void)
 {
-    std::array<Vector2F, 4> UI_POS
-        = { POS_SELECT_BOMB, POS_SELECT_CANNON, POS_SELECT_RECOVERY, POS_SELECT_RAPIDFIRE };
+    if (IS_MULTI)
+    {
+        DrawMulti();
+    }
+    else
+    {
+        std::array<Vector2F, 4> UI_POS
+            = { POS_SELECT_BOMB, POS_SELECT_CANNON, POS_SELECT_RECOVERY, POS_SELECT_RAPIDFIRE };
         //= { POS_SELECT_BOMB, POS_SELECT_RAPIDFIRE, POS_SELECT_CANNON, POS_SELECT_RECOVERY};
 
-    for (int i = 0; i < uiCollisions_.size(); i++)
-    {
-        // 選択中の職業の画像以外は未選択の画像を表示
-        int imageNum = i + ((selectedIdx_ != i) ? 1 : 0);
+        for (int i = 0; i < uiCollisions_.size(); i++)
+        {
+            // 選択中の職業の画像以外は未選択の画像を表示
+            int imageNum = i + ((selectedIdx_ != i) ? 1 : 0);
 
-        DrawRotaGraph(UI_POS.at(i).x, UI_POS.at(i).y, BUTTON_SCALE,
-            0.0, uiHandles_.at(imageNum), true);
+            DrawRotaGraph(UI_POS.at(i).x, UI_POS.at(i).y, BUTTON_SCALE,
+                0.0, uiHandles_.at(imageNum), true);
 
 #ifdef _DEBUG
-        CollisionController::GetInstance().DrawDebug2D();
+            CollisionController::GetInstance().DrawDebug2D();
 #endif
-    }
+        }
 
-    const Vector2 pos = {};
-    DrawGraph(pos.x, pos.y, uiHandles_.at(static_cast<int>(UI_SINGLE::GAME_START)), true);
-}
+        const Vector2 pos = {};
+        DrawGraph(pos.x, pos.y, uiHandles_.at(static_cast<int>(UI_SINGLE::GAME_START)), true);
+
+    }
+ }
 
 void SceneLobby::Release(void)
 {
@@ -237,4 +248,125 @@ void SceneLobby::UpdateSingle(void)
 
 void SceneLobby::UpdateMulti(void)
 {
+    switch (lobbyState_)
+    {
+    case SceneLobby::LOBBY_STATE::SELECT_MODE:
+        UpdateSelectMode();
+        break;
+
+    case SceneLobby::LOBBY_STATE::CONNECTING:
+        UpdateConnecting();
+        break;
+
+    case SceneLobby::LOBBY_STATE::IN_ROOM:
+        UpdateInRoom();
+        break;
+
+    default:
+        break;
+    }
+}
+
+void SceneLobby::UpdateSelectMode(void)
+{
+    const int IP_MAX_LIMIT = 256;
+
+    // IPアドレス編集モード
+    if (isEditing_)
+    {
+        if (KeyConfInputManager::GetInstance().isTrigerDown("CANCEL"))
+        {
+            isEditing_ = false;
+            return;
+        }
+
+        if (KeyConfInputManager::GetInstance().isTrigerDown("LEFT"))
+        {
+            selectOctet_ = (selectOctet_ + 3) % 4;
+        }
+
+        if (KeyConfInputManager::GetInstance().isTrigerDown("RIGHT"))
+        {
+            selectOctet_ = (selectOctet_ + 1) % 4;
+        }
+
+        if (KeyConfInputManager::GetInstance().isTrigerDown("UP"))
+        {
+            ipParts_[selectOctet_] = (ipParts_[selectOctet_] + 1) % IP_MAX_LIMIT;
+        }
+
+        if (KeyConfInputManager::GetInstance().isTrigerDown("DOWN"))
+        {
+            ipParts_[selectOctet_] = (ipParts_[selectOctet_] + 255) & IP_MAX_LIMIT;
+        }
+
+        if (KeyConfInputManager::GetInstance().isTrigerDown("OK"))
+        {
+            isEditing_ = false;
+        }
+    }
+
+    // モード選択(左右キー)
+    if (KeyConfInputManager::GetInstance().isTrigerDown("LEFT")
+        || KeyConfInputManager::GetInstance().isTrigerDown("RIGHT"))
+    {
+        buttonSelectIndex_ = (buttonSelectIndex_ == 0) ? 1 : 0;
+    }
+
+    // クライアント選択時、上キーでIP編集へ
+    if (buttonSelectIndex_ == 1 && KeyConfInputManager::GetInstance().isTrigerDown("UP"))
+    {
+        isEditing_ = true;
+        selectOctet_ = 0;
+    }
+
+    // 決定キーで通信開始
+    if(if)
+
+}
+
+void SceneLobby::UpdateConnecting(void)
+{
+
+}
+
+void SceneLobby::UpdateInRoom(void)
+{
+
+}
+
+void SceneLobby::DrawMulti(void)
+{
+    switch (lobbyState_)
+    {
+    case SceneLobby::LOBBY_STATE::SELECT_MODE:
+        DrawSelectMode();
+        break;
+
+    case SceneLobby::LOBBY_STATE::CONNECTING:
+        DrawConnecting();
+        break;
+
+    case SceneLobby::LOBBY_STATE::IN_ROOM:
+        DrawInRoom();
+        break;
+
+    default:
+        break;
+    }
+}
+
+void SceneLobby::DrawSelectMode(void)
+{
+
+}
+
+void SceneLobby::DrawConnecting(void)
+{
+
+}
+
+void SceneLobby::DrawInRoom(void)
+{
+
 }

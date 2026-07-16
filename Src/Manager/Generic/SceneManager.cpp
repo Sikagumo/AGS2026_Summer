@@ -7,6 +7,7 @@
 #include "../../Object/Collision/CollisionController.h"
 #include "../../Shader/ShaderController.h"
 #include "../System/TimeManager.h"
+#include "../System/NetManager.h"
 #include "../../Camera/Camera.h"
 #include "../../Common/Loading.h"
 #include "../../Common/Fader.h"
@@ -60,6 +61,7 @@ void SceneManager::Initialize(void)
 {
     SetMouseDispFlag(true);
 
+    NetManager::CreateInstance();
     SoundManager::CreateInstance();
     SoundManager::GetInstance().Initialize();
     TimeManager::CreateInstance();
