@@ -28,6 +28,18 @@ public:
 	NET_JOIN_USER GetSelfUser(void) const;
 	std::map<int, NET_JOIN_USER> GetNetUsers(void) const;
 	void SetSelfInfo(const NET_JOIN_USER& info);
+	void SetRoomWordId(int _id);
+
+	// 自分の最新アクションを履歴に追加する
+	void AddSelfAction(const NET_ACTION& _action);
+
+	// 自分の過去数フレーム分のアクション履歴を取得する
+	NET_ACTION_HIS GetSelfActionHis(void) const;
+
+	// 他人のアクション履歴を取得する関数
+	std::map<int, NET_ACTION_HIS> GetRemoteActionHis(void) const;
+
+	bool GetHasReceivedGoGame(void) const { return hasReceivedGoGame_; }
 
 private:
 	NetManager(void);
@@ -40,9 +52,13 @@ private:
 
 	bool isRunning_;
 	NET_MODE mode_;
+	NET_ACTION_HIS selfActionHis_;
 	int recvSocketId_;
 	int sendSocketId_;
+	int roomWordId_;
+	bool hasReceivedGoGame_;
 	IPDATA hostIp_;
+	std::map<int, NET_ACTION_HIS> remoteActionHis_;
 
 	struct NET_POOL
 	{

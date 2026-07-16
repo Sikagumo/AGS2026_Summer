@@ -32,8 +32,17 @@ NetManager::NetManager(void)
 	, mode_(NET_MODE::NONE)
 	, recvSocketId_(-1)
 	, sendSocketId_(-1)
+	, roomWordId_(-1)
 	, hostIp_(LOCALHOST_IP)
+	, hasReceivedGoGame_(false)
 {
+	selfActionHis_.key = -1;
+	for (int i = 0; i < NUM_FRAME; ++i) 
+	{
+		selfActionHis_.actions[i].key = -1;
+		selfActionHis_.actions[i].frameNo = 0;
+		selfActionHis_.actions[i].animId = 0;
+	}
 }
 
 NetManager::~NetManager(void)
@@ -51,6 +60,7 @@ void NetManager::Run(NET_MODE _mode)
 	pool_.selfUser_.key = rand() % 99999 + 1;
 	pool_.selfUser_.mode = mode_;
 	pool_.selfUser_.gameState = GAME_STATE::CONNECTING;
+	pool_.selfUser_.roomWordId = roomWordId_;
 
 	GetMyIPAddress(&pool_.selfUser_.ip);
 
@@ -100,15 +110,20 @@ void NetManager::Update(void)
 		IPDATA senderIp;
 		int senderPort;
 		char buffer[MAX_SEND_BYTES];
-
-		int recvSize = NetWorkRecvUDP(recvSocketId_, &senderIp, &senderPort, buffer, sizeof(buffer), FALSE);
+		int recvSize = NetWorkRecvUDP(recvSocketId_, &senderIp, &senderPort, buffer, 
+			sizeof(buffer), FALSE);
+		
 		if (recvSize >= sizeof(NET_BASIC_DATA))
 		{
 			NET_BASIC_DATA* header = reinterpret_cast<NET_BASIC_DATA*>(buffer);
 
 			if (mode_ == NET_MODE::HOST && header->type == NET_DATA_TYPE::USER)
 			{
-				NET_JOIN_USER* user = reinterpret_cast<NET_JOIN_USER*>(buffer + sizeof(NET_BASIC_DATA));
+				NET_JOIN_USER* user = reinterpret_cast<NET_JOIN_USER*>(buffer + 
+					sizeof(NET_BASIC_DATA));
+
+				if (user->roomWordId != roomWordId_) return;
+
 				std::lock_guard<std::mutex> lock(poolMutex_);
 
 				// リストにいない新しいキーなら「通信成功」を出す
@@ -123,7 +138,10 @@ void NetManager::Update(void)
 			}
 			else if (mode_ == NET_MODE::CLIENT && header->type == NET_DATA_TYPE::USERS)
 			{
-				NET_JOIN_USERS* users = reinterpret_cast<NET_JOIN_USERS*>(buffer + sizeof(NET_BASIC_DATA));
+				SetHostIp(senderIp);
+
+				NET_JOIN_USERS* users = reinterpret_cast<NET_JOIN_USERS*>(buffer + 
+					sizeof(NET_BASIC_DATA));
 				std::lock_guard<std::mutex> lock(poolMutex_);
 
 				for (int i = 0; i < MAX_PLAYERS; ++i)
@@ -135,13 +153,31 @@ void NetManager::Update(void)
 						if (users->users[i].key == GetMyKey()) continue;
 
 						// リストに登録
-						if (pool_.remoteUsers_.find(users->users[i].key) == pool_.remoteUsers_.end())
+						if (pool_.remoteUsers_.find(users->users[i].key) 
+							== pool_.remoteUsers_.end())
 						{
-							printfDx("【CLIENT】ユーザー(Key:%d)をリストに追加しました！\n", users->users[i].key);
+							printfDx("【CLIENT】ユーザー(Key:%d)をリストに追加しました！\n", 
+								users->users[i].key);
 						}
 						pool_.remoteUsers_[users->users[i].key] = users->users[i];
 					}
 				}
+			}
+			else if (header->type == NET_DATA_TYPE::ACTION_HIST_ALL)
+			{
+				NET_ACTION_HIS* his = reinterpret_cast<NET_ACTION_HIS*>(buffer 
+					+ sizeof(NET_BASIC_DATA));
+				std::lock_guard<std::mutex> look(poolMutex_);
+
+				// 自分の送ったデータが跳ね返って来たものは無視し、他人のデータを保存する
+				if (his->key != GetMyKey())
+				{
+					remoteActionHis_[his->key] = *his;
+				}
+			}
+			else if (header->type == NET_DATA_TYPE::GO_GAME_SCENE)
+			{
+				hasReceivedGoGame_ = true;
 			}
 		}
 	}
@@ -184,4 +220,36 @@ void NetManager::SetSelfInfo(const NET_JOIN_USER& info)
 {
 	std::lock_guard<std::mutex> lock(poolMutex_);
 	pool_.selfUser_ = info;
+}
+
+void NetManager::SetRoomWordId(int _id)
+{
+	roomWordId_ = _id;
+}
+
+void NetManager::AddSelfAction(const NET_ACTION& _action)
+{
+	std::lock_guard<std::mutex> lock(poolMutex_);
+
+	// 履歴を1つずつ後ろにずらす
+	for (int i = NUM_FRAME - 1; i > 0; --i)
+	{
+		selfActionHis_.actions[i] = selfActionHis_.actions[i - 1];
+	}
+
+	// 先頭0に最新のアクションを入れる
+	selfActionHis_.actions[0] = _action;
+	selfActionHis_.key = GetMyKey();
+}
+
+NET_ACTION_HIS NetManager::GetSelfActionHis(void) const
+{
+	std::lock_guard<std::mutex> lock(poolMutex_);
+	return selfActionHis_;
+}
+
+std::map<int, NET_ACTION_HIS> NetManager::GetRemoteActionHis(void) const
+{
+	std::lock_guard<std::mutex> lock(poolMutex_);
+	return remoteActionHis_;
 }

@@ -13,6 +13,8 @@
 #include "../../Manager/Decoration/EffectManager.h"
 #include "SceneTitle.h"
 #include "SceneResult.h"
+#include "../../Net/NetStructures.h"
+#include "../../Manager/System/NetManager.h"
 
 
 // ゲーム時間
@@ -103,6 +105,27 @@ void SceneGame::Initialize(void)
 	camera->ChangeMode(Camera::MODE::FOLLOW);
 	camera->SetFollow(&players_.at(0)->GetTransform());
 
+	NET_JOIN_USER selfUser = NetManager::GetInstance().GetSelfUser();
+	auto remoteUsers = NetManager::GetInstance().GetNetUsers();
+
+	// 自分の設定
+	players_.at(0)->SetIsLocalControl(true);
+	players_.at(0)->SetNetKey(selfUser.key);
+
+	// 他人の設定
+	int idx = 1;
+	for (const auto& pair : remoteUsers)
+	{
+		if (idx >= players_.size())
+		{
+			break;
+		}
+
+		// ラジコンにする
+		players_.at(idx)->SetIsLocalControl(false); 
+		players_.at(idx)->SetNetKey(pair.second.key);
+		idx++;
+	}
 	
 	for (auto& player : players_)
 	{
@@ -136,6 +159,26 @@ void SceneGame::Update(void)
 	boss_->Update();
 	enemyRobo_->Update();
 	stage_->Update();
+
+	auto remoteHisMap = NetManager::GetInstance().GetRemoteActionHis();
+
+	for (auto& player : players_)
+	{
+		// 自分が操作するキャラならスキップ
+		if (player->IsLocalControl()) { continue; }
+
+		int key = player->GetNetKey();
+
+		// 取得した履歴の中に、このラジコンの持ち主のデータがあれば反映
+		if (remoteHisMap.find(key) != remoteHisMap.end())
+		{
+			// 配列の [0] が一番新しい最新アクション
+			NET_ACTION latestAction = remoteHisMap[key].actions[0];
+
+			// 座標と回転、アニメーションをラジコンに強制セット！
+			player->SetNetworkAction(latestAction.pos, latestAction.quaRot, latestAction.animId);
+		}
+	}
 	
 	for (auto& player : players_)
 	{

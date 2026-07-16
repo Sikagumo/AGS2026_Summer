@@ -99,10 +99,49 @@ void NetSend::SendUsers(void)
 
 void NetSend::SendActionHisAll(void)
 {
+	NET_ACTION_HIS myActionHis = NetManager::GetInstance().GetSelfActionHis();
+
+	myActionHis.key = NetManager::GetInstance().GetMyKey();
+
+	NET_BASIC_DATA basicData = MakeBasicData(NET_DATA_TYPE::ACTION_HIST_ALL, 0);
+	char buffer[MAX_SEND_BYTES];
+	
+	memcpy(buffer, &basicData, sizeof(NET_BASIC_DATA));
+	memcpy(buffer + sizeof(NET_BASIC_DATA), &myActionHis, sizeof(NET_ACTION_HIS));
+	
+	int sendSize = sizeof(NET_BASIC_DATA) + sizeof(NET_ACTION_HIS);
+	
+	if (NetManager::GetInstance().IsHost())
+	{
+		SendUDP_Client(buffer, sendSize);
+	}
+	else
+	{
+		SendUDP_Host(buffer, sendSize);
+	}
 }
 
 void NetSend::SendBossAction(void)
 {
+	// ボスの情報はホストしか送信しない
+	if (!NetManager::GetInstance().IsHost())
+	{
+		return;
+	}
+
+	// ボスの最新状態を取得する
+	NET_BOSS_ACTION bossAction;
+
+	NET_BASIC_DATA basicData = MakeBasicData(NET_DATA_TYPE::BOSS_ACTOION, 0);
+
+	char buffer[MAX_SEND_BYTES];
+	memcpy(buffer, &basicData, sizeof(NET_BASIC_DATA));
+	memcpy(buffer + sizeof(NET_BASIC_DATA), &bossAction, sizeof(NET_BOSS_ACTION));
+
+	int sendSize = sizeof(NET_BASIC_DATA) + sizeof(NET_BOSS_ACTION);
+
+	// クライアント全員へ送信
+	SendUDP_Client(buffer, sendSize);
 }
 
 void NetSend::SendAction(void)

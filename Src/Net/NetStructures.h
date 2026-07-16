@@ -38,7 +38,8 @@ enum class NET_DATA_TYPE
 	USER,             // 単一ユーザー情報
 	USERS,            // 全ユーザーのリスト情報
 	ACTION_HIST_ALL,  // 全員の過去アクション履歴
-	BOSS_ACTOION      // ボスの行動情報
+	BOSS_ACTOION,     // ボスの行動情報
+	GO_GAME_SCENE     // 全員が準備完了かどうか
 };
 
 /// @brief 同期するゲームの進行ステート
@@ -78,6 +79,7 @@ struct NET_JOIN_USER
 	int key = -1;
 	IPDATA ip = { 0, 0, 0, 0 };
 	int port = -1;
+	int roomWordId = -1;
 	PLAYER_TYPE playerType = PLAYER_TYPE::PLAYER_1;
 	GAME_STATE gameState = GAME_STATE::CONNECTING;
 };

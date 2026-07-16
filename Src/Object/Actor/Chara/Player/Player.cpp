@@ -19,6 +19,8 @@
 #include "../Weapon/Bullet/Player/PBulletRecovery.h"
 #include "../Weapon/Bullet/Player/PBulletNormal.h"
 #include "../../../../Application.h"
+#include "../../../../Net/NetStructures.h"
+#include "../../../../Manager/System/NetManager.h"
 
 namespace
 {
@@ -61,6 +63,8 @@ Player::Player(int _playerNo, JOB_TYPE _jobType, const VECTOR& _startPos)
 	, knockPowXZ_(UtilityMath::VECTOR2F_ZERO)
 	, dodgePowXZ_(UtilityMath::VECTOR2F_ZERO)
 	, shotTerm_(0.0f)
+	, isLocalControl_(false)
+	, netKey_(0)
 {
 	if (_jobType == JOB_TYPE::CANNON)
 	{
@@ -386,14 +390,23 @@ void Player::UpdateProcess(void)
 	// 無敵時間導入
 	timeInv_ = ((timeInv_ > 0.0f) ? (timeInv_ - delta) : 0.0f);
 
-	ProcessJump();
+	// マルチプレイのため追加
+	if (isLocalControl_)
+	{
+		ProcessJump();
+		ProcessMove();
+		ProcessAttack();
+		ProcessDodge();
+	}
 
-	// 移動操作
-	ProcessMove();
+	//ProcessJump();
 
-	ProcessAttack();
+	//// 移動操作
+	//ProcessMove();
 
-	ProcessDodge();
+	//ProcessAttack();
+
+	//ProcessDodge();
 
 	UpdateBullets();
 
@@ -415,6 +428,12 @@ void Player::UpdateProcess(void)
 		float recovery = (static_cast<float>(HP_MAX) * PBulletRecovery::RECOVERY_RATE);
 		hp_ += static_cast<int>(recovery);
 		hp_ = ((hp_ > HP_MAX) ? HP_MAX : hp_);
+	}
+
+	// マルチプレイのため追加
+	if (isLocalControl_)
+	{
+		SendMyActionToNetManager();
 	}
 }
 
@@ -1096,4 +1115,48 @@ void Player::PlayAnimation(ANIM_TYPE _type, bool _isLoop, float _animSpeed)
 
 	animation_->Play(static_cast<int>(_type), _isLoop, _animSpeed, 0.0f);
 }
+
+//-------------------------------------------------------------------------------------
+// ここから下のコードマルチプレイのために追加
+void Player::SetIsLocalControl(bool _isLocal)
+{
+	isLocalControl_ = _isLocal;
+}
+
+void Player::SetNetworkAction(const VECTOR& _pos, const Quaternion& _rot, int _animId)
+{
+	transform_.pos = _pos;
+	transform_.quaRot = _rot;
+
+	if (static_cast<int>(animType_) != _animId) 
+	{
+		PlayAnimation(static_cast<ANIM_TYPE>(_animId));
+	}
+}
+
+void Player::SetNetKey(int _key)
+{
+	netKey_ = _key;
+}
+
+
+void Player::SendMyActionToNetManager(void)
+{
+	if (!isLocalControl_)
+	{
+		return;
+	}
+
+	NET_ACTION myAction;
+	myAction.key = NetManager::GetInstance().GetMyKey();
+	myAction.frameNo = 0;
+	myAction.pos = transform_.pos;
+	myAction.quaRot = transform_.quaRot;
+	myAction.animId = static_cast<int>(animType_);
+	myAction.currentHp = hp_;
+	myAction.actBits = 0;
+
+	NetManager::GetInstance().AddSelfAction(myAction);
+}
+//-------------------------------------------------------------------------------------
 

@@ -24,3 +24,8 @@ void NetClient::UpdateGotoGame(void)
         netManager_.Send(NET_DATA_TYPE::USER);
     }
 }
+
+void NetClient::UpdateGamePlaying(void)
+{
+    netManager_.Send(NET_DATA_TYPE::ACTION_HIST_ALL);
+}

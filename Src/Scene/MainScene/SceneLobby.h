@@ -8,6 +8,7 @@
 #include "../../Object/Collider2D/Collider2DBase.h"
 #include "../../Object/Collider2D/Collider2DCircle.h"
 #include "../../Object/Collider2D/Collider2DBox.h"
+#include "../../Net/NetStructures.h"
 
 class SceneLobby : public SceneBase
 {
@@ -92,9 +93,8 @@ private:
     };
 
     LOBBY_STATE multiState_;
-
     int buttonSelectIndex_;
-    int ipParts_[4];
+    int passcode_[4];
     int selectOctet_;
     bool isEditing_;
     bool myReadyState_;
@@ -111,6 +111,7 @@ private:
     void DrawSelectMode(void);
     void DrawConnecting(void);
     void DrawInRoom(void);
+    void MoveToGameScene(std::map<int, NET_JOIN_USER>& _users);
 
 };
 

@@ -10,5 +10,5 @@ public:
 
     void UpdateGotoGame(void) override;
 
-    void UpdateGamePlaying(void) override {}
+    void UpdateGamePlaying(void) override;
 };

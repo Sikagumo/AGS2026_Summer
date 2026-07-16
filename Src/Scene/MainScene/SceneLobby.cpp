@@ -56,12 +56,11 @@ void SceneLobby::Initialize(void)
 
     if (IS_MULTI)
     {
-        IPDATA ip = NetManager::GetInstance().GetHostIp();
-        ipParts_[0] = ip.d1; 
-        ipParts_[1] = ip.d2;
-        ipParts_[2] = ip.d3;
-        ipParts_[3] = ip.d4;
         multiState_ = LOBBY_STATE::SELECT_MODE;
+        passcode_[0] = 0; 
+        passcode_[1] = 0;
+        passcode_[2] = 0;
+        passcode_[3] = 0;
         buttonSelectIndex_ = 0; 
         isEditing_ = false;
     }
@@ -277,7 +276,6 @@ void SceneLobby::UpdateMulti(void)
 
 void SceneLobby::UpdateSelectMode(void)
 {
-    const int IP_MAX_LIMIT = 256;
 
     // IPアドレス編集モード
     if (isEditing_)
@@ -300,12 +298,12 @@ void SceneLobby::UpdateSelectMode(void)
 
         if (KeyConfInputManager::GetInstance().isTrigerDown("UP"))
         {
-            ipParts_[selectOctet_] = (ipParts_[selectOctet_] + 1) % IP_MAX_LIMIT;
+            passcode_[selectOctet_] = (passcode_[selectOctet_] + 1) % 10;
         }
 
         if (KeyConfInputManager::GetInstance().isTrigerDown("DOWN"))
         {
-            ipParts_[selectOctet_] = (ipParts_[selectOctet_] + 255) & IP_MAX_LIMIT;
+            passcode_[selectOctet_] = (passcode_[selectOctet_] + 9) % 10;
         }
 
         if (KeyConfInputManager::GetInstance().isTrigerDown("OK"))
@@ -331,6 +329,11 @@ void SceneLobby::UpdateSelectMode(void)
     // 決定キーで通信開始
     if (KeyConfInputManager::GetInstance().isTrigerDown("OK"))
     {
+        int roomWord = passcode_[0] * 1000 + passcode_[1] * 100 + 
+            passcode_[2] * 10 + passcode_[3];
+
+        NetManager::GetInstance().SetRoomWordId(roomWord);
+
         // ホスト
         if (buttonSelectIndex_ == 0)
         {
@@ -341,10 +344,10 @@ void SceneLobby::UpdateSelectMode(void)
         else if (buttonSelectIndex_ == 1)
         {
             IPDATA hostIp;
-            hostIp.d1 = ipParts_[0];
-            hostIp.d2 = ipParts_[1];
-            hostIp.d3 = ipParts_[2];
-            hostIp.d4 = ipParts_[3];
+            hostIp.d1 = 255; 
+            hostIp.d2 = 255; 
+            hostIp.d3 = 255; 
+            hostIp.d4 = 255;
 
             NetManager::GetInstance().SetHostIp(hostIp);
             NetManager::GetInstance().Run(NET_MODE::CLIENT);
@@ -373,8 +376,16 @@ void SceneLobby::UpdateConnecting(void)
 
 void SceneLobby::UpdateInRoom(void)
 {
+    if (NetManager::GetInstance().GetHasReceivedGoGame())
+    {
+        // 全員分のユーザーリストを使って遷移実行
+        auto users = NetManager::GetInstance().GetNetUsers();
+        MoveToGameScene(users);
+        return;
+    }
+
     // キャンセルキーで退出
-    if (KeyConfInputManager::GetInstance().isTrigerDown("CANCEL"))
+    if (KeyConfInputManager::GetInstance().isTrigerDown("DEBUG_CANCEL"))
     {
         NetManager::GetInstance().Stop();
         Initialize();
@@ -387,11 +398,49 @@ void SceneLobby::UpdateInRoom(void)
         myReadyState_ = !myReadyState_;
 
         NET_JOIN_USER self = NetManager::GetInstance().GetSelfUser();
-        
+
         self.gameState = myReadyState_ ? GAME_STATE::GOTO_GAME : GAME_STATE::CONNECTING;
-        
+
         NetManager::GetInstance().SetSelfInfo(self);
     }
+
+    // 自分の最新状態を取得
+    NET_JOIN_USER self = NetManager::GetInstance().GetSelfUser();
+
+    bool isAllReady = true;
+
+    // 自分が準備完了じゃなければ全員準備完了ではない
+    if (self.gameState != GAME_STATE::GOTO_GAME)
+    {
+        isAllReady = false;
+    }
+
+    // 他のプレイヤーが準備完了かチェック
+    auto users = NetManager::GetInstance().GetNetUsers();
+    for (const auto& pair : users)
+    {
+        if (pair.second.gameState != GAME_STATE::GOTO_GAME)
+        {
+            isAllReady = false;
+
+            // 1人でも準備中ならチェック終了
+            break; 
+        }
+    }
+
+    // 自分含めて全員が準備完了
+    if (isAllReady && (!users.empty() || NetManager::GetInstance().IsHost()))
+    {
+        if (NetManager::GetInstance().IsHost())
+        {
+            // ホストは全員に「シーン遷移しろ！」と命令を送る
+            NetManager::GetInstance().Send(NET_DATA_TYPE::GO_GAME_SCENE);
+
+            // その後、自分自身も遷移
+            MoveToGameScene(users);
+        }
+    }
+
 }
 
 void SceneLobby::DrawMulti(void)
@@ -424,12 +473,14 @@ void SceneLobby::DrawSelectMode(void)
     // IPアドレスボックス
     DrawBox(ipBoxX, 250, ipBoxX + 400, 310, GetColor(30, 30, 30), true);
     DrawBox(ipBoxX, 250, ipBoxX + 400, 310, isEditing_ ? COLOR_YELLOW : COLOR_WHITE, false);
-    std::string ipStr = std::to_string(ipParts_[0]) + "." + std::to_string(ipParts_[1]) + 
-        "." + std::to_string(ipParts_[2]) + "." + std::to_string(ipParts_[3]);
-    DrawString(ipBoxX + 20, 272, ("Target IP: " + ipStr).c_str(), COLOR_WHITE);
+    std::string passStr = std::to_string(passcode_[0]) + std::to_string(passcode_[1]) +
+        std::to_string(passcode_[2]) + std::to_string(passcode_[3]);
+    DrawString(ipBoxX + 20, 272, ("Room Passcode: " + passStr).c_str(), COLOR_WHITE);
 
-    if (isEditing_) DrawFormatString(ipBoxX + 20, 320, COLOR_YELLOW, "編集中: 第%dセグメント",
-        selectOctet_ + 1);
+    if (isEditing_)
+    {
+        DrawFormatString(ipBoxX + 20, 320, COLOR_YELLOW, "編集中: %d桁目", selectOctet_ + 1);
+    }
 
     // HOSTボタン
     DrawBox(btnStartX, 400, btnStartX + 180, 460, GetColor(0, 100, 0), TRUE);
@@ -505,4 +556,18 @@ void SceneLobby::DrawInRoom(void)
 
     DrawString(100, 400, "[Enter] 準備完了(READY)を切り替え", COLOR_YELLOW);
     DrawString(100, 430, "[BackSpace] 退出する", COLOR_WHITE);
+}
+
+void SceneLobby::MoveToGameScene(std::map<int, NET_JOIN_USER>& _users)
+{
+    // 自分
+    std::vector<PlayerBase::JOB_TYPE> playerJobs;
+    playerJobs.push_back(PlayerBase::JOB_TYPE::CANNON);
+    
+    // 他人
+    for (int i = 0; i < _users.size(); ++i) 
+    {
+        playerJobs.push_back(PlayerBase::JOB_TYPE::BOMB);
+    }
+    SceneManager::GetInstance().ChangeScene(std::make_shared<SceneGame>(playerJobs));
 }
