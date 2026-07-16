@@ -164,7 +164,7 @@ void Player::InitAnimation(void)
 
 	constexpr float SPEED_DODGE = 50.0f;
 	constexpr VECTOR LOCAL_POS_DODGE = { 0.0f, 25.0f, 0.0f };
-	constexpr VECTOR LOCAL_POS_DODGE_END = { 0.0f, 0.0f, 0.0f };
+	constexpr VECTOR LOCAL_POS_DODGE_END = { 0.0f, 50.0f, 0.0f };
 	animation_->AddExternal(static_cast<int>(ANIM_TYPE::DODGE)
 		, resMng.LoadHandleId(ResourceManager::SRC::ANIM_DODGE)
 		, LOCAL_POS_DODGE, LOCAL_POS_DODGE_END, SPEED_DODGE);
@@ -176,18 +176,20 @@ void Player::InitAnimation(void)
 void Player::InitTransform(void)
 {
 	constexpr float MODEL_SCALE = 0.625f;
+	constexpr float LOCAL_POS_Y = -3.25f;
 	constexpr float LOCAL_ROT_Y = 180.0f;
 
 	transform_.InitTransform(MODEL_SCALE
 		, Quaternion::Identity()
 		, Quaternion::AngleAxis(UtilityMath::Deg2RadF(LOCAL_ROT_Y), UtilityMath::AXIS_Y)
-		, UtilityMath::VECTOR_ZERO);
+		, UtilityMath::VECTOR_ZERO, VGet(0.0f, LOCAL_POS_Y, 0.0f));
 
 	transform_.Update();
 }
 void Player::InitCollider(void)
 {
-	ColliderLine* colLine = new ColliderLine(ColliderBase::TAG::PLAYER, &transform_, COL_LINE_START_LOCAL_POS, COL_LINE_END_LOCAL_POS);
+	ColliderLine* colLine = new ColliderLine(ColliderBase::TAG::PLAYER, &transform_
+								, COL_LINE_START_LOCAL_POS, COL_LINE_END_LOCAL_POS);
 	ownColliders_[static_cast<int>(ColliderBase::TAG::PLAYER)].push_back(colLine);
 	colLine->SetTriger(false);
 
@@ -1092,8 +1094,11 @@ void Player::PlayAnimation(ANIM_TYPE _type, bool _isLoop, float _animSpeed)
 		}
 	}
 
+	// 回避アニメーションからの遷移だけブレンドを行わない
+	float blendTime = ((animType_ == ANIM_TYPE::DODGE) ? 0.0f : AnimationController::BLEND_TIME_DEFAULT);
+
 	animType_ = _type;
 
-	animation_->Play(static_cast<int>(_type), _isLoop, _animSpeed, 0.0f);
+	animation_->Play(static_cast<int>(_type), _isLoop, _animSpeed,blendTime);
 }
 

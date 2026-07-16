@@ -68,6 +68,8 @@ void AnimationController::AddInternal(int _type, const VECTOR& _localPos, float 
 	if (!UtilityMath::EqualsVZero(_localPos))
 	{
 		animation.inPlaceLocalPos = _localPos;
+		
+		animation.inPlaceLocalPosEnd = _localPos;
 	}
 
 	// アニメーション追加処理
@@ -319,8 +321,9 @@ void AnimationController::AnimationInPlace(Animation& _prePlayAnim, Animation& _
 	
 	if (_curPlayAnim.isInPlace)
 	{
-		// 固定位置アニメーションの場合、固定値を使用
-		curBase = _curPlayAnim.inPlaceLocalPos;
+		// 固定位置アニメーションの場合、自身の再生進行度(step/totalTime)に応じて
+		// inPlaceLocalPos → inPlaceLocalPosEnd へ徐々に移動した目標位置を使用
+		curBase = GetInPlaceProgressPos(_curPlayAnim);
 	}
 	else
 	{
@@ -366,6 +369,23 @@ VECTOR AnimationController::GetRawAnimRootPos(Animation& _target, Animation& _ot
 
 	MATRIX mat = MV1GetFrameLocalMatrix(modelId_, FRAME_ROOT_NUM);
 	return MGetTranslateElem(mat);
+}
+
+VECTOR AnimationController::GetInPlaceProgressPos(const Animation& _anim) const
+{
+	// 総再生時間が未取得(0以下)の間は開始位置をそのまま返す
+	if (_anim.totalTime <= 0.0f) { return _anim.inPlaceLocalPos; }
+
+	// アニメーション自身の再生進行度(0.0～1.0)
+	float animRate = std::clamp((_anim.step / _anim.totalTime), 0.0f, 1.0f);
+
+	// 開始位置(inPlaceLocalPos) → 終了位置(inPlaceLocalPosEnd) へ進行度で線形補間
+	VECTOR pos = UtilityMath::VECTOR_ZERO;
+	pos.x = _anim.inPlaceLocalPos.x + (_anim.inPlaceLocalPosEnd.x - _anim.inPlaceLocalPos.x) * animRate;
+	pos.y = _anim.inPlaceLocalPos.y + (_anim.inPlaceLocalPosEnd.y - _anim.inPlaceLocalPos.y) * animRate;
+	pos.z = _anim.inPlaceLocalPos.z + (_anim.inPlaceLocalPosEnd.z - _anim.inPlaceLocalPos.z) * animRate;
+
+	return pos;
 }
 
 
