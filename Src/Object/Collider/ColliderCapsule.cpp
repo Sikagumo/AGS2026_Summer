@@ -49,14 +49,6 @@ float ColliderCapsule::GetRadius(void) const
     return radius_;
 }
 
-void ColliderCapsule::SetShape(const VECTOR& _localStartPos, const VECTOR& _localEndPos, 
-    float _radius)
-{
-    localStartPos_ = _localStartPos;
-    localEndPos_ = _localEndPos;
-    radius_ = _radius;
-}
-
 void ColliderCapsule::DrawDebug(int debugColor) const
 {
     const VECTOR startPos = GetWorldStartPos();

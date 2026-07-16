@@ -218,7 +218,7 @@ void DamageController::Update()
 
 void DamageController::DebugDraw(void)
 {
-	DrawFormatString(10, 150, 0xffffff, "PlayerDamage_:%d", damageData_);
+	DrawFormatString(10, 160, 0xffffff, "PlayerDamage_:%d", damageData_);
 }
 
 void DamageController::SetPlayerAttack(int _bulletAttack, int _blastAttack)

@@ -115,7 +115,7 @@ void Boss::SetWeaponRGDamage(int _damage)
 void Boss::SetBossDamage(int _damage)
 {
 	hp_ -= _damage;
-	if (_damage > 0)
+	if (_damage > 5)
 	{
 
 		PlayEffect();
@@ -811,9 +811,6 @@ void Boss::DrawPre(void)
 	CharaBase::DrawShadowRound(200.0f);
 
 #ifdef _DEBUG
-
-
-	DrawFormatString(10, 100, 0xffffff, "bossÇÃç¿ïWÅF%f,%f,%f", transform_.pos.x, transform_.pos.y, transform_.pos.z);
 	DrawFormatString(10, 400, 0xffffff, "hp:%d", hp_);
 #endif
 }

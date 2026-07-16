@@ -20,9 +20,9 @@ void Stage::Draw(void)
 
 
 #ifdef _DEBUG
-	// 以前の MV1DrawModel(collisionTrans_.modelId); はこれと被るので消すかコメントアウト
 
-	// 自分が持っているすべてのコライダーを描画する
+	// 以前の MV1DrawModel(collisionTrans_.modelId); はこれと被るので消すかコメントアウト
+	// // 自分が持っているすべてのコライダーを描画する
 	for (const auto& [tagId, colliderList] : ownColliders_)
 	{
 		for (auto* collider : colliderList)
@@ -54,7 +54,6 @@ void Stage::Load(void)
 
 void Stage::InitTransform(void)
 {
-	//constexpr float SCALE = 5.0f;
 	constexpr float SCALE = 0.425f;
 	constexpr VECTOR LOCAL_POS = { 0.0f, -50.0f, 0.0f };
 	VECTOR localPos = LOCAL_POS;
@@ -99,14 +98,6 @@ void Stage::InitCollider(void)
 	}
 
 	CollisionController::GetInstance().RegisterActor(this);
-
-	int frameNum = MV1GetFrameNum(collisionTrans_.modelId);
-	for (int i = 0; i < frameNum; i++)
-	{
-		const char* name = MV1GetFrameName(collisionTrans_.modelId, i);
-		printfDx((std::string(name) + "\n").c_str());
-		// または printfDx や DrawFormatString でi番目のフレーム名を確認
-	}
 }
 
 

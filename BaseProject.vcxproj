@@ -20,7 +20,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\Object\Actor\Chara\Enemy\EnemyRobo.cpp" />
-    <ClCompile Include="Src\Object\Actor\Chara\Enemy\EnemyBase.cpp" />
     <ClCompile Include="Src\Object\Actor\Chara\Weapon\Bullet\Boss\BBulletLaser.cpp" />
     <ClCompile Include="Src\Object\Actor\Chara\Weapon\Bullet\Boss\BBulletCannon.cpp" />
     <ClCompile Include="Src\Object\Actor\Chara\Weapon\Bullet\Boss\BBulletMissile.cpp" />
@@ -119,7 +118,6 @@
   <ItemGroup>
     <ClInclude Include="Src\Object\Actor\Chara\Enemy\EnemyRobo.h" />
     <ClInclude Include="Src\Object\Actor\Chara\Enemy\EnemyBase.h" />
-    <ClInclude Include="Src\Object\Actor\Chara\Weapon\Bullet\Boss\BBulletLaser.h" />
     <ClInclude Include="Src\Shader\ShaderMaterial.h" />
     <ClInclude Include="Src\ImGUI\GuiController.h" />
     <ClInclude Include="Lib\ImGUI\backends\imgui_impl_dx11.h" />
@@ -133,6 +131,7 @@
     <ClInclude Include="Src\ImGUI\ShaderEditorComponent.h" />
     <ClInclude Include="Src\ImGUI\IGuiComponent.h" />
     <ClInclude Include="Src\ImGUI\ImGuiWrapper.h" />
+    <ClInclude Include="Src\Object\Actor\Chara\Weapon\Bullet\Boss\BBulletLaser.h" />
     <ClInclude Include="Src\Object\Actor\Chara\Weapon\Bullet\Boss\BBulletMissile.h" />
     <ClInclude Include="Src\Common\GameTimer.h" />
     <ClInclude Include="Src\Object\Actor\Chara\Weapon\Bullet\Player\PBulletPoison.h" />

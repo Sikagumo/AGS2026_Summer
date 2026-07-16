@@ -93,6 +93,11 @@ void Loading::Update(void)
 			progress_ = 99.9f;
 		}
 	}
+
+	//if (progress_ >= 100.0f && LOAD_COUNT == 0)
+	//{
+	//	EndAsyncLoad();
+	//}
 }
 
 void Loading::Draw(void)

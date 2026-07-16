@@ -11,12 +11,12 @@
 #include "../Collision/CollisionBox.h"
 #include "../../Utility/UtilityMath.h"
 #include "../Collider/ColliderCapsule.h"
+#include "../Collider/ColliderSphere.h"
 
 CollisionController* CollisionController::instance_ = nullptr;
 
 CollisionController::CollisionController(void)
 	: cullingDistSquare_(0.0f)
-	, updateTimer_(0.0f)
 {
 }
 
@@ -70,17 +70,12 @@ void CollisionController::Initialize(void)
 
 void CollisionController::Update(void)
 {
-	updateTimer_ += TimeManager::GetInstance().GetDeltaTime();
+	updateTimer_ = 0.0f;
 
-	// 一定間隔ごとに衝突判定を実行
-	if (updateTimer_ >= UPDATE_INTERVAL)
-	{
-		updateTimer_ = 0.0f;
+	UpdateCollisionPars();
 
-		UpdateCollisionPars();
+	UpdateCollision2D();
 
-		UpdateCollision2D();
-	}
 }
 
 void CollisionController::Clear(void)
@@ -333,17 +328,24 @@ void CollisionController::SetActorColliderRadius(ActorBase* _targetActor,
 	}
 }
 
-void CollisionController::SetActorCapsuleShape(ActorBase* _targetActor, ColliderBase::TAG _targetTag, const VECTOR& _localStartPos, const VECTOR& _localEndPos, float _radius)
+void CollisionController::SetActorSphereLocalPos(ActorBase* _targetActor,
+	ColliderBase::TAG _targetTag, const VECTOR& _localPosition)
 {
 	if (_targetActor == nullptr)
 	{
 		return;
 	}
-	
+
 	auto& ownCollidersMap = _targetActor->GetOwnColliders();
 	int targetKey = static_cast<int>(_targetTag);
 	auto it = const_cast<ActorBase::ColliderMap&>(ownCollidersMap).find(targetKey);
-	
+
+	// そもそも指定したタグが存在するかチェック
+	if (it == const_cast<ActorBase::ColliderMap&>(ownCollidersMap).end())
+	{
+		return;
+	}
+
 	for (auto* collider : it->second)
 	{
 		if (collider == nullptr)
@@ -351,14 +353,55 @@ void CollisionController::SetActorCapsuleShape(ActorBase* _targetActor, Collider
 			continue;
 		}
 
-		auto* capsule =  static_cast<ColliderCapsule*>(collider);
+		// 形状が球である場合のみキャストして位置を変更する
+		if (collider->GetShapeType() == ColliderBase::SHAPE::SPHERE)
+		{
+			auto* sphereCollider = static_cast<ColliderSphere*>(collider);
+			if (sphereCollider != nullptr)
+			{
+				sphereCollider->SetLocalPosition(_localPosition);
+			}
+		}
+	}
+}
 
-		if (capsule == nullptr)
+void CollisionController::SetActorCapsuleShape(ActorBase* _targetActor, 
+	ColliderBase::TAG _targetTag, const VECTOR& _localStartPos, const VECTOR& _localEndPos, 
+	float _radius)
+{
+	if (_targetActor == nullptr)
+	{
+		return;
+	}
+
+	auto& ownCollidersMap = _targetActor->GetOwnColliders();
+	int targetKey = static_cast<int>(_targetTag);
+	auto it = const_cast<ActorBase::ColliderMap&>(ownCollidersMap).find(targetKey);
+
+	// そもそも指定したタグが存在するかチェック
+	if (it == const_cast<ActorBase::ColliderMap&>(ownCollidersMap).end())
+	{
+		return;
+	}
+
+	for (auto* collider : it->second)
+	{
+		if (collider == nullptr)
 		{
 			continue;
 		}
 
-		capsule->SetShape(_localStartPos, _localEndPos, _radius);
+		// 形状が球である場合のみキャストして位置を変更する
+		if (collider->GetShapeType() == ColliderBase::SHAPE::CAPSULE)
+		{
+			auto* CapsuleCollider = static_cast<ColliderCapsule*>(collider);
+			if (CapsuleCollider != nullptr)
+			{
+				CapsuleCollider->SetLocalStartPos(_localStartPos);
+				CapsuleCollider->SetLocalEndPos(_localEndPos);
+				CapsuleCollider->SetRadius(_radius);
+			}
+		}
 	}
 }
 
@@ -508,7 +551,7 @@ void CollisionController::UpdateCollisionPars(void)
 			{
 				for (const auto* colA : colliderVectorA)
 				{
-					if (colA != nullptr && colA->GetCollisionTag() == ColliderBase::TAG::STAGE
+					if (colA->GetCollisionTag() == ColliderBase::TAG::STAGE
 						|| colA->GetCollisionTag() == ColliderBase::TAG::WALL)
 					{
 						isStageCollision = true;
@@ -523,7 +566,7 @@ void CollisionController::UpdateCollisionPars(void)
 			{
 				for (const auto* colB : colliderVectorB)
 				{
-					if (colB != nullptr && colB->GetCollisionTag() == ColliderBase::TAG::STAGE
+					if (colB->GetCollisionTag() == ColliderBase::TAG::STAGE
 						|| colB->GetCollisionTag() == ColliderBase::TAG::WALL)
 					{
 						isStageCollision = true;
@@ -644,6 +687,20 @@ bool CollisionController::CanCollide(int _tagA, int _tagB) const
 			|| tagHurt == TAG::MISSILE_ATTACK
 			|| tagHurt == TAG::MISSILE_PUSH
 			|| tagHurt == TAG::PLAYER_RECOVERY
+			|| tagHurt == TAG::WALL
+			|| tagHurt == TAG::ENEMYROBO
+			|| tagHurt == TAG::ENEMY_ATTACK)
+		{
+			return true;
+		}
+	}
+
+	if (tagHit == TAG::ENEMYROBO || tagHit == TAG::ENEMY_ATTACK)
+	{
+		if (tagHurt == TAG::STAGE
+			|| tagHurt == TAG::PLAYER_BULLET || tagHurt == TAG::PLAYER_BLAST
+			|| tagHurt == TAG::LASER
+			|| tagHurt == TAG::PLAYER
 			|| tagHurt == TAG::WALL)
 		{
 			return true;
@@ -684,7 +741,9 @@ bool CollisionController::CanCollide(int _tagA, int _tagB) const
 		|| tagHit == TAG::MISSILE_ATTACK
 		|| tagHit == TAG::MISSILE_PUSH)
 	{
-		if (tagHurt == TAG::PLAYER || tagHurt == TAG::WALL)
+		if (tagHurt == TAG::PLAYER 
+			|| tagHurt == TAG::WALL 
+			|| tagHurt == TAG::ENEMYROBO)
 		{
 			return true;
 		}
@@ -693,7 +752,7 @@ bool CollisionController::CanCollide(int _tagA, int _tagB) const
 	if (tagHit == TAG::STAGE)
 	{
 		if (tagHurt == TAG::PLAYER || tagHurt == TAG::PLAYER_BULLET || tagHurt == TAG::PLAYER_BLAST
-			|| tagHurt == TAG::BOSS || tagHurt == TAG::ENEMY
+			|| tagHurt == TAG::BOSS || tagHurt == TAG::ENEMYROBO
 			|| tagHurt == TAG::WEAPON_CANNON_L || tagHurt == TAG::WEAPON_CANNON_R
 			|| tagHurt == TAG::WEAPON_MG_L || tagHurt == TAG::WEAPON_MG_R
 			|| tagHurt == TAG::WEAPON_MP_L || tagHurt == TAG::WEAPON_MP_R
@@ -710,7 +769,8 @@ bool CollisionController::CanCollide(int _tagA, int _tagB) const
 			|| tagHurt == TAG::PLAYER_BULLET 
 			|| tagHurt == TAG::PLAYER_BLAST
 			|| tagHurt == TAG::BOSS
-			|| tagHurt == TAG::ROAD_ATTACK)
+			|| tagHurt == TAG::ROAD_ATTACK
+			|| tagHurt == TAG::ENEMYROBO)
 		{
 			return true;
 		}

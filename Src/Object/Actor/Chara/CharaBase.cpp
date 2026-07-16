@@ -117,11 +117,14 @@ void CharaBase::Collision(void)
 	// 任意の値を加算
 	transform_.pos = VAdd(transform_.pos, CalcAddPosition());
 
-	// ジャンプ量を加算
-	transform_.pos.y += jumpPow_;
 
 	// 衝突(重力)
 	CollisionGravity();
+
+	// ジャンプ量を加算
+	transform_.pos.y += jumpPow_;
+
+	
 
 }
 

@@ -19,6 +19,7 @@
 #include "../../ImGUI/GuiController.h"
 #include "../../Shader/ShaderLibrary.h"
 
+
 SceneTitle::SceneTitle(void)
     : imageTitle_(-1)
     , peachHandle_(-1)
@@ -46,11 +47,12 @@ SceneTitle::SceneTitle(void)
     }
 }
 
-
 void SceneTitle::Load(void)
 {
     // isLoading_ を true に
     SceneBase::Load();
+
+    Loading::GetInstance()->SetProgress(10.0f);
 
     // BGM・SEロード
     SoundManager::GetInstance()
@@ -102,6 +104,7 @@ void SceneTitle::Load(void)
 
     //時間カウントリセット
     TimeManager::GetInstance().Reset();
+
 }
 
 void SceneTitle::EndLoad(void)
@@ -139,6 +142,7 @@ void SceneTitle::Initialize(void)
     SoundManager::GetInstance().Add(SoundManager::TYPE::SE, SoundManager::SOUND::SE_SELECT
         , ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::SE_SELECT));
 }
+
 void SceneTitle::InitUI(void)
 {
     // UIボタンの配置計算設定
@@ -187,6 +191,8 @@ void SceneTitle::InitUI(void)
         Collider2DBase::TAG_2D::OPTION_BUTTON,
         Collider2DBase::TAG_2D::EXIT_UTTON
     };
+    
+#ifdef _DEBUG
 
     // 定数バッファの初期化
     peachMaterial_.SetAmbient(0.8f);
@@ -211,15 +217,15 @@ void SceneTitle::InitUI(void)
     Vector2F oniSimaPos = Vector2F(Application::SCREEN_SIZE_X - 100.0f, Application::SCREEN_HALF_Y - 50);
 
     // 桃の当たり判定
-    peachCollider_ = std::make_unique<Collider2DBox>(peachPos, 300.0f, 300.0f, 
+    peachCollider_ = std::make_unique<Collider2DBox>(peachPos, 300.0f, 300.0f,
         Collider2DBase::TAG_2D::PEACH);
-    
+
     // 波の当たり判定
-    waveCollider_ = std::make_unique<Collider2DBox>(wavePos, Application::SCREEN_SIZE_X, 
+    waveCollider_ = std::make_unique<Collider2DBox>(wavePos, Application::SCREEN_SIZE_X,
         Application::SCREEN_HALF_Y, Collider2DBase::TAG_2D::WAVE);
-    
+
     // 鬼ヶ島の当たり判定
-    oniSimaCollider_ = std::make_unique<Collider2DBox>(oniSimaPos, 200.0f, 
+    oniSimaCollider_ = std::make_unique<Collider2DBox>(oniSimaPos, 200.0f,
         150.0f, Collider2DBase::TAG_2D::ONI_GASHIMA);
 
     CollisionController::GetInstance().RegisterCollider2D(peachCollider_.get());
@@ -232,6 +238,8 @@ void SceneTitle::InitUI(void)
         Collider2DBase::TAG_2D::WAVE, true);
     CollisionController::GetInstance().SetCollisionGroup2D(Collider2DBase::TAG_2D::MOUSE_CURSOR,
         Collider2DBase::TAG_2D::ONI_GASHIMA, true);
+        
+#endif // _DEBUG
 
     // メニュー選択有効化
     isSelectMenu_ = true;
@@ -284,8 +292,6 @@ void SceneTitle::Update(void)
     Vector2F stick = keyConfInputManager.GetLeftStickRaw();
     constexpr float THRESHOLD = 0.5f;
     constexpr int STICK_TINERVAL = 15;
-
-   
 
     if (isSelectMenu_)
     {
@@ -442,10 +448,10 @@ void SceneTitle::ProcessMenuState(void)
         {
             auto playerJob = { PlayerBase::JOB_TYPE::BOMB };
             SceneManager::GetInstance()
-               .ChangeScene(std::make_shared<SceneGame>(playerJob));
+             .ChangeScene(std::make_shared<SceneGame>(playerJob));
                
-            //SceneManager::GetInstance()
-              // .ChangeScene(std::make_shared<SceneLobby>(false));
+           //SceneManager::GetInstance()
+             // .ChangeScene(std::make_shared<SceneTitle>());
         }
         break;
 
