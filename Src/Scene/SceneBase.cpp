@@ -1,9 +1,14 @@
 #include"SceneBase.h"
 
+SceneBase::SceneBase(void)
+	: isDebugMode_(false)
+	, isLoading_(false)
+{
+}
+
 //デストラクタ
 SceneBase::~SceneBase(void)
 {
-	isLoading_ = false;
 }
 
 //初期化

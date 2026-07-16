@@ -15,7 +15,8 @@ const std::string PATH_DATA = "Data/";
 // 暗号化済みのリソースフォルダパス
 #else
 
-const std::string PATH_DATA = "_ResourceData/";
+//const std::string PATH_DATA = "_ResourceData/";
+const std::string PATH_DATA = "Data/";
 #endif
 
 
@@ -53,6 +54,9 @@ void ResourceManager::Initialize(void)
 	
 	// タイトル画像
 	_SetResource(LOAD_TYPE::IMAGE, SRC::IMG_TITLE, PATH_IMAGE + "Title.png");
+
+	// タイトルのノーマルマップ
+	_SetResource(LOAD_TYPE::IMAGE, SRC::IMG_NOTMALMAP_TITLE, PATH_IMAGE + "Title_n.png");
 	
 	// 桃の画像
 	_SetResource(LOAD_TYPE::IMAGE, SRC::IMG_PEACH, PATH_IMAGE + "peach_T.png");
@@ -68,6 +72,9 @@ void ResourceManager::Initialize(void)
 
 	// 鬼ヶ島の画像
 	_SetResource(LOAD_TYPE::IMAGE, SRC::IMG_ONIGASIMA, PATH_IMAGE + "OnigaSima.png");
+
+	// タイトル背景の画像
+	_SetResource(LOAD_TYPE::IMAGE, SRC::IMG_BUCGROUND_TITLE, PATH_MODEL + "SkyDome/Skydome.png");
 
 	// 鬼ヶ島のノーマルマップ
 	_SetResource(LOAD_TYPE::IMAGE, SRC::IMG_NOMALMAP_ONIGASIMA, PATH_IMAGE + "OnigaSima_n.png");
@@ -120,6 +127,13 @@ void ResourceManager::Initialize(void)
 	_SetResource(LOAD_TYPE::IMAGES, SRC::IMGS_TITLE_TEXT, PATH_IMAGE + "TextsTitle.png"
 				, imagesAllNum, imagesNumX, imagesNumY);
 
+	// 選択文字
+	imagesAllNum = 9;
+	imagesNumX = 1;
+	imagesNumY = 9;
+	_SetResource(LOAD_TYPE::IMAGES, SRC::IMGS_SELECT, PATH_IMAGE + "SelectImages.png"
+				, imagesAllNum, imagesNumX, imagesNumY);
+
 	// ゲームシーンの文字
 	imagesAllNum = 1;
 	imagesNumX = 1;
@@ -130,7 +144,7 @@ void ResourceManager::Initialize(void)
 	imagesAllNum = 4;
 	imagesNumX = 1;
 	imagesNumY = 4;
-	_SetResource(LOAD_TYPE::IMAGES, SRC::IMGS_RESULT, PATH_IMAGE + "EndTxt.png"
+	_SetResource(LOAD_TYPE::IMAGES, SRC::IMGS_RESULT, PATH_IMAGE + "EndText.png"
 				, imagesAllNum, imagesNumX, imagesNumY);
 
 	/* エフェクト */
@@ -140,6 +154,7 @@ void ResourceManager::Initialize(void)
 	_SetResource(LOAD_TYPE::EFFECT, SRC::EFFECT_BOSS_HIT, PATH_EFFECT + "BossAttack/Hit.efkefc");
 	_SetResource(LOAD_TYPE::EFFECT, SRC::EFFECT_LASER, PATH_EFFECT + "BossAttack/Laser.efkefc");
 	_SetResource(LOAD_TYPE::EFFECT, SRC::EFFECT_MISSILE, PATH_EFFECT + "BossAttack/MissileExplosion.efkefc");
+	_SetResource(LOAD_TYPE::EFFECT, SRC::EFFECT_PLAYER_BLAST, PATH_EFFECT + "BlastHit/BlastHit.efkefc");
 
 
 	/* モデル */
@@ -151,12 +166,11 @@ void ResourceManager::Initialize(void)
 	_SetResource(LOAD_TYPE::MODEL, SRC::MODEL_PLAYER_BIRD,	PATH_MODEL + "Player/Chara/Bird/PlayerBird.mv1");
 	_SetResource(LOAD_TYPE::MODEL, SRC::MODEL_PLAYER_MONKEY,PATH_MODEL + "Player/Chara/Monkey/PlayerMonkey.mv1");
 
-	_SetResource(LOAD_TYPE::MODEL, SRC::MODEL_STAGE, PATH_MODEL + "Stage/Stage/Stage.mv1");
-	_SetResource(LOAD_TYPE::MODEL, SRC::MODEL_STAGE_COLLISION, PATH_MODEL + "Stage/Stage/StageCollision.mv1");
-	//_SetResource(LOAD_TYPE::MODEL, SRC::MODEL_STAGE, PATH_MODEL + "Stage/FloatingIsland/FloatingIsland02.mv1");
-	//_SetResource(LOAD_TYPE::MODEL, SRC::MODEL_STAGE_COLLISION, PATH_MODEL + "Stage/FloatingIsland/FloatingIsland02.mv1");
-	_SetResource(LOAD_TYPE::MODEL, SRC::MODEL_TREE_POSITION, PATH_MODEL + "Stage/Stage/TreePosition.mv1");
+	_SetResource(LOAD_TYPE::MODEL, SRC::MODEL_STAGE, PATH_MODEL + "Stage/Stage.mv1");
+	_SetResource(LOAD_TYPE::MODEL, SRC::MODEL_STAGE_COLLISION, PATH_MODEL + "Stage/StageCollision.mv1");
+	_SetResource(LOAD_TYPE::MODEL, SRC::MODEL_TREE_POSITION, PATH_MODEL + "Stage/TreePosition.mv1");
 
+	//ボスの武器本体系
 	_SetResource(LOAD_TYPE::MODEL, SRC::MODEL_BOSS_FEET, PATH_MODEL + "Boss/oni_feet.mv1");
 	_SetResource(LOAD_TYPE::MODEL, SRC::MODEL_BOSS_CAR, PATH_MODEL + "Boss/oni_feet_car.mv1");
 	_SetResource(LOAD_TYPE::MODEL, SRC::MODEL_BOSS_WHEEL_FRONT, PATH_MODEL + "Boss/oni_wheel_hedo.mv1");
@@ -168,8 +182,12 @@ void ResourceManager::Initialize(void)
 	_SetResource(LOAD_TYPE::MODEL, SRC::MODEL_BOSS_WEAPON_RK, PATH_MODEL + "Boss/oni_RK.mv1");
 	_SetResource(LOAD_TYPE::MODEL, SRC::MODEL_BOSS_WEAPON_RG, PATH_MODEL + "Boss/oni_RG.mv1");
 
+	//ボスの弾系
 	_SetResource(LOAD_TYPE::MODEL, SRC::MODEL_BOSS_BULLET, PATH_MODEL + "Boss/BBullet.mv1");
 	_SetResource(LOAD_TYPE::MODEL, SRC::MODEL_BOSS_MISSILE, PATH_MODEL + "Boss/missile.mv1");
+
+	//雑魚敵
+	_SetResource(LOAD_TYPE::MODEL, SRC::MODEL_ENEMY_ROBO, PATH_MODEL + "Enemy/ninOni.mv1");
 
 	/* アニメーション */
 	_SetResource(LOAD_TYPE::ANIM, SRC::ANIM_IDLE, PATH_ANIM + "Idle.mv1");
@@ -179,6 +197,7 @@ void ResourceManager::Initialize(void)
 	_SetResource(LOAD_TYPE::ANIM, SRC::ANIM_THROW_RIGHT, PATH_ANIM + "Throw_Right.mv1");
 	_SetResource(LOAD_TYPE::ANIM, SRC::ANIM_JUMP, PATH_ANIM + "Jump.mv1");
 	_SetResource(LOAD_TYPE::ANIM, SRC::ANIM_DODGE, PATH_ANIM + "Rolling.mv1");
+	_SetResource(LOAD_TYPE::ANIM, SRC::ANIM_DEFEAT, PATH_ANIM + "Defeat.mv1");
 
 	/* BGM */
 	_SetResource(LOAD_TYPE::SOUND, SRC::BGM_TITLE_SEA, PATH_BGM + "Sea.mp3");
@@ -186,12 +205,12 @@ void ResourceManager::Initialize(void)
 	_SetResource(LOAD_TYPE::SOUND, SRC::BGM_GAME, PATH_BGM + "GameBGM.mp3");
 
 	/* 効果音 */
-	_SetResource(LOAD_TYPE::SOUND, SRC::SE_CLICK, PATH_SE + "Click.mp3");
 	_SetResource(LOAD_TYPE::SOUND, SRC::SE_SELECT, PATH_SE + "Select.mp3");
-	_SetResource(LOAD_TYPE::SOUND, SRC::SE_DAMAGE, PATH_SE + "Damage.mp3");
-	_SetResource(LOAD_TYPE::SOUND, SRC::SE_MG_FIRE, PATH_SE + "MGFire.mp3");
+	_SetResource(LOAD_TYPE::SOUND, SRC::SE_PLAYER_DAMAGE, PATH_SE + "PlayerDamage.mp3");
+	_SetResource(LOAD_TYPE::SOUND, SRC::SE_BOSS_MG_FIRE, PATH_SE + "MGFire.mp3");
 	_SetResource(LOAD_TYPE::SOUND, SRC::SE_BOSS_LANDING, PATH_SE + "BossLanding.mp3");
-	_SetResource(LOAD_TYPE::SOUND, SRC::SE_ROAD, PATH_SE + "Road.mp3");
+	_SetResource(LOAD_TYPE::SOUND, SRC::SE_BOSS_ROAD, PATH_SE + "Road.mp3");
+	_SetResource(LOAD_TYPE::SOUND, SRC::SE_BOSS_HIT, PATH_SE + "BossHit.mp3");
 
 }
 void ResourceManager::_SetResource(Resource::LOAD_TYPE _loadType, SRC _src, std::string _path
@@ -261,11 +280,9 @@ void ResourceManager::LoadHandleIds(SRC _src, int* _target)
 {
 	// 複数画像ではない場合、処理終了
 	if (resourcesMap_[_src].GetLoadType() != Resource::LOAD_TYPE::IMAGES) { return; }
-	SetUseASyncLoadFlag(false);
 
 	// 複数画像の対象にコピー
 	Load(_src).CopyHandle(_target);
-	SetUseASyncLoadFlag(true);
 
 #ifdef _DEBUG
 	if (*_target == -1)

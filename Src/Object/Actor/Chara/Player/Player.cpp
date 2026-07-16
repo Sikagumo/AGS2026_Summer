@@ -70,7 +70,7 @@ Player::Player(int _playerNo, JOB_TYPE _jobType, const VECTOR& _startPos)
 
 	std::array< SHOT_TYPE, static_cast<int>(JOB_TYPE::MAX)>
 		JOB_SHOT_TYPE
-	{ SHOT_TYPE::BOMB, SHOT_TYPE::BIG, SHOT_TYPE::RAPID_FIRE, SHOT_TYPE::RECOVERY };
+	{ SHOT_TYPE::BOMB, SHOT_TYPE::SELECT_BIG, SHOT_TYPE::RAPID_FIRE, SHOT_TYPE::RECOVERY };
 
 	shotType_ = JOB_SHOT_TYPE[static_cast<int>(jobType_)];
 
@@ -80,7 +80,14 @@ Player::Player(int _playerNo, JOB_TYPE _jobType, const VECTOR& _startPos)
 
 void Player::Load(void)
 {
-	transform_.modelId = ResourceManager::GetInstance().LoadModelDuplicate(ResourceManager::SRC::MODEL_PLAYER_HUMAN);
+	std::array<ResourceManager::SRC, 4>
+		modelSrc = { ResourceManager::SRC::MODEL_PLAYER_HUMAN
+					, ResourceManager::SRC::MODEL_PLAYER_MONKEY
+					,ResourceManager::SRC::MODEL_PLAYER_BIRD
+					,ResourceManager::SRC::MODEL_PLAYER_DOG };
+
+	transform_.modelId = ResourceManager::GetInstance()
+		.LoadModelDuplicate(modelSrc.at(static_cast<int>(jobType_)));
 
 	//SetPlayerType(PLAYER_TYPE::BIRD);
 	//SetPlayerType(playerType_);
@@ -114,11 +121,11 @@ void Player::InitAnimation(void)
 
 	constexpr float SPEED_IDLE = 30.0f;
 	animation_->AddExternal(static_cast<int>(ANIM_TYPE::IDLE)
-		, SPEED_IDLE, resMng.LoadHandleId(ResourceManager::SRC::ANIM_IDLE));
+		, resMng.LoadHandleId(ResourceManager::SRC::ANIM_IDLE), SPEED_IDLE);
 
 	constexpr float SPEED_RUN = 32.5f;
 	animation_->AddExternal(static_cast<int>(ANIM_TYPE::RUN)
-		, SPEED_RUN, resMng.LoadHandleId(ResourceManager::SRC::ANIM_RUN));
+		, resMng.LoadHandleId(ResourceManager::SRC::ANIM_RUN), SPEED_RUN);
 
 	float throwSpeed = 0.0f;
 
@@ -140,26 +147,27 @@ void Player::InitAnimation(void)
 	}
 
 	animation_->AddExternal(static_cast<int>(ANIM_TYPE::THROW_LEFT)
-		, throwSpeed, resMng.LoadHandleId(ResourceManager::SRC::ANIM_THROW_LEFT));
+		, resMng.LoadHandleId(ResourceManager::SRC::ANIM_THROW_LEFT), throwSpeed);
 
 	animation_->AddExternal(static_cast<int>(ANIM_TYPE::THROW_RIGHT)
-		, throwSpeed, resMng.LoadHandleId(ResourceManager::SRC::ANIM_THROW_RIGHT));
+		, resMng.LoadHandleId(ResourceManager::SRC::ANIM_THROW_RIGHT), throwSpeed);
 
 	animation_->AddExternal(static_cast<int>(ANIM_TYPE::THROW_RUN)
-		, 20.0f, resMng.LoadHandleId(ResourceManager::SRC::ANIM_THROW_RUN));
+		, resMng.LoadHandleId(ResourceManager::SRC::ANIM_THROW_RUN), 20.0f);
 
 
 	constexpr float SPEED_JUMP = 50.0f;
 	constexpr VECTOR LOCAL_POS_JUMP = { 0.0f, 50.0f, 0.0f };
 	animation_->AddExternal(static_cast<int>(ANIM_TYPE::JUMP)
-		, SPEED_JUMP, resMng.LoadHandleId(ResourceManager::SRC::ANIM_JUMP)
-		, true, LOCAL_POS_JUMP);
+		, resMng.LoadHandleId(ResourceManager::SRC::ANIM_JUMP)
+		, LOCAL_POS_JUMP, SPEED_JUMP);
 
 	constexpr float SPEED_DODGE = 50.0f;
-	constexpr VECTOR LOCAL_POS_DODGE = { 0.0f, 22.5f, 0.0f };
+	constexpr VECTOR LOCAL_POS_DODGE = { 0.0f, 25.0f, 0.0f };
+	constexpr VECTOR LOCAL_POS_DODGE_END = { 0.0f, 0.0f, 0.0f };
 	animation_->AddExternal(static_cast<int>(ANIM_TYPE::DODGE)
-		, SPEED_DODGE, resMng.LoadHandleId(ResourceManager::SRC::ANIM_DODGE)
-		, true, LOCAL_POS_DODGE);
+		, resMng.LoadHandleId(ResourceManager::SRC::ANIM_DODGE)
+		, LOCAL_POS_DODGE, LOCAL_POS_DODGE_END, SPEED_DODGE);
 
 
 	animType_ = ANIM_TYPE::IDLE;
@@ -275,12 +283,21 @@ void Player::InitPost(void)
 	}
 	else if (jobType_ == JOB_TYPE::RAPID_FIRE)
 	{
-		actionNum = static_cast<int>(ACTION_TYPE::ATTACK);
+		actionNum = static_cast<int>(ACTION_TYPE::ATTACK_SPECIAL);
 		constexpr float SHOT_TIME_ACTIVE = 0.4f; // 有効時間
 		constexpr float SHOT_TIME_ACTION_ACTIVE = 0.325f;
 		timeEnd = 0.0f;
 		timeActive = SHOT_TIME_ACTIVE;
 		timeActionActive = SHOT_TIME_ACTION_ACTIVE;
+
+		actionController_->SetAction(actionNum, timeActive, timeActionActive, timeEnd
+			, std::bind(&Player::ShotCluster, this));
+
+
+		actionNum = static_cast<int>(ACTION_TYPE::ATTACK);
+		timeEnd = 0.0f;
+		timeActive = 0.4f;
+		timeActionActive = 0.325f;
 
 		actionController_->SetAction(actionNum, timeActive, timeActionActive, timeEnd
 			, std::bind(&Player::ShotBullet, this));
@@ -320,7 +337,9 @@ void Player::Draw(void)
 	}
 	MV1SetMaterialDifColor(transform_.modelId, 0, material);
 
-	DrawFormatString(10, 140, 0xffffff, "Pleyerの座標：%f,%f,%f", transform_.pos.x, transform_.pos.y, transform_.pos.z);
+#ifdef _DEBUG
+	DrawFormatString(10, 140, 0xffffff, "Playerの座標：%f,%f,%f", transform_.pos.x, transform_.pos.y, transform_.pos.z);
+#endif
 	ActorBase::Draw();
 
 	CharaBase::DrawShadowRound(30.0f);
@@ -381,8 +400,6 @@ void Player::UpdateProcess(void)
 	// 吹っ飛ばし処理
 	ProcessKnock();
 	
-	// 移動位置制限
-	//MoveLimit();
 
 	// 胴体位置更新
 	bodyPos_ = transform_.pos;
@@ -450,8 +467,20 @@ VECTOR Player::CalcAddPosition(void)
 	ret = VAdd(ret, knockVec);
 
 	// 回避移動量を加算
-	const VECTOR dodgeVec = VGet(dodgePowXZ_.x, 0.0f, dodgePowXZ_.y);
-	ret = VAdd(ret, dodgeVec);
+	VECTOR dodgeVec;
+	if (CollisionController::GetInstance()
+		.IsTagCollidingWithTag(ColliderBase::TAG::PLAYER, ColliderBase::TAG::WALL))
+	{
+		dodgeVec = VGet(-dodgePowXZ_.x, 0.0f, -dodgePowXZ_.y);
+		ret = VAdd(ret, dodgeVec);
+		dodgePowXZ_ = UtilityMath::VECTOR2F_ZERO;
+	}
+	else
+	{
+	
+		dodgeVec = VGet(dodgePowXZ_.x, 0.0f, dodgePowXZ_.y);
+		ret = VAdd(ret, dodgeVec);
+	}
 
 	return ret;
 }
@@ -532,24 +561,6 @@ void Player::ProcessMove(void)
 		{
 			PlayAnimation(ANIM_TYPE::IDLE);
 		}
-	}
-}
-
-void Player::MoveLimit(void)
-{
-	/* 範囲外の移動制限 */
-	const float RADIUS = 1750.0f;
-	VECTOR limitPos = transform_.pos;
-	limitPos.y = 0.0f;
-	float curRange = VSize(VSub(limitPos, UtilityMath::VECTOR_ZERO));
-
-	// 範囲外の時、ステージ内に戻す
-	if (curRange > RADIUS)
-	{
-		const float REFLECT_POW = 10.0f;
-		transform_.pos = VAdd(transform_.pos,
-			VScale(VNorm(VSub(UtilityMath::VECTOR_ZERO, limitPos)),
-				REFLECT_POW));
 	}
 }
 
@@ -920,7 +931,7 @@ void Player::CreateBullet(void)
 
 	switch (shotType_)
 	{
-		case SHOT_TYPE::BIG:
+		case SHOT_TYPE::SELECT_BIG:
 			bullet = std::make_unique<PBulletBig>();
 		break;
 
@@ -1018,6 +1029,16 @@ void Player::CreateCluster(void)
 	}
 
 }
+void Player::ShotCluster(void)
+{
+	// 発射処理の有効化
+	for (auto& bullet : clusterBullets_)
+	{
+		bullet->Shot();
+	}
+
+	shotIndex_ = -1;
+}
 std::unique_ptr<PBulletNormal> Player::_CreateClusterBullet(const VECTOR& _throwDir)
 {
 	constexpr float SCALE = 0.25f;
@@ -1057,104 +1078,6 @@ VECTOR Player::CalcShotDir(void)
 	return shotDir;
 }
 
-void Player::DrawShadowRound(void)
-{
-	/* 丸影 */
-	/*
-	const float PLAYER_SHADOW_HEIGHT = 700.0f;
-	const float PLAYER_SHADOW_SIZE = 50.0f;
-	MV1_COLL_RESULT_POLY_DIM HitResDim;
-	MV1_COLL_RESULT_POLY* HitRes;
-	VERTEX3D Vertex[3];
-	VECTOR SlideVec;
-
-	// ライティングを無効にする
-	SetUseLighting(FALSE);
-
-	// Ｚバッファを有効にする
-	SetUseZBuffer3D(TRUE);
-
-	// テクスチャアドレスモードを CLAMP にする( テクスチャの端より先は端のドットが延々続く )
-	SetTextureAddressMode(DX_TEXADDRESS_CLAMP);
-
-	// 影を落とすモデルの数だけ繰り返し
-	for (auto& col : hitColliders_)
-	{
-		// チェックするモデルは、jが0の時はステージモデル、1以上の場合はコリジョンモデル
-		if (j == 0)
-		{
-			ModelHandle = stg.ModelHandle;
-		}
-		else
-		{
-			ModelHandle = stg.CollObjModelHandle[j - 1];
-		}
-
-		// プレイヤーの直下に存在する地面のポリゴンを取得
-		HitResDim = MV1CollCheck_Capsule(col->GetFollow()->modelId, -1, transform_.pos,
-										 VAdd(transform_.pos, VGet(0.0f, -PLAYER_SHADOW_HEIGHT, 0.0f)),
-										 PLAYER_SHADOW_SIZE);
-
-		// 頂点データで変化が無い部分をセット
-		Vertex[0].dif = GetColorU8(255, 255, 255, 255);
-		Vertex[0].spc = GetColorU8(0, 0, 0, 0);
-		Vertex[0].su = 0.0f;
-		Vertex[0].sv = 0.0f;
-		Vertex[1] = Vertex[0];
-		Vertex[2] = Vertex[0];
-
-		// 球の直下に存在するポリゴンの数だけ繰り返し
-		HitRes = HitResDim.Dim;
-		for (int i = 0; i < HitResDim.HitNum; i++, HitRes++)
-		{
-			// ポリゴンの座標は地面ポリゴンの座標
-			Vertex[0].pos = HitRes->Position[0];
-			Vertex[1].pos = HitRes->Position[1];
-			Vertex[2].pos = HitRes->Position[2];
-
-			// ちょっと持ち上げて重ならないようにする
-			SlideVec = VScale(HitRes->Normal, 0.5f);
-			Vertex[0].pos = VAdd(Vertex[0].pos, SlideVec);
-			Vertex[1].pos = VAdd(Vertex[1].pos, SlideVec);
-			Vertex[2].pos = VAdd(Vertex[2].pos, SlideVec);
-
-			// ポリゴンの不透明度を設定する
-			Vertex[0].dif.a = 0;
-			Vertex[1].dif.a = 0;
-			Vertex[2].dif.a = 0;
-			if (HitRes->Position[0].y > transform_.pos.y - PLAYER_SHADOW_HEIGHT)
-				Vertex[0].dif.a = static_cast<BYTE>(128 * (1.0f - fabs(HitRes->Position[0].y - transform_.pos.y) / PLAYER_SHADOW_HEIGHT));
-
-			if (HitRes->Position[1].y > transform_.pos.y - PLAYER_SHADOW_HEIGHT)
-				Vertex[1].dif.a = static_cast<BYTE>(128 * (1.0f - fabs(HitRes->Position[1].y - transform_.pos.y) / PLAYER_SHADOW_HEIGHT));
-
-			if (HitRes->Position[2].y > transform_.pos.y - PLAYER_SHADOW_HEIGHT)
-				Vertex[2].dif.a = static_cast<BYTE>(128 * (1.0f - fabs(HitRes->Position[2].y - transform_.pos.y) / PLAYER_SHADOW_HEIGHT));
-
-			// ＵＶ値は地面ポリゴンとプレイヤーの相対座標から割り出す
-			Vertex[0].u = (HitRes->Position[0].x - transform_.pos.x) / (PLAYER_SHADOW_SIZE * 2.0f) + 0.5f;
-			Vertex[0].v = (HitRes->Position[0].z - transform_.pos.z) / (PLAYER_SHADOW_SIZE * 2.0f) + 0.5f;
-			Vertex[1].u = (HitRes->Position[1].x - transform_.pos.x) / (PLAYER_SHADOW_SIZE * 2.0f) + 0.5f;
-			Vertex[1].v = (HitRes->Position[1].z - transform_.pos.z) / (PLAYER_SHADOW_SIZE * 2.0f) + 0.5f;
-			Vertex[2].u = (HitRes->Position[2].x - transform_.pos.x) / (PLAYER_SHADOW_SIZE * 2.0f) + 0.5f;
-			Vertex[2].v = (HitRes->Position[2].z - transform_.pos.z) / (PLAYER_SHADOW_SIZE * 2.0f) + 0.5f;
-
-			// 影ポリゴンを描画
-			DrawPolygon3D(Vertex, 1, shadowHandle_, TRUE);
-		}
-
-		// 検出した地面ポリゴン情報の後始末
-		MV1CollResultPolyDimTerminate(HitResDim);
-	}
-
-	// ライティングを有効にする
-	SetUseLighting(TRUE);
-
-	// Ｚバッファを無効にする
-	SetUseZBuffer3D(FALSE);
-	*/
-}
-
 void Player::PlayAnimation(ANIM_TYPE _type, bool _isLoop, float _animSpeed)
 {
 	// コンボ時のみ
@@ -1171,6 +1094,6 @@ void Player::PlayAnimation(ANIM_TYPE _type, bool _isLoop, float _animSpeed)
 
 	animType_ = _type;
 
-	animation_->Play(static_cast<int>(_type), _isLoop, _animSpeed);
+	animation_->Play(static_cast<int>(_type), _isLoop, _animSpeed, 0.0f);
 }
 

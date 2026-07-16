@@ -5,7 +5,9 @@
 #include <vector>
 #include <array>
 #include "../../Object/Actor/Chara/Player/Player.h"
+#include "../../Object/Actor/Chara/Player/PlayerBase.h"
 #include "../../Object/Actor/Chara/Boss/Boss.h"
+#include "../../Object/Actor/Chara/Enemy/EnemyRobo.h"
 #include "../../Object/Actor/Stage/Stage.h"
 #include "../../Object/Common/DamageController.h"
 #include "../../Common/GameTimer.h"
@@ -17,7 +19,7 @@ class SceneGame : public SceneBase
 public:
 
     /// @brief コンストラクタ
-    SceneGame(void);
+    SceneGame(std::vector<PlayerBase::JOB_TYPE> _playerJob);
 
     /// @brief デストラクタ
     ~SceneGame(void) = default;
@@ -42,12 +44,22 @@ public:
 
 private:
 
+    enum class GAME_STATE
+    {
+        NONE = -1,
+        MOVIE,
+        MOVIE_BOSS,
+        GAME,
+    };
+    
     const std::vector<VECTOR> PLAYER_INIT_POS =
-    { { 0,0,-1000.0f },{ 0,0,0 },{ 0,0,0 },{ 0,0,0 } };
+    { { 0,0,-2000.0f },{ 0,0,0 },{ 0,0,0 },{ 0,0,0 } };
 
     std::vector<std::unique_ptr<Player>> players_;
 
     std::unique_ptr<Boss> boss_;
+
+    std::unique_ptr<EnemyRobo>enemyRobo_;
 
     std::unique_ptr<Stage> stage_;
 
@@ -57,11 +69,11 @@ private:
 
     int targetHpImage_;
     int targetHpBerImage_;
-
+    int gameTexts_;
 
     enum class UI_GAME
     {
-
+        TIMER_LABEL,
         MAX
     };
     std::array<int, static_cast<int>(UI_GAME::MAX)> uiGame_;
@@ -82,4 +94,7 @@ private:
     void DamageProcess(void);
 
     void UpdateGameTime(void);
+
+    /// @brief Gui用の更新処理
+    void UpdateGui(void) override;
 };

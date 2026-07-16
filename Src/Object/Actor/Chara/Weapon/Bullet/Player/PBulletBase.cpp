@@ -2,6 +2,7 @@
 #include <DxLib.h>
 #include "../../../../../../Utility/UtilityMath.h"
 #include "../../../../../../Manager/System/TimeManager.h"
+#include "../../../../../../Manager/Decoration/EffectManager.h"
 #include "../../../../../../Application.h"
 #include "../../../../../Collider/ColliderSphere.h"
 #include "../../../../../Collision/CollisionController.h"
@@ -11,7 +12,7 @@ PBulletBase::PBulletBase(bool _isGravity)
 	, bulletState_(BULLET_STATE::INACTIVE)
 	, radiusBullet_(0.0f) , radiusBlast_(0.0f)
 	, shotSpeedXZ_(0.0f), shotSpeedY_(0.0f)
-	, shotPow_(UtilityMath::VECTOR_ZERO)
+	, throwPow_(UtilityMath::VECTOR_ZERO)
 	, curGravityPow_(0.0f)
 	, aliveTime_(0.0f)
 	, shotCnt_(0)
@@ -56,7 +57,7 @@ void PBulletBase::Update(void)
 {
 	if (bulletState_ == BULLET_STATE::SHOT)
 	{
-		VECTOR pos = shotPow_;
+		VECTOR pos = throwPow_;
 
 		if (IS_GRAVITY)
 		{
@@ -101,7 +102,7 @@ void PBulletBase::Update(void)
 
 	// ステージに衝突時、爆発処理
 	if (colMng.IsActorCollidingWithTag(this, ColliderBase::TAG::STAGE)
-		|| shotPow_.y < 0.0f)
+		|| throwPow_.y < 0.0f)
 	{
 		BlastAction();
 	}
@@ -117,13 +118,16 @@ void PBulletBase::Draw(void)
 		DrawSphere3D(transform_.pos, radiusBullet_, SPHERE_DIV, 0xffffff, 0xffffff, true);
 	}
 
-#ifdef _DEBUG
+
 	if (bulletState_ == BULLET_STATE::BLAST)
 	{
+		EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_PLAYER_BLAST,
+			transform_.pos, {},
+			{ 35.0f , 35.0f, 35.0f }, 1.0f, this);
+#ifdef _DEBUG
 		DrawSphere3D(transform_.pos, radiusBlast_, SPHERE_DIV, 0xff0000, 0xffffff, false);
-	}
-
 #endif
+	}
 }
 
 void PBulletBase::ReleasePost(void)
@@ -148,6 +152,7 @@ void PBulletBase::Create(const VECTOR& _pos, const VECTOR& _throwDir, int _shotC
 	bulletState_ = BULLET_STATE::INACTIVE;
 
 	curGravityPow_ = 0.0f;
+	throwDir_ = _throwDir;
 	transform_.pos = VAdd(_pos, VScale(_throwDir, radiusBullet_));
 
 	isFinish_ = _isFinish;
@@ -159,11 +164,14 @@ void PBulletBase::Create(const VECTOR& _pos, const VECTOR& _throwDir, int _shotC
 
 void PBulletBase::Shot(const VECTOR& _shotDir)
 {
+	VECTOR shotDir = ((UtilityMath::EqualsVZero(_shotDir))
+							? throwDir_ : _shotDir);
+
 	VECTOR shotPowXZ = VScale(UtilityMath::VNormalize(_shotDir), shotSpeedXZ_);
 	float shotPowY = VScale(UtilityMath::VNormalize(_shotDir), shotSpeedY_).y;
-	shotPow_.x = shotPowXZ.x;
-	shotPow_.y = shotPowY;
-	shotPow_.z = shotPowXZ.z;
+	throwPow_.x = shotPowXZ.x;
+	throwPow_.y = shotPowY;
+	throwPow_.z = shotPowXZ.z;
 
 	bulletState_ = BULLET_STATE::SHOT;
 

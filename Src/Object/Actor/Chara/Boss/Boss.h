@@ -202,6 +202,7 @@ private:
 	int hp_;						//HP
 	std::array<Bone,7> boneId_;		//各ボーン
 	BONE_NAME boneName_;			//ボーンの名前
+	VECTOR wallStopPos_;
 	VECTOR jumpDir_;				//ジャンプ中の移動方向
 	VECTOR roadDir_;				//体当たり中の移動方向
 	float speed_;					//移動スピード
@@ -281,6 +282,10 @@ private:
 
 	//機能関数
 	void LookPlayer(void);
+
+	//effect
+	void PlayEffect(void);
+	void UpdateEffect(void);
 
 
 protected:

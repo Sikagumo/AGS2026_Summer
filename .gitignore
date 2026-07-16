@@ -25,6 +25,7 @@
 *.la
 *.a
 *.lib
+*.dxa
 
 # Executables
 *.exe
@@ -32,6 +33,7 @@
 *.pdb
 *.out
 *.app
+
 
 # New addition
 .vs/

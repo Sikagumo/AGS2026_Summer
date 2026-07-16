@@ -28,7 +28,7 @@ public:
 		, BOMB		// ФЪФj
 		, BOMB_FINISH
 
-		, BIG // ЛРСе
+		, SELECT_BIG // ЛРСе
 
 		, RAPID_FIRE // ШAОЋ
 		, CLUSTER	 // КgОU

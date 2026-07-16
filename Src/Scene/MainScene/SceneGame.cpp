@@ -20,39 +20,24 @@
 constexpr float GAME_TIME = 500.0f;
 constexpr float GAME_TIME_DEFEAT_DEC = 75.0f;
 
-SceneGame::SceneGame(void)
+SceneGame::SceneGame(std::vector<PlayerBase::JOB_TYPE> _playerJob)
 	: players_()
 	, boss_(std::make_unique<Boss>())
+	, enemyRobo_(std::make_unique<EnemyRobo>())
 	, stage_(std::make_unique<Stage>())
 	, damageController_(std::make_unique<DamageController>())
-	, targetHpImage_(-1), targetHpBerImage_(-1)
+	, targetHpImage_(-1)
+	, targetHpBerImage_(-1)
 	, gameTimer_(nullptr)
 {
-	std::unique_ptr<Player> player1
-		= std::make_unique<Player>(0, Player::JOB_TYPE::BOMB
-								   , PLAYER_INIT_POS[0]);
-	/*
-	std::unique_ptr<Player> player2
-		= std::make_unique<Player>(1, Player::JOB_TYPE::CANNON
-								   , PLAYER_INIT_POS[1]);
-	std::unique_ptr<Player> player3
-		= std::make_unique<Player>(2, Player::JOB_TYPE::CANNON
-								   , PLAYER_INIT_POS[2]);
-	std::unique_ptr<Player> player4
-		= std::make_unique<Player>(3, Player::JOB_TYPE::BOMB
-								   , PLAYER_INIT_POS[3]);
-	*/
+	for (int i = 0; i < _playerJob.size(); i++)
+	{
+		std::unique_ptr<Player> player
+			= std::make_unique<Player>(i, _playerJob.at(i)
+				, PLAYER_INIT_POS[i]);
 
-	players_.emplace_back(std::move(player1));
-	//players_.emplace_back(std::move(player2));
-	//players_.emplace_back(std::move(player3));
-	//players_.emplace_back(std::move(player4));
-
-	playerHpImageBack_ = ResourceManager::GetInstance().LoadHandleIdsOnce(ResourceManager::SRC::IMGS_HP_PLAYER, 0);
-	playerHpImage_ = ResourceManager::GetInstance().LoadHandleIdsOnce(ResourceManager::SRC::IMGS_HP_PLAYER, 1);
-
-	targetHpBerImage_ = ResourceManager::GetInstance().LoadHandleIdsOnce(ResourceManager::SRC::IMGS_HP_TARGET, 0);
-	targetHpImage_ = ResourceManager::GetInstance().LoadHandleIdsOnce(ResourceManager::SRC::IMGS_HP_TARGET, 1);
+		players_.emplace_back(std::move(player));
+	}
 }
 
 
@@ -60,13 +45,30 @@ void SceneGame::Load(void)
 {
 	SceneBase::Load();
 
+	playerHpImageBack_ = ResourceManager::GetInstance().LoadHandleIdsOnce(ResourceManager::SRC::IMGS_HP_PLAYER, 0);
+	playerHpImage_ = ResourceManager::GetInstance().LoadHandleIdsOnce(ResourceManager::SRC::IMGS_HP_PLAYER, 1);
+
+	targetHpBerImage_ = ResourceManager::GetInstance().LoadHandleIdsOnce(ResourceManager::SRC::IMGS_HP_TARGET, 0);
+	targetHpImage_ = ResourceManager::GetInstance().LoadHandleIdsOnce(ResourceManager::SRC::IMGS_HP_TARGET, 1);
+
+	ResourceManager::GetInstance().LoadHandleIds(ResourceManager::SRC::IMGS_GAME_TEXT, uiGame_.data());
+
 
 	for (auto& player : players_)
 	{
 		player->Load();
 	}
+	
+	playerHpImageBack_ = ResourceManager::GetInstance().LoadHandleIdsOnce(ResourceManager::SRC::IMGS_HP_PLAYER, 0);
+	playerHpImage_ = ResourceManager::GetInstance().LoadHandleIdsOnce(ResourceManager::SRC::IMGS_HP_PLAYER, 1);
+
+	targetHpBerImage_ = ResourceManager::GetInstance().LoadHandleIdsOnce(ResourceManager::SRC::IMGS_HP_TARGET, 0);
+	targetHpImage_ = ResourceManager::GetInstance().LoadHandleIdsOnce(ResourceManager::SRC::IMGS_HP_TARGET, 1);
+
+	ResourceManager::GetInstance().LoadHandleIds(ResourceManager::SRC::IMGS_GAME_TEXT, uiGame_.data());
 
 	boss_->Load();
+	enemyRobo_->Load();
 
 	stage_->Load();
 
@@ -74,8 +76,15 @@ void SceneGame::Load(void)
 
 	SoundManager::GetInstance().Add(SoundManager::TYPE::BGM, SoundManager::SOUND::BGM_GAME, ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::BGM_GAME));
 
+	SoundManager::GetInstance().Add(SoundManager::TYPE::SE, SoundManager::SOUND::SE_DAMAGE_PLAYER
+		, ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::SE_PLAYER_DAMAGE));
+
+	SoundManager::GetInstance().Add(SoundManager::TYPE::SE, SoundManager::SOUND::SE_DAMAGE_BOSS
+		, ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::SE_BOSS_HIT));
+
 	//時間カウントリセット
 	TimeManager::GetInstance().Reset();
+
 }
 
 void SceneGame::EndLoad(void)
@@ -86,10 +95,10 @@ void SceneGame::EndLoad(void)
 void SceneGame::Initialize(void)
 {
 
-	//if (Loading::GetInstance()->IsLoading()) { return; }
+	if (Loading::GetInstance()->IsLoading()) { return; }
 
 	// マウスを表示しない設定にする
-	SetMouseDispFlag(FALSE);
+	SetMouseDispFlag(false);
 	
 	auto& camera = SceneManager::GetInstance().GetCamera();
 	camera->ChangeMode(Camera::MODE::FOLLOW);
@@ -103,6 +112,7 @@ void SceneGame::Initialize(void)
 
 	boss_->Init();
 	stage_->Init();
+	enemyRobo_->Init();
 
 	// タイマー有効化
 	gameTimer_->SetIsTimeActive(true);
@@ -125,6 +135,7 @@ void SceneGame::Update(void)
 	DamageProcess();
 
 	boss_->Update();
+	enemyRobo_->Update();
 	stage_->Update();
 	
 	for (auto& player : players_)
@@ -132,8 +143,6 @@ void SceneGame::Update(void)
 		player->Update();
 		player->SetSoundData(boss_->GetBossPos(), boss_->GetSoundRadius(), boss_->GetLandingFlag(), boss_->GetMGFireFlag(), boss_->GetRoadFlag());
 	}
-
-	DamageProcess();
 
 	UpdateGameTime();
 
@@ -149,6 +158,7 @@ void SceneGame::Update(void)
 
 void SceneGame::DamageProcess(void)
 {
+	enemyRobo_->SetPlayerPos(players_.at(0)->GetBodyPos());
 	boss_->SetPlayer1Pos(players_.at(0)->GetBodyPos());
 	
 	boss_->SetBossDamage(damageController_->GetBossDamage());
@@ -164,21 +174,36 @@ void SceneGame::DamageProcess(void)
 
 	boss_->SetWeaponRGDamage(damageController_->GetWeaponRGDamage());
 
-	//// プレイヤーの攻撃
-	//for (auto& player : players_)
-	//{
-	//	// 弾
-	//	for (auto& bullet : player->GetBullets())
-	//	{
-	//		damageController_->SetPlayerAttack(bullet->GetPowerBullet(), bullet->GetPowerBlast());
-	//	}
 
-	//	// 拡散弾
-	//	for (auto& bullet : player->GetBulletsCluster())
-	//	{
-	//		damageController_->SetPlayerAttack(bullet->GetPowerBullet(), bullet->GetPowerBlast());
-	//	}
-	//}
+	if (damageController_->GetBossDamage() > 0
+		|| damageController_->GetWeaponCannonLDamage() > 0
+		|| damageController_->GetWeaponCannonRDamage() > 0
+		|| damageController_->GetWeaponMGLDamage() > 0
+		|| damageController_->GetWeaponMGRDamage() > 0
+		|| damageController_->GetWeaponMPLDamage() > 0
+		|| damageController_->GetWeaponMPRDamage() > 0
+		|| damageController_->GetWeaponRGDamage() > 0)
+	{
+		SoundManager::GetInstance().Play(SoundManager::SOUND::SE_DAMAGE_BOSS);
+	}
+
+
+	// プレイヤーの攻撃
+	for (auto& player : players_)
+	{
+		// 弾
+		for (auto& bullet : player->GetBullets())
+		{
+			damageController_->SetPlayerAttack(bullet->GetPowerBullet(), bullet->GetPowerBlast());
+		}
+
+		// 拡散弾
+		for (auto& bullet : player->GetBulletsCluster())
+		{
+			if (bullet == nullptr) { continue; }
+			damageController_->SetPlayerAttack(bullet->GetPowerBullet(), bullet->GetPowerBlast());
+		}
+	}
 
 	// プレイヤー被ダメージ処理
 	for (auto& player : players_)
@@ -208,7 +233,6 @@ void SceneGame::UpdateGameTime(void)
 	}
 }
 
-
 void SceneGame::Draw(void)
 {
 	auto& effect = EffectManager::GetInstance();
@@ -222,11 +246,15 @@ void SceneGame::Draw(void)
 
 	boss_->Draw();
 
+	enemyRobo_->Draw();
+	
 	effect.Draw();
 
 	DrawHpBerBoss();
 
 	gameTimer_->Draw();
+
+	DrawRotaGraph((Application::SCREEN_HALF_X - 300), 35, 0.5, 0.0, uiGame_.at(0), true);
 
 	DrawHpBerPlayer();
 
@@ -408,6 +436,7 @@ void SceneGame::DrawHpBerBoss(void)
 #endif
 	}
 }
+
 float SceneGame::CalcHpBarScale(const VECTOR& _targetPos)
 {
 	// 距離の最小値
@@ -436,4 +465,9 @@ void SceneGame::DrawDebug(void)
 	SceneManager::GetInstance().GetCamera()->DrawDebug();
 	damageController_->DebugDraw();
 }
+
+void SceneGame::UpdateGui(void)
+{
+}
+
 

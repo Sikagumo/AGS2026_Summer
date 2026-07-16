@@ -39,7 +39,7 @@ protected:
 	static constexpr float COLLISION_BACK_DIS = 1.0f;
 
 	//影の描画する高さ式（前が高さ)(後ろが補正値)
-	static constexpr float SHADOW_POS_Y = -22.0f + 0.5;
+	static constexpr float SHADOW_POS_Y = -7.0f + 0.5;
 	//影の濃さの最大値
 	static constexpr int MAX_SHADOW_COL = 255;
 	//影を完全に消す高さ

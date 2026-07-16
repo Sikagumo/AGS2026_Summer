@@ -3,6 +3,7 @@
 #include <unordered_map>
 #include <vector>
 #include <mutex>
+#include "../../Utility/UtilityMath.h"
 
 class EffectManager
 {
@@ -18,15 +19,18 @@ public:
 		EFFECT_LASER,
 		EFFECT_MISSILE,
 
+		EFFECT_PLAYER_BULLET,
+		EFFECT_PLAYER_BLAST,
+
 	};
 	/// @brief エフェクトのリソースデータ構造体
 	struct EFFECT_DATA
 	{
-		int Data;
-		VECTOR pos;
-		VECTOR rot;
-		VECTOR scl;
-		float speed;
+		int Data = 0;
+		VECTOR pos = UtilityMath::VECTOR_ZERO;
+		VECTOR rot = UtilityMath::VECTOR_ZERO;
+		VECTOR scl = UtilityMath::VECTOR_ONE;
+		float speed = 0.0f;
 	};
 	struct PLAYING_EFFECT
 	{

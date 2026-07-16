@@ -36,6 +36,7 @@ void PlayerBase::SetDamage(int _damage, bool _isInvincible
 		timeInv_ = _timeInvincible;
 	}
 
+	SoundManager::GetInstance().Play(SoundManager::SOUND::SE_DAMAGE_PLAYER);
 	hp_ -= _damage;
 }
 
@@ -50,13 +51,13 @@ void PlayerBase::SetSoundData(VECTOR _pos, float _radius,bool _isLanging, bool _
 
 	if (_isMGFire)
 	{
-		sound.Play3D(SoundManager::SOUND::SE_MG_FIRE
+		sound.Play3D(SoundManager::SOUND::SE_BOSS_MG_FIRE
 					 , _pos, transform_.pos, _radius);
 	}
 
 	if (_isRoad)
 	{
-		sound.Play3D(SoundManager::SOUND::SE_ROAD
+		sound.Play3D(SoundManager::SOUND::SE_BOSS_ROAD
 					 , _pos, transform_.pos, _radius);
 	}
 

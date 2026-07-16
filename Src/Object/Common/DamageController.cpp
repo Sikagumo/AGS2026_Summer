@@ -48,13 +48,6 @@ void DamageController::Update()
 	isInvincible_ = true;
 
 	// ボス関連とプレイヤー弾＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝
-	
-	// ボスとプレイヤー弾
-	if (CollisionController::GetInstance()
-			.IsTagCollidingWithTag(ColliderBase::TAG::BOSS, ColliderBase::TAG::PLAYER_BULLET))
-	{
-		bossDamage_ = playerAttackBullet_;
-	}
 	// 左キャノンとプレイヤー弾
 	if (CollisionController::GetInstance()
 			.IsTagCollidingWithTag(ColliderBase::TAG::WEAPON_CANNON_L, ColliderBase::TAG::PLAYER_BULLET))
@@ -104,62 +97,70 @@ void DamageController::Update()
 		weaponRGDamage_ = playerAttackBullet_;
 		bossDamage_ = static_cast<int>(playerAttackBullet_ * BOSS_CUT_DAMAGE);
 	}
-	
-	
-	// ボスとプレイヤー爆発
+	// ボスとプレイヤー弾
 	if (CollisionController::GetInstance()
-			.IsTagCollidingWithTag(ColliderBase::TAG::BOSS, ColliderBase::TAG::PLAYER_BLAST))
+			.IsTagCollidingWithTag(ColliderBase::TAG::BOSS, ColliderBase::TAG::PLAYER_BULLET))
 	{
-		bossDamage_ = playerAttackBlast_;
+		bossDamage_ = playerAttackBullet_;
 	}
-	// 左キャノンとプレイヤー爆発
-	if (CollisionController::GetInstance()
+	
+	if (playerAttackBlast_ > 0)
+	{
+		// 左キャノンとプレイヤー爆発
+		if (CollisionController::GetInstance()
 			.IsTagCollidingWithTag(ColliderBase::TAG::WEAPON_CANNON_L, ColliderBase::TAG::PLAYER_BLAST))
-	{
-		weaponCannonLDamage_ = playerAttackBlast_;
-		bossDamage_ = static_cast<int>(playerAttackBlast_ * BOSS_CUT_DAMAGE);
-	}
-	// 右キャノンとプレイヤー爆発
-	if (CollisionController::GetInstance()
+		{
+			weaponCannonLDamage_ = playerAttackBlast_;
+			bossDamage_ = static_cast<int>(playerAttackBlast_ * BOSS_CUT_DAMAGE);
+		}
+		// 右キャノンとプレイヤー爆発
+		if (CollisionController::GetInstance()
 			.IsTagCollidingWithTag(ColliderBase::TAG::WEAPON_CANNON_R, ColliderBase::TAG::PLAYER_BLAST))
-	{
-		weaponCannonRDamage_ = playerAttackBlast_;
-		bossDamage_ = static_cast<int>(playerAttackBlast_ * BOSS_CUT_DAMAGE);
-	}
-	// 左ガトリングとプレイヤー爆発
-	if (CollisionController::GetInstance()
+		{
+			weaponCannonRDamage_ = playerAttackBlast_;
+			bossDamage_ = static_cast<int>(playerAttackBlast_ * BOSS_CUT_DAMAGE);
+		}
+		// 左ガトリングとプレイヤー爆発
+		if (CollisionController::GetInstance()
 			.IsTagCollidingWithTag(ColliderBase::TAG::WEAPON_MG_L, ColliderBase::TAG::PLAYER_BLAST))
-	{
-		weaponMGLDamage_ = playerAttackBlast_;
-		bossDamage_ = static_cast<int>(playerAttackBlast_ * BOSS_CUT_DAMAGE);
-	}
-	// 右ガトリングとプレイヤー爆発
-	if (CollisionController::GetInstance()
+		{
+			weaponMGLDamage_ = playerAttackBlast_;
+			bossDamage_ = static_cast<int>(playerAttackBlast_ * BOSS_CUT_DAMAGE);
+		}
+		// 右ガトリングとプレイヤー爆発
+		if (CollisionController::GetInstance()
 			.IsTagCollidingWithTag(ColliderBase::TAG::WEAPON_MG_R, ColliderBase::TAG::PLAYER_BLAST))
-	{
-		weaponMGRDamage_ = playerAttackBlast_;
-		bossDamage_ = static_cast<int>(playerAttackBlast_ * BOSS_CUT_DAMAGE);
-	}
-	// 左ミサイルポッドとプレイヤー爆発
-	if (CollisionController::GetInstance()
+		{
+			weaponMGRDamage_ = playerAttackBlast_;
+			bossDamage_ = static_cast<int>(playerAttackBlast_ * BOSS_CUT_DAMAGE);
+		}
+		// 左ミサイルポッドとプレイヤー爆発
+		if (CollisionController::GetInstance()
 			.IsTagCollidingWithTag(ColliderBase::TAG::WEAPON_MP_L, ColliderBase::TAG::PLAYER_BLAST))
-	{
-		weaponMPLDamage_ = playerAttackBlast_;
-		bossDamage_ = static_cast<int>(playerAttackBlast_ * BOSS_CUT_DAMAGE);
-	}
-	// 右ミサイルポッドとプレイヤー爆発
-	if (CollisionController::GetInstance()
+		{
+			weaponMPLDamage_ = playerAttackBlast_;
+			bossDamage_ = static_cast<int>(playerAttackBlast_ * BOSS_CUT_DAMAGE);
+		}
+		// 右ミサイルポッドとプレイヤー爆発
+		if (CollisionController::GetInstance()
 			.IsTagCollidingWithTag(ColliderBase::TAG::WEAPON_MP_R, ColliderBase::TAG::PLAYER_BLAST))
-	{
-		weaponMPRDamage_ = playerAttackBlast_;
-		bossDamage_ = static_cast<int>(playerAttackBlast_ * BOSS_CUT_DAMAGE);
-	}
-	// レールガンとプレイヤー爆発
-	if (CollisionController::GetInstance()
+		{
+			weaponMPRDamage_ = playerAttackBlast_;
+			bossDamage_ = static_cast<int>(playerAttackBlast_ * BOSS_CUT_DAMAGE);
+		}
+		// レールガンとプレイヤー爆発
+		if (CollisionController::GetInstance()
 			.IsTagCollidingWithTag(ColliderBase::TAG::WEAPON_RG, ColliderBase::TAG::PLAYER_BLAST))
-	{
-		weaponRGDamage_ = playerAttackBlast_;
-		bossDamage_ = static_cast<int>(playerAttackBlast_ * BOSS_CUT_DAMAGE);
+		{
+			weaponRGDamage_ = playerAttackBlast_;
+			bossDamage_ = static_cast<int>(playerAttackBlast_ * BOSS_CUT_DAMAGE);
+		}
+		// ボスとプレイヤー爆発
+		if (CollisionController::GetInstance()
+			.IsTagCollidingWithTag(ColliderBase::TAG::BOSS, ColliderBase::TAG::PLAYER_BLAST))
+		{
+			bossDamage_ = playerAttackBlast_;
+		}
 	}
 
 	// プレイヤーとボスの攻撃＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝
@@ -172,7 +173,7 @@ void DamageController::Update()
 		damageData_ = playerDamage_;
 	}
 	else if (CollisionController::GetInstance()
-				.IsTagCollidingWithTag(ColliderBase::TAG::MG_BULLET, ColliderBase::TAG::PLAYER))
+			.IsTagCollidingWithTag(ColliderBase::TAG::MG_BULLET, ColliderBase::TAG::PLAYER))
 	{
 		// HP割合ダメージ
 		const float RATE_DAMAGE = (playerHpMax_ * mg_.attack);
@@ -181,7 +182,7 @@ void DamageController::Update()
 		damageData_ = playerDamage_;
 	}
 	else if (CollisionController::GetInstance()
-				.IsTagCollidingWithTag(ColliderBase::TAG::ROAD_ATTACK, ColliderBase::TAG::PLAYER))
+			.IsTagCollidingWithTag(ColliderBase::TAG::ROAD_ATTACK, ColliderBase::TAG::PLAYER))
 	{
 		// HP割合ダメージ
 		const float RATE_DAMAGE = (playerHpMax_ * rode_.attack);
@@ -189,7 +190,7 @@ void DamageController::Update()
 		damageData_ = playerDamage_;
 	}
 	else if (CollisionController::GetInstance()
-				.IsTagCollidingWithTag(ColliderBase::TAG::MISSILE_ATTACK, ColliderBase::TAG::PLAYER))
+			.IsTagCollidingWithTag(ColliderBase::TAG::MISSILE_ATTACK, ColliderBase::TAG::PLAYER))
 	{
 		// HP割合ダメージ
 		const float RATE_DAMAGE = (playerHpMax_ * mp_.attack);
@@ -197,7 +198,7 @@ void DamageController::Update()
 		damageData_ = playerDamage_;
 	}
 	else if (CollisionController::GetInstance()
-				.IsTagCollidingWithTag(ColliderBase::TAG::LASER, ColliderBase::TAG::PLAYER))
+			.IsTagCollidingWithTag(ColliderBase::TAG::LASER, ColliderBase::TAG::PLAYER))
 	{
 		// HP割合ダメージ
 		const float RATE_DAMAGE = (playerHpMax_ * rg_.attack);
@@ -206,7 +207,7 @@ void DamageController::Update()
 		damageData_ = playerDamage_;
 	}
 	else if (CollisionController::GetInstance()
-				.IsTagCollidingWithTag(ColliderBase::TAG::CANNON_BULLET, ColliderBase::TAG::PLAYER))
+			.IsTagCollidingWithTag(ColliderBase::TAG::CANNON_BULLET, ColliderBase::TAG::PLAYER))
 	{
 		// HP割合ダメージ
 		const float RATE_DAMAGE = (playerHpMax_ * cannon_.attack);
@@ -217,7 +218,7 @@ void DamageController::Update()
 
 void DamageController::DebugDraw(void)
 {
-	DrawFormatString(10, 150, 0xffffff, "PlayerDamage_:%d", damageData_);
+	DrawFormatString(10, 160, 0xffffff, "PlayerDamage_:%d", damageData_);
 }
 
 void DamageController::SetPlayerAttack(int _bulletAttack, int _blastAttack)

@@ -31,6 +31,8 @@ public:
 		PLAYER_BLAST,	// プレイヤー爆発
 		PLAYER_RECOVERY,// プレイヤー回復
 		ENEMY,          // 敵
+		ENEMYROBO,		//ロボ敵
+		ENEMY_ATTACK,	//敵の攻撃
 		BOSS,			// ボス
 		WEAPON_MG_L,	//マシンガン（左
 		WEAPON_MG_R,	//マシンガン（右

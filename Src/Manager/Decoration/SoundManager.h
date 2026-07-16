@@ -27,10 +27,13 @@ public:
 
 		// SE
 		SE_SELECT,
+
 		SE_DAMAGE_PLAYER, // プレイヤー被ダメージ処理
+		SE_DAMAGE_BOSS,
+
 		SE_BOSS_LANDING,//ボスの着地
-		SE_MG_FIRE,
-		SE_ROAD,
+		SE_BOSS_MG_FIRE,
+		SE_BOSS_ROAD,
 	};
 
 	/// @brief サウンドのリソースデータ構造体
@@ -142,10 +145,10 @@ private:
 	static constexpr int DX_MAX_VOLUME = 255;
 
 	// BGMの初期音量(0～100)
-	static constexpr int DEFAULT_BGM_VOLUME = 65;
+	static constexpr int DEFAULT_BGM_VOLUME = 60;
 
 	// SEの初期音量(0～100)
-	static constexpr int DEFAULT_SE_VOLUME  = 85;
+	static constexpr int DEFAULT_SE_VOLUME  = 90;
 
 
 	// シングルトンインスタンス

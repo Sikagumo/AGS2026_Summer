@@ -143,9 +143,9 @@ void BBulletMissile::MoveDown(void)
 	
 	transform_.pos.y -= 30.0f;
 
-	if (transform_.pos.y <= -23.0f)
+	if (transform_.pos.y <= -7.0f)
 	{
-		transform_.pos.y = -23.0f; // ˆÊ’u‚ðŒÅ’è
+		transform_.pos.y = -7.0f; // ˆÊ’u‚ðŒÅ’è
 		CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::MISSILE_ATTACK, true);
 		CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::MISSILE_PUSH, true);
 		EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_MISSILE, transform_.pos, { 0.0f,0.0f,0.0f }, { 90.0f,90.0f,90.0f }, 20.0f, this);

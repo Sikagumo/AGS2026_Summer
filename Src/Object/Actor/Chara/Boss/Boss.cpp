@@ -51,6 +51,7 @@ Boss::Boss(void) :
 	laserAttackRot_(0.0f),
 	laserRotSpeed_(2.0f),
 	lastAttackType_ (ATTACK_TYPE::MAX),
+	wallStopPos_({0,0,0}),
 
 
 	CharaBase()
@@ -114,6 +115,13 @@ void Boss::SetWeaponRGDamage(int _damage)
 void Boss::SetBossDamage(int _damage)
 {
 	hp_ -= _damage;
+	if (_damage > 5)
+	{
+
+		PlayEffect();
+	}
+
+
 }
 //＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝
 
@@ -152,9 +160,45 @@ void Boss::Load(void)
 	//SE
 	SoundManager::GetInstance().Add(SoundManager::TYPE::SE, SoundManager::SOUND::SE_BOSS_LANDING, ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::SE_BOSS_LANDING));
 
-	SoundManager::GetInstance().Add(SoundManager::TYPE::SE, SoundManager::SOUND::SE_ROAD, ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::SE_ROAD));
+	SoundManager::GetInstance().Add(SoundManager::TYPE::SE, SoundManager::SOUND::SE_BOSS_ROAD, ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::SE_BOSS_ROAD));
 
 	
+
+
+}
+
+void Boss::PlayEffect(void)
+{
+	
+	EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_BOSS_HIT, { 0,0,0 }, { 90,0,0 }, { 10,10,10 }, 1.0f, this, 1);
+	EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_BOSS_HIT, { 0,0,0 }, { 0,0,0 }, { 10,10,10 }, 1.0f, this, 2);
+	EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_BOSS_HIT, { 0,0,0 }, { 0,0,0 }, { 10,10,10 }, 1.0f, this, 3);
+}
+
+void Boss::UpdateEffect(void)
+{
+	VECTOR hitEffectPos1= MV1GetFramePosition(transform_.modelId, JOINT_FEET_BODY);
+	EffectManager::GetInstance().UpdatePos(EffectManager::EFFECT::EFFECT_BOSS_HIT, this, hitEffectPos1, 1);
+	VECTOR hitEffectPos2 = MV1GetFramePosition(transformBody_.modelId, JOINT_WAEAPON_MP_L);
+	EffectManager::GetInstance().UpdatePos(EffectManager::EFFECT::EFFECT_BOSS_HIT, this, hitEffectPos2, 2);
+	VECTOR hitEffectPos3 = MV1GetFramePosition(transformBody_.modelId, JOINT_WAEAPON_MP_R);
+	EffectManager::GetInstance().UpdatePos(EffectManager::EFFECT::EFFECT_BOSS_HIT, this, hitEffectPos3, 3);
+
+	VECTOR hitEffectRot1 = Quaternion::Mult(transformBody_.quaRot, Quaternion::AngleAxis(UtilityMath::Deg2RadF(90.0f), UtilityMath::AXIS_X)).ToEuler();
+	hitEffectRot1.x = UtilityMath::Rad2DegF(hitEffectRot1.x);
+	hitEffectRot1.y = UtilityMath::Rad2DegF(hitEffectRot1.y);
+	hitEffectRot1.z = UtilityMath::Rad2DegF(hitEffectRot1.z);
+	EffectManager::GetInstance().UpdateRot(EffectManager::EFFECT::EFFECT_BOSS_HIT, this, hitEffectRot1, 1);
+	VECTOR hitEffectRot2 = Quaternion::Mult(transformBody_.quaRot, Quaternion::AngleAxis(UtilityMath::Deg2RadF(180.0f), UtilityMath::AXIS_Y)).ToEuler();
+	hitEffectRot2.x = UtilityMath::Rad2DegF(hitEffectRot2.x);
+	hitEffectRot2.y = UtilityMath::Rad2DegF(hitEffectRot2.y);
+	hitEffectRot2.z = UtilityMath::Rad2DegF(hitEffectRot2.z);
+	EffectManager::GetInstance().UpdateRot(EffectManager::EFFECT::EFFECT_BOSS_HIT, this, hitEffectRot2, 2);
+	VECTOR hitEffectRot3 = Quaternion::Mult(transformBody_.quaRot, Quaternion::AngleAxis(UtilityMath::Deg2RadF(0.0f), UtilityMath::AXIS_X)).ToEuler();
+	hitEffectRot3.x = UtilityMath::Rad2DegF(hitEffectRot3.x);
+	hitEffectRot3.y = UtilityMath::Rad2DegF(hitEffectRot3.y);
+	hitEffectRot3.z = UtilityMath::Rad2DegF(hitEffectRot3.z);
+	EffectManager::GetInstance().UpdateRot(EffectManager::EFFECT::EFFECT_BOSS_HIT, this, hitEffectRot3, 3);
 
 
 }
@@ -439,7 +483,7 @@ void Boss::BossTransformUpdate(void)
 	WeaponUpdate();
 
 	SoundManager::GetInstance().Set3DPosition(SoundManager::SOUND::SE_BOSS_LANDING, transform_.pos);
-	SoundManager::GetInstance().Set3DPosition(SoundManager::SOUND::SE_ROAD, transform_.pos);
+	SoundManager::GetInstance().Set3DPosition(SoundManager::SOUND::SE_BOSS_ROAD, transform_.pos);
 }
 
 void Boss::UpdateProcess(void)
@@ -450,7 +494,7 @@ void Boss::UpdateProcess(void)
 	isMGFire_ = false;
 	if (weaponMGL_->IsAttack() == true || weaponMGR_->IsAttack() == true)
 	{
-		if (SoundManager::GetInstance().IsPlaying(SoundManager::SOUND::SE_MG_FIRE) == false)
+		if (SoundManager::GetInstance().IsPlaying(SoundManager::SOUND::SE_BOSS_MG_FIRE) == false)
 		{
 			isMGFire_ = true;
 		}
@@ -474,11 +518,16 @@ void Boss::UpdateProcess(void)
 	camera->SetLockOnTargets(Camera::LOCKON_TARGET::BOSS_BODY, transformBody_.pos, hp_);
 	camera->SetLockOnTargets(Camera::LOCKON_TARGET::BOSS_WEAPON_MGL_L, weaponMGL_->GetPos(), weaponMGL_->GetHp());
 	camera->SetLockOnTargets(Camera::LOCKON_TARGET::BOSS_WEAPON_MGL_R, weaponMGR_->GetPos(), weaponMGR_->GetHp());
+	camera->SetLockOnTargets(Camera::LOCKON_TARGET::BOSS_WEAPON_CANNON_L, weaponCannonL_->GetPos(), weaponCannonL_->GetHp());
+	camera->SetLockOnTargets(Camera::LOCKON_TARGET::BOSS_WEAPON_CANNON_R, weaponCannonR_->GetPos(), weaponCannonR_->GetHp());
+	camera->SetLockOnTargets(Camera::LOCKON_TARGET::BOSS_WEAPON_MP_L, weaponMPL_->GetPos(), weaponMPL_->GetHp());
+	camera->SetLockOnTargets(Camera::LOCKON_TARGET::BOSS_WEAPON_MP_R, weaponMPR_->GetPos(), weaponMPR_->GetHp());
+	camera->SetLockOnTargets(Camera::LOCKON_TARGET::BOSS_WEAPON_RG, weaponRG_->GetPos(), weaponRG_->GetHp());
 }
 
 void Boss::UpdateProcessPost(void)
 {
-	
+	UpdateEffect();
 }
 
 //各ステイトのアップデート関数＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝－
@@ -530,6 +579,8 @@ void Boss::UpdateAttack(void)
 	// 今回選ばれた攻撃を「前回の攻撃」として保存しておく
 	lastAttackType_ = attackSelect_;
 
+	 //attackSelect_ = ATTACK_TYPE::ROAD;
+
 	switch (attackSelect_)
 	{
 	case ATTACK_TYPE::JUMP:
@@ -537,8 +588,10 @@ void Boss::UpdateAttack(void)
 		break;
 
 	case ATTACK_TYPE::MG:
-		weaponMGL_->ChangeState(WeaponMGL::STATE::ATTACK);
-		weaponMGR_->ChangeState(WeaponMGR::STATE::ATTACK);
+		if (weaponMGL_->GetIsAlive()==true)weaponMGL_->ChangeState(WeaponMGL::STATE::ATTACK);
+		
+		if (weaponMGR_->GetIsAlive() == true)weaponMGR_->ChangeState(WeaponMGR::STATE::ATTACK);
+		
 		isMGFire_ = true;
 		ChangeState(STATE::IDLE);
 		break;
@@ -548,15 +601,21 @@ void Boss::UpdateAttack(void)
 		break;
 
 	case ATTACK_TYPE::CANNON:
-		weaponCannonL_->ChangeState(WeaponCannon::STATE::ATTACK);
-		weaponCannonR_->ChangeState(WeaponCannon::STATE::ATTACK);
+		if(weaponCannonL_->GetIsAlive()==true)weaponCannonL_->ChangeState(WeaponCannon::STATE::ATTACK);
+		if (weaponCannonR_->GetIsAlive() == true)weaponCannonR_->ChangeState(WeaponCannon::STATE::ATTACK);
 		ChangeState(STATE::IDLE);
 		break;
 	case ATTACK_TYPE::MISSILE:
-		weaponMPL_->ChangeState(WeaponMP::STATE::ATTACK);
-		weaponMPL_->IsLR(true);
-		weaponMPR_->ChangeState(WeaponMP::STATE::ATTACK);
-		weaponMPR_->IsLR(false);
+		if (weaponMPL_->GetIsAlive() == true)
+		{
+			weaponMPL_->ChangeState(WeaponMP::STATE::ATTACK);
+			weaponMPL_->IsLR(true);
+		}
+		if (weaponMPR_->GetIsAlive() == true)
+		{
+			weaponMPR_->ChangeState(WeaponMP::STATE::ATTACK);
+			weaponMPR_->IsLR(false);
+		}
 		ChangeState(STATE::IDLE);
 		break;
 	default:
@@ -608,7 +667,7 @@ void Boss::UpdateJumpBefore(void)
 
 void Boss::UpdateRoadAttack(void)
 {
-	SoundManager::GetInstance().Set3DPosition(SoundManager::SOUND::SE_ROAD, transform_.pos);
+	SoundManager::GetInstance().Set3DPosition(SoundManager::SOUND::SE_BOSS_ROAD, transform_.pos);
 	
 	transformBody_.pos = MV1GetFramePosition(transform_.modelId, JOINT_CAR_BODY);
 	transformWheelFrontL_.pos = MV1GetFramePosition(transform_.modelId, JOINT_CAR_WHEEL_FRONT_L);
@@ -669,6 +728,17 @@ void Boss::UpdateRoadAttack(void)
 		VECTOR movePow = VScale(roadDir_, speed_);
 		// 移動処理
 		transform_.pos = VAdd(transform_.pos, movePow);
+		transform_.Update();
+		bool hitWall = CollisionController::GetInstance().IsTagCollidingWithTag(ColliderBase::TAG::ROAD_ATTACK, ColliderBase::TAG::WALL);
+		if (hitWall==true)
+		{
+			roadAttackTime_ = 0;
+			roadIsAttack_ = false;
+			CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::ROAD_ATTACK, false);
+		}
+
+		wallStopPos_ = transform_.pos;
+		
 		roadAttackTime_++;
 		if (roadAttackTime_ >= MAX_ROAD_ATTACK_TIME)
 		{
@@ -684,7 +754,7 @@ void Boss::UpdateRoadAttack(void)
 		transform_.modelId = transformFeet_.modelId;
 		transform_.scl = transformFeet_.scl;
 		CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::ROAD_ATTACK, false);
-		SoundManager::GetInstance().Stop(SoundManager::SOUND::SE_ROAD);
+		SoundManager::GetInstance().Stop(SoundManager::SOUND::SE_BOSS_ROAD);
 		ChangeState(STATE::IDLE);
 	}
 
@@ -741,9 +811,6 @@ void Boss::DrawPre(void)
 	CharaBase::DrawShadowRound(200.0f);
 
 #ifdef _DEBUG
-
-
-	DrawFormatString(10, 100, 0xffffff, "bossの座標：%f,%f,%f", transform_.pos.x, transform_.pos.y, transform_.pos.z);
 	DrawFormatString(10, 400, 0xffffff, "hp:%d", hp_);
 #endif
 }

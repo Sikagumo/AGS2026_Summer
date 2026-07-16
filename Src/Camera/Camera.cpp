@@ -74,10 +74,11 @@ void Camera::InitPost(void)
 void Camera::Update(void)
 {
 	if (InputManager::GetInstance().IsTrgDown(KEY_INPUT_E)
-		|| InputManager::GetInstance().IsPadBtnTrgDown(InputManager::JOYPAD_NO::PAD1, InputManager::JOYPAD_BTN::L_TRIGGER))
+		|| InputManager::GetInstance().IsPadBtnTrgDown(InputManager::JOYPAD_NO::PAD1, InputManager::JOYPAD_BTN::R_STICK))
 	{
 		if (!isLockOn_)
 		{
+			// ロックオン有効化
 			LockOnChoice();
 		}
 		else
@@ -158,19 +159,33 @@ void Camera::DrawDebug(void)
 		, transform_.pos.x, transform_.pos.y, transform_.pos.z
 		, UtilityMath::Rad2DegF(angles_.x), UtilityMath::Rad2DegF(angles_.y), UtilityMath::Rad2DegF(angles_.z)
 		, UtilityMath::Rad2DegF(rotY.x), UtilityMath::Rad2DegF(rotY.y), UtilityMath::Rad2DegF(rotY.z));
-#endif
 
 	std::string targetText = "追従対象：";
-
-	targetText += ((!isLockOn_ || lockOnTarget_ == LOCKON_TARGET::NONE)
-					? "なし" : "");
-	targetText += ((isLockOn_ && lockOnTarget_ == LOCKON_TARGET::BOSS_BODY)
-					? "ボス胴体" : "");
-	targetText += ((isLockOn_ && lockOnTarget_ == LOCKON_TARGET::BOSS_WEAPON_MGL_L)
-					? "左マシンガン" : "");
-	targetText += ((isLockOn_ && lockOnTarget_ == LOCKON_TARGET::BOSS_WEAPON_MGL_R)
-					? "右マシンガン" : "");
+	if (isLockOn_)
+	{
+		targetText += ((lockOnTarget_ == LOCKON_TARGET::BOSS_BODY)
+			? "ボス胴体" : "");
+		targetText += ((lockOnTarget_ == LOCKON_TARGET::BOSS_WEAPON_MGL_L)
+			? "左マシンガン" : "");
+		targetText += ((lockOnTarget_ == LOCKON_TARGET::BOSS_WEAPON_MGL_R)
+			? "右マシンガン" : "");
+		targetText += ((lockOnTarget_ == LOCKON_TARGET::BOSS_WEAPON_CANNON_L)
+			? "左大砲" : "");
+		targetText += ((lockOnTarget_ == LOCKON_TARGET::BOSS_WEAPON_CANNON_R)
+			? "右大砲" : "");
+		targetText += ((lockOnTarget_ == LOCKON_TARGET::BOSS_WEAPON_MP_L)
+			? "左ミサイル" : "");
+		targetText += ((lockOnTarget_ == LOCKON_TARGET::BOSS_WEAPON_MP_R)
+			? "右ミサイル" : "");
+		targetText += ((lockOnTarget_ == LOCKON_TARGET::BOSS_WEAPON_RG)
+			? "レーザー" : "");
+	}
+	else if ((lockOnTarget_ == LOCKON_TARGET::NONE))
+	{
+		targetText += "なし";
+	}
 	DrawString(Application::SCREEN_SIZE_X - 200, 0, targetText.c_str(), 0xff0000);
+#endif
 }
 
 VECTOR Camera::GetForward(void) const
@@ -247,22 +262,41 @@ void Camera::LockOnChoice(void)
 	
 	if (targetsParam_.empty()) { return; }
 
-	for (auto& [target, param] : targetsParam_)
+	if (!isLockOn_)
 	{
-		if (lockOnTarget_ == target) { continue; }
-
-		VECTOR posFollow = VGet(param->pos.x, 0.0f, param->pos.z);
-		VECTOR posCamera = VGet(transform_.pos.x, 0.0f, transform_.pos.z);
-
-		// 最も近い対象範囲内にいる対象を追尾
-		float sizeXZ = std::abs(VSize(VSub(posFollow, posCamera)));
-
-		if (sizeXZ < vecSize
-			&& sizeXZ <= POS_SPACE_MAX && sizeXZ >= POS_SPACE_MIN)
+		for (auto& [target, param] : targetsParam_)
 		{
-			vecSize = sizeXZ;
-			lockTarget = target;
+			if (lockOnTarget_ == target) { continue; }
+
+			VECTOR posFollow = VGet(param->pos.x, 0.0f, param->pos.z);
+			VECTOR posCamera = VGet(transform_.pos.x, 0.0f, transform_.pos.z);
+
+			// 最も近い対象範囲内にいる対象を追尾
+			float sizeXZ = std::abs(VSize(VSub(posFollow, posCamera)));
+
+			if (sizeXZ < vecSize
+				&& sizeXZ <= POS_SPACE_MAX && sizeXZ >= POS_SPACE_MIN)
+			{
+				vecSize = sizeXZ;
+				lockTarget = target;
+			}
 		}
+	}
+	else
+	{
+		int target = static_cast<int>(lockOnTarget_);
+
+		int wheelPow = 0;
+		wheelPow = InputManager::GetInstance().GetMouseWheel();
+		target += wheelPow;
+
+		int padPow = 0;
+		padPow -= InputManager::GetInstance().IsPadBtnTrgDown(InputManager::JOYPAD_NO::PAD1, InputManager::JOYPAD_BTN::L_BUTTON);
+		padPow += InputManager::GetInstance().IsPadBtnTrgDown(InputManager::JOYPAD_NO::PAD1, InputManager::JOYPAD_BTN::R_BUTTON);
+		target += padPow;
+
+		target = (target % static_cast<int>(LOCKON_TARGET::MAX));
+		lockTarget = static_cast<LOCKON_TARGET>(target);
 	}
 
 
@@ -442,6 +476,13 @@ void Camera::SetBeforeDrawFollow(void)
 
 	// 衝突判定
 	Collision();
+
+	// 地面下に移動制限を掛ける
+	constexpr float FOLLOW_POS_MIN_Y = -5.0f;
+	if (transform_.pos.y < FOLLOW_POS_MIN_Y)
+	{
+		transform_.pos.y = FOLLOW_POS_MIN_Y;
+	}
 }
 
 void Camera::ProcessMove(void)

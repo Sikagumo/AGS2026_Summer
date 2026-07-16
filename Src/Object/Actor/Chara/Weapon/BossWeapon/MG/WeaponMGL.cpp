@@ -28,7 +28,7 @@ void WeaponMGL::Load(void)
 
 	
 
-	SoundManager::GetInstance().Add(SoundManager::TYPE::SE, SoundManager::SOUND::SE_MG_FIRE, ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::SE_MG_FIRE));
+	SoundManager::GetInstance().Add(SoundManager::TYPE::SE, SoundManager::SOUND::SE_BOSS_MG_FIRE, ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::SE_BOSS_MG_FIRE));
 }
 
 void WeaponMGL::InitTransform(void)
@@ -62,6 +62,7 @@ void WeaponMGL::InitAnimation(void)
 
 void WeaponMGL::InitPost(void)
 {
+	hp_ = 1250;
 	isAlive_ = true;
 	localPos_ = LINE_START_POS;
 	look = -1;
@@ -102,8 +103,6 @@ void WeaponMGL::DrawPre(void)
 	
 
 	
-	DrawFormatString(10, 270, 0xffffff, "MG_L_Bullet%d", bullets_.size());
-	DrawFormatString(10, 300, 0xffffff, "MG_L_ROT%f,%f,%f", transform_.quaRot.x, transform_.quaRot.y, transform_.quaRot.z);
 
 #endif
 }

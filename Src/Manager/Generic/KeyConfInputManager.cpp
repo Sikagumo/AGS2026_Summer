@@ -110,6 +110,18 @@ void KeyConfInputManager::InitInputTable(void)
 	{
 
 	};
+
+	inputTable_["APPLY_DEBUG"] =
+	{
+		{INPUT_TYPE::KEY_BOARD, KEY_INPUT_BACK},
+		{INPUT_TYPE::KEY_BOARD, KEY_INPUT_END}
+	};
+
+	inputTable_["UNAPPLY_DEBUG"] =
+	{
+		{INPUT_TYPE::KEY_BOARD, KEY_INPUT_RSHIFT},
+		{INPUT_TYPE::KEY_BOARD, KEY_INPUT_HOME}
+	};
 }
 
 void KeyConfInputManager::Update(void)
@@ -161,33 +173,49 @@ void KeyConfInputManager::Update(void)
 		//前のフレームの状態は引き継がず、毎フレーム必ずfalse(未入力状態)からチェックする
 		bool hit = false;
 
-		for (const auto& inputInfo : pair.second)
+		if (eventName == "APPLY_DEBUG" || eventName == "UNAPPLY_DEBUG")
 		{
-			switch (inputInfo.type)
+			hit = true;
+
+			for (const auto& inputInfo : pair.second)
 			{
-			case INPUT_TYPE::KEY_BOARD:
-				if (keyState[inputInfo.id] != 0)
+				if (keyState[inputInfo.id] == 0)
 				{
-					hit = true;
+					hit = false;
+					break;
 				}
-				break;
-
-			case INPUT_TYPE::MOUSE:
-				if ((mouseState & inputInfo.id) != 0)
-				{
-					hit = true;
-				}
-				break;
-
-			case INPUT_TYPE::JOYPAD:
-				if ((padState & inputInfo.id) != 0)
-				{
-					hit = true;
-				}
-				break;
 			}
 		}
+		else
+		{
 
+			for (const auto& inputInfo : pair.second)
+			{
+				switch (inputInfo.type)
+				{
+				case INPUT_TYPE::KEY_BOARD:
+					if (keyState[inputInfo.id] != 0)
+					{
+						hit = true;
+					}
+					break;
+
+				case INPUT_TYPE::MOUSE:
+					if ((mouseState & inputInfo.id) != 0)
+					{
+						hit = true;
+					}
+					break;
+
+				case INPUT_TYPE::JOYPAD:
+					if ((padState & inputInfo.id) != 0)
+					{
+						hit = true;
+					}
+					break;
+				}
+			}
+		}
 		currentInputState_[eventName] = hit;
 	}
 }

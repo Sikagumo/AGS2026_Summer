@@ -21,7 +21,7 @@ WeaponMGR::WeaponMGR():MGBase()
 void WeaponMGR::Load(void)
 {
 	transform_.SetModel(ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::MODEL_BOSS_WEAPON_MG_R));
-	SoundManager::GetInstance().Add(SoundManager::TYPE::SE, SoundManager::SOUND::SE_MG_FIRE, ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::SE_MG_FIRE));
+	SoundManager::GetInstance().Add(SoundManager::TYPE::SE, SoundManager::SOUND::SE_BOSS_MG_FIRE, ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::SE_BOSS_MG_FIRE));
 }
 
 void WeaponMGR::ReleasePost(void)
@@ -63,6 +63,7 @@ void WeaponMGR::InitAnimation(void)
 
 void WeaponMGR::InitPost(void)
 {
+	hp_ = 1250;
 	isAlive_ = true;
 	localPos_ = LINE_START_POS;
 	look = 1;
@@ -104,9 +105,6 @@ void WeaponMGR::DrawPre(void)
 	}
 
 #ifdef _DEBUG
-
-
-	DrawFormatString(10, 250, 0xffffff, "MG_L_Bullet%d", bullets_.size());
 
 
 	
