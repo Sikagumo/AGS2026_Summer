@@ -12,6 +12,7 @@ Stage::Stage(void)
 
 void Stage::Update(void)
 {
+	transform_.pos = { 0,-7,0 };
 }
 
 void Stage::Draw(void)

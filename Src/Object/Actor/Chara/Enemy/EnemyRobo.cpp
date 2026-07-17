@@ -32,6 +32,8 @@ void EnemyRobo::Load(void)
 
 void EnemyRobo::InitTransform(void)
 {
+	
+
 	transform_.scl = { 2,2,2};
 	transform_.quaRot = Quaternion::Identity();
 	transform_.quaRotLocal = Quaternion::AngleAxis(UtilityMath::Deg2RadF(180.0f), UtilityMath::AXIS_Y);
@@ -52,12 +54,17 @@ void EnemyRobo::InitCollider(void)
 	ownColliders_[static_cast<int>(ColliderBase::TAG::ENEMYROBO)].push_back(colCapsule);
 	colCapsule->SetTriger(false);
 
+	ColliderSphere* colSphere = new ColliderSphere(ColliderBase::TAG::ENEMYROBO, &transform_, {0,40,40}, 20.0f);
+	ownColliders_[static_cast<int>(ColliderBase::TAG::ENEMYROBO)].push_back(colSphere);
+	colSphere->SetTriger(true);
+
+
 	VECTOR handPos= MV1GetFramePosition(transform_.modelId, 52);
 	VECTOR handLocalPos = VSub(handPos, transform_.pos);
 
-	ColliderSphere* colSphere = new ColliderSphere(ColliderBase::TAG::ENEMY_ATTACK, &transform_, handLocalPos, 20.0f);
-	ownColliders_[static_cast<int>(ColliderBase::TAG::ENEMY_ATTACK)].push_back(colSphere);
-	colSphere->SetTriger(false);
+	ColliderSphere* colAttackSphere = new ColliderSphere(ColliderBase::TAG::ENEMY_ATTACK, &transform_, handLocalPos, 20.0f);
+	ownColliders_[static_cast<int>(ColliderBase::TAG::ENEMY_ATTACK)].push_back(colAttackSphere);
+	colAttackSphere->SetTriger(false);
 
 	CollisionController::GetInstance().RegisterActor(this);
 	CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::ENEMY_ATTACK, false);
@@ -68,14 +75,14 @@ void EnemyRobo::InitAnimation(void)
 	CharaBase::InitAnimation();
 	for (int i = 0; i < static_cast<int>(ANIM_TYPE::MAX); i++)
 	{
-		animation_->AddInternal(i, 20.0f);
+		animation_->AddInternal(i, 20.0f,true,{0,0,-0.25});
 	}
 	animation_->Play(static_cast<int>(ANIM_TYPE::DIR));
 }
 
 void EnemyRobo::InitPost(void)
 {
-
+	hp_ = 200;
 
 	stateChanges_.emplace(static_cast<int>(STATE::IDLE), std::bind(&EnemyRobo::ChangeStateIdle, this));
 	stateChanges_.emplace(static_cast<int>(STATE::ATTACK), std::bind(&EnemyRobo::ChangeStateAttack, this));
@@ -86,6 +93,27 @@ void EnemyRobo::InitPost(void)
 
 void EnemyRobo::UpdateProcess(void)
 {
+	if (hp_ <= 0)
+	{
+		if (state_ != STATE::END)
+		{
+			ChangeState(STATE::END);
+		}
+		
+	}
+	else if(hp_>0)
+	{
+		bool isAttack = CollisionController::GetInstance().IsActorCollidingWithTag(this, ColliderBase::TAG::PLAYER);
+		if (isAttack == true)
+		{
+			if (state_ != STATE::ATTACK)
+			{
+				ChangeState(STATE::ATTACK);
+			}
+			
+		}
+	}
+
 	stateUpdate_();
 }
 
@@ -138,11 +166,16 @@ void EnemyRobo::ChangeState(int state)
 void EnemyRobo::ChangeStateIdle(void)
 {
 	stateUpdate_ = std::bind(&EnemyRobo::UpdateIdle, this);
+
+	CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::ENEMY_ATTACK, false);
 }
 
 void EnemyRobo::ChangeStateAttack(void)
 {
 	stateUpdate_ = std::bind(&EnemyRobo::UpdateAttack, this);
+
+	CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::ENEMY_ATTACK, true);
+
 	float time = TimeManager::GetInstance().GetGameTime();
 	if ((static_cast<int>(time) % 2) == 0)
 	{
@@ -159,28 +192,41 @@ void EnemyRobo::ChangeStateAttack(void)
 void EnemyRobo::ChangeStateMove(void)
 {
 	stateUpdate_ = std::bind(&EnemyRobo::UpdateStateMove, this);
-	animation_->Play(static_cast<int>(ANIM_TYPE::WARK), false);
+	animation_->Play(static_cast<int>(ANIM_TYPE::WARK));
 
 }
 
 void EnemyRobo::ChangeStateEnd(void)
 {
 	stateUpdate_ = std::bind(&EnemyRobo::UpdateEnd, this);
+	count_ = 0;
+
+	EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_MISSILE, transform_.pos, { 0,0,0 }, { 50,50,50 }, 1, this);
 }
 
 void EnemyRobo::UpdateIdle(void)
 {
 	
+
+	ChangeState(STATE::MOVE);
 }
 
 void EnemyRobo::UpdateAttack(void)
 {
 
 
+	/*VECTOR handPos = MV1GetFramePosition(transform_.modelId, 52);
+	VECTOR handLocalPos = VSub(handPos, transform_.pos);*/
 	VECTOR handPos = MV1GetFramePosition(transform_.modelId, 52);
-	VECTOR handLocalPos = VSub(handPos, transform_.pos);
+	VECTOR worldOffset = VSub(handPos, transform_.pos);
 
-	
+	// ワールド回転を打ち消してローカル空間に戻す
+	Quaternion invRot = transform_.quaRot.Inverse();
+	VECTOR handLocalPos = invRot.PosAxis(worldOffset);
+
+	CollisionController::GetInstance().SetActorSphereLocalPos(this, ColliderBase::TAG::ENEMY_ATTACK, handLocalPos);
+
+
 
 	if (animation_->IsEnd()==true)
 	{
@@ -195,6 +241,14 @@ void EnemyRobo::UpdateStateMove(void)
 
 void EnemyRobo::UpdateEnd(void)
 {
+	if (count_ >= COUNT_MAX)
+	{
+		EffectManager::GetInstance().Stop(EffectManager::EFFECT::EFFECT_MISSILE, this);
+	}
+	else
+	{
+		count_++;
+	}
 }
 
 void EnemyRobo::LockPlayer(void)

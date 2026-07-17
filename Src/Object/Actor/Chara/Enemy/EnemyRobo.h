@@ -94,12 +94,15 @@ private:
 	static constexpr VECTOR COL_LINE_END_POS = { 0.0f,-1.0f,0.0f };
 	//ƒJƒvƒZƒ‹
 	static constexpr VECTOR COL_CAPSULE_START_POS = { 0.0f,90.0f,0.0f };
-	static constexpr VECTOR COL_CAPSULE_END_POS = { 0.0f,30.0f,0.0f };
+	static constexpr VECTOR COL_CAPSULE_END_POS = { 0.0f,40.0f,0.0f };
 	static constexpr float COL_CAPSULE_END_RADIUS = 30.0f;
 
+	static constexpr float COUNT_MAX = 10.0f;
 
 
+	int hp_;
 	VECTOR playerPos_;
+	int count_;
 
 
 	void LockPlayer(void);
