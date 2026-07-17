@@ -253,3 +253,8 @@ std::map<int, NET_ACTION_HIS> NetManager::GetRemoteActionHis(void) const
 	std::lock_guard<std::mutex> lock(poolMutex_);
 	return remoteActionHis_;
 }
+
+void NetManager::ResetGoGame(void)
+{
+	hasReceivedGoGame_ = false;
+}

@@ -78,7 +78,7 @@ void Stage::InitCollider(void)
 	ColliderModel* colModel = new ColliderModel(ColliderBase::TAG::STAGE, &collisionTrans_);
 	ownColliders_[static_cast<int>(ColliderBase::TAG::STAGE)].push_back(colModel);
 
-	colModel->SetTriger(false);
+	colModel->SetTriger(true);
 
 	for (const auto& excludeName : EXCLUDE_STAGE_NAMES)
 	{

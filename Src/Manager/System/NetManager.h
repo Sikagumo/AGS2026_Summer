@@ -41,6 +41,8 @@ public:
 
 	bool GetHasReceivedGoGame(void) const { return hasReceivedGoGame_; }
 
+	void ResetGoGame(void);
+
 private:
 	NetManager(void);
 	~NetManager(void);

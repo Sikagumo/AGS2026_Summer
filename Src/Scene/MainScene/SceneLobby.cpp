@@ -376,9 +376,15 @@ void SceneLobby::UpdateConnecting(void)
 
 void SceneLobby::UpdateInRoom(void)
 {
+    // クライアント側：ホストからの遷移命令を受信して遷移
     if (NetManager::GetInstance().GetHasReceivedGoGame())
     {
-        // 全員分のユーザーリストを使って遷移実行
+        NetManager::GetInstance().ResetGoGame();
+
+        NET_JOIN_USER self = NetManager::GetInstance().GetSelfUser();
+        self.gameState = GAME_STATE::GAME_PLAYING;
+        NetManager::GetInstance().SetSelfInfo(self);
+
         auto users = NetManager::GetInstance().GetNetUsers();
         MoveToGameScene(users);
         return;
@@ -392,55 +398,45 @@ void SceneLobby::UpdateInRoom(void)
         return;
     }
 
-    // OKキーで準備完了切り替え
-    if (KeyConfInputManager::GetInstance().isTrigerDown("OK"))
-    {
-        myReadyState_ = !myReadyState_;
-
-        NET_JOIN_USER self = NetManager::GetInstance().GetSelfUser();
-
-        self.gameState = myReadyState_ ? GAME_STATE::GOTO_GAME : GAME_STATE::CONNECTING;
-
-        NetManager::GetInstance().SetSelfInfo(self);
-    }
-
-    // 自分の最新状態を取得
+    // 全員の準備完了状態をチェック
     NET_JOIN_USER self = NetManager::GetInstance().GetSelfUser();
+    bool isAllReady = (self.gameState == GAME_STATE::GOTO_GAME);
 
-    bool isAllReady = true;
-
-    // 自分が準備完了じゃなければ全員準備完了ではない
-    if (self.gameState != GAME_STATE::GOTO_GAME)
-    {
-        isAllReady = false;
-    }
-
-    // 他のプレイヤーが準備完了かチェック
     auto users = NetManager::GetInstance().GetNetUsers();
     for (const auto& pair : users)
     {
         if (pair.second.gameState != GAME_STATE::GOTO_GAME)
         {
             isAllReady = false;
-
-            // 1人でも準備中ならチェック終了
-            break; 
+            break;
         }
     }
 
-    // 自分含めて全員が準備完了
-    if (isAllReady && (!users.empty() || NetManager::GetInstance().IsHost()))
+    // ホスト側：全員準備完了時にOKキーで出撃
+    if (isAllReady && NetManager::GetInstance().IsHost() && !users.empty())
     {
-        if (NetManager::GetInstance().IsHost())
+        if (KeyConfInputManager::GetInstance().isTrigerDown("OK"))
         {
-            // ホストは全員に「シーン遷移しろ！」と命令を送る
+            self.gameState = GAME_STATE::GAME_PLAYING;
+            NetManager::GetInstance().SetSelfInfo(self);
+
+            // 全員にゲーム開始命令を送信
             NetManager::GetInstance().Send(NET_DATA_TYPE::GO_GAME_SCENE);
 
-            // その後、自分自身も遷移
             MoveToGameScene(users);
+            return;
         }
     }
-
+    else
+    {
+        // 通常の準備完了切り替え
+        if (KeyConfInputManager::GetInstance().isTrigerDown("OK"))
+        {
+            myReadyState_ = !myReadyState_;
+            self.gameState = myReadyState_ ? GAME_STATE::GOTO_GAME : GAME_STATE::CONNECTING;
+            NetManager::GetInstance().SetSelfInfo(self);
+        }
+    }
 }
 
 void SceneLobby::DrawMulti(void)
@@ -556,6 +552,23 @@ void SceneLobby::DrawInRoom(void)
 
     DrawString(100, 400, "[Enter] 準備完了(READY)を切り替え", COLOR_YELLOW);
     DrawString(100, 430, "[BackSpace] 退出する", COLOR_WHITE);
+
+    auto users = NetManager::GetInstance().GetNetUsers(); 
+    bool isAllReady = (self.gameState == GAME_STATE::GOTO_GAME);
+
+    for (const auto& pair : users)
+    {
+        if (pair.second.gameState != GAME_STATE::GOTO_GAME)
+        {
+            isAllReady = false;
+            break;
+        }
+    }
+
+    if (isAllReady && NetManager::GetInstance().IsHost() && !users.empty())
+    {
+        DrawString(100, 480, "出撃 [OKキーで開始]", GetColor(255, 255, 0));
+    }
 }
 
 void SceneLobby::MoveToGameScene(std::map<int, NET_JOIN_USER>& _users)
