@@ -12,7 +12,7 @@ Stage::Stage(void)
 
 void Stage::Update(void)
 {
-	transform_.pos = { 0,-7,0 };
+	//transform_.pos = { 0,-7,0 };
 }
 
 void Stage::Draw(void)
@@ -80,7 +80,7 @@ void Stage::InitCollider(void)
 	ColliderModel* colModel = new ColliderModel(ColliderBase::TAG::STAGE, &collisionTrans_);
 	ownColliders_[static_cast<int>(ColliderBase::TAG::STAGE)].push_back(colModel);
 
-	colModel->SetTriger(false);
+	colModel->SetTriger(true);
 
 	for (const auto& excludeName : EXCLUDE_STAGE_NAMES)
 	{
