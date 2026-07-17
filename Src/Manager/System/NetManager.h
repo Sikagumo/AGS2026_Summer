@@ -43,6 +43,10 @@ public:
 
 	void ResetGoGame(void);
 
+	void SetBossAction(const NET_BOSS_ACTION& action);
+
+	const NET_BOSS_ACTION GetBossAction(void) const;
+
 private:
 	NetManager(void);
 	~NetManager(void);
@@ -65,8 +69,11 @@ private:
 	struct NET_POOL
 	{
 		NET_JOIN_USER selfUser_;
+		NET_BOSS_ACTION bossAction;
 		std::map<int, NET_JOIN_USER> remoteUsers_;
-	} pool_;
+	};
+
+	NET_POOL pool_;
 
 	mutable std::mutex poolMutex_;
 };

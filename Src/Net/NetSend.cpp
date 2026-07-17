@@ -30,6 +30,10 @@ void NetSend::Send(NET_DATA_TYPE _type)
 	case NET_DATA_TYPE::BOSS_ACTOION:
 		SendBossAction();
 		break;
+
+	case NET_DATA_TYPE::GO_GAME_SCENE:
+		SendGoGameScene();
+		break;
 	}
 }
 
@@ -167,4 +171,19 @@ void NetSend::SendUDP_Client(const void* _bufferPointer, int _dataSize)
 
 		NetWorkSendUDP(sendSocketId_, remoteUser.ip, remoteUser.port, _bufferPointer, _dataSize);
 	}
+}
+
+void NetSend::SendGoGameScene(void)
+{
+	// ホストしか送らない
+	if (!NetManager::GetInstance().IsHost()) { return; }
+
+	// ペイロードなし、ヘッダーのみ送信
+	NET_BASIC_DATA basicData = MakeBasicData(NET_DATA_TYPE::GO_GAME_SCENE, 0);
+
+	char buffer[sizeof(NET_BASIC_DATA)];
+	memcpy(buffer, &basicData, sizeof(NET_BASIC_DATA));
+
+	SendUDP_Client(buffer, sizeof(NET_BASIC_DATA));
+	printfDx("[Host] GO_GAME_SCENE を全クライアントへ送信しました\n");
 }
