@@ -30,7 +30,7 @@ public:
 
 
 
-    EnemyRobo();
+    EnemyRobo(VECTOR _pos);
     ~EnemyRobo()override;
 
 
@@ -86,6 +86,7 @@ protected:
 	void UpdateStateMove(void);
 	void UpdateEnd(void);
 
+	
 private:
 
 	//ìñÇΩÇËîªíËÇÃç¿ïW
@@ -99,14 +100,17 @@ private:
 
 	static constexpr float COUNT_MAX = 10.0f;
 
+	static constexpr float MOVE_SPEED_INIT = 5.0f;
 
 	int hp_;
 	VECTOR playerPos_;
+	VECTOR moveDir_;
 	int count_;
+	bool poizun_;
 
 
 	void LockPlayer(void);
 
-
+	void Damez(void);
 };
 

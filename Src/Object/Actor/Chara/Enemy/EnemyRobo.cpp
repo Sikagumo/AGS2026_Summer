@@ -16,8 +16,11 @@
 #include "../../../Collision/CollisionController.h"
 #include "EnemyRobo.h"
 
-EnemyRobo::EnemyRobo()
+EnemyRobo::EnemyRobo(VECTOR _pos)
+	:poizun_(false)
+
 {
+	transform_.pos = _pos;
 }
 
 EnemyRobo::~EnemyRobo()
@@ -37,8 +40,6 @@ void EnemyRobo::InitTransform(void)
 	transform_.scl = { 2,2,2};
 	transform_.quaRot = Quaternion::Identity();
 	transform_.quaRotLocal = Quaternion::AngleAxis(UtilityMath::Deg2RadF(180.0f), UtilityMath::AXIS_Y);
-
-	transform_.pos = { 0.0f,100.0f,100.0f };
 
 	transform_.Update();
 }
@@ -209,6 +210,8 @@ void EnemyRobo::UpdateIdle(void)
 	
 
 	ChangeState(STATE::MOVE);
+	
+	
 }
 
 void EnemyRobo::UpdateAttack(void)
@@ -237,6 +240,10 @@ void EnemyRobo::UpdateAttack(void)
 void EnemyRobo::UpdateStateMove(void)
 {
 	LockPlayer();
+	float speed = MOVE_SPEED_INIT;
+	VECTOR movePow = VScale(moveDir_, speed);
+	// à⁄ìÆèàóù
+	transform_.pos = VAdd(transform_.pos, movePow);
 }
 
 void EnemyRobo::UpdateEnd(void)
@@ -257,6 +264,27 @@ void EnemyRobo::LockPlayer(void)
 	VECTOR moveDir = VSub(playerPos_, transform_.pos);
 	moveDir.y = 0.0f;
 	moveDir = VNorm(moveDir);
+	moveDir_ = moveDir;
 	float targetAngle = atan2(moveDir.x, moveDir.z);
 	transform_.quaRot = Quaternion::AngleAxis(targetAngle, UtilityMath::AXIS_Y);
+}
+
+void EnemyRobo::Damez(void)
+{
+	
+
+
+	if (CollisionController::GetInstance().IsActorCollidingWithTag(this, ColliderBase::TAG::PLAYER_BLAST) || CollisionController::GetInstance().IsActorCollidingWithTag(this, ColliderBase::TAG::PLAYER_BULLET) || CollisionController::GetInstance().IsActorCollidingWithTag(this, ColliderBase::TAG::LASER))
+	{
+		hp_ = hp_ - 200;
+	}
+	if (CollisionController::GetInstance().IsActorCollidingWithTag(this, ColliderBase::TAG::PLAYER_RECOVERY))
+	{
+		poizun_ == true;
+	}
+
+	if (poizun_)
+	{
+		hp_ -= 1;
+	}
 }

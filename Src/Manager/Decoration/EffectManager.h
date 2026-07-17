@@ -106,6 +106,8 @@ private:
 	static constexpr VECTOR INIT_SCL = { 1.0f,1.0f,1.0f };
 	static constexpr float INIT_SPEED = 1.0f;
 
+	
+
 	static EffectManager* instance_; // シングルトンインスタンス
 
 	std::unordered_map<EFFECT, EFFECT_DATA> effect_; // サウンドハンドルの管理マップ
