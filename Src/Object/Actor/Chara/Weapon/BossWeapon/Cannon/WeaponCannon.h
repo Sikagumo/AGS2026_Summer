@@ -47,7 +47,7 @@ public:
 	/// <returns>Œ»İHP</returns>
 	int GetHp(void)override { return hp_; }
 
-
+	void SetHp(int _hp)override { hp_ = _hp; }
 	
 
 	// ó‘Ô‘JˆÚ

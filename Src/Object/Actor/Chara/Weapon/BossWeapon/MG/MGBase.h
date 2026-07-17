@@ -17,6 +17,8 @@ public:
     void SetDamage(int _damage) override { hp_ -= _damage; }
     bool GetIsAlive(void) override { return isAlive_; }
     int GetHp(void) override { return hp_; }
+    void SetHp(int _hp)override { hp_ = _hp; }
+
     // ó‘Ô‘JˆÚ
     void ChangeState(STATE _state)override;
     bool IsAttack(void) { return isAttack_; }
