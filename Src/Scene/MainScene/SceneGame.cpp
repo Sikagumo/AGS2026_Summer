@@ -20,10 +20,11 @@
 constexpr float GAME_TIME = 500.0f;
 constexpr float GAME_TIME_DEFEAT_DEC = 75.0f;
 
-SceneGame::SceneGame(std::vector<PlayerBase::JOB_TYPE> _playerJob)
+SceneGame::SceneGame(std::vector<PlayerSelectType> _playerSelectType)
 	: players_()
 	, boss_(std::make_unique<Boss>())
 	, enemyRobos_()
+	, gameTexts_()
 	, stage_(std::make_unique<Stage>())
 	, damageController_(std::make_unique<DamageController>())
 	, targetHpImage_(-1)
@@ -31,11 +32,13 @@ SceneGame::SceneGame(std::vector<PlayerBase::JOB_TYPE> _playerJob)
 	, gameTimer_(nullptr)
 {
 	
-	for (int i = 0; i < _playerJob.size(); i++)
+	for (int i = 0; i < _playerSelectType.size(); i++)
 	{
+		auto job = _playerSelectType.at(i).job;
+		auto skin = _playerSelectType.at(i).skin;
 		std::unique_ptr<Player> player
-			= std::make_unique<Player>(i, _playerJob.at(i)
-				, PLAYER_INIT_POS[i]);
+			= std::make_unique<Player>(i, job, skin
+									  , PLAYER_INIT_POS[i]);
 
 		players_.emplace_back(std::move(player));
 	}
@@ -95,8 +98,8 @@ void SceneGame::Load(void)
 	SoundManager::GetInstance().Add(SoundManager::TYPE::SE, SoundManager::SOUND::SE_DAMAGE_PLAYER
 		, ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::SE_PLAYER_DAMAGE));
 
-	SoundManager::GetInstance().Add(SoundManager::TYPE::SE, SoundManager::SOUND::SE_DAMAGE_BOSS
-		, ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::SE_BOSS_HIT));
+	SoundManager::GetInstance().Add(SoundManager::TYPE::SE, SoundManager::SOUND::SE_HIT_BLAST
+		, ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::SE_HIT_BLAST));
 
 	//時間カウントリセット
 	TimeManager::GetInstance().Reset();
@@ -183,7 +186,8 @@ void SceneGame::DamageProcess(void)
 		enemyRobo->SetPlayerPos(players_.at(0)->GetBodyPos());
 	}
 	boss_->SetPlayer1Pos(players_.at(0)->GetBodyPos());
-	
+
+
 	boss_->SetBossDamage(damageController_->GetBossDamage());
 
 	boss_->SetWeaponCannonLDamage(damageController_->GetWeaponCannonLDamage());
@@ -207,7 +211,7 @@ void SceneGame::DamageProcess(void)
 		|| damageController_->GetWeaponMPRDamage() > 0
 		|| damageController_->GetWeaponRGDamage() > 0)
 	{
-		SoundManager::GetInstance().Play(SoundManager::SOUND::SE_DAMAGE_BOSS);
+		SoundManager::GetInstance().Play(SoundManager::SOUND::SE_HIT_BLAST);
 	}
 
 

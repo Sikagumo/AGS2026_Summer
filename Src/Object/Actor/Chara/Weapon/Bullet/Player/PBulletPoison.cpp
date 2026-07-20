@@ -3,23 +3,28 @@
 #include <algorithm>
 #include "../../../../../Collision/CollisionController.h"
 #include "../../../../../../Manager/System/TimeManager.h"
+#include "../../../../../../Manager/Decoration/EffectManager.h"
+#include "../../../../../../Manager/Generic/ResourceManager.h"
+#include "../../../../../../Manager/Decoration/SoundManager.h"
 
 constexpr float RADIUS_BULLET = 5.0f;
-constexpr float RADIUS_POISON = 87.5f;
+constexpr float RADIUS_POISON = 175.0f;
 constexpr float SCALE_POISON = 1.0f;
 constexpr float TIME_ALIVE_POISON = 7.5f;
-constexpr int POWER_POISON = 1;
-constexpr float ACTIVE_TIME = 1.25f;
+constexpr int POWER_POISON = 5;
+constexpr float ACTIVE_TIME = 2.5f;
 
 
-PBulletPoison::PBulletPoison(void)
-	: PBulletBase::PBulletBase()
-	, activeTime_(0.0f)
+PBulletPoison::PBulletPoison(int _shotType)
+	: PBulletBase::PBulletBase(_shotType)
+	, activeTime_(ACTIVE_TIME)
 {
 }
 
 void PBulletPoison::Load(void)
 {
+	SoundManager::GetInstance().Add(SoundManager::TYPE::SE, SoundManager::SOUND::SE_PBULLET_POISON
+		, ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::SE_PBULLET_POISON));
 }
 
 void PBulletPoison::InitTransform(void)
@@ -31,7 +36,7 @@ void PBulletPoison::InitPost(void)
 {
 	PBulletBase::InitPost();
 
-	activeTime_ = 0.0f;
+	activeTime_ = ACTIVE_TIME;
 }
 
 void PBulletPoison::UpdatePost(void)
@@ -43,7 +48,7 @@ void PBulletPoison::UpdatePost(void)
 			// “–‚½‚è”»’è–³Œø‰»
 			CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::PLAYER_BLAST, false);
 			bulletState_ = BULLET_STATE::INACTIVE;
-			activePowerBullet_ = 0;
+			activePowerBlast_ = 0;
 			return;
 		}
 
@@ -77,7 +82,8 @@ void PBulletPoison::SetParam(void)
 	radiusBullet_ = RADIUS_BULLET;
 	radiusBlast_ = 0.0f;
 	power_ = POWER_POISON;
-	transform_.InitTransform(SCALE_POISON, transform_.quaRot, Quaternion::Identity());
+	transform_.InitTransform(SCALE_POISON
+		, transform_.quaRot, Quaternion::Identity());
 }
 
 void PBulletPoison::BlastAction(void)
@@ -85,6 +91,7 @@ void PBulletPoison::BlastAction(void)
 	bulletState_ = BULLET_STATE::BLAST;
 	isVisible_ = false;
 	activePowerBlast_ = power_;
+	activeTime_ = ACTIVE_TIME;
 
 	// “–‚½‚è”»’è–³Œø‰»
 	CollisionController::GetInstance()
@@ -98,4 +105,10 @@ void PBulletPoison::BlastAction(void)
 
 	CollisionController::GetInstance()
 		.SetCollisionActive(this, ColliderBase::TAG::PLAYER_BLAST, true);
+
+	EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_PLAYER_POISON,
+		transform_.pos, Quaternion::Identity().ToEuler(),
+		{ 35.0f , 35.0f, 35.0f }, 1.0f, this);
+
+	SoundManager::GetInstance().Play(SoundManager::SOUND::SE_PBULLET_POISON);
 }

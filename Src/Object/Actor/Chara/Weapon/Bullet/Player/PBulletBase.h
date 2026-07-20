@@ -17,7 +17,7 @@ public:
 	};
 
 
-	PBulletBase(bool _isGravity = true);
+	PBulletBase(int _shotType, bool _isGravity = true);
 
 	virtual ~PBulletBase(void)override = default;
 
@@ -54,6 +54,7 @@ public:
 	int GetPowerBullet(void)const { return activePowerBullet_; }
 	int GetPowerBlast(void)const { return activePowerBlast_; }
 
+	int GetShotType(void)const { return shotType_; }
 	virtual void BlastAction(void) = 0;
 
 
@@ -69,6 +70,8 @@ protected:
 	BULLET_STATE bulletState_;
 
 	const bool IS_GRAVITY;
+
+	int shotType_;
 
 	float radiusBullet_;
 	float radiusBlast_;

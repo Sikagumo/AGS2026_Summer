@@ -35,69 +35,41 @@ void EffectManager::Initialize(void)
     effect_.clear();
     playingList_.clear();
 
-    EFFECT_DATA waveData;
-    waveData.Data = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::EFFECT_WAVE);
-    waveData.pos = INIT_POS;
-    waveData.rot = INIT_ROT;
-    waveData.scl = INIT_SCL;
-    waveData.speed = INIT_SPEED;
-    effect_[EFFECT::EFFECT_WAVE] = waveData;
+    EFFECT_DATA wave = EFFECT_DATA();
+    wave.Data = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::EFFECT_WAVE);
+    effect_[EFFECT::EFFECT_WAVE] = wave;
 
-    EFFECT_DATA landingData;
-    landingData.Data = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::EFFECT_LANDING);
-    landingData.pos = INIT_POS;
-    landingData.rot = INIT_ROT;
-    landingData.scl = INIT_SCL;
-    landingData.speed = INIT_SPEED;
-    effect_[EFFECT::EFFECT_LANDING] = landingData;
+    EFFECT_DATA loading = EFFECT_DATA();
+    loading.Data = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::EFFECT_LANDING);
+    effect_[EFFECT::EFFECT_LANDING] = loading;
 
-    EFFECT_DATA mgData;
-    mgData.Data = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::EFFECT_MG);
-    mgData.pos = INIT_POS;
-    mgData.rot = INIT_ROT;
-    mgData.scl = INIT_SCL;
-    mgData.speed = INIT_SPEED;
-    effect_[EFFECT::EFFECT_MG] = mgData;
+    EFFECT_DATA mg = EFFECT_DATA();
+    mg.Data = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::EFFECT_MG);
+    effect_[EFFECT::EFFECT_MG] = mg;
 
-    EFFECT_DATA hitData;
-    hitData.Data = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::EFFECT_BOSS_HIT);
-    hitData.pos = INIT_POS;
-    hitData.rot = INIT_ROT;
-    hitData.scl = INIT_SCL;
-    hitData.speed = INIT_SPEED;
-    effect_[EFFECT::EFFECT_BOSS_HIT] = hitData;
+    EFFECT_DATA bossHit = EFFECT_DATA();
+    bossHit.Data = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::EFFECT_BOSS_HIT);
+    effect_[EFFECT::EFFECT_BOSS_HIT] = bossHit;
 
-    EFFECT_DATA laserData;
-    laserData.Data = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::EFFECT_LASER);
-    laserData.pos = INIT_POS;
-    laserData.rot = INIT_ROT;
-    laserData.scl = INIT_SCL;
-    laserData.speed = INIT_SPEED;
-    effect_[EFFECT::EFFECT_LASER] = laserData;
+    EFFECT_DATA laser = EFFECT_DATA();
+    laser.Data = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::EFFECT_LASER);
+    effect_[EFFECT::EFFECT_LASER] = laser;
 
-    EFFECT_DATA missileData;
-    missileData.Data = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::EFFECT_MISSILE);
-    missileData.pos = INIT_POS;
-    missileData.rot = INIT_ROT;
-    missileData.scl = INIT_SCL;
-    missileData.speed = INIT_SPEED;
-    effect_[EFFECT::EFFECT_MISSILE] = missileData;
+    EFFECT_DATA missile = EFFECT_DATA();
+    missile.Data = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::EFFECT_MISSILE);
+    effect_[EFFECT::EFFECT_MISSILE] = missile;
 
-    EFFECT_DATA playerBulletData;
-    playerBulletData.Data = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::EFFECT_PLAYER_BLAST);
-    playerBulletData.pos = INIT_POS;
-    playerBulletData.rot = INIT_ROT;
-    playerBulletData.scl = INIT_SCL;
-    playerBulletData.speed = INIT_SPEED;
-    effect_[EFFECT::EFFECT_PLAYER_BULLET] = playerBulletData;
+    EFFECT_DATA pBlast = EFFECT_DATA();
+    pBlast.Data = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::EFFECT_PLAYER_BLAST);
+    effect_[EFFECT::EFFECT_PLAYER_BLAST] = pBlast;
 
-    EFFECT_DATA playerBlastData;
-    playerBlastData.Data = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::EFFECT_PLAYER_BLAST);
-    playerBlastData.pos = INIT_POS;
-    playerBlastData.rot = INIT_ROT;
-    playerBlastData.scl = INIT_SCL;
-    playerBlastData.speed = INIT_SPEED;
-    effect_[EFFECT::EFFECT_PLAYER_BLAST] = playerBlastData;
+    EFFECT_DATA pRecovery = EFFECT_DATA();
+    pRecovery.Data = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::EFFECT_PLAYER_RECOVERY);
+    effect_[EFFECT::EFFECT_PLAYER_RECOVERY] = pRecovery;
+
+    EFFECT_DATA pPoison = EFFECT_DATA();
+    pPoison.Data = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::EFFECT_PLAYER_POISON);
+    effect_[EFFECT::EFFECT_PLAYER_POISON] = pPoison;
 
 }
 

@@ -7,8 +7,9 @@
 #include "../../../../../Collider/ColliderSphere.h"
 #include "../../../../../Collision/CollisionController.h"
 
-PBulletBase::PBulletBase(bool _isGravity)
+PBulletBase::PBulletBase(int _shotType, bool _isGravity)
 	: ActorBase::ActorBase()
+	, shotType_(_shotType)
 	, bulletState_(BULLET_STATE::INACTIVE)
 	, radiusBullet_(0.0f) , radiusBlast_(0.0f)
 	, shotSpeedXZ_(0.0f), shotSpeedY_(0.0f)
@@ -83,7 +84,7 @@ void PBulletBase::Update(void)
 
 
 	const std::vector<ColliderBase::TAG> BOSS_TAG
-		= { ColliderBase::TAG::BOSS
+		= { ColliderBase::TAG::BOSS, ColliderBase::TAG::ENEMY, ColliderBase::TAG::ENEMYROBO
 			, ColliderBase::TAG::WEAPON_CANNON_L, ColliderBase::TAG::WEAPON_CANNON_R
 			, ColliderBase::TAG::WEAPON_MG_L, ColliderBase::TAG::WEAPON_MG_R
 			, ColliderBase::TAG::WEAPON_MP_L, ColliderBase::TAG::WEAPON_MP_R
@@ -121,9 +122,6 @@ void PBulletBase::Draw(void)
 
 	if (bulletState_ == BULLET_STATE::BLAST)
 	{
-		EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_PLAYER_BLAST,
-			transform_.pos, {},
-			{ 35.0f , 35.0f, 35.0f }, 1.0f, this);
 #ifdef _DEBUG
 		DrawSphere3D(transform_.pos, radiusBlast_, SPHERE_DIV, 0xff0000, 0xffffff, false);
 #endif

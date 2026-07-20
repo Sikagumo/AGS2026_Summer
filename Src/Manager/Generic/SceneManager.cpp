@@ -199,8 +199,8 @@ void SceneManager::Update(void)
         }
 
         //ChangeScene(std::make_shared<SceneTitle>());
-        auto bomb = { PlayerBase::JOB_TYPE::BOMB };
-        ChangeScene(std::make_shared<SceneGame>(bomb));
+        auto jobs = { SceneGame::PlayerSelectType(PlayerBase::JOB_TYPE::SUPPORT, PlayerBase::SKIN_TYPE::DOG)};
+        ChangeScene(std::make_shared<SceneGame>(jobs));
 
         return;
     }

@@ -19,7 +19,7 @@ public:
 	/// @param _isActiveGravity èdóÕÇïtó^Ç∑ÇÈÇ©î€Ç©
 	PBulletNormal(float _scale, float _radius, int _power
 				, float _shotSpeedXZ, float _shotSpeedY, float _aliveTime
-				, bool _isActiveGravity = true);
+				, int _shotType, bool _isActiveGravity = true);
 
 	~PBulletNormal(void)override = default;
 

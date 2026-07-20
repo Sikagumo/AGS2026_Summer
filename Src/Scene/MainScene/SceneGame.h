@@ -17,9 +17,15 @@
 class SceneGame : public SceneBase
 {
 public:
+    
+    struct PlayerSelectType
+    {
+        PlayerBase::JOB_TYPE job;
+        PlayerBase::SKIN_TYPE skin;
+    };
 
     /// @brief コンストラクタ
-    SceneGame(std::vector<PlayerBase::JOB_TYPE> _playerJob);
+    SceneGame(std::vector<PlayerSelectType> _playerSelectType);
 
     /// @brief デストラクタ
     ~SceneGame(void) = default;
@@ -71,7 +77,10 @@ private:
     };
     
     const std::vector<VECTOR> PLAYER_INIT_POS =
-    { { 0,0,-2000.0f },{ 0,0,0 },{ 0,0,0 },{ 0,0,0 } };
+    { { 0.0f,0,-3000.0f }
+     ,{ 250.0f,0,-3250.0f }
+     ,{ -250.0f,0,-3250.0f }
+     ,{ 0.0f,0,-3500.0f } };
 
     std::vector<std::unique_ptr<Player>> players_;
 

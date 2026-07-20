@@ -155,6 +155,8 @@ void ResourceManager::Initialize(void)
 	_SetResource(LOAD_TYPE::EFFECT, SRC::EFFECT_LASER, PATH_EFFECT + "BossAttack/Laser.efkefc");
 	_SetResource(LOAD_TYPE::EFFECT, SRC::EFFECT_MISSILE, PATH_EFFECT + "BossAttack/MissileExplosion.efkefc");
 	_SetResource(LOAD_TYPE::EFFECT, SRC::EFFECT_PLAYER_BLAST, PATH_EFFECT + "BlastHit/BlastHit.efkefc");
+	_SetResource(LOAD_TYPE::EFFECT, SRC::EFFECT_PLAYER_RECOVERY, PATH_EFFECT + "Recovery/Recovery.efkefc");
+	_SetResource(LOAD_TYPE::EFFECT, SRC::EFFECT_PLAYER_POISON, PATH_EFFECT + "PoisonHit/PoisonHit.efkefc");
 
 
 	/* ƒ‚ƒfƒ‹ */
@@ -206,11 +208,14 @@ void ResourceManager::Initialize(void)
 
 	/* Œø‰Ê‰¹ */
 	_SetResource(LOAD_TYPE::SOUND, SRC::SE_SELECT, PATH_SE + "Select.mp3");
+	_SetResource(LOAD_TYPE::SOUND, SRC::SE_PBULLET_POISON, PATH_SE + "PoisonBulletHit.mp3");
+	_SetResource(LOAD_TYPE::SOUND, SRC::SE_HIT_POISON, PATH_SE + "HitPoison.mp3");
+	_SetResource(LOAD_TYPE::SOUND, SRC::SE_HIT_BLAST, PATH_SE + "HitBlast.mp3");
 	_SetResource(LOAD_TYPE::SOUND, SRC::SE_PLAYER_DAMAGE, PATH_SE + "PlayerDamage.mp3");
 	_SetResource(LOAD_TYPE::SOUND, SRC::SE_BOSS_MG_FIRE, PATH_SE + "MGFire.mp3");
 	_SetResource(LOAD_TYPE::SOUND, SRC::SE_BOSS_LANDING, PATH_SE + "BossLanding.mp3");
 	_SetResource(LOAD_TYPE::SOUND, SRC::SE_BOSS_ROAD, PATH_SE + "Road.mp3");
-	_SetResource(LOAD_TYPE::SOUND, SRC::SE_BOSS_HIT, PATH_SE + "BossHit.mp3");
+	
 
 }
 void ResourceManager::_SetResource(Resource::LOAD_TYPE _loadType, SRC _src, std::string _path

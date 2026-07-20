@@ -36,8 +36,9 @@ public:
 	/// @brief コンストラクタ
 	/// @param _playerNo プレイヤー番号
 	/// @param _jobType 攻撃の種類
+	/// @param _skinType 見た目の種類
 	/// @param _startPos 開始位置
-	Player(int _playerNo, JOB_TYPE _jobType, const VECTOR& _startPos);
+	Player(int _playerNo, JOB_TYPE _jobType, SKIN_TYPE _skinType, const VECTOR& _startPos);
 
 	~Player(void)override = default;
 
@@ -59,7 +60,7 @@ public:
 
 	void SetRespawn(void);
 	
-	void SetPlayerType(PLAYER_TYPE _type = PLAYER_TYPE::MAX);
+	void SetPlayerType(SKIN_TYPE _type = SKIN_TYPE::MAX);
 	
 	void SetSoundData(VECTOR _pos, float _radius, bool _isLanging, bool _isMGFire, bool _isRoad)override;
 
@@ -86,12 +87,11 @@ private:
 
 	static constexpr std::array<SHOT_TYPE, static_cast<int>(JOB_TYPE::MAX)>
 		SHOT_TYPE_NORMAL
-		= { SHOT_TYPE::BOMB, SHOT_TYPE::SELECT_BIG, SHOT_TYPE::RAPID_FIRE, SHOT_TYPE::RECOVERY };
+		= { SHOT_TYPE::BOMB, SHOT_TYPE::BIG, SHOT_TYPE::RAPID_FIRE, SHOT_TYPE::POISON };
 
 	static constexpr std::array<SHOT_TYPE, static_cast<int>(JOB_TYPE::MAX)>
 		SHOT_TYPE_SPECIAL
-		= { SHOT_TYPE::BOMB_FINISH, SHOT_TYPE::NONE, SHOT_TYPE::CLUSTER, SHOT_TYPE::POISON };
-
+		= { SHOT_TYPE::BOMB_FINISH, SHOT_TYPE::NONE, SHOT_TYPE::CLUSTER, SHOT_TYPE::RECOVERY };
 
 	// 連射パラメータ
 	static constexpr float SCALE_RAPID = 1.0f;

@@ -8,7 +8,7 @@ public:
 	static constexpr float SHOT_SPEED_POISON_XZ = 10.0f;
 	static constexpr float SHOT_SPEED_POISON_Y = 8.5f;
 
-	PBulletPoison(void);
+	PBulletPoison(int _shotType);
 
 	~PBulletPoison(void)override = default;
 

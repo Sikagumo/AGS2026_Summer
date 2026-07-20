@@ -447,12 +447,8 @@ void SceneTitle::ProcessMenuState(void)
     {
         case MENU_ITEM::SOLO:
         {
-            auto playerJob = { PlayerBase::JOB_TYPE::BOMB };
             SceneManager::GetInstance()
-             .ChangeScene(std::make_shared<SceneGame>(playerJob));
-               
-           //SceneManager::GetInstance()
-             // .ChangeScene(std::make_shared<SceneTitle>());
+                .ChangeScene(std::make_shared<SceneLobby>(FALSE));
         }
         break;
 

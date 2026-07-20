@@ -4,15 +4,19 @@
 #include "../../../../../Collision/CollisionController.h"
 #include "../../../../../Collider/ColliderSphere.h"
 #include "../../../../../../Utility/UtilityMath.h"
+#include "../../../../../../Manager/System/TimeManager.h"
+#include "../../../../../../Manager/Decoration/EffectManager.h"
+
 
 constexpr float RADIUS_BULLET = 10.0f;
 constexpr float RADIUS_RECOVERY = 250.0f;
 constexpr float SCALE_RECOVERY = 1.5f;
 constexpr float TIME_ALIVE_RECOVERY = 15.0f;
+constexpr float ACTIVE_TIME = 1.5f;
 
-
-PBulletRecovery::PBulletRecovery(void)
-	: PBulletBase::PBulletBase()
+PBulletRecovery::PBulletRecovery(int _shotType)
+	: PBulletBase::PBulletBase(_shotType)
+	, activeTime_(0.0f)
 {
 }
 
@@ -34,15 +38,13 @@ void PBulletRecovery::InitPost(void)
 	ownColliders_[static_cast<int>(COLLISION_TYPE::SUPPORT)]
 		.emplace_back(recovery);
 
-	CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::PLAYER_BULLET, true);
+	CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::PLAYER_RECOVERY, false);
 }
 
 void PBulletRecovery::UpdatePost(void)
 {
 	if (bulletState_ == BULLET_STATE::BLAST)
 	{
-		// íeÇè¡ñ≈Ç≥ÇπÇÈ
-		isActiveDestroy_ = true;
 		if (isActiveDestroy_)
 		{
 			// ìñÇΩÇËîªíËñ≥å¯âª
@@ -52,7 +54,15 @@ void PBulletRecovery::UpdatePost(void)
 			return;
 		}
 
-		
+		if (activeTime_ > 0.0f)
+		{
+			activeTime_ -= TimeManager::GetInstance().GetDeltaTime();
+		}
+		else
+		{
+			// íeÇè¡ñ≈Ç≥ÇπÇÈ
+			isActiveDestroy_ = true;
+		}
 	}
 }
 
@@ -81,6 +91,7 @@ void PBulletRecovery::BlastAction(void)
 {
 	bulletState_ = BULLET_STATE::BLAST;
 	isVisible_ = false;
+	activeTime_ = ACTIVE_TIME;
 
 	// ìñÇΩÇËîªíËñ≥å¯âª
 	CollisionController::GetInstance()
@@ -93,4 +104,8 @@ void PBulletRecovery::BlastAction(void)
 
 	CollisionController::GetInstance()
 		.SetCollisionActive(this, ColliderBase::TAG::PLAYER_RECOVERY, true);
+
+	EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_PLAYER_RECOVERY,
+		transform_.pos, Quaternion::Identity().ToEuler(),
+		{ 35.0f , 35.0f, 35.0f }, 1.0f, this);
 }

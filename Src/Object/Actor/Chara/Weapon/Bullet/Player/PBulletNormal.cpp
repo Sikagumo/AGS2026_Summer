@@ -5,8 +5,9 @@
 
 
 PBulletNormal::PBulletNormal(float _scale, float _radius, int _power
-		, float _shotSpeedXZ, float _shotSpeedY, float _aliveTime, bool _isActiveGravity)
-	: PBulletBase::PBulletBase(_isActiveGravity)
+		, float _shotSpeedXZ, float _shotSpeedY, float _aliveTime
+	, int _shotType, bool _isActiveGravity)
+	: PBulletBase::PBulletBase(_shotType, _isActiveGravity)
 	, ALIVE_TIME(_aliveTime), SCALE(_scale)
 {
 	shotSpeedXZ_ = _shotSpeedXZ;

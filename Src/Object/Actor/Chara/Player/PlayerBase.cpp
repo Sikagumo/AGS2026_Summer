@@ -3,7 +3,7 @@
 
 constexpr int HP_MAX_PLAYER = 250;
 
-PlayerBase::PlayerBase(int _playerNo, JOB_TYPE _jobType, const VECTOR& _startPos, PLAYER_TYPE _playerType)
+PlayerBase::PlayerBase(int _playerNo, JOB_TYPE _jobType, const VECTOR& _startPos, SKIN_TYPE _playerType)
 	: CharaBase::CharaBase()
 	, playerNo_(_playerNo)
 	, jobType_(_jobType)
