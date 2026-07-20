@@ -53,8 +53,6 @@ void CollisionController::Initialize(void)
 	// カリング距離の事前計算
 	cullingDistSquare_ = DEFAULT_CULL_DIST * DEFAULT_CULL_DIST;
 
-	updateTimer_ = 0.0f;
-
 	colliders2D_.clear();
 
 	for (size_t i = 0; i < MATRIX_SIZE_2D; ++i)
@@ -70,8 +68,6 @@ void CollisionController::Initialize(void)
 
 void CollisionController::Update(void)
 {
-	updateTimer_ = 0.0f;
-
 	UpdateCollisionPars();
 
 	UpdateCollision2D();

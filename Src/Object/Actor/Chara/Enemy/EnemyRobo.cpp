@@ -76,7 +76,7 @@ void EnemyRobo::InitAnimation(void)
 	CharaBase::InitAnimation();
 	for (int i = 0; i < static_cast<int>(ANIM_TYPE::MAX); i++)
 	{
-		animation_->AddInternal(i, 20.0f,true,{0,0,-0.25});
+		animation_->AddInternal(i, {0, 0, -0.25}, 20.0f);
 	}
 	animation_->Play(static_cast<int>(ANIM_TYPE::DIR));
 }
