@@ -664,6 +664,9 @@ bool CollisionController::CanCollide(int _tagA, int _tagB) const
 		// エネミー同士のみ、衝突を許可する
 		if (tagHit == TAG::ENEMY) { return true; }
 
+		// エネミーロボ同士のみ、衝突を許可する
+		if (tagHit == TAG::ENEMYROBO) { return true; }
+
 		// ステージ同士のみ、衝突を許可する
 		if (tagHit == TAG::STAGE) { return true; }
 		return false;

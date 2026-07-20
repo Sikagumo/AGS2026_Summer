@@ -1,4 +1,5 @@
 #include "SceneGame.h"
+#define NOMINMAX
 #include <algorithm>
 #include <math.h>
 #include "../../Manager/Generic/SceneManager.h"
@@ -22,13 +23,14 @@ constexpr float GAME_TIME_DEFEAT_DEC = 75.0f;
 SceneGame::SceneGame(std::vector<PlayerBase::JOB_TYPE> _playerJob)
 	: players_()
 	, boss_(std::make_unique<Boss>())
-	, enemyRobo_(std::make_unique<EnemyRobo>())
+	, enemyRobos_()
 	, stage_(std::make_unique<Stage>())
 	, damageController_(std::make_unique<DamageController>())
 	, targetHpImage_(-1)
 	, targetHpBerImage_(-1)
 	, gameTimer_(nullptr)
 {
+	
 	for (int i = 0; i < _playerJob.size(); i++)
 	{
 		std::unique_ptr<Player> player
@@ -37,8 +39,14 @@ SceneGame::SceneGame(std::vector<PlayerBase::JOB_TYPE> _playerJob)
 
 		players_.emplace_back(std::move(player));
 	}
-}
+	
+	for (int i = 0; i < ENEMYS_POP; i++)
+	{
+		std::unique_ptr<EnemyRobo> enemy = std::make_unique<EnemyRobo>(ENEMY_POS[i]);
 
+		enemyRobos_.emplace_back(std::move(enemy));
+	}
+}
 
 void SceneGame::Load(void)
 {
@@ -57,6 +65,11 @@ void SceneGame::Load(void)
 	{
 		player->Load();
 	}
+
+	for (auto& enemyRobo : enemyRobos_)
+	{
+		enemyRobo->Load();
+	}
 	
 	playerHpImageBack_ = ResourceManager::GetInstance().LoadHandleIdsOnce(ResourceManager::SRC::IMGS_HP_PLAYER, 0);
 	playerHpImage_ = ResourceManager::GetInstance().LoadHandleIdsOnce(ResourceManager::SRC::IMGS_HP_PLAYER, 1);
@@ -66,8 +79,12 @@ void SceneGame::Load(void)
 
 	ResourceManager::GetInstance().LoadHandleIds(ResourceManager::SRC::IMGS_GAME_TEXT, uiGame_.data());
 
+	for (auto& enemyRobo : enemyRobos_)
+	{
+		enemyRobo->Load();
+	}
+
 	boss_->Load();
-	enemyRobo_->Load();
 
 	stage_->Load();
 
@@ -108,10 +125,12 @@ void SceneGame::Initialize(void)
 	{
 		player->Init();
 	}
-
+	for (auto& enemyRobo : enemyRobos_)
+	{
+		enemyRobo->Init();
+	}
 	boss_->Init();
 	stage_->Init();
-	enemyRobo_->Init();
 
 	// タイマー有効化
 	gameTimer_->SetIsTimeActive(true);
@@ -134,9 +153,11 @@ void SceneGame::Update(void)
 	DamageProcess();
 
 	boss_->Update();
-	enemyRobo_->Update();
 	stage_->Update();
-	
+	for (auto& enemyRobo : enemyRobos_)
+	{
+		enemyRobo->Update();
+	}
 	for (auto& player : players_)
 	{
 		player->Update();
@@ -157,7 +178,10 @@ void SceneGame::Update(void)
 
 void SceneGame::DamageProcess(void)
 {
-	enemyRobo_->SetPlayerPos(players_.at(0)->GetBodyPos());
+	for (auto& enemyRobo : enemyRobos_)
+	{
+		enemyRobo->SetPlayerPos(players_.at(0)->GetBodyPos());
+	}
 	boss_->SetPlayer1Pos(players_.at(0)->GetBodyPos());
 	
 	boss_->SetBossDamage(damageController_->GetBossDamage());
@@ -244,8 +268,10 @@ void SceneGame::Draw(void)
 	}
 
 	boss_->Draw();
-
-	enemyRobo_->Draw();
+	for (auto& enemyRobo : enemyRobos_)
+	{
+		enemyRobo->Draw();
+	}
 	
 	effect.Draw();
 
