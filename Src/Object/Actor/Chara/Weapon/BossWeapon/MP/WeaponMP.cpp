@@ -99,7 +99,7 @@ void WeaponMP::InitPost(void)
 
 void WeaponMP::UpdateProcess(void)
 {
-	LookPlayer();
+	
 	// HP‚ª‚È‚­‚È‚Á‚½‚ç€–Sˆ—i¶‰E‹¤’Êj
 	if (hp_ <= 0 && isAlive_)
 	{
@@ -178,6 +178,7 @@ void WeaponMP::ChangeStateEnd(void)
 
 void WeaponMP::UpdateAttack(void)
 {
+	LookPlayer();
 	transform_.pos = MV1GetFramePosition(bone_.transform.modelId, bone_.id);
 	outCount_++;
 	if (outCount_ >= ATTACK_DELAY)
@@ -200,6 +201,7 @@ void WeaponMP::UpdateAttack(void)
 
 void WeaponMP::UpdateIdle(void)
 {
+	LookPlayer();
 	transform_.pos = MV1GetFramePosition(bone_.transform.modelId, bone_.id);
 }
 

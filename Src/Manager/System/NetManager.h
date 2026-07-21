@@ -76,4 +76,7 @@ private:
 	NET_POOL pool_;
 
 	mutable std::mutex poolMutex_;
+
+	/// @brief 受信したUDPパケットの解析とデータ種別ごとの振り分け処理
+	void UdpReceiveData(void);
 };

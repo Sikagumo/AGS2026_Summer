@@ -47,7 +47,7 @@ public:
 	/// <returns>åªç›HP</returns>
 	int GetHp(void)override { return hp_; }
 
-
+	void SetHp(int _hp)override { hp_ = _hp; }
 	
 
 	// èÛë‘ëJà⁄
@@ -104,6 +104,8 @@ private:
 	static constexpr float CAPSULE_RADIUS = 20.0f;
 
 	static constexpr float DOUN_ROCK = -45.0f;
+
+	static constexpr float BULLET_HIT_SIZE = 18.0f;
 
 
 	bool isAttack_;

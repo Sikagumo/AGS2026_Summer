@@ -66,10 +66,10 @@ public:
 	void SetSoundData(VECTOR _pos, float _radius, bool _isLanging, bool _isMGFire, bool _isRoad)override;
 
 	// 自分が操作するキャラクターかどうかを設定
-	void SetIsLocalControl(bool _isLocal);
+	void SetHostControl(bool _isLocal);
 
 	//自分が操作するキャラクターかどうかを取得する
-	bool IsLocalControl(void) const { return isLocalControl_; }
+	bool GetHostControl(void) const { return isHostControl_; }
 
 	// ネットワークから受け取った情報を強制的にセットする（ラジコン用）
 	void SetNetworkAction(const VECTOR& _pos, const Quaternion& _rot, int _animId);
@@ -147,8 +147,8 @@ private:
 
 	float shotTerm_;
 
-	// 自分が操作するかどうか falseの場合はラジコン
-	bool isLocalControl_;
+	// 自分が操作するかどうか
+	bool isHostControl_;
 
 	// 誰のキャラクターかを識別key
 	int netKey_;

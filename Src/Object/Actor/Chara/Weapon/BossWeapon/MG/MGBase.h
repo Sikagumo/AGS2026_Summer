@@ -17,6 +17,8 @@ public:
     void SetDamage(int _damage) override { hp_ -= _damage; }
     bool GetIsAlive(void) override { return isAlive_; }
     int GetHp(void) override { return hp_; }
+    void SetHp(int _hp)override { hp_ = _hp; }
+
     // 状態遷移
     void ChangeState(STATE _state)override;
     bool IsAttack(void) { return isAttack_; }
@@ -30,6 +32,8 @@ protected:
     static constexpr int MUZZLE_MAX_COUNT = 6;
 
     static constexpr float CAPSULE_RADIUS = 20.0f;
+
+    static constexpr float BULLET_HIT_SIZE = 6.0f;
 
     // 子クラス(MGL/MGR)のUpdateProcessから呼ばれる共通の更新関数
     void UpdateCommon(void);

@@ -572,14 +572,24 @@ void SceneLobby::DrawInRoom(void)
 
 void SceneLobby::MoveToGameScene(std::map<int, NET_JOIN_USER>& _users)
 {
+    std::vector<SceneGame::PlayerSelectType> playerSelectTypes;
+
     // é©ï™
-    std::vector<PlayerBase::JOB_TYPE> playerJobs;
-    playerJobs.push_back(PlayerBase::JOB_TYPE::CANNON);
-    
-    // ëºêl
-    for (int i = 0; i < _users.size(); ++i) 
     {
-        playerJobs.push_back(PlayerBase::JOB_TYPE::BOMB);
+        SceneGame::PlayerSelectType myType;
+        myType.job = PlayerBase::JOB_TYPE::CANNON;
+        myType.skin = PlayerBase::SKIN_TYPE::DOG;
+        playerSelectTypes.push_back(myType);
     }
-    SceneManager::GetInstance().ChangeScene(std::make_shared<SceneGame>(playerJobs));
+
+    // ëºêl
+    for (auto itr = _users.begin(); itr != _users.end(); ++itr)
+    {
+        SceneGame::PlayerSelectType otherType;
+        otherType.job = PlayerBase::JOB_TYPE::BOMB;
+        otherType.skin = PlayerBase::SKIN_TYPE::DOG; 
+        playerSelectTypes.push_back(otherType);
+    }
+
+    SceneManager::GetInstance().ChangeScene(std::make_shared<SceneGame>(playerSelectTypes));
 }

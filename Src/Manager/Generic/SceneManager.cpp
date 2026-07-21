@@ -205,10 +205,13 @@ void SceneManager::Update(void)
             camera_->Init();
         }
 
-        auto jobs = { SceneGame::PlayerSelectType(PlayerBase::JOB_TYPE::RAPID_FIRE, PlayerBase::SKIN_TYPE::DOG)};
-        ChangeScene(std::make_shared<SceneGame>(jobs));
+        //std::vector<SceneGame::PlayerSelectType> jobs =
+        //{
+        //      {PlayerBase::JOB_TYPE::RAPID_FIRE, PlayerBase::SKIN_TYPE::DOG}
+        //};
+        //ChangeScene(std::make_shared<SceneGame>(jobs));
 
-        return;
+        ChangeScene(std::make_shared<SceneTitle>());
     }
 
     TimeManager::GetInstance().Update();

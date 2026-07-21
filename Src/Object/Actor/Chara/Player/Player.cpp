@@ -66,7 +66,7 @@ Player::Player(int _playerNo, JOB_TYPE _jobType, SKIN_TYPE _skinType, const VECT
 	, knockPowXZ_(UtilityMath::VECTOR2F_ZERO)
 	, dodgePowXZ_(UtilityMath::VECTOR2F_ZERO)
 	, shotTerm_(0.0f)
-	, isLocalControl_(false)
+	, isHostControl_(false)
 	, netKey_(0)
 {
 	if (_jobType == JOB_TYPE::CANNON)
@@ -437,7 +437,7 @@ void Player::UpdateProcess(void)
 	timeInv_ = ((timeInv_ > 0.0f) ? (timeInv_ - delta) : 0.0f);
 
 	// マルチプレイのため追加
-	if (isLocalControl_)
+	if (isHostControl_)
 	{
 		ProcessJump();
 		ProcessMove();
@@ -479,7 +479,7 @@ void Player::UpdateProcess(void)
 	}
 
 	// マルチプレイのため追加
-	if (isLocalControl_)
+	if (isHostControl_)
 	{
 		SendMyActionToNetManager();
 	}
@@ -1192,9 +1192,9 @@ void Player::PlayAnimation(ANIM_TYPE _type, bool _isLoop, float _animSpeed)
 
 //-------------------------------------------------------------------------------------
 // ここから下のコードマルチプレイのために追加
-void Player::SetIsLocalControl(bool _isLocal)
+void Player::SetHostControl(bool _isLocal)
 {
-	isLocalControl_ = _isLocal;
+	isHostControl_ = _isLocal;
 }
 
 void Player::SetNetworkAction(const VECTOR& _pos, const Quaternion& _rot, int _animId)
@@ -1216,7 +1216,7 @@ void Player::SetNetKey(int _key)
 
 void Player::SendMyActionToNetManager(void)
 {
-	if (!isLocalControl_)
+	if (!isHostControl_)
 	{
 		return;
 	}

@@ -70,6 +70,8 @@ public:
 	/// <returns>Œ»İHP</returns>
 	virtual int GetHp(void) = 0;
 
+	virtual void SetHp(int _hp)=0;
+
 	// ó‘Ô‘JˆÚ
 	virtual void ChangeState(STATE _state);
 
