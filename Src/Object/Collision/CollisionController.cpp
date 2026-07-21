@@ -11,12 +11,12 @@
 #include "../Collision/CollisionBox.h"
 #include "../../Utility/UtilityMath.h"
 #include "../Collider/ColliderCapsule.h"
+#include "../Collider/ColliderSphere.h"
 
 CollisionController* CollisionController::instance_ = nullptr;
 
 CollisionController::CollisionController(void)
 	: cullingDistSquare_(0.0f)
-	, updateTimer_(0.0f)
 {
 }
 
@@ -53,8 +53,6 @@ void CollisionController::Initialize(void)
 	// カリング距離の事前計算
 	cullingDistSquare_ = DEFAULT_CULL_DIST * DEFAULT_CULL_DIST;
 
-	updateTimer_ = 0.0f;
-
 	colliders2D_.clear();
 
 	for (size_t i = 0; i < MATRIX_SIZE_2D; ++i)
@@ -70,17 +68,10 @@ void CollisionController::Initialize(void)
 
 void CollisionController::Update(void)
 {
-	updateTimer_ += TimeManager::GetInstance().GetDeltaTime();
+	UpdateCollisionPars();
 
-	// 一定間隔ごとに衝突判定を実行
-	if (updateTimer_ >= UPDATE_INTERVAL)
-	{
-		updateTimer_ = 0.0f;
+	UpdateCollision2D();
 
-		UpdateCollisionPars();
-
-		UpdateCollision2D();
-	}
 }
 
 void CollisionController::Clear(void)
@@ -333,17 +324,24 @@ void CollisionController::SetActorColliderRadius(ActorBase* _targetActor,
 	}
 }
 
-void CollisionController::SetActorCapsuleShape(ActorBase* _targetActor, ColliderBase::TAG _targetTag, const VECTOR& _localStartPos, const VECTOR& _localEndPos, float _radius)
+void CollisionController::SetActorSphereLocalPos(ActorBase* _targetActor,
+	ColliderBase::TAG _targetTag, const VECTOR& _localPosition)
 {
 	if (_targetActor == nullptr)
 	{
 		return;
 	}
-	
+
 	auto& ownCollidersMap = _targetActor->GetOwnColliders();
 	int targetKey = static_cast<int>(_targetTag);
 	auto it = const_cast<ActorBase::ColliderMap&>(ownCollidersMap).find(targetKey);
-	
+
+	// そもそも指定したタグが存在するかチェック
+	if (it == const_cast<ActorBase::ColliderMap&>(ownCollidersMap).end())
+	{
+		return;
+	}
+
 	for (auto* collider : it->second)
 	{
 		if (collider == nullptr)
@@ -351,14 +349,55 @@ void CollisionController::SetActorCapsuleShape(ActorBase* _targetActor, Collider
 			continue;
 		}
 
-		auto* capsule =  static_cast<ColliderCapsule*>(collider);
+		// 形状が球である場合のみキャストして位置を変更する
+		if (collider->GetShapeType() == ColliderBase::SHAPE::SPHERE)
+		{
+			auto* sphereCollider = static_cast<ColliderSphere*>(collider);
+			if (sphereCollider != nullptr)
+			{
+				sphereCollider->SetLocalPosition(_localPosition);
+			}
+		}
+	}
+}
 
-		if (capsule == nullptr)
+void CollisionController::SetActorCapsuleShape(ActorBase* _targetActor, 
+	ColliderBase::TAG _targetTag, const VECTOR& _localStartPos, const VECTOR& _localEndPos, 
+	float _radius)
+{
+	if (_targetActor == nullptr)
+	{
+		return;
+	}
+
+	auto& ownCollidersMap = _targetActor->GetOwnColliders();
+	int targetKey = static_cast<int>(_targetTag);
+	auto it = const_cast<ActorBase::ColliderMap&>(ownCollidersMap).find(targetKey);
+
+	// そもそも指定したタグが存在するかチェック
+	if (it == const_cast<ActorBase::ColliderMap&>(ownCollidersMap).end())
+	{
+		return;
+	}
+
+	for (auto* collider : it->second)
+	{
+		if (collider == nullptr)
 		{
 			continue;
 		}
 
-		capsule->SetShape(_localStartPos, _localEndPos, _radius);
+		// 形状が球である場合のみキャストして位置を変更する
+		if (collider->GetShapeType() == ColliderBase::SHAPE::CAPSULE)
+		{
+			auto* CapsuleCollider = static_cast<ColliderCapsule*>(collider);
+			if (CapsuleCollider != nullptr)
+			{
+				CapsuleCollider->SetLocalStartPos(_localStartPos);
+				CapsuleCollider->SetLocalEndPos(_localEndPos);
+				CapsuleCollider->SetRadius(_radius);
+			}
+		}
 	}
 }
 
@@ -508,7 +547,7 @@ void CollisionController::UpdateCollisionPars(void)
 			{
 				for (const auto* colA : colliderVectorA)
 				{
-					if (colA != nullptr && colA->GetCollisionTag() == ColliderBase::TAG::STAGE
+					if (colA->GetCollisionTag() == ColliderBase::TAG::STAGE
 						|| colA->GetCollisionTag() == ColliderBase::TAG::WALL)
 					{
 						isStageCollision = true;
@@ -523,7 +562,7 @@ void CollisionController::UpdateCollisionPars(void)
 			{
 				for (const auto* colB : colliderVectorB)
 				{
-					if (colB != nullptr && colB->GetCollisionTag() == ColliderBase::TAG::STAGE
+					if (colB->GetCollisionTag() == ColliderBase::TAG::STAGE
 						|| colB->GetCollisionTag() == ColliderBase::TAG::WALL)
 					{
 						isStageCollision = true;
@@ -620,6 +659,9 @@ bool CollisionController::CanCollide(int _tagA, int _tagB) const
 	{
 		// エネミー同士のみ、衝突を許可する
 		if (tagHit == TAG::ENEMY) { return true; }
+
+		// エネミーロボ同士のみ、衝突を許可する
+		if (tagHit == TAG::ENEMYROBO) { return true; }
 
 		// ステージ同士のみ、衝突を許可する
 		if (tagHit == TAG::STAGE) { return true; }

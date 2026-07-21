@@ -24,6 +24,9 @@ public:
 		SELECT_SINGLE_RECOVERY,
 		SELECT_SINGLE_RAPIDFIRE,
 		MOUSE_CURSOR,
+		PEACH,
+		WAVE,
+		ONI_GASHIMA
 	};
 
 	/// @brief コンストラクタ

@@ -54,6 +54,9 @@ void ResourceManager::Initialize(void)
 	
 	// タイトル画像
 	_SetResource(LOAD_TYPE::IMAGE, SRC::IMG_TITLE, PATH_IMAGE + "Title.png");
+
+	// タイトルのノーマルマップ
+	_SetResource(LOAD_TYPE::IMAGE, SRC::IMG_NOTMALMAP_TITLE, PATH_IMAGE + "Title_n.png");
 	
 	// 桃の画像
 	_SetResource(LOAD_TYPE::IMAGE, SRC::IMG_PEACH, PATH_IMAGE + "peach_T.png");
@@ -69,6 +72,9 @@ void ResourceManager::Initialize(void)
 
 	// 鬼ヶ島の画像
 	_SetResource(LOAD_TYPE::IMAGE, SRC::IMG_ONIGASIMA, PATH_IMAGE + "OnigaSima.png");
+
+	// タイトル背景の画像
+	_SetResource(LOAD_TYPE::IMAGE, SRC::IMG_BUCGROUND_TITLE, PATH_MODEL + "SkyDome/Skydome.png");
 
 	// 鬼ヶ島のノーマルマップ
 	_SetResource(LOAD_TYPE::IMAGE, SRC::IMG_NOMALMAP_ONIGASIMA, PATH_IMAGE + "OnigaSima_n.png");
@@ -160,11 +166,9 @@ void ResourceManager::Initialize(void)
 	_SetResource(LOAD_TYPE::MODEL, SRC::MODEL_PLAYER_BIRD,	PATH_MODEL + "Player/Chara/Bird/PlayerBird.mv1");
 	_SetResource(LOAD_TYPE::MODEL, SRC::MODEL_PLAYER_MONKEY,PATH_MODEL + "Player/Chara/Monkey/PlayerMonkey.mv1");
 
-	_SetResource(LOAD_TYPE::MODEL, SRC::MODEL_STAGE, PATH_MODEL + "Stage/Stage/Stage.mv1");
-	_SetResource(LOAD_TYPE::MODEL, SRC::MODEL_STAGE_COLLISION, PATH_MODEL + "Stage/Stage/StageCollision.mv1");
-	//_SetResource(LOAD_TYPE::MODEL, SRC::MODEL_STAGE, PATH_MODEL + "Stage/FloatingIsland/FloatingIsland02.mv1");
-	//_SetResource(LOAD_TYPE::MODEL, SRC::MODEL_STAGE_COLLISION, PATH_MODEL + "Stage/FloatingIsland/FloatingIsland02.mv1");
-	_SetResource(LOAD_TYPE::MODEL, SRC::MODEL_TREE_POSITION, PATH_MODEL + "Stage/Stage/TreePosition.mv1");
+	_SetResource(LOAD_TYPE::MODEL, SRC::MODEL_STAGE, PATH_MODEL + "Stage/Stage.mv1");
+	_SetResource(LOAD_TYPE::MODEL, SRC::MODEL_STAGE_COLLISION, PATH_MODEL + "Stage/StageCollision.mv1");
+	_SetResource(LOAD_TYPE::MODEL, SRC::MODEL_TREE_POSITION, PATH_MODEL + "Stage/TreePosition.mv1");
 
 	//ボスの武器本体系
 	_SetResource(LOAD_TYPE::MODEL, SRC::MODEL_BOSS_FEET, PATH_MODEL + "Boss/oni_feet.mv1");
@@ -276,11 +280,9 @@ void ResourceManager::LoadHandleIds(SRC _src, int* _target)
 {
 	// 複数画像ではない場合、処理終了
 	if (resourcesMap_[_src].GetLoadType() != Resource::LOAD_TYPE::IMAGES) { return; }
-	SetUseASyncLoadFlag(false);
 
 	// 複数画像の対象にコピー
 	Load(_src).CopyHandle(_target);
-	SetUseASyncLoadFlag(true);
 
 #ifdef _DEBUG
 	if (*_target == -1)

@@ -5,12 +5,14 @@
 #include "../../Scene/MainScene/SceneGameBoss.h"
 #include "../Decoration/SoundManager.h"
 #include "../../Object/Collision/CollisionController.h"
-#include "../../Shader/ShaderManager.h"
+#include "../../Shader/ShaderController.h"
 #include "../System/TimeManager.h"
 #include "../../Camera/Camera.h"
 #include "../../Common/Loading.h"
+#include "../../Common/Fader.h"
 #include "../../Application.h"
 #include "KeyConfInputManager.h"
+#include "../../ImGUI/GuiController.h"
 
 SceneManager* SceneManager::instance_ = nullptr;
 
@@ -44,6 +46,7 @@ SceneManager::SceneManager(void)
     , sceneMutex_()
 {
     camera_ = std::make_unique<Camera>();
+    fader_ = std::make_unique<Fader>();
     scenes_ = std::list<std::shared_ptr<SceneBase>>();
     oldScene_ = nullptr;
     nextScene_ = nullptr;
@@ -60,12 +63,13 @@ void SceneManager::Initialize(void)
     SoundManager::CreateInstance();
     SoundManager::GetInstance().Initialize();
     TimeManager::CreateInstance();
-    ShaderManager::CreateInstance();
-    ShaderManager::GetInstance().Initialize();
+    ShaderController::CreateInstance();
+    ShaderController::GetInstance().Initialize();
     Loading::CreateInstance();
     Loading::GetInstance()->Initialize();
     CollisionController::CreateInstance();
     CollisionController::GetInstance().Initialize();
+    GuiController::CreateInstance();
 }
 
 void SceneManager::Init3D(void)
@@ -131,6 +135,9 @@ void SceneManager::ChangeScene(std::shared_ptr<SceneBase> scene)
     nextScene_ = scene;
     isSceneChanging_ = true;
 
+    fader_->SetFade(Fader::STATE::FADE_IN);
+
+
     // 非同期ロード開始（ロード画面付き）
     Loading::GetInstance()->StartAsyncLoad([scene]()
         {
@@ -191,7 +198,9 @@ void SceneManager::Update(void)
             camera_->Init();
         }
 
-        ChangeScene(std::make_shared<SceneTitle>());
+        //ChangeScene(std::make_shared<SceneTitle>());
+        auto bomb = { PlayerBase::JOB_TYPE::BOMB };
+        ChangeScene(std::make_shared<SceneGame>(bomb));
 
         return;
     }
@@ -205,6 +214,7 @@ void SceneManager::Update(void)
     // ロード中の処理を完全に分離する
     if (isSceneChanging_)
     {
+        fader_->Update();
         auto loader = Loading::GetInstance();
         loader->Update();
 
@@ -242,14 +252,14 @@ void SceneManager::Update(void)
     {
         current->Update();
     }
-
+    
     CollisionController::GetInstance().Update();
-
 }
 
 void SceneManager::Draw(void)
 {
     ClearDrawScreen();
+
     if (!scenes_.empty())
     {
         if (camera_) camera_->SetBeforeDraw();
@@ -259,6 +269,20 @@ void SceneManager::Draw(void)
         }
     }
 
+#ifdef _DEBUG
+    for (auto& scene : scenes_)
+    {
+        if (scene)
+        {
+            if (scene->GetDebugMode() == true)
+            {
+                GuiController::GetInstance().DrawUI();
+            }
+        }
+    }
+#endif 
+
+
     // ロード中ならその上にロード画面を重ねる
     auto loader = Loading::GetInstance();
 
@@ -266,6 +290,8 @@ void SceneManager::Draw(void)
     {
         if (loader) loader->Draw();
     }
+
+    fader_->Draw();
 }
 
 void SceneManager::Release(void)
@@ -273,8 +299,6 @@ void SceneManager::Release(void)
     // ロード完了を待機する
     if (Loading::GetInstance()->IsLoading())
     {
-        SetUseASyncLoadFlag(false);
-
         Loading::GetInstance()->EndAsyncLoad();
     }
 
@@ -288,15 +312,13 @@ void SceneManager::Release(void)
     // カメラを解放する
     camera_.reset();
 
-    // 解放処理
-    ShaderManager::GetInstance().Release();
-
     // 各マネージャーを破棄する
     SoundManager::GetInstance().DestroyInstance();
-    ShaderManager::GetInstance().DestroyInstance();
+    ShaderController::GetInstance().DestroyInstance();
     TimeManager::GetInstance().DestroyInstance();
     Loading::GetInstance()->DestroyInstance();
     CollisionController::DestroyInstance();
+    GuiController::DestroyInstance();
 }
 
 const std::unique_ptr<Camera>& SceneManager::GetCamera(void) const

@@ -6,6 +6,7 @@
 
 class SceneBase;
 class Camera;
+class Fader;
 
 /// @brief シーンのスタック管理、遷移を管理するクラス（シングルトン）
 class SceneManager
@@ -70,6 +71,9 @@ private:
 
     // カメラ
     std::unique_ptr<Camera> camera_;
+
+    // フェード
+    std::unique_ptr<Fader> fader_;
 
     /// @brief 3D描画に関する初期設定
     void Init3D(void);

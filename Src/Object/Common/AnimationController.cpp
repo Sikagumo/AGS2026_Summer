@@ -17,6 +17,7 @@ AnimationController::AnimationController(int _modelId)
 	, isLoop_(false)
 	, isStop_(false), timeStop_(0.0f)
 	, playSpeed_(0.0f)
+	, preAnimLocalPos_(UtilityMath::VECTOR_ZERO)
 {
 }
 
@@ -27,8 +28,7 @@ AnimationController::~AnimationController(void)
 }
 
 
-void AnimationController::AddInternal(int _type, float _speed, bool _isPlace
-	, const VECTOR& _localPos)
+void AnimationController::AddInternal(int _type, float _speed)
 {
 	/* 内部のアニメーションの追加 */
 	Animation animation = Animation();
@@ -43,19 +43,40 @@ void AnimationController::AddInternal(int _type, float _speed, bool _isPlace
 
 	animation.step = 0.0f;
 
+	animation.isInPlace = false;
+
+	// アニメーション追加処理
+	Add(_type, animation);
+}
+void AnimationController::AddInternal(int _type, const VECTOR& _localPos, float _speed)
+{
+	/* 内部のアニメーションの追加 */
+	Animation animation = Animation();
+
+	animation.animIndex = _type;
+
+	// アニメーション速度割り当て
+	animation.speed = _speed;
+
+	// アニメーション状態割り当て
+	animation.type = ANIM_TYPE::INTERNAL;
+
+	animation.step = 0.0f;
+
+	animation.isInPlace = true;
+
 	if (!UtilityMath::EqualsVZero(_localPos))
 	{
 		animation.inPlaceLocalPos = _localPos;
+		
+		animation.inPlaceLocalPosEnd = _localPos;
 	}
-
-	animation.isInPlace = _isPlace;
 
 	// アニメーション追加処理
 	Add(_type, animation);
 }
 
-void AnimationController::AddExternal(int _type, float _speed, int _handle
-									, bool _isPlace, const VECTOR& _localPos)
+void AnimationController::AddExternal(int _type, int _handle, float _speed)
 {
 	/* 外部のアニメーションの追加 */
 	Animation animation = Animation();
@@ -70,12 +91,64 @@ void AnimationController::AddExternal(int _type, float _speed, int _handle
 
 	animation.step = 0.0f;
 
+	animation.isInPlace = false;
+	
+	// アニメーション追加処理
+	Add(_type, animation);
+}
+void AnimationController::AddExternal(int _type, int _handle
+									  , const VECTOR& _localPos, float _speed)
+{
+	/* 外部のアニメーションの追加 */
+	Animation animation = Animation();
+
+	animation.modelId = _handle;
+
+	// アニメーション速度割り当て
+	animation.speed = _speed;
+
+	// アニメーション状態割り当て
+	animation.type = ANIM_TYPE::EXTERNAL;
+
+	animation.step = 0.0f;
+
+	animation.isInPlace = true;
+
+	if (!UtilityMath::EqualsVZero(_localPos))
+	{
+		animation.inPlaceLocalPos = _localPos;
+		animation.inPlaceLocalPosEnd = _localPos;
+	}
+	
+	// アニメーション追加処理
+	Add(_type, animation);
+}
+void AnimationController::AddExternal(int _type, int _handle
+									  , const VECTOR& _localPos, const VECTOR& _localPosEnd, float _speed)
+{
+	/* 外部のアニメーションの追加 */
+	Animation animation = Animation();
+
+	animation.modelId = _handle;
+
+	// アニメーション速度割り当て
+	animation.speed = _speed;
+
+	// アニメーション状態割り当て
+	animation.type = ANIM_TYPE::EXTERNAL;
+
+	animation.step = 0.0f;
+
+	animation.isInPlace = true;
+
 	if (!UtilityMath::EqualsVZero(_localPos))
 	{
 		animation.inPlaceLocalPos = _localPos;
 	}
-
-	animation.isInPlace = _isPlace;
+	if (!UtilityMath::Equals(_localPos, _localPosEnd))
+	{
+		animation.inPlaceLocalPosEnd = _localPosEnd;
+	}
 	
 	// アニメーション追加処理
 	Add(_type, animation);
@@ -99,6 +172,19 @@ void AnimationController::Play(int _type, bool _isLoop, float _playSpeed, float 
 	if (playType_ != -1)
 	{
 		prePlayType_ = playType_;
+		
+		auto& stateFromAnim = animations_[prePlayType_];
+		if (stateFromAnim.isInPlace)
+		{
+			// 遷移元が固定位置アニメの場合、固定値をそのまま使用
+			preAnimLocalPos_ = stateFromAnim.inPlaceLocalPos;
+		}
+		else
+		{
+			// 遷移元が非固定の場合、現在のルートフレームの実際のローカル位置を取得
+			MATRIX curFrameMat = MV1GetFrameLocalMatrix(modelId_, FRAME_ROOT_NUM);
+			preAnimLocalPos_ = MGetTranslateElem(curFrameMat);
+		}
 	}
 
 	// アニメーションループ
@@ -214,65 +300,57 @@ void AnimationController::Update(void)
 	// 対象フレームのローカル行列を初期値にリセットする
 	MV1ResetFrameUserLocalMatrix(modelId_, FRAME_ROOT_NUM);
 
+	
 	if (preAnim.isInPlace || curAnim.isInPlace)
 	{
-		// アニメーション位置固定処理
+		// 遷移前/遷移後アニメーションが固定の場合、アニメーション位置固定処理
 		AnimationInPlace(preAnim, curAnim, term);
 	}
 }
 void AnimationController::AnimationInPlace(Animation& _prePlayAnim, Animation& _curPlayAnim, float _rate)
 {
-	// 対象フレームのローカル行列を初期値にリセットする
+	// 対象フレームのローカル行列を初期値にリセットす
 	MV1ResetFrameUserLocalMatrix(modelId_, FRAME_ROOT_NUM);
-
-	// 対象フレームのローカル行列(大きさ、回転、位置)を取得する
-	MATRIX mat = MV1GetFrameLocalMatrix(modelId_, FRAME_ROOT_NUM);
-	VECTOR scl = MGetSize(mat);
-	MATRIX rot = MGetRotElem(mat);
-	VECTOR pos = MGetTranslateElem(mat);
-
-	// 大きさ、回転、位置をローカル行列に戻す
-	MATRIX mix = MGetIdent();
-	mix = MMult(mix, MGetScale(scl));
-	mix = MMult(mix, rot);
-
-	// ローカル座標を行列にそのまま戻さず、調整したローカル座標を設定する
+	
+	// アニメーションブレンド率
 	float rate = std::clamp(_rate, 0.0f, 1.0f);
 
-	const float preBlendRateNow = 1.0f - rate;
-	const float curBlendRateNow = rate;
-
-	VECTOR preBase = pos;
-	if (_prePlayAnim.isInPlace)
-	{
-		preBase = _prePlayAnim.inPlaceLocalPos;
-	}
-	else if (rate < 1.0f)
-	{
-		preBase = GetRawAnimRootPos(_prePlayAnim, _curPlayAnim);
-
-		if (_prePlayAnim.attachNo != -1) { MV1SetAttachAnimBlendRate(modelId_, _prePlayAnim.attachNo, preBlendRateNow); }
-		if (_curPlayAnim.attachNo != -1) { MV1SetAttachAnimBlendRate(modelId_, _curPlayAnim.attachNo, curBlendRateNow); }
-	}
-
-	VECTOR curBase = pos;
+	// 遷移の位置
+	VECTOR preBase = preAnimLocalPos_;
+	VECTOR curBase = UtilityMath::VECTOR_ZERO;
+	
 	if (_curPlayAnim.isInPlace)
 	{
-		curBase = _curPlayAnim.inPlaceLocalPos;
+		// 固定位置アニメーションの場合、自身の再生進行度(step/totalTime)に応じて
+		// inPlaceLocalPos → inPlaceLocalPosEnd へ徐々に移動した目標位置を使用
+		curBase = GetInPlaceProgressPos(_curPlayAnim);
 	}
-	else if (rate > 0.0f)
+	else
 	{
 		curBase = GetRawAnimRootPos(_curPlayAnim, _prePlayAnim);
-
-		if (_curPlayAnim.attachNo != -1) { MV1SetAttachAnimBlendRate(modelId_, _curPlayAnim.attachNo, curBlendRateNow); }
-		if (_prePlayAnim.attachNo != -1) { MV1SetAttachAnimBlendRate(modelId_, _prePlayAnim.attachNo, preBlendRateNow); }
+		
+		// ブレンド率に戻す
+		if (_curPlayAnim.attachNo != -1)
+			{ MV1SetAttachAnimBlendRate(modelId_, _curPlayAnim.attachNo, rate); }
+			
+		if (_prePlayAnim.attachNo != -1)
+			{ MV1SetAttachAnimBlendRate(modelId_, _prePlayAnim.attachNo, (1.0f - rate)); }
 	}
-
-	VECTOR localPos = pos;
+		
+	// アニメーション位置変更の線形補間用座標
+	VECTOR localPos = UtilityMath::VECTOR_ZERO;
 	localPos.x = (preBase.x + (curBase.x - preBase.x) * rate);
 	localPos.y = (preBase.y + (curBase.y - preBase.y) * rate);
 	localPos.z = (preBase.z + (curBase.z - preBase.z) * rate);
 
+	// 対象フレームのローカル行列(大きさ、回転)はモデル本来の値を使用
+	MATRIX mat = MV1GetFrameLocalMatrix(modelId_, FRAME_ROOT_NUM);
+	VECTOR scl = MGetSize(mat);
+	MATRIX rot = MGetRotElem(mat);
+
+	MATRIX mix = MGetIdent();
+	mix = MMult(mix, MGetScale(scl));
+	mix = MMult(mix, rot);
 	mix = MMult(mix, MGetTranslate(localPos));
 
 	// 対象フレームにセットし直し、アニメーションの移動値を無効化
@@ -291,6 +369,23 @@ VECTOR AnimationController::GetRawAnimRootPos(Animation& _target, Animation& _ot
 
 	MATRIX mat = MV1GetFrameLocalMatrix(modelId_, FRAME_ROOT_NUM);
 	return MGetTranslateElem(mat);
+}
+
+VECTOR AnimationController::GetInPlaceProgressPos(const Animation& _anim) const
+{
+	// 総再生時間が未取得(0以下)の間は開始位置をそのまま返す
+	if (_anim.totalTime <= 0.0f) { return _anim.inPlaceLocalPos; }
+
+	// アニメーション自身の再生進行度(0.0～1.0)
+	float animRate = std::clamp((_anim.step / _anim.totalTime), 0.0f, 1.0f);
+
+	// 開始位置(inPlaceLocalPos) → 終了位置(inPlaceLocalPosEnd) へ進行度で線形補間
+	VECTOR pos = UtilityMath::VECTOR_ZERO;
+	pos.x = _anim.inPlaceLocalPos.x + (_anim.inPlaceLocalPosEnd.x - _anim.inPlaceLocalPos.x) * animRate;
+	pos.y = _anim.inPlaceLocalPos.y + (_anim.inPlaceLocalPosEnd.y - _anim.inPlaceLocalPos.y) * animRate;
+	pos.z = _anim.inPlaceLocalPos.z + (_anim.inPlaceLocalPosEnd.z - _anim.inPlaceLocalPos.z) * animRate;
+
+	return pos;
 }
 
 

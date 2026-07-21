@@ -16,7 +16,9 @@
 #include "../../Manager/System/TimeManager.h"
 #include "../../Common/Loading.h"
 #include "../../Utility/UtilityMath.h"
-#include "../../Shader/ShaderManager.h"
+#include "../../Shader/ShaderController.h"
+#include "../../ImGUI/GuiController.h"
+#include "../../Shader/ShaderLibrary.h"
 
 
 SceneTitle::SceneTitle(void)
@@ -37,7 +39,6 @@ SceneTitle::SceneTitle(void)
     , imageMenu_()
     , buttonTags()
     , prevMousePos_(0.0f, 0.0f)
-    , psHandle_(-1)
     , isSelectMenu_(true)
     , inputIntervalCounter_(0)
 {
@@ -52,6 +53,8 @@ void SceneTitle::Load(void)
     // isLoading_ を true に
     SceneBase::Load();
 
+    Loading::GetInstance()->SetProgress(10.0f);
+
     // BGM・SEロード
     SoundManager::GetInstance()
         .Add(SoundManager::TYPE::BGM, SoundManager::SOUND::BGM_TITLE_SEA
@@ -64,6 +67,9 @@ void SceneTitle::Load(void)
 
     // タイトル画像
     imageTitle_ = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::IMG_TITLE);
+
+    // タイトルのノーマルマップ画像
+    titleNormalHandle_ = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::IMG_NOTMALMAP_TITLE);
 
     // メニュー画像
     ResourceManager::GetInstance().LoadHandleIds
@@ -91,10 +97,15 @@ void SceneTitle::Load(void)
     oniSimaNormalHandle_ = ResourceManager::GetInstance().
         LoadHandleId(ResourceManager::SRC::IMG_NOMALMAP_ONIGASIMA);
 
+    // 背景画像
+    backgroundHandle_ = ResourceManager::GetInstance().
+        LoadHandleId(ResourceManager::SRC::IMG_BUCGROUND_TITLE);
+
     // その他画像
 
     //時間カウントリセット
     TimeManager::GetInstance().Reset();
+
 }
 
 void SceneTitle::EndLoad(void)
@@ -132,6 +143,7 @@ void SceneTitle::Initialize(void)
     SoundManager::GetInstance().Add(SoundManager::TYPE::SE, SoundManager::SOUND::SE_SELECT
         , ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::SE_SELECT));
 }
+
 void SceneTitle::InitUI(void)
 {
     // UIボタンの配置計算設定
@@ -180,6 +192,67 @@ void SceneTitle::InitUI(void)
         Collider2DBase::TAG_2D::OPTION_BUTTON,
         Collider2DBase::TAG_2D::EXIT_UTTON
     };
+    
+#ifdef _DEBUG
+
+    // 定数バッファの初期化
+    peachMaterial_.SetAmbient(0.8f);
+    waveMaterial_.SetAmbient(0.8f);
+    titleMaterial_.SetAmbient(0.8f);
+    titleMaterial_.SetLightDirection(0.0f, 0.0f, 0.0f);
+    titleMaterial_.SetWaveSpeed(0.0f);
+    titleMaterial_.SetWaveForce(0.0f);
+    oniSimaMaterial_.SetAmbient(0.8f);
+    waveMaterial_.SetWaveSpeed(3.0f);
+    waveMaterial_.SetWaveForce(0.015f);
+
+    // GUIの初期化
+    peachGui_ = std::make_shared<ShaderEditorComponent>("Peach", &peachMaterial_);
+    waveGui_ = std::make_shared<ShaderEditorComponent>("Wave", &waveMaterial_);
+    oniSimaGui_ = std::make_shared<ShaderEditorComponent>("OniGashima", &oniSimaMaterial_);
+    titleGui_ = std::make_shared<ShaderEditorComponent>("Title", &titleMaterial_);
+
+    // 座標の初期化
+    Vector2F peachPos = Vector2F(100.0f, Application::SCREEN_HALF_Y + 100);
+    Vector2F wavePos = Vector2F(800.0f, Application::SCREEN_HALF_Y + 250);
+    Vector2F oniSimaPos = Vector2F(Application::SCREEN_SIZE_X - 100.0f, Application::SCREEN_HALF_Y - 50);
+
+    // 桃の当たり判定
+    peachCollider_ = std::make_unique<Collider2DBox>(peachPos, 300.0f, 300.0f,
+        Collider2DBase::TAG_2D::PEACH);
+
+    // 波の当たり判定
+    waveCollider_ = std::make_unique<Collider2DBox>(wavePos, Application::SCREEN_SIZE_X,
+        Application::SCREEN_HALF_Y, Collider2DBase::TAG_2D::WAVE);
+
+    // 鬼ヶ島の当たり判定
+    oniSimaCollider_ = std::make_unique<Collider2DBox>(oniSimaPos, 200.0f,
+        150.0f, Collider2DBase::TAG_2D::ONI_GASHIMA);
+
+    CollisionController::GetInstance().RegisterCollider2D(peachCollider_.get());
+    CollisionController::GetInstance().RegisterCollider2D(waveCollider_.get());
+    CollisionController::GetInstance().RegisterCollider2D(oniSimaCollider_.get());
+
+    CollisionController::GetInstance().SetCollisionGroup2D(Collider2DBase::TAG_2D::MOUSE_CURSOR,
+        Collider2DBase::TAG_2D::PEACH, true);
+    CollisionController::GetInstance().SetCollisionGroup2D(Collider2DBase::TAG_2D::MOUSE_CURSOR,
+        Collider2DBase::TAG_2D::WAVE, true);
+    CollisionController::GetInstance().SetCollisionGroup2D(Collider2DBase::TAG_2D::MOUSE_CURSOR,
+        Collider2DBase::TAG_2D::ONI_GASHIMA, true);
+        
+#endif // _DEBUG
+
+    // メニュー選択有効化
+    isSelectMenu_ = true;
+
+
+    // BGM
+    SoundManager::GetInstance().Play(SoundManager::SOUND::BGM_TITLE_SEA);
+    SoundManager::GetInstance().Play(SoundManager::SOUND::BGM_TITLE_THUNDER);
+
+    // 効果音
+    SoundManager::GetInstance().Add(SoundManager::TYPE::SE, SoundManager::SOUND::SE_SELECT
+        , ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::SE_SELECT));
 }
 
 void SceneTitle::Update(void)
@@ -188,15 +261,38 @@ void SceneTitle::Update(void)
 
     auto& keyConfInputManager = KeyConfInputManager::GetInstance();
 
-    // スティック入力による選択インデックスの更新
-    Vector2F stick = keyConfInputManager.GetLeftStickRaw();
-    constexpr float THRESHOLD = 0.5f;
-    constexpr int STICK_TINERVAL = 15;
-
     // マウス座標の更新
     Vector2 mousePos = keyConfInputManager.GetMousePosition();
     Vector2F mousePosF(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y));
     cursorCollider_->SetCenterPos(mousePosF);
+
+#ifdef _DEBUG
+
+    if (KeyConfInputManager::GetInstance().isTrigerDown("APPLY_DEBUG"))
+    {
+        isDebugMode_ = true;
+    }
+
+    
+
+    if (isDebugMode_ == true)
+    {
+
+        if (KeyConfInputManager::GetInstance().isTrigerDown("UNAPPLY_DEBUG"))
+        {
+            isDebugMode_ = false;
+        }
+
+        UpdateGui();
+
+        return; 
+    }
+#endif
+
+    // スティック入力による選択インデックスの更新
+    Vector2F stick = keyConfInputManager.GetLeftStickRaw();
+    constexpr float THRESHOLD = 0.5f;
+    constexpr int STICK_TINERVAL = 15;
 
     if (isSelectMenu_)
     {
@@ -260,45 +356,46 @@ void SceneTitle::Update(void)
             ProcessMenuState();
         }
     }
+
 }
 
 void SceneTitle::Draw(void)
 {
 
     time_ += 0.02f;
+    waveMaterial_.SetTime(time_);
+
+    const float PEACH_SCALE = 0.5f;
+    const float WAVE_SCALE = 1.0f;
+    const float ONISIMA_SCALE = 1.0f;
 
     float amplitude = 20.0f;
     float bobSpeed = 3.0f;
     float offsetY = std::sinf(time_ * bobSpeed) * amplitude;
-    float peachPosY = Application::SCREEN_HALF_Y + offsetY;
-    int peachPosX = -20;
-    int wavePosY = 20;
-    int oniSimaPosX = Application::SCREEN_HALF_X - 100;
-    int oniSimaPosY = 30;
-    const float PEACH_SCALE = 0.5f;
-    const float WAVE_SCALE = 1.0f;
-    const float ONISIMA_SCALE = 1.0f;
-    auto* shaderPeach = ShaderManager::GetInstance().GetShaderNormal();
-    auto* shaderOniSima = ShaderManager::GetInstance().GetShaderNormal();
-    auto* shaderWave = ShaderManager::GetInstance().GetShaderWave();
 
-    shaderOniSima->SetAmbient(0.8f);
-    shaderOniSima->Draw(oniSimaPosX, oniSimaPosY, oniSimaHandle_, oniSimaNormalHandle_, ONISIMA_SCALE);
+    auto& shaderCtrl = ShaderController::GetInstance();
 
 
-    shaderPeach->SetLightDirection(0.5f, 0.5f, 0.5f);
-    shaderPeach->SetAmbient(0.8f);
+    DrawRotaGraph(0, 0, 1.0f, 0.0f, backgroundHandle_, true);
 
-    shaderWave->SetWaveParam(time_, 3.0f, 0.015f);
+    // 鬼ヶ島の描画
+    shaderCtrl.CreateShaderDraw(ShaderLibrary::SHADER_TYPE::NORMAL, Application::SCREEN_HALF_X - 100, 30,
+        oniSimaHandle_, ONISIMA_SCALE, oniSimaMaterial_, oniSimaNormalHandle_);
 
-    ShaderManager::GetInstance().DrawNormalAndWave(0, wavePosY, 
-        waveHandle_, waveNormalHandle_, WAVE_SCALE);
+    // 波の描画
+    shaderCtrl.CreateShaderDraw(ShaderLibrary::SHADER_TYPE::NORMAL_WAVE,
+        0, 20, waveHandle_, WAVE_SCALE, waveMaterial_, waveNormalHandle_);
 
-    shaderPeach->Draw(peachPosX, static_cast<int>(peachPosY),
-        peachHandle_, peachNormalHandle_, PEACH_SCALE);
+    // 桃の描画
+    shaderCtrl.CreateShaderDraw(ShaderLibrary::SHADER_TYPE::NORMAL, -20, static_cast<int>(Application::SCREEN_HALF_Y + offsetY),
+        peachHandle_, PEACH_SCALE, peachMaterial_, peachNormalHandle_);
 
-    const int IMAGET_TITLE_Y = Application::SCREEN_SIZE_Y / 4;
-    DrawRotaGraph(Application::SCREEN_HALF_X, IMAGET_TITLE_Y, 0.7f, 0.0f, imageTitle_, true);
+    const int IMAGET_TITLE_Y = 0;
+    const int IMAGET_TITLE_X = (Application::SCREEN_HALF_X / 2) + 20;
+
+    // タイトル画像の描画
+    shaderCtrl.CreateShaderDraw(ShaderLibrary::SHADER_TYPE::NORMAL, IMAGET_TITLE_X,
+        IMAGET_TITLE_Y, imageTitle_, PEACH_SCALE, titleMaterial_, titleNormalHandle_);
 
     const float DEFAULT_SCALE = 0.5f;
     using TAG_2D = Collider2DBase::TAG_2D;
@@ -350,12 +447,12 @@ void SceneTitle::ProcessMenuState(void)
     {
         case MENU_ITEM::SOLO:
         {
-            auto playerJob = { PlayerBase::JOB_TYPE::RAPID_FIRE };
+            auto playerJob = { PlayerBase::JOB_TYPE::BOMB };
             SceneManager::GetInstance()
-               .ChangeScene(std::make_shared<SceneGame>(playerJob));
+             .ChangeScene(std::make_shared<SceneGame>(playerJob));
                
-            //SceneManager::GetInstance()
-              // .ChangeScene(std::make_shared<SceneLobby>(false));
+           //SceneManager::GetInstance()
+             // .ChangeScene(std::make_shared<SceneTitle>());
         }
         break;
 
@@ -369,6 +466,24 @@ void SceneTitle::ProcessMenuState(void)
             Application::GetInstance().GameEnd();
         break;
     }
-
 }
 
+void SceneTitle::UpdateGui(void)
+{
+    // クリックされたら、対象のGUIをコントローラに渡す
+    if (KeyConfInputManager::GetInstance().isTrigerDown("OK"))
+    {
+        auto& colCtrl = CollisionController::GetInstance();
+        using TAG = Collider2DBase::TAG_2D;
+
+        if (colCtrl.IsTagCollidingWithTag2D(TAG::MOUSE_CURSOR, TAG::PEACH)) {
+            GuiController::GetInstance().SetActiveGui(peachGui_);
+        }
+        else if (colCtrl.IsTagCollidingWithTag2D(TAG::MOUSE_CURSOR, TAG::WAVE)) {
+            GuiController::GetInstance().SetActiveGui(waveGui_);
+        }
+        else if (colCtrl.IsTagCollidingWithTag2D(TAG::MOUSE_CURSOR, TAG::ONI_GASHIMA)) {
+            GuiController::GetInstance().SetActiveGui(oniSimaGui_);
+        }
+    }
+}

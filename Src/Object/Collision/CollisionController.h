@@ -100,6 +100,13 @@ public:
 	void SetActorColliderRadius(ActorBase* _targetActor, ColliderBase::TAG _targetTag, 
 		float _radius);
 
+	/// @brief 指定したタグの球コライダーのローカル座標を変更する
+	/// @param _targetActor 変更したいアクター
+	/// @param _targetTag 変更したいコライダータグ
+	/// @param _localPosition 新しい座標(ローカル座標)
+	void SetActorSphereLocalPos(ActorBase* _targetActor, ColliderBase::TAG _targetTag,
+		const VECTOR& _localPosition);
+
 	/// @brief 指定したタグのカプセルコライダーの始点・終点・半径を一括で変更する
 	/// @param _targetActor 変更したいアクター
 	/// @param _targetTag 変更したいコライダーのタグ
@@ -155,9 +162,6 @@ private:
 	// カリングを行う距離のデフォルト値
 	static constexpr float DEFAULT_CULL_DIST = 5000.0f;
 
-	// 更新のインターバル時間
-	static constexpr float UPDATE_INTERVAL = 0.016f;
-
 	// 配列サイズ
 	static const size_t MATRIX_SIZE_2D = 32;
 
@@ -184,8 +188,7 @@ private:
 	std::array<std::array<bool, MATRIX_SIZE_2D>, MATRIX_SIZE_2D> collisionMatrix2D_;
 
 	// 内部パラメータ関連
-	float cullingDistSquare_;           // カリング距離の2乗（計算高速化用）
-	float updateTimer_;                 // 更新タイマー
+	float cullingDistSquare_;           // カリング距離の2乗（計算高速化用
 
 	/// @brief コンストラクタ
 	CollisionController(void);

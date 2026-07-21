@@ -64,3 +64,7 @@ void SceneResult::Draw(void)
 void SceneResult::Release(void)
 {
 }
+
+void SceneResult::UpdateGui(void)
+{
+}

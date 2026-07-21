@@ -43,6 +43,24 @@ public:
     void Release(void) override;
 
 private:
+    static constexpr int ENEMYS_POP = 7;
+
+
+    const std::vector<VECTOR> ENEMY_POS = {
+        {0,0,0},{100,0,100},{200,0,200},{300,0,300},
+        {-100,0,-100},{-200,0,-200},{-300,0,-300},
+
+        {100,0,0},{200,0,100},{300,0,200},{400,0,300},
+        {-200,0,-100},{-300,0,-200},{-400,0,-300},
+
+        {2,0,0},{300,0,100},{400,0,200},{500,0,300},
+        {-300,0,-100},{-400,0,-200},{-500,0,-300},
+
+        {3,0,0},{400,0,100},{500,0,200},{600,0,300},
+        {-400,0,-100},{-500,0,-200},{-600,0,-300},
+    };
+
+
 
     enum class GAME_STATE
     {
@@ -59,7 +77,7 @@ private:
 
     std::unique_ptr<Boss> boss_;
 
-    std::unique_ptr<EnemyRobo>enemyRobo_;
+    std::vector<std::unique_ptr<EnemyRobo>>enemyRobos_;
 
     std::unique_ptr<Stage> stage_;
 
@@ -94,4 +112,7 @@ private:
     void DamageProcess(void);
 
     void UpdateGameTime(void);
+
+    /// @brief GuiópÇÃçXêVèàóù
+    void UpdateGui(void) override;
 };
