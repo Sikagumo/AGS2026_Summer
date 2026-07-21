@@ -10,6 +10,12 @@ ShaderMaterial::ShaderMaterial(void)
 	waveSpeed_ = 3.0f;
 	waveForce_ = 0.015f;
 	useNormal_ = 1.0f;
+
+	resolutionX_ = 1920;
+	resolutionY_ = 1080;
+	rainIntensity_ = 0.0f;
+	rainIntensityBack_ = 0.0f;
+	rainColor = COLOR_F();
 }
 
 ShaderMaterial::~ShaderMaterial(void)
@@ -51,4 +57,13 @@ void ShaderMaterial::SetUseNormalMap(bool _use)
 bool ShaderMaterial::IsUseNormalMap(void) const
 {
 	return useNormal_ > 0.5f;
+}
+
+void ShaderMaterial::SetUseRainy(float _rainPow, float _rainPowBack)
+{
+	const COLOR_F RAIN_COLOR = { 0.75f, 0.82f, 0.9f };
+	rainColor = RAIN_COLOR;
+
+	rainIntensity_ = _rainPow;
+	rainIntensityBack_ = _rainPowBack;
 }

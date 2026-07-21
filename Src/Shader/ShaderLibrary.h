@@ -15,6 +15,7 @@ public:
 		NORMAL,
 		WAVE,
 		NORMAL_WAVE,
+		RAINY,
 	};
 
 	/// @brief コンストラクタ

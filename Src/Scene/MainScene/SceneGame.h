@@ -11,6 +11,7 @@
 #include "../../Object/Actor/Stage/Stage.h"
 #include "../../Object/Common/DamageController.h"
 #include "../../Common/GameTimer.h"
+#include "../../Shader/ShaderMaterial.h"
 
 
 /// @brief ゲーム本編のメインロジックを管理するシーンクラス
@@ -94,6 +95,9 @@ private:
 
     std::unique_ptr<GameTimer> gameTimer_;
 
+
+    ShaderMaterial rainyMaterial_;
+
     int targetHpImage_;
     int targetHpBerImage_;
     int gameTexts_;
@@ -108,6 +112,7 @@ private:
     int playerHpImage_;
     int playerHpImageBack_;
 
+    float tempTime_;
 
     float CalcHpBarScale(const VECTOR& _targetPos);
 

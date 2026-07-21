@@ -15,6 +15,7 @@ void ShaderLibrary::Initialize(void)
 	LoadPixelShader(SHADER_TYPE::NORMAL, (Application::PATH_SHADER + "NormalMap.cso").c_str());
 	LoadPixelShader(SHADER_TYPE::WAVE, (Application::PATH_SHADER + "NormalMap.cso").c_str());
 	LoadPixelShader(SHADER_TYPE::NORMAL_WAVE, (Application::PATH_SHADER + "NormalMap.cso").c_str());
+	LoadPixelShader(SHADER_TYPE::RAINY, (Application::PATH_SHADER + "Rainy.cso").c_str());
 }
 
 void ShaderLibrary::Release(void)

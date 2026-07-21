@@ -13,6 +13,7 @@
 #include "../../Utility/UtilityMath.h"
 #include "../../Application.h"
 #include "../../Manager/Decoration/EffectManager.h"
+#include "../../Shader/ShaderController.h"
 #include "SceneTitle.h"
 #include "SceneResult.h"
 
@@ -32,7 +33,7 @@ SceneGame::SceneGame(std::vector<PlayerSelectType> _playerSelectType)
 	, targetHpBerImage_(-1)
 	, gameTimer_(nullptr)
 {
-	
+	tempTime_ = 0.0f;
 	for (int i = 0; i < _playerSelectType.size(); i++)
 	{
 		auto job = _playerSelectType.at(i).job;
@@ -141,6 +142,8 @@ void SceneGame::Initialize(void)
 
 	damageController_->SetPlayerMaxHp(players_.at(0)->GetMaxHp());
 	SoundManager::GetInstance().Play(SoundManager::SOUND::BGM_GAME);
+
+	rainyMaterial_.SetUseRainy(1.0f, 1.0f);
 }
 
 void SceneGame::Update(void)
@@ -259,6 +262,10 @@ void SceneGame::UpdateGameTime(void)
 	{
 		SceneManager::GetInstance().ChangeScene(std::make_shared<SceneResult>(true));
 	}
+
+	tempTime_ += TimeManager::GetInstance().GetDeltaTime();
+	//rainyMaterial_.SetTime(tempTime_);
+	rainyMaterial_.SetTime(TimeManager::GetInstance().GetGameTime());
 }
 
 void SceneGame::Draw(void)
@@ -287,13 +294,19 @@ void SceneGame::Draw(void)
 
 	DrawRotaGraph((Application::SCREEN_HALF_X - 300), 35, 0.5, 0.0, uiGame_.at(0), true);
 
+	ShaderController::GetInstance()
+		.CreateShaderDrawRainy(0, 0, rainyMaterial_);
+
 	DrawHpBerPlayer();
+
+
 
 #ifdef _DEBUG
 	DrawDebug();
 #endif // _DEBUG
 
 	SceneManager::GetInstance().GetCamera()->DrawDebug();
+
 }
 
 void SceneGame::Release(void)

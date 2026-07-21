@@ -55,6 +55,7 @@ void ShaderController::CreateShaderDraw(ShaderLibrary::SHADER_TYPE _shaderType, 
     req.buffer.lightY = _material.GetLightDirY();
     req.buffer.lightZ = _material.GetLightDirZ();
     req.buffer.ambient = _material.GetAmbient();
+
     req.buffer.time = _material.GetTime();
     req.buffer.waveSpeed = _material.GetWaveSpeed();
     req.buffer.waveForce = _material.GetWaveForce();
@@ -67,6 +68,29 @@ void ShaderController::CreateShaderDraw(ShaderLibrary::SHADER_TYPE _shaderType, 
         shaderRenderer_->PixelShaderDraw(shader, req);
     }
 }
+
+void ShaderController::CreateShaderDrawRainy(int _x, int _y, const ShaderMaterial& _material) const
+{
+    // 描画リクエストのベースを作る
+    DrawRequest req(_x, _y, -1, 1.0f);
+
+    req.bufferRain.resolutionX = _material.GetResolutionX();
+    req.bufferRain.resolutionY = _material.GetResolutionY();
+    req.bufferRain.time = _material.GetTime();
+
+    req.bufferRain.intensity = _material.GetRainIntensity();
+    req.bufferRain.intensityBack = _material.GetRainIntensityBack();
+    req.bufferRain.rainColor = _material.GetRainColor();
+
+    // 職人に渡す
+    ShaderBase* shader = shaderLibrary_->GetShader(ShaderLibrary::SHADER_TYPE::RAINY);
+    if (shader)
+    {
+        shaderRenderer_->RainyShaderDraw(shader, req);
+    }
+}
+
+
 void ShaderController::Release(void)
 {
     shaderRenderer_->Release();

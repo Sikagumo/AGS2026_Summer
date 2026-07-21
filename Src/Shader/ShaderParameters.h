@@ -1,4 +1,5 @@
 #pragma once
+#include <DxLib.h>
 
 struct alignas(16) IntegratedGpuBuffer
 {
@@ -15,6 +16,23 @@ struct alignas(16) IntegratedGpuBuffer
     float useNormal = 1.0f;
 };
 
+struct alignas(16) IntegratedGpuBufferRain
+{
+    // 画面解像度 (px)
+    float resolutionX = 0.0f;
+    float resolutionY = 0.0f;
+    float time = 0.0f;
+    float dummy1;
+
+    // 雨の強さ(0.0～1.0)
+    float intensity = 0.0f;
+    float intensityBack = 0.0f;
+    float dummy2;
+    float dummy3;
+
+    COLOR_F rainColor = COLOR_F();
+};
+
 struct DrawRequest
 {
     int x = 0;
@@ -23,6 +41,7 @@ struct DrawRequest
     int textureHandle = -1;
     int normalMapHandle = -1;
     IntegratedGpuBuffer buffer;
+    IntegratedGpuBufferRain bufferRain;
 
     // コンストラクタ
     DrawRequest(void) = default;
