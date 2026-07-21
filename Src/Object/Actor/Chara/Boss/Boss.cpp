@@ -457,6 +457,16 @@ void Boss::ChangeStateLaserAttack(void)
 void Boss::ChangeStateEnd(void)
 {
 	stateUpdate_ = std::bind(&Boss::UpdateEnd, this);
+	animation_->Play(static_cast<int>(ANIM_TYPE::JUMPBEFORE), false);
+	weaponCannonL_->SetHp(1);
+	weaponCannonR_->SetHp(1);
+	weaponMGL_->SetHp(1);
+	weaponMGR_->SetHp(1);
+	weaponMPL_->SetHp(1);
+	weaponMPR_->SetHp(1);
+	weaponRG_->SetHp(1);
+	EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_PLAYER_BLAST, transformBody_.pos, { 0,0,0 }, { 35,35,35 }, 1, this);
+
 }
 //===========================================================================================================================================================================================================================================================
 
@@ -522,6 +532,8 @@ void Boss::UpdateProcess(void)
 	camera->SetLockOnTargets(Camera::LOCKON_TARGET::BOSS_WEAPON_MP_L, weaponMPL_->GetPos(), weaponMPL_->GetHp());
 	camera->SetLockOnTargets(Camera::LOCKON_TARGET::BOSS_WEAPON_MP_R, weaponMPR_->GetPos(), weaponMPR_->GetHp());
 	camera->SetLockOnTargets(Camera::LOCKON_TARGET::BOSS_WEAPON_RG, weaponRG_->GetPos(), weaponRG_->GetHp());
+
+	cameraPos_ = camera->GetPos();
 }
 
 void Boss::UpdateProcessPost(void)
@@ -534,7 +546,7 @@ void Boss::UpdateIdle(void)
 {
 	transformBody_.pos = MV1GetFramePosition(transform_.modelId, JOINT_FEET_BODY);
 	LookPlayer();
-	//attackCount_++;
+	attackCount_++;
 	if (hp_ <= laserShotHp_ && attackCount_ >= attackInterval_)
 	{
 		ChangeState(STATE::LASER);
@@ -773,7 +785,7 @@ void Boss::UpdateStateLaserAttack(void)
 			laserAttackRot_ = 0.0f;
 			weaponRG_->ChangeState(WeaponRG::STATE::IDLE);
 			
-			ChangeState(STATE::IDLE);
+			ChangeState(STATE::END);
 		}
 		transformBody_.quaRot = Quaternion::Mult(transformBody_.quaRot, Quaternion::AngleAxis(UtilityMath::Deg2RadF(laserRotSpeed_), UtilityMath::AXIS_Y));
 	}
@@ -782,7 +794,28 @@ void Boss::UpdateStateLaserAttack(void)
 
 void Boss::UpdateEnd(void)
 {
-	
+	if (endCount_ >= 4)
+	{
+
+	}
+	else if (endCount_>=3)
+	{
+		weaponCannonL_->SetHp(0);
+		weaponCannonR_->SetHp(0);
+		weaponMGL_->SetHp(0);
+		weaponMGR_->SetHp(0);
+		weaponMPL_->SetHp(0);
+		weaponMPR_->SetHp(0);
+		weaponRG_->SetHp(0);
+
+		bodyDir_ = VSub(transform_.pos,cameraPos_ );
+		bodyDir_.y = 0.0f;
+		bodyDir_ = VNorm(bodyDir_);
+	}
+
+
+
+	endCount_++;
 }
 
 //===========================================================================================================================================================================================================================================================
@@ -831,9 +864,9 @@ void Boss::LookPlayer(void)
 	if (static_cast<int>(gameTime) % 50 == 0)
 	{
 
-		mainPos_ = playerPos_[static_cast<int>(gameTime) % playerSize_];
+		mainIdx_ = static_cast<int>(gameTime) % playerSize_;
 	}
-	
+	mainPos_ = playerPos_[mainIdx_];
 	VECTOR moveDir = VSub(mainPos_, transformBody_.pos);
 	moveDir.y = 0.0f;
 	moveDir = VNorm(moveDir);
@@ -860,9 +893,9 @@ void Boss::WeaponSet(void)
 	if (static_cast<int>(gameTime) % playerSize_ == 0)
 	{
 
-		mpPos_ = playerPos_[static_cast<int>(gameTime) % playerSize_];
+		mpIdx_ = static_cast<int>(gameTime) % playerSize_;
 	}
-
+	mpPos_ = playerPos_[mpIdx_];
 
 
 	weaponMPL_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MP_L)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MP_L)].transform, ColliderBase::TAG::WEAPON_MP_L, mpPos_);
@@ -874,9 +907,9 @@ void Boss::WeaponSet(void)
 	if (static_cast<int>(gameTime) % 10 == 0)
 	{
 
-		CannonPos_ = playerPos_[static_cast<int>(gameTime) % playerSize_];
+		cannonIdx_ = static_cast<int>(gameTime) % playerSize_;
 	}
-
+	CannonPos_ = playerPos_[cannonIdx_];
 	weaponCannonL_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_CANNON_L)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_CANNON_L)].transform, ColliderBase::TAG::WEAPON_CANNON_L, CannonPos_);
 	weaponCannonR_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_CANNON_R)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_CANNON_R)].transform, ColliderBase::TAG::WEAPON_CANNON_R, CannonPos_);
 }
