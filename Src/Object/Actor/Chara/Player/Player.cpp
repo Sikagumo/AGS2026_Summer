@@ -17,6 +17,7 @@
 #include "../Weapon/Bullet/Player/PBulletBig.h"
 #include "../Weapon/Bullet/Player/PBulletBomb.h"
 #include "../Weapon/Bullet/Player/PBulletRecovery.h"
+#include "../Weapon/Bullet/Player/PBulletPoison.h"
 #include "../Weapon/Bullet/Player/PBulletNormal.h"
 #include "../../../../Application.h"
 #include "../../../../Net/NetStructures.h"
@@ -41,17 +42,19 @@ namespace
 	// âÒîóÕ
 	static constexpr float DODGE_POW = 10.0f;
 	constexpr float TIME_DODGE = 0.65f;
-	constexpr float TIME_WAIT_DODGE = 1.75f;
+	constexpr float TIME_WAIT_DODGE = 1.5f;
 
 	constexpr float BODY_POS_OFFSET_Y = 25.0f;
 
 	constexpr float MOVE_SPEED = 8.5f;
 	constexpr float MOVE_SPEED_SHOT = (MOVE_SPEED * 0.3f);
-}
+
+	static constexpr float SHOT_RAPID_TERM = 0.025f;
+};
 
 
-Player::Player(int _playerNo, JOB_TYPE _jobType, const VECTOR& _startPos)
-	: PlayerBase::PlayerBase(_playerNo, _jobType, _startPos)
+Player::Player(int _playerNo, JOB_TYPE _jobType, SKIN_TYPE _skinType, const VECTOR& _startPos)
+	: PlayerBase::PlayerBase(_playerNo, _jobType, _startPos, _skinType)
 	, shadowHandle_(-1)
 	, animType_(ANIM_TYPE::IDLE)
 	, curAttackNum_(0)
@@ -74,7 +77,7 @@ Player::Player(int _playerNo, JOB_TYPE _jobType, const VECTOR& _startPos)
 
 	std::array< SHOT_TYPE, static_cast<int>(JOB_TYPE::MAX)>
 		JOB_SHOT_TYPE
-	{ SHOT_TYPE::BOMB, SHOT_TYPE::SELECT_BIG, SHOT_TYPE::RAPID_FIRE, SHOT_TYPE::RECOVERY };
+	{ SHOT_TYPE::BOMB, SHOT_TYPE::BIG, SHOT_TYPE::RAPID_FIRE, SHOT_TYPE::RECOVERY };
 
 	shotType_ = JOB_SHOT_TYPE[static_cast<int>(jobType_)];
 
@@ -84,30 +87,27 @@ Player::Player(int _playerNo, JOB_TYPE _jobType, const VECTOR& _startPos)
 
 void Player::Load(void)
 {
-	std::array<ResourceManager::SRC, 4>
-		modelSrc = { ResourceManager::SRC::MODEL_PLAYER_HUMAN
-					, ResourceManager::SRC::MODEL_PLAYER_MONKEY
-					,ResourceManager::SRC::MODEL_PLAYER_BIRD
-					,ResourceManager::SRC::MODEL_PLAYER_DOG };
+	const std::map<SKIN_TYPE, ResourceManager::SRC>
+		SKIN_SRC = { { SKIN_TYPE::HYMAN, ResourceManager::SRC::MODEL_PLAYER_HUMAN}
+					, { SKIN_TYPE::MONKEY, ResourceManager::SRC::MODEL_PLAYER_MONKEY}
+					, { SKIN_TYPE::BIRD, ResourceManager::SRC::MODEL_PLAYER_BIRD}
+					, { SKIN_TYPE::DOG, ResourceManager::SRC::MODEL_PLAYER_DOG} };
 
 	transform_.modelId = ResourceManager::GetInstance()
-		.LoadModelDuplicate(modelSrc.at(static_cast<int>(jobType_)));
-
-	//SetPlayerType(PLAYER_TYPE::BIRD);
-	//SetPlayerType(playerType_);
+		.LoadModelDuplicate(SKIN_SRC.at(playerType_));
 }
-void Player::SetPlayerType(PLAYER_TYPE _type)
+void Player::SetPlayerType(SKIN_TYPE _type)
 {
 	using SRC = ResourceManager::SRC;
 
-	const std::array<SRC, static_cast<int>(PLAYER_TYPE::MAX)> MODEL_RESOURCES
+	const std::array<SRC, static_cast<int>(SKIN_TYPE::MAX)> MODEL_RESOURCES
 		= { SRC::MODEL_PLAYER_HUMAN, SRC::MODEL_PLAYER_DOG, SRC::MODEL_PLAYER_MONKEY, SRC::MODEL_PLAYER_BIRD };
 
-	PLAYER_TYPE pType = _type;
-	if (_type == PLAYER_TYPE::MAX)
+	SKIN_TYPE pType = _type;
+	if (_type == SKIN_TYPE::MAX)
 	{
-		int rand = GetRand(static_cast<int>(PLAYER_TYPE::MAX));
-		pType = static_cast<PLAYER_TYPE>(rand);
+		int rand = GetRand(static_cast<int>(SKIN_TYPE::MAX));
+		pType = static_cast<SKIN_TYPE>(rand);
 	}
 
 	playerType_ = pType;
@@ -140,7 +140,7 @@ void Player::InitAnimation(void)
 	}
 	else if (jobType_ == JOB_TYPE::RAPID_FIRE)
 	{
-		constexpr float THROW_SPEED_RAPID = 75.0f;
+		constexpr float THROW_SPEED_RAPID = 200.0f;
 		 throwSpeed = THROW_SPEED_RAPID;
 		//animSpeedRapid_ = throwSpeed = THROW_SPEED_RAPID_START;
 	}
@@ -180,13 +180,15 @@ void Player::InitAnimation(void)
 void Player::InitTransform(void)
 {
 	constexpr float MODEL_SCALE = 0.625f;
-	constexpr float LOCAL_POS_Y = -3.25f;
+	constexpr float LOCAL_POS_Y = -10.25f;
 	constexpr float LOCAL_ROT_Y = 180.0f;
 
 	transform_.InitTransform(MODEL_SCALE
 		, Quaternion::Identity()
 		, Quaternion::AngleAxis(UtilityMath::Deg2RadF(LOCAL_ROT_Y), UtilityMath::AXIS_Y)
 		, UtilityMath::VECTOR_ZERO, VGet(0.0f, LOCAL_POS_Y, 0.0f));
+
+	transform_.pos = START_POS;
 
 	transform_.Update();
 }
@@ -242,6 +244,16 @@ void Player::InitPost(void)
 		, std::bind(&Player::Dodge, this)
 		, timeStop, timeStopActive);
 
+	// åÇîj
+	actionNum = static_cast<int>(ACTION_TYPE::DEFEAT);
+	timeActive = 1.5f;
+	timeActionActive = 1.5f;
+	timeEnd = 0.5f;
+	timeStop = 0.0f;
+	timeStopActive = 0.0f;
+	actionController_->SetAction(actionNum, timeActive, timeActionActive, timeEnd
+		, std::bind(&Player::Defeat, this));
+
 	// çUåÇèàóù
 	timeInput = SHOT_TIME_ACTIVE_INPUT;
 	timeEnd = SHOT_TIME_END;
@@ -286,6 +298,15 @@ void Player::InitPost(void)
 		actionController_->SetAction(actionNum, timeActive, timeActionActive, timeEnd
 			, std::bind(&Player::ShotBullet, this)
 			, timeStop, timeStopActive, timeInput);
+
+
+		actionNum = static_cast<int>(ACTION_TYPE::ATTACK_SPECIAL);
+		timeActive += (SHOT_TIME_INCREMENT * 2);
+		timeInput = 0.0f;
+
+		actionController_->SetAction(actionNum, timeActive, timeActionActive, timeEnd
+			, std::bind(&Player::ShotBullet, this)
+			, timeStop, timeStopActive, timeInput);
 	}
 	else if (jobType_ == JOB_TYPE::RAPID_FIRE)
 	{
@@ -302,8 +323,31 @@ void Player::InitPost(void)
 
 		actionNum = static_cast<int>(ACTION_TYPE::ATTACK);
 		timeEnd = 0.0f;
-		timeActive = 0.4f;
-		timeActionActive = 0.325f;
+		timeActive = 0.5f;
+		timeActionActive = 0.1f;
+
+		actionController_->SetAction(actionNum, timeActive, timeActionActive, timeEnd
+			, std::bind(&Player::ShotBullet, this));
+	}
+	else if (jobType_ == JOB_TYPE::SUPPORT)
+	{
+		constexpr float SHOT_TIME_ACTIVE = 1.0f; // óLå¯éûä‘
+		constexpr float SHOT_TIME_ACTION_ACTIVE = 0.75f; // çsìÆóLå¯éûä‘
+
+		constexpr float SHOT_TIME_STOP = 0.5f; // í‚é~éûä‘
+		constexpr float SHOT_TIME_STOP_ACTIVE = 0.25f; // í‚é~óLå¯âªéûä‘
+
+		actionNum = static_cast<int>(ACTION_TYPE::ATTACK_SPECIAL);
+		timeActive = SHOT_TIME_ACTIVE;
+		timeActionActive = SHOT_TIME_ACTION_ACTIVE;
+
+		actionController_->SetAction(actionNum, timeActive, timeActionActive, timeEnd
+			, std::bind(&Player::ShotBullet, this));
+
+
+		actionNum = static_cast<int>(ACTION_TYPE::ATTACK);
+		timeActive = SHOT_TIME_ACTIVE;
+		timeActionActive = SHOT_TIME_ACTION_ACTIVE;
 
 		actionController_->SetAction(actionNum, timeActive, timeActionActive, timeEnd
 			, std::bind(&Player::ShotBullet, this));
@@ -406,11 +450,13 @@ void Player::UpdateProcess(void)
 	//// à⁄ìÆëÄçÏ
 	//ProcessMove();
 
+	UpdateBullets();
+
+	//ProcessAttack();
+
 	//ProcessAttack();
 
 	//ProcessDodge();
-
-	UpdateBullets();
 
 	// êÅÇ¡îÚÇŒÇµèàóù
 	ProcessKnock();
@@ -733,6 +779,14 @@ void Player::Dodge(void)
 	curTimeWaitDodge_ = TIME_WAIT_DODGE;
 }
 
+void Player::ProcessDefeat(void)
+{
+}
+void Player::Defeat(void)
+{
+
+}
+
 void Player::ProcessKnock(void)
 {
 	/* êÅÇ¡îÚÇŒÇµÇÃèdóÕâ¡éZ */
@@ -869,13 +923,15 @@ void Player::ProcShotSpecial(void)
 void Player::UpdateBullets(void)
 {
 	// î≠éÀéûÇÃéËÇÃÉtÉåÅ[ÉÄÇ…ê∂ê¨ÇµÇΩíeÇí«è]Ç≥ÇπÇÈ
-	constexpr int FRAME_FINGER_LEFT = 23;
-	constexpr int FRAME_FINGER_RIGHT = 39;
+	const int FRAME_FINGER_LEFT = FRAME_NUM_FINGER_LEFT.at(playerType_);
+	const int FRAME_FINGER_RIGHT = FRAME_NUM_FINGER_RIGHT.at(playerType_);
 	const int FRAME_FINGER = ((curAttackNum_ % 2 == 0) ? FRAME_FINGER_LEFT : FRAME_FINGER_RIGHT);
 
 	const int FRAME_HAND_PALM = (FRAME_FINGER - 1);
-	VECTOR posFinger = MV1GetFramePosition(transform_.modelId, FRAME_FINGER);
-	VECTOR posHandPalm = MV1GetFramePosition(transform_.modelId, FRAME_HAND_PALM);
+
+	VECTOR posFinger = UtilityMath::VECTOR_ZERO, posHandPalm = UtilityMath::VECTOR_ZERO;
+	posFinger = MV1GetFramePosition(transform_.modelId, FRAME_FINGER);
+	posHandPalm = MV1GetFramePosition(transform_.modelId, FRAME_HAND_PALM);
 
 	throwDir_ = UtilityMath::VNormalize(VSub(posFinger, posHandPalm));
 	throwPos_ = posFinger;
@@ -890,6 +946,7 @@ void Player::UpdateBullets(void)
 
 	if (shotIndex_ != -1)
 	{
+		int temp = MV1GetFrameNum(transform_.modelId);
 		if (animation_->IsStop())
 		{
 			bullets_.at(shotIndex_)->PreActiveProcess();
@@ -941,7 +998,8 @@ void Player::CreateBullet(void)
 		// ägéUíeÇ≈ÇÕçƒóòópê∂ê¨ÇçsÇÌÇ»Ç¢
 		if (shotType_ == SHOT_TYPE::CLUSTER) { break; }
 
-		if (!bullet->IsAlive())
+		if (!bullet->IsAlive()
+			&& static_cast<int>(shotType_) == bullet->GetShotType())
 		{
 			bullet->Init();
 			bullet->Create(transform_.pos, throwDir_, curAttackNum_, (curAttackNum_ >= (attackNumMax_ - 1)));
@@ -950,18 +1008,27 @@ void Player::CreateBullet(void)
 		shotIndex_++;
 	}
 
+	int type = static_cast<int>(shotType_);
 	switch (shotType_)
 	{
-		case SHOT_TYPE::SELECT_BIG:
-			bullet = std::make_unique<PBulletBig>();
+		case SHOT_TYPE::BIG:
+			bullet = std::make_unique<PBulletBig>(type);
 		break;
 
 		case SHOT_TYPE::BOMB:
-			bullet = std::make_unique<PBulletBomb>();
+			bullet = std::make_unique<PBulletBomb>(type);
+		break;
+
+		case SHOT_TYPE::BOMB_FINISH:
+			bullet = std::make_unique<PBulletBomb>(type);
 		break;
 
 		case SHOT_TYPE::RECOVERY:
-			bullet = std::make_unique<PBulletRecovery>();
+			bullet = std::make_unique<PBulletRecovery>(type);
+		break;
+
+		case SHOT_TYPE::POISON:
+			bullet = std::make_unique<PBulletPoison>(type);
 		break;
 
 		// òAéÀ
@@ -970,7 +1037,7 @@ void Player::CreateBullet(void)
 			bullet = std::make_unique<PBulletNormal>
 						(SCALE_RAPID, RADIUS_RAPID, POWER_RAPID
 						, SHOT_SPEED_XZ_RAPID, SHOT_SPEED_Y_RAPID, ALIVE_TIME_RAPID
-						, false);
+						, type, false);
 		}
 		break;
 
@@ -1068,12 +1135,13 @@ std::unique_ptr<PBulletNormal> Player::_CreateClusterBullet(const VECTOR& _throw
 	constexpr float SHOT_SPEED = 7.5f;
 	constexpr float ALIVE_TIME = 1.25f;
 	
-	return std::make_unique<PBulletNormal>(SCALE, RADIUS, POWER, SHOT_SPEED, 0.0f, ALIVE_TIME, false);
+	return std::make_unique<PBulletNormal>(SCALE, RADIUS, POWER, SHOT_SPEED, 0.0f, ALIVE_TIME
+		,static_cast<int>(SHOT_TYPE::CLUSTER) , false);
 }
 
 void Player::ShotBullet(void)
 {
-	// î≠éÀèàóùÇÃóLå¯âª
+
 	bullets_[shotIndex_]->Shot(CalcShotDir());
 	shotIndex_ = -1;
 }
@@ -1087,6 +1155,7 @@ VECTOR Player::CalcShotDir(void)
 		shotDir = VAdd(shotDir, UtilityMath::DIR_UP);
 		shotDir = UtilityMath::VNormalize(shotDir);
 	}
+
 	else if (SceneManager::GetInstance().GetCamera()->GetIsLockOn())
 	{
 		VECTOR throwDir = UtilityMath::VNormalize(

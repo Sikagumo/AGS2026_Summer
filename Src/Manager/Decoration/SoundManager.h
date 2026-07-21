@@ -29,7 +29,9 @@ public:
 		SE_SELECT,
 
 		SE_DAMAGE_PLAYER, // プレイヤー被ダメージ処理
-		SE_DAMAGE_BOSS,
+		SE_HIT_BLAST,
+		SE_PBULLET_POISON,
+		SE_HIT_POISON,
 
 		SE_BOSS_LANDING,//ボスの着地
 		SE_BOSS_MG_FIRE,

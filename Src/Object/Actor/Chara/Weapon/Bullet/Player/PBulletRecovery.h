@@ -12,7 +12,7 @@ public:
 	static constexpr float RECOVERY_RATE = 0.25f;
 
 
-	PBulletRecovery(void);
+	PBulletRecovery(int _shotType);
 
 	~PBulletRecovery(void)override = default;
 
@@ -34,5 +34,9 @@ protected:
 	void ChangeBulletStateProc(void)override;
 
 	void SetParam(void)override;
+
+private:
+
+	float activeTime_;
 };
 

@@ -39,9 +39,9 @@ public:
     /// @brief ‰ğ•úˆ—
     void Release(void) override;
 
-    /// @brief GUIXVˆ— 
-    void UpdateGui(void) override {};
+protected:
 
+    void UpdateGui(void)override {};
 
 private:
 

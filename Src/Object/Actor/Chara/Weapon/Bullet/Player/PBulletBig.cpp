@@ -19,8 +19,8 @@ constexpr float RADIUS_DURATION = 4.5f;
 
 
 
-PBulletBig::PBulletBig(void)
-	: PBulletBase::PBulletBase()
+PBulletBig::PBulletBig(int _shotType)
+	: PBulletBase::PBulletBase(_shotType)
 	, radiusMax_(0.0f), scaleMax_(0.0f)
 	, scaleUpTime_(0.0f), isScaleUp_(false)
 {
@@ -32,14 +32,8 @@ void PBulletBig::Load(void)
 
 void PBulletBig::InitTransform(void)
 {
-	
-}
 
-void PBulletBig::InitPost(void)
-{
-	SetParam();
 }
-
 
 void PBulletBig::UpdatePost(void)
 {

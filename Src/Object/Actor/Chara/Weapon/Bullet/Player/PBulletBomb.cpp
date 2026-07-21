@@ -2,6 +2,7 @@
 #include "PBulletBase.h"
 #include <algorithm>
 #include "../../../../../Collision/CollisionController.h"
+#include "../../../../../../Manager/Decoration/EffectManager.h"
 
 constexpr float RADIUS_BULLET = 9.0f;
 constexpr float RADIUS_BLAST = 250.0f;
@@ -10,8 +11,8 @@ constexpr float TIME_ALIVE_BOMB = 10.0f;
 constexpr int POWER_BOMB = 250;
 
 
-PBulletBomb::PBulletBomb(void)
-	: PBulletBase::PBulletBase()
+PBulletBomb::PBulletBomb(int _shotType)
+	: PBulletBase::PBulletBase(_shotType)
 {
 }
 
@@ -24,11 +25,6 @@ void PBulletBomb::InitTransform(void)
 	
 }
 
-void PBulletBomb::InitPost(void)
-{
-	PBulletBase::InitPost();
-
-}
 
 void PBulletBomb::UpdatePost(void)
 {
@@ -71,7 +67,8 @@ void PBulletBomb::SetParam(void)
 		.at(0)->SetRadius(radiusBlast_);
 
 	power_ = POWER_BOMB;
-	transform_.InitTransform(SCALE_BOMB, transform_.quaRot, Quaternion::Identity());
+	transform_.InitTransform(SCALE_BOMB
+		, transform_.quaRot, Quaternion::Identity());
 }
 
 void PBulletBomb::BlastAction(void)
@@ -92,4 +89,9 @@ void PBulletBomb::BlastAction(void)
 
 	CollisionController::GetInstance()
 		.SetCollisionActive(this, ColliderBase::TAG::PLAYER_BLAST, true);
+
+
+	EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_PLAYER_BLAST,
+		transform_.pos, Quaternion::Identity().ToEuler(),
+		{ 35.0f , 35.0f, 35.0f }, 1.0f, this);
 }

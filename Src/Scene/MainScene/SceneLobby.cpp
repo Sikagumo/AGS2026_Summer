@@ -246,10 +246,9 @@ void SceneLobby::UpdateSingle(void)
     else if (!SoundManager::GetInstance().IsPlaying(SoundManager::SOUND::SE_SELECT))
     {
         // Œø‰Ê‰¹I—¹‚ÉŒˆ’èˆ—‚ğÀs
-        auto playerJob = { static_cast<PlayerBase::JOB_TYPE>(selectedIdx_) };
-
+        auto jobs = { SceneGame::PlayerSelectType(PlayerBase::JOB_TYPE::SUPPORT, PlayerBase::SKIN_TYPE::DOG) };
         SceneManager::GetInstance()
-            .ChangeScene(std::make_shared<SceneGame>(playerJob));
+            .ChangeScene(std::make_shared<SceneGame>(jobs));
     }
 }
 
