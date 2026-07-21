@@ -115,90 +115,23 @@ bool CollisionSphere::CheckSphereVsCapsule(const ColliderBase* _sphereCol,
 	return false;
 }
 
-bool CollisionSphere::CheckSphereVsModel(const ColliderBase* _sphereCol, const ColliderBase* _modelCol, CollisionInfo& _outInfo)
+bool CollisionSphere::CheckSphereVsModel(const ColliderBase* _sphereCol, 
+	const ColliderBase* _modelCol, CollisionInfo& _outInfo)
 {
 	if (!_sphereCol || !_modelCol) { return false; }
 
-	const auto* sphere =  static_cast<const ColliderSphere*>(_sphereCol);
-	const auto* model =  static_cast<const ColliderModel*>(_modelCol);
+	const auto* sphere = static_cast<const ColliderSphere*>(_sphereCol);
+	if (sphere == nullptr) { return false; }
 
-	if (sphere == nullptr || model == nullptr)
+	bool isHit = CheckSphereVsModelCore(sphere->GetWorldPosition(), sphere->GetRadius(),
+		_modelCol, &_outInfo);
+
+	if (isHit)
 	{
-		return false;
-	}
-
-	int modelHandle = model->GetModelHandle();
-
-	if (modelHandle == -1)
-	{
-		return false;
-	}
-
-	VECTOR centerPos = sphere->GetWorldPosition();
-	float radius = sphere->GetRadius();
-
-	// 球体とモデル全体の衝突判定
-	MV1_COLL_RESULT_POLY_DIM hitResult = MV1CollCheck_Sphere(modelHandle, -1, centerPos, radius);
-
-	// 衝突の解析
-	if (hitResult.HitNum > 0)
-	{
-		float maxUpward = -2.0f;
-		int bestIndex = -1;
-
-		for (int i = 0; i < hitResult.HitNum; ++i)
-		{
-			// 除外対象のフレームチェック
-			if (model->IsExcludedFrame(hitResult.Dim[i].FrameIndex))
-			{
-				continue;
-			}
-
-			if (hitResult.Dim[i].Normal.y > maxUpward)
-			{
-				maxUpward = hitResult.Dim[i].Normal.y;
-				bestIndex = i;
-			}
-		}
-
-		if (bestIndex == -1)
-		{
-			MV1CollResultPolyDimTerminate(hitResult);
-			return false;
-		}
-
-		const auto& bestHit = hitResult.Dim[bestIndex];
-
 		_outInfo.myCollider = _sphereCol;
-		_outInfo.hitCollider = _modelCol;
-		_outInfo.hitPosition = bestHit.HitPosition;
-		_outInfo.hitNormal = bestHit.Normal;
-		_outInfo.isActive = true;
-
-		if (bestHit.Normal.y > 0.5f)
-		{
-			float sphereBottomY = centerPos.y - radius;
-
-			_outInfo.penetration = bestHit.HitPosition.y - sphereBottomY;
-		}
-		else
-		{
-			float distance = UtilityMath::MagnitudeF(VSub(bestHit.HitPosition, centerPos));
-
-			_outInfo.penetration = radius - distance;
-		}
-
-		// めり込み量が極端にマイナスにならないよにする
-		if (_outInfo.penetration < 0.0f)
-		{
-			_outInfo.penetration = 0.0f;
-		}
-
-		MV1CollResultPolyDimTerminate(hitResult);
-		return true;
 	}
-	MV1CollResultPolyDimTerminate(hitResult);
-	return false;
+
+	return isHit;
 }
 
 bool CollisionSphere::CheckHitWave(const ColliderBase* _hitCapsuleCol, ColliderBase* _waveCol)
@@ -251,5 +184,88 @@ bool CollisionSphere::CheckHitWave(const ColliderBase* _hitCapsuleCol, ColliderB
 		return false;
 	}
 
+	return true;
+}
+
+bool CollisionSphere::CheckSphereVsModelCore(const VECTOR& _centerPos, float _radius, 
+	const ColliderBase* _modelCol, CollisionInfo* _outInfo)
+{
+	if (!_modelCol) { return false; }
+
+	const auto* model = static_cast<const ColliderModel*>(_modelCol);
+	if (model == nullptr) { return false; }
+
+	int modelHandle = model->GetModelHandle();
+	if (modelHandle == -1) { return false; }
+
+	MV1_COLL_RESULT_POLY_DIM hitResult = MV1CollCheck_Sphere(modelHandle, -1, _centerPos, _radius);
+
+	if (hitResult.HitNum <= 0)
+	{
+		MV1CollResultPolyDimTerminate(hitResult);
+		return false;
+	}
+
+	float maxPenetration = -1.0f;
+	int bestIndex = -1;
+
+	ColliderBase::TAG modelTag = _modelCol->GetCollisionTag();
+
+	for (int i = 0; i < hitResult.HitNum; ++i)
+	{
+		if (model->IsExcludedFrame(hitResult.Dim[i].FrameIndex)) { continue; }
+
+		const auto& poly = hitResult.Dim[i];
+
+		// タグによる法線フィルタ(カプセル版と同じ基準)
+		if (modelTag == ColliderBase::TAG::STAGE && poly.Normal.y <= 0.5f) { continue; }
+		if (modelTag == ColliderBase::TAG::WALL && poly.Normal.y > 0.5f) { continue; }
+
+		VECTOR polyPoint = poly.Position[0];
+		VECTOR toHit = VSub(polyPoint, _centerPos);
+		float distAlongNormal = VDot(toHit, poly.Normal);
+		float polyPenetration = _radius - distAlongNormal;
+
+		if (polyPenetration > maxPenetration)
+		{
+			maxPenetration = polyPenetration;
+			bestIndex = i;
+		}
+	}
+
+	if (bestIndex == -1)
+	{
+		MV1CollResultPolyDimTerminate(hitResult);
+		return false;
+	}
+
+	// 呼び出し側が衝突情報を必要としない場合(スイープ判定など)はここで終了
+	if (_outInfo == nullptr)
+	{
+		MV1CollResultPolyDimTerminate(hitResult);
+		return true;
+	}
+
+	const auto& bestHit = hitResult.Dim[bestIndex];
+
+	// 呼び出し側で設定する
+	_outInfo->myCollider = nullptr;
+	_outInfo->hitCollider = _modelCol;
+
+	VECTOR bestPolyPoint = VScale(
+		VAdd(VAdd(bestHit.Position[0], bestHit.Position[1]), bestHit.Position[2]),
+		1.0f / 3.0f);
+
+	_outInfo->hitPosition = bestPolyPoint;
+	_outInfo->hitNormal = bestHit.Normal;
+	_outInfo->isActive = true;
+
+	VECTOR toHit = VSub(bestPolyPoint, _centerPos);
+	float distAlongNormal = VDot(toHit, bestHit.Normal);
+	_outInfo->penetration = _radius - distAlongNormal;
+
+	if (_outInfo->penetration < 0.0f) { _outInfo->penetration = 0.0f; }
+
+	MV1CollResultPolyDimTerminate(hitResult);
 	return true;
 }

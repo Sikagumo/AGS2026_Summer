@@ -1,5 +1,7 @@
 #pragma once
 
+#include <DxLib.h>
+
 class ColliderBase;
 struct CollisionInfo;
 
@@ -37,6 +39,15 @@ public:
 	/// @param _waveHeight 衝撃波の高さ
 	/// @return 当たっていれば true
 	static bool CheckHitWave(const ColliderBase* _hitCapsuleCol, ColliderBase* _waveCol);
+
+	/// @brief 球とモデルの当たり判定の実処理。中心座標・半径を直接指定
+	/// @param _centerPos 判定したい球の中心座標
+    /// @param _radius 判定したい球の半径
+    /// @param _modelCol 判定対象のモデルコライダー
+    /// @param _outInfo 衝突情報の出力先
+    /// @return 衝突していればtrue
+	static bool CheckSphereVsModelCore(const VECTOR& _centerPos, float _radius,
+		const ColliderBase* _modelCol, CollisionInfo* _outInfo);
 
 private:
 
