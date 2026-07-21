@@ -30,7 +30,7 @@ public:
 
 
 
-    EnemyRobo();
+    EnemyRobo(VECTOR _pos);
     ~EnemyRobo()override;
 
 
@@ -86,6 +86,7 @@ protected:
 	void UpdateStateMove(void);
 	void UpdateEnd(void);
 
+	
 private:
 
 	//当たり判定の座標
@@ -94,16 +95,22 @@ private:
 	static constexpr VECTOR COL_LINE_END_POS = { 0.0f,-1.0f,0.0f };
 	//カプセル
 	static constexpr VECTOR COL_CAPSULE_START_POS = { 0.0f,90.0f,0.0f };
-	static constexpr VECTOR COL_CAPSULE_END_POS = { 0.0f,30.0f,0.0f };
+	static constexpr VECTOR COL_CAPSULE_END_POS = { 0.0f,40.0f,0.0f };
 	static constexpr float COL_CAPSULE_END_RADIUS = 30.0f;
 
+	static constexpr float COUNT_MAX = 10.0f;
 
+	static constexpr float MOVE_SPEED_INIT = 5.0f;
 
+	int hp_;
 	VECTOR playerPos_;
+	VECTOR moveDir_;
+	int count_;
+	bool poizun_;
 
 
 	void LockPlayer(void);
 
-
+	void Damez(void);
 };
 

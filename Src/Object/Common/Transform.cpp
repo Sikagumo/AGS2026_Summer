@@ -93,18 +93,21 @@ void Transform::SetModel(int _model)
 	Update();
 }
 
-void Transform::InitTransform(const VECTOR& _scl, const Quaternion& _rot, const Quaternion& _rotLocal, const VECTOR& _pos)
+void Transform::InitTransform(const VECTOR& _scl, const Quaternion& _rot, const Quaternion& _rotLocal
+								, const VECTOR& _pos, const VECTOR& _posLocal)
 {
 	scl = _scl;
 	quaRot = _rot;
 	quaRotLocal = _rotLocal;
 	pos = _pos;
+	localPos = _posLocal;
 
 	Update();
 }
-void Transform::InitTransform(float _scl, const Quaternion& _rot, const Quaternion& _rotLocal, const VECTOR& _pos)
+void Transform::InitTransform(float _scl, const Quaternion& _rot, const Quaternion& _rotLocal
+								, const VECTOR& _pos, const VECTOR& _posLocal)
 {
-	InitTransform({ _scl,_scl,_scl }, _rot, _rotLocal, _pos);
+	InitTransform({ _scl,_scl,_scl }, _rot, _rotLocal, _pos, _posLocal);
 }
 void Transform::InitTransform(float _scl, const Quaternion& _rot, const Quaternion& _rotLocal)
 {

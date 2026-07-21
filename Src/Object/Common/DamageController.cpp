@@ -214,6 +214,13 @@ void DamageController::Update()
 		playerDamage_ = static_cast<int>(RATE_DAMAGE);
 		damageData_ = playerDamage_;
 	}
+	else if(CollisionController::GetInstance()
+		.IsTagCollidingWithTag(ColliderBase::TAG::ENEMY_ATTACK, ColliderBase::TAG::PLAYER))
+	{
+		// HPäÑçáÉ_ÉÅÅ[ÉW
+		const float RATE_DAMAGE = (playerHpMax_ * pressWave_.attack);
+		playerDamage_ = static_cast<int>(RATE_DAMAGE);
+	}
 }
 
 void DamageController::DebugDraw(void)

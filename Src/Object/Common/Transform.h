@@ -1,6 +1,7 @@
 #pragma once
 #include <DxLib.h>
 #include "../../Common/Quaternion.h"
+#include "../../Utility/UtilityMath.h"
 
 /// <summary>
 /// ÉÇÉfÉãêßå‰ÇÃäÓñ{èÓïÒ
@@ -55,8 +56,10 @@ public:
 	void SetModel(int modelHId);
 
 	/// @brief êîílèâä˙
-	void InitTransform(const VECTOR& _scl,const Quaternion& _rot, const Quaternion& _rotLocal, const VECTOR& _pos);
-	void InitTransform(float _scl,const Quaternion& _rot, const Quaternion& _rotLocal, const VECTOR& _pos);
+	void InitTransform(const VECTOR& _scl,const Quaternion& _rot, const Quaternion& _rotLocal
+						, const VECTOR& _pos, const VECTOR& _posLocal = UtilityMath::VECTOR_ZERO);
+	void InitTransform(float _scl,const Quaternion& _rot, const Quaternion& _rotLocal
+						, const VECTOR& _pos, const VECTOR& _posLocal = UtilityMath::VECTOR_ZERO);
 	void InitTransform(float _scl,const Quaternion& _rot, const Quaternion& _rotLocal);
 	void InitTransform(void);
 

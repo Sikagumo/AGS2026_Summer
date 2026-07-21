@@ -32,6 +32,7 @@ public:
 	};
 
 	static constexpr float ANIM_SPEED_DEFAULT = 30.0f;
+	static constexpr float BLEND_TIME_DEFAULT = 0.175f;
 
 
 	/// @brief コンストラクタ
@@ -83,7 +84,7 @@ public:
 	/// @param _isLoop ループするか否か @hint default = true
 	/// @param _playSpeed 再生速度 @hint default = initSpeed
 	/// @param _blendTime アニメーション遷移時間
-	void Play(int _type, bool _isLoop = true, float _playSpeed = -1.0f, float _blendTime = 0.175f);
+	void Play(int _type, bool _isLoop = true, float _playSpeed = -1.0f, float _blendTime = BLEND_TIME_DEFAULT);
 
 	/// @brief 更新処理
 	void Update(void);
@@ -175,6 +176,11 @@ private:
 	/// @param _target 位置を取得したいアニメーション
 	/// @param _other ブレンド対象の相方アニメーション(一時的にブレンド率0%にする)
 	VECTOR GetRawAnimRootPos(Animation& _target, Animation& _other);
+
+	/// @brief 固定位置アニメーションの、現在の再生進行度に応じた目標位置を取得
+	/// @param _anim 対象の固定位置のアニメーション
+	/// @return 開始位置から線形補間した位置終了した位置
+	VECTOR GetInPlaceProgressPos(const Animation& _anim) const;
 	
 
 	/// @brief アニメーション追加処理
