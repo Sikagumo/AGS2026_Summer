@@ -105,6 +105,8 @@ private:
 
 	static constexpr float DOUN_ROCK = -45.0f;
 
+	static constexpr float BULLET_HIT_SIZE = 18.0f;
+
 
 	bool isAttack_;
 	VECTOR bulletDir_;

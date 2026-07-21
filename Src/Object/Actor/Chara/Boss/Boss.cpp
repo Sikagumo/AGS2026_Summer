@@ -30,11 +30,7 @@ Boss::Boss(void) :
 	jumpDir_({ 0.0f, 0.0f, 0.0f }),          
 	speed_(MOVE_SPEED_INIT),
 	jumpCount_(0),                           
-	attackCount_(0),                         
-	player1Pos_({ 0.0f, 0.0f, 0.0f }),      
-	player2Pos_({ 0.0f, 0.0f, 0.0f }),       
-	player3Pos_({ 0.0f, 0.0f, 0.0f }),       
-	player4Pos_({ 0.0f, 0.0f, 0.0f }),       
+	attackCount_(0),                             
 	state_(STATE::IDLE),
 	stateBase_(-1),
 	roadCount_(0),
@@ -52,6 +48,9 @@ Boss::Boss(void) :
 	laserRotSpeed_(2.0f),
 	lastAttackType_ (ATTACK_TYPE::MAX),
 	wallStopPos_({0,0,0}),
+	mainPos_({0,0,0}),
+	mpPos_({0,0,0}),
+	CannonPos_({0,0,0}),
 
 
 	CharaBase()
@@ -828,8 +827,14 @@ void Boss::LookPlayer(void)
 	{
 		return;
 	}
+	int gameTime = TimeManager::GetInstance().GetGameTime();
+	if (static_cast<int>(gameTime) % 50 == 0)
+	{
+
+		mainPos_ = playerPos_[static_cast<int>(gameTime) % playerSize_];
+	}
 	
-	VECTOR moveDir = VSub(player1Pos_, transformBody_.pos);
+	VECTOR moveDir = VSub(mainPos_, transformBody_.pos);
 	moveDir.y = 0.0f;
 	moveDir = VNorm(moveDir);
 	float targetAngle = atan2(moveDir.x, moveDir.z);
@@ -848,13 +853,32 @@ void Boss::LookPlayer(void)
 void Boss::WeaponSet(void)
 {
 	// 各武器にボーン情報を設定（ここはそのまま）
-	weaponMGL_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MGL_L)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MGL_L)].transform, ColliderBase::TAG::WEAPON_MG_L,player1Pos_);
-	weaponMGR_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MGL_R)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MGL_R)].transform, ColliderBase::TAG::WEAPON_MG_R,player1Pos_);
-	weaponMPL_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MP_L)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MP_L)].transform, ColliderBase::TAG::WEAPON_MP_L,player1Pos_);
-	weaponMPR_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MP_R)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MP_R)].transform, ColliderBase::TAG::WEAPON_MP_R,player1Pos_);
-	weaponRG_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_RG)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_RG)].transform, ColliderBase::TAG::WEAPON_RG,player1Pos_);
-	weaponCannonL_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_CANNON_L)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_CANNON_L)].transform, ColliderBase::TAG::WEAPON_CANNON_L,player1Pos_);
-	weaponCannonR_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_CANNON_R)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_CANNON_R)].transform, ColliderBase::TAG::WEAPON_CANNON_R,player1Pos_);
+	weaponMGL_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MGL_L)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MGL_L)].transform, ColliderBase::TAG::WEAPON_MG_L, mainPos_);
+	weaponMGR_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MGL_R)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MGL_R)].transform, ColliderBase::TAG::WEAPON_MG_R, mainPos_);
+
+	int gameTime = TimeManager::GetInstance().GetGameTime();
+	if (static_cast<int>(gameTime) % playerSize_ == 0)
+	{
+
+		mpPos_ = playerPos_[static_cast<int>(gameTime) % playerSize_];
+	}
+
+
+
+	weaponMPL_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MP_L)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MP_L)].transform, ColliderBase::TAG::WEAPON_MP_L, mpPos_);
+	weaponMPR_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MP_R)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MP_R)].transform, ColliderBase::TAG::WEAPON_MP_R, mpPos_);
+
+	weaponRG_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_RG)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_RG)].transform, ColliderBase::TAG::WEAPON_RG, mainPos_);
+
+
+	if (static_cast<int>(gameTime) % 10 == 0)
+	{
+
+		CannonPos_ = playerPos_[static_cast<int>(gameTime) % playerSize_];
+	}
+
+	weaponCannonL_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_CANNON_L)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_CANNON_L)].transform, ColliderBase::TAG::WEAPON_CANNON_L, CannonPos_);
+	weaponCannonR_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_CANNON_R)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_CANNON_R)].transform, ColliderBase::TAG::WEAPON_CANNON_R, CannonPos_);
 }
 
 void Boss::WeaponLoad(void)

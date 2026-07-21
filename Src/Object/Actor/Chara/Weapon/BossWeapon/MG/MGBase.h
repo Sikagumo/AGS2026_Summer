@@ -33,6 +33,8 @@ protected:
 
     static constexpr float CAPSULE_RADIUS = 20.0f;
 
+    static constexpr float BULLET_HIT_SIZE = 6.0f;
+
     // 子クラス(MGL/MGR)のUpdateProcessから呼ばれる共通の更新関数
     void UpdateCommon(void);
 

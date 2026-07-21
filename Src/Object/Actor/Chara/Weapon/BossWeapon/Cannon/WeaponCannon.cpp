@@ -226,7 +226,7 @@ void WeaponCannon::CreateBullets(void)
 	// 位置を加算して最終的なワールド座標にする
 	VECTOR bulletpos = VAdd(transform_.pos, localRotPos);
 
-	bullet->CreateBullets(bulletpos, bulletDir_, 12.0f);
+	bullet->CreateBullets(bulletpos, bulletDir_,BULLET_HIT_SIZE);
 	bullet->Init();
 	bullet->SetTransform(transform_);
 }
