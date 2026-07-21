@@ -35,13 +35,6 @@ void Stage::Draw(void)
 		}
 	}
 
-	bool isHit = CollisionController::GetInstance().IsTagCollidingWithTag(ColliderBase::TAG::WALL, ColliderBase::TAG::PLAYER);
-
-	if (isHit)
-	{
-		DrawString(0, 600, "当たってる", 0x000000);
-	}
-
 	DrawFormatString(10, 120, 0xffffff, "ステージの座標：%f,%f,%f", transform_.pos.x, transform_.pos.y, transform_.pos.z);
 #endif
 }

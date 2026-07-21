@@ -6,6 +6,7 @@
 #include "../../Manager/Generic/InputManager.h"
 #include "../../Manager/Generic/ResourceManager.h"
 #include "../../Manager/Decoration/SoundManager.h"
+#include "../../Object/Collision/CollisionController.h"
 #include "../../Manager/System/TimeManager.h"
 #include "../../Common/Loading.h"
 #include "../../Camera/Camera.h"
@@ -147,8 +148,6 @@ void SceneGame::Update(void)
 
 	if (Loading::GetInstance()->IsLoading()) { return; }
 
-	SceneManager::GetInstance().GetCamera()->Update();
-
 	damageController_->Update();
 	DamageProcess();
 
@@ -167,13 +166,15 @@ void SceneGame::Update(void)
 	UpdateGameTime();
 
 	EffectManager::GetInstance().Update();
-
+	
 	// ボスHPが０の時、ゲームクリア
 	if (boss_->GetHP() <= 0 && gameTimer_->GetTime() > 0.0f)
 	{
 		SoundManager::GetInstance().Stop(SoundManager::SOUND::BGM_GAME);
 		SceneManager::GetInstance().ChangeScene(std::make_shared<SceneResult>(false));
 	}
+
+	SceneManager::GetInstance().GetCamera()->Update();
 }
 
 void SceneGame::DamageProcess(void)
@@ -489,6 +490,13 @@ void SceneGame::DrawDebug(void)
 {
 	SceneManager::GetInstance().GetCamera()->DrawDebug();
 	damageController_->DebugDraw();
+
+	bool isHit = CollisionController::GetInstance().IsTagCollidingWithTag(ColliderBase::TAG::CAMERA, ColliderBase::TAG::WALL);
+
+	if (isHit)
+	{
+		DrawString(0, 600, "当たってる", 0x000000);
+	}
 }
 
 void SceneGame::UpdateGui(void)

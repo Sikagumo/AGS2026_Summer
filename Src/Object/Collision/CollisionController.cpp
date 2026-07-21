@@ -12,6 +12,7 @@
 #include "../../Utility/UtilityMath.h"
 #include "../Collider/ColliderCapsule.h"
 #include "../Collider/ColliderSphere.h"
+#include "../Collider/ColliderModel.h"
 
 CollisionController* CollisionController::instance_ = nullptr;
 
@@ -71,7 +72,6 @@ void CollisionController::Update(void)
 	UpdateCollisionPars();
 
 	UpdateCollision2D();
-
 }
 
 void CollisionController::Clear(void)
@@ -411,54 +411,59 @@ void CollisionController::ResolveCollision(ActorBase* _actorA, ActorBase* _actor
 
 	using TAG = ColliderBase::TAG;
 
-	// 通常の押し戻しベクトルを計算
-	VECTOR pushVector = VScale(_info.hitNormal, _info.penetration);
-
-	TAG tagA = _info.myCollider->GetCollisionTag();
-	TAG tagB = _info.hitCollider->GetCollisionTag();
-
-	auto isStaticObstacle = [](TAG _tag)
-		{
-			return _tag == TAG::STAGE || _tag == TAG::WALL;
-		};
-
-	// 静的オブジェクト同士の衝突の場合
-	if (isStaticObstacle(tagA) && isStaticObstacle(tagB))
+	// カメラの押し戻しはカメラ自身で行うため、カメラが関わる衝突はここで一切処理しない
+	if (_info.myCollider->GetCollisionTag() == TAG::CAMERA ||
+		_info.hitCollider->GetCollisionTag() == TAG::CAMERA)
 	{
-		float overlap = fabsf(_info.penetration);
-		VECTOR stagePush = VScale(VGet(0.0f, 1.0f, 0.0f), overlap);
-
-		bool isHaveMyCollider = false;
-
-		for (const auto& [id, colliderVector] : _actorA->GetOwnColliders())
-		{
-			for (const auto* collider : colliderVector)
-			{
-				if (collider == _info.myCollider)
-				{
-					isHaveMyCollider = true;
-					break;
-				}
-			}
-			if (isHaveMyCollider)
-			{
-				break;
-			}
-		}
-
-		if (isHaveMyCollider)
-		{
-			_actorA->GetTransform().Translate(stagePush);
-		}
-		else
-		{
-			_actorB->GetTransform().Translate(stagePush);
-		}
 		return;
 	}
 
-	// 片方が動かないオブジェクトで、もう片方が動くオブジェクトの場合
-	if (!isStaticObstacle(tagA) && isStaticObstacle(tagB))
+	// 通常の押し戻しベクトルを計算
+	VECTOR pushVector = VScale(_info.hitNormal, _info.penetration);
+
+	// アクターAが静的オブジェクト（ステージや壁）のコライダーを持っているかチェック
+	bool isActorAStatic = false;
+	for (const auto& [id, colliderVector] : _actorA->GetOwnColliders())
+	{
+		for (const auto* collider : colliderVector)
+		{
+			if (collider->GetCollisionTag() == TAG::STAGE || collider->GetCollisionTag() == TAG::WALL)
+			{
+				isActorAStatic = true;
+				break;
+			}
+		}
+		if (isActorAStatic)
+		{
+			break;
+		}
+	}
+
+	// アクターBが静的オブジェクト（ステージや壁）のコライダーを持っているかチェック
+	bool isActorBStatic = false;
+	for (const auto& [id, colliderVector] : _actorB->GetOwnColliders())
+	{
+		for (const auto* collider : colliderVector)
+		{
+			if (collider->GetCollisionTag() == TAG::STAGE || collider->GetCollisionTag() == TAG::WALL)
+			{
+				isActorBStatic = true;
+				break;
+			}
+		}
+		if (isActorBStatic)
+		{
+			break;
+		}
+	}
+
+	// 両方が静的オブジェクトの場合は位置を動かさない
+	if (isActorAStatic && isActorBStatic)
+	{
+		return;
+	}
+
+	if (!isActorAStatic && isActorBStatic)
 	{
 		if (fabsf(_info.hitNormal.y) < 0.5f)
 		{
@@ -468,7 +473,7 @@ void CollisionController::ResolveCollision(ActorBase* _actorA, ActorBase* _actor
 		_actorA->GetTransform().Translate(pushVector);
 		return;
 	}
-	else if (isStaticObstacle(tagA) && !isStaticObstacle(tagB))
+	else if (isActorAStatic && !isActorBStatic)
 	{
 		if (fabsf(_info.hitNormal.y) < 0.5f)
 		{
@@ -482,25 +487,24 @@ void CollisionController::ResolveCollision(ActorBase* _actorA, ActorBase* _actor
 	// 動くオブジェクト同士の衝突の場合は、Y軸の押し戻しを無視する
 	pushVector.y = 0.0f;
 
-	bool isHaveMyCollider = false;
-
+	bool hasMyCollider = false;
 	for (const auto& [id, colliderVector] : _actorA->GetOwnColliders())
 	{
 		for (const auto* collider : colliderVector)
 		{
 			if (collider == _info.myCollider)
 			{
-				isHaveMyCollider = true;
+				hasMyCollider = true;
 				break;
 			}
 		}
-		if (isHaveMyCollider)
+		if (hasMyCollider)
 		{
 			break;
 		}
 	}
 
-	if (isHaveMyCollider)
+	if (hasMyCollider)
 	{
 		_actorA->GetTransform().Translate(pushVector);
 	}
@@ -733,7 +737,6 @@ bool CollisionController::CanCollide(int _tagA, int _tagB) const
 		}
 	}
 
-
 	if (tagHit == TAG::HIT_WAVE
 		|| tagHit == TAG::ROAD_ATTACK
 		|| tagHit == TAG::LASER
@@ -755,7 +758,8 @@ bool CollisionController::CanCollide(int _tagA, int _tagB) const
 			|| tagHurt == TAG::WEAPON_CANNON_L || tagHurt == TAG::WEAPON_CANNON_R
 			|| tagHurt == TAG::WEAPON_MG_L || tagHurt == TAG::WEAPON_MG_R
 			|| tagHurt == TAG::WEAPON_MP_L || tagHurt == TAG::WEAPON_MP_R
-			|| tagHurt == TAG::WEAPON_RG || tagHurt == TAG::MG_BULLET)
+			|| tagHurt == TAG::WEAPON_RG || tagHurt == TAG::MG_BULLET
+			|| tagHurt == TAG::CAMERA)
 		{
 			return true;
 		}
@@ -769,7 +773,17 @@ bool CollisionController::CanCollide(int _tagA, int _tagB) const
 			|| tagHurt == TAG::PLAYER_BLAST
 			|| tagHurt == TAG::BOSS
 			|| tagHurt == TAG::ROAD_ATTACK
-			|| tagHurt == TAG::ENEMYROBO)
+			|| tagHurt == TAG::ENEMYROBO
+			|| tagHurt == TAG::CAMERA)
+		{
+			return true;
+		}
+	}
+
+	if (tagHit == TAG::CAMERA)
+	{
+		if (tagHurt == TAG::STAGE
+			|| tagHurt == TAG::WALL)
 		{
 			return true;
 		}
