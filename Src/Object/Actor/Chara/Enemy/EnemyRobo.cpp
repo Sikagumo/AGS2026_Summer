@@ -102,7 +102,7 @@ void EnemyRobo::UpdateProcess(void)
 		}
 		
 	}
-	else if(hp_>0)
+	else if(hp_ > 0)
 	{
 		bool isAttack = CollisionController::GetInstance().IsActorCollidingWithTag(this, ColliderBase::TAG::PLAYER);
 		if (isAttack == true)
@@ -114,6 +114,8 @@ void EnemyRobo::UpdateProcess(void)
 			
 		}
 	}
+
+	Damage();
 
 	stateUpdate_();
 }
@@ -269,7 +271,7 @@ void EnemyRobo::LockPlayer(void)
 	transform_.quaRot = Quaternion::AngleAxis(targetAngle, UtilityMath::AXIS_Y);
 }
 
-void EnemyRobo::Damez(void)
+void EnemyRobo::Damage(void)
 {
 	
 

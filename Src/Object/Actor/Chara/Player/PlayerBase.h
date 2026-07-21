@@ -3,6 +3,7 @@
 #include <memory>
 #include <vector>
 #include <array>
+#include <map>
 #include "../Weapon/Bullet/Player/PBulletBase.h"
 #include "../Weapon/Bullet/Player/PBulletNormal.h"
 class PBulletNormal;
@@ -28,7 +29,7 @@ public:
 		, BOMB		// 爆破
 		, BOMB_FINISH
 
-		, SELECT_BIG // 巨大
+		, BIG // 巨大
 
 		, RAPID_FIRE // 連射
 		, CLUSTER	 // 拡散
@@ -39,7 +40,7 @@ public:
 		, MAX
 	};
 
-	enum class PLAYER_TYPE
+	enum class SKIN_TYPE
 	{
 		HYMAN,
 		DOG,
@@ -57,6 +58,7 @@ public:
 		ATTACK,
 	};
 
+	// デフォルト無敵時間
 	static constexpr float TIME_INVINCIBLE = 1.0f;
 
 	// 拡散弾の分割数
@@ -71,7 +73,7 @@ public:
 	/// @param _jobType 弾の種類
 	/// @param _startPos 初期位置
 	/// @param _playerType プレイヤーの見た目の種類
-	PlayerBase(int _playerNo, JOB_TYPE _jobType, const VECTOR& _startPos, PLAYER_TYPE _playerType = PLAYER_TYPE::HYMAN);
+	PlayerBase(int _playerNo, JOB_TYPE _jobType, const VECTOR& _startPos, SKIN_TYPE _playerType);
 
 	virtual ~PlayerBase(void)override = default;
 
@@ -79,7 +81,7 @@ public:
 	/// @brief プレイヤー番号取得
 	int GetPlayerNo(void)const { return playerNo_; };
 
-	PLAYER_TYPE GetPlayerType(void)const { return playerType_; };
+	SKIN_TYPE GetPlayerType(void)const { return playerType_; };
 	JOB_TYPE GetJobType(void)const { return jobType_; };
 	SHOT_TYPE GetShotType(void)const { return shotType_; };
 
@@ -109,6 +111,25 @@ public:
 
 protected:
 
+	const std::map<SKIN_TYPE, int>
+		FRAME_NUM_FINGER_LEFT
+	= {
+		{ SKIN_TYPE::HYMAN, 23},
+		{ SKIN_TYPE::DOG, 15},
+		{ SKIN_TYPE::MONKEY, 23},
+		{ SKIN_TYPE::BIRD, 19}
+	};
+
+	const std::map<SKIN_TYPE, int>
+		FRAME_NUM_FINGER_RIGHT
+		= {
+			{ SKIN_TYPE::HYMAN, 39},
+			{ SKIN_TYPE::DOG, 23},
+			{ SKIN_TYPE::MONKEY, 47},
+			{ SKIN_TYPE::BIRD, 31}
+	};
+
+
 	// プレイヤー番号
 	const int playerNo_;
 
@@ -137,7 +158,7 @@ protected:
 
 	SHOT_TYPE shotType_;
 
-	PLAYER_TYPE playerType_;
+	SKIN_TYPE playerType_;
 
 	
 	void UpdateSound(void);

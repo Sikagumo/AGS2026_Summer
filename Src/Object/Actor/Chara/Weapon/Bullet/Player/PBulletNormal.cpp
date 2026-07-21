@@ -5,8 +5,9 @@
 
 
 PBulletNormal::PBulletNormal(float _scale, float _radius, int _power
-		, float _shotSpeedXZ, float _shotSpeedY, float _aliveTime, bool _isActiveGravity)
-	: PBulletBase::PBulletBase(_isActiveGravity)
+		, float _shotSpeedXZ, float _shotSpeedY, float _aliveTime
+	, int _shotType, bool _isActiveGravity)
+	: PBulletBase::PBulletBase(_shotType, _isActiveGravity)
 	, ALIVE_TIME(_aliveTime), SCALE(_scale)
 {
 	shotSpeedXZ_ = _shotSpeedXZ;
@@ -28,12 +29,6 @@ void PBulletNormal::InitTransform(void)
 
 }
 
-void PBulletNormal::InitPost(void)
-{
-	SetParam();
-}
-
-
 void PBulletNormal::UpdatePost(void)
 {
 	if (bulletState_ == BULLET_STATE::BLAST)
@@ -49,7 +44,6 @@ void PBulletNormal::ChangeBulletStateProc(void)
 void PBulletNormal::SetParam(void)
 {
 	transform_.InitTransform(SCALE, transform_.quaRot, Quaternion::Identity());
-
 	aliveTime_ = ALIVE_TIME;
 }
 
@@ -61,4 +55,8 @@ void PBulletNormal::BlastAction(void)
 
 	// íeÇè¡ñ≈Ç≥ÇπÇÈ
 	isActiveDestroy_ = true;
+
+	// ìñÇΩÇËîªíËñ≥å¯âª
+	CollisionController::GetInstance()
+		.SetCollisionActive(this, ColliderBase::TAG::PLAYER_BULLET, false);
 }

@@ -9,7 +9,7 @@ public:
 	static constexpr float SHOT_SPEED_BIG_Y = 5.0f;
 
 
-	PBulletBig(void);
+	PBulletBig(int _shotType);
 
 	~PBulletBig(void)override = default;
 
@@ -23,8 +23,6 @@ public:
 protected:
 
 	void InitTransform(void)override;
-
-	void InitPost(void)override;
 
 	void UpdatePost(void)override;
 

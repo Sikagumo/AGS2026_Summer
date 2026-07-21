@@ -291,19 +291,47 @@ void Camera::LockOnChoice(void)
 	}
 	else
 	{
-		int target = static_cast<int>(lockOnTarget_);
+		int moveCount = 0;
 
-		int wheelPow = 0;
-		wheelPow = InputManager::GetInstance().GetMouseWheel();
-		target += wheelPow;
+		// マウスホイールの回転量
+		moveCount += InputManager::GetInstance().GetMouseWheel();
 
-		int padPow = 0;
-		padPow -= InputManager::GetInstance().IsPadBtnTrgDown(InputManager::JOYPAD_NO::PAD1, InputManager::JOYPAD_BTN::L_BUTTON);
-		padPow += InputManager::GetInstance().IsPadBtnTrgDown(InputManager::JOYPAD_NO::PAD1, InputManager::JOYPAD_BTN::R_BUTTON);
-		target += padPow;
+		// パッド
+		moveCount -= InputManager::GetInstance().IsPadBtnTrgDown(
+			InputManager::JOYPAD_NO::PAD1,
+			InputManager::JOYPAD_BTN::L_BUTTON);
 
-		target = (target % static_cast<int>(LOCKON_TARGET::MAX));
-		lockTarget = static_cast<LOCKON_TARGET>(target);
+		moveCount += InputManager::GetInstance().IsPadBtnTrgDown(
+			InputManager::JOYPAD_NO::PAD1,
+			InputManager::JOYPAD_BTN::R_BUTTON);
+
+		if (moveCount != 0)
+		{
+			int target = static_cast<int>(lockOnTarget_);
+			constexpr int TARGET_MAX = static_cast<int>(LOCKON_TARGET::MAX);
+
+			int step = (moveCount > 0) ? 1 : -1;
+
+			for (int i = 0; i < std::abs(moveCount); ++i)
+			{
+				do
+				{
+					target += step;
+
+					if (target < 0)
+					{
+						target = TARGET_MAX - 1;
+					}
+					else if (target >= TARGET_MAX)
+					{
+						target = 0;
+					}
+
+				} while (!targetsParam_.contains(static_cast<LOCKON_TARGET>(target)));
+			}
+
+			lockTarget = static_cast<LOCKON_TARGET>(target);
+		}
 	}
 
 

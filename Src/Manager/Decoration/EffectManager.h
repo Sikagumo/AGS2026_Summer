@@ -11,7 +11,8 @@ public:
 	/// @brief 個別エフェクトの識別子
 	enum class EFFECT
 	{
-		NONE,
+		NONE = -1,
+
 		EFFECT_WAVE,
 		EFFECT_LANDING,
 		EFFECT_MG,
@@ -21,6 +22,8 @@ public:
 
 		EFFECT_PLAYER_BULLET,
 		EFFECT_PLAYER_BLAST,
+		EFFECT_PLAYER_RECOVERY,
+		EFFECT_PLAYER_POISON,
 
 	};
 	/// @brief エフェクトのリソースデータ構造体
@@ -100,11 +103,6 @@ public:
 	void Draw(void);
 
 private:
-
-	static constexpr VECTOR INIT_POS = { 0.0f,0.0f,0.0f };
-	static constexpr VECTOR INIT_ROT = { 0.0f,0.0f,0.0f };
-	static constexpr VECTOR INIT_SCL = { 1.0f,1.0f,1.0f };
-	static constexpr float INIT_SPEED = 1.0f;
 
 
 	static EffectManager* instance_; // シングルトンインスタンス
