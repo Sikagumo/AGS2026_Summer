@@ -258,3 +258,13 @@ void NetManager::ResetGoGame(void)
 {
 	hasReceivedGoGame_ = false;
 }
+
+void NetManager::SetBossAction(const NET_BOSS_ACTION& action)
+{
+	pool_.bossAction = action;
+}
+
+const NET_BOSS_ACTION NetManager::GetBossAction(void) const
+{
+	return NET_BOSS_ACTION();
+}

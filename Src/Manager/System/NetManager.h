@@ -45,7 +45,7 @@ public:
 
 	void SetBossAction(const NET_BOSS_ACTION& action);
 
-	const NET_BOSS_ACTION GetBossAction(void) const;
+	const NET_BOSS_ACTION GetBossAction(void) const { return pool_.bossAction; }
 
 private:
 	NetManager(void);
