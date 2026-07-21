@@ -39,6 +39,9 @@ public:
 
 	void SetPlayerPos(VECTOR _pos) { playerPos_ = _pos; }
 
+	bool IsAlive(void)const { return hp_ > 0; };
+
+
 protected:
 
 	// ‘å‚«‚³A‰ñ“]AÀ•W‚Ì‰Šú‰»
@@ -111,6 +114,6 @@ private:
 
 	void LockPlayer(void);
 
-	void Damez(void);
+	void Damage(void);
 };
 

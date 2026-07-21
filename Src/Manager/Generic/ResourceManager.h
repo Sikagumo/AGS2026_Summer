@@ -62,6 +62,7 @@ public:
 
 		MODEL_STAGE,
 		MODEL_STAGE_COLLISION,
+		MODEL_TREE,
 		MODEL_TREE_POSITION,
 
 		/* 外部アニメーション */

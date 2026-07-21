@@ -274,6 +274,7 @@ void SceneGame::Draw(void)
 	boss_->Draw();
 	for (auto& enemyRobo : enemyRobos_)
 	{
+		if (!enemyRobo->IsAlive()) continue;
 		enemyRobo->Draw();
 	}
 	

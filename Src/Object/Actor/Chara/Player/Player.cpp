@@ -40,12 +40,14 @@ namespace
 	// âÒîóÕ
 	static constexpr float DODGE_POW = 10.0f;
 	constexpr float TIME_DODGE = 0.65f;
-	constexpr float TIME_WAIT_DODGE = 1.75f;
+	constexpr float TIME_WAIT_DODGE = 1.5f;
 
 	constexpr float BODY_POS_OFFSET_Y = 25.0f;
 
 	constexpr float MOVE_SPEED = 8.5f;
 	constexpr float MOVE_SPEED_SHOT = (MOVE_SPEED * 0.3f);
+
+	static constexpr float SHOT_RAPID_TERM = 0.025f;
 };
 
 
@@ -134,7 +136,7 @@ void Player::InitAnimation(void)
 	}
 	else if (jobType_ == JOB_TYPE::RAPID_FIRE)
 	{
-		constexpr float THROW_SPEED_RAPID = 75.0f;
+		constexpr float THROW_SPEED_RAPID = 200.0f;
 		 throwSpeed = THROW_SPEED_RAPID;
 		//animSpeedRapid_ = throwSpeed = THROW_SPEED_RAPID_START;
 	}
@@ -238,6 +240,16 @@ void Player::InitPost(void)
 		, std::bind(&Player::Dodge, this)
 		, timeStop, timeStopActive);
 
+	// åÇîj
+	actionNum = static_cast<int>(ACTION_TYPE::DEFEAT);
+	timeActive = 1.5f;
+	timeActionActive = 1.5f;
+	timeEnd = 0.5f;
+	timeStop = 0.0f;
+	timeStopActive = 0.0f;
+	actionController_->SetAction(actionNum, timeActive, timeActionActive, timeEnd
+		, std::bind(&Player::Defeat, this));
+
 	// çUåÇèàóù
 	timeInput = SHOT_TIME_ACTIVE_INPUT;
 	timeEnd = SHOT_TIME_END;
@@ -307,8 +319,8 @@ void Player::InitPost(void)
 
 		actionNum = static_cast<int>(ACTION_TYPE::ATTACK);
 		timeEnd = 0.0f;
-		timeActive = 0.4f;
-		timeActionActive = 0.325f;
+		timeActive = 0.5f;
+		timeActionActive = 0.1f;
 
 		actionController_->SetAction(actionNum, timeActive, timeActionActive, timeEnd
 			, std::bind(&Player::ShotBullet, this));
@@ -744,6 +756,14 @@ void Player::Dodge(void)
 
 	timeInvDodge_ = TIME_DODGE;
 	curTimeWaitDodge_ = TIME_WAIT_DODGE;
+}
+
+void Player::ProcessDefeat(void)
+{
+}
+void Player::Defeat(void)
+{
+
 }
 
 void Player::ProcessKnock(void)

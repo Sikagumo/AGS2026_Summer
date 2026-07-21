@@ -29,6 +29,7 @@ public:
 		NONE = -1,
 		JUMP,
 		DODGE,
+		DEFEAT,
 		ATTACK_SPECIAL,
 		ATTACK,
 	};
@@ -126,9 +127,11 @@ private:
 	// 回避クールタイム
 	float curTimeWaitDodge_;
 
+	// 撃破時間
+	float curTimeDefeat_;
+
 	std::unique_ptr<PActionController> actionController_;
 
-	static constexpr float SHOT_RAPID_TERM = 0.5f;
 	float shotTerm_;
 
 
@@ -142,6 +145,10 @@ private:
 	/// @brief 回避処理
 	void ProcessDodge(void);
 	void Dodge(void);
+
+	/// @brief 回避処理
+	void ProcessDefeat(void);
+	void Defeat(void);
 
 	void ProcessKnock(void);
 

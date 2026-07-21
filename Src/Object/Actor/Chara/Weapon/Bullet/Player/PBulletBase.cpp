@@ -167,9 +167,17 @@ void PBulletBase::Shot(const VECTOR& _shotDir)
 
 	VECTOR shotPowXZ = VScale(UtilityMath::VNormalize(_shotDir), shotSpeedXZ_);
 	float shotPowY = VScale(UtilityMath::VNormalize(_shotDir), shotSpeedY_).y;
-	throwPow_.x = shotPowXZ.x;
-	throwPow_.y = shotPowY;
-	throwPow_.z = shotPowXZ.z;
+
+	if (!IS_GRAVITY)
+	{
+		throwPow_ = VScale(UtilityMath::VNormalize(shotDir), shotSpeedXZ_);
+	}
+	else
+	{
+		throwPow_.x = shotPowXZ.x;
+		throwPow_.y = shotPowY;
+		throwPow_.z = shotPowXZ.z;
+	}
 
 	bulletState_ = BULLET_STATE::SHOT;
 

@@ -29,12 +29,6 @@ void PBulletNormal::InitTransform(void)
 
 }
 
-void PBulletNormal::InitPost(void)
-{
-	SetParam();
-}
-
-
 void PBulletNormal::UpdatePost(void)
 {
 	if (bulletState_ == BULLET_STATE::BLAST)
@@ -50,7 +44,6 @@ void PBulletNormal::ChangeBulletStateProc(void)
 void PBulletNormal::SetParam(void)
 {
 	transform_.InitTransform(SCALE, transform_.quaRot, Quaternion::Identity());
-
 	aliveTime_ = ALIVE_TIME;
 }
 
@@ -62,4 +55,8 @@ void PBulletNormal::BlastAction(void)
 
 	// íeÇè¡ñ≈Ç≥ÇπÇÈ
 	isActiveDestroy_ = true;
+
+	// ìñÇΩÇËîªíËñ≥å¯âª
+	CollisionController::GetInstance()
+		.SetCollisionActive(this, ColliderBase::TAG::PLAYER_BULLET, false);
 }
