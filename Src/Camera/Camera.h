@@ -121,6 +121,9 @@ public:
 	/// @brief イージング遷移中か否か
 	bool IsEasingState(void) { return (easingTerm_ < 1.0f); };
 
+	// 押し返し処理
+	void ResolveCollision(void);
+
 
 protected:
 
@@ -145,10 +148,16 @@ private:
 	static constexpr float COLLISION_BACK_DIS = 2.0f;
 
 	// 衝突判定用球体半径
-	static constexpr float COL_CAPSULE_SPHERE = 50.0f;
+	static constexpr float COL_CAPSULE_SPHERE = 30.0f;
 
 	// カメラの補間移動率
 	static constexpr float LERP_RATE_MOVE = 0.1f;
+
+	// 壁衝突時の追従距離の最小倍率
+	static constexpr float FOLLOW_DIST_MIN_SCALE = 0.5f;
+
+	// 追従距離の補間速度
+	static constexpr float FOLLOW_DIST_LERP_SPEED = 5.0f;
 
 
 	// カメラの更新前位置
@@ -185,6 +194,8 @@ private:
 	VECTOR easingFromPos_;    // カメラ位置イージング開始座標
 	VECTOR easingFromTarget_; // 注視点イージング開始座標
 
+	// 壁衝突時の追従距離倍率
+	float followDistScale_;
 	
 	// カメラを初期位置に戻す
 	void SetDefault(void);

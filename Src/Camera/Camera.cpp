@@ -6,6 +6,7 @@
 #include "../Manager/Generic/InputManager.h"
 #include "../Manager/System/TimeManager.h"
 #include "../Manager/Generic/ResourceManager.h"
+#include "../Object/Collision/CollisionController.h"
 #include "../Object/Common/Transform.h"
 #include "../Object/Collider/ColliderBase.h"
 #include "../Object/Collider/ColliderModel.h"
@@ -45,6 +46,7 @@ Camera::Camera(void)
 	, isLockOn_(false)
 	, lockOnParam_()
 	, lockOnTarget_(LOCKON_TARGET::NONE)
+	, followDistScale_(1.0f)
 {
 	// DxLibの初期設定では、
 	// カメラの位置が x = 320.0f, y = 240.0f, z = (画面のサイズによって変化)、
@@ -56,12 +58,15 @@ Camera::Camera(void)
 void Camera::InitCollider(void)
 {
 	// 主に地面との衝突で使用する球体コライダ
-	ColliderSphere* colliderSphere = new ColliderSphere(ColliderBase::TAG::CAMERA,
-														&transform_,
-														UtilityMath::VECTOR_ZERO,
-														COL_CAPSULE_SPHERE
-														);
-		ownColliders_[static_cast<int>(ColliderBase::TAG::CAMERA)].push_back(colliderSphere);
+	ColliderSphere* colliderSphere = new ColliderSphere
+	(ColliderBase::TAG::CAMERA, &transform_, UtilityMath::VECTOR_ZERO,
+		COL_CAPSULE_SPHERE);
+	ownColliders_[static_cast<int>(ColliderBase::TAG::CAMERA)].push_back(colliderSphere);
+
+	colliderSphere->SetTriger(false);
+
+	CollisionController::GetInstance().RegisterActor(this);
+		
 }
 
 void Camera::InitPost(void)
@@ -106,13 +111,6 @@ void Camera::Update(void)
 		easingTerm_ += TimeManager::GetInstance().GetDeltaTime() / LOCKON_DURATION;
 		easingTerm_ = std::clamp(easingTerm_, 0.0f, 1.0f);
 	}
-}
-
-void Camera::SetBeforeDraw(void)
-{
-
-	// クリップ距離を設定する(SetDrawScreenでリセットされる)
-	SetCameraNearFar(VIEW_NEAR, VIEW_FAR);
 
 	// 更新前情報
 	prePos_ = transform_.pos;
@@ -129,6 +127,15 @@ void Camera::SetBeforeDraw(void)
 		SetBeforeDrawFollow();
 		break;
 	}
+}
+
+void Camera::SetBeforeDraw(void)
+{
+
+	// クリップ距離を設定する(SetDrawScreenでリセットされる)
+	SetCameraNearFar(VIEW_NEAR, VIEW_FAR);
+
+	
 
 	// カメラの設定(位置と注視点による制御)
 	SetCameraPositionAndTargetAndUpVec(
@@ -395,7 +402,8 @@ void Camera::SyncFollow(void)
 
 	// カメラ位置
 	const VECTOR LOCAL_POS = ((isLockOn_) ? FOLLOW_LOCAL_POS_LOCKON : FOLLOW_LOCAL_POS);
-	localPos = transform_.quaRot.PosAxis(LOCAL_POS);
+	VECTOR scaledLocalPos = VScale(LOCAL_POS, followDistScale_);
+	localPos = transform_.quaRot.PosAxis(scaledLocalPos);
 	VECTOR newCamPos = VAdd(pos, localPos);
 
     // イージング中は EasingChangeTarget() で補間、完了後はそのまま代入
@@ -475,7 +483,7 @@ void Camera::SetBeforeDrawFollow(void)
 	SyncFollow();
 
 	// 衝突判定
-	Collision();
+	//Collision();
 
 	// 地面下に移動制限を掛ける
 	constexpr float FOLLOW_POS_MIN_Y = -5.0f;
@@ -605,91 +613,42 @@ void Camera::RotationGamePad(bool _isLimit)
 
 void Camera::Collision(void)
 {
-	// プレイヤーのルートフレーム
-	VECTOR start = MV1GetFramePosition(followTransform_->modelId, 1);
+	const auto& collisionController = CollisionController::GetInstance();
 
-	for (const auto& hitCol : hitColliders_)
+	using TAG = ColliderBase::TAG;
+
+	followDistScale_ = std::clamp(followDistScale_, FOLLOW_DIST_MIN_SCALE, 1.0f);
+
+	// ステージに当たっているかチェック
+	if (collisionController.IsTagCollidingWithTag(TAG::CAMERA, TAG::STAGE))
 	{
-		// モデル以外は処理を飛ばす
-		if (hitCol->GetShapeType() != ColliderBase::SHAPE::MODEL) continue;
+		VECTOR hitPosition = collisionController.IsActorHitPosWithTag(this, TAG::STAGE);
 
-		// 派生クラスへキャスト
-		const ColliderModel* colliderModel = dynamic_cast<const ColliderModel*>(hitCol);
-
-		if (colliderModel == nullptr) continue;
-
-		// 線分で衝突判定
-		//auto hitPoly = colliderModel->GetNearestHitPolyLine(transform_.pos, start, true);
-		
-		auto hits = MV1CollCheck_LineDim(
-			colliderModel->GetFollowTarget()->modelId,
-			-1,
-			transform_.pos,
-			start
-		);
-
-		// 追従対象に一番近い衝突点を探す
-		bool isCollision = false;
-		MV1_COLL_RESULT_POLY hitPoly;
-		double minDist = DBL_MAX;
-
-		for (int i = 0; i < hits.HitNum; i++)
+		if (VSize(hitPosition) > 0.0f)
 		{
-			const auto& hit = hits.Dim[i];
-
-
-			// 除外フレームは無視する
-			if (colliderModel->IsExcludedFrame(hit.FrameIndex)) { continue; }
-			// 
-			// 対象フレームは無視する
-			if (!colliderModel->IsExcludedFrame(hit.FrameIndex)) { continue; }
-
-
-			// 衝突判定
-			isCollision = true;
-
-			// 距離判定
-			float dist = VSize(VSub(hit.HitPosition, transform_.pos));
-
-			if (minDist > dist && minDist > VIEW_NEAR)
+			if (transform_.pos.y < prePos_.y)
 			{
-				// 追従対象に一番近い衝突点を優先
-				minDist = dist;
-				hitPoly = hit;
+				transform_.pos.y = prePos_.y;
 			}
 		}
+	}
+}
 
-		// 検出した地面ポリゴン情報の後始末
-		MV1CollResultPolyDimTerminate(hits);
+void Camera::ResolveCollision(void)
+{
+	if (mode_ != MODE::FOLLOW)
+	{
+		return;
+	}
 
-		if (!isCollision)
-		//if (hitPoly.HitFlag == 0)
-		{
-			// 衝突していなければ次のコライダへ
-			return;
-		}
-		// カメラ位置から注視点への方向
-		VECTOR dirToTarget = UtilityMath::VNormalize(VSub(targetPos_, transform_.pos));
+	// 衝突判定
+	Collision();
 
-		// 衝突点の少し手前にカメラを置く
-		transform_.pos =
-		VAdd(hitPoly.HitPosition, VScale(dirToTarget, COLLISION_BACK_DIS));
-
-
-		// カメラ位置の球体コライダ
-		int typeSphere = static_cast<int>(COLLIDER_TYPE::SPHERE);
-
-		// 球体コライダが無ければ処理を抜ける
-		if (ownColliders_.count(typeSphere) == 0) continue;
-
-		// 球体コライダ情報
-		ColliderSphere* colliderSphere =
-			dynamic_cast<ColliderSphere*>(ownColliders_.at(typeSphere).at(0));
-
-		if (colliderSphere == nullptr) { return; }
-
-		// 反発処理
-		//transform_.pos = colliderSphere->GetPosPushBackAlongNormal(hitPoly, CNT_TRY_COLLISION_CAMERA, COLLISION_BACK_DIS);
+	// 地面下に移動制限を掛ける
+	constexpr float FOLLOW_POS_MIN_Y = -5.0f;
+	if (transform_.pos.y < FOLLOW_POS_MIN_Y)
+	{
+		transform_.pos.y = FOLLOW_POS_MIN_Y;
 	}
 }
 

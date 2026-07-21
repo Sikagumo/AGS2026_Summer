@@ -128,6 +128,11 @@ void SceneManager::ChangeScene(std::shared_ptr<SceneBase> scene)
     // CollisionController‚ðƒNƒŠƒA
     CollisionController::GetInstance().Clear();
 
+    if (camera_)
+    {
+        CollisionController::GetInstance().RegisterActor(camera_.get());
+    }
+
     // BGM‚ð’âŽ~‚·‚é
     SoundManager::GetInstance().StopAllBGM();
 
@@ -254,6 +259,11 @@ void SceneManager::Update(void)
     }
     
     CollisionController::GetInstance().Update();
+
+    if (camera_)
+    {
+        camera_->ResolveCollision();
+    }
 }
 
 void SceneManager::Draw(void)
