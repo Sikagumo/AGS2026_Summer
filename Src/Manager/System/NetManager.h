@@ -47,6 +47,10 @@ public:
 
 	const NET_BOSS_ACTION GetBossAction(void) const { return pool_.bossAction; }
 
+	void SetGameTime(float _time);
+
+	float GetGameTime(void) const { return gameTime_; }
+
 private:
 	NetManager(void);
 	~NetManager(void);
@@ -63,6 +67,7 @@ private:
 	int sendSocketId_;
 	int roomWordId_;
 	bool hasReceivedGoGame_;
+	float gameTime_;
 	IPDATA hostIp_;
 	std::map<int, NET_ACTION_HIS> remoteActionHis_;
 

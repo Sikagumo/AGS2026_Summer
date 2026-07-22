@@ -8,7 +8,7 @@
 void NetClient::UpdateConnecting(void)
 {
     timerUser_ += SEND_INTERVAL_ACTION;
-    if (timerUser_ >= 1.0f)
+    if (timerUser_ >= 0.1f)
     {
         timerUser_ = 0.0f;
         netManager_.Send(NET_DATA_TYPE::USER);
@@ -18,7 +18,7 @@ void NetClient::UpdateConnecting(void)
 void NetClient::UpdateGotoGame(void)
 {
     timerUser_ += SEND_INTERVAL_ACTION;
-    if (timerUser_ >= 1.0f)
+    if (timerUser_ >= 0.1f)
     {
         timerUser_ = 0.0f;
         netManager_.Send(NET_DATA_TYPE::USER);

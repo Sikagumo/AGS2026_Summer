@@ -213,7 +213,6 @@ void SceneGame::Update(void)
 		{
 			NET_ACTION latestAction = remoteHisMap[key].actions[0];
 
-			// isAttack ƒtƒ‰ƒO‚àˆê‚É“n‚·
 			player->SetNetworkAction(latestAction.pos, latestAction.quaRot, latestAction.animId, latestAction.isAttack);
 		}
 	}
@@ -230,21 +229,28 @@ void SceneGame::Update(void)
 	}
 
 	// ƒvƒŒƒCƒ„[‚ÌUŒ‚
+	int attackPower = 0;
+	int attackBlast = 0;
+
 	for (auto& player : players_)
 	{
 		// ’e
 		for (auto& bullet : player->GetBullets())
 		{
-			damageController_->SetPlayerAttack(bullet->GetPowerBullet(), bullet->GetPowerBlast());
+			attackPower = std::max(attackPower, bullet->GetPowerBullet());
+			attackBlast = std::max(attackBlast, bullet->GetPowerBlast());
 		}
 
 		// ŠgU’e
 		for (auto& bullet : player->GetBulletsCluster())
 		{
 			if (bullet == nullptr) { continue; }
-			damageController_->SetPlayerAttack(bullet->GetPowerBullet(), bullet->GetPowerBlast());
+			attackPower = std::max(attackPower, bullet->GetPowerBullet());
+			attackBlast = std::max(attackBlast, bullet->GetPowerBlast());
 		}
 	}
+
+	damageController_->SetPlayerAttack(attackPower, attackBlast);
 
 	UpdateGameTime();
 
@@ -324,22 +330,28 @@ void SceneGame::DamageProcess(void)
 
 void SceneGame::UpdateGameTime(void)
 {
-	gameTimer_->Update();
-
-	for (auto& player : players_)
+	if (NetManager::GetInstance().GetMode() != NET_MODE::CLIENT)
 	{
-		// ƒvƒŒƒCƒ„[Œ‚”jA§ŒÀŠÔ‚ğŒ¸­‚³‚¹‚é
-		if (!player->GetIsRespawn()) { continue; }
-		
-		gameTimer_->SetTime(gameTimer_->GetTime() - GAME_TIME_DEFEAT_DEC);
+		gameTimer_->Update();
+
+		for (auto& player : players_)
+		{
+			if (!player->GetIsRespawn()) { continue; }
+			gameTimer_->SetTime(gameTimer_->GetTime() - GAME_TIME_DEFEAT_DEC);
+		}
+
+		NetManager::GetInstance().SetGameTime(gameTimer_->GetTime());
+	}
+	else
+	{
+		gameTimer_->SetTime(NetManager::GetInstance().GetGameTime());
 	}
 
 	if (gameTimer_->GetTime() <= 0.0f)
 	{
 		SceneManager::GetInstance().ChangeScene(std::make_shared<SceneResult>(true));
 	}
-	
-	// ‰JƒVƒF[ƒ_ŠÔ‰ÁZ
+
 	rainyMaterial_.SetTime(TimeManager::GetInstance().GetGameTime());
 }
 

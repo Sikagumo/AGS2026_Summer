@@ -69,6 +69,7 @@ Player::Player(int _playerNo, JOB_TYPE _jobType, SKIN_TYPE _skinType, const VECT
 	, isHostControl_(false)
 	, netKey_(0)
 	, isNetAttack_(false)
+	, isAttackSend_(false)
 {
 	if (_jobType == JOB_TYPE::CANNON)
 	{
@@ -465,6 +466,7 @@ void Player::Draw(void)
 #ifdef _DEBUG
 	DrawFormatString(10, 140, 0xffffff, "Playerの座標：%f,%f,%f", transform_.pos.x, transform_.pos.y, transform_.pos.z);
 #endif
+
 	ActorBase::Draw();
 
 	CharaBase::DrawShadowRound(30.0f);
@@ -932,6 +934,8 @@ void Player::ProcShotNormal(void)
 		int actionNum = static_cast<int>(ACTION_TYPE::ATTACK) + ((IS_COMBO) ? curAttackNum_ : 0);
 		actionController_->Active(actionNum);
 
+		isAttackSend_ = true;
+
 		curAttackNum_++;
 
 		// 攻撃時に左右交互に弾を投げるアニメーション
@@ -953,6 +957,8 @@ void Player::ProcShotSpecial(void)
 		// 登録した攻撃アクションを呼び出す
 		int actionNum = static_cast<int>(ACTION_TYPE::ATTACK_SPECIAL);
 		actionController_->Active(actionNum);
+
+		isAttackSend_ = true;
 
 		curAttackNum_++;
 
@@ -1280,9 +1286,11 @@ void Player::SendMyActionToNetManager(void)
 	myAction.animId = static_cast<int>(animType_);
 	myAction.currentHp = hp_;
 	myAction.actBits = 0;
-	myAction.isAttack = isNetAttack_;
+	myAction.isAttack = isAttackSend_;
 
 	NetManager::GetInstance().AddSelfAction(myAction);
+
+	isAttackSend_ = false;
 }
 //-------------------------------------------------------------------------------------
 

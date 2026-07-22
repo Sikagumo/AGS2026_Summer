@@ -7,7 +7,7 @@
 void NetHost::UpdateConnecting(void)
 {
     timerUser_ += SEND_INTERVAL_ACTION;
-    if (timerUser_ >= 1.0f)
+    if (timerUser_ >= 0.1f)
     {
         timerUser_ = 0.0f;
         netManager_.Send(NET_DATA_TYPE::USERS);
@@ -17,7 +17,7 @@ void NetHost::UpdateConnecting(void)
 void NetHost::UpdateGotoGame(void)
 {
     timerUser_ += SEND_INTERVAL_ACTION;
-    if (timerUser_ >= 1.0f)
+    if (timerUser_ >= 0.1f)
     {
         timerUser_ = 0.0f;
         netManager_.Send(NET_DATA_TYPE::USERS);

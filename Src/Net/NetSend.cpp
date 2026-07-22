@@ -43,7 +43,7 @@ NET_BASIC_DATA NetSend::MakeBasicData(NET_DATA_TYPE _type, std::uint32_t _crc)
 
 	data.type = _type;
 	data.key = NetManager::GetInstance().GetMyKey();
-	data.gameTime = 0.0f;
+	data.gameTime = NetManager::GetInstance().GetGameTime(); ;
 	data.crc = _crc;
 
 	return data;

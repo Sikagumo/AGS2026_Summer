@@ -158,6 +158,8 @@ private:
 	// UŒ‚‚µ‚½‚©‚Ç‚¤‚©
 	bool isNetAttack_;
 
+	bool isAttackSend_;
+
 	// ‘€ì
 	void ProcessMove(void);
 

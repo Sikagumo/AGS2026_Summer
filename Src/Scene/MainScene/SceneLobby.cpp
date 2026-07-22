@@ -52,6 +52,8 @@ void SceneLobby::EndLoad(void)
 
 void SceneLobby::Initialize(void)
 {
+    NetManager::GetInstance().Stop();
+
     selectedIdx_ = 0;
 
     if (IS_MULTI)
@@ -577,7 +579,7 @@ void SceneLobby::MoveToGameScene(std::map<int, NET_JOIN_USER>& _users)
     // Ž©•ª
     {
         SceneGame::PlayerSelectType myType;
-        myType.job = PlayerBase::JOB_TYPE::CANNON;
+        myType.job = PlayerBase::JOB_TYPE::BOMB;
         myType.skin = PlayerBase::SKIN_TYPE::DOG;
         playerSelectTypes.push_back(myType);
     }

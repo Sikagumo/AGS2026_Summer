@@ -66,7 +66,7 @@ struct NET_BASIC_DATA
 	// 識別・同期関連
 	NET_DATA_TYPE type = NET_DATA_TYPE::NONE; // データの種別
 	int key = -1;                             // ユーザー識別子
-	float gameTime = 0.0f;                    // パケット送信時のゲーム内時刻
+	float gameTime = 500.0f;                    // パケット送信時のゲーム内時刻
 
 	// データの破損検知用CRC32チェックサム
 	uint32_t crc = 0;
