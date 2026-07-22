@@ -809,7 +809,8 @@ void Boss::UpdateEnd(void)
 		speed_ = 30;
 		
 		VECTOR movePow = VScale(roadDir_, speed_);
-		
+		transformBody_.pos = VAdd(transformBody_.pos, movePow);
+		transformBody_.Update();
 	}
 	else if (endCount_>=3)
 	{

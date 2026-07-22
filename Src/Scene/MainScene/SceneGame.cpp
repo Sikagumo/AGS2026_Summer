@@ -584,11 +584,11 @@ void SceneGame::UpdateGameEnd(void)
 	{
 		if (boss_->GetHP() >= 0)
 		{
-			SceneManager::GetInstance().ChangeScene(std::make_shared<SceneResult>(true));
+			SceneManager::GetInstance().ChangeScene(std::make_shared<SceneResult>(false));
 		}
 		else
 		{
-			SceneManager::GetInstance().ChangeScene(std::make_shared<SceneResult>(false));
+			SceneManager::GetInstance().ChangeScene(std::make_shared<SceneResult>(true));
 		}
 		
 	}
@@ -644,11 +644,11 @@ void SceneGame::DrawGameEnd(void)
 	{
 		if (boss_->GetHP() >= 0)
 		{
-			DrawRotaGraph(Application::SCREEN_HALF_X, IMAGET_TITLE_Y, 2.0f, UtilityMath::DEG2RAD, imageResult_[3], true);
+			DrawRotaGraph(Application::SCREEN_HALF_X, IMAGET_TITLE_Y, 2.0f, UtilityMath::DEG2RAD, imageResult_[1], true);
 		}
 		else
 		{
-			DrawRotaGraph(Application::SCREEN_HALF_X, IMAGET_TITLE_Y, 2.0f, UtilityMath::DEG2RAD, imageResult_[1], true);
+			DrawRotaGraph(Application::SCREEN_HALF_X, IMAGET_TITLE_Y, 2.0f, UtilityMath::DEG2RAD, imageResult_[3], true);
 		}
 		
 	}
