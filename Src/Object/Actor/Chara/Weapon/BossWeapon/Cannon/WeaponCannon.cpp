@@ -190,6 +190,13 @@ void WeaponCannon::ChangeStateEnd(void)
 	stateUpdate_ = std::bind(&WeaponCannon::UpdateEnd, this);
 	isAlive_ = false;
 	CollisionController::GetInstance().SetCollisionActive(this, tag_, false);
+	transform_.pos = MV1GetFramePosition(bone_.transform.modelId, bone_.id);
+	transform_.Update();
+	jumpPow_ = JUNP_POW;
+	isJump_ = true;
+	moveDir_ = VSub(transform_.pos, bone_.transform.pos);
+	moveDir_.y = 0.0f;
+	moveDir_ = VNorm(moveDir_);
 }
 
 void WeaponCannon::UpdateAttack(void)
@@ -215,6 +222,19 @@ void WeaponCannon::UpdateIdle(void)
 
 void WeaponCannon::UpdateEnd(void)
 {
+
+	
+
+	speed_ = MOVE_SPEED;
+	VECTOR movePow = VScale(moveDir_, speed_);
+	// à⁄ìÆèàóù
+	if (isJump_)
+	{
+		transform_.pos = VAdd(transform_.pos, movePow);
+	}
+	
+
+
 }
 
 void WeaponCannon::CreateBullets(void)

@@ -126,6 +126,11 @@ void MGBase::ChangeStateEnd(void)
     stateUpdate_ = std::bind(&MGBase::UpdateEnd, this);
     isAlive_ = false;
     CollisionController::GetInstance().SetCollisionActive(this, tag_, false);
+    jumpPow_ = JUNP_POW;
+    isJump_ = true;
+    moveDir_ = VSub(transform_.pos, bone_.transform.pos);
+    moveDir_.y = 0.0f;
+    moveDir_ = VNorm(moveDir_);
 }
 
 void MGBase::UpdateIdle(void)
@@ -173,6 +178,14 @@ void MGBase::UpdateAttack(void)
 
 void MGBase::UpdateEnd(void)
 {
+ 
+    speed_ = MOVE_SPEED;
+    VECTOR movePow = VScale(moveDir_, speed_);
+    // à⁄ìÆèàóù
+    if (isJump_)
+    {
+        transform_.pos = VAdd(transform_.pos, movePow);
+    }
 }
 
 void MGBase::CreateBullets(void)

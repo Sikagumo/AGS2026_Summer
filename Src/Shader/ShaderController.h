@@ -35,6 +35,13 @@ public:
 	void CreateShaderDraw(ShaderLibrary::SHADER_TYPE _shaderType, int _x, int _y, int _textureHandle,
 		float _scale, const ShaderMaterial& _material, int _normalMapHandle = -1) const;
 
+	/// @brief 描画処理
+	/// @param _x X座標
+	/// @param _y Y座標
+	/// @param _material 使用するマテリアル
+	void CreateShaderDrawRainy(int _x, int _y
+		, const ShaderMaterial& _material) const;
+
 	/// @brief 解放処理 
 	void Release(void);
 

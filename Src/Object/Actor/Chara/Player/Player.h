@@ -21,6 +21,7 @@ public:
 		THROW_RUN,
 		JUMP,
 		DODGE,
+		DEFEAT,
 		MAX,
 	};
 
@@ -58,8 +59,6 @@ public:
 	/// @param _knockPowY 縦吹っ飛ばし力
 	void SetKnock(const VECTOR& _knockDirXZ, float _knockPowXZ
 					, bool _isStan, float _knockPowY = KNOCK_POW_Y);
-
-	void SetRespawn(void);
 	
 	void SetPlayerType(SKIN_TYPE _type = SKIN_TYPE::MAX);
 	
@@ -73,6 +72,9 @@ public:
 
 	// ネットワークから受け取った情報を強制的にセットする（ラジコン用）
 	void SetNetworkAction(const VECTOR& _pos, const Quaternion& _rot, int _animId, bool _isAttack);
+	/// @brief リスポーンしたか否か
+	bool GetIsRespawn(void)const;
+
 
 	// キャラクターの通信keyを設定
 	void SetNetKey(int _key);
@@ -156,9 +158,6 @@ private:
 	// 攻撃したかどうか
 	bool isNetAttack_;
 
-	bool isAttackSelf_;
-
-
 	// 操作
 	void ProcessMove(void);
 
@@ -172,18 +171,19 @@ private:
 
 	/// @brief 回避処理
 	void ProcessDefeat(void);
-	void Defeat(void);
 
 	void ProcessKnock(void);
 
 	void ProcessAttack(void);
+
+	void SetRespawn(void);
 
 
 	/// @brief アニメーション再生
 	/// @param _type アニメーションの種類
 	/// @param _isLoop ループ再生するか否か
 	/// @param _animSpeed 再生速度指定(任意)
-	void PlayAnimation(ANIM_TYPE _type, bool _isLoop = true, float _animSpeed = -1.0f);
+	void PlayAnimation(ANIM_TYPE _type, bool _isLoop = true, bool _isAnimBlend = true, float _animSpeed = -1.0f);
 
 	void CreateBullet(void);
 	void ShotBullet(void);

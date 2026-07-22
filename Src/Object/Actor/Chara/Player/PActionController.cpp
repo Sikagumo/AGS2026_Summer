@@ -8,7 +8,7 @@ PActionController::PActionController(std::unique_ptr<AnimationController>& _anim
 	, actionState_(PACTION_STATE::NONE)
 	, curTimeAction_(0.0f), curTimeInput_(0.0f), curTimeActionActive_(0.0f)
 	, curTimeStopActive_(0.0f)
-	, curActionNum_(-1)
+	, curActionNum_(-1), preActionNum_(-1)
 	, isRapidFire_(_isRapidFire)
 {
 }
@@ -77,6 +77,8 @@ bool PActionController::IsActiveInput(void) const
 
 void PActionController::Update(void)
 {
+	preActionNum_ = curActionNum_;
+
 	// 行動名が未割当時、処理終了
 	if (curActionNum_ == -1 || actionState_ == PACTION_STATE::NONE) { return; }
 
@@ -118,9 +120,10 @@ void PActionController::Update_Action(void)
 		curTimeActionActive_ -= TimeManager::GetInstance().GetDeltaTime();
 
 		// 一度だけ行動を実行
-		if (curTimeActionActive_ <= 0.0f)
+		if (curTimeActionActive_ <= 0.0f
+			&& actions_.at(curActionNum_).actionProcess != nullptr)
 		{
-			actions_[curActionNum_].actionProcess();
+			actions_.at(curActionNum_).actionProcess();
 		}
 	}
 

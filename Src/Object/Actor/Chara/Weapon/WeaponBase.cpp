@@ -47,19 +47,17 @@ void WeaponBase::DrawPre(void)
 
 void WeaponBase::CalcGravityPow(void)
 {
-	// 重力方向
-	const VECTOR DIR_GRAVITY = UtilityMath::DIR_DOWN;
-
 	// 重力の強さ
 	float gravityPow = Application::GetInstance().GetGravityPow() * timeManager_.GetDeltaTime();
+	const VECTOR GRAVITY_POW = VScale(UtilityMath::DIR_DOWN, gravityPow);
 
 	// 重力
-	VECTOR gravity = VScale(DIR_GRAVITY, gravityPow);
-
-	jumpPow_ = VAdd(jumpPow_, gravity);
+	jumpPow_ += GRAVITY_POW.y;
 
 	// 重力制限	
-	jumpPow_.y = ((jumpPow_.y < MAX_FALL_SPEED) ? MAX_FALL_SPEED : jumpPow_.y);
+	jumpPow_ = ((jumpPow_ < MAX_FALL_SPEED)
+		? MAX_FALL_SPEED
+		: jumpPow_);
 }
 
 void WeaponBase::Collision(void)
@@ -67,14 +65,11 @@ void WeaponBase::Collision(void)
 	// 移動処理
 	transform_.pos = VAdd(transform_.pos, movePow_);
 
-	
-
-	
-
 	// 衝突(重力)
 	CollisionGravity();
+
 	// ジャンプ量を加算
-	transform_.pos = VAdd(transform_.pos, jumpPow_);
+	transform_.pos.y += jumpPow_;
 }
 
 void WeaponBase::CollisionGravity(void)
@@ -82,11 +77,10 @@ void WeaponBase::CollisionGravity(void)
 	bool isHitStage = CollisionController::GetInstance().IsActorCollidingWithTag(this, ColliderBase::TAG::STAGE);
 
 	// 床に触れていて、かつ下方向に落下している（または静止している）なら着地
-	if (isHitStage && jumpPow_.y <= 0.0f)
+	if (isHitStage && jumpPow_ <= 0.0f)
 	{
 		isJump_ = false;
-		jumpPow_ = UtilityMath::VECTOR_ZERO; // 落下速度を止める
-		
+		jumpPow_ = 0.0f; // 落下速度を止める
 	}
 }
 

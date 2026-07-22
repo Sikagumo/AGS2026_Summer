@@ -274,6 +274,13 @@ private:
 	
 	// ホストかどうか	
 	bool isHostControl_;
+	//死亡時
+	VECTOR bodyDir_;
+	float moveSpeed_;
+	int endCount_;
+	VECTOR cameraPos_;
+
+	
 
 	///ボーン初期化
 	void BoneParam(void);

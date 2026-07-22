@@ -5,7 +5,7 @@
 #include "../Application.h"
 
 ShaderRenderer::ShaderRenderer(void)
-	: constBufferHandle_(-1)
+	: constBufferHandle_(-1), constBufferHandleRain_(-1)
 {
 }
 
@@ -17,6 +17,7 @@ ShaderRenderer::~ShaderRenderer(void)
 void ShaderRenderer::Initialize(void)
 {
 	constBufferHandle_ = CreateShaderConstantBuffer(sizeof(IntegratedGpuBuffer));
+	constBufferHandleRain_ = CreateShaderConstantBuffer(sizeof(IntegratedGpuBufferRain));
 }
 
 void ShaderRenderer::PixelShaderDraw(ShaderBase* _shader, const DrawRequest& _request) const
@@ -67,12 +68,72 @@ void ShaderRenderer::PixelShaderDraw(ShaderBase* _shader, const DrawRequest& _re
 	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 }
 
+void ShaderRenderer::RainyShaderDraw(ShaderBase* _shader, const DrawRequest& _request) const
+{
+	if (!_shader || constBufferHandleRain_ == -1)
+	{
+		return;
+	}
+
+	void* gpuBuffer = GetBufferShaderConstantBuffer(constBufferHandleRain_);
+	if (gpuBuffer)
+	{
+		std::memcpy(gpuBuffer, &_request.bufferRain, sizeof(IntegratedGpuBufferRain));
+		UpdateShaderConstantBuffer(constBufferHandleRain_);
+	}
+
+	const float width = static_cast<float>(Application::SCREEN_SIZE_X) * _request.scale;
+	const float height = static_cast<float>(Application::SCREEN_SIZE_Y) * _request.scale;
+
+	std::array<VERTEX2DSHADER, 4> vertices;
+	ApplyVertices(vertices, width, height);
+
+	for (auto& v : vertices)
+	{
+		v.pos.x += static_cast<float>(_request.x);
+		v.pos.y += static_cast<float>(_request.y);
+	}
+
+	SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255);
+	SetShaderConstantBuffer(constBufferHandleRain_, DX_SHADERTYPE_PIXEL, 4);
+
+	if (_request.textureHandle != -1)
+	{
+		SetUseTextureToShader(0, _request.textureHandle);
+	}
+
+	if (_request.normalMapHandle != -1)
+	{
+		SetUseTextureToShader(1, _request.normalMapHandle);
+	}
+
+	_shader->Apply();
+	DrawPrimitive2DToShader(vertices.data(), 4, DX_PRIMTYPE_TRIANGLESTRIP);
+	_shader->UnApply();
+
+	if (_request.normalMapHandle != -1)
+	{
+		SetUseTextureToShader(1, -1);
+	}
+
+	SetUseTextureToShader(0, -1);
+	SetShaderConstantBuffer(-1, DX_SHADERTYPE_PIXEL, 0);
+	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+}
+
+
 void ShaderRenderer::Release(void)
 {
 	if (constBufferHandle_ != -1)
 	{
 		DeleteShaderConstantBuffer(constBufferHandle_);
 		constBufferHandle_ = - 1;
+	}
+
+	if (constBufferHandleRain_ != -1)
+	{
+		DeleteShaderConstantBuffer(constBufferHandleRain_);
+		constBufferHandleRain_ = - 1;
 	}
 }
 

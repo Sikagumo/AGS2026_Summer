@@ -1,9 +1,11 @@
 #pragma once
+#include <DxLib.h>
 
 /// @brief シェーダのデータ管理クラス
 class ShaderMaterial
 {
 public:
+
 	/// @brief コンストラクタ
 	ShaderMaterial(void);
 
@@ -68,6 +70,27 @@ public:
 	/// @return ノーマルマップフラグ
 	bool IsUseNormalMap(void) const;
 
+
+	/// @brief 雨シェーダを割り当て処理
+	/// @param _rainPow 雨の強さ(0.0～1.0)
+	/// @param _rainPowBack 後ろの雨の強さ(0.0～1.0)
+	/// @param _rainPowBack 後ろの雨の強さ(0.0～1.0)
+	void SetUseRainy(float _rainPow, float _rainPowBack);
+
+	/// @brief 雨シェーダを利用しているか否か
+	bool IsUseRainy(void)const { return (rainIntensity_ > 0.0f || rainIntensityBack_ > 0.0f); };
+
+	/// @brief 解像度
+	float GetResolutionX(void)const { return resolutionX_; };
+	float GetResolutionY(void)const { return resolutionY_; };
+
+	/// @brief 雨の強さを取得
+	float GetRainIntensity(void)const { return rainIntensity_; };
+	float GetRainIntensityBack(void)const { return rainIntensityBack_; };
+
+	COLOR_F GetRainColor(void)const { return rainColor; };
+
+
 private:
 
 	float lightX_;
@@ -79,5 +102,13 @@ private:
 	float waveForce_;
 	float useNormal_;
 
+	// 画面解像度
+	float resolutionX_;
+	float resolutionY_;
+
+	// 雨の強さ 0.0～1.0
+	float rainIntensity_;
+	float rainIntensityBack_;
+	COLOR_F rainColor;
 };
 

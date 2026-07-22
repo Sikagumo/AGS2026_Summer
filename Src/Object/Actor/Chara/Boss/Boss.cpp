@@ -459,6 +459,16 @@ void Boss::ChangeStateLaserAttack(void)
 void Boss::ChangeStateEnd(void)
 {
 	stateUpdate_ = std::bind(&Boss::UpdateEnd, this);
+	animation_->Play(static_cast<int>(ANIM_TYPE::JUMPBEFORE), false);
+	weaponCannonL_->SetHp(1);
+	weaponCannonR_->SetHp(1);
+	weaponMGL_->SetHp(1);
+	weaponMGR_->SetHp(1);
+	weaponMPL_->SetHp(1);
+	weaponMPR_->SetHp(1);
+	weaponRG_->SetHp(1);
+	EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_PLAYER_BLAST, transformBody_.pos, { 0,0,0 }, { 35,35,35 }, 1, this);
+
 }
 //===========================================================================================================================================================================================================================================================
 
@@ -488,7 +498,19 @@ void Boss::BossTransformUpdate(void)
 }
 
 void Boss::UpdateProcess(void)
-{
+{	
+	
+
+	if (hp_ <= 0)
+	{
+		if (state_ != STATE::END)
+		{
+			ChangeState(STATE::END);
+		}
+	}
+	stateUpdate_();
+
+
 	isLanging_ = false;
 	isMGFire_ = false;
 	isRoadFire_ = false;
@@ -524,6 +546,8 @@ void Boss::UpdateProcess(void)
 	camera->SetLockOnTargets(Camera::LOCKON_TARGET::BOSS_WEAPON_MP_L, weaponMPL_->GetPos(), weaponMPL_->GetHp());
 	camera->SetLockOnTargets(Camera::LOCKON_TARGET::BOSS_WEAPON_MP_R, weaponMPR_->GetPos(), weaponMPR_->GetHp());
 	camera->SetLockOnTargets(Camera::LOCKON_TARGET::BOSS_WEAPON_RG, weaponRG_->GetPos(), weaponRG_->GetHp());
+
+	cameraPos_ = camera->GetPos();
 }
 
 void Boss::UpdateProcessPost(void)
@@ -536,7 +560,7 @@ void Boss::UpdateIdle(void)
 {
 	transformBody_.pos = MV1GetFramePosition(transform_.modelId, JOINT_FEET_BODY);
 	LookPlayer();
-	//attackCount_++;
+	attackCount_++;
 	if (hp_ <= laserShotHp_ && attackCount_ >= attackInterval_)
 	{
 		ChangeState(STATE::LASER);
@@ -784,7 +808,33 @@ void Boss::UpdateStateLaserAttack(void)
 
 void Boss::UpdateEnd(void)
 {
-	
+	if (endCount_ >= 4)
+	{
+		speed_ = 30;
+		VECTOR movePow = VScale(bodyDir_, speed_);
+		// ˆÚ“®ˆ—
+		transformBody_.pos = VAdd(transformBody_.pos, movePow);
+		float targetAngle = atan2(bodyDir_.x, bodyDir_.z);
+		transformBody_.quaRot = Quaternion::AngleAxis(targetAngle, UtilityMath::AXIS_Y);
+		transformBody_.Update();
+	}
+	else if (endCount_>=3)
+	{
+		weaponCannonL_->ChangeState(WeaponCannon::STATE::END);
+		weaponCannonR_->ChangeState(WeaponCannon::STATE::END);
+		weaponMGL_->ChangeState(WeaponMGL::STATE::END);
+		weaponMGR_->ChangeState(WeaponMGR::STATE::END);
+		weaponMPL_->ChangeState(WeaponMP::STATE::END);
+		weaponMPR_->ChangeState(WeaponMP::STATE::END);
+		weaponRG_->ChangeState(WeaponRG::STATE::END);
+
+		bodyDir_ = VSub(cameraPos_, transform_.pos );
+		bodyDir_ = VNorm(bodyDir_);
+	}
+
+
+
+	endCount_++;
 }
 
 //===========================================================================================================================================================================================================================================================

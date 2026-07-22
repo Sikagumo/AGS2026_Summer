@@ -23,6 +23,11 @@ public:
 	/// @param request 描画のリクエスト情報
 	void PixelShaderDraw(ShaderBase* _shader, const DrawRequest& _request) const;
 
+	/// @brief 雨シェーダの描画
+	/// @param _shader 使用するピクセルシェーダのポインタ
+	/// @param request 描画のリクエスト情報
+	void RainyShaderDraw(ShaderBase* _shader, const DrawRequest& _request) const;
+
 	/// @brief 解放処理 
 	void Release(void);
 
@@ -30,6 +35,7 @@ private:
 
 	// 定数バッファのハンドル
 	int constBufferHandle_;
+	int constBufferHandleRain_;
 
 	/// @brief 頂点情報の適用
 	/// @param _v 頂点情報の配列

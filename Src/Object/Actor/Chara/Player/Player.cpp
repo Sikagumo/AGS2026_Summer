@@ -69,7 +69,6 @@ Player::Player(int _playerNo, JOB_TYPE _jobType, SKIN_TYPE _skinType, const VECT
 	, isHostControl_(false)
 	, netKey_(0)
 	, isNetAttack_(false)
-	, isAttackSelf_(false)
 {
 	if (_jobType == JOB_TYPE::CANNON)
 	{
@@ -162,12 +161,14 @@ void Player::InitAnimation(void)
 		, resMng.LoadHandleId(ResourceManager::SRC::ANIM_THROW_RUN), 20.0f);
 
 
+	// ジャンプ
 	constexpr float SPEED_JUMP = 50.0f;
 	constexpr VECTOR LOCAL_POS_JUMP = { 0.0f, 50.0f, 0.0f };
 	animation_->AddExternal(static_cast<int>(ANIM_TYPE::JUMP)
 		, resMng.LoadHandleId(ResourceManager::SRC::ANIM_JUMP)
 		, LOCAL_POS_JUMP, SPEED_JUMP);
 
+	// 回避
 	constexpr float SPEED_DODGE = 50.0f;
 	constexpr VECTOR LOCAL_POS_DODGE = { 0.0f, 25.0f, 0.0f };
 	constexpr VECTOR LOCAL_POS_DODGE_END = { 0.0f, 50.0f, 0.0f };
@@ -175,14 +176,18 @@ void Player::InitAnimation(void)
 		, resMng.LoadHandleId(ResourceManager::SRC::ANIM_DODGE)
 		, LOCAL_POS_DODGE, LOCAL_POS_DODGE_END, SPEED_DODGE);
 
+	// 撃墜
+	constexpr float SPEED_DEFEAT = 30.0f;
+	animation_->AddExternal(static_cast<int>(ANIM_TYPE::DEFEAT)
+		, resMng.LoadHandleId(ResourceManager::SRC::ANIM_DEFEAT));
 
-	animType_ = ANIM_TYPE::IDLE;
-	animation_->Play(static_cast<int>(animType_));
+
+	PlayAnimation(ANIM_TYPE::IDLE);
 }
 void Player::InitTransform(void)
 {
 	constexpr float MODEL_SCALE = 0.625f;
-	constexpr float LOCAL_POS_Y = -10.25f;
+	constexpr float LOCAL_POS_Y = 5.25f;
 	constexpr float LOCAL_ROT_Y = 180.0f;
 
 	transform_.InitTransform(MODEL_SCALE
@@ -248,13 +253,13 @@ void Player::InitPost(void)
 
 	// 撃破
 	actionNum = static_cast<int>(ACTION_TYPE::DEFEAT);
-	timeActive = 1.5f;
-	timeActionActive = 1.5f;
-	timeEnd = 0.5f;
-	timeStop = 0.0f;
+	timeActive = 1.0f;
+	timeActionActive = 0.01f;
+	timeEnd = 5.0f;
+	timeStop = 2.5f;
 	timeStopActive = 0.0f;
 	actionController_->SetAction(actionNum, timeActive, timeActionActive, timeEnd
-		, std::bind(&Player::Defeat, this));
+		, nullptr, timeStop, timeStopActive);
 
 	// 攻撃処理
 	timeInput = SHOT_TIME_ACTIVE_INPUT;
@@ -369,6 +374,74 @@ void Player::InitPost(void)
 		actionController_->SetAction(actionNum, timeActive, timeActionActive, timeEnd
 			, std::bind(&Player::ShotBullet, this));
 	}
+
+	isJump_ = false;
+}
+
+
+void Player::UpdateProcess(void)
+{
+	float delta = TimeManager::GetInstance().GetDeltaTime();
+
+	// 無敵時間導入
+	timeInv_ = ((timeInv_ > 0.0f) ? (timeInv_ - delta) : 0.0f);
+
+	// 行動の更新
+	actionController_->Update();
+
+	if (hp_ <= 0)
+	{
+		ProcessDefeat();
+		return;
+	}
+
+	// マルチプレイのため追加
+	if (isHostControl_)
+	{
+		ProcessJump();
+		ProcessMove();
+		ProcessAttack();
+		ProcessDodge();
+	}
+
+	//ProcessJump();
+
+	// 移動操作
+	//ProcessMove();
+
+	UpdateBullets();
+
+	//ProcessAttack();
+
+	// 回避処理
+	//ProcessDodge();
+
+	// 吹っ飛ばし処理
+	ProcessKnock();
+	
+
+	// 胴体位置更新
+	bodyPos_ = transform_.pos;
+	bodyPos_.y += BODY_POS_OFFSET_Y;
+
+
+	UpdateSound();
+
+	// 回復処理
+	if (CollisionController::GetInstance()
+			.IsTagCollidingWithTag(ColliderBase::TAG::PLAYER, ColliderBase::TAG::PLAYER_RECOVERY)
+		&& hp_ <= HP_MAX)
+	{
+		float recovery = (static_cast<float>(HP_MAX) * PBulletRecovery::RECOVERY_RATE);
+		hp_ += static_cast<int>(recovery);
+		hp_ = ((hp_ > HP_MAX) ? HP_MAX : hp_);
+	}
+
+	// マルチプレイのため追加
+	if (isHostControl_)
+	{
+		SendMyActionToNetManager();
+	}
 }
 
 void Player::Draw(void)
@@ -424,69 +497,12 @@ void Player::SetKnock(const VECTOR& _knockDirXZ, float _knockPowXZ, bool _isStan
 
 void Player::SetRespawn(void)
 {
+	InitPost();
 	hp_ = HP_MAX;
 	transform_.pos = START_POS;
 
 	timeInv_ = TIME_INVINCIBLE;
-}
-
-
-void Player::UpdateProcess(void)
-{
-	float delta = TimeManager::GetInstance().GetDeltaTime();
-
-	// 無敵時間導入
-	timeInv_ = ((timeInv_ > 0.0f) ? (timeInv_ - delta) : 0.0f);
-
-	isAttackSelf_ = false;
-
-	// マルチプレイのため追加
-	if (isHostControl_)
-	{
-		ProcessJump();
-		ProcessMove();
-		ProcessAttack();
-		ProcessDodge();
-	}
-
-	//ProcessJump();
-
-	//// 移動操作
-	//ProcessMove();
-
-	UpdateBullets();
-
-	//ProcessAttack();
-
-	//ProcessAttack();
-
-	//ProcessDodge();
-
-	// 吹っ飛ばし処理
-	ProcessKnock();
-	
-
-	// 胴体位置更新
-	bodyPos_ = transform_.pos;
-	bodyPos_.y += BODY_POS_OFFSET_Y;
-
-
-	UpdateSound();
-
-	if (CollisionController::GetInstance()
-			.IsTagCollidingWithTag(ColliderBase::TAG::PLAYER, ColliderBase::TAG::PLAYER_RECOVERY)
-		&& hp_ <= HP_MAX)
-	{
-		float recovery = (static_cast<float>(HP_MAX) * PBulletRecovery::RECOVERY_RATE);
-		hp_ += static_cast<int>(recovery);
-		hp_ = ((hp_ > HP_MAX) ? HP_MAX : hp_);
-	}
-
-	// マルチプレイのため追加
-	if (isHostControl_)
-	{
-		SendMyActionToNetManager();
-	}
+	PlayAnimation(ANIM_TYPE::IDLE, true, false);
 }
 
 void Player::UpdateProcessPost(void)
@@ -533,6 +549,14 @@ VECTOR Player::CalcAddPosition(void)
 {
 	VECTOR ret = UtilityMath::VECTOR_ZERO;
 
+	if (hp_ <= 0)
+	{
+		movePow_ = UtilityMath::VECTOR_ZERO;
+		dodgePowXZ_ = UtilityMath::VECTOR2F_ZERO;
+		knockPowXZ_ = UtilityMath::VECTOR2F_ZERO;
+		return ret;
+	}
+
 	// 吹っ飛ばし量を加算
 	const VECTOR knockVec = VGet(knockPowXZ_.x, 0.0f, knockPowXZ_.y);
 	ret = VAdd(ret, knockVec);
@@ -561,6 +585,12 @@ void Player::SetSoundData(VECTOR _pos, float _radius, bool _isLanging,bool _isMG
 	PlayerBase::SetSoundData(_pos, _radius, _isLanging, _isMGFire, _isRoad);
 }
 
+bool Player::GetIsRespawn(void) const
+{
+	return (actionController_->GetCurActionNum() == static_cast<int>(ACTION_TYPE::NONE)
+			&& actionController_->GetPreActionNum() == static_cast<int>(ACTION_TYPE::DEFEAT));
+}
+
 void Player::ReleasePost(void)
 {
 }
@@ -586,9 +616,10 @@ void Player::ProcessMove(void)
 
 	// ジャンプ行動有効時に行動前の時、処理終了
 	if (!actionController_->IsEndActionActive()
-		&& actionController_->GetCurActionNum() == 3
+		&& actionController_->GetCurActionNum() == static_cast<int>(ACTION_TYPE::ATTACK_SPECIAL)
 		||!actionController_->IsEndActionActive()
-		&& actionController_->GetCurActionNum() == 4)
+		&& actionController_->GetCurActionNum() == static_cast<int>(ACTION_TYPE::ATTACK)
+		|| hp_ <= 0)
 	{
 		movePow_ = UtilityMath::VECTOR_ZERO;
 		return;
@@ -765,7 +796,7 @@ void Player::ProcessDodge(void)
 		if (InputManager::GetInstance().IsTrgDown(KEY_INPUT_LSHIFT)
 			|| InputManager::GetInstance().IsPadBtnTrgDown(InputManager::JOYPAD_NO::PAD1, InputManager::JOYPAD_BTN::RB_LEFT))
 		{
-			PlayAnimation(ANIM_TYPE::DODGE, false);
+			PlayAnimation(ANIM_TYPE::DODGE, false, false);
 			actionController_->Active(static_cast<int>(ACTION_TYPE::DODGE));
 		}
 	}
@@ -785,9 +816,19 @@ void Player::Dodge(void)
 
 void Player::ProcessDefeat(void)
 {
-}
-void Player::Defeat(void)
-{
+	
+	if (actionController_->IsEndActionActive()
+		&& animation_->IsEnd()
+		&& animation_->GetPlayType() == static_cast<int>(ANIM_TYPE::DEFEAT))
+	{
+		// 撃破アニメーションが終了時にリスポーン
+		SetRespawn();
+	}
+	else if (actionController_->GetCurActionNum() != static_cast<int>(ACTION_TYPE::DEFEAT))
+	{
+		actionController_->Active(static_cast<int>(ACTION_TYPE::DEFEAT));
+		PlayAnimation(Player::ANIM_TYPE::DEFEAT, false);
+	}
 
 }
 
@@ -823,9 +864,6 @@ void Player::ProcessKnock(void)
 
 void Player::ProcessAttack(void)
 {
-	// 行動の更新
-	actionController_->Update();
-
 	if (jobType_ == JOB_TYPE::RAPID_FIRE)
 	{
 		if (shotTerm_ <= 0.0f)
@@ -899,8 +937,6 @@ void Player::ProcShotNormal(void)
 		// 攻撃時に左右交互に弾を投げるアニメーション
 		ANIM_TYPE type = ((curAttackNum_ % 2 == 0) ? ANIM_TYPE::THROW_LEFT : ANIM_TYPE::THROW_RIGHT);
 		PlayAnimation(type, false);
-
-		isAttackSelf_ = true;
 	}
 }
 void Player::ProcShotSpecial(void)
@@ -923,9 +959,6 @@ void Player::ProcShotSpecial(void)
 		// 攻撃時に左右交互に弾を投げるアニメーション
 		ANIM_TYPE type = ((curAttackNum_ % 2 == 0) ? ANIM_TYPE::THROW_LEFT : ANIM_TYPE::THROW_RIGHT);
 		PlayAnimation(type, false);
-
-		isAttackSelf_ = true;
-
 	}
 }
 
@@ -1177,7 +1210,7 @@ VECTOR Player::CalcShotDir(void)
 	return shotDir;
 }
 
-void Player::PlayAnimation(ANIM_TYPE _type, bool _isLoop, float _animSpeed)
+void Player::PlayAnimation(ANIM_TYPE _type, bool _isLoop, bool _isAnimBlend, float _animSpeed)
 {
 	// コンボ時のみ
 	if (_type != ANIM_TYPE::THROW_LEFT
@@ -1191,12 +1224,12 @@ void Player::PlayAnimation(ANIM_TYPE _type, bool _isLoop, float _animSpeed)
 		}
 	}
 
-	// 回避アニメーションからの遷移だけブレンドを行わない
-	float blendTime = ((animType_ == ANIM_TYPE::DODGE) ? 0.0f : AnimationController::BLEND_TIME_DEFAULT);
+	// ブレンド無効時、ブレンド時間を減少
+	float blendTime = ((!_isAnimBlend) ? 0.001f : AnimationController::BLEND_TIME_DEFAULT);
 
 	animType_ = _type;
-
-	animation_->Play(static_cast<int>(_type), _isLoop, _animSpeed,blendTime);
+	
+	animation_->Play(static_cast<int>(animType_), _isLoop, _animSpeed, blendTime);
 }
 
 //-------------------------------------------------------------------------------------
