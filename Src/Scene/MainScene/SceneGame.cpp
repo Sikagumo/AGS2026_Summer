@@ -18,7 +18,7 @@
 
 
 // ÉQÅ[ÉÄéûä‘
-constexpr float GAME_TIME = 30.0f;
+constexpr float GAME_TIME = 10.0f;
 constexpr float GAME_TIME_DEFEAT_DEC = 75.0f;
 
 SceneGame::SceneGame(std::vector<PlayerSelectType> _playerSelectType)
@@ -488,7 +488,7 @@ void SceneGame::ChangeGame(void)
 	stateDraw_ = std::bind(&SceneGame::DrawGame, this);
 
 	auto& camera = SceneManager::GetInstance().GetCamera();
-	camera->ChangeMode(Camera::MODE::FOLLOW);
+	camera->ChangeMode(Camera::MODE::PLAYER_FOLLOW);
 	camera->SetFollow(&players_.at(0)->GetTransform());
 
 
@@ -500,7 +500,8 @@ void SceneGame::ChangeGameEnd(void)
 	stateDraw_ = std::bind(&SceneGame::DrawGameEnd, this);
 
 	auto& camera = SceneManager::GetInstance().GetCamera();
-	camera->ChangeMode(Camera::MODE::FIXED_POINT);
+	camera->ChangeMode(Camera::MODE::BOSS_FOLLOW);
+	camera->SetFollow(&boss_->GetBodyTransform());
 	
 
 
@@ -563,28 +564,26 @@ void SceneGame::UpdateGameEnd(void)
 	}
 	else
 	{
-
+		boss_->Update();
+		EffectManager::GetInstance().Update();
 	}
 
 
 	if (srouCount_ >= SROU_COUNT_MAX * 100)
 	{
-		SceneManager::GetInstance().ChangeScene(std::make_shared<SceneResult>(false));
+		if (boss_->GetHP() >= 0)
+		{
+			SceneManager::GetInstance().ChangeScene(std::make_shared<SceneResult>(true));
+		}
+		else
+		{
+			SceneManager::GetInstance().ChangeScene(std::make_shared<SceneResult>(false));
+		}
+		
 	}
 
 	stage_->Update();
 	
-	auto& camera = SceneManager::GetInstance().GetCamera();
-
-	VECTOR cameralocalPos = boss_->GetBodyRot().PosAxis({0,200,800});
-	VECTOR cameraPos = VAdd(boss_->GetTransform().pos, cameralocalPos);
-	camera->SetPos(cameraPos);
-
-	VECTOR cameraDir = VSub(boss_->GetTransform().pos, camera->GetPos());
-	cameraDir = VNorm(cameraDir);
-	float cameraAngle = atan2(cameraDir.x, cameraDir.z);
-	Quaternion cameraQuaRot = Quaternion::AngleAxis(cameraAngle, UtilityMath::AXIS_Y);
-	camera->SetQuaternionRot(cameraQuaRot);
 }
 
 void SceneGame::DrawGame(void)
@@ -630,9 +629,17 @@ void SceneGame::DrawGameEnd(void)
 	effect.Draw();
 
 	const int IMAGET_TITLE_Y = Application::SCREEN_SIZE_Y / 3;
-	if (srouCount_ >= SROU_COUNT_MAX * 10)
+	if (srouCount_ >= SROU_COUNT_MAX * 20)
 	{
-		DrawRotaGraph(Application::SCREEN_HALF_X, IMAGET_TITLE_Y, 2.0f, UtilityMath::DEG2RAD, imageResult_[1], true);
+		if (boss_->GetHP() >= 0)
+		{
+			DrawRotaGraph(Application::SCREEN_HALF_X, IMAGET_TITLE_Y, 2.0f, UtilityMath::DEG2RAD, imageResult_[3], true);
+		}
+		else
+		{
+			DrawRotaGraph(Application::SCREEN_HALF_X, IMAGET_TITLE_Y, 2.0f, UtilityMath::DEG2RAD, imageResult_[1], true);
+		}
+		
 	}
 
 }

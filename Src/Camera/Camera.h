@@ -33,7 +33,8 @@ public:
 		NONE,
 		FIXED_POINT,
 		FREE,
-		FOLLOW,
+		PLAYER_FOLLOW,
+		BOSS_FOLLOW,
 	};
 
 	// 衝突判定種別
@@ -96,9 +97,6 @@ public:
 	// 追従対象の設定
 	void SetFollow(const Transform* _follow) { followTransform_ = _follow; };
 
-	//座標の取得
-	void SetPos(VECTOR _pos) { transform_.pos = _pos; }
-
 	//クオータニオン角度の取得
 	void SetQuaternionRot(Quaternion _rot) { transform_.quaRot = _rot; }
 
@@ -146,6 +144,10 @@ protected:
 	void InitPost(void) override;
 
 private:
+
+	//ボスの追従時の座標
+	static constexpr VECTOR BOSS_CAMERA_POS = { 0,10,-500 };
+
 
 	// 衝突時の押し戻し試行回数
 	static constexpr int CNT_TRY_COLLISION_CAMERA = 30;
@@ -224,7 +226,8 @@ private:
 	// モード別更新ステップ
 	void SetBeforeDrawFixedPoint(void);
 	void SetBeforeDrawFree(void);
-	void SetBeforeDrawFollow(void);
+	void SetBeforeDrawFollowPlayer(void);
+	void SetBeforeDrawFollowBoss(void);
 
 	// 衝突判定
 	void Collision(void);
