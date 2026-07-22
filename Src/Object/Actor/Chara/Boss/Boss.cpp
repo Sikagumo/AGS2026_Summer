@@ -30,11 +30,7 @@ Boss::Boss(void) :
 	jumpDir_({ 0.0f, 0.0f, 0.0f }),          
 	speed_(MOVE_SPEED_INIT),
 	jumpCount_(0),                           
-	attackCount_(0),                         
-	player1Pos_({ 0.0f, 0.0f, 0.0f }),      
-	player2Pos_({ 0.0f, 0.0f, 0.0f }),       
-	player3Pos_({ 0.0f, 0.0f, 0.0f }),       
-	player4Pos_({ 0.0f, 0.0f, 0.0f }),       
+	attackCount_(0),                             
 	state_(STATE::IDLE),
 	stateBase_(-1),
 	roadCount_(0),
@@ -52,6 +48,9 @@ Boss::Boss(void) :
 	laserRotSpeed_(2.0f),
 	lastAttackType_ (ATTACK_TYPE::MAX),
 	wallStopPos_({0,0,0}),
+	mainPos_({0,0,0}),
+	mpPos_({0,0,0}),
+	CannonPos_({0,0,0}),
 
 
 	CharaBase()
@@ -458,6 +457,16 @@ void Boss::ChangeStateLaserAttack(void)
 void Boss::ChangeStateEnd(void)
 {
 	stateUpdate_ = std::bind(&Boss::UpdateEnd, this);
+	animation_->Play(static_cast<int>(ANIM_TYPE::JUMPBEFORE), false);
+	weaponCannonL_->SetHp(1);
+	weaponCannonR_->SetHp(1);
+	weaponMGL_->SetHp(1);
+	weaponMGR_->SetHp(1);
+	weaponMPL_->SetHp(1);
+	weaponMPR_->SetHp(1);
+	weaponRG_->SetHp(1);
+	EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_PLAYER_BLAST, transformBody_.pos, { 0,0,0 }, { 35,35,35 }, 1, this);
+
 }
 //===========================================================================================================================================================================================================================================================
 
@@ -490,6 +499,16 @@ void Boss::UpdateProcess(void)
 {	
 	
 
+	if (hp_ <= 0)
+	{
+		if (state_ != STATE::END)
+		{
+			ChangeState(STATE::END);
+		}
+	}
+	stateUpdate_();
+
+
 	isLanging_ = false;
 	isMGFire_ = false;
 	if (weaponMGL_->IsAttack() == true || weaponMGR_->IsAttack() == true)
@@ -501,7 +520,7 @@ void Boss::UpdateProcess(void)
 	}
 	isRoadFire_ = false;
 
-	stateUpdate_();
+	
 
 	currentWaveScl = VAdd(currentWaveScl, WAVE_SCL_UP);
 	EffectManager::GetInstance().UpdateScl(EffectManager::EFFECT::EFFECT_WAVE,this, currentWaveScl);
@@ -523,6 +542,8 @@ void Boss::UpdateProcess(void)
 	camera->SetLockOnTargets(Camera::LOCKON_TARGET::BOSS_WEAPON_MP_L, weaponMPL_->GetPos(), weaponMPL_->GetHp());
 	camera->SetLockOnTargets(Camera::LOCKON_TARGET::BOSS_WEAPON_MP_R, weaponMPR_->GetPos(), weaponMPR_->GetHp());
 	camera->SetLockOnTargets(Camera::LOCKON_TARGET::BOSS_WEAPON_RG, weaponRG_->GetPos(), weaponRG_->GetHp());
+
+	cameraPos_ = camera->GetPos();
 }
 
 void Boss::UpdateProcessPost(void)
@@ -535,7 +556,7 @@ void Boss::UpdateIdle(void)
 {
 	transformBody_.pos = MV1GetFramePosition(transform_.modelId, JOINT_FEET_BODY);
 	LookPlayer();
-	//attackCount_++;
+	attackCount_++;
 	if (hp_ <= laserShotHp_ && attackCount_ >= attackInterval_)
 	{
 		ChangeState(STATE::LASER);
@@ -783,7 +804,33 @@ void Boss::UpdateStateLaserAttack(void)
 
 void Boss::UpdateEnd(void)
 {
-	
+	if (endCount_ >= 4)
+	{
+		speed_ = 30;
+		VECTOR movePow = VScale(bodyDir_, speed_);
+		// 移動処理
+		transformBody_.pos = VAdd(transformBody_.pos, movePow);
+		float targetAngle = atan2(bodyDir_.x, bodyDir_.z);
+		transformBody_.quaRot = Quaternion::AngleAxis(targetAngle, UtilityMath::AXIS_Y);
+		transformBody_.Update();
+	}
+	else if (endCount_>=3)
+	{
+		weaponCannonL_->ChangeState(WeaponCannon::STATE::END);
+		weaponCannonR_->ChangeState(WeaponCannon::STATE::END);
+		weaponMGL_->ChangeState(WeaponMGL::STATE::END);
+		weaponMGR_->ChangeState(WeaponMGR::STATE::END);
+		weaponMPL_->ChangeState(WeaponMP::STATE::END);
+		weaponMPR_->ChangeState(WeaponMP::STATE::END);
+		weaponRG_->ChangeState(WeaponRG::STATE::END);
+
+		bodyDir_ = VSub(cameraPos_, transform_.pos );
+		bodyDir_ = VNorm(bodyDir_);
+	}
+
+
+
+	endCount_++;
 }
 
 //===========================================================================================================================================================================================================================================================
@@ -828,8 +875,14 @@ void Boss::LookPlayer(void)
 	{
 		return;
 	}
-	
-	VECTOR moveDir = VSub(player1Pos_, transformBody_.pos);
+	int gameTime = TimeManager::GetInstance().GetGameTime();
+	if (static_cast<int>(gameTime) % 50 == 0)
+	{
+
+		mainIdx_ = static_cast<int>(gameTime) % playerSize_;
+	}
+	mainPos_ = playerPos_[mainIdx_];
+	VECTOR moveDir = VSub(mainPos_, transformBody_.pos);
 	moveDir.y = 0.0f;
 	moveDir = VNorm(moveDir);
 	float targetAngle = atan2(moveDir.x, moveDir.z);
@@ -848,13 +901,32 @@ void Boss::LookPlayer(void)
 void Boss::WeaponSet(void)
 {
 	// 各武器にボーン情報を設定（ここはそのまま）
-	weaponMGL_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MGL_L)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MGL_L)].transform, ColliderBase::TAG::WEAPON_MG_L,player1Pos_);
-	weaponMGR_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MGL_R)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MGL_R)].transform, ColliderBase::TAG::WEAPON_MG_R,player1Pos_);
-	weaponMPL_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MP_L)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MP_L)].transform, ColliderBase::TAG::WEAPON_MP_L,player1Pos_);
-	weaponMPR_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MP_R)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MP_R)].transform, ColliderBase::TAG::WEAPON_MP_R,player1Pos_);
-	weaponRG_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_RG)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_RG)].transform, ColliderBase::TAG::WEAPON_RG,player1Pos_);
-	weaponCannonL_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_CANNON_L)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_CANNON_L)].transform, ColliderBase::TAG::WEAPON_CANNON_L,player1Pos_);
-	weaponCannonR_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_CANNON_R)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_CANNON_R)].transform, ColliderBase::TAG::WEAPON_CANNON_R,player1Pos_);
+	weaponMGL_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MGL_L)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MGL_L)].transform, ColliderBase::TAG::WEAPON_MG_L, mainPos_);
+	weaponMGR_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MGL_R)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MGL_R)].transform, ColliderBase::TAG::WEAPON_MG_R, mainPos_);
+
+	int gameTime = TimeManager::GetInstance().GetGameTime();
+	if (static_cast<int>(gameTime) % playerSize_ == 0)
+	{
+
+		mpIdx_ = static_cast<int>(gameTime) % playerSize_;
+	}
+	mpPos_ = playerPos_[mpIdx_];
+
+
+	weaponMPL_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MP_L)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MP_L)].transform, ColliderBase::TAG::WEAPON_MP_L, mpPos_);
+	weaponMPR_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MP_R)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MP_R)].transform, ColliderBase::TAG::WEAPON_MP_R, mpPos_);
+
+	weaponRG_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_RG)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_RG)].transform, ColliderBase::TAG::WEAPON_RG, mainPos_);
+
+
+	if (static_cast<int>(gameTime) % 10 == 0)
+	{
+
+		cannonIdx_ = static_cast<int>(gameTime) % playerSize_;
+	}
+	CannonPos_ = playerPos_[cannonIdx_];
+	weaponCannonL_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_CANNON_L)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_CANNON_L)].transform, ColliderBase::TAG::WEAPON_CANNON_L, CannonPos_);
+	weaponCannonR_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_CANNON_R)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_CANNON_R)].transform, ColliderBase::TAG::WEAPON_CANNON_R, CannonPos_);
 }
 
 void Boss::WeaponLoad(void)

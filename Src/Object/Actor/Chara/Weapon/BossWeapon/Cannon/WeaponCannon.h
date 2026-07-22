@@ -40,6 +40,7 @@ public:
 	/// <param name=""></param>
 	/// <returns>true=¶‚«‚Ä‚¢‚é</returns>
 	bool GetIsAlive(void)override { return isAlive_; }
+
 	/// <summary>
 	/// ƒEƒFƒ|ƒ“‚ÌŒ»İHP‚ğ“n‚·‚æ‚¤
 	/// </summary>
@@ -47,7 +48,7 @@ public:
 	/// <returns>Œ»İHP</returns>
 	int GetHp(void)override { return hp_; }
 
-
+	void SetHp(int _hp)override { hp_ = _hp; }
 	
 
 	// ó‘Ô‘JˆÚ
@@ -104,6 +105,8 @@ private:
 	static constexpr float CAPSULE_RADIUS = 20.0f;
 
 	static constexpr float DOUN_ROCK = -45.0f;
+
+	static constexpr float BULLET_HIT_SIZE = 18.0f;
 
 
 	bool isAttack_;

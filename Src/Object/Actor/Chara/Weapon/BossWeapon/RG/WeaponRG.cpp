@@ -185,6 +185,11 @@ void WeaponRG::ChangeStateEnd(void)
 	stateUpdate_ = std::bind(&WeaponRG::UpdateEnd, this);
 	isAlive_ = false;
 	CollisionController::GetInstance().SetCollisionActive(this, tag_, false);
+	jumpPow_ = JUNP_POW;
+	isJump_ = true;
+	moveDir_ = VSub(transform_.pos, bone_.transform.pos);
+	moveDir_.y = 0.0f;
+	moveDir_ = VNorm(moveDir_);
 }
 
 void WeaponRG::UpdatePreparation(void)
@@ -249,4 +254,12 @@ void WeaponRG::UpdateIdle(void)
 
 void WeaponRG::UpdateEnd(void)
 {
+	
+	speed_ = MOVE_SPEED;
+	VECTOR movePow = VScale(moveDir_, speed_);
+	// à⁄ìÆèàóù
+	if (isJump_)
+	{
+		transform_.pos = VAdd(transform_.pos, movePow);
+	}
 }

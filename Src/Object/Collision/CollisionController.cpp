@@ -720,8 +720,7 @@ bool CollisionController::CanCollide(int _tagA, int _tagB) const
 	{
 		if (tagHurt == TAG::PLAYER
 			|| tagHurt == TAG::PLAYER_BULLET || tagHurt == TAG::PLAYER_BLAST
-			|| tagHurt == TAG::STAGE
-			|| tagHurt == TAG::WALL)
+			|| tagHurt == TAG::STAGE)
 		{
 			return true;
 		}
@@ -771,7 +770,6 @@ bool CollisionController::CanCollide(int _tagA, int _tagB) const
 		if (tagHurt == TAG::PLAYER 
 			|| tagHurt == TAG::PLAYER_BULLET 
 			|| tagHurt == TAG::PLAYER_BLAST
-			|| tagHurt == TAG::BOSS
 			|| tagHurt == TAG::ROAD_ATTACK
 			|| tagHurt == TAG::ENEMYROBO
 			|| tagHurt == TAG::CAMERA)

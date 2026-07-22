@@ -111,22 +111,27 @@ public:
 	/// プレイヤー1の座標取得
 	/// </summary>
 	/// <param name="_playerPos">プレイヤーの座標</param>
-	void SetPlayer1Pos(VECTOR _playerPos) {player1Pos_ = _playerPos;}
+	void SetPlayer1Pos(VECTOR _playerPos) {playerPos_[0] = _playerPos; }
 	/// <summary>
 	/// プレイヤー2の座標取得
 	/// </summary>
 	/// <param name="_playerPos">プレイヤーの座標</param>
-	void SetPlayer2Pos(VECTOR _playerPos) { player2Pos_ = _playerPos; }
+	void SetPlayer2Pos(VECTOR _playerPos) { playerPos_[1] = _playerPos; }
 	/// <summary>
 	/// プレイヤー3の座標取得
 	/// </summary>
 	/// <param name="_playerPos">プレイヤーの座標</param>
-	void SetPlayer3Pos(VECTOR _playerPos) { player3Pos_ = _playerPos; }
+	void SetPlayer3Pos(VECTOR _playerPos) { playerPos_[2] = _playerPos; }
 	/// <summary>
 	/// プレイヤー4の座標取得
 	/// </summary>
 	/// <param name="_playerPos">プレイヤーの座標</param>
-	void SetPlayer4Pos(VECTOR _playerPos) { player4Pos_ = _playerPos; }
+	void SetPlayer4Pos(VECTOR _playerPos) { playerPos_[3] = _playerPos; }
+	/// <summary>
+	/// プレイヤーの量を取得
+	/// </summary>
+	/// <param name="_size">players.sizeの取得</param>
+	void SetPlayerSize(int _size) { playerSize_ = _size; }
 
 private:
 	//bossの大きさ
@@ -229,10 +234,14 @@ private:
 	ATTACK_TYPE attackSelect_;
 
 	//攻撃対象情報
-	VECTOR player1Pos_;
-	VECTOR player2Pos_;
-	VECTOR player3Pos_;
-	VECTOR player4Pos_;
+	VECTOR mainPos_;
+	int mainIdx_;
+	VECTOR mpPos_;
+	int mpIdx_;
+	VECTOR CannonPos_;
+	int cannonIdx_;
+	VECTOR playerPos_[4];
+	int playerSize_;
 
 	//武器のポインター宣言
 	std::unique_ptr<WeaponMGL> weaponMGL_;
@@ -244,6 +253,12 @@ private:
 	std::unique_ptr<WeaponRG> weaponRG_;
 	std::unique_ptr< BBulletWave> wave_;
 	
+	//死亡時
+	VECTOR bodyDir_;
+	float moveSpeed_;
+	int endCount_;
+	VECTOR cameraPos_;
+
 	
 
 	///ボーン初期化

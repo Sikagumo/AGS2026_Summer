@@ -70,6 +70,8 @@ public:
 	/// <returns>現在HP</returns>
 	virtual int GetHp(void) = 0;
 
+	virtual void SetHp(int _hp)=0;
+
 	// 状態遷移
 	virtual void ChangeState(STATE _state);
 
@@ -83,14 +85,18 @@ protected:
 
 	static constexpr VECTOR WEAPON_SIZE = { 3.0f,3.0f,3.0f };
 	static constexpr float WEAPON_ROT = 180.0f;
+	static constexpr float MOVE_SPEED = 5.0f;
+	static constexpr float JUNP_POW = 10.0f;
 
 
 
 	int hp_=500;			//ウェポンのHP
 	bool isAlive_;			//ウェポンの生存フラグ
 	VECTOR movePow_;		//重力用移動量
-	VECTOR jumpPow_;		//吹っ飛び用の移動量
+	float jumpPow_;		    //吹っ飛び用の移動量
 	bool isJump_;			//吹っ飛び中かのフラグ
+	VECTOR moveDir_;		//移動方向
+	float speed_;			//移動速度
 	VECTOR localBackPos_;	//当たり判定用の後方の座標
 	VECTOR localFrontPos_;	//当たり判定用の前方の座標
 	VECTOR localPos_;		//カメラのロックオン用の中央座標

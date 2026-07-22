@@ -43,6 +43,7 @@ SceneGame::SceneGame(std::vector<PlayerSelectType> _playerSelectType)
 									  , PLAYER_INIT_POS[i]);
 
 		players_.emplace_back(std::move(player));
+		
 	}
 	
 	for (int i = 0; i < ENEMYS_POP; i++)
@@ -51,6 +52,8 @@ SceneGame::SceneGame(std::vector<PlayerSelectType> _playerSelectType)
 
 		enemyRobos_.emplace_back(std::move(enemy));
 	}
+
+	boss_->SetPlayerSize(static_cast<int>(_playerSelectType.size()));
 }
 
 void SceneGame::Load(void)
@@ -189,9 +192,12 @@ void SceneGame::DamageProcess(void)
 	{
 		enemyRobo->SetPlayerPos(players_.at(0)->GetBodyPos());
 	}
-	boss_->SetPlayer1Pos(players_.at(0)->GetBodyPos());
 
-
+	boss_->SetPlayer1Pos(players_[0]->GetBodyPos());
+	/*boss_->SetPlayer2Pos(players_[1]->GetBodyPos());
+	boss_->SetPlayer3Pos(players_[2]->GetBodyPos());
+	boss_->SetPlayer4Pos(players_[3]->GetBodyPos());*/
+	
 	boss_->SetBossDamage(damageController_->GetBossDamage());
 
 	boss_->SetWeaponCannonLDamage(damageController_->GetWeaponCannonLDamage());

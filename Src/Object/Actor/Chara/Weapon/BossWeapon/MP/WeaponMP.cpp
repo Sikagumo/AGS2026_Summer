@@ -99,7 +99,7 @@ void WeaponMP::InitPost(void)
 
 void WeaponMP::UpdateProcess(void)
 {
-	LookPlayer();
+	
 	// HP‚ª‚È‚­‚È‚Á‚½‚ç€–Sˆ—i¶‰E‹¤’Êj
 	if (hp_ <= 0 && isAlive_)
 	{
@@ -174,10 +174,16 @@ void WeaponMP::ChangeStateEnd(void)
 	stateUpdate_ = std::bind(&WeaponMP::UpdateEnd, this);
 	isAlive_ = false;
 	CollisionController::GetInstance().SetCollisionActive(this, tag_, false);
+	jumpPow_ = JUNP_POW;
+	isJump_ = true;
+	moveDir_ = VSub(transform_.pos, bone_.transform.pos);
+	moveDir_.y = 0.0f;
+	moveDir_ = VNorm(moveDir_);
 }
 
 void WeaponMP::UpdateAttack(void)
 {
+	LookPlayer();
 	transform_.pos = MV1GetFramePosition(bone_.transform.modelId, bone_.id);
 	outCount_++;
 	if (outCount_ >= ATTACK_DELAY)
@@ -200,11 +206,20 @@ void WeaponMP::UpdateAttack(void)
 
 void WeaponMP::UpdateIdle(void)
 {
+	LookPlayer();
 	transform_.pos = MV1GetFramePosition(bone_.transform.modelId, bone_.id);
 }
 
 void WeaponMP::UpdateEnd(void)
 {
+	
+	speed_ = MOVE_SPEED;
+	VECTOR movePow = VScale(moveDir_, speed_);
+	// ˆÚ“®ˆ—
+	if (isJump_)
+	{
+		transform_.pos = VAdd(transform_.pos, movePow);
+	}
 }
 
 void WeaponMP::CreateBullets(void)
