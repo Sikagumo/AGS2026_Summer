@@ -107,6 +107,8 @@ public:
 	/// </summary>
 	int GetHP(void)const { return hp_; }
 
+	Quaternion GetBodyRot(void) { return transformBody_.quaRot; }
+
 	/// <summary>
 	/// プレイヤー1の座標取得
 	/// </summary>

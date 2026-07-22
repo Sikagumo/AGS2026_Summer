@@ -497,7 +497,10 @@ void Boss::BossTransformUpdate(void)
 
 void Boss::UpdateProcess(void)
 {	
+	// カメラの追従対象に登録
+	const std::unique_ptr<Camera>& camera = SceneManager::GetInstance().GetCamera();
 	
+	cameraPos_ = camera->GetPos();
 
 	if (hp_ <= 0)
 	{
@@ -531,9 +534,6 @@ void Boss::UpdateProcess(void)
 	wave_->Update();
 	
 	
-
-	// カメラの追従対象に登録
-	const std::unique_ptr<Camera>& camera = SceneManager::GetInstance().GetCamera();
 	camera->SetLockOnTargets(Camera::LOCKON_TARGET::BOSS_BODY, transformBody_.pos, hp_);
 	camera->SetLockOnTargets(Camera::LOCKON_TARGET::BOSS_WEAPON_MGL_L, weaponMGL_->GetPos(), weaponMGL_->GetHp());
 	camera->SetLockOnTargets(Camera::LOCKON_TARGET::BOSS_WEAPON_MGL_R, weaponMGR_->GetPos(), weaponMGR_->GetHp());
@@ -543,7 +543,7 @@ void Boss::UpdateProcess(void)
 	camera->SetLockOnTargets(Camera::LOCKON_TARGET::BOSS_WEAPON_MP_R, weaponMPR_->GetPos(), weaponMPR_->GetHp());
 	camera->SetLockOnTargets(Camera::LOCKON_TARGET::BOSS_WEAPON_RG, weaponRG_->GetPos(), weaponRG_->GetHp());
 
-	cameraPos_ = camera->GetPos();
+	
 }
 
 void Boss::UpdateProcessPost(void)
@@ -556,7 +556,7 @@ void Boss::UpdateIdle(void)
 {
 	transformBody_.pos = MV1GetFramePosition(transform_.modelId, JOINT_FEET_BODY);
 	LookPlayer();
-	attackCount_++;
+	//attackCount_++;
 	if (hp_ <= laserShotHp_ && attackCount_ >= attackInterval_)
 	{
 		ChangeState(STATE::LASER);
@@ -807,12 +807,9 @@ void Boss::UpdateEnd(void)
 	if (endCount_ >= 4)
 	{
 		speed_ = 30;
-		VECTOR movePow = VScale(bodyDir_, speed_);
-		// 移動処理
-		transformBody_.pos = VAdd(transformBody_.pos, movePow);
-		float targetAngle = atan2(bodyDir_.x, bodyDir_.z);
-		transformBody_.quaRot = Quaternion::AngleAxis(targetAngle, UtilityMath::AXIS_Y);
-		transformBody_.Update();
+		
+		VECTOR movePow = VScale(roadDir_, speed_);
+		
 	}
 	else if (endCount_>=3)
 	{
@@ -824,8 +821,7 @@ void Boss::UpdateEnd(void)
 		weaponMPR_->ChangeState(WeaponMP::STATE::END);
 		weaponRG_->ChangeState(WeaponRG::STATE::END);
 
-		bodyDir_ = VSub(cameraPos_, transform_.pos );
-		bodyDir_ = VNorm(bodyDir_);
+		
 	}
 
 
@@ -869,8 +865,6 @@ void Boss::DrawPre(void)
 void Boss::LookPlayer(void)
 {
 
-	
-	// 突進「中」は、すでに決まった `roadDir_` に向かって進むので、振り向かない
 	if (state_ == STATE::ROADATTACK && roadIsAttack_)
 	{
 		return;

@@ -4,6 +4,7 @@
 #include <DxLib.h>
 #include <vector>
 #include <array>
+#include <functional>
 #include "../../Object/Actor/Chara/Player/Player.h"
 #include "../../Object/Actor/Chara/Player/PlayerBase.h"
 #include "../../Object/Actor/Chara/Boss/Boss.h"
@@ -49,7 +50,8 @@ public:
     void Release(void) override;
 
 private:
-    static constexpr int ENEMYS_POP = 7;
+    static constexpr int ENEMYS_POP = 0;
+    static constexpr int SROU_COUNT_MAX = 3;
 
 
     const std::vector<VECTOR> ENEMY_POS = {
@@ -71,9 +73,8 @@ private:
     enum class GAME_STATE
     {
         NONE = -1,
-        MOVIE,
-        MOVIE_BOSS,
         GAME,
+        GAME_END,
     };
     
     const std::vector<VECTOR> PLAYER_INIT_POS =
@@ -109,6 +110,14 @@ private:
     int playerHpImageBack_;
 
 
+    //スロー
+    int srouCount_;
+
+    //エンド
+    std::array<int, 4> imageResult_;
+    bool isGameOver_;
+
+
     float CalcHpBarScale(const VECTOR& _targetPos);
 
 
@@ -124,4 +133,33 @@ private:
 
     /// @brief Gui用の更新処理
     void UpdateGui(void) override;
+
+    
+    /// 状態
+    GAME_STATE state_;
+    /// 状態管理
+    int stateBase_;
+
+    // 状態管理(状態遷移時初期処理)
+    std::map<int, std::function<void(void)>> stateChanges_;
+    // 状態遷移
+    void ChangeState(GAME_STATE _state);
+    // 状態遷移
+    void ChangeState(int state);
+    void ChangeGame(void);
+    void ChangeGameEnd(void);
+    // 更新系
+    // 状態管理(更新ステップ)
+    std::function<void(void)> stateUpdate_;
+    void UpdateGame(void);
+    void UpdateGameEnd(void);
+    //描画
+    //状態管理（描画）
+    std::function<void(void)> stateDraw_;
+    void DrawGame(void);
+    void DrawGameEnd(void);
+    
+
+
+
 };

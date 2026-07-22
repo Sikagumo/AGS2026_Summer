@@ -96,6 +96,12 @@ public:
 	// 追従対象の設定
 	void SetFollow(const Transform* _follow) { followTransform_ = _follow; };
 
+	//座標の取得
+	void SetPos(VECTOR _pos) { transform_.pos = _pos; }
+
+	//クオータニオン角度の取得
+	void SetQuaternionRot(Quaternion _rot) { transform_.quaRot = _rot; }
+
 	/// @brief 追従対象割り当て
 	/// @param _target 対象の種類
 	/// @param _targetPos 追従位置

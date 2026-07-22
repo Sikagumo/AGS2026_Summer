@@ -18,7 +18,7 @@
 
 
 // ゲーム時間
-constexpr float GAME_TIME = 500.0f;
+constexpr float GAME_TIME = 30.0f;
 constexpr float GAME_TIME_DEFEAT_DEC = 75.0f;
 
 SceneGame::SceneGame(std::vector<PlayerSelectType> _playerSelectType)
@@ -31,6 +31,7 @@ SceneGame::SceneGame(std::vector<PlayerSelectType> _playerSelectType)
 	, targetHpImage_(-1)
 	, targetHpBerImage_(-1)
 	, gameTimer_(nullptr)
+	, srouCount_(0)
 {
 	
 	for (int i = 0; i < _playerSelectType.size(); i++)
@@ -123,11 +124,6 @@ void SceneGame::Initialize(void)
 	// マウスを表示しない設定にする
 	SetMouseDispFlag(false);
 	
-	auto& camera = SceneManager::GetInstance().GetCamera();
-	camera->ChangeMode(Camera::MODE::FOLLOW);
-	camera->SetFollow(&players_.at(0)->GetTransform());
-
-	
 	for (auto& player : players_)
 	{
 		player->Init();
@@ -144,43 +140,28 @@ void SceneGame::Initialize(void)
 
 	damageController_->SetPlayerMaxHp(players_.at(0)->GetMaxHp());
 	SoundManager::GetInstance().Play(SoundManager::SOUND::BGM_GAME);
+
+	SetMouseDispFlag(true);
+
+	for (size_t i = 0; i < imageResult_.size(); ++i)
+	{
+		imageResult_[i] = -1;
+	}
+
+	ResourceManager::GetInstance().LoadHandleIds(ResourceManager::SRC::IMGS_RESULT, imageResult_.data());
+
+	
+	stateChanges_.emplace(static_cast<int>(GAME_STATE::GAME), std::bind(&SceneGame::ChangeGame, this));
+	stateChanges_.emplace(static_cast<int>(GAME_STATE::GAME_END), std::bind(&SceneGame::ChangeGameEnd, this));
+	ChangeState(GAME_STATE::GAME);
+
+
+
 }
 
 void SceneGame::Update(void)
 {
-	auto& sound = SoundManager::GetInstance();
-	auto& input = InputManager::GetInstance();
-	auto& camera = SceneManager::GetInstance().GetCamera();
-
-	if (Loading::GetInstance()->IsLoading()) { return; }
-
-	damageController_->Update();
-	DamageProcess();
-
-	boss_->Update();
-	stage_->Update();
-	for (auto& enemyRobo : enemyRobos_)
-	{
-		enemyRobo->Update();
-	}
-	for (auto& player : players_)
-	{
-		player->Update();
-		player->SetSoundData(boss_->GetBossPos(), boss_->GetSoundRadius(), boss_->GetLandingFlag(), boss_->GetMGFireFlag(), boss_->GetRoadFlag());
-	}
-
-	UpdateGameTime();
-
-	EffectManager::GetInstance().Update();
-	
-	// ボスHPが０の時、ゲームクリア
-	if (boss_->GetHP() <= 0 && gameTimer_->GetTime() > 0.0f)
-	{
-		SoundManager::GetInstance().Stop(SoundManager::SOUND::BGM_GAME);
-		SceneManager::GetInstance().ChangeScene(std::make_shared<SceneResult>(false));
-	}
-
-	SceneManager::GetInstance().GetCamera()->Update();
+	stateUpdate_();
 }
 
 void SceneGame::DamageProcess(void)
@@ -263,43 +244,13 @@ void SceneGame::UpdateGameTime(void)
 
 	if (gameTimer_->GetTime() <= 0.0f)
 	{
-		SceneManager::GetInstance().ChangeScene(std::make_shared<SceneResult>(true));
+		ChangeState(GAME_STATE::GAME_END);
 	}
 }
 
 void SceneGame::Draw(void)
 {
-	auto& effect = EffectManager::GetInstance();
-
-	stage_->Draw();
-
-	for (auto& player : players_)
-	{
-		player->Draw();
-	}
-
-	boss_->Draw();
-	for (auto& enemyRobo : enemyRobos_)
-	{
-		if (!enemyRobo->IsAlive()) continue;
-		enemyRobo->Draw();
-	}
-	
-	effect.Draw();
-
-	DrawHpBerBoss();
-
-	gameTimer_->Draw();
-
-	DrawRotaGraph((Application::SCREEN_HALF_X - 300), 35, 0.5, 0.0, uiGame_.at(0), true);
-
-	DrawHpBerPlayer();
-
-#ifdef _DEBUG
-	DrawDebug();
-#endif // _DEBUG
-
-	SceneManager::GetInstance().GetCamera()->DrawDebug();
+	stateDraw_();
 }
 
 void SceneGame::Release(void)
@@ -512,6 +463,178 @@ void SceneGame::DrawDebug(void)
 
 void SceneGame::UpdateGui(void)
 {
+}
+
+void SceneGame::ChangeState(GAME_STATE _state)
+{
+	state_ = _state;
+
+	int state = static_cast<int>(state_);
+
+	// 各状態遷移の初期処理
+	ChangeState(state);
+}
+
+void SceneGame::ChangeState(int state)
+{
+	stateBase_ = state;
+	// 各状態遷移の初期処理
+	stateChanges_[stateBase_]();
+}
+
+void SceneGame::ChangeGame(void)
+{
+	stateUpdate_ = std::bind(&SceneGame::UpdateGame, this);
+	stateDraw_ = std::bind(&SceneGame::DrawGame, this);
+
+	auto& camera = SceneManager::GetInstance().GetCamera();
+	camera->ChangeMode(Camera::MODE::FOLLOW);
+	camera->SetFollow(&players_.at(0)->GetTransform());
+
+
+}
+
+void SceneGame::ChangeGameEnd(void)
+{
+	stateUpdate_ = std::bind(&SceneGame::UpdateGameEnd, this);
+	stateDraw_ = std::bind(&SceneGame::DrawGameEnd, this);
+
+	auto& camera = SceneManager::GetInstance().GetCamera();
+	camera->ChangeMode(Camera::MODE::FIXED_POINT);
+	
+
+
+}
+
+void SceneGame::UpdateGame(void)
+{
+	auto& sound = SoundManager::GetInstance();
+	auto& input = InputManager::GetInstance();
+	auto& camera = SceneManager::GetInstance().GetCamera();
+
+	if (Loading::GetInstance()->IsLoading()) { return; }
+
+	damageController_->Update();
+	DamageProcess();
+
+	boss_->Update();
+	stage_->Update();
+	for (auto& enemyRobo : enemyRobos_)
+	{
+		enemyRobo->Update();
+	}
+	for (auto& player : players_)
+	{
+		player->Update();
+		player->SetSoundData(boss_->GetBossPos(), boss_->GetSoundRadius(), boss_->GetLandingFlag(), boss_->GetMGFireFlag(), boss_->GetRoadFlag());
+	}
+
+	UpdateGameTime();
+
+	EffectManager::GetInstance().Update();
+
+	// ボスHPが０の時、ゲームクリア
+	if (boss_->GetHP() <= 0 && gameTimer_->GetTime() > 0.0f)
+	{
+		ChangeState(GAME_STATE::GAME_END);
+	}
+
+	SceneManager::GetInstance().GetCamera()->Update();
+}
+
+void SceneGame::UpdateGameEnd(void)
+{
+	srouCount_++;
+	if (boss_->GetHP() <= 0)
+	{
+		if (srouCount_ <= SROU_COUNT_MAX * 10)
+		{
+			if (srouCount_ % SROU_COUNT_MAX == 0)
+			{
+				boss_->Update();
+
+			}
+		}
+		else
+		{
+			boss_->Update();
+			EffectManager::GetInstance().Update();
+		}
+	}
+	else
+	{
+
+	}
+
+
+	if (srouCount_ >= SROU_COUNT_MAX * 100)
+	{
+		SceneManager::GetInstance().ChangeScene(std::make_shared<SceneResult>(false));
+	}
+
+	stage_->Update();
+	
+	auto& camera = SceneManager::GetInstance().GetCamera();
+
+	VECTOR cameralocalPos = boss_->GetBodyRot().PosAxis({0,200,800});
+	VECTOR cameraPos = VAdd(boss_->GetTransform().pos, cameralocalPos);
+	camera->SetPos(cameraPos);
+
+	VECTOR cameraDir = VSub(boss_->GetTransform().pos, camera->GetPos());
+	cameraDir = VNorm(cameraDir);
+	float cameraAngle = atan2(cameraDir.x, cameraDir.z);
+	Quaternion cameraQuaRot = Quaternion::AngleAxis(cameraAngle, UtilityMath::AXIS_Y);
+	camera->SetQuaternionRot(cameraQuaRot);
+}
+
+void SceneGame::DrawGame(void)
+{
+
+
+	stage_->Draw();
+
+	for (auto& player : players_)
+	{
+		player->Draw();
+	}
+
+	boss_->Draw();
+	for (auto& enemyRobo : enemyRobos_)
+	{
+		if (!enemyRobo->IsAlive()) continue;
+		enemyRobo->Draw();
+	}
+	auto& effect = EffectManager::GetInstance();
+	effect.Draw();
+
+	DrawHpBerBoss();
+
+	gameTimer_->Draw();
+
+	DrawRotaGraph((Application::SCREEN_HALF_X - 300), 35, 0.5, 0.0, uiGame_.at(0), true);
+
+	DrawHpBerPlayer();
+
+#ifdef _DEBUG
+	DrawDebug();
+#endif // _DEBUG
+
+	SceneManager::GetInstance().GetCamera()->DrawDebug();
+}
+
+void SceneGame::DrawGameEnd(void)
+{
+	stage_->Draw();
+	boss_->Draw();
+	auto& effect = EffectManager::GetInstance();
+	effect.Draw();
+
+	const int IMAGET_TITLE_Y = Application::SCREEN_SIZE_Y / 3;
+	if (srouCount_ >= SROU_COUNT_MAX * 10)
+	{
+		DrawRotaGraph(Application::SCREEN_HALF_X, IMAGET_TITLE_Y, 2.0f, UtilityMath::DEG2RAD, imageResult_[1], true);
+	}
+
 }
 
 
