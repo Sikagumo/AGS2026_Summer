@@ -39,8 +39,9 @@ protected:
 
 private:
 
-	Transform collisionTrans_;
+	Transform viewTrans_;
 
+	Transform skyDome_;
 
 	// •Ç‚ÌœŠOƒtƒŒ[ƒ€–¼Ì
 	const std::vector<std::string> EXCLUDE_WALL_NAMES =

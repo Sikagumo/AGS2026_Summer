@@ -94,7 +94,11 @@ void SceneGame::Load(void)
 
 	gameTimer_ = std::make_unique<GameTimer>(GAME_TIME);
 
-	SoundManager::GetInstance().Add(SoundManager::TYPE::BGM, SoundManager::SOUND::BGM_GAME, ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::BGM_GAME));
+	SoundManager::GetInstance().Add(SoundManager::TYPE::BGM, SoundManager::SOUND::BGM_GAME
+		, ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::BGM_GAME));
+
+	SoundManager::GetInstance().Add(SoundManager::TYPE::BGM, SoundManager::SOUND::BGM_TITLE_THUNDER
+			, ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::BGM_TITLE_THUNDER));
 
 	SoundManager::GetInstance().Add(SoundManager::TYPE::SE, SoundManager::SOUND::SE_DAMAGE_PLAYER
 		, ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::SE_PLAYER_DAMAGE));
@@ -141,6 +145,7 @@ void SceneGame::Initialize(void)
 
 	damageController_->SetPlayerMaxHp(players_.at(0)->GetMaxHp());
 	SoundManager::GetInstance().Play(SoundManager::SOUND::BGM_GAME);
+	SoundManager::GetInstance().Play(SoundManager::SOUND::BGM_TITLE_THUNDER);
 }
 
 void SceneGame::Update(void)
@@ -248,11 +253,9 @@ void SceneGame::UpdateGameTime(void)
 	for (auto& player : players_)
 	{
 		// プレイヤー撃破時、制限時間を減少させる
-		if (player->GetCurHp() <= 0)
-		{
-			gameTimer_->SetTime(gameTimer_->GetTime() - GAME_TIME_DEFEAT_DEC);
-			player->SetRespawn();
-		}
+		if (!player->GetIsRespawn()) { continue; }
+		
+		gameTimer_->SetTime(gameTimer_->GetTime() - GAME_TIME_DEFEAT_DEC);
 	}
 
 	if (gameTimer_->GetTime() <= 0.0f)
@@ -324,7 +327,7 @@ void SceneGame::DrawHpBerPlayer(void)
 	Vector2 berPos = BER_POS_MIDDLE;
 
 	// 表示幅としてのRATIOのリマップ範囲（数値で調整可能）
-	constexpr float DISPLAY_RATIO_MIN = 0.1f;
+	constexpr float DISPLAY_RATIO_MIN = 0.05f;
 	constexpr float DISPLAY_RATIO_MAX = 0.815f;
 
 	const int PLAYER_NUM = static_cast<int>(players_.size() + 1);

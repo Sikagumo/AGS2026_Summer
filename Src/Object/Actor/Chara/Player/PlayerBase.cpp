@@ -1,7 +1,7 @@
 #include "../../../../Manager/Decoration/SoundManager.h"
 #include "PlayerBase.h"
 
-constexpr int HP_MAX_PLAYER = 250;
+constexpr int HP_MAX_PLAYER = 1;
 
 PlayerBase::PlayerBase(int _playerNo, JOB_TYPE _jobType, const VECTOR& _startPos, SKIN_TYPE _playerType)
 	: CharaBase::CharaBase()

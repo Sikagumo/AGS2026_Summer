@@ -51,6 +51,7 @@ public:
 
 	/// @brief 現在の行動番号を取得
 	int GetCurActionNum(void)const { return curActionNum_; }
+	int GetPreActionNum(void)const { return preActionNum_; }
 
 	/// @brief 行動が終わっているか否か
 	bool IsEndActionActive(void)const { return (curTimeActionActive_ <= 0.0f); };
@@ -89,8 +90,10 @@ private:
 
 	PACTION_STATE actionState_;
 
+
 	// 現在実行中の行動名
 	int curActionNum_;
+	int preActionNum_;
 
 	float curTimeAction_;
 
