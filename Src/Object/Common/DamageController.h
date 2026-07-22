@@ -9,7 +9,7 @@ public:
 	///武器ダメージの登録用
 	enum class BOSS_WEPO_TYPE
 	{
-		NONE,
+		NONE = -1,
 		MG,
 		PRESSWAVE,
 		CANNON,

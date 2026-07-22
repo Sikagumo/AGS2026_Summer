@@ -21,6 +21,7 @@ public:
 		THROW_RUN,
 		JUMP,
 		DODGE,
+		DEFEAT,
 		MAX,
 	};
 
@@ -58,12 +59,13 @@ public:
 	/// @param _knockPowY 縦吹っ飛ばし力
 	void SetKnock(const VECTOR& _knockDirXZ, float _knockPowXZ
 					, bool _isStan, float _knockPowY = KNOCK_POW_Y);
-
-	void SetRespawn(void);
 	
 	void SetPlayerType(SKIN_TYPE _type = SKIN_TYPE::MAX);
 	
 	void SetSoundData(VECTOR _pos, float _radius, bool _isLanging, bool _isMGFire, bool _isRoad)override;
+
+	/// @brief リスポーンしたか否か
+	bool GetIsRespawn(void)const;
 
 
 protected:
@@ -148,18 +150,19 @@ private:
 
 	/// @brief 回避処理
 	void ProcessDefeat(void);
-	void Defeat(void);
 
 	void ProcessKnock(void);
 
 	void ProcessAttack(void);
+
+	void SetRespawn(void);
 
 
 	/// @brief アニメーション再生
 	/// @param _type アニメーションの種類
 	/// @param _isLoop ループ再生するか否か
 	/// @param _animSpeed 再生速度指定(任意)
-	void PlayAnimation(ANIM_TYPE _type, bool _isLoop = true, float _animSpeed = -1.0f);
+	void PlayAnimation(ANIM_TYPE _type, bool _isLoop = true, bool _isAnimBlend = true, float _animSpeed = -1.0f);
 
 	void CreateBullet(void);
 	void ShotBullet(void);

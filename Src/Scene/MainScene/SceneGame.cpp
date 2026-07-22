@@ -33,7 +33,6 @@ SceneGame::SceneGame(std::vector<PlayerSelectType> _playerSelectType)
 	, targetHpBerImage_(-1)
 	, gameTimer_(nullptr)
 {
-	tempTime_ = 0.0f;
 	for (int i = 0; i < _playerSelectType.size(); i++)
 	{
 		auto job = _playerSelectType.at(i).job;
@@ -98,7 +97,11 @@ void SceneGame::Load(void)
 
 	gameTimer_ = std::make_unique<GameTimer>(GAME_TIME);
 
-	SoundManager::GetInstance().Add(SoundManager::TYPE::BGM, SoundManager::SOUND::BGM_GAME, ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::BGM_GAME));
+	SoundManager::GetInstance().Add(SoundManager::TYPE::BGM, SoundManager::SOUND::BGM_GAME
+		, ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::BGM_GAME));
+
+	SoundManager::GetInstance().Add(SoundManager::TYPE::BGM, SoundManager::SOUND::BGM_TITLE_THUNDER
+			, ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::BGM_TITLE_THUNDER));
 
 	SoundManager::GetInstance().Add(SoundManager::TYPE::SE, SoundManager::SOUND::SE_DAMAGE_PLAYER
 		, ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::SE_PLAYER_DAMAGE));
@@ -145,8 +148,13 @@ void SceneGame::Initialize(void)
 
 	damageController_->SetPlayerMaxHp(players_.at(0)->GetMaxHp());
 	SoundManager::GetInstance().Play(SoundManager::SOUND::BGM_GAME);
-
-	rainyMaterial_.SetUseRainy(1.0f, 1.0f);
+	SoundManager::GetInstance().Play(SoundManager::SOUND::BGM_TITLE_THUNDER);
+	
+	
+	// 雨シェーダ導入
+	constexpr float RAIN_POW = 1.0f;
+	constexpr float RAIN_POW_BACK = 1.0f;
+	rainyMaterial_.SetUseRainy(RAIN_POW, RAIN_POW_BACK);
 }
 
 void SceneGame::Update(void)
@@ -194,9 +202,9 @@ void SceneGame::DamageProcess(void)
 	}
 
 	boss_->SetPlayer1Pos(players_[0]->GetBodyPos());
-	/*boss_->SetPlayer2Pos(players_[1]->GetBodyPos());
-	boss_->SetPlayer3Pos(players_[2]->GetBodyPos());
-	boss_->SetPlayer4Pos(players_[3]->GetBodyPos());*/
+	//boss_->SetPlayer2Pos(players_[1]->GetBodyPos());
+	//boss_->SetPlayer3Pos(players_[2]->GetBodyPos());
+	//boss_->SetPlayer4Pos(players_[3]->GetBodyPos());
 	
 	boss_->SetBossDamage(damageController_->GetBossDamage());
 
@@ -257,20 +265,17 @@ void SceneGame::UpdateGameTime(void)
 	for (auto& player : players_)
 	{
 		// プレイヤー撃破時、制限時間を減少させる
-		if (player->GetCurHp() <= 0)
-		{
-			gameTimer_->SetTime(gameTimer_->GetTime() - GAME_TIME_DEFEAT_DEC);
-			player->SetRespawn();
-		}
+		if (!player->GetIsRespawn()) { continue; }
+		
+		gameTimer_->SetTime(gameTimer_->GetTime() - GAME_TIME_DEFEAT_DEC);
 	}
 
 	if (gameTimer_->GetTime() <= 0.0f)
 	{
 		SceneManager::GetInstance().ChangeScene(std::make_shared<SceneResult>(true));
 	}
-
-	tempTime_ += TimeManager::GetInstance().GetDeltaTime();
-	//rainyMaterial_.SetTime(tempTime_);
+	
+	// 雨シェーダ時間加算
 	rainyMaterial_.SetTime(TimeManager::GetInstance().GetGameTime());
 }
 
@@ -342,8 +347,8 @@ void SceneGame::DrawHpBerPlayer(void)
 	constexpr Vector2 BER_POS_MIDDLE = { 200, 500 };
 	Vector2 berPos = BER_POS_MIDDLE;
 
-	// 表示幅としてのRATIOのリマップ範囲（数値で調整可能）
-	constexpr float DISPLAY_RATIO_MIN = 0.1f;
+	// 表示幅のリマップ範囲（数値で調整可能）
+	constexpr float DISPLAY_RATIO_MIN = 0.05f;
 	constexpr float DISPLAY_RATIO_MAX = 0.815f;
 
 	const int PLAYER_NUM = static_cast<int>(players_.size() + 1);
