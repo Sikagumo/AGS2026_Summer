@@ -95,7 +95,7 @@ void Camera::Update(void)
 	// ロックオン時、常に追従位置を取得する
 	if (isLockOn_)
 	{
-		if (InputManager::GetInstance().IsTrgMouseRight()
+		if (InputManager::GetInstance().GetMouseWheel() != 0
 			|| InputManager::GetInstance().IsPadBtnTrgDown(InputManager::JOYPAD_NO::PAD1, InputManager::JOYPAD_BTN::L_BUTTON)
 			|| InputManager::GetInstance().IsPadBtnTrgDown(InputManager::JOYPAD_NO::PAD1, InputManager::JOYPAD_BTN::R_BUTTON))
 		{
@@ -307,38 +307,37 @@ void Camera::LockOnChoice(void)
 
 		if (moveCount != 0)
 		{
-			int target = static_cast<int>(lockOnTarget_);
+			int base = static_cast<int>(lockOnTarget_);
+
 			constexpr int TARGET_MAX = static_cast<int>(LOCKON_TARGET::MAX);
 
-			int step = (moveCount > 0) ? 1 : -1;
+			int target = ((base + moveCount) % TARGET_MAX);
+			
+			bool isChange = false;
 
-			for (int i = 0; i < std::abs(moveCount); ++i)
+			for (int i = 0; i < TARGET_MAX; i++)
 			{
-				do
+				target = ((target + moveCount + i) % TARGET_MAX);
+
+				if (target == base) { break; }
+
+				// 追従対象が有効ならば、検索終了
+				if (targetsParam_.contains(static_cast<LOCKON_TARGET>(target))
+					|| isChange)
 				{
-					target += step;
-
-					if (target < 0)
-					{
-						target = TARGET_MAX - 1;
-					}
-					else if (target >= TARGET_MAX)
-					{
-						target = 0;
-					}
-
-				} while (!targetsParam_.contains(static_cast<LOCKON_TARGET>(target)));
+					isChange = true;
+					break;
+				}
+			}
+			if (!isChange)
+			{
+				return;
 			}
 
 			lockTarget = static_cast<LOCKON_TARGET>(target);
 		}
 	}
-
-
-	if (lockTarget == LOCKON_TARGET::NONE)
-	{
-		return;
-	}
+	if (lockTarget == LOCKON_TARGET::NONE) { return; }
 
 	// ロックオン切り替え時にイージング開始点を記録
 	easingFromPos_ = transform_.pos;
@@ -373,6 +372,10 @@ void Camera::SetIsLockOn(bool _isLockOn)
 		easingTerm_ = 0.0f;
 	}
 
+	if (_isLockOn)
+	{
+		LockOnChoice();
+	}
 	isLockOn_ = _isLockOn;
 }
 
