@@ -254,8 +254,11 @@ private:
 
 	//UŒ‚‘ÎÛî•ñ
 	VECTOR mainPos_;
+	int mainIdx_;
 	VECTOR mpPos_;
+	int mpIdx_;
 	VECTOR CannonPos_;
+	int cannonIdx_;
 	VECTOR playerPos_[4];
 	int playerSize_;
 

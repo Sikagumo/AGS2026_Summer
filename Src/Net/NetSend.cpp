@@ -134,7 +134,7 @@ void NetSend::SendBossAction(void)
 	}
 
 	// ボスの最新状態を取得する
-	NET_BOSS_ACTION bossAction;
+	NET_BOSS_ACTION bossAction = NetManager::GetInstance().GetBossAction();
 
 	NET_BASIC_DATA basicData = MakeBasicData(NET_DATA_TYPE::BOSS_ACTOION, 0);
 
@@ -144,7 +144,6 @@ void NetSend::SendBossAction(void)
 
 	int sendSize = sizeof(NET_BASIC_DATA) + sizeof(NET_BOSS_ACTION);
 
-	// クライアント全員へ送信
 	SendUDP_Client(buffer, sendSize);
 }
 

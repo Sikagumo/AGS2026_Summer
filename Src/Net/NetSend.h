@@ -12,7 +12,6 @@ public:
 	void Send(NET_DATA_TYPE _type);
 
 private:
-
 	int sendSocketId_;
 
 	void SendUser(void);

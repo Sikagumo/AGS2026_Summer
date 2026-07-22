@@ -14,7 +14,7 @@ private:
 public:
 
 	// スクリーンサイズ
-	static constexpr int SCREEN_ASPECT = 50;/*120*/
+	static constexpr int SCREEN_ASPECT = 100;/*120*/
 	static constexpr int SCREEN_SIZE_X = (16 * SCREEN_ASPECT);
 	static constexpr int SCREEN_SIZE_Y = (9 * SCREEN_ASPECT);
 

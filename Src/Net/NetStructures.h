@@ -100,6 +100,7 @@ struct NET_ACTION
 	int animId = 0;
 	int currentHp = 0;
 	unsigned int actBits = 0;
+	bool isAttack = false;
 };
 
 /// @brief ボスキャラクターの1フレーム分の同期アクションデータ構造体
@@ -115,7 +116,16 @@ struct NET_BOSS_ACTION
 	// ターゲット・状態関連
 	int targetPlayerId = -1;  // 狙っているプレイヤーのID
 	int animId = 0;           // 再生中のアニメーションID
-	int bossHp = 0;           // ボスの現在HP
+	int bossHp = 2000;           // ボスの現在HP
+
+	// 各ウェポンHP関連
+	int weaponMglHp = 1250;
+	int weaponMgrHp = 1250;
+	int weaponMpLHp = 750;
+	int weaponMpRHp = 750;
+	int weaponRgHp = 2000;
+	int weaponCannonLHp = 1000;
+	int weaponCannonRHp = 1000;
 };
 
 /// @brief 複数フレーム分のプレイヤーアクション履歴構造体（パケットロス対策用）

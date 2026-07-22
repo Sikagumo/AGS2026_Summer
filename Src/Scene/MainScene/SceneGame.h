@@ -50,7 +50,7 @@ public:
 
 private:
 
-    static constexpr int ENEMYS_POP = 7;
+    static constexpr int ENEMYS_POP = 0;
 
     // ƒQ[ƒ€ŠÔ
     static constexpr float GAME_TIME = 500.0f;

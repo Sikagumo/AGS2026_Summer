@@ -72,7 +72,7 @@ public:
 	bool GetHostControl(void) const { return isHostControl_; }
 
 	// ネットワークから受け取った情報を強制的にセットする（ラジコン用）
-	void SetNetworkAction(const VECTOR& _pos, const Quaternion& _rot, int _animId);
+	void SetNetworkAction(const VECTOR& _pos, const Quaternion& _rot, int _animId, bool _isAttack);
 
 	// キャラクターの通信keyを設定
 	void SetNetKey(int _key);
@@ -152,6 +152,11 @@ private:
 
 	// 誰のキャラクターかを識別key
 	int netKey_;
+
+	// 攻撃したかどうか
+	bool isNetAttack_;
+
+	bool isAttackSelf_;
 
 
 	// 操作

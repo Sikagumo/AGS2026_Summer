@@ -126,6 +126,8 @@ void SceneGame::Initialize(void)
 
 	NET_JOIN_USER selfUser = NetManager::GetInstance().GetSelfUser();
 	auto remoteUsers = NetManager::GetInstance().GetNetUsers();
+	bool isBossLocalControl = (NetManager::GetInstance().GetMode() != NET_MODE::CLIENT);
+	boss_->SetHostControl(isBossLocalControl);
 
 	// 自分の設定
 	players_.at(0)->SetHostControl(true);
@@ -175,26 +177,33 @@ void SceneGame::Update(void)
 	damageController_->Update();
 	DamageProcess();
 
-	boss_->Update();
+	if (NetManager::GetInstance().GetMode() != NET_MODE::CLIENT)
+	{
+		boss_->Update();
+		NetManager::GetInstance().SetBossAction(boss_->GetNetworkAction());
+	}
+	else
+	{
+		boss_->SetNetworkAction(NetManager::GetInstance().GetBossAction());
+		boss_->Update();
+	}
+
 	stage_->Update();
 
 	auto remoteHisMap = NetManager::GetInstance().GetRemoteActionHis();
 
 	for (auto& player : players_)
 	{
-		// 自分が操作するキャラならスキップ
 		if (player->GetHostControl()) { continue; }
 
 		int key = player->GetNetKey();
 
-		// 取得した履歴の中に、このラジコンの持ち主のデータがあれば反映
 		if (remoteHisMap.find(key) != remoteHisMap.end())
 		{
-			// 配列の [0] が一番新しい最新アクション
 			NET_ACTION latestAction = remoteHisMap[key].actions[0];
 
-			// 座標と回転、アニメーションをラジコンに強制セット！
-			player->SetNetworkAction(latestAction.pos, latestAction.quaRot, latestAction.animId);
+			// isAttack フラグも一緒に渡す
+			player->SetNetworkAction(latestAction.pos, latestAction.quaRot, latestAction.animId, latestAction.isAttack);
 		}
 	}
 	
@@ -208,58 +217,6 @@ void SceneGame::Update(void)
 		player->Update();
 		player->SetSoundData(boss_->GetBossPos(), boss_->GetSoundRadius(), boss_->GetLandingFlag(), boss_->GetMGFireFlag(), boss_->GetRoadFlag());
 	}
-
-	UpdateGameTime();
-
-	EffectManager::GetInstance().Update();
-	
-	// ボスHPが０の時、ゲームクリア
-	if (boss_->GetHP() <= 0 && gameTimer_->GetTime() > 0.0f)
-	{
-		SoundManager::GetInstance().Stop(SoundManager::SOUND::BGM_GAME);
-		SceneManager::GetInstance().ChangeScene(std::make_shared<SceneResult>(false));
-	}
-
-	SceneManager::GetInstance().GetCamera()->Update();
-}
-
-void SceneGame::DamageProcess(void)
-{
-	for (auto& enemyRobo : enemyRobos_)
-	{
-		enemyRobo->SetPlayerPos(players_.at(0)->GetBodyPos());
-	}
-	boss_->SetPlayer1Pos(players_[0]->GetBodyPos());
-	/*boss_->SetPlayer2Pos(players_[1]->GetBodyPos());
-	boss_->SetPlayer3Pos(players_[2]->GetBodyPos());
-	boss_->SetPlayer4Pos(players_[3]->GetBodyPos());*/
-	
-	boss_->SetBossDamage(damageController_->GetBossDamage());
-
-	boss_->SetWeaponCannonLDamage(damageController_->GetWeaponCannonLDamage());
-	boss_->SetWeaponCannonRDamage(damageController_->GetWeaponCannonRDamage());
-
-	boss_->SetWeaponMGLDamage(damageController_->GetWeaponMGLDamage());
-	boss_->SetWeaponMGRDamage(damageController_->GetWeaponMGRDamage());
-
-	boss_->SetWeaponMPLDamage(damageController_->GetWeaponMPLDamage());
-	boss_->SetWeaponMPRDamage(damageController_->GetWeaponMPRDamage());
-
-	boss_->SetWeaponRGDamage(damageController_->GetWeaponRGDamage());
-
-
-	if (damageController_->GetBossDamage() > 0
-		|| damageController_->GetWeaponCannonLDamage() > 0
-		|| damageController_->GetWeaponCannonRDamage() > 0
-		|| damageController_->GetWeaponMGLDamage() > 0
-		|| damageController_->GetWeaponMGRDamage() > 0
-		|| damageController_->GetWeaponMPLDamage() > 0
-		|| damageController_->GetWeaponMPRDamage() > 0
-		|| damageController_->GetWeaponRGDamage() > 0)
-	{
-		SoundManager::GetInstance().Play(SoundManager::SOUND::SE_HIT_BLAST);
-	}
-
 
 	// プレイヤーの攻撃
 	for (auto& player : players_)
@@ -276,6 +233,73 @@ void SceneGame::DamageProcess(void)
 			if (bullet == nullptr) { continue; }
 			damageController_->SetPlayerAttack(bullet->GetPowerBullet(), bullet->GetPowerBlast());
 		}
+	}
+
+	UpdateGameTime();
+
+	EffectManager::GetInstance().Update();
+	
+	const bool isBossHpValid = (boss_->GetHP() >= 0);
+	if (isBossHpValid && boss_->GetHP() <= 0 && gameTimer_->GetTime() > 0.0f)
+	{
+		SoundManager::GetInstance().Stop(SoundManager::SOUND::BGM_GAME);
+		SceneManager::GetInstance().ChangeScene(std::make_shared<SceneResult>(false));
+	}
+
+	SceneManager::GetInstance().GetCamera()->Update();
+}
+
+void SceneGame::DamageProcess(void)
+{
+	for (auto& enemyRobo : enemyRobos_)
+	{
+		enemyRobo->SetPlayerPos(players_.at(0)->GetBodyPos());
+	}
+	const int playerCount = static_cast<int>(players_.size());
+	
+	if (playerCount >= 1)
+	{
+		boss_->SetPlayer1Pos(players_[0]->GetBodyPos());
+	}
+	
+	if (playerCount >= 2)
+	{
+		boss_->SetPlayer2Pos(players_[1]->GetBodyPos());
+	}
+
+	if (playerCount >= 3)
+	{
+		boss_->SetPlayer3Pos(players_[2]->GetBodyPos());
+	}
+
+	if (playerCount >= 4)
+	{
+		boss_->SetPlayer4Pos(players_[3]->GetBodyPos());
+	}
+	
+	if (NetManager::GetInstance().GetMode() != NET_MODE::CLIENT)
+	{
+		// ボスへのダメージ適用をホストのみに限定する
+		boss_->SetBossDamage(damageController_->GetBossDamage());
+		boss_->SetWeaponCannonLDamage(damageController_->GetWeaponCannonLDamage());
+		boss_->SetWeaponCannonRDamage(damageController_->GetWeaponCannonRDamage());
+		boss_->SetWeaponMGLDamage(damageController_->GetWeaponMGLDamage());
+		boss_->SetWeaponMGRDamage(damageController_->GetWeaponMGRDamage());
+		boss_->SetWeaponMPLDamage(damageController_->GetWeaponMPLDamage());
+		boss_->SetWeaponMPRDamage(damageController_->GetWeaponMPRDamage());
+		boss_->SetWeaponRGDamage(damageController_->GetWeaponRGDamage());
+	}
+
+	if (damageController_->GetBossDamage() > 0
+		|| damageController_->GetWeaponCannonLDamage() > 0
+		|| damageController_->GetWeaponCannonRDamage() > 0
+		|| damageController_->GetWeaponMGLDamage() > 0
+		|| damageController_->GetWeaponMGRDamage() > 0
+		|| damageController_->GetWeaponMPLDamage() > 0
+		|| damageController_->GetWeaponMPRDamage() > 0
+		|| damageController_->GetWeaponRGDamage() > 0)
+	{
+		SoundManager::GetInstance().Play(SoundManager::SOUND::SE_HIT_BLAST);
 	}
 
 	// プレイヤー被ダメージ処理

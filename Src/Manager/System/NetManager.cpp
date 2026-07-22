@@ -105,6 +105,8 @@ void NetManager::Update(void)
 {
 	if (!isRunning_) return;
 
+	UdpReceiveData();
+
 	if (netBase_)
 	{
 		NET_JOIN_USER self = GetSelfUser();
@@ -265,6 +267,14 @@ void NetManager::UdpReceiveData(void)
 				// 自分の送ったデータが跳ね返って来たものは無視し、他人のデータを保存する
 				if (his->key != GetMyKey())
 				{
+					if (remoteActionHis_.find(his->key) != remoteActionHis_.end())
+					{
+						if (remoteActionHis_[his->key].actions[0].isAttack)
+						{
+							his->actions[0].isAttack = true;
+						}
+					}
+					
 					remoteActionHis_[his->key] = *his;
 				}
 			}

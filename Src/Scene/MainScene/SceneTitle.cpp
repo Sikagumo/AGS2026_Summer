@@ -444,8 +444,14 @@ void SceneTitle::ProcessMenuState(void)
     {
         case MENU_ITEM::SOLO:
         {
-            SceneManager::GetInstance()
-                .ChangeScene(std::make_shared<SceneLobby>(FALSE));
+            std::vector<SceneGame::PlayerSelectType> playerSelectTypes;
+            SceneGame::PlayerSelectType myType;
+            myType.job = PlayerBase::JOB_TYPE::CANNON;
+            myType.skin = PlayerBase::SKIN_TYPE::DOG;
+            playerSelectTypes.push_back(myType);
+            SceneManager::GetInstance().ChangeScene(std::make_shared<SceneGame>(playerSelectTypes));
+           /* SceneManager::GetInstance()
+                .ChangeScene(std::make_shared<SceneLobby>(false));*/
         }
         break;
 

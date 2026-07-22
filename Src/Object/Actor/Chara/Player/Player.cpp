@@ -68,6 +68,8 @@ Player::Player(int _playerNo, JOB_TYPE _jobType, SKIN_TYPE _skinType, const VECT
 	, shotTerm_(0.0f)
 	, isHostControl_(false)
 	, netKey_(0)
+	, isNetAttack_(false)
+	, isAttackSelf_(false)
 {
 	if (_jobType == JOB_TYPE::CANNON)
 	{
@@ -435,6 +437,8 @@ void Player::UpdateProcess(void)
 
 	// 無敵時間導入
 	timeInv_ = ((timeInv_ > 0.0f) ? (timeInv_ - delta) : 0.0f);
+
+	isAttackSelf_ = false;
 
 	// マルチプレイのため追加
 	if (isHostControl_)
@@ -895,6 +899,8 @@ void Player::ProcShotNormal(void)
 		// 攻撃時に左右交互に弾を投げるアニメーション
 		ANIM_TYPE type = ((curAttackNum_ % 2 == 0) ? ANIM_TYPE::THROW_LEFT : ANIM_TYPE::THROW_RIGHT);
 		PlayAnimation(type, false);
+
+		isAttackSelf_ = true;
 	}
 }
 void Player::ProcShotSpecial(void)
@@ -917,6 +923,9 @@ void Player::ProcShotSpecial(void)
 		// 攻撃時に左右交互に弾を投げるアニメーション
 		ANIM_TYPE type = ((curAttackNum_ % 2 == 0) ? ANIM_TYPE::THROW_LEFT : ANIM_TYPE::THROW_RIGHT);
 		PlayAnimation(type, false);
+
+		isAttackSelf_ = true;
+
 	}
 }
 
@@ -1197,15 +1206,24 @@ void Player::SetHostControl(bool _isLocal)
 	isHostControl_ = _isLocal;
 }
 
-void Player::SetNetworkAction(const VECTOR& _pos, const Quaternion& _rot, int _animId)
+void Player::SetNetworkAction(const VECTOR& _pos, const Quaternion& _rot, int _animId, bool _isAttack)
 {
 	transform_.pos = _pos;
 	transform_.quaRot = _rot;
 
-	if (static_cast<int>(animType_) != _animId) 
+	if (static_cast<int>(animType_) != _animId)
 	{
 		PlayAnimation(static_cast<ANIM_TYPE>(_animId));
 	}
+
+	// 攻撃フラグが OFF から ON に変わった瞬間、かつ未処理の場合のみ発砲する
+	if (_isAttack && !isNetAttack_)
+	{
+		ProcShotNormal();
+	}
+
+	// 受信した攻撃状態を保持
+	isNetAttack_ = _isAttack;
 }
 
 void Player::SetNetKey(int _key)
@@ -1229,6 +1247,7 @@ void Player::SendMyActionToNetManager(void)
 	myAction.animId = static_cast<int>(animType_);
 	myAction.currentHp = hp_;
 	myAction.actBits = 0;
+	myAction.isAttack = isNetAttack_;
 
 	NetManager::GetInstance().AddSelfAction(myAction);
 }
