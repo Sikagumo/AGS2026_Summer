@@ -446,7 +446,7 @@ void SceneTitle::ProcessMenuState(void)
         {
             std::vector<SceneGame::PlayerSelectType> playerSelectTypes;
             SceneGame::PlayerSelectType myType;
-            myType.job = PlayerBase::JOB_TYPE::CANNON;
+            myType.job = PlayerBase::JOB_TYPE::BOMB;
             myType.skin = PlayerBase::SKIN_TYPE::DOG;
             playerSelectTypes.push_back(myType);
             SceneManager::GetInstance().ChangeScene(std::make_shared<SceneGame>(playerSelectTypes));
