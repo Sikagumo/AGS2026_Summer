@@ -40,6 +40,7 @@ public:
 	/// <param name=""></param>
 	/// <returns>true=¶‚«‚Ä‚¢‚é</returns>
 	bool GetIsAlive(void)override { return isAlive_; }
+
 	/// <summary>
 	/// ƒEƒFƒ|ƒ“‚ÌŒ»İHP‚ğ“n‚·‚æ‚¤
 	/// </summary>

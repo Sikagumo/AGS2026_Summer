@@ -499,6 +499,16 @@ void Boss::UpdateProcess(void)
 {	
 	
 
+	if (hp_ <= 0)
+	{
+		if (state_ != STATE::END)
+		{
+			ChangeState(STATE::END);
+		}
+	}
+	stateUpdate_();
+
+
 	isLanging_ = false;
 	isMGFire_ = false;
 	if (weaponMGL_->IsAttack() == true || weaponMGR_->IsAttack() == true)
@@ -510,7 +520,7 @@ void Boss::UpdateProcess(void)
 	}
 	isRoadFire_ = false;
 
-	stateUpdate_();
+	
 
 	currentWaveScl = VAdd(currentWaveScl, WAVE_SCL_UP);
 	EffectManager::GetInstance().UpdateScl(EffectManager::EFFECT::EFFECT_WAVE,this, currentWaveScl);
@@ -785,7 +795,7 @@ void Boss::UpdateStateLaserAttack(void)
 			laserAttackRot_ = 0.0f;
 			weaponRG_->ChangeState(WeaponRG::STATE::IDLE);
 			
-			ChangeState(STATE::END);
+			ChangeState(STATE::IDLE);
 		}
 		transformBody_.quaRot = Quaternion::Mult(transformBody_.quaRot, Quaternion::AngleAxis(UtilityMath::Deg2RadF(laserRotSpeed_), UtilityMath::AXIS_Y));
 	}
@@ -796,20 +806,25 @@ void Boss::UpdateEnd(void)
 {
 	if (endCount_ >= 4)
 	{
-
+		speed_ = 30;
+		VECTOR movePow = VScale(bodyDir_, speed_);
+		// ˆÚ“®ˆ—
+		transformBody_.pos = VAdd(transformBody_.pos, movePow);
+		float targetAngle = atan2(bodyDir_.x, bodyDir_.z);
+		transformBody_.quaRot = Quaternion::AngleAxis(targetAngle, UtilityMath::AXIS_Y);
+		transformBody_.Update();
 	}
 	else if (endCount_>=3)
 	{
-		weaponCannonL_->SetHp(0);
-		weaponCannonR_->SetHp(0);
-		weaponMGL_->SetHp(0);
-		weaponMGR_->SetHp(0);
-		weaponMPL_->SetHp(0);
-		weaponMPR_->SetHp(0);
-		weaponRG_->SetHp(0);
+		weaponCannonL_->ChangeState(WeaponCannon::STATE::END);
+		weaponCannonR_->ChangeState(WeaponCannon::STATE::END);
+		weaponMGL_->ChangeState(WeaponMGL::STATE::END);
+		weaponMGR_->ChangeState(WeaponMGR::STATE::END);
+		weaponMPL_->ChangeState(WeaponMP::STATE::END);
+		weaponMPR_->ChangeState(WeaponMP::STATE::END);
+		weaponRG_->ChangeState(WeaponRG::STATE::END);
 
-		bodyDir_ = VSub(transform_.pos,cameraPos_ );
-		bodyDir_.y = 0.0f;
+		bodyDir_ = VSub(cameraPos_, transform_.pos );
 		bodyDir_ = VNorm(bodyDir_);
 	}
 

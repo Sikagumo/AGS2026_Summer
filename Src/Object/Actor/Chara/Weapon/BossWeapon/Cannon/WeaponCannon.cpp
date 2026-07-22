@@ -89,21 +89,11 @@ void WeaponCannon::InitPost(void)
 void WeaponCannon::UpdateProcess(void)
 {
 	// HPÇ™Ç»Ç≠Ç»Ç¡ÇΩÇÁéÄñSèàóùÅiç∂âEã§í Åj
-	if (!isAlive_)
+	if (hp_ <= 0 && isAlive_)
 	{
-		if (hp_ <= 0)
-		{
-			if (state_ != STATE::END)
-			{
-
-				ChangeState(STATE::END);
-			}
-		}
-		else
-		{
-			ChangeState(STATE::IDLE);
-		}
+		ChangeState(static_cast<int>(STATE::END));
 	}
+
 	for (std::shared_ptr<BBulletBase> bullet : bullets_)
 	{
 		bullet->Update();
@@ -200,6 +190,8 @@ void WeaponCannon::ChangeStateEnd(void)
 	stateUpdate_ = std::bind(&WeaponCannon::UpdateEnd, this);
 	isAlive_ = false;
 	CollisionController::GetInstance().SetCollisionActive(this, tag_, false);
+	transform_.pos = MV1GetFramePosition(bone_.transform.modelId, bone_.id);
+	transform_.Update();
 	jumpPow_ = JUNP_POW;
 	isJump_ = true;
 	moveDir_ = VSub(transform_.pos, bone_.transform.pos);
