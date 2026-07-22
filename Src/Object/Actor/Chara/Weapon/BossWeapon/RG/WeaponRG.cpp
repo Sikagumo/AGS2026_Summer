@@ -183,6 +183,7 @@ void WeaponRG::ChangeStateAttack(void)
 void WeaponRG::ChangeStateEnd(void)
 {
 	stateUpdate_ = std::bind(&WeaponRG::UpdateEnd, this);
+	EffectManager::GetInstance().Stop(EffectManager::EFFECT::EFFECT_LASER, this);
 	isAlive_ = false;
 	CollisionController::GetInstance().SetCollisionActive(this, tag_, false);
 	jumpPow_ = JUNP_POW;

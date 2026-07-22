@@ -123,8 +123,11 @@ void Camera::Update(void)
 	case Camera::MODE::FREE:
 		SetBeforeDrawFree();
 		break;
-	case Camera::MODE::FOLLOW:
-		SetBeforeDrawFollow();
+	case Camera::MODE::PLAYER_FOLLOW:
+		SetBeforeDrawFollowPlayer();
+		break;
+	case Camera::MODE::BOSS_FOLLOW:
+		SetBeforeDrawFollowBoss();
 		break;
 	}
 }
@@ -216,7 +219,9 @@ void Camera::ChangeMode(MODE _mode)
 		break;
 	case Camera::MODE::FREE:
 		break;
-	case Camera::MODE::FOLLOW:
+	case Camera::MODE::PLAYER_FOLLOW:
+		break;
+	case Camera::MODE::BOSS_FOLLOW:
 		break;
 	}
 
@@ -476,6 +481,7 @@ void Camera::ProcessRot(bool _isLimit)
 void Camera::SetBeforeDrawFixedPoint(void)
 {
 	// 何もしない
+	transform_.Update();
 }
 
 void Camera::SetBeforeDrawFree(void)
@@ -496,7 +502,7 @@ void Camera::SetBeforeDrawFree(void)
 	targetPos_ = VAdd(transform_.pos, transform_.quaRot.PosAxis(FOLLOW_TARGET_LOCAL_POS));
 }
 
-void Camera::SetBeforeDrawFollow(void)
+void Camera::SetBeforeDrawFollowPlayer(void)
 {
 	// カメラ位置の補間
 	transform_.pos = UtilityMath::Lerp(prePos_, transform_.pos, LERP_RATE_MOVE);
@@ -519,6 +525,41 @@ void Camera::SetBeforeDrawFollow(void)
 	{
 		transform_.pos.y = FOLLOW_POS_MIN_Y;
 	}
+}
+
+void Camera::SetBeforeDrawFollowBoss(void)
+{
+	// カメラ位置の補間
+	transform_.pos = UtilityMath::Lerp(prePos_, transform_.pos, LERP_RATE_MOVE);
+
+	// 同期先の位置
+	VECTOR pos = followTransform_->pos;
+	angles_ = DERFAULT_ANGLES;
+	// Y軸
+	rotY_ = Quaternion::AngleAxis(angles_.y, UtilityMath::AXIS_Y);
+
+	// 注視点
+	VECTOR localPos = transform_.quaRot.PosAxis(FOLLOW_TARGET_LOCAL_POS);
+	VECTOR newTarget = VAdd(pos, localPos);
+
+	// カメラ位置
+	const VECTOR LOCAL_POS = (BOSS_CAMERA_POS);
+	VECTOR scaledLocalPos = VScale(LOCAL_POS, followDistScale_);
+	localPos = transform_.quaRot.PosAxis(scaledLocalPos);
+	VECTOR newCamPos = VAdd(pos, localPos);
+
+	// イージング中は EasingChangeTarget() で補間、完了後はそのまま代入
+	if (easingTerm_ < 1.0f)
+	{
+		transform_.pos = EasingChangeTarget(easingFromPos_, newCamPos, easingTerm_);
+		targetPos_ = EasingChangeTarget(easingFromTarget_, newTarget, easingTerm_);
+	}
+	else
+	{
+		transform_.pos = newCamPos;
+		targetPos_ = newTarget;
+	}
+
 }
 
 void Camera::ProcessMove(void)
@@ -664,7 +705,7 @@ void Camera::Collision(void)
 
 void Camera::ResolveCollision(void)
 {
-	if (mode_ != MODE::FOLLOW)
+	if (mode_ != MODE::PLAYER_FOLLOW)
 	{
 		return;
 	}

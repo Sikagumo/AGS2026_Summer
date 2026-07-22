@@ -107,6 +107,8 @@ public:
 	/// </summary>
 	int GetHP(void)const { return hp_; }
 
+	Transform& GetBodyTransform(void) { return transformBody_; }
+
 	/// <summary>
 	/// プレイヤー1の座標取得
 	/// </summary>

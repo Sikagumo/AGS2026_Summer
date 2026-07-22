@@ -205,6 +205,10 @@ void EnemyRobo::ChangeStateEnd(void)
 	count_ = 0;
 
 	EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_MISSILE, transform_.pos, { 0,0,0 }, { 50,50,50 }, 1, this);
+
+
+	CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::ENEMYROBO, false);
+	CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::ENEMY_ATTACK, false);
 }
 
 void EnemyRobo::UpdateIdle(void)

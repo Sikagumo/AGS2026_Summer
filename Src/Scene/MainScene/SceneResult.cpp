@@ -2,6 +2,7 @@
 
 #include <DxLib.h>
 
+#include "../../Manager/Generic/KeyConfInputManager.h"
 #include "../../Application.h"
 #include "../../Manager/Generic/InputManager.h"
 #include "../../Manager/Generic/SceneManager.h"
@@ -39,7 +40,9 @@ void SceneResult::Initialize(void)
 
 void SceneResult::Update(void)
 {
-	if (InputManager::GetInstance().IsTrgMouseLeft())
+	auto& keyConfInputManager = KeyConfInputManager::GetInstance();
+
+	if (keyConfInputManager.isTrigerDown("OK"))
 	{
 		SceneManager::GetInstance().ChangeScene(std::make_shared<SceneTitle>());
 	}
