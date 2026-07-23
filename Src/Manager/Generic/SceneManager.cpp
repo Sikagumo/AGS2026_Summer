@@ -14,6 +14,7 @@
 #include "../../Application.h"
 #include "KeyConfInputManager.h"
 #include "../../ImGUI/GuiController.h"
+#include "../../Scene/MainScene/SceneLobby.h"
 
 SceneManager* SceneManager::instance_ = nullptr;
 
@@ -142,7 +143,7 @@ void SceneManager::ChangeScene(std::shared_ptr<SceneBase> scene)
     nextScene_ = scene;
     isSceneChanging_ = true;
 
-    fader_->SetFade(Fader::STATE::FADE_IN);
+    fader_->SetFade(Fader::STATE::FADE_OUT);
 
 
     // 非同期ロード開始（ロード画面付き）
@@ -195,7 +196,7 @@ void SceneManager::Update(void)
 {
     if (isFirstFrame_)
     {
-        isFirstFrame_ = false; 
+        isFirstFrame_ = false;
 
         if (camera_)
         {
@@ -215,9 +216,12 @@ void SceneManager::Update(void)
     TimeManager::GetInstance().Update();
     NetManager::GetInstance().Update();
 
-    if (Application::GetInstance().GetGameEnd()) { return; }
+    if (Application::GetInstance().GetGameEnd())
+    {
+        return;
+    }
 
-    const float LoadCompleteThreshold = 100.0f;
+    constexpr float LoadCompleteThreshold = 100.0f;
 
     // ロード中の処理を完全に分離する
     if (isSceneChanging_)
@@ -226,8 +230,11 @@ void SceneManager::Update(void)
         auto loader = Loading::GetInstance();
         loader->Update();
 
-        // Update内の入れ替え処理部分
-        if (loader->GetProgress() >= LoadCompleteThreshold && !loader->IsLoading())
+        // ロードが完了しており、かつフェードアウトが完了しているか
+        bool isLoadFinished = (loader->GetProgress() >= LoadCompleteThreshold && !loader->IsLoading());
+        bool isFadeOutFinished = (fader_->GetState() == Fader::STATE::FADE_OUT && fader_->IsEnd());
+
+        if (isLoadFinished && isFadeOutFinished && nextScene_ != nullptr)
         {
             // 新しいシーンを確実に登録
             nextScene_->EndLoad();
@@ -236,13 +243,26 @@ void SceneManager::Update(void)
 
             for (auto& scene : scenes_)
             {
-                if (scene != nextScene_) { oldScene_ = scene; }
+                if (scene != nextScene_)
+                {
+                    oldScene_ = scene;
+                }
             }
             scenes_.remove_if([this](const auto& s) { return s != nextScene_; });
 
             nextScene_ = nullptr;
+
+            // シーン切り替えが終わったら、今度は画面を明るくするを開始
+            fader_->SetFade(Fader::STATE::FADE_IN);
+        }
+
+        // フェードインが完了したら、シーン切り替え状態を終了する
+        if (nextScene_ == nullptr && fader_->GetState() == Fader::STATE::FADE_IN && fader_->IsEnd())
+        {
+            fader_->SetFade(Fader::STATE::NONE);
             isSceneChanging_ = false;
         }
+
         return;
     }
 
@@ -253,14 +273,17 @@ void SceneManager::Update(void)
         oldScene_ = nullptr;
     }
 
-    if (scenes_.empty()) { return; }
+    if (scenes_.empty())
+    {
+        return;
+    }
 
     auto current = scenes_.back();
     if (current)
     {
         current->Update();
     }
-    
+
     CollisionController::GetInstance().Update();
 
     if (camera_)

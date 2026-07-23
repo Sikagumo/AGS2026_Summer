@@ -27,6 +27,7 @@ public:
 
 		// SE
 		SE_SELECT,
+		SE_LOBBY_SELECT,
 
 		SE_DAMAGE_PLAYER, // プレイヤー被ダメージ処理
 		SE_HIT_BLAST,

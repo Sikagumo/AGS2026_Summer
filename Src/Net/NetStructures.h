@@ -82,8 +82,11 @@ struct NET_JOIN_USER
 	int roomWordId = -1;
 	PLAYER_TYPE playerType = PLAYER_TYPE::PLAYER_1;
 	GAME_STATE gameState = GAME_STATE::CONNECTING;
-};
 
+	// プレイヤー選択情報関連
+	int selectedJobType = 0;   // 武器
+	int selectedSkinType = 0;  // 選択したスキン
+};
 /// @brief 全ユーザーリスト
 struct NET_JOIN_USERS
 {

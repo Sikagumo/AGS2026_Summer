@@ -184,5 +184,4 @@ void NetSend::SendGoGameScene(void)
 	memcpy(buffer, &basicData, sizeof(NET_BASIC_DATA));
 
 	SendUDP_Client(buffer, sizeof(NET_BASIC_DATA));
-	printfDx("[Host] GO_GAME_SCENE を全クライアントへ送信しました\n");
 }
