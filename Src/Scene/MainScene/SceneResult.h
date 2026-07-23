@@ -39,6 +39,8 @@ private:
 
 	std::array<int, 4> imageResult_;
 
+	int img_;
+
 	bool isGameOver_;
 
 	/// @brief Gui—p‚ÌXVˆ—

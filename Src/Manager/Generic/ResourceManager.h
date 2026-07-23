@@ -25,7 +25,8 @@ public:
 		IMG_FALLING_POINT,
 		IMG_NOTMALMAP_TITLE,
 		IMG_BUCGROUND_TITLE,
-
+		IMG_RESULT_WIN,
+		IMG_RESULT_BUT,
 		/* ï°êîâÊëú */
 		IMGS_TEXTS,
 		IMGS_TIMER,
@@ -35,6 +36,7 @@ public:
 		IMGS_HP_TARGET,
 		IMGS_HP_PLAYER,
 		IMGS_RESULT,
+		
 
 		/* ÉÇÉfÉã */
 		MODEL_SKYDOME,

@@ -640,7 +640,7 @@ void SceneGame::DrawGameEnd(void)
 	effect.Draw();
 
 	const int IMAGET_TITLE_Y = Application::SCREEN_SIZE_Y / 3;
-	if (slowCount_ >= SROU_COUNT_MAX * 20)
+	if (slowCount_ >= SROU_COUNT_MAX * 30)
 	{
 		if (boss_->GetHP() >= 0)
 		{

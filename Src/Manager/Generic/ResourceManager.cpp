@@ -82,7 +82,9 @@ void ResourceManager::Initialize(void)
 	_SetResource(LOAD_TYPE::IMAGE, SRC::IMG_SHADOW, PATH_IMAGE + "Shadow.png");
 	//落下ポイント
 	_SetResource(LOAD_TYPE::IMAGE, SRC::IMG_FALLING_POINT , PATH_IMAGE + "FallingPoint.png");
-
+	//リザルト
+	_SetResource(LOAD_TYPE::IMAGE, SRC::IMG_RESULT_WIN, PATH_IMAGE + "ResultWinBook.png");
+	_SetResource(LOAD_TYPE::IMAGE, SRC::IMG_RESULT_BUT, PATH_IMAGE + "ResultBatBook.png");
 
 	/* 複数画像 */
 

@@ -13,12 +13,20 @@
 
 SceneResult::SceneResult(bool _isGameOver)
 	: isGameOver_(_isGameOver)
+	, img_(-1)
 {
 }
 
 void SceneResult::Load(void)
 {
-	
+	if (isGameOver_)
+	{
+		img_= ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::IMG_RESULT_BUT);
+	}
+	else
+	{
+		img_ = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::IMG_RESULT_WIN);
+	}
 }
 
 void SceneResult::EndLoad(void)
@@ -50,18 +58,21 @@ void SceneResult::Update(void)
 
 void SceneResult::Draw(void)
 {
-	const int IMAGET_TITLE_Y = Application::SCREEN_SIZE_Y / 3;
+	const int IMAGET_TITLE_Y = Application::SCREEN_SIZE_Y / 3+30;
+	const int IMAGET_TITLE_X = Application::SCREEN_HALF_X / 2+30;
+
+	DrawRotaGraph(Application::SCREEN_HALF_X, Application::SCREEN_HALF_Y, 1.0f, UtilityMath::DEG2RAD, img_, true);
 
 	if (isGameOver_)
 	{
-		DrawRotaGraph(Application::SCREEN_HALF_X, IMAGET_TITLE_Y, 2.0f, UtilityMath::DEG2RAD, imageResult_[2], true);
+		DrawRotaGraph(IMAGET_TITLE_X, IMAGET_TITLE_Y, 1.0f, UtilityMath::DEG2RAD, imageResult_[2], true);
 	}
 	else
 	{
-		DrawRotaGraph(Application::SCREEN_HALF_X, IMAGET_TITLE_Y, 2.0f, UtilityMath::DEG2RAD, imageResult_[0], true);
+		DrawRotaGraph(IMAGET_TITLE_X, IMAGET_TITLE_Y, 1.0f, UtilityMath::DEG2RAD, imageResult_[0], true);
 	}
 
-	DrawString(Application::SCREEN_HALF_X, Application::SCREEN_HALF_Y + 10, "クリックしてタイトルへ", 0x000000, true);
+	DrawString(Application::SCREEN_HALF_X+ (Application::SCREEN_HALF_X/2), Application::SCREEN_SIZE_Y - 10, "クリックしてタイトルへ", 0xffffff, true);
 }
 
 void SceneResult::Release(void)
