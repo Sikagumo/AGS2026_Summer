@@ -51,6 +51,7 @@ Boss::Boss(void) :
 	mainPos_({0,0,0}),
 	mpPos_({0,0,0}),
 	CannonPos_({0,0,0}),
+	isHostControl_(false),
 
 
 	CharaBase()
@@ -122,6 +123,7 @@ void Boss::SetBossDamage(int _damage)
 
 
 }
+
 //＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝
 
 
@@ -514,26 +516,29 @@ void Boss::UpdateProcess(void)
 
 	isLanging_ = false;
 	isMGFire_ = false;
-	if (weaponMGL_->IsAttack() == true || weaponMGR_->IsAttack() == true)
-	{
-		if (SoundManager::GetInstance().IsPlaying(SoundManager::SOUND::SE_BOSS_MG_FIRE) == false)
-		{
-			isMGFire_ = true;
-		}
-	}
 	isRoadFire_ = false;
 
-	
+	if (isHostControl_ == true)
+	{
+		if (weaponMGL_->IsAttack() == true || weaponMGR_->IsAttack() == true)
+		{
+			if (SoundManager::GetInstance().IsPlaying(SoundManager::SOUND::SE_BOSS_MG_FIRE) == false)
+			{
+				isMGFire_ = true;
+			}
+		}
+
+		stateUpdate_();
+	}
 
 	currentWaveScl = VAdd(currentWaveScl, WAVE_SCL_UP);
-	EffectManager::GetInstance().UpdateScl(EffectManager::EFFECT::EFFECT_WAVE,this, currentWaveScl);
+	EffectManager::GetInstance().UpdateScl(EffectManager::EFFECT::EFFECT_WAVE, this, currentWaveScl);
 
 	BossTransformUpdate();
-	
+
 	wave_->SetPos(transform_.pos);
 	wave_->Update();
-	
-	
+
 	camera->SetLockOnTargets(Camera::LOCKON_TARGET::BOSS_BODY, transformBody_.pos, hp_);
 	camera->SetLockOnTargets(Camera::LOCKON_TARGET::BOSS_WEAPON_MGL_L, weaponMGL_->GetPos(), weaponMGL_->GetHp());
 	camera->SetLockOnTargets(Camera::LOCKON_TARGET::BOSS_WEAPON_MGL_R, weaponMGR_->GetPos(), weaponMGR_->GetHp());
@@ -543,7 +548,6 @@ void Boss::UpdateProcess(void)
 	camera->SetLockOnTargets(Camera::LOCKON_TARGET::BOSS_WEAPON_MP_R, weaponMPR_->GetPos(), weaponMPR_->GetHp());
 	camera->SetLockOnTargets(Camera::LOCKON_TARGET::BOSS_WEAPON_RG, weaponRG_->GetPos(), weaponRG_->GetHp());
 
-	
 }
 
 void Boss::UpdateProcessPost(void)
@@ -865,7 +869,7 @@ void Boss::DrawPre(void)
 //機能関数
 void Boss::LookPlayer(void)
 {
-
+	// 突進「中」は、すでに決まった `roadDir_` に向かって進むので、振り向かない
 	if (state_ == STATE::ROADATTACK && roadIsAttack_)
 	{
 		return;
@@ -887,9 +891,8 @@ void Boss::LookPlayer(void)
 	// 突進していない（準備中）なら、突進方向を常にプレイヤーに向ける
 	jumpDir_ = moveDir;
 	roadDir_ = moveDir;
-	
-}
 
+}
 
 
 //ウェポンの呼び出し纏めよう＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝
@@ -966,4 +969,75 @@ void Boss::WeaponDraw(void)
 	weaponRG_->Draw();
 	weaponCannonL_->Draw();
 	weaponCannonR_->Draw();
+}
+
+
+/* マルチプレイ用関数 */
+
+void Boss::SetHostControl(bool _isHostControl)
+{
+	isHostControl_ = _isHostControl;
+}
+
+NET_BOSS_ACTION Boss::GetNetworkAction(void) const
+{
+	NET_BOSS_ACTION action;
+	action.pos = transform_.pos;
+	action.quaRot = transform_.quaRot;
+	action.bossHp = hp_;
+	action.animId = static_cast<int>(state_);
+	action.targetPlayerId = mainIdx_;
+
+	action.weaponMglHp = weaponMGL_->GetHp();
+	action.weaponMgrHp = weaponMGR_->GetHp();
+	action.weaponMpLHp = weaponMPL_->GetHp();
+	action.weaponMpRHp = weaponMPR_->GetHp();
+	action.weaponRgHp = weaponRG_->GetHp();
+	action.weaponCannonLHp = weaponCannonL_->GetHp();
+	action.weaponCannonRHp = weaponCannonR_->GetHp();
+
+	return action;
+}
+
+void Boss::SetNetworkAction(const NET_BOSS_ACTION& _action)
+{
+	const int PREV_HP = hp_;
+
+	hp_ = _action.bossHp;
+
+	const int diff = PREV_HP - hp_;
+	if (diff > 5)
+	{
+		PlayEffect();
+	}
+
+	// クライアント側のウェポンHPをホストと同期する
+	weaponMGL_->SetHp(_action.weaponMglHp);
+	weaponMGR_->SetHp(_action.weaponMgrHp);
+	weaponMPL_->SetHp(_action.weaponMpLHp);
+	weaponMPR_->SetHp(_action.weaponMpRHp);
+	weaponRG_->SetHp(_action.weaponRgHp);
+	weaponCannonL_->SetHp(_action.weaponCannonLHp);
+	weaponCannonR_->SetHp(_action.weaponCannonRHp);
+
+	if (static_cast<int>(state_) != _action.animId)
+	{
+		ChangeState(static_cast<STATE>(_action.animId));
+	}
+
+	if (_action.targetPlayerId >= 0 && _action.targetPlayerId < playerSize_)
+	{
+		mainIdx_ = _action.targetPlayerId;
+	}
+
+	transform_.Update();
+	if (state_ == STATE::ROADATTACK)
+	{
+		transformBody_.pos = MV1GetFramePosition(transform_.modelId, JOINT_CAR_BODY);
+	}
+	else
+	{
+		transformBody_.pos = MV1GetFramePosition(transform_.modelId, JOINT_FEET_BODY);
+	}
+	transformBody_.quaRot = transform_.quaRot;
 }

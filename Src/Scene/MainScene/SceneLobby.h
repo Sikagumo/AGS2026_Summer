@@ -8,17 +8,18 @@
 #include "../../Object/Collider2D/Collider2DBase.h"
 #include "../../Object/Collider2D/Collider2DCircle.h"
 #include "../../Object/Collider2D/Collider2DBox.h"
+#include "../../Net/NetStructures.h"
 
 class SceneLobby : public SceneBase
 {
 public:
 
-	/// @brief コンストラクタ
-	/// @param _isMulti マルチプレイか否か
-	SceneLobby(bool _isMulti);
+    /// @brief コンストラクタ
+    /// @param _isMulti マルチプレイか否か
+    SceneLobby(bool _isMulti);
 
-	/// @brief デストラクタ
-    ~SceneLobby(void) = default;
+    /// @brief デストラクタ
+    ~SceneLobby(void) override;
 
     /// @brief リソースの読み込み開始
     void Load(void) override;
@@ -46,6 +47,8 @@ private:
 
     const bool IS_MULTI;
 
+
+    // シングルプレイ用
     bool isSelectMenu_;
     int selectedIdx_;
     int inputIntervalCounter_;
@@ -68,7 +71,6 @@ private:
     std::array<int, static_cast<int>(UI_SINGLE::MAX)>
         uiHandles_;
 
-
     // マウスカーソル用の円コライダー
     std::unique_ptr<Collider2DCircle> cursorCollider_;
 
@@ -77,10 +79,39 @@ private:
 
     std::array<Collider2DBase::TAG_2D, 4>
         uiCollisionTags_;
-    
+
     void InitUISingle(void);
 
     void UpdateSingle(void);
+
+    // マルチプレイ用
+    enum class LOBBY_STATE
+    {
+        SELECT_MODE,
+        CONNECTING,
+        IN_ROOM
+    };
+
+    LOBBY_STATE multiState_;
+    int buttonSelectIndex_;
+    int passcode_[4];
+    int selectOctet_;
+    bool isEditing_;
+    bool myReadyState_;
+   const unsigned int COLOR_WHITE = GetColor(255, 255, 255);
+   const unsigned int COLOR_YELLOW = GetColor(255, 255, 0);
+   const unsigned int COLOR_GRAY = GetColor(100, 100, 100);
+   const unsigned int COLOR_GREEN = GetColor(0, 255, 0);
+    
     void UpdateMulti(void);
+    void UpdateSelectMode(void);
+    void UpdateConnecting(void);
+    void UpdateInRoom(void);
+    void DrawMulti(void);
+    void DrawSelectMode(void);
+    void DrawConnecting(void);
+    void DrawInRoom(void);
+    void MoveToGameScene(std::map<int, NET_JOIN_USER>& _users);
+
 };
 

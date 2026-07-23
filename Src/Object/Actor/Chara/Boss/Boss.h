@@ -5,6 +5,7 @@
 #include <functional>
 #include "../CharaBase.h"
 #include "../../../Common/Transform.h";
+#include "../../../../Net/NetStructures.h"
 
 
 class WeaponMGL;
@@ -135,6 +136,24 @@ public:
 	/// <param name="_size">players.sizeの取得</param>
 	void SetPlayerSize(int _size) { playerSize_ = _size; }
 
+	/// @brief ローカル制御かどうかを設定する
+	/// @param _isLocalControl ローカル制御かどうかのフラグ
+	void SetHostControl(bool _isHostControl);
+
+	/// @brief ローカル制御かどうかを取得する
+	/// @return ローカル制御かどうかのフラグ
+	bool GetHostControl(void) const { return isHostControl_; }
+
+	/// @brief 現在のボスのネットワークアクション情報を取得する
+	/// @return ネットワーク用ボスアクションデータ
+	NET_BOSS_ACTION GetNetworkAction(void) const;
+	
+	/// @brief ネットワークからのアクション情報をボスに適用する
+	/// @param _action 受信したネットワーク用ボスアクションデータ
+	void SetNetworkAction(const NET_BOSS_ACTION& _action);
+
+	
+
 private:
 	//bossの大きさ
 	static constexpr VECTOR BOSS_SIZE = { 3.0f, 3.0f, 3.0f };
@@ -255,6 +274,8 @@ private:
 	std::unique_ptr<WeaponRG> weaponRG_;
 	std::unique_ptr< BBulletWave> wave_;
 	
+	// ホストかどうか	
+	bool isHostControl_;
 	//死亡時
 	VECTOR bodyDir_;
 	float moveSpeed_;
