@@ -358,6 +358,13 @@ void Camera::FollowLockOnPosition(void)
 {
 	if (targetsParam_.empty()) { return; }
 
+	if (!targetsParam_.contains(static_cast<LOCKON_TARGET>(lockOnTarget_)))
+	{
+		lockOnParam_ = TargetParam();
+		isLockOn_ = false;
+		return;
+	}
+	
 	lockOnParam_ = *targetsParam_.at(lockOnTarget_);
 }
 

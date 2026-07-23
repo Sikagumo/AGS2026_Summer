@@ -34,6 +34,7 @@ void PBulletNormal::UpdatePost(void)
 	if (bulletState_ == BULLET_STATE::BLAST)
 	{
 		bulletState_ = BULLET_STATE::INACTIVE;
+		activePowerBullet_ = 0;
 	}
 }
 

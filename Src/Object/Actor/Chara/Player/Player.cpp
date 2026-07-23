@@ -1114,7 +1114,7 @@ void Player::CreateCluster(void)
 		// ¶¬Å‘å”
 		spawnMax = (CLUSTER_SPLIT * i);
 
-		for (int circle = 0; circle < spawnMax; circle++)
+		for (int circle = 0; circle < (spawnMax - 1); circle++)
 		{
 			// ‰~ó‚Éˆê’è‚Ì”ÍˆÍŠÔŠu‚Å¶¬ˆÊ’u‚ğİ’è
 			angle = ((ANGLE / i) * (circle + 1));
