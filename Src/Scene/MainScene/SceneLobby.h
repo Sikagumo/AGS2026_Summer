@@ -9,6 +9,7 @@
 #include "../../Object/Collider2D/Collider2DCircle.h"
 #include "../../Object/Collider2D/Collider2DBox.h"
 #include "../../Net/NetStructures.h"
+#include "../../Application.h"
 
 class SceneLobby : public SceneBase
 {
@@ -47,13 +48,13 @@ protected:
 private:
 
     // UI配置計算定数
-   static constexpr float BUTTON_SCALE = 0.6f;
+   static constexpr float BUTTON_SCALE = 0.3f;
    static constexpr Vector2F BUTTON_SIZE = { 600.0f * BUTTON_SCALE, 250.0f * BUTTON_SCALE };
 
     // レイアウト座標設定
-    const float LEFT_PANEL_X = 150.0f;
-    const float RIGHT_PANEL_X = 1100.0f;
-    const float PANEL_START_Y = 200.0f;
+    const float LEFT_PANEL_X = Application::SCREEN_HALF_X - 500.0f;
+    const float RIGHT_PANEL_X = Application::SCREEN_HALF_X + 500.0f;
+    const float PANEL_START_Y = Application::SCREEN_HALF_Y - 50;
     const float PANEL_INTERVAL_Y = 120.0f;
 
     // UIコライダー用定数
@@ -81,7 +82,16 @@ private:
         NOT_SELECT_RECOVERY,
         SELECT_RAPID_FIRE,
         NOT_SELECT_RAPID_FIRE,
+        SELECT_SKIN_MOMO,
+        NOT_SELECT_SKIN_MOMO,
+        SELECT_SKIN_SARU,
+        NOT_SELECT_SKIN_SARU,
+        SELECT_SKIN_KIGI,
+        NOT_SELECT_SKIN_KIGI,
+        SELECT_SKIN_INU,
+        NOT_SELECT_SKIN_INU,
         GAME_START,
+        FORMATION,
 
         MAX
     };
@@ -91,6 +101,7 @@ private:
     std::unique_ptr<Collider2DCircle> cursorCollider_;
     std::array<std::unique_ptr<Collider2DBase>, UI_SINGLE_MAX> uiCollisions_;
     std::array<Collider2DBase::TAG_2D, UI_SINGLE_MAX> uiCollisionTags_;
+    std::unique_ptr<Collider2DBase> readyButtonCollision_;
 
     int previewModelHandle_; // 表示用3Dモデルハンドル
     int currentModelIndex_;   // 現在読み込まれているモデルのインデックス
@@ -137,14 +148,46 @@ private:
         IN_ROOM           // ルーム内
     };
 
+    // ロビーのUIテキスト
+    enum class UI_MAIN_TEXT
+    {
+        WEAPON,
+        SKIN,
+        ROOM,
+        JOIN,
+        MAX
+    };
+
+    enum class UI_RADY_TEXT
+    {
+        WAITING,
+        RADY,
+        PASSWORLD,
+        GO,
+        MAX
+    };
+
+    static constexpr int HOST_BUTTON_Y = Application::SCREEN_HALF_Y + 70;
+    static constexpr int CLIENT_BUTTON_Y = Application::SCREEN_SIZE_Y - 100;
+    static constexpr int PASSCODE_NUM_MAX = 10;
+
+    std::array<int, static_cast<int>(UI_MAIN_TEXT::MAX)> uiTexHandles_;
+    std::array<int, static_cast<int>(UI_RADY_TEXT::MAX)> uiRadyHandles_;
+
     LOBBY_STATE multiState_;
     int buttonSelectIndex_;
     int passcode_[4];
     int selectOctet_;
     bool isEditing_;
     bool myReadyState_;
-    int readyImageHandle_;   // READY画像用ハンドル
-    int waitingImageHandle_; // WAITING画像用ハンドル
+    int roomBackHandle_;
+    int selectedMultiHandle_;
+    int selectMultiHandle_;
+    int multiTitleHandle_;
+    int connectTexHandle_;
+    int allReadyImageHandle_;
+
+    std::array<int, PASSCODE_NUM_MAX> passcodeTextHandles_; 
 
     // カラー定数関連
     const unsigned int COLOR_WHITE = GetColor(255, 255, 255);
@@ -200,7 +243,30 @@ private:
     std::array<std::unique_ptr<Collider2DBase>, 
         static_cast<size_t>(PlayerBase::SKIN_TYPE::MAX)> skinUiCollisions_;
 
+    // 背景画像
+    int backgroundHandle_;
+
+    int selectUIBackHandle_;
+
+    int selectedUIBackHandle_;
+
+    int uiBackWidth_;
+
+    int uiBackHeight_;
+
     void DrawWeaponWindow(void);
 
     void DrawSkinWindow(void);
+
+    // ロビー表示用: 4種類のスキンモデルをすべて保持
+    std::array<int, static_cast<size_t>(PlayerBase::SKIN_TYPE::MAX)> lobbySkinHandles_;
+
+    // スキンインデックスに応じたロビー用モデルハンドルを取得
+    int GetLobbySkinModelHandle(int _skinIndex) const;
+
+    // 武器の描画用ハンドル取得
+    int GetWeaponUIHandle(PlayerBase::JOB_TYPE _jobType, bool _isSelected) const;
+
+    // スキンの描画用ハンドル取得
+    int GetSkinUIHandle(PlayerBase::SKIN_TYPE _skinType, bool _isSelected) const;
 };

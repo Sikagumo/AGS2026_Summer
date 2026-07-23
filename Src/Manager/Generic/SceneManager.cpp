@@ -14,6 +14,7 @@
 #include "../../Application.h"
 #include "KeyConfInputManager.h"
 #include "../../ImGUI/GuiController.h"
+#include "../../Scene/MainScene/SceneLobby.h"
 
 SceneManager* SceneManager::instance_ = nullptr;
 
@@ -211,7 +212,7 @@ void SceneManager::Update(void)
         //};
         //ChangeScene(std::make_shared<SceneGame>(jobs));
 
-        ChangeScene(std::make_shared<SceneTitle>());
+        ChangeScene(std::make_shared<SceneLobby>(true));
     }
 
     TimeManager::GetInstance().Update();
