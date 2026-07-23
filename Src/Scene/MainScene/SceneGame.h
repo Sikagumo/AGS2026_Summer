@@ -101,6 +101,7 @@ private:
 
     int targetHpImage_;
     int targetHpBerImage_;
+    int sousaImge_;
     int gameTexts_;
 
     enum class UI_GAME

@@ -27,6 +27,8 @@ public:
 		IMG_BUCGROUND_TITLE,
 		IMG_RESULT_WIN,
 		IMG_RESULT_BUT,
+		IMG_SOUSA,
+
 		/* ï°êîâÊëú */
 		IMGS_TEXTS,
 		IMGS_TIMER,

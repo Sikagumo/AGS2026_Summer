@@ -33,6 +33,7 @@ SceneGame::SceneGame(std::vector<PlayerSelectType> _playerSelectType)
 	, targetHpBerImage_(-1)
 	, gameTimer_(nullptr)
 	, slowCount_(0)
+	, sousaImge_(-1)
 {
 	for (int i = 0; i < _playerSelectType.size(); i++)
 	{
@@ -84,6 +85,8 @@ void SceneGame::Load(void)
 
 	targetHpBerImage_ = ResourceManager::GetInstance().LoadHandleIdsOnce(ResourceManager::SRC::IMGS_HP_TARGET, 0);
 	targetHpImage_ = ResourceManager::GetInstance().LoadHandleIdsOnce(ResourceManager::SRC::IMGS_HP_TARGET, 1);
+
+	sousaImge_ = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::IMG_SOUSA);
 
 	ResourceManager::GetInstance().LoadHandleIds(ResourceManager::SRC::IMGS_GAME_TEXT, uiGame_.data());
 
@@ -620,6 +623,8 @@ void SceneGame::DrawGame(void)
 	DrawHpBerBoss();
 
 	gameTimer_->Draw();
+
+	DrawRotaGraph((Application::SCREEN_SIZE_X - (770 / 6)), (587 / 6), 0.25, 0.0, sousaImge_, true);
 
 	DrawRotaGraph((Application::SCREEN_HALF_X - 300), 35, 0.5, 0.0, uiGame_.at(0), true);
 

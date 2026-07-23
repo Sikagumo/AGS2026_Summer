@@ -86,6 +86,8 @@ void ResourceManager::Initialize(void)
 	_SetResource(LOAD_TYPE::IMAGE, SRC::IMG_RESULT_WIN, PATH_IMAGE + "ResultWinBook.png");
 	_SetResource(LOAD_TYPE::IMAGE, SRC::IMG_RESULT_BUT, PATH_IMAGE + "ResultBatBook.png");
 
+	_SetResource(LOAD_TYPE::IMAGE, SRC::IMG_SOUSA, PATH_IMAGE + "sousa.png");
+
 	/* ï°êîâÊëú */
 
 	// âÊëúñáêî
