@@ -138,7 +138,7 @@ void SceneLobby::Initialize(void)
         passcode_[1] = 0;
         passcode_[2] = 0;
         passcode_[3] = 0;
-        buttonSelectIndex_ = -1;
+        buttonSelectIndex_ = static_cast<int>(MULTI_UI_TYPE::HOST_BUTTON);
         isEditing_ = false;
 
         InitUIMulti();
@@ -547,6 +547,7 @@ void SceneLobby::UpdateSingle(void)
                 {
                     // マルチプレイの場合：モード選択状態へ遷移
                     multiState_ = LOBBY_STATE::SELECT_MODE;
+                    buttonSelectIndex_ = static_cast<int>(MULTI_UI_TYPE::HOST_BUTTON);
                 }
                 else
                 {
