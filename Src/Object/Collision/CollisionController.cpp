@@ -69,6 +69,7 @@ void CollisionController::Initialize(void)
 
 void CollisionController::Update(void)
 {
+
 	UpdateCollisionPars();
 
 	UpdateCollision2D();

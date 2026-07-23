@@ -51,9 +51,13 @@ public:
     void Release(void) override;
 
 private:
-    static constexpr int ENEMYS_POP = 0;
-    static constexpr int SROU_COUNT_MAX = 3;
 
+    static constexpr int ENEMYS_POP = 20;
+    static constexpr int SLOW_COUNT_MAX = 3;
+
+    // ÉQÅ[ÉÄéûä‘
+    static constexpr float GAME_TIME = 500.0f;
+    static constexpr float GAME_TIME_DEFEAT_DEC = 75.0f;
 
     const std::vector<VECTOR> ENEMY_POS = {
         {0,0,0},{100,0,100},{200,0,200},{300,0,300},
@@ -101,7 +105,7 @@ private:
 
     int targetHpImage_;
     int targetHpBerImage_;
-    int sousaImge_;
+    int infoImage_;
     int gameTexts_;
 
     enum class UI_GAME

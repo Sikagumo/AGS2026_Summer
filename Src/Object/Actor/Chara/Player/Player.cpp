@@ -20,6 +20,8 @@
 #include "../Weapon/Bullet/Player/PBulletPoison.h"
 #include "../Weapon/Bullet/Player/PBulletNormal.h"
 #include "../../../../Application.h"
+#include "../../../../Net/NetStructures.h"
+#include "../../../../Manager/System/NetManager.h"
 
 namespace
 {
@@ -64,6 +66,10 @@ Player::Player(int _playerNo, JOB_TYPE _jobType, SKIN_TYPE _skinType, const VECT
 	, knockPowXZ_(UtilityMath::VECTOR2F_ZERO)
 	, dodgePowXZ_(UtilityMath::VECTOR2F_ZERO)
 	, shotTerm_(0.0f), curTimeDefeat_(0.0f)
+	, isHostControl_(false)
+	, netKey_(0)
+	, isNetAttack_(false)
+	, isAttackSend_(false)
 {
 	if (_jobType == JOB_TYPE::CANNON)
 	{
@@ -390,17 +396,16 @@ void Player::UpdateProcess(void)
 		return;
 	}
 
-	ProcessJump();
-
-	// 移動操作
-	ProcessMove();
+	// マルチプレイのため追加
+	if (isHostControl_)
+	{
+		ProcessJump();
+		ProcessMove();
+		ProcessAttack();
+		ProcessDodge();
+	}
 
 	UpdateBullets();
-
-	ProcessAttack();
-
-	// 回避処理
-	ProcessDodge();
 
 	// 吹っ飛ばし処理
 	ProcessKnock();
@@ -422,10 +427,12 @@ void Player::UpdateProcess(void)
 		hp_ += static_cast<int>(recovery);
 		hp_ = ((hp_ > HP_MAX) ? HP_MAX : hp_);
 	}
-}
 
-void Player::UpdateProcessPost(void)
-{
+	// マルチプレイのため追加
+	if (isHostControl_)
+	{
+		SendMyActionToNetManager();
+	}
 }
 
 void Player::Draw(void)
@@ -449,6 +456,7 @@ void Player::Draw(void)
 #ifdef _DEBUG
 	DrawFormatString(10, 140, 0xffffff, "Playerの座標：%f,%f,%f", transform_.pos.x, transform_.pos.y, transform_.pos.z);
 #endif
+
 	ActorBase::Draw();
 
 	CharaBase::DrawShadowRound(30.0f);
@@ -487,6 +495,10 @@ void Player::SetRespawn(void)
 
 	timeInv_ = TIME_INVINCIBLE;
 	PlayAnimation(ANIM_TYPE::IDLE, true, false);
+}
+
+void Player::UpdateProcessPost(void)
+{
 }
 
 void Player::DrawPre(void)
@@ -912,6 +924,8 @@ void Player::ProcShotNormal(void)
 		int actionNum = static_cast<int>(ACTION_TYPE::ATTACK) + ((IS_COMBO) ? curAttackNum_ : 0);
 		actionController_->Active(actionNum);
 
+		isAttackSend_ = true;
+
 		curAttackNum_++;
 
 		// 攻撃時に左右交互に弾を投げるアニメーション
@@ -933,6 +947,8 @@ void Player::ProcShotSpecial(void)
 		// 登録した攻撃アクションを呼び出す
 		int actionNum = static_cast<int>(ACTION_TYPE::ATTACK_SPECIAL);
 		actionController_->Active(actionNum);
+
+		isAttackSend_ = true;
 
 		curAttackNum_++;
 
@@ -1210,5 +1226,62 @@ void Player::PlayAnimation(ANIM_TYPE _type, bool _isLoop, bool _isAnimBlend, flo
 	animType_ = _type;
 	
 	animation_->Play(static_cast<int>(animType_), _isLoop, _animSpeed, blendTime);
+}
+
+
+
+/* マルチプレイ処理 */ 
+
+void Player::SetHostControl(bool _isLocal)
+{
+	isHostControl_ = _isLocal;
+}
+
+void Player::SetNetworkAction(const VECTOR& _pos, const Quaternion& _rot, int _animId, bool _isAttack)
+{
+	transform_.pos = _pos;
+	transform_.quaRot = _rot;
+
+	if (static_cast<int>(animType_) != _animId)
+	{
+		PlayAnimation(static_cast<ANIM_TYPE>(_animId));
+	}
+
+	// 攻撃フラグが OFF から ON に変わった瞬間、かつ未処理の場合のみ発砲する
+	if (_isAttack && !isNetAttack_)
+	{
+		ProcShotNormal();
+	}
+
+	// 受信した攻撃状態を保持
+	isNetAttack_ = _isAttack;
+}
+
+void Player::SetNetKey(int _key)
+{
+	netKey_ = _key;
+}
+
+
+void Player::SendMyActionToNetManager(void)
+{
+	if (!isHostControl_)
+	{
+		return;
+	}
+
+	NET_ACTION myAction;
+	myAction.key = NetManager::GetInstance().GetMyKey();
+	myAction.frameNo = 0;
+	myAction.pos = transform_.pos;
+	myAction.quaRot = transform_.quaRot;
+	myAction.animId = static_cast<int>(animType_);
+	myAction.currentHp = hp_;
+	myAction.actBits = 0;
+	myAction.isAttack = isAttackSend_;
+
+	NetManager::GetInstance().AddSelfAction(myAction);
+
+	isAttackSend_ = false;
 }
 

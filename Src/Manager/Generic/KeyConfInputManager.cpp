@@ -106,6 +106,11 @@ void KeyConfInputManager::InitInputTable(void)
 	  {INPUT_TYPE::KEY_BOARD, KEY_INPUT_DELETE}
 	};
 
+	inputTable_["DEBUG_CANCEL"] =
+	{
+	  {INPUT_TYPE::KEY_BOARD, KEY_INPUT_BACK}
+	};
+
 	inputTable_["PAUSE"] =
 	{
 

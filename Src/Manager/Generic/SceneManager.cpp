@@ -7,6 +7,7 @@
 #include "../../Object/Collision/CollisionController.h"
 #include "../../Shader/ShaderController.h"
 #include "../System/TimeManager.h"
+#include "../System/NetManager.h"
 #include "../../Camera/Camera.h"
 #include "../../Common/Loading.h"
 #include "../../Common/Fader.h"
@@ -60,6 +61,7 @@ void SceneManager::Initialize(void)
 {
     SetMouseDispFlag(true);
 
+    NetManager::CreateInstance();
     SoundManager::CreateInstance();
     SoundManager::GetInstance().Initialize();
     TimeManager::CreateInstance();
@@ -203,14 +205,14 @@ void SceneManager::Update(void)
             camera_->Init();
         }
 
-        //ChangeScene(std::make_shared<SceneTitle>());
-        auto jobs = { SceneGame::PlayerSelectType(PlayerBase::JOB_TYPE::BOMB, PlayerBase::SKIN_TYPE::HUMAN)};
-        ChangeScene(std::make_shared<SceneGame>(jobs));
+        //auto jobs = { SceneGame::PlayerSelectType(PlayerBase::JOB_TYPE::BOMB, PlayerBase::SKIN_TYPE::DOG)};
+        //ChangeScene(std::make_shared<SceneGame>(jobs));
 
-        return;
+        ChangeScene(std::make_shared<SceneTitle>());
     }
 
     TimeManager::GetInstance().Update();
+    NetManager::GetInstance().Update();
 
     if (Application::GetInstance().GetGameEnd()) { return; }
 
@@ -327,8 +329,9 @@ void SceneManager::Release(void)
     ShaderController::GetInstance().DestroyInstance();
     TimeManager::GetInstance().DestroyInstance();
     Loading::GetInstance()->DestroyInstance();
-    CollisionController::DestroyInstance();
+    CollisionController::GetInstance().DestroyInstance();
     GuiController::DestroyInstance();
+    NetManager::GetInstance().DestroyInstance();
 }
 
 const std::unique_ptr<Camera>& SceneManager::GetCamera(void) const
