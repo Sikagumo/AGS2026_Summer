@@ -15,6 +15,31 @@ void Stage::Load(void)
 	transform_.modelId = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::MODEL_STAGE_COLLISION);
 	viewTrans_.modelId = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::MODEL_STAGE);
 	skyDome_.modelId = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::MODEL_SKYDOME);
+
+	treePosHandle_ = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::MODEL_TREE_POSITION);
+
+	
+	int frameFront = MV1SearchFrame(treePosHandle_, POS_FRAME_NAME_FRONT.c_str());
+	int maxFront = MV1GetFrameChildNum(treePosHandle_, frameFront);
+
+	for (int i = 0; i < maxFront; i++)
+	{
+		std::unique_ptr<Transform> tree = std::make_unique<Transform>();
+		tree->modelId = ResourceManager::GetInstance().LoadModelDuplicate(ResourceManager::SRC::MODEL_TREE);
+
+		treesFront_.emplace_back(std::move(tree));
+	}
+
+
+	int frameBack = MV1SearchFrame(treePosHandle_, POS_FRAME_NAME_BACK.c_str());
+	int maxBack = MV1GetFrameChildNum(treePosHandle_, frameBack);
+	for (int i = 0; i < maxBack; i++)
+	{
+		std::unique_ptr<Transform> tree = std::make_unique<Transform>();
+		tree->modelId = ResourceManager::GetInstance().LoadModelDuplicate(ResourceManager::SRC::MODEL_TREE);
+
+		treesBack_.emplace_back(std::move(tree));
+	}
 }
 
 void Stage::InitTransform(void)
@@ -36,6 +61,33 @@ void Stage::InitTransform(void)
 	constexpr float SKYDOME_SCALE = 150.0f;
 	skyDome_.InitTransform(SKYDOME_SCALE,
 		Quaternion::Identity(), Quaternion::Identity());
+
+
+	constexpr float TREE_SCALE = 1.25f;
+
+	int frameFront = MV1SearchFrame(treePosHandle_, POS_FRAME_NAME_FRONT.c_str());
+	int maxFront = MV1GetFrameChildNum(treePosHandle_, frameFront);
+	for (int i = 0; i < maxFront; i++)
+	{
+		float rot = static_cast<float>(360 - GetRand(360 * 2));
+		VECTOR pos = MV1GetFramePosition(treePosHandle_, (frameFront + (i + 1)));
+
+		treesFront_.at(i)->InitTransform(TREE_SCALE
+			, Quaternion::Identity(), Quaternion::AngleAxis(UtilityMath::Deg2RadF(rot), UtilityMath::AXIS_Y)
+			, pos);
+	}
+
+	int frameBack = MV1SearchFrame(treePosHandle_, POS_FRAME_NAME_BACK.c_str());
+	int maxBack = MV1GetFrameChildNum(treePosHandle_, frameBack);
+	for (int i = 0; i < maxBack; i++)
+	{
+		float rot = static_cast<float>(360 - GetRand(360 * 2));
+		VECTOR pos = MV1GetFramePosition(treePosHandle_, (frameBack + (i + 1)));
+
+		treesBack_.at(i)->InitTransform(TREE_SCALE
+			, Quaternion::Identity(), Quaternion::AngleAxis(UtilityMath::Deg2RadF(rot), UtilityMath::AXIS_Y)
+			, pos);
+	}
 }
 
 void Stage::InitCollider(void)
@@ -80,7 +132,7 @@ void Stage::InitPost(void)
 
 void Stage::Update(void)
 {
-	skyDome_.Rotate(UtilityMath::AXIS_Y, 0.0025f);
+	skyDome_.Rotate(UtilityMath::AXIS_Y, 0.001f);
 }
 
 void Stage::Draw(void)
@@ -88,6 +140,16 @@ void Stage::Draw(void)
 	MV1DrawModel(skyDome_.modelId);
 
 	MV1DrawModel(viewTrans_.modelId);
+
+	for (auto& treeFront : treesFront_)
+	{
+		MV1DrawModel(treeFront->modelId);
+	}
+
+	for (auto& treeBack : treesBack_)
+	{
+		MV1DrawModel(treeBack->modelId);
+	}
 
 #ifdef _DEBUG
 	ActorBase::Draw();

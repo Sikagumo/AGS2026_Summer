@@ -39,9 +39,17 @@ protected:
 
 private:
 
+	const std::string POS_FRAME_NAME_FRONT = "tree_In";
+	const std::string POS_FRAME_NAME_BACK  = "tree_Out";
+
 	Transform viewTrans_;
 
 	Transform skyDome_;
+
+	// 木のモデル
+	int treePosHandle_;
+	std::vector<std::unique_ptr<Transform>> treesFront_;
+	std::vector<std::unique_ptr<Transform>> treesBack_;
 
 	// 壁の除外フレーム名称
 	const std::vector<std::string> EXCLUDE_WALL_NAMES =

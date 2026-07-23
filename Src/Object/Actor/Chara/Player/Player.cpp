@@ -63,7 +63,7 @@ Player::Player(int _playerNo, JOB_TYPE _jobType, SKIN_TYPE _skinType, const VECT
 	, attackNumMax_(0)
 	, knockPowXZ_(UtilityMath::VECTOR2F_ZERO)
 	, dodgePowXZ_(UtilityMath::VECTOR2F_ZERO)
-	, shotTerm_(0.0f)
+	, shotTerm_(0.0f), curTimeDefeat_(0.0f)
 {
 	if (_jobType == JOB_TYPE::CANNON)
 	{
