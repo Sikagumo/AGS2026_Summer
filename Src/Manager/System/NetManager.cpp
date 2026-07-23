@@ -35,7 +35,7 @@ NetManager::NetManager(void)
 	, roomWordId_(-1)
 	, hostIp_(LOCALHOST_IP)
 	, hasReceivedGoGame_(false)
-	, gameTime_(0.0f)
+	, gameTime_(500.0f)
 {
 	selfActionHis_.key = -1;
 	for (int i = 0; i < NUM_FRAME; ++i) 
@@ -110,6 +110,7 @@ void NetManager::Stop(void)
 	pool_.bossAction = NET_BOSS_ACTION();
 	remoteActionHis_.clear();
 	hasReceivedGoGame_ = false;
+	gameTime_ = 500.0f;
 }
 
 void NetManager::Update(void)
@@ -233,12 +234,6 @@ void NetManager::UdpReceiveData(void)
 				{
 					std::lock_guard<std::mutex> lock(poolMutex_);
 
-					// リストにいない新しいキーなら「通信成功」を出す
-					if (pool_.remoteUsers_.find(user->key) == pool_.remoteUsers_.end())
-					{
-						printfDx("【HOST】クライアント(Key:%d)との通信成功！\n", user->key);
-					}
-
 					user->ip = senderIp;
 					user->port = senderPort;
 					pool_.remoteUsers_[user->key] = *user;
@@ -262,13 +257,6 @@ void NetManager::UdpReceiveData(void)
 						// 自分の情報はスキップ
 						if (users->users[i].key == GetMyKey()) continue;
 
-						// リストに登録
-						if (pool_.remoteUsers_.find(users->users[i].key)
-							== pool_.remoteUsers_.end())
-						{
-							printfDx("【CLIENT】ユーザー(Key:%d)をリストに追加しました！\n",
-								users->users[i].key);
-						}
 						pool_.remoteUsers_[users->users[i].key] = users->users[i];
 					}
 				}

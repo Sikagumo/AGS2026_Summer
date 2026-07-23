@@ -514,18 +514,6 @@ void SceneLobby::UpdateSingle(void)
         // åàíËì¸óÕéûÇÃèàóù
         if (keyConfInputManager.isTrigerDown("OK"))
         {
-            if (mainSelectIndex_ == 0)
-            {
-                selectState_ = SELECT_STATE::WEAPON_WINDOW;
-                SoundManager::GetInstance().Play(SoundManager::SOUND::SE_LOBBY_SELECT);
-                return; 
-            }
-            else if (mainSelectIndex_ == 1)
-            {
-                selectState_ = SELECT_STATE::SKIN_WINDOW;
-                SoundManager::GetInstance().Play(SoundManager::SOUND::SE_LOBBY_SELECT);
-                return;
-            }
 
             if (mainSelectIndex_ == 0)
             {
@@ -603,6 +591,7 @@ void SceneLobby::UpdateSingle(void)
                     {
                         selectState_ = SELECT_STATE::MAIN;
                         SoundManager::GetInstance().Play(SoundManager::SOUND::SE_LOBBY_SELECT);
+                        SetJobToSKin();
                         return;
                     }
                 }
@@ -614,6 +603,7 @@ void SceneLobby::UpdateSingle(void)
         {
             selectState_ = SELECT_STATE::MAIN;
             SoundManager::GetInstance().Play(SoundManager::SOUND::SE_LOBBY_SELECT);
+            SetJobToSKin();
             return;
         }
 
@@ -665,6 +655,7 @@ void SceneLobby::UpdateSingle(void)
                     {
                         selectState_ = SELECT_STATE::MAIN;
                         SoundManager::GetInstance().Play(SoundManager::SOUND::SE_LOBBY_SELECT);
+                        SetJobToSKin();
                         return; 
                     }
                 }
@@ -676,6 +667,7 @@ void SceneLobby::UpdateSingle(void)
         {
             selectState_ = SELECT_STATE::MAIN;
             SoundManager::GetInstance().Play(SoundManager::SOUND::SE_LOBBY_SELECT);
+            SetJobToSKin();
             return;
         }
 
@@ -896,6 +888,8 @@ void SceneLobby::UpdateSelectMode(void)
 
             // NetManagerÇÃèÄîıÇ∆CLIENTÉÇÅ[ÉhãNìÆ
             auto& netManager = NetManager::GetInstance();
+            IPDATA hostIp = { 255, 255, 255, 255 };
+            NetManager::GetInstance().SetHostIp(hostIp);
             netManager.SetRoomWordId(roomWordId);
             netManager.Run(NET_MODE::CLIENT);
 
@@ -1248,12 +1242,22 @@ void SceneLobby::MoveToGameScene(std::map<int, NET_JOIN_USER>& _users)
     for (auto iterator = _users.begin(); iterator != _users.end(); ++iterator)
     {
         SceneGame::PlayerSelectType otherType;
-        otherType.job = PlayerBase::JOB_TYPE::BOMB;
-        otherType.skin = PlayerBase::SKIN_TYPE::DOG;
+        otherType.job = static_cast<PlayerBase::JOB_TYPE>(iterator->second.selectedJobType);
+        otherType.skin = static_cast<PlayerBase::SKIN_TYPE>(iterator->second.selectedSkinType);
         playerSelectTypes.push_back(otherType);
     }
 
     SceneManager::GetInstance().ChangeScene(std::make_shared<SceneGame>(playerSelectTypes));
+}
+
+void SceneLobby::SetJobToSKin(void)
+{
+    if (!IS_MULTI) { return; }
+
+    NET_JOIN_USER self = NetManager::GetInstance().GetSelfUser();
+    self.selectedJobType = selectedJobIndex_;
+    self.selectedSkinType = selectedSkinIndex_;
+    NetManager::GetInstance().SetSelfInfo(self);
 }
 
 void SceneLobby::DrawWeaponWindow(void)

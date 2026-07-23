@@ -224,6 +224,10 @@ private:
     /// @param _users ネットワーク参加ユーザーマップ
     void MoveToGameScene(std::map<int, NET_JOIN_USER>& _users);
 
+    /// @brief 武器とスキンをネットに登録する
+    /// @param  
+    void SetJobToSKin(void);
+
     // ミニウィンドウの状態
     enum class SELECT_STATE
     {
