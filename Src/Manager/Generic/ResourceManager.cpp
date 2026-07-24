@@ -15,7 +15,7 @@ const std::string PATH_DATA = "Data/";
 // 暗号化済みのリソースフォルダパス
 #else
 
-//const std::string PATH_DATA = "_ResourceData/";
+//const std::string PATH_DATA = "Data/ResourceData/";
 const std::string PATH_DATA = "Data/";
 #endif
 
@@ -78,7 +78,26 @@ void ResourceManager::Initialize(void)
 
 	// 鬼ヶ島のノーマルマップ
 	_SetResource(LOAD_TYPE::IMAGE, SRC::IMG_NOMALMAP_ONIGASIMA, PATH_IMAGE + "OnigaSima_n.png");
-	//〇影
+
+	// 選択シーンの背景
+	_SetResource(LOAD_TYPE::IMAGE, SRC::IMG_BACKGROUND_SELCET, PATH_IMAGE + "JunbiSitu.png");
+
+	// マルチシーンの背景
+	_SetResource(LOAD_TYPE::IMAGE, SRC::IMG_BACKGROUND_MALUTI, PATH_IMAGE + "MarlutiHeya.png");
+
+	// セレクトUIの背景
+	_SetResource(LOAD_TYPE::IMAGE, SRC::IMG_SELECT_UI_BACK, PATH_IMAGE + "selcetUIBack.png");
+
+	// セレクト中UIの背景
+	_SetResource(LOAD_TYPE::IMAGE, SRC::IMG_SELECTED_UI_BACK, PATH_IMAGE + "selcetedUIBack.png");
+
+	// マルチ選択UI背景
+	_SetResource(LOAD_TYPE::IMAGE, SRC::IMG_SELECT_MULTI_BACK, PATH_IMAGE + "waku.png");
+
+	// マルチ選択中UI背景
+	_SetResource(LOAD_TYPE::IMAGE, SRC::IMG_SELECTED_MULTI_BACK, PATH_IMAGE + "wakuPick.png");
+
+	//丸影
 	_SetResource(LOAD_TYPE::IMAGE, SRC::IMG_SHADOW, PATH_IMAGE + "Shadow.png");
 	//落下ポイント
 	_SetResource(LOAD_TYPE::IMAGE, SRC::IMG_FALLING_POINT , PATH_IMAGE + "FallingPoint.png");
@@ -86,7 +105,7 @@ void ResourceManager::Initialize(void)
 	_SetResource(LOAD_TYPE::IMAGE, SRC::IMG_RESULT_WIN, PATH_IMAGE + "ResultWinBook.png");
 	_SetResource(LOAD_TYPE::IMAGE, SRC::IMG_RESULT_BUT, PATH_IMAGE + "ResultBatBook.png");
 
-	_SetResource(LOAD_TYPE::IMAGE, SRC::IMG_SOUSA, PATH_IMAGE + "sousa.png");
+	_SetResource(LOAD_TYPE::IMAGE, SRC::IMG_INFO, PATH_IMAGE + "sousa.png");
 
 	/* 複数画像 */
 
@@ -132,8 +151,8 @@ void ResourceManager::Initialize(void)
 				, imagesAllNum, imagesNumX, imagesNumY);
 
 	// 選択文字
-	imagesAllNum = 9;
-	imagesNumX = 1;
+	imagesAllNum = 18;
+	imagesNumX = 2;
 	imagesNumY = 9;
 	_SetResource(LOAD_TYPE::IMAGES, SRC::IMGS_SELECT, PATH_IMAGE + "SelectImages.png"
 				, imagesAllNum, imagesNumX, imagesNumY);
@@ -150,6 +169,24 @@ void ResourceManager::Initialize(void)
 	imagesNumY = 4;
 	_SetResource(LOAD_TYPE::IMAGES, SRC::IMGS_RESULT, PATH_IMAGE + "EndText.png"
 				, imagesAllNum, imagesNumX, imagesNumY);
+
+	imagesAllNum = 4;
+	imagesNumX = 1;
+	imagesNumY = 4;
+	_SetResource(LOAD_TYPE::IMAGES, SRC::IMGS_LOBBY_UI_TEX, PATH_IMAGE + "sentakuTex.png"
+		, imagesAllNum, imagesNumX, imagesNumY);
+
+	imagesAllNum = 4;
+	imagesNumX = 1;
+	imagesNumY = 4;
+	_SetResource(LOAD_TYPE::IMAGES, SRC::IMGS_MULTI_TEX, PATH_IMAGE + "junbi.png"
+		, imagesAllNum, imagesNumX, imagesNumY);
+
+	imagesAllNum = 2;
+	imagesNumX = 1;
+	imagesNumY = 2;
+	_SetResource(LOAD_TYPE::IMAGES, SRC::IMGS_CONECT_TEX, PATH_IMAGE + "butai.png"
+		, imagesAllNum, imagesNumX, imagesNumY);
 
 	/* エフェクト */
 	_SetResource(LOAD_TYPE::EFFECT, SRC::EFFECT_WAVE, PATH_EFFECT + "BossAttack/AttackWave.efkefc");
@@ -221,6 +258,7 @@ void ResourceManager::Initialize(void)
 	_SetResource(LOAD_TYPE::SOUND, SRC::SE_BOSS_MG_FIRE, PATH_SE + "MGFire.mp3");
 	_SetResource(LOAD_TYPE::SOUND, SRC::SE_BOSS_LANDING, PATH_SE + "BossLanding.mp3");
 	_SetResource(LOAD_TYPE::SOUND, SRC::SE_BOSS_ROAD, PATH_SE + "Road.mp3");
+	_SetResource(LOAD_TYPE::SOUND, SRC::SE_LOBBY_SELCET, PATH_SE + "LobbySelect.mp3");
 	
 
 }

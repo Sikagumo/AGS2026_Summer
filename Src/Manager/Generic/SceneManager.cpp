@@ -14,6 +14,7 @@
 #include "../../Application.h"
 #include "KeyConfInputManager.h"
 #include "../../ImGUI/GuiController.h"
+#include "../../Scene/MainScene/SceneLobby.h"
 
 SceneManager* SceneManager::instance_ = nullptr;
 
@@ -77,7 +78,7 @@ void SceneManager::Initialize(void)
 void SceneManager::Init3D(void)
 {
     // îwåiêF
-    constexpr COLOR_F BACK_COLOR = { 125,125,125 };
+    constexpr COLOR_F BACK_COLOR = { 0,0,0 };
 
     // ä¬ã´åıÇÃã≠Ç≥
     const float AmbientVal = 0.8f;
@@ -209,7 +210,7 @@ void SceneManager::Update(void)
         //auto jobs = { SceneGame::PlayerSelectType(PlayerBase::JOB_TYPE::BOMB, PlayerBase::SKIN_TYPE::DOG)};
         //ChangeScene(std::make_shared<SceneGame>(jobs));
 
-        ChangeScene(std::make_shared<SceneTitle>());
+        ChangeScene(std::make_shared<SceneLobby>(true));
     }
 
     TimeManager::GetInstance().Update();
@@ -255,7 +256,7 @@ void SceneManager::Update(void)
 
     if (scenes_.empty()) { return; }
 
-    auto current = scenes_.back();
+    auto& current = scenes_.back();
     if (current)
     {
         current->Update();

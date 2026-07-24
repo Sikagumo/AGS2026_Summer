@@ -60,7 +60,7 @@ public:
 	std::string GetHandlePath(void)const { return path_; };
 
 	/// @brief “Ç‚İ‚Şƒtƒ@ƒCƒ‹‚Ì‘ÎÛ‚Ìí—Ş‚Ìæ“¾ˆ— 
-	LOAD_TYPE GetLoadType(void) { return resType_; };
+	LOAD_TYPE GetLoadType(void)const { return resType_; };
 
 
 private:
@@ -100,9 +100,9 @@ private:
 	void Load_Sound(void);
 
 	/* ‰ğ•úˆ— */
-	void Release_ImageAndMovie(void);
+	void Release_ImageAndMovie(void)const;
 	void Release_Images(void);
-	void Release_ModelAndAnim(void);
-	void Release_Effect(void);
-	void Release_Sound(void);
+	void Release_ModelAndAnim(void)const;
+	void Release_Effect(void)const;
+	void Release_Sound(void)const;
 };

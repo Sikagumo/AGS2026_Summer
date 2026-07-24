@@ -83,7 +83,7 @@ void SceneGame::Load(void)
 	targetHpBerImage_ = ResourceManager::GetInstance().LoadHandleIdsOnce(ResourceManager::SRC::IMGS_HP_TARGET, 0);
 	targetHpImage_ = ResourceManager::GetInstance().LoadHandleIdsOnce(ResourceManager::SRC::IMGS_HP_TARGET, 1);
 
-	infoImage_ = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::IMG_SOUSA);
+	infoImage_ = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::IMG_INFO);
 
 	ResourceManager::GetInstance().LoadHandleIds(ResourceManager::SRC::IMGS_GAME_TEXT, uiGame_.data());
 
