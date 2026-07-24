@@ -51,9 +51,13 @@ public:
 
 	float GetGameTime(void) const { return gameTime_; }
 
+	/// @brief 通信相手とのタイムアウトを検知する
+	bool GetIsConnectionLost(void) const;
+
 private:
-	NetManager(void);
-	~NetManager(void);
+
+	// 接続ロストと判定するまでの秒数
+	static constexpr float CONNECTION_TIMEOUT = 5.0f;
 
 	static NetManager* instance_;
 
@@ -69,6 +73,9 @@ private:
 	bool hasReceivedGoGame_;
 	float gameTime_;
 	IPDATA hostIp_;
+	float hostTimeoutTimer_;
+	std::map<int, float> clientTimeoutTimers_;
+
 	std::map<int, NET_ACTION_HIS> remoteActionHis_;
 
 	struct NET_POOL
@@ -81,6 +88,10 @@ private:
 	NET_POOL pool_;
 
 	mutable std::mutex poolMutex_;
+
+
+	NetManager(void);
+	~NetManager(void);
 
 	/// @brief 受信したUDPパケットの解析とデータ種別ごとの振り分け処理
 	void UdpReceiveData(void);

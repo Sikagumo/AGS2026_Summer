@@ -143,10 +143,10 @@ void SceneManager::ChangeScene(std::shared_ptr<SceneBase> scene)
     nextScene_ = scene;
     isSceneChanging_ = true;
 
+    // 【重要】まずはフェードアウト（暗転）を開始する
     fader_->SetFade(Fader::STATE::FADE_OUT);
 
-
-    // 非同期ロード開始（ロード画面付き）
+    // 非同期ロード開始（ロード処理自体は裏で進めておく）
     Loading::GetInstance()->StartAsyncLoad([scene]()
         {
             scene->Load();
@@ -202,14 +202,10 @@ void SceneManager::Update(void)
         {
             // 3D描画設定を初期化する
             Init3D();
-
             camera_->Init();
         }
 
-        //ChangeScene(std::make_shared<SceneTitle>());
-        //auto jobs = { SceneGame::PlayerSelectType(PlayerBase::JOB_TYPE::BOMB, PlayerBase::SKIN_TYPE::DOG)};
-        //ChangeScene(std::make_shared<SceneGame>(jobs));
-
+        fader_->LoadFadeImage();
         ChangeScene(std::make_shared<SceneTitle>());
     }
 
@@ -227,12 +223,13 @@ void SceneManager::Update(void)
     if (isSceneChanging_)
     {
         fader_->Update();
+
         auto loader = Loading::GetInstance();
         loader->Update();
 
         // ロードが完了しており、かつフェードアウトが完了しているか
-        bool isLoadFinished = (loader->GetProgress() >= LoadCompleteThreshold && !loader->IsLoading());
-        bool isFadeOutFinished = (fader_->GetState() == Fader::STATE::FADE_OUT && fader_->IsEnd());
+        const bool isLoadFinished = (loader->GetProgress() >= LoadCompleteThreshold && !loader->IsLoading());
+        const bool isFadeOutFinished = (fader_->GetState() == Fader::STATE::FADE_OUT && fader_->IsEnd());
 
         if (isLoadFinished && isFadeOutFinished && nextScene_ != nullptr)
         {
@@ -252,7 +249,7 @@ void SceneManager::Update(void)
 
             nextScene_ = nullptr;
 
-            // シーン切り替えが終わったら、今度は画面を明るくするを開始
+            // シーン切り替えが終わったら、今度は画面を明るくする（フェードイン）を開始
             fader_->SetFade(Fader::STATE::FADE_IN);
         }
 
@@ -298,10 +295,16 @@ void SceneManager::Draw(void)
 
     if (!scenes_.empty())
     {
-        if (camera_) camera_->SetBeforeDraw();
+        if (camera_)
+        {
+            camera_->SetBeforeDraw();
+        }
         for (auto& scene : scenes_)
         {
-            if (scene) { scene->Draw(); }
+            if (scene)
+            {
+                scene->Draw();
+            }
         }
     }
 
@@ -318,16 +321,23 @@ void SceneManager::Draw(void)
     }
 #endif 
 
+    // フェードを先に描画する
+    fader_->Draw();
 
-    // ロード中ならその上にロード画面を重ねる
+    // フェードアウトが完全に終わって「画面が真っ黒」になってからロード画面を上に重ねる
     auto loader = Loading::GetInstance();
 
     if (isSceneChanging_)
     {
-        if (loader) loader->Draw();
+        // 状態がFADE_OUTであり、かつIsEnd()がtrueの時のみロード画面を描画する
+        if (fader_->GetState() == Fader::STATE::FADE_OUT && fader_->IsEnd())
+        {
+            if (loader)
+            {
+                loader->Draw();
+            }
+        }
     }
-
-    fader_->Draw();
 }
 
 void SceneManager::Release(void)

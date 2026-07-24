@@ -119,11 +119,7 @@ void Application::Run(void)
 	// ÉQÅ[ÉÄÉãÅ[Év
 	while (ProcessMessage() == 0)
 	{
-		if (sceneManager.IsSceneChanging() && CheckHitKey(KEY_INPUT_ESCAPE) != 0)
-		{
-
-		}
-		else if (KeyConfInputManager::GetInstance().isTrigerDown("CANCEL") != 0 || isGameEnd_)
+		if(isGameEnd_)
 		{
 			break;
 		}

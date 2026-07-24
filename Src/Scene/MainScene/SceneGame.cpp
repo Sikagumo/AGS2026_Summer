@@ -18,6 +18,8 @@
 #include "SceneResult.h"
 #include "../../Net/NetStructures.h"
 #include "../../Manager/System/NetManager.h"
+#include "../../Manager/Generic/KeyConfInputManager.h"
+#include "../SubScene/ScenePause.h"
 
 SceneGame::SceneGame(std::vector<PlayerSelectType> _playerSelectType)
 	: players_()
@@ -198,6 +200,19 @@ void SceneGame::Initialize(void)
 
 void SceneGame::Update(void)
 {
+	if (KeyConfInputManager::GetInstance().isTrigerDown("PAUSE"))
+	{
+		SceneManager::GetInstance().PushScene(std::make_shared<ScenePause>());
+	}
+
+	if (NetManager::GetInstance().GetMode() != NET_MODE::NONE
+		&& NetManager::GetInstance().GetIsConnectionLost())
+	{
+		NetManager::GetInstance().Stop();
+		SceneManager::GetInstance().ChangeScene(std::make_shared<SceneTitle>());
+		return;
+	}
+
 	stateUpdate_();
 }
 

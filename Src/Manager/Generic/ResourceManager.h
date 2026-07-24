@@ -35,6 +35,7 @@ public:
 		IMG_RESULT_WIN,
 		IMG_RESULT_BUT,
 		IMG_SOUSA,
+		IMG_AICON,
 
 		/* •¡”‰æ‘œ */
 		IMGS_TEXTS,

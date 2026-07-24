@@ -2,6 +2,7 @@
 #include "../../Net/NetHost.h"
 #include "../../Net/NetClient.h"
 #include "../../Net/NetSend.h"
+#include "TimeManager.h" 
 #include <cstdlib>
 
 NetManager* NetManager::instance_ = nullptr;
@@ -36,6 +37,7 @@ NetManager::NetManager(void)
 	, hostIp_(LOCALHOST_IP)
 	, hasReceivedGoGame_(false)
 	, gameTime_(500.0f)
+	, hostTimeoutTimer_(0.0f)
 {
 	selfActionHis_.key = -1;
 	for (int i = 0; i < NUM_FRAME; ++i) 
@@ -118,6 +120,22 @@ void NetManager::Update(void)
 	if (!isRunning_) return;
 
 	UdpReceiveData();
+
+	const float delta = TimeManager::GetInstance().GetDeltaTime();
+
+	if (mode_ == NET_MODE::CLIENT)
+	{
+		hostTimeoutTimer_ += delta;
+	}
+	else if (mode_ == NET_MODE::HOST)
+	{
+		std::lock_guard<std::mutex> lock(poolMutex_);
+		for (auto& pair : clientTimeoutTimers_)
+		{
+			pair.second += delta;
+		}
+	}
+
 
 	if (netBase_)
 	{
@@ -224,6 +242,11 @@ void NetManager::UdpReceiveData(void)
 		{
 			NET_BASIC_DATA* header = reinterpret_cast<NET_BASIC_DATA*>(buffer);
 
+			if (mode_ == NET_MODE::CLIENT)
+			{
+				hostTimeoutTimer_ = 0.0f;
+			}
+
 			if (mode_ == NET_MODE::HOST && header->type == NET_DATA_TYPE::USER)
 			{
 				NET_JOIN_USER* user = reinterpret_cast<NET_JOIN_USER*>(buffer +
@@ -271,6 +294,11 @@ void NetManager::UdpReceiveData(void)
 				if (his->key != GetMyKey())
 				{
 					remoteActionHis_[his->key] = *his;
+
+					if (mode_ == NET_MODE::HOST)
+					{
+						clientTimeoutTimers_[his->key] = 0.0f;
+					}
 				}
 
 				if (mode_ == NET_MODE::CLIENT && pool_.selfUser_.gameState 
@@ -307,4 +335,26 @@ void NetManager::UdpReceiveData(void)
 void NetManager::SetGameTime(float _time)
 {
 	gameTime_ = _time;
+}
+
+bool NetManager::GetIsConnectionLost(void) const
+{
+	std::lock_guard<std::mutex> lock(poolMutex_);
+
+	if (mode_ == NET_MODE::CLIENT)
+	{
+		return (hostTimeoutTimer_ > CONNECTION_TIMEOUT);
+	}
+	else if (mode_ == NET_MODE::HOST)
+	{
+		for (const auto& pair : clientTimeoutTimers_)
+		{
+			if (pair.second > CONNECTION_TIMEOUT)
+			{
+				return true;
+			}
+		}
+	}
+
+	return false;
 }
