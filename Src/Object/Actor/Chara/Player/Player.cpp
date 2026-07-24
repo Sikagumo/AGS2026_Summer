@@ -90,7 +90,7 @@ Player::Player(int _playerNo, JOB_TYPE _jobType, SKIN_TYPE _skinType, const VECT
 void Player::Load(void)
 {
 	const std::map<SKIN_TYPE, ResourceManager::SRC>
-		SKIN_SRC = { { SKIN_TYPE::HYMAN, ResourceManager::SRC::MODEL_PLAYER_HUMAN}
+		SKIN_SRC = { { SKIN_TYPE::HUMAN, ResourceManager::SRC::MODEL_PLAYER_HUMAN}
 					, { SKIN_TYPE::MONKEY, ResourceManager::SRC::MODEL_PLAYER_MONKEY}
 					, { SKIN_TYPE::BIRD, ResourceManager::SRC::MODEL_PLAYER_BIRD}
 					, { SKIN_TYPE::DOG, ResourceManager::SRC::MODEL_PLAYER_DOG} };

@@ -42,7 +42,7 @@ public:
 
 	enum class SKIN_TYPE
 	{
-		HYMAN,
+		HUMAN,
 		DOG,
 		MONKEY,
 		BIRD,
@@ -114,7 +114,7 @@ protected:
 	const std::map<SKIN_TYPE, int>
 		FRAME_NUM_FINGER_LEFT
 	= {
-		{ SKIN_TYPE::HYMAN, 23},
+		{ SKIN_TYPE::HUMAN, 23},
 		{ SKIN_TYPE::DOG, 15},
 		{ SKIN_TYPE::MONKEY, 23},
 		{ SKIN_TYPE::BIRD, 19}
@@ -123,7 +123,7 @@ protected:
 	const std::map<SKIN_TYPE, int>
 		FRAME_NUM_FINGER_RIGHT
 		= {
-			{ SKIN_TYPE::HYMAN, 39},
+			{ SKIN_TYPE::HUMAN, 39},
 			{ SKIN_TYPE::DOG, 23},
 			{ SKIN_TYPE::MONKEY, 47},
 			{ SKIN_TYPE::BIRD, 31}
