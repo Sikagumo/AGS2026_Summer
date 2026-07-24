@@ -460,13 +460,6 @@ void Boss::ChangeStateEnd(void)
 {
 	stateUpdate_ = std::bind(&Boss::UpdateEnd, this);
 	animation_->Play(static_cast<int>(ANIM_TYPE::JUMPBEFORE), false);
-	weaponCannonL_->SetHp(1);
-	weaponCannonR_->SetHp(1);
-	weaponMGL_->SetHp(1);
-	weaponMGR_->SetHp(1);
-	weaponMPL_->SetHp(1);
-	weaponMPR_->SetHp(1);
-	weaponRG_->SetHp(1);
 	EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_PLAYER_BLAST, transformBody_.pos, { 0,0,0 }, { 35,35,35 }, 1, this);
 
 }
