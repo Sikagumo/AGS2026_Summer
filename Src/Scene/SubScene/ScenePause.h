@@ -51,6 +51,8 @@ private:
 	static constexpr float BUTTON_HEIGHT = 35.0f;              // ボタンの当たり判定の縦幅
 	static constexpr float YES_NO_BUTTON_WIDTH = 80.0f;        // YES/NOボタンの当たり判定の横幅
 	static constexpr float YES_NO_BUTTON_HEIGHT = 40.0f;       // YES/NOボタンの当たり判定の縦幅
+	static constexpr int STICK_INTERVAL = 15;                  // スティックの連続入力の間隔
+	static constexpr float STICK_THRESHOLD = 0.5f;             // スティックの入力しきい値
 
 	enum class PHASE
 	{
@@ -68,10 +70,13 @@ private:
 	};
 
 	// 状態関連
-	PHASE currentPhase_; // 現在のフェーズ
-	int frame_;          // 経過フレーム
-	int selectedIndex_;  // 選択中のインデックス
-	bool isYes_;         // YESが選択されているか
+	PHASE currentPhase_;     // 現在のフェーズ
+	int frame_;              // 経過フレーム
+	int selectedIndex_;      // 選択中のインデックス
+	bool isYes_;             // YESが選択されているか
+
+	// 入力関連
+	int inputIntervalCounter_; // スティックの入力間隔カウンター
 
 	// メニュー関連
 	std::string yesNoTitle_;              // ダイアログのタイトル
