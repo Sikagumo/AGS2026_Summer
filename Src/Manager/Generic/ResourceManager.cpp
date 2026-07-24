@@ -97,11 +97,14 @@ void ResourceManager::Initialize(void)
 	// マルチ選択中UI背景
 	_SetResource(LOAD_TYPE::IMAGE, SRC::IMG_SELECTED_MULTI_BACK, PATH_IMAGE + "wakuPick.png");
 
-	//丸影
+	// チームロゴ
+	_SetResource(LOAD_TYPE::IMAGE, SRC::IMG_ICON, PATH_IMAGE + "Logo.png");
+
+	// 丸影
 	_SetResource(LOAD_TYPE::IMAGE, SRC::IMG_SHADOW, PATH_IMAGE + "Shadow.png");
-	//落下ポイント
+	// 落下ポイント
 	_SetResource(LOAD_TYPE::IMAGE, SRC::IMG_FALLING_POINT , PATH_IMAGE + "FallingPoint.png");
-	//リザルト
+	// リザルト
 	_SetResource(LOAD_TYPE::IMAGE, SRC::IMG_RESULT_WIN, PATH_IMAGE + "ResultWinBook.png");
 	_SetResource(LOAD_TYPE::IMAGE, SRC::IMG_RESULT_BUT, PATH_IMAGE + "ResultBatBook.png");
 

@@ -1,58 +1,63 @@
 #pragma once
 
+#include <string>
+
 class Fader
 {
 
 public:
 
 	// フェードが進む速さ
-	static constexpr float SPEED_ALPHA = 5.0f;
+	static constexpr float SPEED_ALPHA = 4.0f;
 
 	// 状態
 	enum class STATE
 	{
-		NONE, 
+		NONE,
 		FADE_OUT,	// 徐々に暗転
 		FADE_IN		// 徐々に明転
 	};
 
-	// コンストラクタ
+	/// @brief コンストラクタ
 	Fader(void);
 
-	// デストラクタ
+	/// @brief デストラクタ
 	~Fader(void);
 
-	// 状態の取得
+	/// @brief 状態の取得
+	/// @return 現在のフェード状態
 	STATE GetState(void) const;
 
-	// フェード処理が終了しているか
+	/// @brief フェード処理が終了しているか
+	/// @return 終了している場合はtrue
 	bool IsEnd(void) const;
 
-	// 指定フェードを開始する
+	/// @brief 指定フェードを開始する
+	/// @param state 開始するフェードの状態
 	void SetFade(STATE state);
 
-	// 初期化
+	/// @brief 初期化
 	void Init(void);
 
-	// 更新
+	/// @brief 更新
 	void Update(void);
 
-	// 描画
+	/// @brief 描画
 	void Draw(void);
+
+	/// @brief 初回用のフェード画像を読み込む
+	/// @param path 画像のファイルパス
+	void LoadFadeImage(void);
 
 private:
 
-	// 状態
-	STATE state_;
+	// 状態関連
+	STATE state_;   // 状態
+	float alpha_;   // 透明度
+	bool isPreEnd_; // 状態(STATE)を保ったまま終了判定を行うため、Update->Draw->Updateの1フレーム判定用
+	bool isEnd_;    // フェード処理の終了判定
 
-	// 透明度
-	float alpha_;
-
-	// 状態(STATE)を保ったまま終了判定を行うため、
-	// Update->Draw->Updateの1フレーム判定用
-	bool isPreEnd_;
-
-	// フェード処理の終了判定
-	bool isEnd_;
+	// フェードに使用する画像ハンドル
+	int fadeImageHandle_; 
 
 };

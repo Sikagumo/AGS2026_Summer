@@ -2,6 +2,7 @@
 #include "../../Net/NetHost.h"
 #include "../../Net/NetClient.h"
 #include "../../Net/NetSend.h"
+#include "TimeManager.h" 
 #include <cstdlib>
 
 NetManager* NetManager::instance_ = nullptr;
@@ -35,7 +36,8 @@ NetManager::NetManager(void)
 	, roomWordId_(-1)
 	, hostIp_(LOCALHOST_IP)
 	, hasReceivedGoGame_(false)
-	, gameTime_(0.0f)
+	, gameTime_(500.0f)
+	, hostTimeoutTimer_(0.0f)
 {
 	selfActionHis_.key = -1;
 	for (int i = 0; i < NUM_FRAME; ++i) 
@@ -110,6 +112,7 @@ void NetManager::Stop(void)
 	pool_.bossAction = NET_BOSS_ACTION();
 	remoteActionHis_.clear();
 	hasReceivedGoGame_ = false;
+	gameTime_ = 500.0f;
 }
 
 void NetManager::Update(void)
@@ -117,6 +120,22 @@ void NetManager::Update(void)
 	if (!isRunning_) return;
 
 	UdpReceiveData();
+
+	const float delta = TimeManager::GetInstance().GetDeltaTime();
+
+	if (mode_ == NET_MODE::CLIENT)
+	{
+		hostTimeoutTimer_ += delta;
+	}
+	else if (mode_ == NET_MODE::HOST)
+	{
+		std::lock_guard<std::mutex> lock(poolMutex_);
+		for (auto& pair : clientTimeoutTimers_)
+		{
+			pair.second += delta;
+		}
+	}
+
 
 	if (netBase_)
 	{
@@ -223,6 +242,11 @@ void NetManager::UdpReceiveData(void)
 		{
 			NET_BASIC_DATA* header = reinterpret_cast<NET_BASIC_DATA*>(buffer);
 
+			if (mode_ == NET_MODE::CLIENT)
+			{
+				hostTimeoutTimer_ = 0.0f;
+			}
+
 			if (mode_ == NET_MODE::HOST && header->type == NET_DATA_TYPE::USER)
 			{
 				NET_JOIN_USER* user = reinterpret_cast<NET_JOIN_USER*>(buffer +
@@ -232,12 +256,6 @@ void NetManager::UdpReceiveData(void)
 
 				{
 					std::lock_guard<std::mutex> lock(poolMutex_);
-
-					// リストにいない新しいキーなら「通信成功」を出す
-					if (pool_.remoteUsers_.find(user->key) == pool_.remoteUsers_.end())
-					{
-						printfDx("【HOST】クライアント(Key:%d)との通信成功！\n", user->key);
-					}
 
 					user->ip = senderIp;
 					user->port = senderPort;
@@ -262,13 +280,6 @@ void NetManager::UdpReceiveData(void)
 						// 自分の情報はスキップ
 						if (users->users[i].key == GetMyKey()) continue;
 
-						// リストに登録
-						if (pool_.remoteUsers_.find(users->users[i].key)
-							== pool_.remoteUsers_.end())
-						{
-							printfDx("【CLIENT】ユーザー(Key:%d)をリストに追加しました！\n",
-								users->users[i].key);
-						}
 						pool_.remoteUsers_[users->users[i].key] = users->users[i];
 					}
 				}
@@ -283,6 +294,11 @@ void NetManager::UdpReceiveData(void)
 				if (his->key != GetMyKey())
 				{
 					remoteActionHis_[his->key] = *his;
+
+					if (mode_ == NET_MODE::HOST)
+					{
+						clientTimeoutTimers_[his->key] = 0.0f;
+					}
 				}
 
 				if (mode_ == NET_MODE::CLIENT && pool_.selfUser_.gameState 
@@ -319,4 +335,26 @@ void NetManager::UdpReceiveData(void)
 void NetManager::SetGameTime(float _time)
 {
 	gameTime_ = _time;
+}
+
+bool NetManager::GetIsConnectionLost(void) const
+{
+	std::lock_guard<std::mutex> lock(poolMutex_);
+
+	if (mode_ == NET_MODE::CLIENT)
+	{
+		return (hostTimeoutTimer_ > CONNECTION_TIMEOUT);
+	}
+	else if (mode_ == NET_MODE::HOST)
+	{
+		for (const auto& pair : clientTimeoutTimers_)
+		{
+			if (pair.second > CONNECTION_TIMEOUT)
+			{
+				return true;
+			}
+		}
+	}
+
+	return false;
 }
