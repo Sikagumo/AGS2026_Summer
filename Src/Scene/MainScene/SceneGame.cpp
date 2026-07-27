@@ -1,5 +1,5 @@
-#include "SceneGame.h"
 #define NOMINMAX
+#include "SceneGame.h"
 #include <algorithm>
 #include <math.h>
 #include "../../Manager/Generic/SceneManager.h"
@@ -16,11 +16,10 @@
 #include "../../Shader/ShaderController.h"
 #include "SceneTitle.h"
 #include "SceneResult.h"
-
-
-// ゲーム時間
-constexpr float GAME_TIME = 500.0f;
-constexpr float GAME_TIME_DEFEAT_DEC = 75.0f;
+#include "../../Net/NetStructures.h"
+#include "../../Manager/System/NetManager.h"
+#include "../../Manager/Generic/KeyConfInputManager.h"
+#include "../SubScene/ScenePause.h"
 
 SceneGame::SceneGame(std::vector<PlayerSelectType> _playerSelectType)
 	: players_()
@@ -33,7 +32,7 @@ SceneGame::SceneGame(std::vector<PlayerSelectType> _playerSelectType)
 	, targetHpBerImage_(-1)
 	, gameTimer_(nullptr)
 	, slowCount_(0)
-	, sousaImge_(-1)
+	, infoImage_(-1)
 {
 	for (int i = 0; i < _playerSelectType.size(); i++)
 	{
@@ -86,7 +85,7 @@ void SceneGame::Load(void)
 	targetHpBerImage_ = ResourceManager::GetInstance().LoadHandleIdsOnce(ResourceManager::SRC::IMGS_HP_TARGET, 0);
 	targetHpImage_ = ResourceManager::GetInstance().LoadHandleIdsOnce(ResourceManager::SRC::IMGS_HP_TARGET, 1);
 
-	sousaImge_ = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::IMG_SOUSA);
+	infoImage_ = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::IMG_SOUSA);
 
 	ResourceManager::GetInstance().LoadHandleIds(ResourceManager::SRC::IMGS_GAME_TEXT, uiGame_.data());
 
@@ -131,6 +130,34 @@ void SceneGame::Initialize(void)
 	// マウスを表示しない設定にする
 	SetMouseDispFlag(false);
 	
+	auto& camera = SceneManager::GetInstance().GetCamera();
+	camera->ChangeMode(Camera::MODE::PLAYER_FOLLOW);
+	camera->SetFollow(&players_.at(0)->GetTransform());
+
+	NET_JOIN_USER selfUser = NetManager::GetInstance().GetSelfUser();
+	auto remoteUsers = NetManager::GetInstance().GetNetUsers();
+	bool isBossLocalControl = (NetManager::GetInstance().GetMode() != NET_MODE::CLIENT);
+	boss_->SetHostControl(isBossLocalControl);
+
+	// 自分の設定
+	players_.at(0)->SetHostControl(true);
+	players_.at(0)->SetNetKey(selfUser.key);
+
+	// 他人の設定
+	int idx = 1;
+	for (const auto& pair : remoteUsers)
+	{
+		if (idx >= players_.size())
+		{
+			break;
+		}
+
+		// ラジコンにする
+		players_.at(idx)->SetHostControl(false); 
+		players_.at(idx)->SetNetKey(pair.second.key);
+		idx++;
+	}
+	
 	for (auto& player : players_)
 	{
 		player->Init();
@@ -173,6 +200,19 @@ void SceneGame::Initialize(void)
 
 void SceneGame::Update(void)
 {
+	if (KeyConfInputManager::GetInstance().isTrigerDown("PAUSE"))
+	{
+		SceneManager::GetInstance().PushScene(std::make_shared<ScenePause>());
+	}
+
+	if (NetManager::GetInstance().GetMode() != NET_MODE::NONE
+		&& NetManager::GetInstance().GetIsConnectionLost())
+	{
+		NetManager::GetInstance().Stop();
+		SceneManager::GetInstance().ChangeScene(std::make_shared<SceneTitle>());
+		return;
+	}
+
 	stateUpdate_();
 }
 
@@ -182,24 +222,40 @@ void SceneGame::DamageProcess(void)
 	{
 		enemyRobo->SetPlayerPos(players_.at(0)->GetBodyPos());
 	}
-
-	boss_->SetPlayer1Pos(players_[0]->GetBodyPos());
-	//boss_->SetPlayer2Pos(players_[1]->GetBodyPos());
-	//boss_->SetPlayer3Pos(players_[2]->GetBodyPos());
-	//boss_->SetPlayer4Pos(players_[3]->GetBodyPos());
+	const int playerCount = static_cast<int>(players_.size());
 	
-	boss_->SetBossDamage(damageController_->GetBossDamage());
+	if (playerCount >= 1)
+	{
+		boss_->SetPlayer1Pos(players_[0]->GetBodyPos());
+	}
+	
+	if (playerCount >= 2)
+	{
+		boss_->SetPlayer2Pos(players_[1]->GetBodyPos());
+	}
 
-	boss_->SetWeaponCannonLDamage(damageController_->GetWeaponCannonLDamage());
-	boss_->SetWeaponCannonRDamage(damageController_->GetWeaponCannonRDamage());
+	if (playerCount >= 3)
+	{
+		boss_->SetPlayer3Pos(players_[2]->GetBodyPos());
+	}
 
-	boss_->SetWeaponMGLDamage(damageController_->GetWeaponMGLDamage());
-	boss_->SetWeaponMGRDamage(damageController_->GetWeaponMGRDamage());
-
-	boss_->SetWeaponMPLDamage(damageController_->GetWeaponMPLDamage());
-	boss_->SetWeaponMPRDamage(damageController_->GetWeaponMPRDamage());
-
-	boss_->SetWeaponRGDamage(damageController_->GetWeaponRGDamage());
+	if (playerCount >= 4)
+	{
+		boss_->SetPlayer4Pos(players_[3]->GetBodyPos());
+	}
+	
+	if (NetManager::GetInstance().GetMode() != NET_MODE::CLIENT)
+	{
+		// ボスへのダメージ適用をホストのみに限定する
+		boss_->SetBossDamage(damageController_->GetBossDamage());
+		boss_->SetWeaponCannonLDamage(damageController_->GetWeaponCannonLDamage());
+		boss_->SetWeaponCannonRDamage(damageController_->GetWeaponCannonRDamage());
+		boss_->SetWeaponMGLDamage(damageController_->GetWeaponMGLDamage());
+		boss_->SetWeaponMGRDamage(damageController_->GetWeaponMGRDamage());
+		boss_->SetWeaponMPLDamage(damageController_->GetWeaponMPLDamage());
+		boss_->SetWeaponMPRDamage(damageController_->GetWeaponMPRDamage());
+		boss_->SetWeaponRGDamage(damageController_->GetWeaponRGDamage());
+	}
 
 
 	if (damageController_->GetBossDamage() > 0
@@ -214,24 +270,6 @@ void SceneGame::DamageProcess(void)
 		SoundManager::GetInstance().Play(SoundManager::SOUND::SE_HIT_BLAST);
 	}
 
-
-	// プレイヤーの攻撃
-	for (auto& player : players_)
-	{
-		// 弾
-		for (auto& bullet : player->GetBullets())
-		{
-			damageController_->SetPlayerAttack(bullet->GetPowerBullet(), bullet->GetPowerBlast());
-		}
-
-		// 拡散弾
-		for (auto& bullet : player->GetBulletsCluster())
-		{
-			if (bullet == nullptr) { continue; }
-			damageController_->SetPlayerAttack(bullet->GetPowerBullet(), bullet->GetPowerBlast());
-		}
-	}
-
 	// プレイヤー被ダメージ処理
 	for (auto& player : players_)
 	{
@@ -242,22 +280,28 @@ void SceneGame::DamageProcess(void)
 
 void SceneGame::UpdateGameTime(void)
 {
-	gameTimer_->Update();
-
-	for (auto& player : players_)
+	if (NetManager::GetInstance().GetMode() != NET_MODE::CLIENT)
 	{
-		// プレイヤー撃破時、制限時間を減少させる
-		if (!player->GetIsRespawn()) { continue; }
-		
-		gameTimer_->SetTime(gameTimer_->GetTime() - GAME_TIME_DEFEAT_DEC);
+		gameTimer_->Update();
+
+		for (auto& player : players_)
+		{
+			if (!player->GetIsRespawn()) { continue; }
+			gameTimer_->SetTime(gameTimer_->GetTime() - GAME_TIME_DEFEAT_DEC);
+		}
+
+		NetManager::GetInstance().SetGameTime(gameTimer_->GetTime());
+	}
+	else
+	{
+		gameTimer_->SetTime(NetManager::GetInstance().GetGameTime());
 	}
 
 	if (gameTimer_->GetTime() <= 0.0f)
 	{
 		ChangeState(GAME_STATE::GAME_END);
 	}
-	
-	// 雨シェーダ時間加算
+
 	rainyMaterial_.SetTime(TimeManager::GetInstance().GetGameTime());
 }
 
@@ -531,8 +575,36 @@ void SceneGame::UpdateGame(void)
 	damageController_->Update();
 	DamageProcess();
 
-	boss_->Update();
+	if (NetManager::GetInstance().GetMode() != NET_MODE::CLIENT)
+	{
+		boss_->Update();
+		NetManager::GetInstance().SetBossAction(boss_->GetNetworkAction());
+	}
+	else
+	{
+		boss_->SetNetworkAction(NetManager::GetInstance().GetBossAction());
+		boss_->Update();
+	}
+
 	stage_->Update();
+
+	auto remoteHisMap = NetManager::GetInstance().GetRemoteActionHis();
+
+	for (auto& player : players_)
+	{
+		if (player->GetHostControl()) { continue; }
+
+		int key = player->GetNetKey();
+
+		if (remoteHisMap.find(key) != remoteHisMap.end())
+		{
+			NET_ACTION latestAction = remoteHisMap[key].actions[0];
+
+			player->SetNetworkAction(latestAction.pos, latestAction.quaRot, latestAction.animId, latestAction.isAttack);
+		}
+	}
+
+
 	for (auto& enemyRobo : enemyRobos_)
 	{
 		enemyRobo->Update();
@@ -543,13 +615,37 @@ void SceneGame::UpdateGame(void)
 		player->SetSoundData(boss_->GetBossPos(), boss_->GetSoundRadius(), boss_->GetLandingFlag(), boss_->GetMGFireFlag(), boss_->GetRoadFlag());
 	}
 
+	// プレイヤーの攻撃
+	int attackPower = 0;
+	int attackBlast = 0;
+	for (auto& player : players_)
+	{
+		// 弾
+		for (auto& bullet : player->GetBullets())
+		{
+			attackPower = std::max(attackPower, bullet->GetPowerBullet());
+			attackBlast = std::max(attackBlast, bullet->GetPowerBlast());
+		}
+
+		// 拡散弾
+		for (auto& bullet : player->GetBulletsCluster())
+		{
+			if (bullet == nullptr) { continue; }
+			attackPower = std::max(attackPower, bullet->GetPowerBullet());
+			attackBlast = std::max(attackBlast, bullet->GetPowerBlast());
+		}
+	}
+	damageController_->SetPlayerAttack(attackPower, attackBlast);
+
 	UpdateGameTime();
 
 	EffectManager::GetInstance().Update();
 
 	// ボスHPが０の時、ゲームクリア
-	if (boss_->GetHP() <= 0 && gameTimer_->GetTime() > 0.0f)
+	const bool isBossHpValid = (boss_->GetHP() >= 0);
+	if (isBossHpValid && boss_->GetHP() <= 0 && gameTimer_->GetTime() > 0.0f)
 	{
+		//SoundManager::GetInstance().Stop(SoundManager::SOUND::BGM_GAME);
 		ChangeState(GAME_STATE::GAME_END);
 	}
 
@@ -562,9 +658,9 @@ void SceneGame::UpdateGameEnd(void)
 
 	if (boss_->GetHP() <= 0)
 	{
-		if (slowCount_ <= SROU_COUNT_MAX * 10)
+		if (slowCount_ <= SLOW_COUNT_MAX * 10)
 		{
-			if (slowCount_ % SROU_COUNT_MAX == 0)
+			if (slowCount_ % SLOW_COUNT_MAX == 0)
 			{
 				boss_->Update();
 
@@ -583,7 +679,7 @@ void SceneGame::UpdateGameEnd(void)
 	}
 
 
-	if (slowCount_ >= SROU_COUNT_MAX * 100)
+	if (slowCount_ >= SLOW_COUNT_MAX * 100)
 	{
 		if (boss_->GetHP() >= 0)
 		{
@@ -624,7 +720,7 @@ void SceneGame::DrawGame(void)
 
 	gameTimer_->Draw();
 
-	DrawRotaGraph((Application::SCREEN_SIZE_X - (770 / 6)), (587 / 6), 0.25, 0.0, sousaImge_, true);
+	DrawRotaGraph((Application::SCREEN_SIZE_X - (770 / 6)), (587 / 6), 0.25, 0.0, infoImage_, true);
 
 	DrawRotaGraph((Application::SCREEN_HALF_X - 300), 35, 0.5, 0.0, uiGame_.at(0), true);
 
@@ -645,7 +741,7 @@ void SceneGame::DrawGameEnd(void)
 	effect.Draw();
 
 	const int IMAGET_TITLE_Y = Application::SCREEN_SIZE_Y / 3;
-	if (slowCount_ >= SROU_COUNT_MAX * 30)
+	if (slowCount_ >= SLOW_COUNT_MAX * 30)
 	{
 		if (boss_->GetHP() >= 0)
 		{

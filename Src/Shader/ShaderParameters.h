@@ -22,13 +22,13 @@ struct alignas(16) IntegratedGpuBufferRain
     float resolutionX = 0.0f;
     float resolutionY = 0.0f;
     float time = 0.0f;
-    float dummy1;
+    float dummy1 = 0.0f;
 
     // ‰J‚Ì‹­‚³(0.0`1.0)
     float intensity = 0.0f;
     float intensityBack = 0.0f;
-    float dummy2;
-    float dummy3;
+    float dummy2 = 0.0f;;
+    float dummy3 = 0.0f;;
 
     COLOR_F rainColor = COLOR_F();
 };

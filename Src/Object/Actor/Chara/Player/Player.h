@@ -64,9 +64,23 @@ public:
 	
 	void SetSoundData(VECTOR _pos, float _radius, bool _isLanging, bool _isMGFire, bool _isRoad)override;
 
+	// 自分が操作するキャラクターかどうかを設定
+	void SetHostControl(bool _isLocal);
+
+	//自分が操作するキャラクターかどうかを取得する
+	bool GetHostControl(void) const { return isHostControl_; }
+
+	// ネットワークから受け取った情報を強制的にセットする（ラジコン用）
+	void SetNetworkAction(const VECTOR& _pos, const Quaternion& _rot, int _animId, bool _isAttack);
 	/// @brief リスポーンしたか否か
 	bool GetIsRespawn(void)const;
 
+
+	// キャラクターの通信keyを設定
+	void SetNetKey(int _key);
+
+	// キャラクターの通信keyを取得
+	int GetNetKey(void) const { return netKey_; }
 
 protected:
 
@@ -84,7 +98,6 @@ protected:
 	void DrawLate(void)override;
 
 	VECTOR CalcAddPosition(void) override;
-
 
 private:
 
@@ -136,6 +149,16 @@ private:
 
 	float shotTerm_;
 
+	// 自分が操作するかどうか
+	bool isHostControl_;
+
+	// 誰のキャラクターかを識別key
+	int netKey_;
+
+	// 攻撃したかどうか
+	bool isNetAttack_;
+
+	bool isAttackSend_;
 
 	// 操作
 	void ProcessMove(void);
@@ -181,4 +204,7 @@ private:
 
 	void ProcShotNormal(void);
 	void ProcShotSpecial(void);
+
+	// 自分の最新状態をパケット用に変換して NetManager に送る
+	void SendMyActionToNetManager(void);
 };

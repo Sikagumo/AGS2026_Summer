@@ -59,12 +59,13 @@ void Application::Init(void)
 	// FPS§Œä‰Šú‰»
 	fpsController_ = new FpsController(FRAME_RATE);
 
-	SetUseASyncLoadFlag(true);
-
 	// DxLib‚Ì‰Šú‰»
 	SetUseDirect3DVersion(DX_DIRECT3D_11);
 	isInitFail_ = false;
+	SetAlwaysRunFlag(true);
 	SetMultiThreadFlag(true);
+	SetDoubleStartValidFlag(true);
+
 	if (DxLib_Init() == -1)
 	{
 		isInitFail_ = true;
@@ -118,11 +119,7 @@ void Application::Run(void)
 	// ƒQ[ƒ€ƒ‹[ƒv
 	while (ProcessMessage() == 0)
 	{
-		if (sceneManager.IsSceneChanging() && CheckHitKey(KEY_INPUT_ESCAPE) != 0)
-		{
-
-		}
-		else if (KeyConfInputManager::GetInstance().isTrigerDown("CANCEL") != 0 || isGameEnd_)
+		if(isGameEnd_)
 		{
 			break;
 		}

@@ -15,6 +15,7 @@ public:
 	/// @brief 衝突の識別タグ
 	enum class TAG_2D
 	{
+		NONE,
 		SOLO_PLAY_BUTTON,
 		MULTI_PLAY_BUTTON,
 		OPTION_BUTTON,
@@ -23,10 +24,19 @@ public:
 		SELECT_SINGLE_BIG,
 		SELECT_SINGLE_RECOVERY,
 		SELECT_SINGLE_RAPIDFIRE,
+		SELECT_SKIN_HYMAN,
+		SELECT_SKIN_DOG,
+		SELECT_SKIN_MONKEY,
+		SELECT_SKIN_BIRD,
 		MOUSE_CURSOR,
 		PEACH,
 		WAVE,
-		ONI_GASHIMA
+		ONI_GASHIMA,
+		UI_MAIN_WEAPON,  // メイン画面：武器選択
+		UI_MAIN_SKIN,    // メイン画面：スキン選択
+		UI_MAIN_READY,   // メイン画面：任務開始（準備完了）
+		UI_WINDOW_WEAPON,// ミニウィンドウ：武器項目
+		UI_WINDOW_SKIN   // ミニウィンドウ：スキン項目
 	};
 
 	/// @brief コンストラクタ

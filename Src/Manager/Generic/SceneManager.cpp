@@ -7,12 +7,14 @@
 #include "../../Object/Collision/CollisionController.h"
 #include "../../Shader/ShaderController.h"
 #include "../System/TimeManager.h"
+#include "../System/NetManager.h"
 #include "../../Camera/Camera.h"
 #include "../../Common/Loading.h"
 #include "../../Common/Fader.h"
 #include "../../Application.h"
 #include "KeyConfInputManager.h"
 #include "../../ImGUI/GuiController.h"
+#include "../../Scene/MainScene/SceneLobby.h"
 
 SceneManager* SceneManager::instance_ = nullptr;
 
@@ -60,6 +62,7 @@ void SceneManager::Initialize(void)
 {
     SetMouseDispFlag(true);
 
+    NetManager::CreateInstance();
     SoundManager::CreateInstance();
     SoundManager::GetInstance().Initialize();
     TimeManager::CreateInstance();
@@ -140,10 +143,10 @@ void SceneManager::ChangeScene(std::shared_ptr<SceneBase> scene)
     nextScene_ = scene;
     isSceneChanging_ = true;
 
-    fader_->SetFade(Fader::STATE::FADE_IN);
+    // 【重要】まずはフェードアウト（暗転）を開始する
+    fader_->SetFade(Fader::STATE::FADE_OUT);
 
-
-    // 非同期ロード開始（ロード画面付き）
+    // 非同期ロード開始（ロード処理自体は裏で進めておく）
     Loading::GetInstance()->StartAsyncLoad([scene]()
         {
             scene->Load();
@@ -193,38 +196,42 @@ void SceneManager::Update(void)
 {
     if (isFirstFrame_)
     {
-        isFirstFrame_ = false; 
+        isFirstFrame_ = false;
 
         if (camera_)
         {
             // 3D描画設定を初期化する
             Init3D();
-
             camera_->Init();
         }
 
-        //ChangeScene(std::make_shared<SceneTitle>());
-        auto jobs = { SceneGame::PlayerSelectType(PlayerBase::JOB_TYPE::RAPID_FIRE, PlayerBase::SKIN_TYPE::DOG)};
-        ChangeScene(std::make_shared<SceneGame>(jobs));
-
-        return;
+        fader_->LoadFadeImage();
+        ChangeScene(std::make_shared<SceneTitle>());
     }
 
     TimeManager::GetInstance().Update();
+    NetManager::GetInstance().Update();
 
-    if (Application::GetInstance().GetGameEnd()) { return; }
+    if (Application::GetInstance().GetGameEnd())
+    {
+        return;
+    }
 
-    const float LoadCompleteThreshold = 100.0f;
+    constexpr float LoadCompleteThreshold = 100.0f;
 
     // ロード中の処理を完全に分離する
     if (isSceneChanging_)
     {
         fader_->Update();
+
         auto loader = Loading::GetInstance();
         loader->Update();
 
-        // Update内の入れ替え処理部分
-        if (loader->GetProgress() >= LoadCompleteThreshold && !loader->IsLoading())
+        // ロードが完了しており、かつフェードアウトが完了しているか
+        const bool isLoadFinished = (loader->GetProgress() >= LoadCompleteThreshold && !loader->IsLoading());
+        const bool isFadeOutFinished = (fader_->GetState() == Fader::STATE::FADE_OUT && fader_->IsEnd());
+
+        if (isLoadFinished && isFadeOutFinished && nextScene_ != nullptr)
         {
             // 新しいシーンを確実に登録
             nextScene_->EndLoad();
@@ -233,13 +240,26 @@ void SceneManager::Update(void)
 
             for (auto& scene : scenes_)
             {
-                if (scene != nextScene_) { oldScene_ = scene; }
+                if (scene != nextScene_)
+                {
+                    oldScene_ = scene;
+                }
             }
             scenes_.remove_if([this](const auto& s) { return s != nextScene_; });
 
             nextScene_ = nullptr;
+
+            // シーン切り替えが終わったら、今度は画面を明るくする（フェードイン）を開始
+            fader_->SetFade(Fader::STATE::FADE_IN);
+        }
+
+        // フェードインが完了したら、シーン切り替え状態を終了する
+        if (nextScene_ == nullptr && fader_->GetState() == Fader::STATE::FADE_IN && fader_->IsEnd())
+        {
+            fader_->SetFade(Fader::STATE::NONE);
             isSceneChanging_ = false;
         }
+
         return;
     }
 
@@ -250,14 +270,17 @@ void SceneManager::Update(void)
         oldScene_ = nullptr;
     }
 
-    if (scenes_.empty()) { return; }
+    if (scenes_.empty())
+    {
+        return;
+    }
 
     auto current = scenes_.back();
     if (current)
     {
         current->Update();
     }
-    
+
     CollisionController::GetInstance().Update();
 
     if (camera_)
@@ -272,10 +295,16 @@ void SceneManager::Draw(void)
 
     if (!scenes_.empty())
     {
-        if (camera_) camera_->SetBeforeDraw();
+        if (camera_)
+        {
+            camera_->SetBeforeDraw();
+        }
         for (auto& scene : scenes_)
         {
-            if (scene) { scene->Draw(); }
+            if (scene)
+            {
+                scene->Draw();
+            }
         }
     }
 
@@ -292,16 +321,23 @@ void SceneManager::Draw(void)
     }
 #endif 
 
+    // フェードを先に描画する
+    fader_->Draw();
 
-    // ロード中ならその上にロード画面を重ねる
+    // フェードアウトが完全に終わって「画面が真っ黒」になってからロード画面を上に重ねる
     auto loader = Loading::GetInstance();
 
     if (isSceneChanging_)
     {
-        if (loader) loader->Draw();
+        // 状態がFADE_OUTであり、かつIsEnd()がtrueの時のみロード画面を描画する
+        if (fader_->GetState() == Fader::STATE::FADE_OUT && fader_->IsEnd())
+        {
+            if (loader)
+            {
+                loader->Draw();
+            }
+        }
     }
-
-    fader_->Draw();
 }
 
 void SceneManager::Release(void)
@@ -327,8 +363,9 @@ void SceneManager::Release(void)
     ShaderController::GetInstance().DestroyInstance();
     TimeManager::GetInstance().DestroyInstance();
     Loading::GetInstance()->DestroyInstance();
-    CollisionController::DestroyInstance();
+    CollisionController::GetInstance().DestroyInstance();
     GuiController::DestroyInstance();
+    NetManager::GetInstance().DestroyInstance();
 }
 
 const std::unique_ptr<Camera>& SceneManager::GetCamera(void) const

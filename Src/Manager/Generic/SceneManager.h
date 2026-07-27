@@ -75,6 +75,9 @@ private:
     // フェード
     std::unique_ptr<Fader> fader_;
 
+    // 初回フェード用の画像ハンドル
+    int firstFadeImageHandle_;     
+
     /// @brief 3D描画に関する初期設定
     void Init3D(void);
 

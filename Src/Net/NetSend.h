@@ -1,19 +1,18 @@
 #pragma once
-
 #include "NetStructures.h"
-
-class NetManager;
 
 class NetSend
 {
 public:
-	NetSend(NetManager& netManager, int& sendSocketId);
+
+	NetSend(int _sendSocketId);
 
 	~NetSend(void) = default;
 
-	void Send(NET_DATA_TYPE type);
+	void Send(NET_DATA_TYPE _type);
 
 private:
+	int sendSocketId_;
 
 	void SendUser(void);
 
@@ -25,14 +24,11 @@ private:
 
 	void SendAction(void);
 
-	NET_BASIC_DATA MakeBasicData(NET_DATA_TYPE type, std::uint32_t crc);
+	void SendGoGameScene(void);
 
-	void SendUDP_Host(const void* bufptr, int size);
+	NET_BASIC_DATA MakeBasicData(NET_DATA_TYPE _type, std::uint32_t _crc);
 
-	void SendUDP_Client(const void* bufptr, int size);
+	void SendUDP_Host(const void* _bufferPointer, int _dataSize);
 
-	NetManager& netManager_;
-
-	int& sendSocketId_;
+	void SendUDP_Client(const void* _bufferPointer, int _dataSize);
 };
-

@@ -78,6 +78,28 @@ void ResourceManager::Initialize(void)
 
 	// 鬼ヶ島のノーマルマップ
 	_SetResource(LOAD_TYPE::IMAGE, SRC::IMG_NOMALMAP_ONIGASIMA, PATH_IMAGE + "OnigaSima_n.png");
+
+	// 選択シーンの背景
+	_SetResource(LOAD_TYPE::IMAGE, SRC::IMG_BUCGROUND_SELCET, PATH_IMAGE + "JunbiSitu.png");
+
+	// マルチシーンの背景
+	_SetResource(LOAD_TYPE::IMAGE, SRC::IMG_BUCGROUND_MALUTI, PATH_IMAGE + "MarlutiHeya.png");
+
+	// セレクトUIの背景
+	_SetResource(LOAD_TYPE::IMAGE, SRC::IMG_SELECT_UI_BACK, PATH_IMAGE + "selcetUIBack.png");
+
+	// セレクト中UIの背景
+	_SetResource(LOAD_TYPE::IMAGE, SRC::IMG_SELECTED_UI_BACK, PATH_IMAGE + "selcetedUIBack.png");
+
+	// マルチ選択UI背景
+	_SetResource(LOAD_TYPE::IMAGE, SRC::IMG_SELECT_MULTI_BACK, PATH_IMAGE + "waku.png");
+
+	// マルチ選択中UI背景
+	_SetResource(LOAD_TYPE::IMAGE, SRC::IMG_SELECTED_MULTI_BACK, PATH_IMAGE + "wakuPick.png");
+
+	// チームロゴ
+	_SetResource(LOAD_TYPE::IMAGE, SRC::IMG_AICON, PATH_IMAGE + "Logo.png");
+
 	//〇影
 	_SetResource(LOAD_TYPE::IMAGE, SRC::IMG_SHADOW, PATH_IMAGE + "Shadow.png");
 	//落下ポイント
@@ -132,8 +154,8 @@ void ResourceManager::Initialize(void)
 				, imagesAllNum, imagesNumX, imagesNumY);
 
 	// 選択文字
-	imagesAllNum = 9;
-	imagesNumX = 1;
+	imagesAllNum = 18;
+	imagesNumX = 2;
 	imagesNumY = 9;
 	_SetResource(LOAD_TYPE::IMAGES, SRC::IMGS_SELECT, PATH_IMAGE + "SelectImages.png"
 				, imagesAllNum, imagesNumX, imagesNumY);
@@ -150,6 +172,24 @@ void ResourceManager::Initialize(void)
 	imagesNumY = 4;
 	_SetResource(LOAD_TYPE::IMAGES, SRC::IMGS_RESULT, PATH_IMAGE + "EndText.png"
 				, imagesAllNum, imagesNumX, imagesNumY);
+
+	imagesAllNum = 4;
+	imagesNumX = 1;
+	imagesNumY = 4;
+	_SetResource(LOAD_TYPE::IMAGES, SRC::IMGS_LOBBY_UI_TEX, PATH_IMAGE + "sentakuTex.png"
+		, imagesAllNum, imagesNumX, imagesNumY);
+
+	imagesAllNum = 4;
+	imagesNumX = 1;
+	imagesNumY = 4;
+	_SetResource(LOAD_TYPE::IMAGES, SRC::IMGS_MULTI_TEX, PATH_IMAGE + "junbi.png"
+		, imagesAllNum, imagesNumX, imagesNumY);
+
+	imagesAllNum = 2;
+	imagesNumX = 1;
+	imagesNumY = 2;
+	_SetResource(LOAD_TYPE::IMAGES, SRC::IMGS_CONECT_TEX, PATH_IMAGE + "butai.png"
+		, imagesAllNum, imagesNumX, imagesNumY);
 
 	/* エフェクト */
 	_SetResource(LOAD_TYPE::EFFECT, SRC::EFFECT_WAVE, PATH_EFFECT + "BossAttack/AttackWave.efkefc");
@@ -172,12 +212,13 @@ void ResourceManager::Initialize(void)
 	_SetResource(LOAD_TYPE::MODEL, SRC::MODEL_PLAYER_BIRD,	PATH_MODEL + "Player/Chara/Bird/PlayerBird.mv1");
 	_SetResource(LOAD_TYPE::MODEL, SRC::MODEL_PLAYER_MONKEY,PATH_MODEL + "Player/Chara/Monkey/PlayerMonkey.mv1");
 
+	// ステージモデル
 	_SetResource(LOAD_TYPE::MODEL, SRC::MODEL_STAGE, PATH_MODEL + "Stage/Stage.mv1");
 	_SetResource(LOAD_TYPE::MODEL, SRC::MODEL_STAGE_COLLISION, PATH_MODEL + "Stage/StageCollision.mv1");
 	_SetResource(LOAD_TYPE::MODEL, SRC::MODEL_TREE, PATH_MODEL + "Stage/Tree.mv1");
 	_SetResource(LOAD_TYPE::MODEL, SRC::MODEL_TREE_POSITION, PATH_MODEL + "Stage/TreePosition.mv1");
 
-	//ボスの武器本体系
+	// ボスの武器本体系
 	_SetResource(LOAD_TYPE::MODEL, SRC::MODEL_BOSS_FEET, PATH_MODEL + "Boss/oni_feet.mv1");
 	_SetResource(LOAD_TYPE::MODEL, SRC::MODEL_BOSS_CAR, PATH_MODEL + "Boss/oni_feet_car.mv1");
 	_SetResource(LOAD_TYPE::MODEL, SRC::MODEL_BOSS_WHEEL_FRONT, PATH_MODEL + "Boss/oni_wheel_hedo.mv1");
@@ -189,11 +230,11 @@ void ResourceManager::Initialize(void)
 	_SetResource(LOAD_TYPE::MODEL, SRC::MODEL_BOSS_WEAPON_RK, PATH_MODEL + "Boss/oni_RK.mv1");
 	_SetResource(LOAD_TYPE::MODEL, SRC::MODEL_BOSS_WEAPON_RG, PATH_MODEL + "Boss/oni_RG.mv1");
 
-	//ボスの弾系
+	// ボスの弾系
 	_SetResource(LOAD_TYPE::MODEL, SRC::MODEL_BOSS_BULLET, PATH_MODEL + "Boss/BBullet.mv1");
 	_SetResource(LOAD_TYPE::MODEL, SRC::MODEL_BOSS_MISSILE, PATH_MODEL + "Boss/missile.mv1");
 
-	//雑魚敵
+	// 雑魚敵
 	_SetResource(LOAD_TYPE::MODEL, SRC::MODEL_ENEMY_ROBO, PATH_MODEL + "Enemy/ninOni.mv1");
 
 	/* アニメーション */
@@ -220,6 +261,7 @@ void ResourceManager::Initialize(void)
 	_SetResource(LOAD_TYPE::SOUND, SRC::SE_BOSS_MG_FIRE, PATH_SE + "MGFire.mp3");
 	_SetResource(LOAD_TYPE::SOUND, SRC::SE_BOSS_LANDING, PATH_SE + "BossLanding.mp3");
 	_SetResource(LOAD_TYPE::SOUND, SRC::SE_BOSS_ROAD, PATH_SE + "Road.mp3");
+	_SetResource(LOAD_TYPE::SOUND, SRC::SE_LOBBY_SELCET, PATH_SE + "LobbySelect.mp3");
 	
 
 }

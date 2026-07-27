@@ -2,9 +2,10 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <FxCompile Include="srcGraphics\Pixel\NormalMap.hlsl" />
+    <FxCompile Include="srcGraphics\Pixel\Rainy.hlsl" />
   </ItemGroup>
   <ItemGroup>
-  	<ClCompile Include="Src\main.cpp" />
+    <ClCompile Include="Src\main.cpp" />
     <ClCompile Include="Src\Manager\Decoration\EffectManager.cpp" />
     <ClCompile Include="Src\Manager\Decoration\SoundManager.cpp" />
     <ClCompile Include="Src\Manager\Generic\KeyConfInputManager.cpp" />
@@ -81,7 +82,6 @@
     <ClCompile Include="Src\Object\Actor\Chara\Weapon\Bullet\Boss\BBulletLaser.cpp" />
     <ClCompile Include="Src\Object\Actor\Chara\Weapon\Bullet\Player\PBulletPoison.cpp" />
     <ClCompile Include="Src\Object\Actor\Chara\Weapon\Bullet\Player\PBulletNormal.cpp" />
-    <ClCompile Include="Src\Object\Actor\Chara\Enemy\EnemyBase.cpp" />
     <ClCompile Include="Src\Object\Actor\Chara\Enemy\EnemyRobo.cpp" />
     <ClCompile Include="Src\Shader\ShaderPixel\ShaderPixel.cpp" />
     <ClCompile Include="Src\Shader\ShaderController.cpp" />
@@ -100,6 +100,7 @@
     <ClCompile Include="Lib\ImGUI\imgui_tables.cpp" />
     <ClCompile Include="Lib\ImGUI\imgui_widgets.cpp" />
     <ClCompile Include="Src\Common\GameTimer.cpp" />
+    <ClCompile Include="Src\Scene\SubScene\ScenePause.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\Shader\ShaderParameters.h" />
@@ -203,6 +204,8 @@
     <ClInclude Include="Src\ImGUI\GuiController.h" />
     <ClInclude Include="Src\Shader\ShaderMaterial.h" />
     <ClInclude Include="Src\Common\GameTimer.h" />
+    <ClInclude Include="Src\Manager\Decoration\EffectManager.h" />
+    <ClInclude Include="Src\Scene\SubScene\ScenePause.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="srcGraphics\Common\Pixel\PixelShader2DHeader.hlsli" />

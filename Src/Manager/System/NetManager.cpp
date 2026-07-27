@@ -2,15 +2,14 @@
 #include "../../Net/NetHost.h"
 #include "../../Net/NetClient.h"
 #include "../../Net/NetSend.h"
+#include "TimeManager.h" 
+#include <cstdlib>
 
 NetManager* NetManager::instance_ = nullptr;
 
 void NetManager::CreateInstance(void)
 {
-	if (!instance_)
-	{
-		instance_ = new NetManager();
-	}
+	if (!instance_) instance_ = new NetManager();
 }
 
 NetManager& NetManager::GetInstance(void)
@@ -23,7 +22,6 @@ void NetManager::DestroyInstance(void)
 	if (instance_)
 	{
 		delete instance_;
-
 		instance_ = nullptr;
 	}
 }
@@ -33,12 +31,21 @@ NetManager::NetManager(void)
 	, netSend_(nullptr)
 	, isRunning_(false)
 	, mode_(NET_MODE::NONE)
-	, frameNo_(0)
 	, recvSocketId_(-1)
 	, sendSocketId_(-1)
-	, hostIp_(127, 0, 0, 1)
+	, roomWordId_(-1)
+	, hostIp_(LOCALHOST_IP)
+	, hasReceivedGoGame_(false)
+	, gameTime_(500.0f)
+	, hostTimeoutTimer_(0.0f)
 {
-
+	selfActionHis_.key = -1;
+	for (int i = 0; i < NUM_FRAME; ++i) 
+	{
+		selfActionHis_.actions[i].key = -1;
+		selfActionHis_.actions[i].frameNo = 0;
+		selfActionHis_.actions[i].animId = 0;
+	}
 }
 
 NetManager::~NetManager(void)
@@ -46,117 +53,308 @@ NetManager::~NetManager(void)
 	Stop();
 }
 
-void NetManager::Run(NET_MODE mode)
+void NetManager::Run(NET_MODE _mode)
 {
-	if (isRunning_) return;
+	if (isRunning_) { return; }
 
-	mode_ = mode;
+	mode_ = _mode;
+	isRunning_ = true;
 
-	recvSocketId_ = MakeUDPSocket(65000);
+	pool_.selfUser_.key = (rand() + GetNowCount()) % 99999 + 1;
 
-	sendSocketId_ = MakeUDPSocket(0);
+	pool_.selfUser_.mode = mode_;
+	pool_.selfUser_.gameState = GAME_STATE::CONNECTING;
+	pool_.selfUser_.roomWordId = roomWordId_;
 
-	if (mode == NET_MODE::HOST)
+	GetMyIPAddress(&pool_.selfUser_.ip);
+
+	if (mode_ == NET_MODE::HOST)
 	{
+		pool_.selfUser_.port = HOST_PORT;
+		recvSocketId_ = MakeUDPSocket(HOST_PORT);
+		sendSocketId_ = recvSocketId_;
+
 		netBase_ = new NetHost(*this);
 	}
-	else
+	else if (mode_ == NET_MODE::CLIENT)
 	{
+		recvSocketId_ = MakeUDPSocket(-1);
+		sendSocketId_ = recvSocketId_;
+
 		netBase_ = new NetClient(*this);
 	}
 
-	netSend_ = new NetSend(*this, sendSocketId_);
-
-	isRunning_ = true;
-
-	recvThread_ = std::thread(&NetManager::RecvLoop, this);
+	netSend_ = new NetSend(sendSocketId_);
 }
 
 void NetManager::Stop(void)
 {
-	isRunning_ = false;
+	if (!isRunning_) { return; }
 
-	if (recvThread_.joinable())
+	if (recvSocketId_ != -1)
 	{
-		recvThread_.join();
+		DeleteUDPSocket(recvSocketId_);
+		recvSocketId_ = -1;
+		sendSocketId_ = -1;
 	}
 
-	delete netBase_;
-
+	delete netBase_; 
 	netBase_ = nullptr;
-
+	
 	delete netSend_;
-
 	netSend_ = nullptr;
+
+	isRunning_ = false;
+	mode_ = NET_MODE::NONE;
+	pool_.remoteUsers_.clear();
+
+	pool_.selfUser_ = NET_JOIN_USER();
+	pool_.bossAction = NET_BOSS_ACTION();
+	remoteActionHis_.clear();
+	hasReceivedGoGame_ = false;
+	gameTime_ = 500.0f;
 }
 
 void NetManager::Update(void)
 {
-	if (!netBase_)return;
+	if (!isRunning_) return;
 
-	frameNo_++;
+	UdpReceiveData();
 
-	GAME_STATE state = pool_.selfUser_.state;
+	const float delta = TimeManager::GetInstance().GetDeltaTime();
 
-	switch (state)
+	if (mode_ == NET_MODE::CLIENT)
 	{
-	case GAME_STATE::CONNECTING:
+		hostTimeoutTimer_ += delta;
+	}
+	else if (mode_ == NET_MODE::HOST)
+	{
+		std::lock_guard<std::mutex> lock(poolMutex_);
+		for (auto& pair : clientTimeoutTimers_)
+		{
+			pair.second += delta;
+		}
+	}
 
-		netBase_->UpdateConnecting();
 
-		break;
+	if (netBase_)
+	{
+		NET_JOIN_USER self = GetSelfUser();
+		switch (self.gameState)
+		{
+		case GAME_STATE::CONNECTING: 
+			netBase_->UpdateConnecting();
+			break;
 
-	case GAME_STATE::GOTO_GAME:
+		case GAME_STATE::GOTO_GAME:    
+			netBase_->UpdateGotoGame();   
+			break;
 
-		netBase_->UpdateGotoGame();
-
-		break;
-
-	case GAME_STATE::GAME_PLAYING:
-
-		netBase_->UpdateGamePlaying();
-
-		break;
-
+		case GAME_STATE::GAME_PLAYING: 
+			netBase_->UpdateGamePlaying();
+			break;
+		}
 	}
 }
 
-void NetManager::Send(NET_DATA_TYPE type)
+void NetManager::Send(NET_DATA_TYPE _type)
 {
-	if (netSend_)
-	{
-		netSend_->Send(type);
-	}
+	if (netSend_) netSend_->Send(_type);
 }
 
-void NetManager::SetSelfInfo(const NET_JOINT_USER& info)
+void NetManager::SetHostIp(IPDATA _ip)
 {
-	std::lock_guard<std::mutex> Lock(poolMutex_);
+	hostIp_ = _ip;
+}
 
+NET_JOIN_USER NetManager::GetSelfUser(void) const
+{
+	std::lock_guard<std::mutex> lock(poolMutex_);
+	return pool_.selfUser_;
+}
+
+std::map<int, NET_JOIN_USER> NetManager::GetNetUsers(void) const
+{
+	std::lock_guard<std::mutex> lock(poolMutex_);
+	return pool_.remoteUsers_;
+}
+
+void NetManager::SetSelfInfo(const NET_JOIN_USER& info)
+{
+	std::lock_guard<std::mutex> lock(poolMutex_);
 	pool_.selfUser_ = info;
 }
 
-void NetManager::RecvLoop(void)
+void NetManager::SetRoomWordId(int _id)
 {
-	char buffer[4096];
+	roomWordId_ = _id;
+}
 
-	IPDATA senderIp;
+void NetManager::AddSelfAction(const NET_ACTION& _action)
+{
+	std::lock_guard<std::mutex> lock(poolMutex_);
 
-	int senderPort;
-
-	while (isRunning_)
+	// 履歴を1つずつ後ろにずらす
+	for (int i = NUM_FRAME - 1; i > 0; --i)
 	{
-		if (CheckNetWorkRecvUDP(recvSocketId_) > 0)
-		{
-			int size = NetWorkRecvUDP(recvSocketId_, &senderIp, &senderPort, buffer, sizeof(buffer), FALSE);
+		selfActionHis_.actions[i] = selfActionHis_.actions[i - 1];
+	}
 
-			if (size >= sizeof(NET_BASIC_DATA))
+	// 先頭0に最新のアクションを入れる
+	selfActionHis_.actions[0] = _action;
+	selfActionHis_.key = GetMyKey();
+}
+
+NET_ACTION_HIS NetManager::GetSelfActionHis(void) const
+{
+	std::lock_guard<std::mutex> lock(poolMutex_);
+	return selfActionHis_;
+}
+
+std::map<int, NET_ACTION_HIS> NetManager::GetRemoteActionHis(void) const
+{
+	std::lock_guard<std::mutex> lock(poolMutex_);
+	return remoteActionHis_;
+}
+
+void NetManager::ResetGoGame(void)
+{
+	hasReceivedGoGame_ = false;
+}
+
+void NetManager::SetBossAction(const NET_BOSS_ACTION& action)
+{
+	pool_.bossAction = action;
+}
+
+void NetManager::UdpReceiveData(void)
+{
+
+	while (CheckNetWorkRecvUDP(recvSocketId_) == true)
+	{
+		IPDATA senderIp;
+		int senderPort;
+		char buffer[MAX_SEND_BYTES];
+		int recvSize = NetWorkRecvUDP(recvSocketId_, &senderIp, &senderPort, buffer,
+			sizeof(buffer), FALSE);
+
+		if (recvSize >= sizeof(NET_BASIC_DATA))
+		{
+			NET_BASIC_DATA* header = reinterpret_cast<NET_BASIC_DATA*>(buffer);
+
+			if (mode_ == NET_MODE::CLIENT)
 			{
-				// 送信元のIPを表示してみる
-				printfDx("受信! from %d.%d.%d.%d サイズ:%d\n",
-					senderIp.d1, senderIp.d2, senderIp.d3, senderIp.d4, size);
+				hostTimeoutTimer_ = 0.0f;
+			}
+
+			if (mode_ == NET_MODE::HOST && header->type == NET_DATA_TYPE::USER)
+			{
+				NET_JOIN_USER* user = reinterpret_cast<NET_JOIN_USER*>(buffer +
+					sizeof(NET_BASIC_DATA));
+
+				if (user->roomWordId != roomWordId_) { continue; }
+
+				{
+					std::lock_guard<std::mutex> lock(poolMutex_);
+
+					user->ip = senderIp;
+					user->port = senderPort;
+					pool_.remoteUsers_[user->key] = *user;
+				}
+
+				Send(NET_DATA_TYPE::USERS);
+			}
+			else if (mode_ == NET_MODE::CLIENT && header->type == NET_DATA_TYPE::USERS)
+			{
+				SetHostIp(senderIp);
+
+				NET_JOIN_USERS* users = reinterpret_cast<NET_JOIN_USERS*>(buffer +
+					sizeof(NET_BASIC_DATA));
+				std::lock_guard<std::mutex> lock(poolMutex_);
+
+				for (int i = 0; i < MAX_PLAYERS; ++i)
+				{
+					// modeがNONE以外なら、ホスト自身も含めてすべてリストに入れる
+					if (users->users[i].mode != NET_MODE::NONE)
+					{
+						// 自分の情報はスキップ
+						if (users->users[i].key == GetMyKey()) continue;
+
+						pool_.remoteUsers_[users->users[i].key] = users->users[i];
+					}
+				}
+			}
+			else if (header->type == NET_DATA_TYPE::ACTION_HIST_ALL)
+			{
+				NET_ACTION_HIS* his = reinterpret_cast<NET_ACTION_HIS*>(buffer
+					+ sizeof(NET_BASIC_DATA));
+				std::lock_guard<std::mutex> look(poolMutex_);
+
+				// 自分の送ったデータが跳ね返って来たものは無視し、他人のデータを保存する
+				if (his->key != GetMyKey())
+				{
+					remoteActionHis_[his->key] = *his;
+
+					if (mode_ == NET_MODE::HOST)
+					{
+						clientTimeoutTimers_[his->key] = 0.0f;
+					}
+				}
+
+				if (mode_ == NET_MODE::CLIENT && pool_.selfUser_.gameState 
+					!= GAME_STATE::GAME_PLAYING)
+				{
+					hasReceivedGoGame_ = true;
+				}
+			}
+			else if (header->type == NET_DATA_TYPE::GO_GAME_SCENE)
+			{
+				hasReceivedGoGame_ = true;
+			}
+			else if (header->type == NET_DATA_TYPE::BOSS_ACTOION)
+			{
+				NET_BOSS_ACTION* boss = reinterpret_cast<NET_BOSS_ACTION*>(buffer + sizeof(NET_BASIC_DATA));
+				std::lock_guard<std::mutex> lock(poolMutex_);
+
+				// クライアントは受信したボスの最新状態をローカルのプールに保存する
+				if (!IsHost())
+				{
+					pool_.bossAction = *boss;
+					gameTime_ = header->gameTime;
+
+					if (pool_.selfUser_.gameState != GAME_STATE::GAME_PLAYING)
+					{
+						hasReceivedGoGame_ = true;
+					}
+				}
 			}
 		}
-		std::this_thread::sleep_for(std::chrono::milliseconds(1));
 	}
+}
+
+void NetManager::SetGameTime(float _time)
+{
+	gameTime_ = _time;
+}
+
+bool NetManager::GetIsConnectionLost(void) const
+{
+	std::lock_guard<std::mutex> lock(poolMutex_);
+
+	if (mode_ == NET_MODE::CLIENT)
+	{
+		return (hostTimeoutTimer_ > CONNECTION_TIMEOUT);
+	}
+	else if (mode_ == NET_MODE::HOST)
+	{
+		for (const auto& pair : clientTimeoutTimers_)
+		{
+			if (pair.second > CONNECTION_TIMEOUT)
+			{
+				return true;
+			}
+		}
+	}
+
+	return false;
 }

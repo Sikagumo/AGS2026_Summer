@@ -21,19 +21,18 @@ public:
 
 	virtual void OnReceiveUser(void) {};
 
-	virtual void OnReceiveUsers(const std::vector<NET_JOINT_USER>& users) {};
+	virtual void OnReceiveUsers(const std::vector<NET_JOIN_USER>& users) {};
 
 	virtual void OnReceiveAction(const NET_ACTION_HIS& actionHis) {};
 
-	virtual void OnReceiveBossAction(const NET_BOSS_ACTION& bossAction) {};
+	virtual void OnReceiveBossAction(const NET_BOSS_ACTION& _action) {};
 
 protected:
 
 	NetManager& netManager_;
 
-	static constexpr float SEND_TIMERVAL_USER = 1.0f;
-
-	static constexpr float SEND_INTERVAL_ACTION = 0.1f / 60.0f;
+	static constexpr float SEND_TIMERVAL_USER = 2.0f;
+	static constexpr float SEND_INTERVAL_ACTION = 1.0f / 60.0f;
 
 	float timerUser_;
 
