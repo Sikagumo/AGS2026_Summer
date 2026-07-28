@@ -53,6 +53,7 @@ void NetSend::SendUser(void)
 {
 	// 【クライアント用】自分の情報をホストへ送る
 	NET_JOIN_USER self = NetManager::GetInstance().GetSelfUser();
+	uint32_t crc = CRC::Calculate(&self, sizeof(NET_JOIN_USER), CRC::CRC_32());
 	NET_BASIC_DATA basicData = MakeBasicData(NET_DATA_TYPE::USER, 0);
 
 	char buffer[MAX_SEND_BYTES];
@@ -89,6 +90,7 @@ void NetSend::SendUsers(void)
 		idx++;
 	}
 
+	uint32_t crc = CRC::Calculate(&usersData, sizeof(NET_JOIN_USERS), CRC::CRC_32());
 	NET_BASIC_DATA basicData = MakeBasicData(NET_DATA_TYPE::USERS, 0);
 
 	char buffer[MAX_SEND_BYTES];
@@ -107,6 +109,7 @@ void NetSend::SendActionHisAll(void)
 
 	myActionHis.key = NetManager::GetInstance().GetMyKey();
 
+	uint32_t crc = CRC::Calculate(&myActionHis, sizeof(NET_ACTION_HIS), CRC::CRC_32());
 	NET_BASIC_DATA basicData = MakeBasicData(NET_DATA_TYPE::ACTION_HIST_ALL, 0);
 	char buffer[MAX_SEND_BYTES];
 	
@@ -135,7 +138,7 @@ void NetSend::SendBossAction(void)
 
 	// ボスの最新状態を取得する
 	NET_BOSS_ACTION bossAction = NetManager::GetInstance().GetBossAction();
-
+	uint32_t crc = CRC::Calculate(&bossAction, sizeof(NET_BOSS_ACTION), CRC::CRC_32());
 	NET_BASIC_DATA basicData = MakeBasicData(NET_DATA_TYPE::BOSS_ACTOION, 0);
 
 	char buffer[MAX_SEND_BYTES];

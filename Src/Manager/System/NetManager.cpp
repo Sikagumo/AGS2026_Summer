@@ -2,6 +2,7 @@
 #include "../../Net/NetHost.h"
 #include "../../Net/NetClient.h"
 #include "../../Net/NetSend.h"
+#include "../../Common/CRC.h"
 #include <cstdlib>
 
 NetManager* NetManager::instance_ = nullptr;
@@ -35,7 +36,7 @@ NetManager::NetManager(void)
 	, roomWordId_(-1)
 	, hostIp_(LOCALHOST_IP)
 	, hasReceivedGoGame_(false)
-	, gameTime_(0.0f)
+	, gameTime_(500.0f)
 {
 	selfActionHis_.key = -1;
 	for (int i = 0; i < NUM_FRAME; ++i) 
@@ -222,6 +223,9 @@ void NetManager::UdpReceiveData(void)
 		if (recvSize >= sizeof(NET_BASIC_DATA))
 		{
 			NET_BASIC_DATA* header = reinterpret_cast<NET_BASIC_DATA*>(buffer);
+
+			const char* PAY_LOAD = buffer + sizeof(NET_BASIC_DATA);
+			const int PAY_LOAD_SIZE = recvSize - static_cast<int>(sizeof(NET_BASIC_DATA));
 
 			if (mode_ == NET_MODE::HOST && header->type == NET_DATA_TYPE::USER)
 			{

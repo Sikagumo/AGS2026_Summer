@@ -118,6 +118,10 @@ struct NET_BOSS_ACTION
 	int animId = 0;           // 再生中のアニメーションID
 	int bossHp = 2000;           // ボスの現在HP
 
+	int mpTargetId = 0;
+
+	int cannonTargetId = 0;
+
 	// 各ウェポンHP関連
 	int weaponMglHp = 1250;
 	int weaponMgrHp = 1250;
