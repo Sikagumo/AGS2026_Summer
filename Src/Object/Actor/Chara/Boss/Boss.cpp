@@ -52,6 +52,10 @@ Boss::Boss(void) :
 	mpPos_({0,0,0}),
 	CannonPos_({0,0,0}),
 	isHostControl_(false),
+	nextChangeMainTime_(INTERVAL_SEC),
+	nextChangeMpTime_(INTERVAL_SEC_MP),
+	nextChangeCannonTime_(INTERVAL_SEC_CANNON),
+	
 
 
 	CharaBase()
@@ -871,10 +875,11 @@ void Boss::LookPlayer(void)
 	if (isHostControl_)
 	{
 		int gameTime = TimeManager::GetInstance().GetGameTime();
-		if (static_cast<int>(gameTime) % 50 == 0)
+		if (static_cast<int>(gameTime) >= nextChangeMainTime_)
 		{
 
-			mainIdx_ = static_cast<int>(gameTime) % playerSize_;
+			mainIdx_ = std::rand() % playerSize_;
+			nextChangeMainTime_ = static_cast<int>(gameTime) + INTERVAL_SEC;
 		}
 	}
 	
@@ -900,39 +905,35 @@ void Boss::WeaponSet(void)
 	weaponMGL_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MGL_L)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MGL_L)].transform, ColliderBase::TAG::WEAPON_MG_L, mainPos_);
 	weaponMGR_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MGL_R)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MGL_R)].transform, ColliderBase::TAG::WEAPON_MG_R, mainPos_);
 
-<<<<<<< HEAD
-=======
 	int gameTime = TimeManager::GetInstance().GetGameTime();
 
 	if (isHostControl_)
 	{
-		if (static_cast<int>(gameTime) % playerSize_ == 0)
+		int gameTime = TimeManager::GetInstance().GetGameTime();
+		if (static_cast<int>(gameTime) >= nextChangeMpTime_)
 		{
 
-			mpIdx_ = static_cast<int>(gameTime) % playerSize_;
+			mpIdx_ = std::rand() % playerSize_;
+			nextChangeMpTime_ = static_cast<int>(gameTime) + INTERVAL_SEC_MP;
 		}
 	}
 	
 	mpPos_ = playerPos_[mpIdx_];
 
 
->>>>>>> origin/NetGame
 	weaponMPL_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MP_L)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MP_L)].transform, ColliderBase::TAG::WEAPON_MP_L, mpPos_);
 	weaponMPR_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MP_R)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MP_R)].transform, ColliderBase::TAG::WEAPON_MP_R, mainPos_);
 
 	weaponRG_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_RG)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_RG)].transform, ColliderBase::TAG::WEAPON_RG, mainPos_);
 
-<<<<<<< HEAD
-	int gameTime = TimeManager::GetInstance().GetGameTime();
-	if (static_cast<int>(gameTime) % 10 == 0)
-=======
-	if(isHostControl_)
->>>>>>> origin/NetGame
+	if (isHostControl_)
 	{
-		if (static_cast<int>(gameTime) % 10 == 0)
+		int gameTime = TimeManager::GetInstance().GetGameTime();
+		if (static_cast<int>(gameTime) >= nextChangeCannonTime_)
 		{
 
-			cannonIdx_ = static_cast<int>(gameTime) % playerSize_;
+			cannonIdx_ = std::rand() % playerSize_;
+			nextChangeCannonTime_ = static_cast<int>(gameTime) + INTERVAL_SEC_CANNON;
 		}
 	}
 	

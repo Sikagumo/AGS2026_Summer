@@ -168,6 +168,9 @@ private:
 	//çUåÇ
 	static constexpr float MAX_ATTACK_INTERVAL = 600;
 	static constexpr float DOUN_ATTACK_INTERVAL = 50;
+	static constexpr int INTERVAL_SEC = 20;
+	static constexpr int INTERVAL_SEC_MP = 4;
+	static constexpr int INTERVAL_SEC_CANNON = 10;
 	//âπ
 	static constexpr float SOUND_RADIUS = 2000.0f;
 
@@ -261,8 +264,13 @@ private:
 	//çUåÇëŒè€èÓïÒ
 	VECTOR mainPos_;
 	int mainIdx_;
+	int nextChangeMainTime_;
+	VECTOR mpPos_;
+	int mpIdx_;
+	int nextChangeMpTime_;
 	VECTOR CannonPos_;
 	int cannonIdx_;
+	int nextChangeCannonTime_;
 	VECTOR playerPos_[4];
 	int playerSize_;
 
