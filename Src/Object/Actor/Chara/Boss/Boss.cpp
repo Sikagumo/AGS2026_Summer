@@ -867,12 +867,17 @@ void Boss::LookPlayer(void)
 	{
 		return;
 	}
-	int gameTime = TimeManager::GetInstance().GetGameTime();
-	if (static_cast<int>(gameTime) % 50 == 0)
-	{
 
-		mainIdx_ = static_cast<int>(gameTime) % playerSize_;
+	if (isHostControl_)
+	{
+		int gameTime = TimeManager::GetInstance().GetGameTime();
+		if (static_cast<int>(gameTime) % 50 == 0)
+		{
+
+			mainIdx_ = static_cast<int>(gameTime) % playerSize_;
+		}
 	}
+	
 	mainPos_ = playerPos_[mainIdx_];
 	VECTOR moveDir = VSub(mainPos_, transformBody_.pos);
 	moveDir.y = 0.0f;
@@ -896,11 +901,16 @@ void Boss::WeaponSet(void)
 	weaponMGR_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MGL_R)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MGL_R)].transform, ColliderBase::TAG::WEAPON_MG_R, mainPos_);
 
 	int gameTime = TimeManager::GetInstance().GetGameTime();
-	if (static_cast<int>(gameTime) % playerSize_ == 0)
-	{
 
-		mpIdx_ = static_cast<int>(gameTime) % playerSize_;
+	if (isHostControl_)
+	{
+		if (static_cast<int>(gameTime) % playerSize_ == 0)
+		{
+
+			mpIdx_ = static_cast<int>(gameTime) % playerSize_;
+		}
 	}
+	
 	mpPos_ = playerPos_[mpIdx_];
 
 
@@ -909,12 +919,15 @@ void Boss::WeaponSet(void)
 
 	weaponRG_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_RG)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_RG)].transform, ColliderBase::TAG::WEAPON_RG, mainPos_);
 
-
-	if (static_cast<int>(gameTime) % 10 == 0)
+	if(isHostControl_)
 	{
+		if (static_cast<int>(gameTime) % 10 == 0)
+		{
 
-		cannonIdx_ = static_cast<int>(gameTime) % playerSize_;
+			cannonIdx_ = static_cast<int>(gameTime) % playerSize_;
+		}
 	}
+	
 	CannonPos_ = playerPos_[cannonIdx_];
 	weaponCannonL_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_CANNON_L)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_CANNON_L)].transform, ColliderBase::TAG::WEAPON_CANNON_L, CannonPos_);
 	weaponCannonR_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_CANNON_R)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_CANNON_R)].transform, ColliderBase::TAG::WEAPON_CANNON_R, CannonPos_);
@@ -981,6 +994,9 @@ NET_BOSS_ACTION Boss::GetNetworkAction(void) const
 	action.animId = static_cast<int>(state_);
 	action.targetPlayerId = mainIdx_;
 
+	action.mpTargetId = mpIdx_;
+	action.cannonTargetId = cannonIdx_;
+
 	action.weaponMglHp = weaponMGL_->GetHp();
 	action.weaponMgrHp = weaponMGR_->GetHp();
 	action.weaponMpLHp = weaponMPL_->GetHp();
@@ -1002,6 +1018,15 @@ void Boss::SetNetworkAction(const NET_BOSS_ACTION& _action)
 	if (diff > 5)
 	{
 		PlayEffect();
+	}
+
+	if (_action.mpTargetId >= 0 && _action.mpTargetId < playerSize_)
+	{
+		mpIdx_ = _action.mpTargetId;
+	}
+	if (_action.cannonTargetId >= 0 && _action.cannonTargetId < playerSize_)
+	{
+		cannonIdx_ = _action.cannonTargetId;
 	}
 
 	// クライアント側のウェポンHPをホストと同期する
@@ -1032,5 +1057,4 @@ void Boss::SetNetworkAction(const NET_BOSS_ACTION& _action)
 	{
 		transformBody_.pos = MV1GetFramePosition(transform_.modelId, JOINT_FEET_BODY);
 	}
-	transformBody_.quaRot = transform_.quaRot;
 }

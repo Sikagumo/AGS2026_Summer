@@ -222,26 +222,38 @@ void SceneGame::DamageProcess(void)
 	{
 		enemyRobo->SetPlayerPos(players_.at(0)->GetBodyPos());
 	}
-	const int playerCount = static_cast<int>(players_.size());
-	
+
+	std::vector<std::pair<int, VECTOR>> keyPosList;
+	for (auto& player : players_)
+	{
+		keyPosList.emplace_back(player->GetNetKey(), player->GetBodyPos());
+	}
+
+	std::sort(keyPosList.begin(), keyPosList.end(), [](const auto& a, const auto& b)
+		{
+			return a.first < b.first; 
+		});
+
+	const int playerCount = static_cast<int>(keyPosList.size());
+
 	if (playerCount >= 1)
 	{
-		boss_->SetPlayer1Pos(players_[0]->GetBodyPos());
+		boss_->SetPlayer1Pos(keyPosList[0].second);
 	}
-	
+
 	if (playerCount >= 2)
 	{
-		boss_->SetPlayer2Pos(players_[1]->GetBodyPos());
+		boss_->SetPlayer2Pos(keyPosList[1].second);
 	}
 
 	if (playerCount >= 3)
 	{
-		boss_->SetPlayer3Pos(players_[2]->GetBodyPos());
+		boss_->SetPlayer3Pos(keyPosList[2].second);
 	}
 
 	if (playerCount >= 4)
 	{
-		boss_->SetPlayer4Pos(players_[3]->GetBodyPos());
+		boss_->SetPlayer4Pos(keyPosList[3].second);
 	}
 	
 	if (NetManager::GetInstance().GetMode() != NET_MODE::CLIENT)
