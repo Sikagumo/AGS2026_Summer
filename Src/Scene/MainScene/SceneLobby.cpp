@@ -364,7 +364,7 @@ void SceneLobby::Draw(void)
     }
 
 #ifdef _DEBUG
-    CollisionController::GetInstance().DrawDebug2D();
+    //CollisionController::GetInstance().DrawDebug2D();
 #endif
 }
 

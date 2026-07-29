@@ -152,7 +152,11 @@ public:
 	/// @param _action 受信したネットワーク用ボスアクションデータ
 	void SetNetworkAction(const NET_BOSS_ACTION& _action);
 
-	
+	VECTOR GetMainTargetPos(void) { return mainPos_; }
+	void SetMainTargetPos(VECTOR _pos) { mainPos_ = _pos; }
+
+	/*VECTOR GetCannonTargetPos(void) { return CannonPos_; }
+	void SetCannonTargerPos(VECTOR _pos) { CannonPos_ = _pos; }*/
 
 private:
 	//bossの大きさ
@@ -164,6 +168,9 @@ private:
 	//攻撃
 	static constexpr float MAX_ATTACK_INTERVAL = 600;
 	static constexpr float DOUN_ATTACK_INTERVAL = 50;
+	static constexpr int INTERVAL_SEC = 20;
+	static constexpr int INTERVAL_SEC_MP = 4;
+	static constexpr int INTERVAL_SEC_CANNON = 10;
 	//音
 	static constexpr float SOUND_RADIUS = 2000.0f;
 
@@ -257,10 +264,13 @@ private:
 	//攻撃対象情報
 	VECTOR mainPos_;
 	int mainIdx_;
+	int nextChangeMainTime_;
 	VECTOR mpPos_;
 	int mpIdx_;
+	int nextChangeMpTime_;
 	VECTOR CannonPos_;
 	int cannonIdx_;
+	int nextChangeCannonTime_;
 	VECTOR playerPos_[4];
 	int playerSize_;
 
