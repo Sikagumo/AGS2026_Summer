@@ -465,7 +465,7 @@ void Boss::ChangeStateEnd(void)
 	stateUpdate_ = std::bind(&Boss::UpdateEnd, this);
 	animation_->Play(static_cast<int>(ANIM_TYPE::JUMPBEFORE), false);
 	EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_PLAYER_BLAST, transformBody_.pos, { 0,0,0 }, { 35,35,35 }, 1, this);
-
+	SoundManager::GetInstance().Play(SoundManager::SOUND::SE_HIT_BLAST);
 }
 //===========================================================================================================================================================================================================================================================
 
@@ -503,6 +503,13 @@ void Boss::UpdateProcess(void)
 
 	if (hp_ <= 0)
 	{
+		weaponCannonL_->SetHp(0);
+		weaponCannonR_->SetHp(0);
+		weaponMGL_->SetHp(0);
+		weaponMGR_->SetHp(0);
+		weaponMPL_->SetHp(0);
+		weaponMPR_->SetHp(0);
+		weaponRG_->SetHp(0);
 		if (state_ != STATE::END)
 		{
 			ChangeState(STATE::END);
