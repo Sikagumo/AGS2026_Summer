@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Src\Scene\SubScene\SceneOperation.cpp" />
     <ClCompile Include="Src\Scene\SubScene\ScenePause.cpp" />
     <ClCompile Include="Src\Object\Actor\Chara\Enemy\EnemyRobo.cpp" />
     <ClCompile Include="Src\Object\Actor\Chara\Weapon\Bullet\Boss\BBulletLaser.cpp" />
@@ -117,6 +118,7 @@
     <ClCompile Include="Src\Object\Actor\Chara\Weapon\BossWeapon\MG\WeaponMGR.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Src\Scene\SubScene\SceneOperation.h" />
     <ClInclude Include="Src\Scene\SubScene\ScenePause.h" />
     <ClInclude Include="Src\Manager\Decoration\EffectManager.h" />
     <ClInclude Include="Src\Object\Actor\Chara\Enemy\EnemyRobo.h" />
