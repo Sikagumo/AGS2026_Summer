@@ -39,8 +39,14 @@ public:
 	/// @param _x X座標
 	/// @param _y Y座標
 	/// @param _material 使用するマテリアル
-	void CreateShaderDrawRainy(int _x, int _y
-		, const ShaderMaterial& _material) const;
+	void CreateShaderDrawRainy(int _x, int _y, const ShaderMaterial& _material) const;
+
+	/// @brief 描画処理
+	/// @param _x X座標
+	/// @param _y Y座標
+	/// @param _textureHandle 画像ハンドル
+	/// @param _material 使用するマテリアル
+	void CreateShaderDrawTexScale(int _x, int _y, int _modelId, int _textureHandle, const ShaderMaterial& _material) const;
 
 	/// @brief 解放処理 
 	void Release(void);
@@ -55,6 +61,7 @@ private:
 
 	// シェーダの管理クラス
 	std::unique_ptr<ShaderLibrary> shaderLibrary_;
+
 
 	/// @brief コンストラクタ 
 	ShaderController(void);

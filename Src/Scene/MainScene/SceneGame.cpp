@@ -728,6 +728,9 @@ void SceneGame::DrawGame(void)
 	auto& effect = EffectManager::GetInstance();
 	effect.Draw();
 
+	ShaderController::GetInstance()
+		.CreateShaderDrawRainy(0, 0, rainyMaterial_);
+
 	DrawHpBerBoss();
 
 	gameTimer_->Draw();
@@ -751,6 +754,9 @@ void SceneGame::DrawGameEnd(void)
 	boss_->Draw();
 	auto& effect = EffectManager::GetInstance();
 	effect.Draw();
+
+	ShaderController::GetInstance()
+		.CreateShaderDrawRainy(0, 0, rainyMaterial_);
 
 	const int IMAGET_TITLE_Y = Application::SCREEN_SIZE_Y / 3;
 	if (slowCount_ >= SLOW_COUNT_MAX * 30)

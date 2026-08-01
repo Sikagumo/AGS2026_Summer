@@ -91,6 +91,24 @@ void ShaderController::CreateShaderDrawRainy(int _x, int _y, const ShaderMateria
 }
 
 
+void ShaderController::CreateShaderDrawTexScale(int _x, int _y, int _modelId, int _textureHandle, const ShaderMaterial& _material) const
+{
+    // 描画リクエストのベースを作る
+    DrawRequest req(_x, _y, _textureHandle, 1.0f, _modelId);
+
+    req.bufferTexScale.scaleX = _material.GetTexScaleX();
+    req.bufferTexScale.scaleY = _material.GetTexScaleY();
+
+    // 職人に渡す
+    ShaderBase* shaderPS = shaderLibrary_->GetShader(ShaderLibrary::SHADER_TYPE::TEX_SCALE_PS);
+    ShaderBase* shaderVS = shaderLibrary_->GetShader(ShaderLibrary::SHADER_TYPE::TEX_SCALE_VS);
+
+    if (shaderPS && shaderVS)
+    {
+        shaderRenderer_->TexScaleShaderDraw(shaderPS, shaderVS, req);
+    }
+}
+
 void ShaderController::Release(void)
 {
     shaderRenderer_->Release();
