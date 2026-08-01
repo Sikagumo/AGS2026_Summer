@@ -111,6 +111,7 @@ public:
 		BGM_TITLE_SEA,
 		BGM_TITLE_THUNDER,
 		BGM_GAME,
+		BGM_RESULT,
 
 		/* Œø‰Ê‰¹ */
 		SE_SELECT,
