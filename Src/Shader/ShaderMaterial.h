@@ -88,7 +88,12 @@ public:
 	float GetRainIntensity(void)const { return rainIntensity_; };
 	float GetRainIntensityBack(void)const { return rainIntensityBack_; };
 
-	COLOR_F GetRainColor(void)const { return rainColor; };
+	COLOR_F GetRainColor(void)const { return rainColor_; };
+
+
+	void SetTexScale(float _texScaleX, float _texScaleY);
+	float GetTexScaleX(void)const { return texScaleX_; }
+	float GetTexScaleY(void)const { return texScaleY_; }
 
 
 private:
@@ -109,6 +114,9 @@ private:
 	// âJÇÃã≠Ç≥ 0.0Å`1.0
 	float rainIntensity_;
 	float rainIntensityBack_;
-	COLOR_F rainColor;
+	COLOR_F rainColor_;
+
+	float texScaleX_;
+	float texScaleY_;
 };
 

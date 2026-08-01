@@ -347,7 +347,7 @@ void SceneTitle::Update(void)
             // 選択変更有効化
             isSelectMenu_ = true;
         }
-        else if (!SoundManager::GetInstance().IsPlaying(SoundManager::SOUND::SE_SELECT))
+        else
         {
             // 効果音終了時に決定処理を実行
             ProcessMenuState();

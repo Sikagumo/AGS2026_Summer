@@ -4,9 +4,12 @@
 #include "../../../Object/Collision/CollisionController.h"
 #include "../../../Utility/UtilityMath.h"
 #include "../../Collider/ColliderModel.h"
+#include "../../Collider/ColliderCapsule.h"
+#include "../../../Shader/ShaderController.h"
 
 
 Stage::Stage(void)
+	: viewStageTexHandle_(-1)
 {
 }
 
@@ -16,30 +19,35 @@ void Stage::Load(void)
 	viewTrans_.modelId = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::MODEL_STAGE);
 	skyDome_.modelId = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::MODEL_SKYDOME);
 
-	treePosHandle_ = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::MODEL_TREE_POSITION);
+	treePosModel_.modelId = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::MODEL_TREE_POSITION);
 
 	
-	int frameFront = MV1SearchFrame(treePosHandle_, POS_FRAME_NAME_FRONT.c_str());
-	int maxFront = MV1GetFrameChildNum(treePosHandle_, frameFront);
+	int frameFront = MV1SearchFrame(treePosModel_.modelId, POS_FRAME_NAME_FRONT.c_str());
+	int maxFront = MV1GetFrameChildNum(treePosModel_.modelId, frameFront);
 
 	for (int i = 0; i < maxFront; i++)
 	{
-		std::unique_ptr<Transform> tree = std::make_unique<Transform>();
-		tree->modelId = ResourceManager::GetInstance().LoadModelDuplicate(ResourceManager::SRC::MODEL_TREE);
+		Transform tree = Transform();
+		tree.modelId = ResourceManager::GetInstance().
+			LoadModelDuplicate(ResourceManager::SRC::MODEL_TREE);
 
-		treesFront_.emplace_back(std::move(tree));
+		treesFront_.emplace_back(tree);
 	}
 
 
-	int frameBack = MV1SearchFrame(treePosHandle_, POS_FRAME_NAME_BACK.c_str());
-	int maxBack = MV1GetFrameChildNum(treePosHandle_, frameBack);
+	int frameBack = MV1SearchFrame(treePosModel_.modelId, POS_FRAME_NAME_BACK.c_str());
+	int maxBack = MV1GetFrameChildNum(treePosModel_.modelId, frameBack);
 	for (int i = 0; i < maxBack; i++)
 	{
-		std::unique_ptr<Transform> tree = std::make_unique<Transform>();
-		tree->modelId = ResourceManager::GetInstance().LoadModelDuplicate(ResourceManager::SRC::MODEL_TREE);
+		Transform tree = Transform();
+		tree.modelId = ResourceManager::GetInstance().
+			LoadModelDuplicate(ResourceManager::SRC::MODEL_TREE);
 
-		treesBack_.emplace_back(std::move(tree));
+		treesBack_.emplace_back(tree);
 	}
+
+
+	viewStageTexHandle_ = MV1GetTextureGraphHandle(viewTrans_.modelId, 0);
 }
 
 void Stage::InitTransform(void)
@@ -63,28 +71,35 @@ void Stage::InitTransform(void)
 		Quaternion::Identity(), Quaternion::Identity());
 
 
-	constexpr float TREE_SCALE = 1.25f;
+	treePosModel_.InitTransform(SCALE,
+		Quaternion::Identity(), Quaternion::Identity(),
+		localPos);
 
-	int frameFront = MV1SearchFrame(treePosHandle_, POS_FRAME_NAME_FRONT.c_str());
-	int maxFront = MV1GetFrameChildNum(treePosHandle_, frameFront);
+
+	constexpr float TREE_SCALE = 1.25f;
+	constexpr float TREE_POS_Y = -25.0f;
+	int frameFront = MV1SearchFrame(treePosModel_.modelId, POS_FRAME_NAME_FRONT.c_str());
+	int maxFront = MV1GetFrameChildNum(treePosModel_.modelId, frameFront);
 	for (int i = 0; i < maxFront; i++)
 	{
 		float rot = static_cast<float>(360 - GetRand(360 * 2));
-		VECTOR pos = MV1GetFramePosition(treePosHandle_, (frameFront + (i + 1)));
+		VECTOR pos = MV1GetFramePosition(treePosModel_.modelId, (frameFront + (i + 1)));
+		pos.y = TREE_POS_Y;
 
-		treesFront_.at(i)->InitTransform(TREE_SCALE
+		treesFront_.at(i).InitTransform(TREE_SCALE
 			, Quaternion::Identity(), Quaternion::AngleAxis(UtilityMath::Deg2RadF(rot), UtilityMath::AXIS_Y)
 			, pos);
 	}
 
-	int frameBack = MV1SearchFrame(treePosHandle_, POS_FRAME_NAME_BACK.c_str());
-	int maxBack = MV1GetFrameChildNum(treePosHandle_, frameBack);
+	int frameBack = MV1SearchFrame(treePosModel_.modelId, POS_FRAME_NAME_BACK.c_str());
+	int maxBack = MV1GetFrameChildNum(treePosModel_.modelId, frameBack);
 	for (int i = 0; i < maxBack; i++)
 	{
 		float rot = static_cast<float>(360 - GetRand(360 * 2));
-		VECTOR pos = MV1GetFramePosition(treePosHandle_, (frameBack + (i + 1)));
+		VECTOR pos = MV1GetFramePosition(treePosModel_.modelId, (frameBack + (i + 1)));
+		pos.y = TREE_POS_Y;
 
-		treesBack_.at(i)->InitTransform(TREE_SCALE
+		treesBack_.at(i).InitTransform(TREE_SCALE
 			, Quaternion::Identity(), Quaternion::AngleAxis(UtilityMath::Deg2RadF(rot), UtilityMath::AXIS_Y)
 			, pos);
 	}
@@ -119,6 +134,17 @@ void Stage::InitCollider(void)
 	}
 
 	CollisionController::GetInstance().RegisterActor(this);
+
+	for (auto& tree : treesFront_)
+	{
+		// 壁のコライダ割り当て
+		VECTOR posEnd = UtilityMath::VECTOR_ZERO;
+		posEnd.y = 250.0f;
+		constexpr float TREE_RADIUS = 100.0f;
+
+		ColliderCapsule* treeCol = new ColliderCapsule(ColliderBase::TAG::WALL, &tree, UtilityMath::VECTOR_ZERO, posEnd, TREE_RADIUS);
+		ownColliders_[static_cast<int>(ColliderBase::TAG::WALL)].push_back(treeCol);
+	}
 }
 
 
@@ -128,6 +154,8 @@ void Stage::InitAnimation(void)
 
 void Stage::InitPost(void)
 {
+	float SCALE = 50.0f;
+	texScaleMaterial_.SetTexScale(SCALE, SCALE);
 }
 
 void Stage::Update(void)
@@ -139,23 +167,25 @@ void Stage::Draw(void)
 {
 	MV1DrawModel(skyDome_.modelId);
 
-	MV1DrawModel(viewTrans_.modelId);
+	ShaderController::GetInstance()
+		.CreateShaderDrawTexScale(0, 0, viewTrans_.modelId, viewStageTexHandle_, texScaleMaterial_);
+
 
 	for (auto& treeFront : treesFront_)
 	{
-		MV1DrawModel(treeFront->modelId);
+		MV1DrawModel(treeFront.modelId);
 	}
 
 	for (auto& treeBack : treesBack_)
 	{
-		MV1DrawModel(treeBack->modelId);
+		MV1DrawModel(treeBack.modelId);
 	}
 
 #ifdef _DEBUG
-	ActorBase::Draw();
+	//ActorBase::Draw();
 
 	// 以前の MV1DrawModel(collisionTrans_.modelId); はこれと被るので消すかコメントアウト
-	// // 自分が持っているすべてのコライダーを描画する
+	// 自分が持っているすべてのコライダーを描画する
 	for (const auto& [tagId, colliderList] : ownColliders_)
 	{
 		for (auto* collider : colliderList)

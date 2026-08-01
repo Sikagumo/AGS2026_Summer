@@ -5,7 +5,7 @@
 #include "../Application.h"
 
 ShaderRenderer::ShaderRenderer(void)
-	: constBufferHandle_(-1), constBufferHandleRain_(-1)
+	: constBufferHandle_(-1), constBufferHandleRain_(-1), constBufferHandleTexScale_(-1)
 {
 }
 
@@ -18,6 +18,7 @@ void ShaderRenderer::Initialize(void)
 {
 	constBufferHandle_ = CreateShaderConstantBuffer(sizeof(IntegratedGpuBuffer));
 	constBufferHandleRain_ = CreateShaderConstantBuffer(sizeof(IntegratedGpuBufferRain));
+	constBufferHandleTexScale_ = CreateShaderConstantBuffer(sizeof(IntegratedGpuBufferTexScale));
 }
 
 void ShaderRenderer::PixelShaderDraw(ShaderBase* _shader, const DrawRequest& _request) const
@@ -47,7 +48,7 @@ void ShaderRenderer::PixelShaderDraw(ShaderBase* _shader, const DrawRequest& _re
 	}
 
 	SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255);
-	SetShaderConstantBuffer(constBufferHandle_, DX_SHADERTYPE_PIXEL, 4);
+	SetShaderConstantBuffer(constBufferHandle_, DX_SHADERTYPE_PIXEL, CONSTANT_BUF_SLOT_PS);
 	SetUseTextureToShader(0, _request.textureHandle);
 
 	if (_request.normalMapHandle != -1)
@@ -95,7 +96,7 @@ void ShaderRenderer::RainyShaderDraw(ShaderBase* _shader, const DrawRequest& _re
 	}
 
 	SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255);
-	SetShaderConstantBuffer(constBufferHandleRain_, DX_SHADERTYPE_PIXEL, 4);
+	SetShaderConstantBuffer(constBufferHandleRain_, DX_SHADERTYPE_PIXEL, CONSTANT_BUF_SLOT_PS);
 
 	if (_request.textureHandle != -1)
 	{
@@ -122,6 +123,69 @@ void ShaderRenderer::RainyShaderDraw(ShaderBase* _shader, const DrawRequest& _re
 }
 
 
+void ShaderRenderer::TexScaleShaderDraw(ShaderBase* _shaderPS, ShaderBase* _shaderVS, const DrawRequest& _request) const
+{
+	if (!_shaderVS || !_shaderPS || constBufferHandleTexScale_ == -1 || _request.modelId == -1)
+	{
+		return;
+	}
+
+	// 定数バッファへUVスケール値を書き込む
+	void* gpuBuffer = GetBufferShaderConstantBuffer(constBufferHandleTexScale_);
+	if (gpuBuffer)
+	{
+		std::memcpy(gpuBuffer, &_request.bufferTexScale, sizeof(IntegratedGpuBufferTexScale));
+		UpdateShaderConstantBuffer(constBufferHandleTexScale_);
+	}
+
+	// オリジナルシェーダ設定(ON)
+	MV1SetUseOrigShader(true);
+
+	// 頂点シェーダー用の定数バッファを定数バッファレジスタ(b7)にセット
+	SetShaderConstantBuffer(constBufferHandleTexScale_, DX_SHADERTYPE_VERTEX, CONSTANT_BUF_SLOT_VS);
+
+	// 頂点シェーダ設定
+	_shaderVS->Apply();
+
+	// テクスチャの設定
+	if (_request.textureHandle != -1)
+	{
+		SetUseTextureToShader(0, _request.textureHandle);
+	}
+
+	// ピクセルシェーダ設定
+	_shaderPS->Apply();
+
+	// テクスチャアドレスタイプをWRAPに変更
+	SetTextureAddressModeUV(DX_TEXADDRESS_WRAP, DX_TEXADDRESS_WRAP);
+
+	// モデル描画
+	MV1DrawModel(_request.modelId);
+
+
+	// 後始末
+	//-----------------------------------------
+
+	// テクスチャ解除
+	SetUseTextureToShader(0, -1);
+
+	// テクスチャアドレスタイプを元に戻す
+	SetTextureAddressModeUV(DX_TEXADDRESS_CLAMP, DX_TEXADDRESS_CLAMP);
+
+	// ピクセルシェーダ解除
+	_shaderPS->UnApply();
+
+	// 頂点シェーダ解除
+	_shaderVS->UnApply();
+
+	// 頂点シェーダー用の定数バッファレジスタを解除
+	SetShaderConstantBuffer(-1, DX_SHADERTYPE_VERTEX, CONSTANT_BUF_SLOT_VS);
+
+	// オリジナルシェーダ設定(OFF)
+	MV1SetUseOrigShader(false);
+	//-----------------------------------------
+}
+
 void ShaderRenderer::Release(void)
 {
 	if (constBufferHandle_ != -1)
@@ -134,6 +198,12 @@ void ShaderRenderer::Release(void)
 	{
 		DeleteShaderConstantBuffer(constBufferHandleRain_);
 		constBufferHandleRain_ = - 1;
+	}
+
+	if (constBufferHandleTexScale_ != -1)
+	{
+		DeleteShaderConstantBuffer(constBufferHandleTexScale_);
+		constBufferHandleTexScale_ = - 1;
 	}
 }
 
