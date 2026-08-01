@@ -5,7 +5,7 @@
 #include "../../../../../../Manager/Decoration/EffectManager.h"
 
 constexpr float RADIUS_BULLET = 9.0f;
-constexpr float RADIUS_BLAST = 250.0f;
+constexpr float RADIUS_BLAST = 135.0f;
 constexpr float SCALE_BOMB = 1.0f;
 constexpr float TIME_ALIVE_BOMB = 10.0f;
 constexpr int POWER_BOMB = 50;

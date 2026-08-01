@@ -140,7 +140,7 @@ void Stage::InitCollider(void)
 		// •Ç‚ÌƒRƒ‰ƒCƒ_Š„‚è“–‚Ä
 		VECTOR posEnd = UtilityMath::VECTOR_ZERO;
 		posEnd.y = 250.0f;
-		constexpr float TREE_RADIUS = 100.0f;
+		constexpr float TREE_RADIUS = 27.5f;
 
 		ColliderCapsule* treeCol = new ColliderCapsule(ColliderBase::TAG::WALL, &tree, UtilityMath::VECTOR_ZERO, posEnd, TREE_RADIUS);
 		ownColliders_[static_cast<int>(ColliderBase::TAG::WALL)].push_back(treeCol);
