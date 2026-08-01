@@ -18,6 +18,7 @@
 #include "../../Shader/ShaderController.h"
 #include "../../ImGUI/GuiController.h"
 #include "../../Shader/ShaderLibrary.h"
+#include "../SubScene/SceneOperation.h"
 
 
 SceneTitle::SceneTitle(void)
@@ -342,7 +343,7 @@ void SceneTitle::Update(void)
         if (selectedIdx_ == static_cast<int>(MENU_ITEM::OPTION))
         {
             // 設定処理有効化
-            /* (設定有効化処理の追加) */
+            SceneManager::GetInstance().PushScene(std::make_shared<SceneOperation>());
 
             // 選択変更有効化
             isSelectMenu_ = true;
@@ -460,6 +461,10 @@ void SceneTitle::ProcessMenuState(void)
             SceneManager::GetInstance().ChangeScene(std::make_shared<SceneLobby>(true));
 
         break;
+
+        case MENU_ITEM::OPTION:
+            SceneManager::GetInstance().PushScene(std::make_shared<SceneOperation>());
+            break;
 
         case MENU_ITEM::EXIT:
 

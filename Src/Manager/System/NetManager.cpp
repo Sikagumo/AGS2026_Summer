@@ -113,6 +113,8 @@ void NetManager::Stop(void)
 	remoteActionHis_.clear();
 	hasReceivedGoGame_ = false;
 	gameTime_ = 500.0f;
+	hostTimeoutTimer_ = 0.0f;
+	clientTimeoutTimers_.clear();
 }
 
 void NetManager::Update(void)
@@ -351,9 +353,15 @@ bool NetManager::GetIsConnectionLost(void) const
 	}
 	else if (mode_ == NET_MODE::HOST)
 	{
-		for (const auto& pair : clientTimeoutTimers_)
+		// 現在ルームに登録されているユーザーのキーだけをチェックする
+		for (const auto& userPair : pool_.remoteUsers_)
 		{
-			if (pair.second > CONNECTION_TIMEOUT)
+			auto it = clientTimeoutTimers_.find(userPair.first);
+
+			// タイマーがまだ登録されていない場合はスキップ
+			if (it == clientTimeoutTimers_.end()) { continue; }
+
+			if (it->second > CONNECTION_TIMEOUT)
 			{
 				return true;
 			}

@@ -165,6 +165,7 @@ void SceneManager::PushScene(std::shared_ptr<SceneBase> scene)
 
 void SceneManager::PopScene(void)
 {
+
     if (scenes_.size() > 1)
     {
         scenes_.back()->Release();
@@ -214,6 +215,14 @@ void SceneManager::Update(void)
 
     TimeManager::GetInstance().Update();
     NetManager::GetInstance().Update();
+
+    if (NetManager::GetInstance().GetMode() != NET_MODE::NONE
+        && NetManager::GetInstance().GetIsConnectionLost())
+    {
+        NetManager::GetInstance().Stop();
+        ChangeScene(std::make_shared<SceneTitle>());
+        return;
+    }
 
     if (Application::GetInstance().GetGameEnd())
     {

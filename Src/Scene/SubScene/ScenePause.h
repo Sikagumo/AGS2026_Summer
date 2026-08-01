@@ -2,7 +2,10 @@
 #include <vector>
 #include <string>
 #include <memory>
+#include <array>
+
 #include "../SceneBase.h"
+#include "../../Application.h"
 
 class Collider2DCircle;
 class Collider2DBox;
@@ -42,17 +45,15 @@ protected:
 private:
 
 	// 定数関連
-	static constexpr int MARGIN_SIZE = 50;                     // 端からの余白
-	static constexpr int EXPAND_INTERVAL = 30;                 // 広がるまでにかかるフレーム数
-	static constexpr int MENU_TOP_OFFSET = MARGIN_SIZE + 100;  // メニュー上部の余白
-	static constexpr int MENU_LEFT_OFFSET = MARGIN_SIZE + 300; // メニュー左部の余白
-	static constexpr int MENU_ITEM_HEIGHT = 40;                // メニュー項目の縦幅
-	static constexpr float BUTTON_WIDTH = 300.0f;              // ボタンの当たり判定の横幅
-	static constexpr float BUTTON_HEIGHT = 35.0f;              // ボタンの当たり判定の縦幅
-	static constexpr float YES_NO_BUTTON_WIDTH = 80.0f;        // YES/NOボタンの当たり判定の横幅
-	static constexpr float YES_NO_BUTTON_HEIGHT = 40.0f;       // YES/NOボタンの当たり判定の縦幅
-	static constexpr int STICK_INTERVAL = 15;                  // スティックの連続入力の間隔
-	static constexpr float STICK_THRESHOLD = 0.5f;             // スティックの入力しきい値
+	static constexpr int EXPAND_INTERVAL = 30;                                        // 広がるまでにかかるフレーム数
+	static constexpr int MENU_TOP_OFFSET = Application::SCREEN_HALF_Y - 50;           // メニュー上部の余白
+	static constexpr int MENU_ITEM_HEIGHT = 100;                                      // メニュー項目の縦幅
+	static constexpr float BUTTON_WIDTH = 350.0f;                                     // ボタンの当たり判定の横幅
+	static constexpr float BUTTON_HEIGHT = 60.0f;                                     // ボタンの当たり判定の縦幅
+	static constexpr float YES_NO_BUTTON_WIDTH = 180.0f;                              // YES/NOボタンの当たり判定の横幅
+	static constexpr float YES_NO_BUTTON_HEIGHT = 35.0f;                              // YES/NOボタンの当たり判定の縦幅
+	static constexpr int STICK_INTERVAL = 15;                                         // スティックの連続入力の間隔
+	static constexpr float STICK_THRESHOLD = 0.5f;                                    // スティックの入力しきい値
 
 	enum class PHASE
 	{
@@ -69,6 +70,16 @@ private:
 		COUNT
 	};
 
+	// UI文字画像の識別列挙型 (画像の順番通り)
+	enum class PAUSE_TEXT_UI
+	{
+		RETURN_GAME,   // 1. ゲームに戻る
+		RETURN_TITLE,  // 2. タイトルに戻る
+		YES,           // 3. はい
+		NO,            // 4. いいえ
+		MAX
+	};
+
 	// 状態関連
 	PHASE currentPhase_;     // 現在のフェーズ
 	int frame_;              // 経過フレーム
@@ -77,11 +88,17 @@ private:
 
 	// 入力関連
 	int inputIntervalCounter_; // スティックの入力間隔カウンター
+	bool isPhaseChanged_;      // フェーズ変更直後の入力無効化フラグ
 
 	// メニュー関連
 	std::string yesNoTitle_;              // ダイアログのタイトル
 	std::vector<std::string> menuItems_;  // メニューの項目
 	std::vector<std::string> yesNoItems_; // YES/NOダイアログの項目
+
+	// 画像関連
+	std::array<int, static_cast<size_t>(PAUSE_TEXT_UI::MAX)> selectTextHandles_;    // 選択中文字画像配列
+	std::array<int, static_cast<size_t>(PAUSE_TEXT_UI::MAX)> noSelectTextHandles_;  // 非選択中文字画像配列 
+	int backGroundHandle_;                                                                  // 背景画像
 
 	// 当たり判定関連
 	std::unique_ptr<Collider2DCircle> cursorCollider_;             // マウスカーソル用
@@ -123,5 +140,11 @@ private:
 
 	/// @brief メニュー項目の描画処理
 	void DrawMenu(void);
+
+	/// @brief 文字画像のハンドルを取得する
+	/// @param textType 文字画像種別
+	/// @param isSelected 選択中かどうか
+	/// @return 画像ハンドル
+	int GetTextUIHandle(PAUSE_TEXT_UI textType, bool isSelected) const;
 
 };

@@ -97,6 +97,9 @@ void ResourceManager::Initialize(void)
 	// マルチ選択中UI背景
 	_SetResource(LOAD_TYPE::IMAGE, SRC::IMG_SELECTED_MULTI_BACK, PATH_IMAGE + "wakuPick.png");
 
+	// 操作説明
+	_SetResource(LOAD_TYPE::IMAGE, SRC::IMG_OPERATION, PATH_IMAGE + "Operation.png");
+
 	// チームロゴ
 	_SetResource(LOAD_TYPE::IMAGE, SRC::IMG_ICON, PATH_IMAGE + "Logo.png");
 
@@ -172,23 +175,40 @@ void ResourceManager::Initialize(void)
 	imagesNumY = 4;
 	_SetResource(LOAD_TYPE::IMAGES, SRC::IMGS_RESULT, PATH_IMAGE + "EndText.png"
 				, imagesAllNum, imagesNumX, imagesNumY);
-
+	
+	// ロビーシーンの文字
 	imagesAllNum = 4;
 	imagesNumX = 1;
 	imagesNumY = 4;
 	_SetResource(LOAD_TYPE::IMAGES, SRC::IMGS_LOBBY_UI_TEX, PATH_IMAGE + "sentakuTex.png"
 		, imagesAllNum, imagesNumX, imagesNumY);
 
+	// マルチ用の文字
 	imagesAllNum = 4;
 	imagesNumX = 1;
 	imagesNumY = 4;
 	_SetResource(LOAD_TYPE::IMAGES, SRC::IMGS_MULTI_TEX, PATH_IMAGE + "junbi.png"
 		, imagesAllNum, imagesNumX, imagesNumY);
 
+	// 接続用の文字
 	imagesAllNum = 2;
 	imagesNumX = 1;
 	imagesNumY = 2;
 	_SetResource(LOAD_TYPE::IMAGES, SRC::IMGS_CONECT_TEX, PATH_IMAGE + "butai.png"
+		, imagesAllNum, imagesNumX, imagesNumY);
+
+	// ポーズシーンの文字
+	imagesAllNum = 4;
+	imagesNumX = 1;
+	imagesNumY = 4;
+	_SetResource(LOAD_TYPE::IMAGES, SRC::IMGS_POUSE_TEX, PATH_IMAGE + "pouzuNomal.png"
+		, imagesAllNum, imagesNumX, imagesNumY);
+
+	// ポーズシーンの選択時の文字
+	imagesAllNum = 4;
+	imagesNumX = 1;
+	imagesNumY = 4;
+	_SetResource(LOAD_TYPE::IMAGES, SRC::IMGS_SELECT_PUSE_TEX, PATH_IMAGE + "pouzuRain.png"
 		, imagesAllNum, imagesNumX, imagesNumY);
 
 	/* エフェクト */

@@ -10,6 +10,7 @@
 #include "../../Camera/Camera.h"
 #include "./SceneGame.h"
 #include "../../Common/Loading.h"
+#include "../SubScene/ScenePause.h"
 
 SceneLobby::SceneLobby(bool _isMulti)
     : SceneBase::SceneBase()
@@ -437,6 +438,11 @@ void SceneLobby::UpdateSingle(void)
     Vector2F stick = keyConfInputManager.GetLeftStickRaw();
     constexpr float THRESHOLD = 0.5f;
     constexpr int STICK_INTERVAL = 15;
+
+    if (KeyConfInputManager::GetInstance().isTrigerDown("PAUSE"))
+    {
+        SceneManager::GetInstance().PushScene(std::make_shared<ScenePause>());
+    }
 
     // スティック用のインターバルタイマー更新
     if (inputIntervalCounter_ > 0)
