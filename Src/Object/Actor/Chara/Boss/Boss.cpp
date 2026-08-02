@@ -387,6 +387,7 @@ void Boss::ChangeStateIdle(void)
 	stateUpdate_ = std::bind(&Boss::UpdateIdle, this);
 	attackCount_ = 0;
 	animation_->Play(static_cast<int>(ANIM_TYPE::DIR));
+	weaponRG_->ChangeState(WeaponRG::STATE::IDLE);
 }
 
 void Boss::ChangeStateAttack(void)
