@@ -1016,7 +1016,7 @@ NET_BOSS_ACTION Boss::GetNetworkAction(void) const
 {
 	NET_BOSS_ACTION action;
 	action.pos = transform_.pos;
-	action.quaRot = transform_.quaRot;
+	action.quaRot = transformBody_.quaRot;
 	action.bossHp = hp_;
 	action.animId = static_cast<int>(state_);
 	action.targetPlayerId = mainIdx_;
@@ -1044,6 +1044,8 @@ void Boss::SetNetworkAction(const NET_BOSS_ACTION& _action)
 	const int diff = PREV_HP - hp_;
 
 	transform_.pos = _action.pos;
+
+	transformBody_.quaRot = _action.quaRot;
 
 	if (diff > 5)
 	{

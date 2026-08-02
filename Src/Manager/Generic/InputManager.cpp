@@ -478,9 +478,9 @@ Vector2F InputManager::GetMouseVelocityAndFixCenter(void)
 	if (abs(diffX) <= 1.0f) { diffX = 0.0f; }
 	if (abs(diffY) <= 1.0f) { diffY = 0.0f; }
 
-	//SetMousePoint(centerX, centerY);
+	SetMousePoint(centerX, centerY);
 
-	//mousePos_ = Vector2(centerX, centerY);
+	mousePos_ = Vector2(centerX, centerY);
 
 	return Vector2F(diffX, diffY);
 }
