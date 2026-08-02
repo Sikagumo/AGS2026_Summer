@@ -450,8 +450,7 @@ VECTOR InputManager::GetDirectionXZAKey(int aKeyX, int aKeyY) const
 		return UtilityMath::VECTOR_ZERO;
 	}
 
-	// デッドゾーン境界からに再スケーリング(可変デッドゾーン)
-	// ( しきい値 0.35 の場合は、 0.0 ～ 0.65 / 0.65 になる )
+	// デッドゾーン境界からに再スケーリング
 	float scale = (len - THRESHOLD) / (1.0f - THRESHOLD);
 	dirX = (dirX / len) * scale;
 	dirZ = (dirZ / len) * scale;
@@ -464,7 +463,7 @@ VECTOR InputManager::GetDirectionXZAKey(int aKeyX, int aKeyY) const
  
 Vector2F InputManager::GetMouseVelocityAndFixCenter(void)
 {
-	/* マウスを中央に固定・非表示にする */
+	// マウスを中央に固定・非表示にする 
 
 	int centerX = Application::SCREEN_HALF_X;
 	int centerY = Application::SCREEN_HALF_Y;
@@ -479,9 +478,9 @@ Vector2F InputManager::GetMouseVelocityAndFixCenter(void)
 	if (abs(diffX) <= 1.0f) { diffX = 0.0f; }
 	if (abs(diffY) <= 1.0f) { diffY = 0.0f; }
 
-	SetMousePoint(centerX, centerY);
+	//SetMousePoint(centerX, centerY);
 
-	mousePos_ = Vector2(centerX, centerY);
+	//mousePos_ = Vector2(centerX, centerY);
 
 	return Vector2F(diffX, diffY);
 }
