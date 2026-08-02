@@ -338,6 +338,17 @@ void Boss::InitPost(void)
 
 	WeaponInit();
 
+
+	hp_ = MAX_HP + ((MAX_HP * 0.5f) * playerSize_);
+	weaponCannonL_->SetHp(hp_ * 0.5f);
+	weaponCannonR_->SetHp(hp_ * 0.5f);
+	weaponMGL_->SetHp(hp_ * 0.8f);
+	weaponMGR_->SetHp(hp_ * 0.8f);
+	weaponMPL_->SetHp(hp_ * 0.7f);
+	weaponMPR_->SetHp(hp_ * 0.7f);
+	weaponRG_->SetHp(hp_);
+
+
 	
 	wave_->Init();
 
