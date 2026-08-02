@@ -78,7 +78,7 @@ void SceneManager::Initialize(void)
 void SceneManager::Init3D(void)
 {
     // 背景色
-    constexpr COLOR_F BACK_COLOR = { 125,125,125 };
+    constexpr COLOR_F BACK_COLOR = { 0,0,0 };
 
     // 環境光の強さ
     const float AmbientVal = 0.8f;
@@ -143,10 +143,10 @@ void SceneManager::ChangeScene(std::shared_ptr<SceneBase> scene)
     nextScene_ = scene;
     isSceneChanging_ = true;
 
-    // 【重要】まずはフェードアウト（暗転）を開始する
+    // フェードアウト(暗転)を開始
     fader_->SetFade(Fader::STATE::FADE_OUT);
 
-    // 非同期ロード開始（ロード処理自体は裏で進めておく）
+    // 非同期ロード開始
     Loading::GetInstance()->StartAsyncLoad([scene]()
         {
             scene->Load();
@@ -205,6 +205,9 @@ void SceneManager::Update(void)
             Init3D();
             camera_->Init();
         }
+
+        //auto jobs = { SceneGame::PlayerSelectType(PlayerBase::JOB_TYPE::BOMB, PlayerBase::SKIN_TYPE::DOG)};
+        //ChangeScene(std::make_shared<SceneGame>(jobs));
 
         fader_->LoadFadeImage();
         ChangeScene(std::make_shared<SceneTitle>());
@@ -284,7 +287,7 @@ void SceneManager::Update(void)
         return;
     }
 
-    auto current = scenes_.back();
+    auto& current = scenes_.back();
     if (current)
     {
         current->Update();

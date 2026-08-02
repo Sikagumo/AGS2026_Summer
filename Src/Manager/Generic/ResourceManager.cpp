@@ -15,7 +15,7 @@ const std::string PATH_DATA = "Data/";
 // 暗号化済みのリソースフォルダパス
 #else
 
-//const std::string PATH_DATA = "_ResourceData/";
+//const std::string PATH_DATA = "Data/ResourceData/";
 const std::string PATH_DATA = "Data/";
 #endif
 
@@ -80,10 +80,10 @@ void ResourceManager::Initialize(void)
 	_SetResource(LOAD_TYPE::IMAGE, SRC::IMG_NOMALMAP_ONIGASIMA, PATH_IMAGE + "OnigaSima_n.png");
 
 	// 選択シーンの背景
-	_SetResource(LOAD_TYPE::IMAGE, SRC::IMG_BUCGROUND_SELCET, PATH_IMAGE + "JunbiSitu.png");
+	_SetResource(LOAD_TYPE::IMAGE, SRC::IMG_BACKGROUND_SELCET, PATH_IMAGE + "JunbiSitu.png");
 
 	// マルチシーンの背景
-	_SetResource(LOAD_TYPE::IMAGE, SRC::IMG_BUCGROUND_MALUTI, PATH_IMAGE + "MarlutiHeya.png");
+	_SetResource(LOAD_TYPE::IMAGE, SRC::IMG_BACKGROUND_MALUTI, PATH_IMAGE + "MarlutiHeya.png");
 
 	// セレクトUIの背景
 	_SetResource(LOAD_TYPE::IMAGE, SRC::IMG_SELECT_UI_BACK, PATH_IMAGE + "selcetUIBack.png");
@@ -101,17 +101,17 @@ void ResourceManager::Initialize(void)
 	_SetResource(LOAD_TYPE::IMAGE, SRC::IMG_OPERATION, PATH_IMAGE + "Operation.png");
 
 	// チームロゴ
-	_SetResource(LOAD_TYPE::IMAGE, SRC::IMG_AICON, PATH_IMAGE + "Logo.png");
+	_SetResource(LOAD_TYPE::IMAGE, SRC::IMG_ICON, PATH_IMAGE + "Logo.png");
 
-	//〇影
+	// 丸影
 	_SetResource(LOAD_TYPE::IMAGE, SRC::IMG_SHADOW, PATH_IMAGE + "Shadow.png");
-	//落下ポイント
+	// 落下ポイント
 	_SetResource(LOAD_TYPE::IMAGE, SRC::IMG_FALLING_POINT , PATH_IMAGE + "FallingPoint.png");
-	//リザルト
+	// リザルト
 	_SetResource(LOAD_TYPE::IMAGE, SRC::IMG_RESULT_WIN, PATH_IMAGE + "ResultWinBook.png");
 	_SetResource(LOAD_TYPE::IMAGE, SRC::IMG_RESULT_BUT, PATH_IMAGE + "ResultBatBook.png");
 
-	_SetResource(LOAD_TYPE::IMAGE, SRC::IMG_SOUSA, PATH_IMAGE + "sousa.png");
+	_SetResource(LOAD_TYPE::IMAGE, SRC::IMG_INFO, PATH_IMAGE + "sousa.png");
 
 	/* 複数画像 */
 
@@ -271,6 +271,7 @@ void ResourceManager::Initialize(void)
 	_SetResource(LOAD_TYPE::SOUND, SRC::BGM_TITLE_SEA, PATH_BGM + "Sea.mp3");
 	_SetResource(LOAD_TYPE::SOUND, SRC::BGM_TITLE_THUNDER, PATH_BGM + "Thunderstorm.mp3");
 	_SetResource(LOAD_TYPE::SOUND, SRC::BGM_GAME, PATH_BGM + "GameBGM.mp3");
+	_SetResource(LOAD_TYPE::SOUND, SRC::BGM_RESULT, PATH_BGM + "Result.mp3");
 
 	/* 効果音 */
 	_SetResource(LOAD_TYPE::SOUND, SRC::SE_SELECT, PATH_SE + "Select.mp3");

@@ -55,11 +55,11 @@ void SceneLobby::Load(void)
 
     // ëIëÉVÅ[ÉìÇÃîwåi
     backgroundHandle_ = ResourceManager::GetInstance()
-        .LoadHandleId(ResourceManager::SRC::IMG_BUCGROUND_SELCET);
+        .LoadHandleId(ResourceManager::SRC::IMG_BACKGROUND_SELCET);
 
     // É}ÉãÉ`É}ÉbÉ`ÉìÉOîwåi
     roomBackHandle_ = ResourceManager::GetInstance()
-        .LoadHandleId(ResourceManager::SRC::IMG_BUCGROUND_MALUTI);
+        .LoadHandleId(ResourceManager::SRC::IMG_BACKGROUND_MALUTI);
 
     // UIÇÃîwåi
     selectUIBackHandle_ = ResourceManager::GetInstance()
@@ -1366,7 +1366,7 @@ int SceneLobby::GetSkinUIHandle(PlayerBase::SKIN_TYPE _skinType, bool _isSelecte
 {
     switch (_skinType)
     {
-    case PlayerBase::SKIN_TYPE::HYMAN:
+    case PlayerBase::SKIN_TYPE::HUMAN:
         return _isSelected
             ? uiHandles_.at(static_cast<size_t>(UI_SINGLE::SELECT_SKIN_MOMO))
             : uiHandles_.at(static_cast<size_t>(UI_SINGLE::NOT_SELECT_SKIN_MOMO));

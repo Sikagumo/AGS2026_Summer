@@ -52,10 +52,10 @@ private:
    static constexpr Vector2F BUTTON_SIZE = { 600.0f * BUTTON_SCALE, 250.0f * BUTTON_SCALE };
 
     // レイアウト座標設定
-    const float LEFT_PANEL_X = Application::SCREEN_HALF_X - 500.0f;
-    const float RIGHT_PANEL_X = Application::SCREEN_HALF_X + 500.0f;
-    const float PANEL_START_Y = Application::SCREEN_HALF_Y - 50;
-    const float PANEL_INTERVAL_Y = 120.0f;
+    const int LEFT_PANEL_X = Application::SCREEN_HALF_X - 500;
+    const int RIGHT_PANEL_X = Application::SCREEN_HALF_X + 500;
+    const int PANEL_START_Y = Application::SCREEN_HALF_Y - 50;
+    const int PANEL_INTERVAL_Y = 120;
 
     // UIコライダー用定数
     static constexpr size_t UI_SINGLE_MAX = 8;

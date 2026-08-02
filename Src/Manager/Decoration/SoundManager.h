@@ -24,6 +24,7 @@ public:
 		BGM_TITLE_SEA,
 		BGM_TITLE_THUNDER,
 		BGM_GAME,
+		BGM_RESULT,
 
 		// SE
 		SE_SELECT,

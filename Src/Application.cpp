@@ -196,11 +196,6 @@ void Application::GameEnd(void)
 	isGameEnd_ = true;
 }
 
-bool Application::GetGameEnd(void)
-{
-	return isGameEnd_;
-}
-
 Application::Application(void)
 	:
 	isInitFail_(false),

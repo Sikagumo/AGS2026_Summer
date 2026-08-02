@@ -8,7 +8,7 @@ class Fader
 public:
 
 	// フェードが進む速さ
-	static constexpr float SPEED_ALPHA = 5.0f;
+	static constexpr float SPEED_ALPHA = 4.0f;
 
 	// 状態
 	enum class STATE

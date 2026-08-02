@@ -3,6 +3,7 @@
 #include <DxLib.h>
 
 #include "../../Manager/Generic/KeyConfInputManager.h"
+#include "../../Manager/Decoration/SoundManager.h"
 #include "../../Application.h"
 #include "../../Manager/Generic/InputManager.h"
 #include "../../Manager/Generic/SceneManager.h"
@@ -27,6 +28,8 @@ void SceneResult::Load(void)
 	{
 		img_ = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::IMG_RESULT_WIN);
 	}
+	SoundManager::GetInstance().Add(SoundManager::TYPE::BGM, SoundManager::SOUND::BGM_RESULT
+		, ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::BGM_RESULT));
 }
 
 void SceneResult::EndLoad(void)
@@ -44,6 +47,8 @@ void SceneResult::Initialize(void)
 
 	ResourceManager::GetInstance().LoadHandleIds(ResourceManager::SRC::IMGS_RESULT, imageResult_.data());
 	SceneManager::GetInstance().GetCamera()->ChangeMode(Camera::MODE::NONE);
+
+	SoundManager::GetInstance().Play(SoundManager::SOUND::BGM_RESULT);
 }
 
 void SceneResult::Update(void)
@@ -59,7 +64,7 @@ void SceneResult::Update(void)
 void SceneResult::Draw(void)
 {
 	const int IMAGET_TITLE_Y = Application::SCREEN_SIZE_Y / 3+30;
-	const int IMAGET_TITLE_X = Application::SCREEN_HALF_X / 2+30;
+	const int IMAGET_TITLE_X = Application::SCREEN_HALF_X / 2+50;
 
 	DrawRotaGraph(Application::SCREEN_HALF_X, Application::SCREEN_HALF_Y, 1.0f, UtilityMath::DEG2RAD, img_, true);
 
@@ -72,7 +77,7 @@ void SceneResult::Draw(void)
 		DrawRotaGraph(IMAGET_TITLE_X, IMAGET_TITLE_Y, 1.0f, UtilityMath::DEG2RAD, imageResult_[0], true);
 	}
 
-	DrawString(Application::SCREEN_HALF_X+ (Application::SCREEN_HALF_X/2), Application::SCREEN_SIZE_Y - 10, "クリックしてタイトルへ", 0xffffff, true);
+	DrawString(Application::SCREEN_HALF_X+ (Application::SCREEN_HALF_X/2), Application::SCREEN_SIZE_Y - 20, "クリックしてタイトルへ", 0xffffff, true);
 }
 
 void SceneResult::Release(void)

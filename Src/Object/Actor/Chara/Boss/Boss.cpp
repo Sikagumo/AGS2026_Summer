@@ -338,6 +338,17 @@ void Boss::InitPost(void)
 
 	WeaponInit();
 
+
+	hp_ = MAX_HP + ((MAX_HP * 0.5f) * playerSize_);
+	weaponCannonL_->SetHp(hp_ * 0.5f);
+	weaponCannonR_->SetHp(hp_ * 0.5f);
+	weaponMGL_->SetHp(hp_ * 0.8f);
+	weaponMGR_->SetHp(hp_ * 0.8f);
+	weaponMPL_->SetHp(hp_ * 0.7f);
+	weaponMPR_->SetHp(hp_ * 0.7f);
+	weaponRG_->SetHp(hp_);
+
+
 	
 	wave_->Init();
 
@@ -465,7 +476,7 @@ void Boss::ChangeStateEnd(void)
 	stateUpdate_ = std::bind(&Boss::UpdateEnd, this);
 	animation_->Play(static_cast<int>(ANIM_TYPE::JUMPBEFORE), false);
 	EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_PLAYER_BLAST, transformBody_.pos, { 0,0,0 }, { 35,35,35 }, 1, this);
-
+	SoundManager::GetInstance().Play(SoundManager::SOUND::SE_HIT_BLAST);
 }
 //===========================================================================================================================================================================================================================================================
 
@@ -503,6 +514,13 @@ void Boss::UpdateProcess(void)
 
 	if (hp_ <= 0)
 	{
+		weaponCannonL_->SetHp(0);
+		weaponCannonR_->SetHp(0);
+		weaponMGL_->SetHp(0);
+		weaponMGR_->SetHp(0);
+		weaponMPL_->SetHp(0);
+		weaponMPR_->SetHp(0);
+		weaponRG_->SetHp(0);
 		if (state_ != STATE::END)
 		{
 			ChangeState(STATE::END);

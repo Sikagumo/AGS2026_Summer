@@ -48,7 +48,7 @@ void Fader::Init(void)
 void Fader::LoadFadeImage(void)
 {
 
-	fadeImageHandle_ = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::IMG_AICON);
+	fadeImageHandle_ = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::IMG_ICON);
 }
 
 void Fader::Update(void)

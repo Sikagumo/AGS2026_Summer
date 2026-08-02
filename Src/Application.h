@@ -69,7 +69,8 @@ public:
 
 	/// @brief ゲーム終了 
 	/// @return ゲームの終了フラグ
-	bool GetGameEnd(void);
+	bool GetGameEnd(void)const { return isGameEnd_; };
+
 
 private:
 

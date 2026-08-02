@@ -3,7 +3,6 @@
 #include "../../Net/NetClient.h"
 #include "../../Net/NetSend.h"
 #include "TimeManager.h" 
-#include "../../Common/CRC.h"
 #include <cstdlib>
 
 NetManager* NetManager::instance_ = nullptr;
@@ -249,6 +248,7 @@ void NetManager::UdpReceiveData(void)
 			{
 				hostTimeoutTimer_ = 0.0f;
 			}
+
 
 			const char* PAY_LOAD = buffer + sizeof(NET_BASIC_DATA);
 			const int PAY_LOAD_SIZE = recvSize - static_cast<int>(sizeof(NET_BASIC_DATA));

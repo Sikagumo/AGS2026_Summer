@@ -132,7 +132,7 @@ void Resource::Release(void)
 		break;
 	}
 }
-void Resource::Release_ImageAndMovie(void)
+void Resource::Release_ImageAndMovie(void)const
 {
 	/* 単一画像・映像ファイルの解放 */
 	DeleteGraph(handleId_);
@@ -145,7 +145,7 @@ void Resource::Release_Images(void)
 		DeleteGraph(handle);
 	}
 }
-void Resource::Release_ModelAndAnim(void)
+void Resource::Release_ModelAndAnim(void)const
 {
 	/* 3Dモデル・アニメーションファイルの解放 */
 	MV1DeleteModel(handleId_);
@@ -163,12 +163,12 @@ void Resource::Release_ModelAndAnim(void)
 		MV1DeleteModel(id);
 	}
 }
-void Resource::Release_Effect(void)
+void Resource::Release_Effect(void)const
 {
 	/* エフェクトの解放 */
 	DeleteEffekseerEffect(handleId_);
 }
-void Resource::Release_Sound(void)
+void Resource::Release_Sound(void)const
 {
 	/* 音声ファイルの解放 */
 	if (CheckSoundMem(handleId_) == 1)
