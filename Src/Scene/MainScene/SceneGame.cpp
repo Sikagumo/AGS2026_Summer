@@ -285,6 +285,8 @@ void SceneGame::DamageProcess(void)
 	// プレイヤー被ダメージ処理
 	for (auto& player : players_)
 	{
+		if (!player->GetHostControl()) { continue; }
+
 		player->SetDamage(damageController_->GetPlayerDamage()
 						  , damageController_->GetInvincible());
 	}
@@ -612,7 +614,7 @@ void SceneGame::UpdateGame(void)
 		{
 			NET_ACTION latestAction = remoteHisMap[key].actions[0];
 
-			player->SetNetworkAction(latestAction.pos, latestAction.quaRot, latestAction.animId, latestAction.isAttack);
+			player->SetNetworkAction(latestAction.pos, latestAction.quaRot, latestAction.animId, latestAction.isAttack, latestAction.currentHp);
 		}
 	}
 

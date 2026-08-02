@@ -526,7 +526,7 @@ void Boss::UpdateProcess(void)
 			ChangeState(STATE::END);
 		}
 	}
-	stateUpdate_();
+	//stateUpdate_();
 
 
 	isLanging_ = false;
@@ -1042,6 +1042,9 @@ void Boss::SetNetworkAction(const NET_BOSS_ACTION& _action)
 	hp_ = _action.bossHp;
 
 	const int diff = PREV_HP - hp_;
+
+	transform_.pos = _action.pos;
+
 	if (diff > 5)
 	{
 		PlayEffect();
