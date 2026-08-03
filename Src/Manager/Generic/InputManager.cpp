@@ -7,7 +7,7 @@ InputManager* InputManager::instance_ = nullptr;
 
 InputManager::InputManager(void)
 	: mouseInput_(-1)
-	, mouseWheel_(0)
+	, mouseWheel_(0), mouseWheelOld_(0)
 	, infoEmpty_(Info::Info())
 	, mousePos_(UtilityMath::VECTOR2_ZERO)
 {
@@ -184,7 +184,17 @@ bool InputManager::IsTrgMouseRight(void) const
 
 int InputManager::GetMouseWheel(void) const
 {
-	return (mouseWheelOld_ - mouseWheel_);
+	//return (mouseWheelOld_ - mouseWheel_);
+	return mouseWheel_;
+}
+int InputManager::GetMouseWheelDir(void) const
+{
+	int dir = 0;
+
+	dir += ((GetMouseWheel() > 0) ? 1 : 0);
+	dir += ((GetMouseWheel() < 0) ? -1 : 0);
+
+	return dir;
 }
 
 

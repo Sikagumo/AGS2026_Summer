@@ -3,6 +3,7 @@
 #include "../Common/Quaternion.h"
 #include "../Object/Actor/ActorBase.h"
 #include <map>
+#include <functional>
 #include <memory>
 class Transform;
 
@@ -167,6 +168,9 @@ private:
 	// 追従距離の補間速度
 	static constexpr float FOLLOW_DIST_LERP_SPEED = 5.0f;
 
+
+	// 更新処理
+	std::function<void(void)> update_;
 
 	// カメラの更新前位置
 	VECTOR prePos_;

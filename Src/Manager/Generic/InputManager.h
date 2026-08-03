@@ -129,6 +129,7 @@ public:
 
 	/// @brief マウスホイールの移動量を取得
 	int GetMouseWheel(void) const;
+	int GetMouseWheelDir(void) const;
 
 
 	// コントローラの入力情報を取得する
