@@ -338,6 +338,18 @@ void Boss::InitPost(void)
 
 	WeaponInit();
 
+
+	hp_ = MAX_HP + ((MAX_HP * 0.5f) * playerSize_);
+	laserShotHp_ = hp_;
+	weaponCannonL_->SetHp(hp_ * 0.5f);
+	weaponCannonR_->SetHp(hp_ * 0.5f);
+	weaponMGL_->SetHp(hp_ * 0.8f);
+	weaponMGR_->SetHp(hp_ * 0.8f);
+	weaponMPL_->SetHp(hp_ * 0.7f);
+	weaponMPR_->SetHp(hp_ * 0.7f);
+	weaponRG_->SetHp(hp_);
+
+
 	
 	wave_->Init();
 
@@ -375,13 +387,14 @@ void Boss::ChangeStateIdle(void)
 	stateUpdate_ = std::bind(&Boss::UpdateIdle, this);
 	attackCount_ = 0;
 	animation_->Play(static_cast<int>(ANIM_TYPE::DIR));
+	weaponRG_->ChangeState(WeaponRG::STATE::IDLE);
 }
 
 void Boss::ChangeStateAttack(void)
 {
 	stateUpdate_ = std::bind(&Boss::UpdateAttack, this);
 	attackCount_ = 0;
-	if (laserShotHp_ == MAX_HP)
+	if (laserShotHp_ == (MAX_HP + ((MAX_HP * 0.5f) * playerSize_)))
 	{
 		attackCount_ = 580;
 	}
@@ -454,7 +467,7 @@ void Boss::ChangeStateLaserAttack(void)
 	weaponRG_->ChangeState(WeaponRG::STATE::PREPARATION);
 
 	animation_->Play(static_cast<int>(ANIM_TYPE::JUMPBEFORE), false);
-	if (laserShotHp_ != MAX_HP)
+	if (laserShotHp_ != (MAX_HP + ((MAX_HP * 0.5f) * playerSize_)))
 	{
 		laserRotSpeed_ = 0.5;
 	}
@@ -466,6 +479,14 @@ void Boss::ChangeStateEnd(void)
 	animation_->Play(static_cast<int>(ANIM_TYPE::JUMPBEFORE), false);
 	EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_PLAYER_BLAST, transformBody_.pos, { 0,0,0 }, { 35,35,35 }, 1, this);
 	SoundManager::GetInstance().Play(SoundManager::SOUND::SE_HIT_BLAST);
+
+	weaponCannonL_->SetHp(0);
+	weaponCannonR_->SetHp(0);
+	weaponMGL_->SetHp(0);
+	weaponMGR_->SetHp(0);
+	weaponMPL_->SetHp(0);
+	weaponMPR_->SetHp(0);
+	weaponRG_->SetHp(0);
 }
 //===========================================================================================================================================================================================================================================================
 
@@ -501,21 +522,22 @@ void Boss::UpdateProcess(void)
 	
 	cameraPos_ = camera->GetPos();
 
+	if (transform_.pos.y < -50)
+	{
+		transform_.pos = {0,2000,0};
+	}
+	
+
+
 	if (hp_ <= 0)
 	{
-		weaponCannonL_->SetHp(0);
-		weaponCannonR_->SetHp(0);
-		weaponMGL_->SetHp(0);
-		weaponMGR_->SetHp(0);
-		weaponMPL_->SetHp(0);
-		weaponMPR_->SetHp(0);
-		weaponRG_->SetHp(0);
+		
 		if (state_ != STATE::END)
 		{
 			ChangeState(STATE::END);
 		}
 	}
-	stateUpdate_();
+	//stateUpdate_();
 
 
 	isLanging_ = false;
@@ -568,14 +590,14 @@ void Boss::UpdateIdle(void)
 	if (hp_ <= laserShotHp_ && attackCount_ >= attackInterval_)
 	{
 		ChangeState(STATE::LASER);
-		if (laserShotHp_== MAX_HP)
+		if (laserShotHp_== (MAX_HP + ((MAX_HP * 0.5f) * playerSize_)))
 		{
-			laserShotHp_ = MAX_HP/2;
+			laserShotHp_ = (MAX_HP + ((MAX_HP * 0.5f) * playerSize_)) /2;
 			
 		}
-		else if (laserShotHp_ == (MAX_HP / 2))
+		else if (laserShotHp_ == ((MAX_HP + ((MAX_HP * 0.5f) * playerSize_)) / 2))
 		{
-			laserShotHp_ = MAX_HP * 0.2;
+			laserShotHp_ = (MAX_HP + ((MAX_HP * 0.5f) * playerSize_)) * 0.2;
 			
 		}
 		else
@@ -812,6 +834,14 @@ void Boss::UpdateStateLaserAttack(void)
 
 void Boss::UpdateEnd(void)
 {
+	weaponCannonL_->SetHp(0);
+	weaponCannonR_->SetHp(0);
+	weaponMGL_->SetHp(0);
+	weaponMGR_->SetHp(0);
+	weaponMPL_->SetHp(0);
+	weaponMPR_->SetHp(0);
+	weaponRG_->SetHp(0);
+
 	if (endCount_ >= 4)
 	{
 		speed_ = 30;
@@ -822,6 +852,7 @@ void Boss::UpdateEnd(void)
 	}
 	else if (endCount_>=3)
 	{
+		
 		weaponCannonL_->ChangeState(WeaponCannon::STATE::END);
 		weaponCannonR_->ChangeState(WeaponCannon::STATE::END);
 		weaponMGL_->ChangeState(WeaponMGL::STATE::END);
@@ -1005,7 +1036,7 @@ NET_BOSS_ACTION Boss::GetNetworkAction(void) const
 {
 	NET_BOSS_ACTION action;
 	action.pos = transform_.pos;
-	action.quaRot = transform_.quaRot;
+	action.quaRot = transformBody_.quaRot;
 	action.bossHp = hp_;
 	action.animId = static_cast<int>(state_);
 	action.targetPlayerId = mainIdx_;
@@ -1031,6 +1062,11 @@ void Boss::SetNetworkAction(const NET_BOSS_ACTION& _action)
 	hp_ = _action.bossHp;
 
 	const int diff = PREV_HP - hp_;
+
+	transform_.pos = _action.pos;
+
+	transformBody_.quaRot = _action.quaRot;
+
 	if (diff > 5)
 	{
 		PlayEffect();

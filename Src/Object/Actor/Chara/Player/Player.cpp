@@ -1217,7 +1217,7 @@ void Player::SetHostControl(bool _isLocal)
 	isHostControl_ = _isLocal;
 }
 
-void Player::SetNetworkAction(const VECTOR& _pos, const Quaternion& _rot, int _animId, bool _isAttack)
+void Player::SetNetworkAction(const VECTOR& _pos, const Quaternion& _rot, int _animId, bool _isAttack, int _currentHp)
 {
 	transform_.pos = _pos;
 	transform_.quaRot = _rot;
@@ -1227,14 +1227,14 @@ void Player::SetNetworkAction(const VECTOR& _pos, const Quaternion& _rot, int _a
 		PlayAnimation(static_cast<ANIM_TYPE>(_animId));
 	}
 
-	// UŒ‚ƒtƒ‰ƒO‚ª OFF ‚©‚ç ON ‚É•Ï‚í‚Á‚½uŠÔA‚©‚Â–¢ˆ—‚Ìê‡‚Ì‚İ”­–C‚·‚é
 	if (_isAttack && !isNetAttack_)
 	{
 		ProcShotNormal();
 	}
 
-	// óM‚µ‚½UŒ‚ó‘Ô‚ğ•Û
 	isNetAttack_ = _isAttack;
+
+	hp_ = _currentHp;
 }
 
 void Player::SetNetKey(int _key)

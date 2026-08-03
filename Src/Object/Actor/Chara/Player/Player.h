@@ -69,7 +69,8 @@ public:
 	bool GetHostControl(void) const { return isHostControl_; }
 
 	// ネットワークから受け取った情報を強制的にセットする（ラジコン用）
-	void SetNetworkAction(const VECTOR& _pos, const Quaternion& _rot, int _animId, bool _isAttack);
+	void SetNetworkAction(const VECTOR& _pos, const Quaternion& _rot, int _animId, bool _isAttack, int _currentHp);
+
 	/// @brief リスポーンしたか否か
 	bool GetIsRespawn(void)const;
 

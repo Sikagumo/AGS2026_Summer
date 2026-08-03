@@ -285,6 +285,8 @@ void SceneGame::DamageProcess(void)
 	// プレイヤー被ダメージ処理
 	for (auto& player : players_)
 	{
+		if (!player->GetHostControl()) { continue; }
+
 		player->SetDamage(damageController_->GetPlayerDamage()
 						  , damageController_->GetInvincible());
 	}
@@ -612,7 +614,7 @@ void SceneGame::UpdateGame(void)
 		{
 			NET_ACTION latestAction = remoteHisMap[key].actions[0];
 
-			player->SetNetworkAction(latestAction.pos, latestAction.quaRot, latestAction.animId, latestAction.isAttack);
+			player->SetNetworkAction(latestAction.pos, latestAction.quaRot, latestAction.animId, latestAction.isAttack, latestAction.currentHp);
 		}
 	}
 
@@ -654,8 +656,7 @@ void SceneGame::UpdateGame(void)
 	EffectManager::GetInstance().Update();
 
 	// ボスHPが０の時、ゲームクリア
-	const bool isBossHpValid = (boss_->GetHP() >= 0);
-	if (isBossHpValid && boss_->GetHP() <= 0 && gameTimer_->GetTime() > 0.0f)
+	if (boss_->GetHP() <= 0 || gameTimer_->GetTime() <= 0.0f)
 	{
 		//SoundManager::GetInstance().Stop(SoundManager::SOUND::BGM_GAME);
 		ChangeState(GAME_STATE::GAME_END);
@@ -695,11 +696,11 @@ void SceneGame::UpdateGameEnd(void)
 	{
 		if (boss_->GetHP() >= 0)
 		{
-			SceneManager::GetInstance().ChangeScene(std::make_shared<SceneResult>(false));
+			SceneManager::GetInstance().ChangeScene(std::make_shared<SceneResult>(true));
 		}
 		else
 		{
-			SceneManager::GetInstance().ChangeScene(std::make_shared<SceneResult>(true));
+			SceneManager::GetInstance().ChangeScene(std::make_shared<SceneResult>(false));
 		}
 		
 	}
@@ -761,13 +762,13 @@ void SceneGame::DrawGameEnd(void)
 	const int IMAGET_TITLE_Y = Application::SCREEN_SIZE_Y / 3;
 	if (slowCount_ >= SLOW_COUNT_MAX * 30)
 	{
-		if (boss_->GetHP() >= 0)
+		if (boss_->GetHP() > 0)
 		{
-			DrawRotaGraph(Application::SCREEN_HALF_X, IMAGET_TITLE_Y, 2.0f, UtilityMath::DEG2RAD, imageResult_[1], true);
+			DrawRotaGraph(Application::SCREEN_HALF_X, IMAGET_TITLE_Y, 2.0f, UtilityMath::DEG2RAD, imageResult_[3], true);
 		}
 		else
 		{
-			DrawRotaGraph(Application::SCREEN_HALF_X, IMAGET_TITLE_Y, 2.0f, UtilityMath::DEG2RAD, imageResult_[3], true);
+			DrawRotaGraph(Application::SCREEN_HALF_X, IMAGET_TITLE_Y, 2.0f, UtilityMath::DEG2RAD, imageResult_[1], true);
 		}
 		
 	}
