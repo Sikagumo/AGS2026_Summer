@@ -63,8 +63,6 @@ void PBulletBomb::SetParam(void)
 
 	radiusBullet_ = RADIUS_BULLET;
 	radiusBlast_ = 0.0f;
-	ownColliders_[static_cast<int>(COLLISION_TYPE::BLAST)]
-		.at(0)->SetRadius(radiusBlast_);
 
 	power_ = POWER_BOMB;
 	transform_.InitTransform(SCALE_BOMB

@@ -26,17 +26,37 @@ void PBulletRecovery::Load(void)
 
 void PBulletRecovery::InitTransform(void)
 {
-	
+	transform_.InitTransform(SCALE_RECOVERY
+		, transform_.quaRot, Quaternion::Identity());
 }
 
 void PBulletRecovery::InitPost(void)
 {
 	PBulletBase::InitPost();
 
+
 	ColliderSphere* recovery = new ColliderSphere(ColliderBase::TAG::PLAYER_RECOVERY, &transform_
-								, UtilityMath::VECTOR_ZERO, radiusBlast_);
+		, UtilityMath::VECTOR_ZERO, radiusBlast_);
 	ownColliders_[static_cast<int>(COLLISION_TYPE::SUPPORT)]
 		.emplace_back(recovery);
+
+	CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::PLAYER_RECOVERY, false);
+
+	ownColliders_.at(static_cast<int>(COLLISION_TYPE::SUPPORT))
+		.at(0)->SetRadius(radiusBlast_);
+}
+void PBulletRecovery::SetParam(void)
+{
+	shotSpeedXZ_ = SHOT_SPEED_RECOVERY_XZ;
+	shotSpeedY_ = SHOT_SPEED_RECOVERY_Y;
+
+	aliveTime_ = TIME_ALIVE_RECOVERY;
+
+	radiusBullet_ = RADIUS_BULLET;
+	radiusBlast_ = 0.0f;
+
+	transform_.InitTransform(SCALE_RECOVERY
+		, transform_.quaRot, Quaternion::Identity());
 
 	CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::PLAYER_RECOVERY, false);
 }
@@ -74,19 +94,6 @@ void PBulletRecovery::ChangeBulletStateProc(void)
 {
 }
 
-void PBulletRecovery::SetParam(void)
-{
-	shotSpeedXZ_ = SHOT_SPEED_RECOVERY_XZ;
-	shotSpeedY_ = SHOT_SPEED_RECOVERY_Y;
-
-	aliveTime_ = TIME_ALIVE_RECOVERY;
-
-	radiusBullet_ = RADIUS_BULLET;
-	radiusBlast_ = 0.0f;
-
-	transform_.InitTransform(SCALE_RECOVERY
-		, transform_.quaRot, Quaternion::Identity());
-}
 void PBulletRecovery::BlastAction(void)
 {
 	bulletState_ = BULLET_STATE::BLAST;
@@ -97,13 +104,16 @@ void PBulletRecovery::BlastAction(void)
 	CollisionController::GetInstance()
 		.SetCollisionActive(this, ColliderBase::TAG::PLAYER_BULLET, false);
 
-	// ”š”­—LŒø‰»
+
+	// ‰ñ•œ“–‚½‚è”»’è—LŒø‰»
 	radiusBlast_ = RADIUS_RECOVERY;
 
-	ownColliders_.at(static_cast<int>(COLLISION_TYPE::SUPPORT)).at(0)->SetRadius(radiusBlast_);
+	ownColliders_.at(static_cast<int>(COLLISION_TYPE::SUPPORT))
+		.at(0)->SetRadius(radiusBlast_);
 
 	CollisionController::GetInstance()
 		.SetCollisionActive(this, ColliderBase::TAG::PLAYER_RECOVERY, true);
+
 
 	EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_PLAYER_RECOVERY,
 		transform_.pos, Quaternion::Identity().ToEuler(),

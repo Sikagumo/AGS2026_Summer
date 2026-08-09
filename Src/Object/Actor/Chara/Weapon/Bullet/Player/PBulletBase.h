@@ -104,7 +104,7 @@ protected:
 	std::function<void(void)> updateProc_;
 
 
-	virtual void InitTransform(void)override = 0;
+	void InitTransform(void)override;
 
 	void InitCollider(void)override final;
 

@@ -788,7 +788,11 @@ void Player::Dodge(void)
 
 void Player::ProcessDefeat(void)
 {
-	
+	constexpr int VIBRATION_POW = 750;
+	constexpr float VIBRATION_TIME = 0.1f;
+	InputManager::GetInstance()
+		.SetVibration(InputManager::JOYPAD_NO::PAD1, VIBRATION_POW, VIBRATION_TIME);
+
 	if (actionController_->IsEndActionActive()
 		&& animation_->IsEnd()
 		&& animation_->GetPlayType() == static_cast<int>(ANIM_TYPE::DEFEAT))

@@ -206,11 +206,10 @@ void SceneManager::Update(void)
             camera_->Init();
         }
 
-        //auto jobs = { SceneGame::PlayerSelectType(PlayerBase::JOB_TYPE::BOMB, PlayerBase::SKIN_TYPE::DOG)};
-        //ChangeScene(std::make_shared<SceneGame>(jobs));
-
         fader_->LoadFadeImage();
-        ChangeScene(std::make_shared<SceneTitle>());
+        auto jobs = { SceneGame::PlayerSelectType(PlayerBase::JOB_TYPE::SUPPORT, PlayerBase::SKIN_TYPE::DOG) };
+        ChangeScene(std::make_shared<SceneGame>(jobs));
+        //ChangeScene(std::make_shared<SceneTitle>());
     }
 
     TimeManager::GetInstance().Update();
