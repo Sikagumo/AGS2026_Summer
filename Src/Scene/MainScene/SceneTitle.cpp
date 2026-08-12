@@ -62,6 +62,12 @@ void SceneTitle::Load(void)
     SoundManager::GetInstance()
         .Add(SoundManager::TYPE::BGM, SoundManager::SOUND::BGM_TITLE_THUNDER
             , ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::BGM_TITLE_THUNDER));
+
+    SoundManager::GetInstance().Add(SoundManager::TYPE::SE, SoundManager::SOUND::SE_UI_SELECT
+        , ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::SE_UI_SELECT));
+
+    SoundManager::GetInstance().Add(SoundManager::TYPE::SE, SoundManager::SOUND::SE_UI_CANCEL
+        , ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::SE_UI_CANCEL));
             
     // âπó í≤êÆ
 

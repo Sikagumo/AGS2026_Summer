@@ -524,18 +524,18 @@ void SceneLobby::UpdateSingle(void)
             if (mainSelectIndex_ == 0)
             {
                 selectState_ = SELECT_STATE::WEAPON_WINDOW;
-                SoundManager::GetInstance().Play(SoundManager::SOUND::SE_LOBBY_SELECT);
+                SoundManager::GetInstance().Play(SoundManager::SOUND::SE_UI_SELECT);
                 return;
             }
             else if (mainSelectIndex_ == 1)
             {
                 selectState_ = SELECT_STATE::SKIN_WINDOW;
-                SoundManager::GetInstance().Play(SoundManager::SOUND::SE_LOBBY_SELECT);
+                SoundManager::GetInstance().Play(SoundManager::SOUND::SE_UI_SELECT);
                 return;
             }
             else if (mainSelectIndex_ == 2)
             {
-                SoundManager::GetInstance().Play(SoundManager::SOUND::SE_LOBBY_SELECT);
+                SoundManager::GetInstance().Play(SoundManager::SOUND::SE_UI_SELECT);
 
                 if (IS_MULTI)
                 {
@@ -813,7 +813,7 @@ void SceneLobby::UpdateSelectMode(void)
         if (keyConfInputManager.isTrigerDown("OK") || keyConfInputManager.isTrigerDown("CANCEL"))
         {
             isEditing_ = false;
-            SoundManager::GetInstance().Play(SoundManager::SOUND::SE_LOBBY_SELECT);
+            SoundManager::GetInstance().Play(SoundManager::SOUND::SE_UI_SELECT);
             return;
         }
 

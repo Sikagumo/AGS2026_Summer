@@ -231,7 +231,7 @@ private:
     // ミニウィンドウの状態
     enum class SELECT_STATE
     {
-        MAIN,           // 左右メインUI（武器 / 見た目）選択
+        MAIN,           // 左右メインUI選択
         WEAPON_WINDOW,  // 中央：武器選択ミニウィンドウ表示中
         SKIN_WINDOW     // 中央：スキン選択ミニウィンドウ表示中
     };
@@ -241,7 +241,7 @@ private:
     // メインUI用
     std::array<std::unique_ptr<Collider2DBase>, 2> mainUiCollisions_;
 
-    // ミニウィンドウ内のボタン用（武器4つ、スキン4つ）
+    // ミニウィンドウ内のボタン用
     std::array<std::unique_ptr<Collider2DBase>, 
         static_cast<size_t>(PlayerBase::JOB_TYPE::MAX)> weaponUiCollisions_;
     std::array<std::unique_ptr<Collider2DBase>, 

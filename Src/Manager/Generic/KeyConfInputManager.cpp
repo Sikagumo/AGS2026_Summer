@@ -134,22 +134,14 @@ void KeyConfInputManager::Update(void)
 {
 	previousInputState_ = currentInputState_;
 
-
-
 	// 生データ取得
 	std::array<char, 256> keyState{};
 	GetHitKeyStateAll(keyState.data());
 
-
-
 	int mouseState = GetMouseInput();
 	int padState = GetJoypadInputState(usePadNo_);
 
-
-
 	GetMousePoint(&mousePosition_.x, &mousePosition_.y);
-
-
 
 	XINPUT_STATE xInput{};
 	if (GetJoypadXInputState(usePadNo_, &xInput) == 0)
@@ -159,16 +151,6 @@ void KeyConfInputManager::Update(void)
 		stickInfo_.ly = xInput.ThumbLY;
 		stickInfo_.rx = xInput.ThumbRX;
 		stickInfo_.ry = xInput.ThumbRY;
-
-		// RTの判定 (一定押し込みでATTACKをON)
-		if (xInput.RightTrigger > 128)
-		{
-			currentInputState_["ATTACK"] = true;
-		}
-		else
-		{
-			currentInputState_["ATTACK"] = false;
-		}
 	}
 
 	// 各入力イベントの走査
@@ -176,7 +158,7 @@ void KeyConfInputManager::Update(void)
 	{
 		const auto& eventName = pair.first;
 
-		//前のフレームの状態は引き継がず、毎フレーム必ずfalse(未入力状態)からチェックする
+		//前のフレームの状態は引き継がず、毎フレーム必ずfalseからチェックする
 		bool hit = false;
 
 		if (eventName == "APPLY_DEBUG" || eventName == "UNAPPLY_DEBUG")
@@ -185,7 +167,7 @@ void KeyConfInputManager::Update(void)
 
 			for (const auto& inputInfo : pair.second)
 			{
-				if (keyState[inputInfo.id] == 0)
+				if (CheckKeyboardInput(inputInfo, keyState) == false)
 				{
 					hit = false;
 					break;
@@ -200,25 +182,40 @@ void KeyConfInputManager::Update(void)
 				switch (inputInfo.type)
 				{
 				case INPUT_TYPE::KEY_BOARD:
-					if (keyState[inputInfo.id] != 0)
+				{
+					if (CheckKeyboardInput(inputInfo, keyState))
 					{
 						hit = true;
 					}
-					break;
+				}
+				break;
 
 				case INPUT_TYPE::MOUSE:
+				{
 					if ((mouseState & inputInfo.id) != 0)
 					{
 						hit = true;
 					}
-					break;
+				}
+				break;
 
 				case INPUT_TYPE::JOYPAD:
+				{
 					if ((padState & inputInfo.id) != 0)
 					{
 						hit = true;
 					}
-					break;
+				}
+				break;
+
+				case INPUT_TYPE::XINPUT_ANALOG:
+				{
+					if (CheckXInputAnalog(inputInfo, xInput))
+					{
+						hit = true;
+					}
+				}
+				break;
 				}
 			}
 		}
@@ -328,6 +325,118 @@ void KeyConfInputManager::ApplyRightStickSensitivity(int _x, int _y,
 
 	_outX = normalX;
 	_outY = normalY;
+}
+
+bool KeyConfInputManager::CheckKeyboardInput(const InputInfo& _inputInfo,
+	const std::array<char, 256>& _keyState) const
+{
+	if (_keyState[_inputInfo.id] != 0)
+	{
+		return true;
+	}
+	return false;
+}
+
+bool KeyConfInputManager::CheckXInputAnalog(const InputInfo& _inputInfo,
+	const XINPUT_STATE& _xInputState) const
+{
+	const int TRIGGER_THRESHOLD = 128;
+	const int STICK_THRESHOLD = 16000;
+
+	switch (static_cast<XINPUT_ANALOG_ID>(_inputInfo.id))
+	{
+	case XINPUT_ANALOG_ID::LEFT_TRIGGER:
+	{
+		if (_xInputState.LeftTrigger > TRIGGER_THRESHOLD)
+		{
+			return true;
+		}
+	}
+	break;
+
+	case XINPUT_ANALOG_ID::RIGHT_TRIGGER:
+	{
+		if (_xInputState.RightTrigger > TRIGGER_THRESHOLD)
+		{
+			return true;
+		}
+	}
+	break;
+
+	case XINPUT_ANALOG_ID::LEFT_STICK_UP:
+	{
+		if (_xInputState.ThumbLY > STICK_THRESHOLD)
+		{
+			return true;
+		}
+	}
+	break;
+
+	case XINPUT_ANALOG_ID::LEFT_STICK_DOWN:
+	{
+		if (_xInputState.ThumbLY < -STICK_THRESHOLD)
+		{
+			return true;
+		}
+	}
+	break;
+
+	case XINPUT_ANALOG_ID::LEFT_STICK_LEFT:
+	{
+		if (_xInputState.ThumbLX < -STICK_THRESHOLD)
+		{
+			return true;
+		}
+	}
+	break;
+
+	case XINPUT_ANALOG_ID::LEFT_STICK_RIGHT:
+	{
+		if (_xInputState.ThumbLX > STICK_THRESHOLD)
+		{
+			return true;
+		}
+	}
+	break;
+	
+	case XINPUT_ANALOG_ID::RIGHT_STICK_UP:
+	{
+		if (_xInputState.ThumbRY > STICK_THRESHOLD)
+		{
+			return true;
+		}
+	}
+	break;
+
+	case XINPUT_ANALOG_ID::RIGHT_STICK_DOWN:
+	{
+		if (_xInputState.ThumbRY < -STICK_THRESHOLD)
+		{
+			return true;
+		}
+	}
+	break;
+
+	case XINPUT_ANALOG_ID::RIGHT_STICK_LEFT:
+	{
+		if (_xInputState.ThumbRX < -STICK_THRESHOLD)
+		{
+			return true;
+		}
+	}
+	break;
+
+	case XINPUT_ANALOG_ID::RIGHT_STICK_RIGHT:
+	{
+		if (_xInputState.ThumbRX > STICK_THRESHOLD)
+		{
+			return true;
+		}
+	}
+	break;
+
+	}
+	return false;
 }
 
 VECTOR KeyConfInputManager::GetLeftStickDirection(void) const
