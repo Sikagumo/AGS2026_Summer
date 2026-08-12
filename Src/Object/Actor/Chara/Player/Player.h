@@ -60,8 +60,6 @@ public:
 	void SetKnock(const VECTOR& _knockDirXZ, float _knockPowXZ
 					, bool _isStan, float _knockPowY = KNOCK_POW_Y);
 	
-	void SetPlayerType(SKIN_TYPE _type = SKIN_TYPE::MAX);
-	
 	void SetSoundData(VECTOR _pos, float _radius, bool _isLanging, bool _isMGFire, bool _isRoad)override;
 
 	// 自分が操作するキャラクターかどうかを設定

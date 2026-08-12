@@ -96,27 +96,7 @@ void Player::Load(void)
 					, { SKIN_TYPE::DOG, ResourceManager::SRC::MODEL_PLAYER_DOG} };
 
 	transform_.modelId = ResourceManager::GetInstance()
-		.LoadModelDuplicate(SKIN_SRC.at(playerType_));
-}
-void Player::SetPlayerType(SKIN_TYPE _type)
-{
-	using SRC = ResourceManager::SRC;
-
-	const std::array<SRC, static_cast<int>(SKIN_TYPE::MAX)> MODEL_RESOURCES
-		= { SRC::MODEL_PLAYER_HUMAN, SRC::MODEL_PLAYER_DOG, SRC::MODEL_PLAYER_MONKEY, SRC::MODEL_PLAYER_BIRD };
-
-	SKIN_TYPE pType = _type;
-	if (_type == SKIN_TYPE::MAX)
-	{
-		int rand = GetRand(static_cast<int>(SKIN_TYPE::MAX));
-		pType = static_cast<SKIN_TYPE>(rand);
-	}
-
-	playerType_ = pType;
-
-
-	transform_.SetModel(ResourceManager::GetInstance()
-		.LoadModelDuplicate(MODEL_RESOURCES.at(static_cast<int>(playerType_))));
+		.LoadModelDuplicate(SKIN_SRC.at(skinType_));
 }
 
 void Player::InitAnimation(void)
@@ -961,8 +941,8 @@ void Player::ProcShotSpecial(void)
 void Player::UpdateBullets(void)
 {
 	// î≠éÀéûÇÃéËÇÃÉtÉåÅ[ÉÄÇ…ê∂ê¨ÇµÇΩíeÇí«è]Ç≥ÇπÇÈ
-	const int FRAME_FINGER_LEFT = FRAME_NUM_FINGER_LEFT.at(playerType_);
-	const int FRAME_FINGER_RIGHT = FRAME_NUM_FINGER_RIGHT.at(playerType_);
+	const int FRAME_FINGER_LEFT = FRAME_NUM_FINGER_LEFT.at(skinType_);
+	const int FRAME_FINGER_RIGHT = FRAME_NUM_FINGER_RIGHT.at(skinType_);
 	const int FRAME_FINGER = ((curAttackNum_ % 2 == 0) ? FRAME_FINGER_LEFT : FRAME_FINGER_RIGHT);
 
 	const int FRAME_HAND_PALM = (FRAME_FINGER - 1);

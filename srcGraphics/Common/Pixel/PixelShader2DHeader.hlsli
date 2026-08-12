@@ -1,9 +1,9 @@
 struct PS_INPUT
 {
-    float4 screenPosition : SV_POSITION;
-    float4 diffuseColor : COLOR0;        //拡散反射の色
-    float2 textureUV : TEXCOORD0;        //UV値
-    float2 subTextureUV : TEXCOORD1;     //サブテクスチャのUV値
+    float4 position : SV_POSITION;
+    float4 color : COLOR0;        //拡散反射の色
+    float2 uv : TEXCOORD0;        //UV値
+    float2 subUV : TEXCOORD1;     //サブテクスチャのUV値
 };
 
 Texture2D baseTexture : register(t0); //テクスチャ

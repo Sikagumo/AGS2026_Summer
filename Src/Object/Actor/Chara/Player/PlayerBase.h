@@ -81,7 +81,7 @@ public:
 	/// @brief ƒvƒŒƒCƒ„[”Ô†æ“¾
 	int GetPlayerNo(void)const { return playerNo_; };
 
-	SKIN_TYPE GetPlayerType(void)const { return playerType_; };
+	SKIN_TYPE GetPlayerType(void)const { return skinType_; };
 	JOB_TYPE GetJobType(void)const { return jobType_; };
 	SHOT_TYPE GetShotType(void)const { return shotType_; };
 
@@ -158,7 +158,7 @@ protected:
 
 	SHOT_TYPE shotType_;
 
-	SKIN_TYPE playerType_;
+	SKIN_TYPE skinType_;
 
 	
 	void UpdateSound(void);

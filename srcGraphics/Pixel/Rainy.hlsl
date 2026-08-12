@@ -76,7 +76,7 @@ float RainLayer(float2 uv, float columns, float speed, float streakLen, float wi
 
 float4 main(PS_INPUT input) : SV_TARGET
 {
-    float2 uv = input.textureUV;
+    float2 uv = input.uv;
 
     // 奥のレイヤー(細く速く、密度高め、暗め)
     float back = RainLayer(uv, 140.0, 1.6, 0.55, 1.0) * g_intensityBack;
@@ -86,5 +86,5 @@ float4 main(PS_INPUT input) : SV_TARGET
 
     float rain = saturate(back + front) * g_intensity;
 
-    return float4(g_rainColor.rgb, rain);
+    return float4(g_rainColor.rgb, rain * 0.5f);
 }

@@ -1,21 +1,13 @@
 #include "ShaderMaterial.h"
 
 ShaderMaterial::ShaderMaterial(void)
+	: lightX_(0.5f), lightY_(0.5f), lightZ_(0.5f)
+	, ambient_(0.8f), time_ (0.0f)
+	, waveSpeed_(3.0f) , waveForce_(0.015f), useNormal_(1.0f)
+	, resolutionX_(1920), resolutionY_(1080)
+	, rainIntensity_(0.0f), rainIntensityBack_(0.0f), rainColor_()
+	, texScaleX_(1.0f), texScaleY_(1.0f)
 {
-	lightX_ = 0.5f;
-	lightY_ = 0.5f;
-	lightZ_ = 0.5f;
-	ambient_ = 0.8f;
-	time_ = 0.0f;
-	waveSpeed_ = 3.0f;
-	waveForce_ = 0.015f;
-	useNormal_ = 1.0f;
-
-	resolutionX_ = 1920;
-	resolutionY_ = 1080;
-	rainIntensity_ = 0.0f;
-	rainIntensityBack_ = 0.0f;
-	rainColor = COLOR_F();
 }
 
 ShaderMaterial::~ShaderMaterial(void)
@@ -62,8 +54,15 @@ bool ShaderMaterial::IsUseNormalMap(void) const
 void ShaderMaterial::SetUseRainy(float _rainPow, float _rainPowBack)
 {
 	const COLOR_F RAIN_COLOR = { 0.75f, 0.82f, 0.9f };
-	rainColor = RAIN_COLOR;
+	rainColor_ = RAIN_COLOR;
+	time_ = 0.0f;
 
 	rainIntensity_ = _rainPow;
 	rainIntensityBack_ = _rainPowBack;
+}
+
+void ShaderMaterial::SetTexScale(float _texScaleX, float _texScaleY)
+{
+	texScaleX_ = _texScaleX;
+	texScaleY_ = _texScaleY;
 }

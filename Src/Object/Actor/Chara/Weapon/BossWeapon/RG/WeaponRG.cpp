@@ -188,6 +188,7 @@ void WeaponRG::ChangeStateEnd(void)
 	CollisionController::GetInstance().SetCollisionActive(this, tag_, false);
 	jumpPow_ = JUNP_POW;
 	isJump_ = true;
+	bulletLaser_->SetIsAttack(false);
 	moveDir_ = VSub(transform_.pos, bone_.transform.pos);
 	moveDir_.y = 0.0f;
 	moveDir_ = VNorm(moveDir_);

@@ -1,6 +1,6 @@
-SamplerState smp : register(s0);
-Texture2D<float4> tex : register(t0);
+#include "../Common/Pixel/PixelShader2DHeader.hlsli"
 Texture2D<float4> normTex : register(t1);
+
 
 cbuffer BaseBuffer : register(b4)
 {
@@ -15,14 +15,7 @@ cbuffer BaseBuffer : register(b4)
     float useNormal;
 }
 
-struct PSInput
-{
-    float4 position : SV_POSITION;
-    float4 color : COLOR0;
-    float2 uv : TEXCOORD0;
-};
-
-float4 main(PSInput input) : SV_TARGET
+float4 main(PS_INPUT input) : SV_TARGET
 {
     float2 uv = input.uv;
 
@@ -30,7 +23,7 @@ float4 main(PSInput input) : SV_TARGET
     uv.y += sin(uv.x * 20.0f + time * waveSpeed) * waveForce;
     uv.x -= cos(time * (waveSpeed * 0.5f)) * (waveForce * 0.5f);
 
-    float4 color = tex.Sample(smp, uv);
+    float4 color = baseTexture.Sample(textureSampler, uv);
     if (color.a <= 0.01f)
     {
         discard;
@@ -40,7 +33,7 @@ float4 main(PSInput input) : SV_TARGET
     if (useNormal > 0.5f)
     {
         // óßëÃONÇÃèàóù
-        float4 norm = normTex.Sample(smp, uv);
+        float4 norm = normTex.Sample(textureSampler, uv);
         norm *= 2.0;
         norm -= 1.0;
         norm.z = -norm.z;

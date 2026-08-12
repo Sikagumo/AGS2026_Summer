@@ -33,6 +33,15 @@ struct alignas(16) IntegratedGpuBufferRain
     COLOR_F rainColor = COLOR_F();
 };
 
+struct alignas(16) IntegratedGpuBufferTexScale
+{
+    // スケール
+    float scaleX = 1.0f;
+    float scaleY = 1.0f;
+    float dummy1 = 0.0f;
+    float dummy2 = 0.0f;
+};
+
 struct DrawRequest
 {
     int x = 0;
@@ -40,18 +49,21 @@ struct DrawRequest
     float scale = 1.0f;
     int textureHandle = -1;
     int normalMapHandle = -1;
+    int modelId = -1;
     IntegratedGpuBuffer buffer;
     IntegratedGpuBufferRain bufferRain;
+    IntegratedGpuBufferTexScale bufferTexScale;
 
     // コンストラクタ
     DrawRequest(void) = default;
 
-    DrawRequest(int _x, int _y, int _textureHandle, float _scale)
+    DrawRequest(int _x, int _y, int _textureHandle, float _scale, int _modelId = -1)
         : x(_x)
         , y(_y)
         , scale(_scale)
         , textureHandle(_textureHandle)
         , normalMapHandle(-1)
+        , modelId(_modelId)
     {
 
     }

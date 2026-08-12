@@ -7,7 +7,7 @@ PlayerBase::PlayerBase(int _playerNo, JOB_TYPE _jobType, const VECTOR& _startPos
 	: CharaBase::CharaBase()
 	, playerNo_(_playerNo)
 	, jobType_(_jobType)
-	, playerType_(_playerType)
+	, skinType_(_playerType)
 	, hp_(HP_MAX_PLAYER), HP_MAX(HP_MAX_PLAYER)
 	, START_POS(_startPos)
 	, bodyPos_(UtilityMath::VECTOR_ZERO)
@@ -15,6 +15,7 @@ PlayerBase::PlayerBase(int _playerNo, JOB_TYPE _jobType, const VECTOR& _startPos
 	, shotType_(SHOT_TYPE::NONE)
 	, bullets_{}, clusterBullets_{}
 {
+	transform_.pos = START_POS;
 }
 
 void PlayerBase::SetDamage(int _damage, bool _isInvincible
