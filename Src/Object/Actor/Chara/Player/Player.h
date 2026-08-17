@@ -8,7 +8,10 @@ class Player : public PlayerBase
 {
 private:
 
+	// 吹っ飛ばし量
 	static constexpr float KNOCK_POW_Y = 5.0f;
+
+
 public:
 
 	enum class ANIM_TYPE
@@ -75,10 +78,10 @@ public:
 	bool GetIsRespawn(void)const;
 
 
-	// キャラクターの通信keyを設定
+	// キャラクターの通信キーを設定
 	void SetNetKey(int _key);
 
-	// キャラクターの通信keyを取得
+	// キャラクターの通信キーを取得
 	int GetNetKey(void) const { return netKey_; }
 
 protected:
@@ -106,15 +109,15 @@ private:
 
 	static constexpr std::array<SHOT_TYPE, static_cast<int>(JOB_TYPE::MAX)>
 		SHOT_TYPE_SPECIAL
-		= { SHOT_TYPE::BOMB_FINISH, SHOT_TYPE::NONE, SHOT_TYPE::CLUSTER, SHOT_TYPE::RECOVERY };
+		= { SHOT_TYPE::BOMB_FINISH, SHOT_TYPE::BIG, SHOT_TYPE::CLUSTER, SHOT_TYPE::RECOVERY };
 
 	// 連射パラメータ
-	static constexpr float SCALE_RAPID = 1.0f;
+	static constexpr float SCALE_RAPID = 0.85f;
 	static constexpr float RADIUS_RAPID = 10.0f;
-	static constexpr int POWER_RAPID = 1;
+	static constexpr int POWER_RAPID = 18;
 	static constexpr float SHOT_SPEED_XZ_RAPID = 17.5f;
 	static constexpr float SHOT_SPEED_Y_RAPID = 2.5f;
-	static constexpr float ALIVE_TIME_RAPID = 3.0f;
+	static constexpr float ALIVE_TIME_RAPID = 2.5f;
 
 
 	// 攻撃回数
@@ -158,6 +161,7 @@ private:
 	bool isNetAttack_;
 
 	bool isAttackSend_;
+
 
 	// 操作
 	void ProcessMove(void);

@@ -30,6 +30,7 @@ public:
 		, BOMB_FINISH
 
 		, BIG // ‹‘å
+		, BIG_FINISH // ‹‘å
 
 		, RAPID_FIRE // ˜AË
 		, CLUSTER	 // ŠgU
@@ -62,10 +63,10 @@ public:
 	static constexpr float TIME_INVINCIBLE = 1.0f;
 
 	// ŠgU’e‚Ì•ªŠ„”
-	static constexpr int CLUSTER_SPLIT = 8;
+	static constexpr int CLUSTER_SPLIT = 16;
 
-	// ŠgU’e¶¬ˆÊ’u’†‰›‚Ì’e‚ğœ‚­Aˆê“x‚É¶¬‚³‚ê‚é”
-	static constexpr int CLUSTER_NUM_MAX = (3 * CLUSTER_SPLIT) - 1;
+	// ŠgU’e‚Ìˆê“x‚É¶¬‚³‚ê‚é”
+	static constexpr int CLUSTER_NUM_MAX = ((2 * CLUSTER_SPLIT) + 1);
 
 
 	/// @brief ƒRƒ“ƒXƒgƒ‰ƒNƒ^
@@ -105,12 +106,13 @@ public:
 		GetBullets(void)const { return bullets_; };
 
 	/// @brief ŠgU’e‚ğæ“¾
-	std::array<std::unique_ptr<PBulletNormal>, (CLUSTER_NUM_MAX + 1)>&
+	std::array<std::unique_ptr<PBulletNormal>, (CLUSTER_NUM_MAX)>&
 		GetBulletsCluster(void) { return clusterBullets_; };
 
 
 protected:
 
+	// ¶è‚ÌƒtƒŒ[ƒ€”Ô†
 	const std::map<SKIN_TYPE, int>
 		FRAME_NUM_FINGER_LEFT
 	= {
@@ -120,6 +122,7 @@ protected:
 		{ SKIN_TYPE::BIRD, 19}
 	};
 
+	// ‰Eè‚ÌƒtƒŒ[ƒ€”Ô†
 	const std::map<SKIN_TYPE, int>
 		FRAME_NUM_FINGER_RIGHT
 		= {
@@ -149,7 +152,7 @@ protected:
 		bullets_;
 
 	// ŠgU’e
-	std::array<std::unique_ptr<PBulletNormal>, (CLUSTER_NUM_MAX + 1)>
+	std::array<std::unique_ptr<PBulletNormal>, (CLUSTER_NUM_MAX)>
 		clusterBullets_;
 
 	int hp_;

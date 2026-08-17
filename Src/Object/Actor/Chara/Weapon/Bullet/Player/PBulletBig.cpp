@@ -15,7 +15,7 @@ constexpr int POWER_START = 50;
 constexpr int POWER_INCREMENT = 75;
 
 // Šg‘åŠ®—¹‚Ü‚Å‚ÌŽžŠÔ
-constexpr float RADIUS_DURATION = 4.5f;
+constexpr float RADIUS_DURATION = 1.0f;
 
 
 

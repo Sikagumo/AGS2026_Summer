@@ -46,6 +46,7 @@ void PBulletNormal::SetParam(void)
 {
 	transform_.InitTransform(SCALE, transform_.quaRot, Quaternion::Identity());
 	aliveTime_ = ALIVE_TIME;
+	throwPow_.y = ((throwPow_.y < 0.0f) ? 0.0f : throwPow_.y);
 }
 
 void PBulletNormal::BlastAction(void)

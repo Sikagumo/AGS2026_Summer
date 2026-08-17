@@ -57,6 +57,11 @@ public:
 	int GetShotType(void)const { return shotType_; }
 	virtual void BlastAction(void) = 0;
 
+	const VECTOR& GetThrowDir(void)const { return throwDir_; };
+	const VECTOR& GetThrowPow(void)const { return throwPow_; };
+
+	float GetAliveTime(void)const { return aliveTime_; };
+	
 
 protected:
 

@@ -70,6 +70,8 @@ void PBulletRecovery::UpdatePost(void)
 			// “–‚½‚è”»’è–³Œø‰»
 			CollisionController::GetInstance()
 				.SetCollisionActive(this, ColliderBase::TAG::PLAYER_RECOVERY, false);
+
+
 			bulletState_ = BULLET_STATE::INACTIVE;
 			return;
 		}

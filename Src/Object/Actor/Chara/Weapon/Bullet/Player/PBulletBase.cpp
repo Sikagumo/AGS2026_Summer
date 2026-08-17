@@ -80,7 +80,11 @@ void PBulletBase::Update(void)
 
 		transform_.Translate(pos);
 
-		if (aliveTime_ <= 0.0f)
+		if (aliveTime_ > 0.0f)
+		{
+			aliveTime_ -= timeManager_.GetDeltaTime();
+		}
+		else
 		{
 			BlastAction();
 		}
@@ -176,8 +180,6 @@ void PBulletBase::Shot(const VECTOR& _shotDir)
 	VECTOR shotDir = ((UtilityMath::EqualsVZero(_shotDir))
 							? throwDir_ : _shotDir);
 
-	VECTOR shotPowXZ = VScale(UtilityMath::VNormalize(_shotDir), shotSpeedXZ_);
-	float shotPowY = VScale(UtilityMath::VNormalize(_shotDir), shotSpeedY_).y;
 
 	if (!IS_GRAVITY)
 	{
@@ -185,6 +187,9 @@ void PBulletBase::Shot(const VECTOR& _shotDir)
 	}
 	else
 	{
+		VECTOR shotPowXZ = VScale(UtilityMath::VNormalize(shotDir), shotSpeedXZ_);
+		float shotPowY = VScale(UtilityMath::VNormalize(shotDir), shotSpeedY_).y;
+
 		throwPow_.x = shotPowXZ.x;
 		throwPow_.y = shotPowY;
 		throwPow_.z = shotPowXZ.z;

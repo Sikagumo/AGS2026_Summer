@@ -8,6 +8,7 @@
 #include "../../../../Manager/Generic/InputManager.h"
 #include "../../../../Manager/Generic/SceneManager.h"
 #include "../../../../Manager/System/TimeManager.h"
+#include "../../../../Manager/Decoration/SoundManager.h"
 #include "../../../../Camera/Camera.h"
 #include "../../../../Common/Quaternion.h"
 #include "../../../Collision/CollisionController.h"
@@ -50,6 +51,13 @@ namespace
 	constexpr float MOVE_SPEED_SHOT = (MOVE_SPEED * 0.3f);
 
 	static constexpr float SHOT_RAPID_TERM = 0.025f;
+
+	// ägéUíe
+	constexpr float CLUSTER_SCALE = 0.25f;
+	constexpr float CLUSTER_RADIUS = 5.0f;
+	constexpr int CLUSTER_POWER = 10;
+	constexpr float CLUSTER_SHOT_SPEED = 20.0f;
+	constexpr float CLUSTER_ALIVE_TIME = 0.25f;
 };
 
 
@@ -84,6 +92,8 @@ Player::Player(int _playerNo, JOB_TYPE _jobType, SKIN_TYPE _skinType, const VECT
 	shotType_ = JOB_SHOT_TYPE[static_cast<int>(jobType_)];
 
 	moveSpeed_ = MOVE_SPEED;
+
+	std::fill(clusterBullets_.begin(), clusterBullets_.end(), nullptr);
 }
 
 
@@ -97,6 +107,10 @@ void Player::Load(void)
 
 	transform_.modelId = ResourceManager::GetInstance()
 		.LoadModelDuplicate(SKIN_SRC.at(skinType_));
+
+	// âÒïúSE
+	SoundManager::GetInstance().Add(SoundManager::TYPE::SE, SoundManager::SOUND::SE_RECOVERY_PLAYER
+		, ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::SE_PLAYER_RECOVERY));
 }
 
 void Player::InitAnimation(void)
@@ -122,9 +136,8 @@ void Player::InitAnimation(void)
 	}
 	else if (jobType_ == JOB_TYPE::RAPID_FIRE)
 	{
-		constexpr float THROW_SPEED_RAPID = 200.0f;
+		constexpr float THROW_SPEED_RAPID = 75.0f;
 		 throwSpeed = THROW_SPEED_RAPID;
-		//animSpeedRapid_ = throwSpeed = THROW_SPEED_RAPID_START;
 	}
 	else
 	{
@@ -203,7 +216,7 @@ void Player::InitPost(void)
 	actionController_ = std::make_unique<PActionController>(animation_, IS_RAPID_FIRE);
 
 
-	constexpr float SHOT_TIME_ACTIVE_INPUT = 1.725f; // ì¸óÕâ¬î\éûä‘
+	constexpr float SHOT_TIME_ACTIVE_INPUT = 2.0f; // ì¸óÕâ¬î\éûä‘
 	constexpr float SHOT_TIME_END = 0.25f; // èIóπéûä‘
 
 	float timeActive = 0.0f, timeActionActive = 0.0f, timeInput = 0.0f, timeEnd = 0.0f, timeStop = 0.0f, timeStopActive = 0.0f;
@@ -288,8 +301,9 @@ void Player::InitPost(void)
 			, timeStop, timeStopActive, timeInput);
 
 
+		// ì¡éÍ
 		actionNum = static_cast<int>(ACTION_TYPE::ATTACK_SPECIAL);
-		timeActive += (SHOT_TIME_INCREMENT * 2);
+		timeActive = SHOT_TIME_ACTIVE;
 		timeInput = 0.0f;
 
 		actionController_->SetAction(actionNum, timeActive, timeActionActive, timeEnd
@@ -298,21 +312,22 @@ void Player::InitPost(void)
 	}
 	else if (jobType_ == JOB_TYPE::RAPID_FIRE)
 	{
+		// ägéUíe
 		actionNum = static_cast<int>(ACTION_TYPE::ATTACK_SPECIAL);
-		constexpr float SHOT_TIME_ACTIVE = 0.4f; // óLå¯éûä‘
-		constexpr float SHOT_TIME_ACTION_ACTIVE = 0.325f;
-		timeEnd = 0.0f;
+		constexpr float SHOT_TIME_ACTIVE = 0.5f; // óLå¯éûä‘
+		constexpr float SHOT_TIME_ACTION_ACTIVE = 0.375f;
+		timeEnd = 0.25f;
 		timeActive = SHOT_TIME_ACTIVE;
 		timeActionActive = SHOT_TIME_ACTION_ACTIVE;
 
 		actionController_->SetAction(actionNum, timeActive, timeActionActive, timeEnd
 			, std::bind(&Player::ShotCluster, this));
 
-
+		// òAéÀíe
 		actionNum = static_cast<int>(ACTION_TYPE::ATTACK);
 		timeEnd = 0.0f;
-		timeActive = 0.5f;
-		timeActionActive = 0.1f;
+		timeActive = 0.4f;
+		timeActionActive = 0.25f;
 
 		actionController_->SetAction(actionNum, timeActive, timeActionActive, timeEnd
 			, std::bind(&Player::ShotBullet, this));
@@ -406,6 +421,9 @@ void Player::UpdateProcess(void)
 		float recovery = (static_cast<float>(HP_MAX) * PBulletRecovery::RECOVERY_RATE);
 		hp_ += static_cast<int>(recovery);
 		hp_ = ((hp_ > HP_MAX) ? HP_MAX : hp_);
+
+		// SEçƒê∂
+		SoundManager::GetInstance().Play(SoundManager::SOUND::SE_RECOVERY_PLAYER);
 	}
 
 	// É}ÉãÉ`ÉvÉåÉCÇÃÇΩÇﬂí«â¡
@@ -421,6 +439,15 @@ void Player::Draw(void)
 
 	// î≠éÀï˚å¸ï`âÊ
 	DrawShotOrbit();
+
+	if (jobType_ == JOB_TYPE::RAPID_FIRE && !clusterBullets_.empty())
+	{
+		for (auto& bullet : clusterBullets_)
+		{
+			if (bullet == nullptr) { continue; }
+			bullet->Draw();
+		}
+	}
 
 	if (timeInv_ > 0.0f)
 	{
@@ -788,11 +815,6 @@ void Player::Dodge(void)
 
 void Player::ProcessDefeat(void)
 {
-	constexpr int VIBRATION_POW = 750;
-	constexpr float VIBRATION_TIME = 0.1f;
-	InputManager::GetInstance()
-		.SetVibration(InputManager::JOYPAD_NO::PAD1, VIBRATION_POW, VIBRATION_TIME);
-
 	if (actionController_->IsEndActionActive()
 		&& animation_->IsEnd()
 		&& animation_->GetPlayType() == static_cast<int>(ANIM_TYPE::DEFEAT))
@@ -840,10 +862,12 @@ void Player::ProcessKnock(void)
 
 void Player::ProcessAttack(void)
 {
+	// òAéÀíeå^
 	if (jobType_ == JOB_TYPE::RAPID_FIRE)
 	{
 		if (shotTerm_ <= 0.0f)
 		{
+			// 
 			if (InputManager::GetInstance().IsClickMouseLeft()
 				|| InputManager::GetInstance().IsPadBtnNew(InputManager::JOYPAD_NO::PAD1, InputManager::JOYPAD_BTN::R_TRIGGER))
 			{
@@ -851,9 +875,18 @@ void Player::ProcessAttack(void)
 				shotTerm_ = SHOT_RAPID_TERM;
 			}
 
-			if (InputManager::GetInstance().IsClickMouseLeft()
-				|| InputManager::GetInstance().IsPadBtnNew(InputManager::JOYPAD_NO::PAD1, InputManager::JOYPAD_BTN::L_TRIGGER))
+			if (InputManager::GetInstance().IsTrgMouseRight()
+				|| InputManager::GetInstance().IsPadBtnTrgDown(InputManager::JOYPAD_NO::PAD1, InputManager::JOYPAD_BTN::L_TRIGGER))
 			{
+				// íeÇ™ê∂ë∂íÜÇÕägéUíeÇóLå¯Ç…ÇµÇ»Ç¢
+				if (clusterBullets_.at(0) != nullptr)
+				{
+					if (clusterBullets_.at(0)->IsAlive())
+					{
+						return;
+					}
+				}
+
 				ProcShotSpecial();
 				shotTerm_ = SHOT_RAPID_TERM;
 			}
@@ -863,6 +896,7 @@ void Player::ProcessAttack(void)
 			shotTerm_ -= TimeManager::GetInstance().GetDeltaTime();
 		}
 	}
+
 	else
 	{
 		if (InputManager::GetInstance().IsTrgMouseLeft()
@@ -963,12 +997,21 @@ void Player::UpdateBullets(void)
 		bullet->Update();
 	}
 
+	if (jobType_ == JOB_TYPE::RAPID_FIRE)
+	{
+		for (auto& cluster : clusterBullets_)
+		{
+			if (cluster == nullptr) { continue; }
+
+			cluster->Update();
+		}
+	}
+
 	if (bullets_.empty()) { return; }
 	
 
 	if (shotIndex_ != -1)
 	{
-		int temp = MV1GetFrameNum(transform_.modelId);
 		if (animation_->IsStop())
 		{
 			bullets_.at(shotIndex_)->PreActiveProcess();
@@ -1076,94 +1119,119 @@ void Player::CreateBullet(void)
 
 	}
 
+	// èIóπéûÇÃî≠éÀèàóùÇ…ïœçXÇ∑ÇÈÇ©î€Ç©
+	bool isFinishShot = (curAttackNum_ >= (attackNumMax_ - 1));
+
 	bullet->Load();
 	bullet->Init();
-	bullet->Create(throwPos_, throwDir_, curAttackNum_, (curAttackNum_ >= (attackNumMax_ - 1)));
+	bullet->Create(throwPos_, throwDir_, curAttackNum_, isFinishShot);
 
 	bullets_.emplace_back(std::move(bullet));
 }
 
 void Player::CreateCluster(void)
 {
-	// â~ÇÃï™äÑêî
-	constexpr float ANGLE = (360.0f / CLUSTER_SPLIT);
+	// ägéUÇ∑ÇÈäpìxÇÃç≈ëÂíl
+	constexpr float CONE_ANGLE_MAX = (360.0f / CLUSTER_SPLIT);
 
-	const float RANGE = 50;
+	// ê≥ñ ÇÃï˚å¸(É[ÉçÉxÉNÉgÉãéûÇÕZ+ï˚å¸Çê≥ñ Ç…Ç∑ÇÈ)
+	const VECTOR FORWARD_DIR = ((UtilityMath::EqualsVZero(transform_.GetForward()) ? VGet(0.0f, 0.0f, 1.0f) : transform_.GetForward()));
 
-	float angle = 0;
-	int cnt = 0, listCnt = -1;
-	Quaternion rot = Quaternion::Identity();
+	int cnt = 0;
+
+	// èââÒê∂ê¨Ç©î€Ç©
+	const bool IS_FIRST_CREATE = (clusterBullets_.at(0) == nullptr);
 
 	VECTOR createPos = throwPos_;
+	createPos.y += 10.0f;
 
-	// íeÇê∂ê¨
-	std::unique_ptr<PBulletNormal> bullet;
+	// ëOï˚å¸ÇÃäÓèÄé≤
+	VECTOR rightAxis = UtilityMath::VNormalize(VCross(UtilityMath::AXIS_Y, FORWARD_DIR));
+	if (UtilityMath::EqualsVZero(rightAxis))
+	{
+		// ê^è„/ê^â∫Ç…å¸Ç¢ÇƒÇ¢ÇÈèÍçáÇÃï€åØ
+		rightAxis = UtilityMath::AXIS_X;
+	}
 
 	// íÜêSÇÃíeÇê∂ê¨
-	clusterBullets_.at(cnt) = _CreateClusterBullet(throwDir_);
-
-	createPos.y += 1.0f;
-
-	const int MAX = (CLUSTER_NUM_MAX / CLUSTER_SPLIT) + 1;
-	int spawnMax;
-
-	for (int i = 1; i < MAX; i++)
+	if (IS_FIRST_CREATE)
 	{
-		rot = Quaternion::Identity();
+		std::unique_ptr<PBulletNormal> centerBullet = _CreateClusterBullet(FORWARD_DIR);
+		centerBullet->Load();
+		centerBullet->Init();
+		centerBullet->Create(createPos, FORWARD_DIR);
+		clusterBullets_.at(cnt++) = std::move(centerBullet);
+	}
+	else
+	{
+		// çƒóòóp
+		clusterBullets_.at(cnt)->Init();
+		clusterBullets_.at(cnt)->Create(createPos, FORWARD_DIR);
+		cnt++;
+	}
 
-		// ê∂ê¨ç≈ëÂêî
-		spawnMax = (CLUSTER_SPLIT * i);
 
-		for (int circle = 0; circle < (spawnMax - 1); circle++)
+
+	// ägéUÇ∑ÇÈíeÇÃó÷ÇÃç≈ëÂêî
+	const int RING_NUM = (CLUSTER_NUM_MAX / CLUSTER_SPLIT);
+	
+	for (int ring = 1; ring < RING_NUM; ring++)
+	{
+		// ó÷ÇÃägéUäpìx
+		const float CONE_ANGLE = (CONE_ANGLE_MAX / static_cast<float>(RING_NUM - 1) * static_cast<float>(ring));
+		const Quaternion CONE_ROT = Quaternion::AngleAxis(UtilityMath::Deg2RadF(CONE_ANGLE), rightAxis);
+
+		// ëOï˚å¸ÇåXÇØÇÈ
+		const VECTOR TILED_DIR = Quaternion::PosAxis(CONE_ROT, FORWARD_DIR);
+
+
+		// äpìxÇïœçXÇµÇƒÇ¢Ç≠íl
+		const float AZIMUTH_STEP = (360.0f / static_cast<float>(CLUSTER_SPLIT));
+
+		for (int circle = 1; circle < CLUSTER_SPLIT; circle++)
 		{
-			// â~èÛÇ…àÍíËÇÃîÕàÕä‘äuÇ≈ê∂ê¨à íuÇê›íË
-			angle = ((ANGLE / i) * (circle + 1));
-			rot = rot.Mult(Quaternion::AngleAxis(UtilityMath::Deg2RadF(angle), UtilityMath::AXIS_Y));
+			// äpìx
+			float azimuth = AZIMUTH_STEP * static_cast<float>(circle);
+			const Quaternion azimuthRot = Quaternion::AngleAxis(UtilityMath::Deg2RadF(azimuth), FORWARD_DIR);
 
-			//VECTOR shotDir = rot.GetForward();
-			VECTOR shotDir = UtilityMath::VNormalize(VAdd(transform_.GetForward(), rot.GetForward()));
-			createPos = VScale(shotDir, RANGE * i);
+			// ï˙éÀèÛÇ…î≠éÀÇ∑ÇÈÇÊÇ§Ç…ï˚å¸Çí≤êÆ
+			VECTOR shotDir = UtilityMath::VNormalize(Quaternion::PosAxis(azimuthRot, TILED_DIR));
 
-			// â~èÛÇ…ìGê∂ê¨èàóù
-			// íÜêSÇÃíeÇê∂ê¨
-			std::unique_ptr bullet = _CreateClusterBullet(throwDir_);
 
-			bullet->Load();
-			bullet->Init();
-			bullet->Create(createPos, shotDir);
-			clusterBullets_.at(++cnt) = std::move(bullet);
+			// äeägéUíeÇê∂ê¨
+			if (IS_FIRST_CREATE)
+			{
+				std::unique_ptr bullet = _CreateClusterBullet(shotDir);
 
-			// ê∂ê¨êîÇ™àÍíËÇí¥Ç¶ÇΩÇÁèIóπ
-			if (cnt > CLUSTER_NUM_MAX) { break; }
+				bullet->Load();
+				bullet->Init();
+				bullet->Create(createPos, shotDir);
+
+				clusterBullets_.at(cnt++) = std::move(bullet);
+			}
+			else
+			{
+				// çƒóòóp
+				clusterBullets_.at(cnt)->Init();
+				clusterBullets_.at(cnt)->Create(createPos, shotDir);
+				cnt++;
+			}
 		}
-	}
 
-}
-void Player::ShotCluster(void)
-{
-	// î≠éÀèàóùÇÃóLå¯âª
-	for (auto& bullet : clusterBullets_)
-	{
-		bullet->Shot();
+		// ê∂ê¨êîÇ™àÍíËÇí¥Ç¶ÇΩÇÁèIóπ
+		if (cnt > (CLUSTER_NUM_MAX)) { break; }
 	}
-
-	shotIndex_ = -1;
 }
+
 std::unique_ptr<PBulletNormal> Player::_CreateClusterBullet(const VECTOR& _throwDir)
 {
-	constexpr float SCALE = 0.25f;
-	constexpr float RADIUS = 10.0f;
-	constexpr int POWER = 2;
-	constexpr float SHOT_SPEED = 7.5f;
-	constexpr float ALIVE_TIME = 1.25f;
-	
-	return std::make_unique<PBulletNormal>(SCALE, RADIUS, POWER, SHOT_SPEED, 0.0f, ALIVE_TIME
+	return std::make_unique<PBulletNormal>(CLUSTER_SCALE, CLUSTER_RADIUS, CLUSTER_POWER
+											, CLUSTER_SHOT_SPEED, 0.0f, CLUSTER_ALIVE_TIME
 		,static_cast<int>(SHOT_TYPE::CLUSTER) , false);
 }
 
 void Player::ShotBullet(void)
 {
-
 	bullets_[shotIndex_]->Shot(CalcShotDir());
 	shotIndex_ = -1;
 }
@@ -1180,6 +1248,7 @@ VECTOR Player::CalcShotDir(void)
 
 	else if (SceneManager::GetInstance().GetCamera()->GetIsLockOn())
 	{
+		// íºê¸Ç…ìäÇ∞ÇÈ
 		VECTOR throwDir = UtilityMath::VNormalize(
 			VSub(SceneManager::GetInstance().GetCamera()->GetLockOnPos(),
 				throwPos_));
@@ -1188,6 +1257,17 @@ VECTOR Player::CalcShotDir(void)
 	}
 
 	return shotDir;
+}
+void Player::ShotCluster(void)
+{
+	// î≠éÀèàóùÇÃóLå¯âª
+	for (auto& bullet : clusterBullets_)
+	{
+		if (bullet == nullptr) { continue; }
+
+		bullet->Shot();
+	}
+	shotIndex_ = -1;
 }
 
 void Player::PlayAnimation(ANIM_TYPE _type, bool _isLoop, bool _isAnimBlend, float _animSpeed)
