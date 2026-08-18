@@ -92,7 +92,7 @@ private:
 
     std::unique_ptr<Boss> boss_;
 
-    std::vector<std::unique_ptr<EnemyRobo>>enemyRobos_;
+    std::vector<std::unique_ptr<EnemyRobo>>enemyRobots_;
 
     std::unique_ptr<Stage> stage_;
 

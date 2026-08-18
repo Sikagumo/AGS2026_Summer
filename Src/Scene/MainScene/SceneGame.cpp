@@ -23,7 +23,7 @@
 SceneGame::SceneGame(std::vector<PlayerSelectType> _playerSelectType)
 	: players_()
 	, boss_(std::make_unique<Boss>())
-	, enemyRobos_()
+	, enemyRobots_()
 	, gameTexts_()
 	, stage_(std::make_unique<Stage>())
 	, damageController_(std::make_unique<DamageController>())
@@ -49,7 +49,7 @@ SceneGame::SceneGame(std::vector<PlayerSelectType> _playerSelectType)
 	{
 		std::unique_ptr<EnemyRobo> enemy = std::make_unique<EnemyRobo>(ENEMY_POS[i]);
 
-		enemyRobos_.emplace_back(std::move(enemy));
+		enemyRobots_.emplace_back(std::move(enemy));
 	}
 
 	boss_->SetPlayerSize(static_cast<int>(_playerSelectType.size()));
@@ -73,7 +73,7 @@ void SceneGame::Load(void)
 		player->Load();
 	}
 
-	for (auto& enemyRobo : enemyRobos_)
+	for (auto& enemyRobo : enemyRobots_)
 	{
 		enemyRobo->Load();
 	}
@@ -88,7 +88,7 @@ void SceneGame::Load(void)
 
 	ResourceManager::GetInstance().LoadHandleIds(ResourceManager::SRC::IMGS_GAME_TEXT, uiGame_.data());
 
-	for (auto& enemyRobo : enemyRobos_)
+	for (auto& enemyRobo : enemyRobots_)
 	{
 		enemyRobo->Load();
 	}
@@ -104,9 +104,6 @@ void SceneGame::Load(void)
 
 	SoundManager::GetInstance().Add(SoundManager::TYPE::BGM, SoundManager::SOUND::BGM_TITLE_THUNDER
 			, ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::BGM_TITLE_THUNDER));
-
-	SoundManager::GetInstance().Add(SoundManager::TYPE::SE, SoundManager::SOUND::SE_DAMAGE_PLAYER
-		, ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::SE_PLAYER_DAMAGE));
 
 	SoundManager::GetInstance().Add(SoundManager::TYPE::SE, SoundManager::SOUND::SE_HIT_BLAST
 		, ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::SE_HIT_BLAST));
@@ -161,7 +158,7 @@ void SceneGame::Initialize(void)
 	{
 		player->Init();
 	}
-	for (auto& enemyRobo : enemyRobos_)
+	for (auto& enemyRobo : enemyRobots_)
 	{
 		enemyRobo->Init();
 	}
@@ -217,7 +214,7 @@ void SceneGame::Update(void)
 
 void SceneGame::DamageProcess(void)
 {
-	for (auto& enemyRobo : enemyRobos_)
+	for (auto& enemyRobo : enemyRobots_)
 	{
 		enemyRobo->SetPlayerPos(players_.at(0)->GetBodyPos());
 	}
@@ -297,6 +294,7 @@ void SceneGame::UpdateGameTime(void)
 	{
 		gameTimer_->Update();
 
+		// プレイヤー撃破時、制限時間の減少
 		for (auto& player : players_)
 		{
 			if (!player->GetIsRespawn()) { continue; }
@@ -310,6 +308,7 @@ void SceneGame::UpdateGameTime(void)
 		gameTimer_->SetTime(NetManager::GetInstance().GetGameTime());
 	}
 
+	// 制限時間が0の時、ゲーム終了
 	if (gameTimer_->GetTime() <= 0.0f)
 	{
 		ChangeState(GAME_STATE::GAME_END);
@@ -617,7 +616,7 @@ void SceneGame::UpdateGame(void)
 	}
 
 
-	for (auto& enemyRobo : enemyRobos_)
+	for (auto& enemyRobo : enemyRobots_)
 	{
 		enemyRobo->Update();
 	}
@@ -645,6 +644,10 @@ void SceneGame::UpdateGame(void)
 			if (bullet == nullptr) { continue; }
 			attackPower = std::max(attackPower, bullet->GetPowerBullet());
 			attackBlast = std::max(attackBlast, bullet->GetPowerBlast());
+			if (bullet->GetPowerBullet() > 0)
+			{
+				int temp = 0;
+			}
 		}
 	}
 	damageController_->SetPlayerAttack(attackPower, attackBlast);
@@ -719,7 +722,7 @@ void SceneGame::DrawGame(void)
 	}
 
 	boss_->Draw();
-	for (auto& enemyRobo : enemyRobos_)
+	for (auto& enemyRobo : enemyRobots_)
 	{
 		if (!enemyRobo->IsAlive()) continue;
 		enemyRobo->Draw();

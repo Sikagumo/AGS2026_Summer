@@ -116,6 +116,7 @@
     <ClCompile Include="Src\Object\Actor\Chara\Weapon\BossWeapon\Cannon\WeaponCannon.cpp" />
     <ClCompile Include="Src\Object\Actor\Chara\Weapon\BossWeapon\MG\WeaponMGL.cpp" />
     <ClCompile Include="Src\Object\Actor\Chara\Weapon\BossWeapon\MG\WeaponMGR.cpp" />
+    <ClCompile Include="Src\Manager\Generic\StatusManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\Scene\SubScene\SceneOperation.h" />
@@ -221,6 +222,7 @@
     <ClInclude Include="Src\Object\Actor\Chara\Weapon\BossWeapon\Cannon\WeaponCannon.h" />
     <ClInclude Include="Src\Object\Actor\Chara\Weapon\BossWeapon\MG\WeaponMGL.h" />
     <ClInclude Include="Src\Object\Actor\Chara\Weapon\BossWeapon\MG\WeaponMGR.h" />
+    <ClInclude Include="Src\Manager\Generic\StatusManager.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="srcGraphics\Pixel\NormalMap.hlsl">

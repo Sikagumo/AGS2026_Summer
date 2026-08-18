@@ -17,7 +17,7 @@ constexpr float ACTIVE_TIME = 2.5f;
 
 PBulletPoison::PBulletPoison(int _shotType)
 	: PBulletBase::PBulletBase(_shotType)
-	, activeTime_(ACTIVE_TIME)
+	, activeTime_(0.0f)
 {
 }
 
@@ -25,18 +25,6 @@ void PBulletPoison::Load(void)
 {
 	SoundManager::GetInstance().Add(SoundManager::TYPE::SE, SoundManager::SOUND::SE_PBULLET_POISON
 		, ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::SE_PBULLET_POISON));
-}
-
-void PBulletPoison::InitTransform(void)
-{
-	
-}
-
-void PBulletPoison::InitPost(void)
-{
-	PBulletBase::InitPost();
-
-	activeTime_ = ACTIVE_TIME;
 }
 
 void PBulletPoison::UpdatePost(void)
@@ -81,6 +69,8 @@ void PBulletPoison::SetParam(void)
 
 	radiusBullet_ = RADIUS_BULLET;
 	radiusBlast_ = 0.0f;
+
+
 	power_ = POWER_POISON;
 	transform_.InitTransform(SCALE_POISON
 		, transform_.quaRot, Quaternion::Identity());
@@ -90,6 +80,7 @@ void PBulletPoison::BlastAction(void)
 {
 	bulletState_ = BULLET_STATE::BLAST;
 	isVisible_ = false;
+
 	activePowerBlast_ = power_;
 	activeTime_ = ACTIVE_TIME;
 

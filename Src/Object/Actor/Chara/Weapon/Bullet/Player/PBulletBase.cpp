@@ -25,6 +25,9 @@ PBulletBase::PBulletBase(int _shotType, bool _isGravity)
 {
 }
 
+void PBulletBase::InitTransform(void)
+{
+}
 void PBulletBase::InitCollider(void)
 {
 	// çƒèâä˙âªéûÅAèàóùÇèIóπ
@@ -40,17 +43,26 @@ void PBulletBase::InitCollider(void)
 									, UtilityMath::VECTOR_ZERO, radiusBullet_);
 	ownColliders_[static_cast<int>(COLLISION_TYPE::BLAST)]
 		.emplace_back(blast);
+
+	CollisionController::GetInstance()
+		.SetCollisionActive(this, ColliderBase::TAG::PLAYER_BULLET, true);
+
+	CollisionController::GetInstance()
+		.SetCollisionActive(this, ColliderBase::TAG::PLAYER_BLAST, false);
 }
 
 void PBulletBase::InitPost(void)
 {
 	isVisible_ = true;
 	bulletState_ = BULLET_STATE::INACTIVE;
-	activePowerBullet_ = 0;
-	activePowerBlast_ = 0;
+	activePowerBullet_ = activePowerBlast_ = 0;
 	isActiveDestroy_ = false;
+	radiusBlast_ = 0.0f;
 
 	SetParam();
+
+	ownColliders_.at(static_cast<int>(COLLISION_TYPE::BLAST))
+		.at(0)->SetRadius(radiusBlast_);
 }
 
 
@@ -68,7 +80,11 @@ void PBulletBase::Update(void)
 
 		transform_.Translate(pos);
 
-		if (aliveTime_ <= 0.0f)
+		if (aliveTime_ > 0.0f)
+		{
+			aliveTime_ -= timeManager_.GetDeltaTime();
+		}
+		else
 		{
 			BlastAction();
 		}
@@ -119,13 +135,12 @@ void PBulletBase::Draw(void)
 		DrawSphere3D(transform_.pos, radiusBullet_, SPHERE_DIV, 0xffffff, 0xffffff, true);
 	}
 
-
+#ifdef _DEBUG
 	if (bulletState_ == BULLET_STATE::BLAST)
 	{
-#ifdef _DEBUG
 		DrawSphere3D(transform_.pos, radiusBlast_, SPHERE_DIV, 0xff0000, 0xffffff, false);
-#endif
 	}
+#endif
 }
 
 void PBulletBase::ReleasePost(void)
@@ -165,8 +180,6 @@ void PBulletBase::Shot(const VECTOR& _shotDir)
 	VECTOR shotDir = ((UtilityMath::EqualsVZero(_shotDir))
 							? throwDir_ : _shotDir);
 
-	VECTOR shotPowXZ = VScale(UtilityMath::VNormalize(_shotDir), shotSpeedXZ_);
-	float shotPowY = VScale(UtilityMath::VNormalize(_shotDir), shotSpeedY_).y;
 
 	if (!IS_GRAVITY)
 	{
@@ -174,6 +187,9 @@ void PBulletBase::Shot(const VECTOR& _shotDir)
 	}
 	else
 	{
+		VECTOR shotPowXZ = VScale(UtilityMath::VNormalize(shotDir), shotSpeedXZ_);
+		float shotPowY = VScale(UtilityMath::VNormalize(shotDir), shotSpeedY_).y;
+
 		throwPow_.x = shotPowXZ.x;
 		throwPow_.y = shotPowY;
 		throwPow_.z = shotPowXZ.z;

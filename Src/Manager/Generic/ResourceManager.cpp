@@ -283,6 +283,7 @@ void ResourceManager::Initialize(void)
 	_SetResource(LOAD_TYPE::SOUND, SRC::SE_HIT_POISON, PATH_SE + "HitPoison.mp3");
 	_SetResource(LOAD_TYPE::SOUND, SRC::SE_HIT_BLAST, PATH_SE + "HitBlast.mp3");
 	_SetResource(LOAD_TYPE::SOUND, SRC::SE_PLAYER_DAMAGE, PATH_SE + "PlayerDamage.mp3");
+	_SetResource(LOAD_TYPE::SOUND, SRC::SE_PLAYER_RECOVERY, PATH_SE + "PlayerRecovery.mp3");
 	_SetResource(LOAD_TYPE::SOUND, SRC::SE_BOSS_MG_FIRE, PATH_SE + "MGFire.mp3");
 	_SetResource(LOAD_TYPE::SOUND, SRC::SE_BOSS_LANDING, PATH_SE + "BossLanding.mp3");
 	_SetResource(LOAD_TYPE::SOUND, SRC::SE_BOSS_ROAD, PATH_SE + "Road.mp3");

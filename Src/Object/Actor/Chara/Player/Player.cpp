@@ -8,6 +8,7 @@
 #include "../../../../Manager/Generic/KeyConfInputManager.h"
 #include "../../../../Manager/Generic/SceneManager.h"
 #include "../../../../Manager/System/TimeManager.h"
+#include "../../../../Manager/Decoration/SoundManager.h"
 #include "../../../../Camera/Camera.h"
 #include "../../../../Common/Quaternion.h"
 #include "../../../Collision/CollisionController.h"
@@ -50,6 +51,13 @@ namespace
 	constexpr float MOVE_SPEED_SHOT = (MOVE_SPEED * 0.3f);
 
 	static constexpr float SHOT_RAPID_TERM = 0.025f;
+
+	// 拡散弾
+	constexpr float CLUSTER_SCALE = 0.25f;
+	constexpr float CLUSTER_RADIUS = 5.0f;
+	constexpr int CLUSTER_POWER = 10;
+	constexpr float CLUSTER_SHOT_SPEED = 20.0f;
+	constexpr float CLUSTER_ALIVE_TIME = 0.25f;
 };
 
 
@@ -84,6 +92,8 @@ Player::Player(int _playerNo, JOB_TYPE _jobType, SKIN_TYPE _skinType, const VECT
 	shotType_ = JOB_SHOT_TYPE[static_cast<int>(jobType_)];
 
 	moveSpeed_ = MOVE_SPEED;
+
+	std::fill(clusterBullets_.begin(), clusterBullets_.end(), nullptr);
 }
 
 
@@ -97,6 +107,10 @@ void Player::Load(void)
 
 	transform_.modelId = ResourceManager::GetInstance()
 		.LoadModelDuplicate(SKIN_SRC.at(skinType_));
+
+	// 回復SE
+	SoundManager::GetInstance().Add(SoundManager::TYPE::SE, SoundManager::SOUND::SE_RECOVERY_PLAYER
+		, ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::SE_PLAYER_RECOVERY));
 }
 
 void Player::InitAnimation(void)
@@ -122,9 +136,8 @@ void Player::InitAnimation(void)
 	}
 	else if (jobType_ == JOB_TYPE::RAPID_FIRE)
 	{
-		constexpr float THROW_SPEED_RAPID = 200.0f;
+		constexpr float THROW_SPEED_RAPID = 75.0f;
 		 throwSpeed = THROW_SPEED_RAPID;
-		//animSpeedRapid_ = throwSpeed = THROW_SPEED_RAPID_START;
 	}
 	else
 	{
@@ -203,7 +216,7 @@ void Player::InitPost(void)
 	actionController_ = std::make_unique<PActionController>(animation_, IS_RAPID_FIRE);
 
 
-	constexpr float SHOT_TIME_ACTIVE_INPUT = 1.725f; // 入力可能時間
+	constexpr float SHOT_TIME_ACTIVE_INPUT = 2.0f; // 入力可能時間
 	constexpr float SHOT_TIME_END = 0.25f; // 終了時間
 
 	float timeActive = 0.0f, timeActionActive = 0.0f, timeInput = 0.0f, timeEnd = 0.0f, timeStop = 0.0f, timeStopActive = 0.0f;
@@ -288,8 +301,9 @@ void Player::InitPost(void)
 			, timeStop, timeStopActive, timeInput);
 
 
+		// 特殊
 		actionNum = static_cast<int>(ACTION_TYPE::ATTACK_SPECIAL);
-		timeActive += (SHOT_TIME_INCREMENT * 2);
+		timeActive = SHOT_TIME_ACTIVE;
 		timeInput = 0.0f;
 
 		actionController_->SetAction(actionNum, timeActive, timeActionActive, timeEnd
@@ -298,21 +312,22 @@ void Player::InitPost(void)
 	}
 	else if (jobType_ == JOB_TYPE::RAPID_FIRE)
 	{
+		// 拡散弾
 		actionNum = static_cast<int>(ACTION_TYPE::ATTACK_SPECIAL);
-		constexpr float SHOT_TIME_ACTIVE = 0.4f; // 有効時間
-		constexpr float SHOT_TIME_ACTION_ACTIVE = 0.325f;
-		timeEnd = 0.0f;
+		constexpr float SHOT_TIME_ACTIVE = 0.5f; // 有効時間
+		constexpr float SHOT_TIME_ACTION_ACTIVE = 0.375f;
+		timeEnd = 0.25f;
 		timeActive = SHOT_TIME_ACTIVE;
 		timeActionActive = SHOT_TIME_ACTION_ACTIVE;
 
 		actionController_->SetAction(actionNum, timeActive, timeActionActive, timeEnd
 			, std::bind(&Player::ShotCluster, this));
 
-
+		// 連射弾
 		actionNum = static_cast<int>(ACTION_TYPE::ATTACK);
 		timeEnd = 0.0f;
-		timeActive = 0.5f;
-		timeActionActive = 0.1f;
+		timeActive = 0.4f;
+		timeActionActive = 0.25f;
 
 		actionController_->SetAction(actionNum, timeActive, timeActionActive, timeEnd
 			, std::bind(&Player::ShotBullet, this));
@@ -406,6 +421,9 @@ void Player::UpdateProcess(void)
 		float recovery = (static_cast<float>(HP_MAX) * PBulletRecovery::RECOVERY_RATE);
 		hp_ += static_cast<int>(recovery);
 		hp_ = ((hp_ > HP_MAX) ? HP_MAX : hp_);
+
+		// SE再生
+		SoundManager::GetInstance().Play(SoundManager::SOUND::SE_RECOVERY_PLAYER);
 	}
 
 	// マルチプレイのため追加
@@ -421,6 +439,15 @@ void Player::Draw(void)
 
 	// 発射方向描画
 	DrawShotOrbit();
+
+	if (jobType_ == JOB_TYPE::RAPID_FIRE && !clusterBullets_.empty())
+	{
+		for (auto& bullet : clusterBullets_)
+		{
+			if (bullet == nullptr) { continue; }
+			bullet->Draw();
+		}
+	}
 
 	if (timeInv_ > 0.0f)
 	{
@@ -519,9 +546,12 @@ void Player::DrawLate(void)
 
 VECTOR Player::CalcAddPosition(void)
 {
+	/* 座標にベクトルを加算 */
+
 	VECTOR ret = UtilityMath::VECTOR_ZERO;
 
-	if (hp_ <= 0)
+	if (hp_ <= 0
+		|| CollisionController::GetInstance().IsActorCollidingWithTag(this, ColliderBase::TAG::WALL))
 	{
 		movePow_ = UtilityMath::VECTOR_ZERO;
 		dodgePowXZ_ = UtilityMath::VECTOR2F_ZERO;
@@ -559,8 +589,10 @@ void Player::SetSoundData(VECTOR _pos, float _radius, bool _isLanging,bool _isMG
 
 bool Player::GetIsRespawn(void) const
 {
-	return (actionController_->GetCurActionNum() == static_cast<int>(ACTION_TYPE::NONE)
-			&& actionController_->GetPreActionNum() == static_cast<int>(ACTION_TYPE::DEFEAT));
+	// 撃破アニメーション終了の瞬間true
+	return (actionController_->GetCurActionNum() == static_cast<int>(ACTION_TYPE::DEFEAT)
+			&& animation_->GetPlayType() == static_cast<int>(ANIM_TYPE::DEFEAT)
+			&& animation_->IsEnd());
 }
 
 void Player::ReleasePost(void)
@@ -805,7 +837,6 @@ void Player::Dodge(void)
 
 void Player::ProcessDefeat(void)
 {
-	
 	if (actionController_->IsEndActionActive()
 		&& animation_->IsEnd()
 		&& animation_->GetPlayType() == static_cast<int>(ANIM_TYPE::DEFEAT))
@@ -824,35 +855,54 @@ void Player::ProcessDefeat(void)
 void Player::ProcessKnock(void)
 {
 	/* 吹っ飛ばしの重力加算 */
-	if (!UtilityMath::EqualsVZero(knockPowXZ_)
-		&& jumpPow_ < 0.0f)
+
+	constexpr float WAVE_KNOCK = 3.25f;
+	constexpr float MISSILE_KNOCK = 2.5f;
+
+	// ボスの衝撃波による吹っ飛ばし
+	if (CollisionController::GetInstance().IsActorCollidingWithTag(
+		this, ColliderBase::TAG::HIT_WAVE))
+	{
+		VECTOR hitPos =
+			CollisionController::GetInstance().IsActorHitPosWithTag(
+				this, ColliderBase::TAG::HIT_WAVE);
+
+		VECTOR knockDir = VSub(transform_.pos, hitPos);
+
+		knockDir.y = KNOCK_POW_Y;
+		knockDir = UtilityMath::VNormalize(knockDir);
+
+		SetKnock(knockDir, WAVE_KNOCK, false);
+	}
+
+	// ボスのミサイルによる吹っ飛ばし
+	if (CollisionController::GetInstance().IsActorCollidingWithTag(
+		this, ColliderBase::TAG::MISSILE_PUSH))
+	{
+		VECTOR hitPos =
+			CollisionController::GetInstance().IsActorHitPosWithTag(
+				this, ColliderBase::TAG::MISSILE_PUSH);
+
+		VECTOR knockDir = VSub(transform_.pos, hitPos);
+
+		knockDir.y = (KNOCK_POW_Y / 2);
+		knockDir = UtilityMath::VNormalize(knockDir);
+
+		SetKnock(knockDir, MISSILE_KNOCK, false);
+	}
+
+
+	// 壁に衝突・落下中に吹っ飛ばしが残っている場合は停止を停止
+	if (CollisionController::GetInstance().IsActorCollidingWithTag(this, ColliderBase::TAG::WALL)
+		|| !UtilityMath::EqualsVZero(knockPowXZ_) && jumpPow_ < 0.0f)
 	{
 		knockPowXZ_ = UtilityMath::VECTOR2F_ZERO;
-	}
-
-	if (CollisionController::GetInstance().IsActorCollidingWithTag(this, ColliderBase::TAG::HIT_WAVE))
-	{
-		VECTOR hitPos = CollisionController::GetInstance().IsActorHitPosWithTag(this, ColliderBase::TAG::HIT_WAVE);
-		VECTOR knockDir = VSub(transform_.pos, hitPos);
-		knockDir.y = KNOCK_POW_Y;
-		knockDir = UtilityMath::VNormalize(knockDir);
-
-		SetKnock(knockDir, 10.0f, false);
-	}
-
-	if (CollisionController::GetInstance().IsActorCollidingWithTag(this, ColliderBase::TAG::MISSILE_PUSH))
-	{
-		VECTOR hitPos = CollisionController::GetInstance().IsActorHitPosWithTag(this, ColliderBase::TAG::MISSILE_PUSH);
-		VECTOR knockDir = VSub(transform_.pos, hitPos);
-		knockDir.y = KNOCK_POW_Y;
-		knockDir = UtilityMath::VNormalize(knockDir);
-
-		SetKnock(knockDir, 10.0f, false);
 	}
 }
 
 void Player::ProcessAttack(void)
 {
+	// 連射弾型
 	auto& keyConfInputManager = KeyConfInputManager::GetInstance();
 
 	if (jobType_ == JOB_TYPE::RAPID_FIRE)
@@ -868,6 +918,15 @@ void Player::ProcessAttack(void)
 
 			if (keyConfInputManager.isPressed("ATTACK_SPECIAL"))
 			{
+				// 弾が生存中は拡散弾を有効にしない
+				if (clusterBullets_.at(0) != nullptr)
+				{
+					if (clusterBullets_.at(0)->IsAlive())
+					{
+						return;
+					}
+				}
+
 				ProcShotSpecial();
 				shotTerm_ = SHOT_RAPID_TERM;
 			}
@@ -877,6 +936,7 @@ void Player::ProcessAttack(void)
 			shotTerm_ -= TimeManager::GetInstance().GetDeltaTime();
 		}
 	}
+
 	else
 	{
 		// 押した瞬間の単発判定
@@ -977,12 +1037,21 @@ void Player::UpdateBullets(void)
 		bullet->Update();
 	}
 
+	if (jobType_ == JOB_TYPE::RAPID_FIRE)
+	{
+		for (auto& cluster : clusterBullets_)
+		{
+			if (cluster == nullptr) { continue; }
+
+			cluster->Update();
+		}
+	}
+
 	if (bullets_.empty()) { return; }
 	
 
 	if (shotIndex_ != -1)
 	{
-		int temp = MV1GetFrameNum(transform_.modelId);
 		if (animation_->IsStop())
 		{
 			bullets_.at(shotIndex_)->PreActiveProcess();
@@ -1090,94 +1159,119 @@ void Player::CreateBullet(void)
 
 	}
 
+	// 終了時の発射処理に変更するか否か
+	bool isFinishShot = (curAttackNum_ >= (attackNumMax_ - 1));
+
 	bullet->Load();
 	bullet->Init();
-	bullet->Create(throwPos_, throwDir_, curAttackNum_, (curAttackNum_ >= (attackNumMax_ - 1)));
+	bullet->Create(throwPos_, throwDir_, curAttackNum_, isFinishShot);
 
 	bullets_.emplace_back(std::move(bullet));
 }
 
 void Player::CreateCluster(void)
 {
-	// 円の分割数
-	constexpr float ANGLE = (360.0f / CLUSTER_SPLIT);
+	// 拡散する角度の最大値
+	constexpr float CONE_ANGLE_MAX = (360.0f / CLUSTER_SPLIT);
 
-	const float RANGE = 50;
+	// 正面の方向(ゼロベクトル時はZ+方向を正面にする)
+	const VECTOR FORWARD_DIR = ((UtilityMath::EqualsVZero(transform_.GetForward()) ? VGet(0.0f, 0.0f, 1.0f) : transform_.GetForward()));
 
-	float angle = 0;
-	int cnt = 0, listCnt = -1;
-	Quaternion rot = Quaternion::Identity();
+	int cnt = 0;
+
+	// 初回生成か否か
+	const bool IS_FIRST_CREATE = (clusterBullets_.at(0) == nullptr);
 
 	VECTOR createPos = throwPos_;
+	createPos.y += 10.0f;
 
-	// 弾を生成
-	std::unique_ptr<PBulletNormal> bullet;
+	// 前方向の基準軸
+	VECTOR rightAxis = UtilityMath::VNormalize(VCross(UtilityMath::AXIS_Y, FORWARD_DIR));
+	if (UtilityMath::EqualsVZero(rightAxis))
+	{
+		// 真上/真下に向いている場合の保険
+		rightAxis = UtilityMath::AXIS_X;
+	}
 
 	// 中心の弾を生成
-	clusterBullets_.at(cnt) = _CreateClusterBullet(throwDir_);
-
-	createPos.y += 1.0f;
-
-	const int MAX = (CLUSTER_NUM_MAX / CLUSTER_SPLIT) + 1;
-	int spawnMax;
-
-	for (int i = 1; i < MAX; i++)
+	if (IS_FIRST_CREATE)
 	{
-		rot = Quaternion::Identity();
+		std::unique_ptr<PBulletNormal> centerBullet = _CreateClusterBullet(FORWARD_DIR);
+		centerBullet->Load();
+		centerBullet->Init();
+		centerBullet->Create(createPos, FORWARD_DIR);
+		clusterBullets_.at(cnt++) = std::move(centerBullet);
+	}
+	else
+	{
+		// 再利用
+		clusterBullets_.at(cnt)->Init();
+		clusterBullets_.at(cnt)->Create(createPos, FORWARD_DIR);
+		cnt++;
+	}
 
-		// 生成最大数
-		spawnMax = (CLUSTER_SPLIT * i);
 
-		for (int circle = 0; circle < (spawnMax - 1); circle++)
+
+	// 拡散する弾の輪の最大数
+	const int RING_NUM = (CLUSTER_NUM_MAX / CLUSTER_SPLIT);
+	
+	for (int ring = 1; ring < RING_NUM; ring++)
+	{
+		// 輪の拡散角度
+		const float CONE_ANGLE = (CONE_ANGLE_MAX / static_cast<float>(RING_NUM - 1) * static_cast<float>(ring));
+		const Quaternion CONE_ROT = Quaternion::AngleAxis(UtilityMath::Deg2RadF(CONE_ANGLE), rightAxis);
+
+		// 前方向を傾ける
+		const VECTOR TILED_DIR = Quaternion::PosAxis(CONE_ROT, FORWARD_DIR);
+
+
+		// 角度を変更していく値
+		const float AZIMUTH_STEP = (360.0f / static_cast<float>(CLUSTER_SPLIT));
+
+		for (int circle = 1; circle < CLUSTER_SPLIT; circle++)
 		{
-			// 円状に一定の範囲間隔で生成位置を設定
-			angle = ((ANGLE / i) * (circle + 1));
-			rot = rot.Mult(Quaternion::AngleAxis(UtilityMath::Deg2RadF(angle), UtilityMath::AXIS_Y));
+			// 角度
+			float azimuth = AZIMUTH_STEP * static_cast<float>(circle);
+			const Quaternion azimuthRot = Quaternion::AngleAxis(UtilityMath::Deg2RadF(azimuth), FORWARD_DIR);
 
-			//VECTOR shotDir = rot.GetForward();
-			VECTOR shotDir = UtilityMath::VNormalize(VAdd(transform_.GetForward(), rot.GetForward()));
-			createPos = VScale(shotDir, RANGE * i);
+			// 放射状に発射するように方向を調整
+			VECTOR shotDir = UtilityMath::VNormalize(Quaternion::PosAxis(azimuthRot, TILED_DIR));
 
-			// 円状に敵生成処理
-			// 中心の弾を生成
-			std::unique_ptr bullet = _CreateClusterBullet(throwDir_);
 
-			bullet->Load();
-			bullet->Init();
-			bullet->Create(createPos, shotDir);
-			clusterBullets_.at(++cnt) = std::move(bullet);
+			// 各拡散弾を生成
+			if (IS_FIRST_CREATE)
+			{
+				std::unique_ptr bullet = _CreateClusterBullet(shotDir);
 
-			// 生成数が一定を超えたら終了
-			if (cnt > CLUSTER_NUM_MAX) { break; }
+				bullet->Load();
+				bullet->Init();
+				bullet->Create(createPos, shotDir);
+
+				clusterBullets_.at(cnt++) = std::move(bullet);
+			}
+			else
+			{
+				// 再利用
+				clusterBullets_.at(cnt)->Init();
+				clusterBullets_.at(cnt)->Create(createPos, shotDir);
+				cnt++;
+			}
 		}
-	}
 
-}
-void Player::ShotCluster(void)
-{
-	// 発射処理の有効化
-	for (auto& bullet : clusterBullets_)
-	{
-		bullet->Shot();
+		// 生成数が一定を超えたら終了
+		if (cnt > (CLUSTER_NUM_MAX)) { break; }
 	}
-
-	shotIndex_ = -1;
 }
+
 std::unique_ptr<PBulletNormal> Player::_CreateClusterBullet(const VECTOR& _throwDir)
 {
-	constexpr float SCALE = 0.25f;
-	constexpr float RADIUS = 10.0f;
-	constexpr int POWER = 2;
-	constexpr float SHOT_SPEED = 7.5f;
-	constexpr float ALIVE_TIME = 1.25f;
-	
-	return std::make_unique<PBulletNormal>(SCALE, RADIUS, POWER, SHOT_SPEED, 0.0f, ALIVE_TIME
+	return std::make_unique<PBulletNormal>(CLUSTER_SCALE, CLUSTER_RADIUS, CLUSTER_POWER
+											, CLUSTER_SHOT_SPEED, 0.0f, CLUSTER_ALIVE_TIME
 		,static_cast<int>(SHOT_TYPE::CLUSTER) , false);
 }
 
 void Player::ShotBullet(void)
 {
-
 	bullets_[shotIndex_]->Shot(CalcShotDir());
 	shotIndex_ = -1;
 }
@@ -1194,6 +1288,7 @@ VECTOR Player::CalcShotDir(void)
 
 	else if (SceneManager::GetInstance().GetCamera()->GetIsLockOn())
 	{
+		// 直線に投げる
 		VECTOR throwDir = UtilityMath::VNormalize(
 			VSub(SceneManager::GetInstance().GetCamera()->GetLockOnPos(),
 				throwPos_));
@@ -1202,6 +1297,17 @@ VECTOR Player::CalcShotDir(void)
 	}
 
 	return shotDir;
+}
+void Player::ShotCluster(void)
+{
+	// 発射処理の有効化
+	for (auto& bullet : clusterBullets_)
+	{
+		if (bullet == nullptr) { continue; }
+
+		bullet->Shot();
+	}
+	shotIndex_ = -1;
 }
 
 void Player::PlayAnimation(ANIM_TYPE _type, bool _isLoop, bool _isAnimBlend, float _animSpeed)

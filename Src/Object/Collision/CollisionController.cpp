@@ -677,7 +677,7 @@ bool CollisionController::CanCollide(int _tagA, int _tagB) const
 	if (tagHit == TAG::PLAYER || tagHit == TAG::PLAYER_BULLET)
 	{
 		if (tagHurt == TAG::ENEMY
-			|| tagHurt == TAG::STAGE
+			|| tagHurt == TAG::STAGE || tagHurt == TAG::TREE
 			|| tagHurt == TAG::BOSS
 			|| tagHurt == TAG::WEAPON_CANNON_L || tagHurt == TAG::WEAPON_CANNON_R
 			|| tagHurt == TAG::WEAPON_MG_L || tagHurt == TAG::WEAPON_MG_R
@@ -701,7 +701,7 @@ bool CollisionController::CanCollide(int _tagA, int _tagB) const
 
 	if (tagHit == TAG::ENEMYROBO || tagHit == TAG::ENEMY_ATTACK)
 	{
-		if (tagHurt == TAG::STAGE
+		if (tagHurt == TAG::STAGE || tagHurt == TAG::TREE
 			|| tagHurt == TAG::PLAYER_BULLET || tagHurt == TAG::PLAYER_BLAST
 			|| tagHurt == TAG::LASER
 			|| tagHurt == TAG::PLAYER
@@ -721,7 +721,7 @@ bool CollisionController::CanCollide(int _tagA, int _tagB) const
 	{
 		if (tagHurt == TAG::PLAYER
 			|| tagHurt == TAG::PLAYER_BULLET || tagHurt == TAG::PLAYER_BLAST
-			|| tagHurt == TAG::STAGE)
+			|| tagHurt == TAG::STAGE || tagHurt == TAG::TREE)
 		{
 			return true;
 		}
@@ -731,7 +731,7 @@ bool CollisionController::CanCollide(int _tagA, int _tagB) const
 		|| tagHit==TAG::CANNON_BULLET)
 	{
 		if (tagHurt == TAG::PLAYER
-			|| tagHurt == TAG::STAGE)
+			|| tagHurt == TAG::STAGE || tagHurt == TAG::TREE)
 		{
 			return true;
 		}
@@ -745,13 +745,14 @@ bool CollisionController::CanCollide(int _tagA, int _tagB) const
 	{
 		if (tagHurt == TAG::PLAYER 
 			|| tagHurt == TAG::WALL 
-			|| tagHurt == TAG::ENEMYROBO)
+			|| tagHurt == TAG::ENEMYROBO
+			|| tagHurt == TAG::TREE)
 		{
 			return true;
 		}
 	}
 
-	if (tagHit == TAG::STAGE)
+	if (tagHit == TAG::STAGE || tagHit == TAG::TREE)
 	{
 		if (tagHurt == TAG::PLAYER || tagHurt == TAG::PLAYER_BULLET || tagHurt == TAG::PLAYER_BLAST
 			|| tagHurt == TAG::BOSS || tagHurt == TAG::ENEMYROBO
@@ -782,6 +783,7 @@ bool CollisionController::CanCollide(int _tagA, int _tagB) const
 	if (tagHit == TAG::CAMERA)
 	{
 		if (tagHurt == TAG::STAGE
+			|| tagHurt == TAG::TREE
 			|| tagHurt == TAG::WALL)
 		{
 			return true;
