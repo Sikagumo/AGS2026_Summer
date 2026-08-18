@@ -1,5 +1,5 @@
-#include <DxLib.h>
 #include "InputManager.h"
+#include <DxLib.h>
 #include "../../Utility/UtilityMath.h"
 #include "../../Application.h"
 
@@ -7,7 +7,7 @@ InputManager* InputManager::instance_ = nullptr;
 
 InputManager::InputManager(void)
 	: mouseInput_(-1)
-	, mouseWheel_(0)
+	, mouseWheel_(0), mouseWheelOld_(0)
 	, infoEmpty_(Info::Info())
 	, mousePos_(UtilityMath::VECTOR2_ZERO)
 {
@@ -184,7 +184,17 @@ bool InputManager::IsTrgMouseRight(void) const
 
 int InputManager::GetMouseWheel(void) const
 {
-	return (mouseWheelOld_ - mouseWheel_);
+	//return (mouseWheelOld_ - mouseWheel_);
+	return mouseWheel_;
+}
+int InputManager::GetMouseWheelDir(void) const
+{
+	int dir = 0;
+
+	dir += ((GetMouseWheel() > 0) ? 1 : 0);
+	dir += ((GetMouseWheel() < 0) ? -1 : 0);
+
+	return dir;
 }
 
 
@@ -461,6 +471,27 @@ VECTOR InputManager::GetDirectionXZAKey(int aKeyX, int aKeyY) const
 }
 
  
+void InputManager::SetVibration(JOYPAD_NO _targetPad, int _vibrationPow, float _vibrationTime)
+{
+	using JOYPAD_NUM = InputManager::JOYPAD_NO;
+	constexpr int MAX_PAD_TYPE = 5;
+	const std::array<JOYPAD_NUM, MAX_PAD_TYPE> PAD_TYPE
+		= { JOYPAD_NUM::KEY_PAD1, JOYPAD_NUM::PAD1, JOYPAD_NUM::PAD2, JOYPAD_NUM::PAD3, JOYPAD_NUM::PAD4 };
+
+	// 指定したパッドを振動させる
+	for (auto& pad : PAD_TYPE)
+	{
+		if (_targetPad == pad)
+		{
+			// 秒→ミリ秒に変換
+			constexpr int TIME_MILLI = 100;
+			int time = static_cast<int>(_vibrationTime * TIME_MILLI);
+
+			StartJoypadVibration(static_cast<int>(pad), _vibrationPow, time);
+		}
+	}
+}
+
 Vector2F InputManager::GetMouseVelocityAndFixCenter(void)
 {
 	// マウスを中央に固定・非表示にする 

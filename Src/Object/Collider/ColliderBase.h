@@ -26,6 +26,7 @@ public:
 	enum class TAG
 	{
 		STAGE,			// ステージ
+		TREE,			// 木
 		PLAYER,			// プレイヤー
 		PLAYER_BULLET,	// プレイヤー弾爆弾
 		PLAYER_BLAST,	// プレイヤー爆発

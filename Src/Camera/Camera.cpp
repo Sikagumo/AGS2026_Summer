@@ -78,58 +78,10 @@ void Camera::InitPost(void)
 
 void Camera::Update(void)
 {
-	if (InputManager::GetInstance().IsTrgDown(KEY_INPUT_E)
-		|| InputManager::GetInstance().IsPadBtnTrgDown(InputManager::JOYPAD_NO::PAD1, InputManager::JOYPAD_BTN::R_STICK))
-	{
-		if (!isLockOn_)
-		{
-			// ロックオン有効化
-			LockOnChoice();
-		}
-		else
-		{
-			SetIsLockOn(false);
-		}
-	}
-
-	// ロックオン時、常に追従位置を取得する
-	if (isLockOn_)
-	{
-		if (InputManager::GetInstance().GetMouseWheel() != 0
-			|| InputManager::GetInstance().IsPadBtnTrgDown(InputManager::JOYPAD_NO::PAD1, InputManager::JOYPAD_BTN::L_BUTTON)
-			|| InputManager::GetInstance().IsPadBtnTrgDown(InputManager::JOYPAD_NO::PAD1, InputManager::JOYPAD_BTN::R_BUTTON))
-		{
-			LockOnChoice();
-		}
-
-		FollowLockOnPosition();
-	}
-
-	// ターゲット対象切替時のイージング進行
-	if (easingTerm_ < 1.0f)
-	{
-		easingTerm_ += TimeManager::GetInstance().GetDeltaTime() / LOCKON_DURATION;
-		easingTerm_ = std::clamp(easingTerm_, 0.0f, 1.0f);
-	}
-
 	// 更新前情報
 	prePos_ = transform_.pos;
 
-	switch (mode_)
-	{
-	case Camera::MODE::FIXED_POINT:
-		SetBeforeDrawFixedPoint();
-		break;
-	case Camera::MODE::FREE:
-		SetBeforeDrawFree();
-		break;
-	case Camera::MODE::PLAYER_FOLLOW:
-		SetBeforeDrawFollowPlayer();
-		break;
-	case Camera::MODE::BOSS_FOLLOW:
-		SetBeforeDrawFollowBoss();
-		break;
-	}
+	update_();
 }
 
 void Camera::SetBeforeDraw(void)
@@ -170,30 +122,11 @@ void Camera::DrawDebug(void)
 		, UtilityMath::Rad2DegF(angles_.x), UtilityMath::Rad2DegF(angles_.y), UtilityMath::Rad2DegF(angles_.z)
 		, UtilityMath::Rad2DegF(rotY.x), UtilityMath::Rad2DegF(rotY.y), UtilityMath::Rad2DegF(rotY.z));
 
+	const std::array<std::string, static_cast<int>(LOCKON_TARGET::MAX) + 1> TARGET_NUM
+		= { "なし", "ボス胴体", "左マシンガン", "右マシンガン", "左大砲", "右大砲", "左ミサイル", "左ミサイル", "レーザー" };
 	std::string targetText = "追従対象：";
-	if (isLockOn_)
-	{
-		targetText += ((lockOnTarget_ == LOCKON_TARGET::BOSS_BODY)
-			? "ボス胴体" : "");
-		targetText += ((lockOnTarget_ == LOCKON_TARGET::BOSS_WEAPON_MGL_L)
-			? "左マシンガン" : "");
-		targetText += ((lockOnTarget_ == LOCKON_TARGET::BOSS_WEAPON_MGL_R)
-			? "右マシンガン" : "");
-		targetText += ((lockOnTarget_ == LOCKON_TARGET::BOSS_WEAPON_CANNON_L)
-			? "左大砲" : "");
-		targetText += ((lockOnTarget_ == LOCKON_TARGET::BOSS_WEAPON_CANNON_R)
-			? "右大砲" : "");
-		targetText += ((lockOnTarget_ == LOCKON_TARGET::BOSS_WEAPON_MP_L)
-			? "左ミサイル" : "");
-		targetText += ((lockOnTarget_ == LOCKON_TARGET::BOSS_WEAPON_MP_R)
-			? "右ミサイル" : "");
-		targetText += ((lockOnTarget_ == LOCKON_TARGET::BOSS_WEAPON_RG)
-			? "レーザー" : "");
-	}
-	else if ((lockOnTarget_ == LOCKON_TARGET::NONE))
-	{
-		targetText += "なし";
-	}
+	targetText += TARGET_NUM.at(static_cast<int>(lockOnTarget_) + 1);
+
 	DrawString(Application::SCREEN_SIZE_X - 200, 0, targetText.c_str(), 0xff0000);
 #endif
 }
@@ -216,12 +149,16 @@ void Camera::ChangeMode(MODE _mode)
 	switch (mode_)
 	{
 	case Camera::MODE::FIXED_POINT:
+		update_ = std::bind(&Camera::SetBeforeDrawFixedPoint, this);
 		break;
 	case Camera::MODE::FREE:
+		update_ = std::bind(&Camera::SetBeforeDrawFree, this);
 		break;
 	case Camera::MODE::PLAYER_FOLLOW:
+		update_ = std::bind(&Camera::SetBeforeDrawFollowPlayer, this);
 		break;
 	case Camera::MODE::BOSS_FOLLOW:
+		update_ = std::bind(&Camera::SetBeforeDrawFollowBoss, this);
 		break;
 	}
 
@@ -298,33 +235,34 @@ void Camera::LockOnChoice(void)
 	{
 		int moveCount = 0;
 
-		// マウスホイールの回転量
-		moveCount += InputManager::GetInstance().GetMouseWheel();
+		// マウスホイール
+		moveCount = InputManager::GetInstance().GetMouseWheelDir();
 
 		// パッド
-		moveCount -= InputManager::GetInstance().IsPadBtnTrgDown(
+		moveCount -= (InputManager::GetInstance().IsPadBtnTrgDown(
 			InputManager::JOYPAD_NO::PAD1,
-			InputManager::JOYPAD_BTN::L_BUTTON);
+			InputManager::JOYPAD_BTN::L_BUTTON) ? 1 : 0);
 
-		moveCount += InputManager::GetInstance().IsPadBtnTrgDown(
+		moveCount += (InputManager::GetInstance().IsPadBtnTrgDown(
 			InputManager::JOYPAD_NO::PAD1,
-			InputManager::JOYPAD_BTN::R_BUTTON);
+			InputManager::JOYPAD_BTN::R_BUTTON) ? 1 : 0);
 
 		if (moveCount != 0)
 		{
+
 			int base = static_cast<int>(lockOnTarget_);
 
 			constexpr int TARGET_MAX = static_cast<int>(LOCKON_TARGET::MAX);
 
-			int target = ((base + moveCount) % TARGET_MAX);
+			int target = 0;
 			
 			bool isChange = false;
 
 			for (int i = 0; i < TARGET_MAX; i++)
 			{
-				target = ((target + moveCount + i) % TARGET_MAX);
+				target = ((TARGET_MAX + base + moveCount + i) % TARGET_MAX);
 
-				if (target == base) { break; }
+				if (target == base) { continue; }
 
 				// 追従対象が有効ならば、検索終了
 				if (targetsParam_.contains(static_cast<LOCKON_TARGET>(target))
@@ -356,9 +294,11 @@ void Camera::LockOnChoice(void)
 
 void Camera::FollowLockOnPosition(void)
 {
-	if (targetsParam_.empty()) { return; }
+	if (targetsParam_.empty() || lockOnTarget_ == LOCKON_TARGET::NONE) { return; }
 
-	if (!targetsParam_.contains(static_cast<LOCKON_TARGET>(lockOnTarget_)))
+	// 追従対象が一定以上、追従対象が無効時、ロックオン解除
+	if (!targetsParam_.contains(static_cast<LOCKON_TARGET>(lockOnTarget_))
+		|| targetsParam_.at(lockOnTarget_)->pos.y > TARGET_POS_MAX_Y)
 	{
 		lockOnParam_ = TargetParam();
 		isLockOn_ = false;
@@ -514,6 +454,40 @@ void Camera::SetBeforeDrawFree(void)
 
 void Camera::SetBeforeDrawFollowPlayer(void)
 {
+	if (InputManager::GetInstance().IsTrgDown(KEY_INPUT_E)
+		|| InputManager::GetInstance().IsPadBtnTrgDown(InputManager::JOYPAD_NO::PAD1, InputManager::JOYPAD_BTN::R_STICK))
+	{
+		if (!isLockOn_)
+		{
+			// ロックオン有効化
+			LockOnChoice();
+		}
+		else
+		{
+			SetIsLockOn(false);
+		}
+	}
+
+	// ロックオン時、常に追従位置を取得する
+	if (isLockOn_)
+	{
+		if (InputManager::GetInstance().GetMouseWheel() != 0
+			|| InputManager::GetInstance().IsPadBtnTrgDown(InputManager::JOYPAD_NO::PAD1, InputManager::JOYPAD_BTN::L_BUTTON)
+			|| InputManager::GetInstance().IsPadBtnTrgDown(InputManager::JOYPAD_NO::PAD1, InputManager::JOYPAD_BTN::R_BUTTON))
+		{
+			LockOnChoice();
+		}
+
+		FollowLockOnPosition();
+	}
+
+	// ターゲット対象切替時のイージング進行
+	if (easingTerm_ < 1.0f)
+	{
+		easingTerm_ += TimeManager::GetInstance().GetDeltaTime() / LOCKON_DURATION;
+		easingTerm_ = std::clamp(easingTerm_, 0.0f, 1.0f);
+	}
+
 	// カメラ位置の補間
 	transform_.pos = UtilityMath::Lerp(prePos_, transform_.pos, LERP_RATE_MOVE);
 

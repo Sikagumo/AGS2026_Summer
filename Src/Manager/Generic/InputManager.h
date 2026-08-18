@@ -1,6 +1,7 @@
 #pragma once
 #include <map>
 #include <Dxlib.h>
+#include <array>
 #include "../../Common/Vector2.h"
 
 class InputManager
@@ -129,6 +130,7 @@ public:
 
 	/// @brief マウスホイールの移動量を取得
 	int GetMouseWheel(void) const;
+	int GetMouseWheelDir(void) const;
 
 
 	// コントローラの入力情報を取得する
@@ -142,10 +144,16 @@ public:
 	// アナログキーの入力値から方向(正規化済み)を取得
 	VECTOR GetDirectionXZAKey(int aKeyX, int aKeyY) const;
 
+	/// @brief 任意のパッドを振動
+	/// @param _targetPad 対象のパッド
+	/// @param _vibrationPow 振動の強さ(0～1000)
+	/// @param _vibrationTime 振動させる時間(秒単位)
+	void SetVibration(JOYPAD_NO _targetPad, int _vibrationPow, float _vibrationTime);
+
+
 	/// @brief マウスの移動量を取得し、カーソルを中央に固定・非表示にする
     /// @return マウスの移動量
 	Vector2F GetMouseVelocityAndFixCenter(void);
-
 
 private:
 

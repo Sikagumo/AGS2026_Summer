@@ -22,8 +22,6 @@ public:
 
 protected:
 
-	void InitTransform(void)override;
-
 	void UpdatePost(void)override;
 
 	void ChangeBulletStateProc(void)override;

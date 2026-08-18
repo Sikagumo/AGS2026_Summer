@@ -33,6 +33,7 @@ public:
 		SE_UI_CANCEL,
 
 		SE_DAMAGE_PLAYER, // プレイヤー被ダメージ処理
+		SE_RECOVERY_PLAYER, // プレイヤー回復処理
 		SE_HIT_BLAST,
 		SE_PBULLET_POISON,
 		SE_HIT_POISON,
