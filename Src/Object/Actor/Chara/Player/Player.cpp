@@ -546,9 +546,12 @@ void Player::DrawLate(void)
 
 VECTOR Player::CalcAddPosition(void)
 {
+	/* 座標にベクトルを加算 */
+
 	VECTOR ret = UtilityMath::VECTOR_ZERO;
 
-	if (hp_ <= 0)
+	if (hp_ <= 0
+		|| CollisionController::GetInstance().IsActorCollidingWithTag(this, ColliderBase::TAG::WALL))
 	{
 		movePow_ = UtilityMath::VECTOR_ZERO;
 		dodgePowXZ_ = UtilityMath::VECTOR2F_ZERO;
@@ -835,30 +838,48 @@ void Player::ProcessDefeat(void)
 void Player::ProcessKnock(void)
 {
 	/* 吹っ飛ばしの重力加算 */
-	if (!UtilityMath::EqualsVZero(knockPowXZ_)
-		&& jumpPow_ < 0.0f)
+
+	constexpr float WAVE_KNOCK = 3.25f;
+	constexpr float MISSILE_KNOCK = 2.5f;
+
+	// ボスの衝撃波による吹っ飛ばし
+	if (CollisionController::GetInstance().IsActorCollidingWithTag(
+		this, ColliderBase::TAG::HIT_WAVE))
+	{
+		VECTOR hitPos =
+			CollisionController::GetInstance().IsActorHitPosWithTag(
+				this, ColliderBase::TAG::HIT_WAVE);
+
+		VECTOR knockDir = VSub(transform_.pos, hitPos);
+
+		knockDir.y = KNOCK_POW_Y;
+		knockDir = UtilityMath::VNormalize(knockDir);
+
+		SetKnock(knockDir, WAVE_KNOCK, false);
+	}
+
+	// ボスのミサイルによる吹っ飛ばし
+	if (CollisionController::GetInstance().IsActorCollidingWithTag(
+		this, ColliderBase::TAG::MISSILE_PUSH))
+	{
+		VECTOR hitPos =
+			CollisionController::GetInstance().IsActorHitPosWithTag(
+				this, ColliderBase::TAG::MISSILE_PUSH);
+
+		VECTOR knockDir = VSub(transform_.pos, hitPos);
+
+		knockDir.y = (KNOCK_POW_Y / 2);
+		knockDir = UtilityMath::VNormalize(knockDir);
+
+		SetKnock(knockDir, MISSILE_KNOCK, false);
+	}
+
+
+	// 壁に衝突・落下中に吹っ飛ばしが残っている場合は停止を停止
+	if (CollisionController::GetInstance().IsActorCollidingWithTag(this, ColliderBase::TAG::WALL)
+		|| !UtilityMath::EqualsVZero(knockPowXZ_) && jumpPow_ < 0.0f)
 	{
 		knockPowXZ_ = UtilityMath::VECTOR2F_ZERO;
-	}
-
-	if (CollisionController::GetInstance().IsActorCollidingWithTag(this, ColliderBase::TAG::HIT_WAVE))
-	{
-		VECTOR hitPos = CollisionController::GetInstance().IsActorHitPosWithTag(this, ColliderBase::TAG::HIT_WAVE);
-		VECTOR knockDir = VSub(transform_.pos, hitPos);
-		knockDir.y = KNOCK_POW_Y;
-		knockDir = UtilityMath::VNormalize(knockDir);
-
-		SetKnock(knockDir, 10.0f, false);
-	}
-
-	if (CollisionController::GetInstance().IsActorCollidingWithTag(this, ColliderBase::TAG::MISSILE_PUSH))
-	{
-		VECTOR hitPos = CollisionController::GetInstance().IsActorHitPosWithTag(this, ColliderBase::TAG::MISSILE_PUSH);
-		VECTOR knockDir = VSub(transform_.pos, hitPos);
-		knockDir.y = KNOCK_POW_Y;
-		knockDir = UtilityMath::VNormalize(knockDir);
-
-		SetKnock(knockDir, 10.0f, false);
 	}
 }
 

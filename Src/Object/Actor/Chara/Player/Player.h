@@ -9,7 +9,7 @@ class Player : public PlayerBase
 private:
 
 	// êÅÇ¡îÚÇŒÇµó 
-	static constexpr float KNOCK_POW_Y = 5.0f;
+	static constexpr float KNOCK_POW_Y = 3.75f;
 
 
 public:

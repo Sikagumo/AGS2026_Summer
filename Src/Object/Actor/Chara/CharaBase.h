@@ -54,6 +54,7 @@ protected:
 
 	VECTOR movePow_;
 
+	// ジャンプ量
 	float jumpPow_;
 
 	// 移動前の座標
