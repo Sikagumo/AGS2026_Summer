@@ -295,6 +295,7 @@ void SceneGame::UpdateGameTime(void)
 	{
 		gameTimer_->Update();
 
+		// プレイヤー撃破時、制限時間の減少
 		for (auto& player : players_)
 		{
 			if (!player->GetIsRespawn()) { continue; }
@@ -308,6 +309,7 @@ void SceneGame::UpdateGameTime(void)
 		gameTimer_->SetTime(NetManager::GetInstance().GetGameTime());
 	}
 
+	// 制限時間が0の時、ゲーム終了
 	if (gameTimer_->GetTime() <= 0.0f)
 	{
 		ChangeState(GAME_STATE::GAME_END);

@@ -586,8 +586,10 @@ void Player::SetSoundData(VECTOR _pos, float _radius, bool _isLanging,bool _isMG
 
 bool Player::GetIsRespawn(void) const
 {
-	return (actionController_->GetCurActionNum() == static_cast<int>(ACTION_TYPE::NONE)
-			&& actionController_->GetPreActionNum() == static_cast<int>(ACTION_TYPE::DEFEAT));
+	// 撃破アニメーション終了の瞬間true
+	return (actionController_->GetCurActionNum() == static_cast<int>(ACTION_TYPE::DEFEAT)
+			&& animation_->GetPlayType() == static_cast<int>(ANIM_TYPE::DEFEAT)
+			&& animation_->IsEnd());
 }
 
 void Player::ReleasePost(void)

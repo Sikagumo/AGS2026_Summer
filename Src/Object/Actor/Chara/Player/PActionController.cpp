@@ -8,7 +8,7 @@ PActionController::PActionController(std::unique_ptr<AnimationController>& _anim
 	, actionState_(PACTION_STATE::NONE)
 	, curTimeAction_(0.0f), curTimeInput_(0.0f), curTimeActionActive_(0.0f)
 	, curTimeStopActive_(0.0f)
-	, curActionNum_(-1), preActionNum_(-1)
+	, curActionNum_(-1)
 	, isRapidFire_(_isRapidFire)
 {
 }
@@ -77,8 +77,6 @@ bool PActionController::IsActiveInput(void) const
 
 void PActionController::Update(void)
 {
-	preActionNum_ = curActionNum_;
-
 	// çsìÆñºÇ™ñ¢äÑìñéûÅAèàóùèIóπ
 	if (curActionNum_ == -1 || actionState_ == PACTION_STATE::NONE) { return; }
 
