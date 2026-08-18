@@ -45,7 +45,7 @@ Boss::Boss(void) :
 	isRoadFire_(false),
 	laserShotHp_(MAX_HP),
 	laserAttackRot_(0.0f),
-	laserRotSpeed_(2.0f),
+	laserRotSpeed_(LASER_ROT_SPEED),
 	lastAttackType_ (ATTACK_TYPE::MAX),
 	wallStopPos_({0,0,0}),
 	mainPos_({0,0,0}),
@@ -119,7 +119,7 @@ void Boss::SetWeaponRGDamage(int _damage)
 void Boss::SetBossDamage(int _damage)
 {
 	hp_ -= _damage;
-	if (_damage > 5)
+	if (_damage > EFFECT_PLAEY_DAMEGE)
 	{
 
 		PlayEffect();
@@ -175,35 +175,35 @@ void Boss::Load(void)
 void Boss::PlayEffect(void)
 {
 	
-	EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_BOSS_HIT, { 0,0,0 }, { 90,0,0 }, { 10,10,10 }, 1.0f, this, 1);
-	EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_BOSS_HIT, { 0,0,0 }, { 0,0,0 }, { 10,10,10 }, 1.0f, this, 2);
-	EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_BOSS_HIT, { 0,0,0 }, { 0,0,0 }, { 10,10,10 }, 1.0f, this, 3);
+	EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_BOSS_HIT, { 0,0,0 }, EFFECT_ROT, EFFECT_SCL, EFFECT_PLAEY_SPEED, this, EFFECT_NO_ONE);
+	EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_BOSS_HIT, { 0,0,0 }, { 0,0,0 }, EFFECT_SCL, EFFECT_PLAEY_SPEED, this, EFFECT_NO_TWO);
+	EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_BOSS_HIT, { 0,0,0 }, { 0,0,0 }, EFFECT_SCL, EFFECT_PLAEY_SPEED, this, EFFECT_NO_THREE);
 }
 
 void Boss::UpdateEffect(void)
 {
 	VECTOR hitEffectPos1= MV1GetFramePosition(transform_.modelId, JOINT_FEET_BODY);
-	EffectManager::GetInstance().UpdatePos(EffectManager::EFFECT::EFFECT_BOSS_HIT, this, hitEffectPos1, 1);
+	EffectManager::GetInstance().UpdatePos(EffectManager::EFFECT::EFFECT_BOSS_HIT, this, hitEffectPos1, EFFECT_NO_ONE);
 	VECTOR hitEffectPos2 = MV1GetFramePosition(transformBody_.modelId, JOINT_WAEAPON_MP_L);
-	EffectManager::GetInstance().UpdatePos(EffectManager::EFFECT::EFFECT_BOSS_HIT, this, hitEffectPos2, 2);
+	EffectManager::GetInstance().UpdatePos(EffectManager::EFFECT::EFFECT_BOSS_HIT, this, hitEffectPos2, EFFECT_NO_TWO);
 	VECTOR hitEffectPos3 = MV1GetFramePosition(transformBody_.modelId, JOINT_WAEAPON_MP_R);
-	EffectManager::GetInstance().UpdatePos(EffectManager::EFFECT::EFFECT_BOSS_HIT, this, hitEffectPos3, 3);
+	EffectManager::GetInstance().UpdatePos(EffectManager::EFFECT::EFFECT_BOSS_HIT, this, hitEffectPos3, EFFECT_NO_THREE);
 
 	VECTOR hitEffectRot1 = Quaternion::Mult(transformBody_.quaRot, Quaternion::AngleAxis(UtilityMath::Deg2RadF(90.0f), UtilityMath::AXIS_X)).ToEuler();
 	hitEffectRot1.x = UtilityMath::Rad2DegF(hitEffectRot1.x);
 	hitEffectRot1.y = UtilityMath::Rad2DegF(hitEffectRot1.y);
 	hitEffectRot1.z = UtilityMath::Rad2DegF(hitEffectRot1.z);
-	EffectManager::GetInstance().UpdateRot(EffectManager::EFFECT::EFFECT_BOSS_HIT, this, hitEffectRot1, 1);
+	EffectManager::GetInstance().UpdateRot(EffectManager::EFFECT::EFFECT_BOSS_HIT, this, hitEffectRot1, EFFECT_NO_ONE);
 	VECTOR hitEffectRot2 = Quaternion::Mult(transformBody_.quaRot, Quaternion::AngleAxis(UtilityMath::Deg2RadF(180.0f), UtilityMath::AXIS_Y)).ToEuler();
 	hitEffectRot2.x = UtilityMath::Rad2DegF(hitEffectRot2.x);
 	hitEffectRot2.y = UtilityMath::Rad2DegF(hitEffectRot2.y);
 	hitEffectRot2.z = UtilityMath::Rad2DegF(hitEffectRot2.z);
-	EffectManager::GetInstance().UpdateRot(EffectManager::EFFECT::EFFECT_BOSS_HIT, this, hitEffectRot2, 2);
+	EffectManager::GetInstance().UpdateRot(EffectManager::EFFECT::EFFECT_BOSS_HIT, this, hitEffectRot2, EFFECT_NO_TWO);
 	VECTOR hitEffectRot3 = Quaternion::Mult(transformBody_.quaRot, Quaternion::AngleAxis(UtilityMath::Deg2RadF(0.0f), UtilityMath::AXIS_X)).ToEuler();
 	hitEffectRot3.x = UtilityMath::Rad2DegF(hitEffectRot3.x);
 	hitEffectRot3.y = UtilityMath::Rad2DegF(hitEffectRot3.y);
 	hitEffectRot3.z = UtilityMath::Rad2DegF(hitEffectRot3.z);
-	EffectManager::GetInstance().UpdateRot(EffectManager::EFFECT::EFFECT_BOSS_HIT, this, hitEffectRot3, 3);
+	EffectManager::GetInstance().UpdateRot(EffectManager::EFFECT::EFFECT_BOSS_HIT, this, hitEffectRot3, EFFECT_NO_THREE);
 
 
 }
@@ -226,7 +226,7 @@ void Boss::InitTransform(void)
 	transformFeet_.Update();
 
 	//車体
-	transformFeetCar_.scl = { 5.0f,5.0f,5.0f };
+	transformFeetCar_.scl = BOSS_CAR_SIZE;
 	transformFeetCar_.quaRot = Quaternion::Identity();
 	transformFeetCar_.quaRotLocal =
 		Quaternion::Mult(transformFeetCar_.quaRotLocal,
@@ -235,42 +235,42 @@ void Boss::InitTransform(void)
 	transformFeetCar_.Update();
 
 	//前輪L
-	transformWheelFrontL_.scl = { 5.0f,5.0f,5.0f };
+	transformWheelFrontL_.scl = BOSS_CAR_SIZE;
 	transformWheelFrontL_.quaRot = Quaternion::Identity();
 	transformWheelFrontL_.quaRotLocal =
 		Quaternion::Mult(transformWheelFrontL_.quaRotLocal,
 			Quaternion::AngleAxis(UtilityMath::Deg2RadF(INIT_ROT), UtilityMath::AXIS_Y));
 	transformWheelFrontL_.Update();
 	//前輪R
-	transformWheelFrontR_.scl = { 5.0f,5.0f,5.0f };
+	transformWheelFrontR_.scl = BOSS_CAR_SIZE;
 	transformWheelFrontR_.quaRot = Quaternion::Identity();
 	transformWheelFrontR_.quaRotLocal =
 		Quaternion::Mult(transformWheelFrontR_.quaRotLocal,
 			Quaternion::AngleAxis(UtilityMath::Deg2RadF(0.0f), UtilityMath::AXIS_Y));
 	transformWheelFrontR_.Update();
 	//後輪前L
-	transformWheelBackFrontL_.scl = { 5.0f,5.0f,5.0f };
+	transformWheelBackFrontL_.scl = BOSS_CAR_SIZE;
 	transformWheelBackFrontL_.quaRot = Quaternion::Identity();
 	transformWheelBackFrontL_.quaRotLocal =
 		Quaternion::Mult(transformWheelBackFrontL_.quaRotLocal,
 			Quaternion::AngleAxis(UtilityMath::Deg2RadF(INIT_ROT), UtilityMath::AXIS_Y));
 	transformWheelBackFrontL_.Update();
 	//後輪前R
-	transformWheelBackFrontR_.scl = { 5.0f,5.0f,5.0f };
+	transformWheelBackFrontR_.scl = BOSS_CAR_SIZE;
 	transformWheelBackFrontR_.quaRot = Quaternion::Identity();
 	transformWheelBackFrontR_.quaRotLocal =
 		Quaternion::Mult(transformWheelBackFrontR_.quaRotLocal,
 			Quaternion::AngleAxis(UtilityMath::Deg2RadF(0.0f), UtilityMath::AXIS_Y));
 	transformWheelBackFrontR_.Update();
 	//後輪L
-	transformWheelBackL_.scl = { 5.0f,5.0f,5.0f };
+	transformWheelBackL_.scl = BOSS_CAR_SIZE;
 	transformWheelBackL_.quaRot = Quaternion::Identity();
 	transformWheelBackL_.quaRotLocal =
 		Quaternion::Mult(transformWheelBackL_.quaRotLocal,
 			Quaternion::AngleAxis(UtilityMath::Deg2RadF(INIT_ROT), UtilityMath::AXIS_Y));
 	transformWheelBackL_.Update();
 	//後輪R
-	transformWheelBackR_.scl = { 5.0f,5.0f,5.0f };
+	transformWheelBackR_.scl = BOSS_CAR_SIZE;
 	transformWheelBackR_.quaRot = Quaternion::Identity();
 	transformWheelBackR_.quaRotLocal =
 		Quaternion::Mult(transformWheelBackR_.quaRotLocal,
@@ -319,7 +319,7 @@ void Boss::InitAnimation(void)
 	CharaBase::InitAnimation();
 	for (int i = 0; i < static_cast<int>(ANIM_TYPE::MAX); i++)
 	{
-		animation_->AddInternal(i, 20.0f);
+		animation_->AddInternal(i, ANIM_SPEED);
 	}
 	animation_->Play(static_cast<int>(ANIM_TYPE::DIR));
 
@@ -339,14 +339,14 @@ void Boss::InitPost(void)
 	WeaponInit();
 
 
-	hp_ = MAX_HP + ((MAX_HP * 0.5f) * playerSize_);
+	hp_ = MAX_HP + (MAX_HP_HALF * playerSize_);
 	laserShotHp_ = hp_;
-	weaponCannonL_->SetHp(hp_ * 0.5f);
-	weaponCannonR_->SetHp(hp_ * 0.5f);
-	weaponMGL_->SetHp(hp_ * 0.8f);
-	weaponMGR_->SetHp(hp_ * 0.8f);
-	weaponMPL_->SetHp(hp_ * 0.7f);
-	weaponMPR_->SetHp(hp_ * 0.7f);
+	weaponCannonL_->SetHp(hp_ * WEAPON_HP_CANNON);
+	weaponCannonR_->SetHp(hp_ * WEAPON_HP_CANNON);
+	weaponMGL_->SetHp(hp_ * WEAPON_HP_MG);
+	weaponMGR_->SetHp(hp_ * WEAPON_HP_MG);
+	weaponMPL_->SetHp(hp_ * WEAPON_HP_MP);
+	weaponMPR_->SetHp(hp_ * WEAPON_HP_MP);
 	weaponRG_->SetHp(hp_);
 
 
@@ -394,9 +394,9 @@ void Boss::ChangeStateAttack(void)
 {
 	stateUpdate_ = std::bind(&Boss::UpdateAttack, this);
 	attackCount_ = 0;
-	if (laserShotHp_ == (MAX_HP + ((MAX_HP * 0.5f) * playerSize_)))
+	if (laserShotHp_ == (MAX_HP + (MAX_HP_HALF * playerSize_)))
 	{
-		attackCount_ = 580;
+		attackCount_ = FIRST_ATTACK_INTERVAL;
 	}
 	animation_->Play(static_cast<int>(ANIM_TYPE::ATTACK));
 	
@@ -467,9 +467,9 @@ void Boss::ChangeStateLaserAttack(void)
 	weaponRG_->ChangeState(WeaponRG::STATE::PREPARATION);
 
 	animation_->Play(static_cast<int>(ANIM_TYPE::JUMPBEFORE), false);
-	if (laserShotHp_ != (MAX_HP + ((MAX_HP * 0.5f) * playerSize_)))
+	if (laserShotHp_ != (MAX_HP + (MAX_HP_HALF * playerSize_)))
 	{
-		laserRotSpeed_ = 0.5;
+		laserRotSpeed_ = FIRST_LASER_ROT_SPEED;
 	}
 }
 
@@ -477,7 +477,7 @@ void Boss::ChangeStateEnd(void)
 {
 	stateUpdate_ = std::bind(&Boss::UpdateEnd, this);
 	animation_->Play(static_cast<int>(ANIM_TYPE::JUMPBEFORE), false);
-	EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_PLAYER_BLAST, transformBody_.pos, { 0,0,0 }, { 35,35,35 }, 1, this);
+	EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_PLAYER_BLAST, transformBody_.pos, { 0,0,0 }, EFFECT_SCL_LASER, EFFECT_PLAEY_SPEED, this);
 	SoundManager::GetInstance().Play(SoundManager::SOUND::SE_HIT_BLAST);
 
 	weaponCannonL_->SetHp(0);
@@ -522,9 +522,9 @@ void Boss::UpdateProcess(void)
 	
 	cameraPos_ = camera->GetPos();
 
-	if (transform_.pos.y < -50)
+	if (transform_.pos.y < DOWU_POS)
 	{
-		transform_.pos = {0,2000,0};
+		transform_.pos = POP_POS;
 	}
 	
 
@@ -590,19 +590,19 @@ void Boss::UpdateIdle(void)
 	if (hp_ <= laserShotHp_ && attackCount_ >= attackInterval_)
 	{
 		ChangeState(STATE::LASER);
-		if (laserShotHp_== (MAX_HP + ((MAX_HP * 0.5f) * playerSize_)))
+		if (laserShotHp_== (MAX_HP + (MAX_HP_HALF * playerSize_)))
 		{
-			laserShotHp_ = (MAX_HP + ((MAX_HP * 0.5f) * playerSize_)) /2;
+			laserShotHp_ = (MAX_HP + (MAX_HP_HALF * playerSize_)) / HALF;
 			
 		}
-		else if (laserShotHp_ == ((MAX_HP + ((MAX_HP * 0.5f) * playerSize_)) / 2))
+		else if (laserShotHp_ == ((MAX_HP + (MAX_HP_HALF * playerSize_)) / HALF))
 		{
-			laserShotHp_ = (MAX_HP + ((MAX_HP * 0.5f) * playerSize_)) * 0.2;
+			laserShotHp_ = (MAX_HP + (MAX_HP_HALF * playerSize_)) * LASER_END;
 			
 		}
 		else
 		{
-			laserShotHp_ = -1000;
+			laserShotHp_ = -MAX_HP_HALF;
 		}
 		
 	}
@@ -684,8 +684,8 @@ void Boss::UpdateJump(void)
 		wave_->SetIsAttack(true);
 		isLanging_ = true;
 		currentWaveScl = WAVE_SCL;
-		EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_WAVE, transform_.pos, currentWaveScl, LANDING_SCL, 1.0f,this);
-		EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_LANDING, transform_.pos, { 0.0f,0.0f,0.0f }, LANDING_SCL, 1.0f,this);
+		EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_WAVE, transform_.pos, currentWaveScl, LANDING_SCL, EFFECT_PLAEY_SPEED,this);
+		EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_LANDING, transform_.pos, { 0.0f,0.0f,0.0f }, LANDING_SCL, EFFECT_PLAEY_SPEED,this);
 		ChangeState(STATE::IDLE);
 	}
 	else if (isJump_)
@@ -820,7 +820,7 @@ void Boss::UpdateStateLaserAttack(void)
 	if (weaponRG_->GetIsAttack() == true)
 	{
 		laserAttackRot_ += laserRotSpeed_;
-		if (laserAttackRot_ >= 360.0f)
+		if (laserAttackRot_ >= LASER_MAX_ROT)
 		{
 			laserAttackRot_ = 0.0f;
 			weaponRG_->ChangeState(WeaponRG::STATE::IDLE);
@@ -842,15 +842,15 @@ void Boss::UpdateEnd(void)
 	weaponMPR_->SetHp(0);
 	weaponRG_->SetHp(0);
 
-	if (endCount_ >= 4)
+	if (endCount_ >= END_MAX_COUNT)
 	{
-		speed_ = 30;
+		speed_ = MOVE_SPEED;
 		
 		VECTOR movePow = VScale(roadDir_, speed_);
 		transformBody_.pos = VAdd(transformBody_.pos, movePow);
 		transformBody_.Update();
 	}
-	else if (endCount_>=3)
+	else if (endCount_>= END_COUNT)
 	{
 		
 		weaponCannonL_->ChangeState(WeaponCannon::STATE::END);
@@ -1067,7 +1067,7 @@ void Boss::SetNetworkAction(const NET_BOSS_ACTION& _action)
 
 	transformBody_.quaRot = _action.quaRot;
 
-	if (diff > 5)
+	if (diff > EFFECT_PLAEY_DAMEGE)
 	{
 		PlayEffect();
 	}

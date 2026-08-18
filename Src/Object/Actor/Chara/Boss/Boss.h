@@ -159,23 +159,51 @@ public:
 	void SetCannonTargerPos(VECTOR _pos) { CannonPos_ = _pos; }*/
 
 private:
+	//汎用
+	static constexpr int HALF = 2;
+
 	//bossの大きさ
 	static constexpr VECTOR BOSS_SIZE = { 3.0f, 3.0f, 3.0f };
+	static constexpr VECTOR BOSS_CAR_SIZE = { 5.0f, 5.0f, 5.0f };
 	//bossの初期座標
 	static constexpr VECTOR BOSS_INIT_POS= { 500.0f, 0.0f, 200.0f };
 	//回転
 	static constexpr float INIT_ROT = 180.0f;
 	//攻撃
+	static constexpr float FIRST_ATTACK_INTERVAL = 580;
 	static constexpr float MAX_ATTACK_INTERVAL = 600;
 	static constexpr float DOUN_ATTACK_INTERVAL = 50;
 	static constexpr int INTERVAL_SEC = 20;
 	static constexpr int INTERVAL_SEC_MP = 4;
 	static constexpr int INTERVAL_SEC_CANNON = 10;
+	static constexpr float FIRST_LASER_ROT_SPEED = 5.0f;
+	static constexpr float LASER_ROT_SPEED = 2.0f;
+	static constexpr float LASER_END = 0.2f;
+	static constexpr float LASER_MAX_ROT = 360.0f;
+
 	//音
 	static constexpr float SOUND_RADIUS = 2000.0f;
 
-	//MAXHP
+	//エフェクト
+	static constexpr float EFFECT_PLAEY_DAMEGE = 5.0f;
+	static constexpr VECTOR EFFECT_SCL = { 10,10,10 };
+	static constexpr VECTOR EFFECT_SCL_LASER = { 35,35,35 };
+	static constexpr float EFFECT_PLAEY_SPEED = 1.0f;
+	static constexpr VECTOR EFFECT_ROT = { 90.0f,0.0f,0.0f };
+	static constexpr int EFFECT_NO_ZERO = 0;
+	static constexpr int EFFECT_NO_ONE = 1;
+	static constexpr int EFFECT_NO_TWO = 2;
+	static constexpr int EFFECT_NO_THREE = 3;
+	
+	//アニメーション
+	static constexpr float ANIM_SPEED = 20.0f;
+
+	//HP
 	static constexpr int MAX_HP = 2000;
+	static constexpr float MAX_HP_HALF = MAX_HP / 2.0f;
+	static constexpr float WEAPON_HP_CANNON = 0.5f;
+	static constexpr float WEAPON_HP_MP = 0.7f;
+	static constexpr float WEAPON_HP_MG = 0.8f;
 
 
 	//ジャンプ力
@@ -219,6 +247,16 @@ private:
 	static constexpr int JOINT_WAEAPON_MP_L = JOINT_CAR_WHEEL_BACK_FRONT_L;
 	static constexpr int JOINT_WAEAPON_MP_R = JOINT_CAR_WHEEL_BACK_R;
 	static constexpr int JOINT_WAEAPON_RG = JOINT_CAR_WHEEL_BACK_FRONT_R;
+
+	//復帰
+	static constexpr int DOWU_POS = -50;
+	static constexpr VECTOR POP_POS = { 0, 2000,0 };
+
+	//死亡時
+	static constexpr int END_MAX_COUNT = 4;
+	static constexpr int END_COUNT = 3;
+	static constexpr int MOVE_SPEED = 30;
+
 
 	//ボス本体の各トランスフォーム
 	Transform transformFeet_;
