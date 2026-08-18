@@ -2,7 +2,6 @@
 
 #include <DxLib.h>
 
-#include "../Manager/Generic/InputManager.h"
 #include "../Manager/Generic/KeyConfInputManager.h"
 #include "../../Lib/ImGUI/backends/imgui_impl_dx11.h"
 #include "../../Lib/ImGUI/backends/imgui_impl_win32.h"
@@ -110,28 +109,18 @@ ImGuiWrapper::~ImGuiWrapper(void)
 
 void ImGuiWrapper::UpdateInputMouse(void)
 {
-
-	// マウス情報をImGuiに渡す(InputManager使用)
+	// マウス情報をImGuiに渡す
 	ImGuiIO& io = ImGui::GetIO();
-	auto mousePos = InputManager::GetInstance().GetMousePos();
-	io.AddMousePosEvent(mousePos.x, mousePos.y);
-	io.AddMouseButtonEvent(ImGuiMouseButton_Left, InputManager::GetInstance().IsClickMouseLeft());
-	io.AddMouseButtonEvent(ImGuiMouseButton_Right, InputManager::GetInstance().IsClickMouseRight());
 
-	// マウス情報をImGuiに渡す(KeyConfInputManager使用)
+	// KeyConfInputManagerからマウス座標を取得
+	Vector2 mousePos = KeyConfInputManager::GetInstance().GetMousePosition();
+	io.AddMousePosEvent(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y));
 
-	// マウス情報をImGuiに渡す(InputManager未使用、DxLib使用)
-	//ImGuiIO& io = ImGui::GetIO();
-	//auto mouseInput = DxLib::GetMouseInput();
-	//int mousePosX = 0;
-	//int mousePosY = 0;
-	//DxLib::GetMousePoint(&mousePosX, &mousePosY);
-	//io.AddMousePosEvent(mousePosX, mousePosY);
-	//io.AddMouseButtonEvent(ImGuiMouseButton_Left, mouseInput & MOUSE_INPUT_LEFT);
-	//io.AddMouseButtonEvent(ImGuiMouseButton_Right, mouseInput & MOUSE_INPUT_RIGHT);
-
+	// クリック状態はDxLibの関数から直接取得して判定
+	int mouseInput = GetMouseInput();
+	io.AddMouseButtonEvent(ImGuiMouseButton_Left, (mouseInput & MOUSE_INPUT_LEFT) != 0);
+	io.AddMouseButtonEvent(ImGuiMouseButton_Right, (mouseInput & MOUSE_INPUT_RIGHT) != 0);
 }
-
 void ImGuiWrapper::UpdateNewFrame(void)
 {
 

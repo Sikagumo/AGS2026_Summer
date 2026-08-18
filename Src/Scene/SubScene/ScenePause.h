@@ -52,8 +52,7 @@ private:
 	static constexpr float BUTTON_HEIGHT = 60.0f;                                     // ボタンの当たり判定の縦幅
 	static constexpr float YES_NO_BUTTON_WIDTH = 180.0f;                              // YES/NOボタンの当たり判定の横幅
 	static constexpr float YES_NO_BUTTON_HEIGHT = 35.0f;                              // YES/NOボタンの当たり判定の縦幅
-	static constexpr int STICK_INTERVAL = 15;                                         // スティックの連続入力の間隔
-	static constexpr float STICK_THRESHOLD = 0.5f;                                    // スティックの入力しきい値
+	static constexpr int STICK_INTERVAL = 15;                                         // スティック入力のインターバル
 
 	enum class PHASE
 	{
@@ -70,7 +69,7 @@ private:
 		COUNT
 	};
 
-	// UI文字画像の識別列挙型 (画像の順番通り)
+	// UI文字画像の識別列挙型
 	enum class PAUSE_TEXT_UI
 	{
 		RETURN_GAME,   // 1. ゲームに戻る
@@ -90,15 +89,10 @@ private:
 	int inputIntervalCounter_; // スティックの入力間隔カウンター
 	bool isPhaseChanged_;      // フェーズ変更直後の入力無効化フラグ
 
-	// メニュー関連
-	std::string yesNoTitle_;              // ダイアログのタイトル
-	std::vector<std::string> menuItems_;  // メニューの項目
-	std::vector<std::string> yesNoItems_; // YES/NOダイアログの項目
-
 	// 画像関連
 	std::array<int, static_cast<size_t>(PAUSE_TEXT_UI::MAX)> selectTextHandles_;    // 選択中文字画像配列
 	std::array<int, static_cast<size_t>(PAUSE_TEXT_UI::MAX)> noSelectTextHandles_;  // 非選択中文字画像配列 
-	int backGroundHandle_;                                                                  // 背景画像
+	int backGroundHandle_;                                                          // 背景画像
 
 	// 当たり判定関連
 	std::unique_ptr<Collider2DCircle> cursorCollider_;             // マウスカーソル用
@@ -135,16 +129,16 @@ private:
 	void DrawYesNo(void);
 
 	/// @brief 背景枠の描画処理
-	/// @param rate 枠の広がり具合(0.0f～1.0f)
-	void DrawFrame(float rate);
+	/// @param _rate 枠の広がり具合(0.0f～1.0f)
+	void DrawFrame(float _rate);
 
 	/// @brief メニュー項目の描画処理
 	void DrawMenu(void);
 
 	/// @brief 文字画像のハンドルを取得する
-	/// @param textType 文字画像種別
-	/// @param isSelected 選択中かどうか
+	/// @param _textType 文字画像種別
+	/// @param _isSelected 選択中かどうか
 	/// @return 画像ハンドル
-	int GetTextUIHandle(PAUSE_TEXT_UI textType, bool isSelected) const;
+	int GetTextUIHandle(PAUSE_TEXT_UI _textType, bool _isSelected) const;
 
 };

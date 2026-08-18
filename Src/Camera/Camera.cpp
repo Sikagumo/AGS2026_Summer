@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <EffekseerForDXLib.h>
 #include "../Utility/UtilityMath.h"
-#include "../Manager/Generic/InputManager.h"
+#include "../Manager/Generic/KeyConfInputManager.h"
 #include "../Manager/System/TimeManager.h"
 #include "../Manager/Generic/ResourceManager.h"
 #include "../Object/Collision/CollisionController.h"
@@ -78,8 +78,9 @@ void Camera::InitPost(void)
 
 void Camera::Update(void)
 {
-	if (InputManager::GetInstance().IsTrgDown(KEY_INPUT_E)
-		|| InputManager::GetInstance().IsPadBtnTrgDown(InputManager::JOYPAD_NO::PAD1, InputManager::JOYPAD_BTN::R_STICK))
+	auto& keyConf = KeyConfInputManager::GetInstance();
+
+	if (keyConf.isTrigerDown("LOCK_ON"))
 	{
 		if (!isLockOn_)
 		{
@@ -95,9 +96,9 @@ void Camera::Update(void)
 	// ロックオン時、常に追従位置を取得する
 	if (isLockOn_)
 	{
-		if (InputManager::GetInstance().GetMouseWheel() != 0
-			|| InputManager::GetInstance().IsPadBtnTrgDown(InputManager::JOYPAD_NO::PAD1, InputManager::JOYPAD_BTN::L_BUTTON)
-			|| InputManager::GetInstance().IsPadBtnTrgDown(InputManager::JOYPAD_NO::PAD1, InputManager::JOYPAD_BTN::R_BUTTON))
+		if (GetMouseWheelRotVol() != 0
+			|| keyConf.isTrigerDown("TARGET_CHANGE_LEFT")
+			|| keyConf.isTrigerDown("TARGET_CHANGE_RIGHT"))
 		{
 			LockOnChoice();
 		}
@@ -271,7 +272,7 @@ void Camera::LockOnChoice(void)
 
 	float vecSize = POS_SPACE_MAX;
 	LOCKON_TARGET lockTarget = LOCKON_TARGET::NONE;
-	
+
 	if (targetsParam_.empty()) { return; }
 
 	if (!isLockOn_)
@@ -299,16 +300,18 @@ void Camera::LockOnChoice(void)
 		int moveCount = 0;
 
 		// マウスホイールの回転量
-		moveCount += InputManager::GetInstance().GetMouseWheel();
+		moveCount += KeyConfInputManager::GetInstance().GetMouseWheel();
 
-		// パッド
-		moveCount -= InputManager::GetInstance().IsPadBtnTrgDown(
-			InputManager::JOYPAD_NO::PAD1,
-			InputManager::JOYPAD_BTN::L_BUTTON);
+		// パッド・キーボードによる切り替え
+		if (KeyConfInputManager::GetInstance().isTrigerDown("TARGET_CHANGE_LEFT"))
+		{
+			moveCount -= 1;
+		}
 
-		moveCount += InputManager::GetInstance().IsPadBtnTrgDown(
-			InputManager::JOYPAD_NO::PAD1,
-			InputManager::JOYPAD_BTN::R_BUTTON);
+		if (KeyConfInputManager::GetInstance().isTrigerDown("TARGET_CHANGE_RIGHT"))
+		{
+			moveCount += 1;
+		}
 
 		if (moveCount != 0)
 		{
@@ -317,7 +320,7 @@ void Camera::LockOnChoice(void)
 			constexpr int TARGET_MAX = static_cast<int>(LOCKON_TARGET::MAX);
 
 			int target = ((base + moveCount) % TARGET_MAX);
-			
+
 			bool isChange = false;
 
 			for (int i = 0; i < TARGET_MAX; i++)
@@ -334,6 +337,7 @@ void Camera::LockOnChoice(void)
 					break;
 				}
 			}
+
 			if (!isChange)
 			{
 				return;
@@ -576,16 +580,26 @@ void Camera::ProcessMove(void)
 {
 	// カメラの移動スピード
 	constexpr float CAMERA_MOVE_SPEED = 50.0f;
-	InputManager& inputManager = InputManager::GetInstance();
-	VECTOR moveDir = UtilityMath::VECTOR_ZERO;
+	VECTOR moveDir = KeyConfInputManager::GetInstance().GetLeftStickDirection();
 
-
-	if (GetJoypadNum() != 0)
+	if (KeyConfInputManager::GetInstance().isPressed("UP"))
 	{
-		InputManager::JOYPAD_IN_STATE padState = inputManager.GetJPadInputState(InputManager::JOYPAD_NO::PAD1);
+		//moveDir.z += 1.0f;
+	}
 
-		// 左スティックの傾き
-		moveDir = inputManager.GetDirectionXZAKey(padState.AKeyLX, padState.AKeyLY);
+	if (KeyConfInputManager::GetInstance().isPressed("DOWN"))
+	{
+		//moveDir.z -= 1.0f;
+	}
+
+	if (KeyConfInputManager::GetInstance().isPressed("LEFT"))
+	{
+		//moveDir.x -= 1.0f;
+	}
+
+	if (KeyConfInputManager::GetInstance().isPressed("RIGHT"))
+	{
+		//moveDir.x += 1.0f;
 	}
 
 	// 移動処理
@@ -606,22 +620,20 @@ void Camera::ProcessMove(void)
 
 void Camera::RotationKeyboard(bool _isLimit)
 {
-	InputManager& inputManager = InputManager::GetInstance();
-
 	// カメラ回転
-	if (inputManager.IsNew(KEY_INPUT_RIGHT))
+	if (KeyConfInputManager::GetInstance().isPressed("RIGHT"))
 	{
 		// 右回転
 		//angles_.y += ROT_POW_RAD;
 	}
-	if (inputManager.IsNew(KEY_INPUT_LEFT))
+	if (KeyConfInputManager::GetInstance().isPressed("LEFT"))
 	{
 		// 左回転
 		//angles_.y -= ROT_POW_RAD;
 	}
 
 	// 上回転
-	if (inputManager.IsNew(KEY_INPUT_UP))
+	if (KeyConfInputManager::GetInstance().isPressed("UP"))
 	{
 		//angles_.x += ROT_POW_RAD;
 		if (_isLimit && angles_.x > LIMIT_X_UP)
@@ -631,7 +643,7 @@ void Camera::RotationKeyboard(bool _isLimit)
 	}
 
 	// 下回転
-	if (inputManager.IsNew(KEY_INPUT_DOWN))
+	if (KeyConfInputManager::GetInstance().isPressed("DOWN"))
 	{
 		//angles_.x -= ROT_POW_RAD;
 		if (_isLimit && angles_.x < -LIMIT_X_DOWN)
@@ -640,6 +652,7 @@ void Camera::RotationKeyboard(bool _isLimit)
 		}
 	}
 }
+
 void Camera::RotationMouse(bool _isLimit)
 {
 	// マウス感度倍率
@@ -647,13 +660,26 @@ void Camera::RotationMouse(bool _isLimit)
 	constexpr float MOUSE_MOVE_THRESHOLD = 0.0f;
 
 	// マウス移動量
-	Vector2F mouseMove = InputManager::GetInstance().GetMouseVelocityAndFixCenter();
+	Vector2F mouseMove = KeyConfInputManager::GetInstance().GetMouseVelocityAndFixCenter();
 
 	// マウス移動量がしきい値未満の場合０にする
 	mouseMove.x = ((std::abs(mouseMove.x) > MOUSE_MOVE_THRESHOLD) ? mouseMove.x : 0.0f);
 	mouseMove.y = ((std::abs(mouseMove.y) > MOUSE_MOVE_THRESHOLD) ? mouseMove.y : 0.0f);
 
-	// 感度倍率を掛ける
+	auto sensitivity = KeyConfInputManager::GetInstance().GetMouseSensitivity();
+	mouseMove.x *= sensitivity.x;
+	mouseMove.y *= sensitivity.y;
+
+	if (sensitivity.invertX)
+	{
+		mouseMove.x = -mouseMove.x;
+	}
+	if (sensitivity.invertY)
+	{
+		mouseMove.y = -mouseMove.y;
+	}
+
+	// 全体の感度倍率を掛ける
 	mouseMove *= ROT_SENS;
 
 	if (!UtilityMath::EqualsVZero(mouseMove))
@@ -661,18 +687,19 @@ void Camera::RotationMouse(bool _isLimit)
 		angles_.x += (mouseMove.y * ROT_POW_MOUSE);
 		angles_.y += (mouseMove.x * ROT_POW_MOUSE);
 
-		angles_.x = std::clamp(angles_.x, -LIMIT_X_DOWN, LIMIT_X_UP);
+		if (_isLimit)
+		{
+			angles_.x = std::clamp(angles_.x, -LIMIT_X_DOWN, LIMIT_X_UP);
+		}
 	}
 }
+
 void Camera::RotationGamePad(bool _isLimit)
 {
-	InputManager& inputManager = InputManager::GetInstance();
-	// 接続されているゲームパッド１の情報を取得
-	InputManager::JOYPAD_IN_STATE padState = inputManager.GetJPadInputState(InputManager::JOYPAD_NO::PAD1);
+	Vector2F rightStick = KeyConfInputManager::GetInstance().GetRIghtStick();
 
-	// 右スティックの傾き
-	VECTOR dir = inputManager.GetDirectionXZAKey(padState.AKeyRX, padState.AKeyRY);
-
+	// 取得したX, Yの値をVECTOR型のX, Zに割り当てる
+	VECTOR dir = VGet(rightStick.x, 0.0f, rightStick.y);
 
 	if (!UtilityMath::EqualsVZero(dir))
 	{

@@ -38,9 +38,9 @@ public:
 		ONI_GASHIMA,
 		UI_MAIN_WEAPON,  // メイン画面：武器選択
 		UI_MAIN_SKIN,    // メイン画面：スキン選択
-		UI_MAIN_READY,   // メイン画面：任務開始（準備完了）
+		UI_MAIN_READY,   // メイン画面：任務開始
 		UI_WINDOW_WEAPON,// ミニウィンドウ：武器項目
-		UI_WINDOW_SKIN   // ミニウィンドウ：スキン項目
+		UI_WINDOW_SKIN,  // ミニウィンドウ：スキン項目
 	};
 
 	/// @brief コンストラクタ

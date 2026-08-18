@@ -968,7 +968,7 @@ void CollisionController::DrawDebug2D(void)
 			}
 		}
 
-		// 各コライダー（円や矩形）が自分で持っている DrawDebug を呼び出して実際の形を描画
+		// 各コライダーが自分で持っている DrawDebug を呼び出して実際の形を描画
 		collider->DrawDebug(drawColor);
 	}
 }

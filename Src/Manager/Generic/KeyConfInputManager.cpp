@@ -39,6 +39,7 @@ KeyConfInputManager::KeyConfInputManager(void)
 	, stickInfo_{}
 	, mouseSensitivity_{}
 	, rStickSensitivity_{}
+	, mouseWheelVol_(0)
 {
 	InitInputTable();
 	LoadInputTable();
@@ -59,26 +60,32 @@ void KeyConfInputManager::InitInputTable(void)
 
 	inputTable_["UP"] =
 	{
-	  {INPUT_TYPE::KEY_BOARD, KEY_INPUT_W},
-	  {INPUT_TYPE::KEY_BOARD, KEY_INPUT_UP},
+		{INPUT_TYPE::KEY_BOARD, KEY_INPUT_W},
+		{INPUT_TYPE::KEY_BOARD, KEY_INPUT_UP},
+		{INPUT_TYPE::JOYPAD, PAD_INPUT_UP},
+		{INPUT_TYPE::XINPUT_ANALOG, static_cast<unsigned int>(XINPUT_ANALOG_ID::LEFT_STICK_UP)}
 	};
 
 	inputTable_["DOWN"] =
 	{
-	  {INPUT_TYPE::KEY_BOARD, KEY_INPUT_S},
-	  {INPUT_TYPE::KEY_BOARD, KEY_INPUT_DOWN}
+		{INPUT_TYPE::KEY_BOARD, KEY_INPUT_S},
+		{INPUT_TYPE::KEY_BOARD, KEY_INPUT_DOWN},
+		{INPUT_TYPE::JOYPAD, PAD_INPUT_DOWN},
+		{INPUT_TYPE::XINPUT_ANALOG, static_cast<unsigned int>(XINPUT_ANALOG_ID::LEFT_STICK_DOWN)} 
 	};
 
 	inputTable_["LEFT"] =
 	{
 	  {INPUT_TYPE::KEY_BOARD, KEY_INPUT_A},
 	  {INPUT_TYPE::KEY_BOARD, KEY_INPUT_LEFT},
+	  {INPUT_TYPE::XINPUT_ANALOG, static_cast<unsigned int>(XINPUT_ANALOG_ID::LEFT_STICK_LEFT)}
 	};
 
 	inputTable_["RIGHT"] =
 	{
 	  {INPUT_TYPE::KEY_BOARD, KEY_INPUT_D},
-	  {INPUT_TYPE::KEY_BOARD, KEY_INPUT_RIGHT}
+	  {INPUT_TYPE::KEY_BOARD, KEY_INPUT_RIGHT},
+	  { INPUT_TYPE::XINPUT_ANALOG, static_cast<unsigned int>(XINPUT_ANALOG_ID::LEFT_STICK_RIGHT) }
 	};
 
 	inputTable_["JUMP"] =
@@ -88,9 +95,23 @@ void KeyConfInputManager::InitInputTable(void)
 	  {INPUT_TYPE::JOYPAD, PAD_INPUT_A}
 	};
 
-	inputTable_["ATTACK"] =
+	inputTable_["DODGE"] =
 	{
-	  {INPUT_TYPE::MOUSE, MOUSE_INPUT_LEFT},
+		{INPUT_TYPE::KEY_BOARD, KEY_INPUT_LSHIFT},
+		{INPUT_TYPE::JOYPAD, PAD_INPUT_C}
+
+	};
+
+	inputTable_["ATTACK_NORMAL"] =
+	{
+		{INPUT_TYPE::MOUSE, MOUSE_INPUT_LEFT},
+		{INPUT_TYPE::XINPUT_ANALOG, static_cast<unsigned int>(XINPUT_ANALOG_ID::RIGHT_TRIGGER)}
+	};
+
+	inputTable_["ATTACK_SPECIAL"] =
+	{
+		{INPUT_TYPE::MOUSE, MOUSE_INPUT_RIGHT},
+		{INPUT_TYPE::XINPUT_ANALOG, static_cast<unsigned int>(XINPUT_ANALOG_ID::LEFT_TRIGGER)}
 	};
 
 	inputTable_["OK"] =
@@ -115,6 +136,42 @@ void KeyConfInputManager::InitInputTable(void)
 	inputTable_["PAUSE"] =
 	{
 	  {INPUT_TYPE::KEY_BOARD, KEY_INPUT_ESCAPE},
+	};
+
+	inputTable_["LOCK_ON"] =
+	{
+		{INPUT_TYPE::KEY_BOARD, KEY_INPUT_E},
+		{INPUT_TYPE::XINPUT_ANALOG, static_cast<unsigned int>(XINPUT_ANALOG_ID::RIGHT_STICK_PUSH)}
+	};
+
+	inputTable_["TARGET_CHANGE_LEFT"] =
+	{
+		{INPUT_TYPE::XINPUT_ANALOG, static_cast<unsigned int>(XINPUT_ANALOG_ID::LEFT_SHOULDER)}
+	};
+
+	inputTable_["TARGET_CHANGE_RIGHT"] =
+	{
+		{INPUT_TYPE::XINPUT_ANALOG, static_cast<unsigned int>(XINPUT_ANALOG_ID::RIGHT_SHOULDER)}
+	};
+
+	inputTable_["CAMERA_UP"] =
+	{
+		{INPUT_TYPE::KEY_BOARD, KEY_INPUT_UP} 
+	};
+	
+	inputTable_["CAMERA_DOWN"] = 
+	{ 
+		{INPUT_TYPE::KEY_BOARD, KEY_INPUT_DOWN} 
+	};
+
+	inputTable_["CAMERA_LEFT"] = 
+	{
+		{INPUT_TYPE::KEY_BOARD, KEY_INPUT_LEFT}
+	};
+
+	inputTable_["CAMERA_RIGHT"] = 
+	{
+		{INPUT_TYPE::KEY_BOARD, KEY_INPUT_RIGHT}
 	};
 
 	inputTable_["APPLY_DEBUG"] =
@@ -142,6 +199,8 @@ void KeyConfInputManager::Update(void)
 	int padState = GetJoypadInputState(usePadNo_);
 
 	GetMousePoint(&mousePosition_.x, &mousePosition_.y);
+
+	mouseWheelVol_ = GetMouseWheelRotVol();
 
 	XINPUT_STATE xInput{};
 	if (GetJoypadXInputState(usePadNo_, &xInput) == 0)
@@ -295,8 +354,8 @@ KeyConfInputManager::GetMouseSensitivity(void) const
 void KeyConfInputManager::ApplyRightStickSensitivity(int _x, int _y,
 	float& _outX, float& _outY) const
 {
-	float normalX = static_cast<float>(stickInfo_.lx) / XINPUT_VAL_MAX;
-	float normalY = static_cast<float>(stickInfo_.ly) / XINPUT_VAL_MAX;
+	float normalX = static_cast<float>(_x) / XINPUT_VAL_MAX;
+	float normalY = static_cast<float>(_y) / XINPUT_VAL_MAX;
 
 	float length = sqrtf(normalX * normalX + normalY * normalY);
 
@@ -320,8 +379,14 @@ void KeyConfInputManager::ApplyRightStickSensitivity(int _x, int _y,
 	normalY = std::fmax(-1.0f, std::fmin(1.0f, normalY));
 
 	// 反転処理
-	if (rStickSensitivity_.invertX) { normalX = -normalX; }
-	if (rStickSensitivity_.invertY) { normalY = -normalY; }
+	if (rStickSensitivity_.invertX)
+	{
+		normalX = -normalX;
+	}
+	if (rStickSensitivity_.invertY)
+	{
+		normalY = -normalY;
+	}
 
 	_outX = normalX;
 	_outY = normalY;
@@ -435,6 +500,42 @@ bool KeyConfInputManager::CheckXInputAnalog(const InputInfo& _inputInfo,
 	}
 	break;
 
+	case XINPUT_ANALOG_ID::LEFT_SHOULDER:
+	{
+		if (_xInputState.Buttons[XINPUT_BUTTON_LEFT_SHOULDER] != 0)
+		{
+			return true;
+		}
+	}
+	break;
+	
+	case XINPUT_ANALOG_ID::RIGHT_SHOULDER:
+	{
+		if (_xInputState.Buttons[XINPUT_BUTTON_RIGHT_SHOULDER] != 0)
+		{
+			return true;
+		}
+	}
+	break;
+
+	case XINPUT_ANALOG_ID::LEFT_STICK_PUSH:
+	{
+		if (_xInputState.Buttons[XINPUT_BUTTON_LEFT_THUMB] != 0)
+		{
+			return true;
+		}
+	}
+	break;
+
+	case XINPUT_ANALOG_ID::RIGHT_STICK_PUSH:
+	{
+		if (_xInputState.Buttons[XINPUT_BUTTON_RIGHT_THUMB] != 0)
+		{
+			return true;
+		}
+	}
+	break;
+
 	}
 	return false;
 }
@@ -456,12 +557,13 @@ VECTOR KeyConfInputManager::GetLeftStickDirection(void) const
 	normalX = (normalX / length) * scale;
 	normalY = (normalY / length) * scale;
 
-	return VNorm(VGet(normalX, 0.0f, -normalY));
+	return VNorm(VGet(normalX, 0.0f, normalY));
 }
 
 Vector2F KeyConfInputManager::GetRIghtStick(void) const
 {
-	float x,y = 0.0f;
+	float x = 0.0f;
+	float y = 0.0f;
 
 	ApplyRightStickSensitivity(stickInfo_.rx, stickInfo_.ry, x, y);
 
@@ -493,7 +595,6 @@ Vector2F KeyConfInputManager::GetRightStickRaw(void) const
 	float length = sqrtf(normalX * normalX + normalY * normalY);
 
 	// 右スティック用デッドゾーンを適用
-	// (右スティックには個別の設定があるのでそれを使用)
 	if (length < rStickSensitivity_.deadZone)
 	{
 		return UtilityMath::VECTOR2F_ZERO;
@@ -611,4 +712,9 @@ void KeyConfInputManager::LoadSensitivitySettings(void)
 void KeyConfInputManager::SetUsePadNo(int _padNo)
 {
 	usePadNo_ = _padNo;
+}
+
+int KeyConfInputManager::GetMouseWheel(void) const
+{
+	return mouseWheelVol_;
 }

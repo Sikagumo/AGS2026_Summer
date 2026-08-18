@@ -111,9 +111,12 @@ public:
     void LoadSensitivitySettings(void);
 
     /// @brief 使用するパッドの番号を設定する
-    /// @param padNo DxLib定数(DX_INPUT_PAD1 ～ DX_INPUT_PAD4)
+    /// @param padNo DxLib定数
     void SetUsePadNo(int _padNo);
 
+    /// @brief マウスホイールの回転量を取得する
+    /// @return 前フレームからの回転量 (奥に回すとプラス、手前に回すとマイナス)
+    int GetMouseWheel(void) const;
 	
 private:
 
@@ -170,6 +173,10 @@ private:
         RIGHT_STICK_DOWN,  // 右スティック下
         RIGHT_STICK_LEFT,  // 右スティック左
         RIGHT_STICK_RIGHT, // 右スティック右
+        LEFT_SHOULDER,     // Lボタン/LB
+        RIGHT_SHOULDER,    // Rボタン/RB
+        LEFT_STICK_PUSH,   // 左スティック押し込み
+        RIGHT_STICK_PUSH,  // 右スティック押し込み
     };
 
     // XInputのアナログ値の最大値
@@ -191,6 +198,7 @@ private:
     // マウス関連
     Vector2 mousePosition_;               // マウスカーソルの座標
     MouseSensitivity mouseSensitivity_;   // マウス感度
+    int mouseWheelVol_;                   // マウスホイールの回転量
 
     // パット番号
     int usePadNo_;
@@ -221,7 +229,7 @@ private:
     bool CheckKeyboardInput(const InputInfo& _inputInfo, 
         const std::array<char, 256>& _keyState) const;
 
-    /// @brief XInputのアナログ入力（トリガーやスティック）の判定を行う
+    /// @brief XInputのアナログ入力トリガーやスティックの判定を行う
     /// @param _inputInfo 判定する入力情報
     /// @param _xInputState XInputの生データ
     /// @return 閾値を超えていれば true

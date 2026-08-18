@@ -4,7 +4,7 @@
 #include <cmath>
 
 #include "../../Manager/Generic/SceneManager.h" 
-#include "../MainScene/SceneTitle.h"   
+#include "../MainScene/SceneTitle.h"
 #include "../../Manager/Generic/KeyConfInputManager.h" 
 #include "../../Manager/Generic/ResourceManager.h"
 #include "../../Object/Collision/CollisionController.h"
@@ -17,7 +17,6 @@ ScenePause::ScenePause(void)
 	, selectedIndex_(0)
 	, isYes_(false)
 	, inputIntervalCounter_(0)
-	, yesNoTitle_("")
 	, selectTextHandles_{}
 	, noSelectTextHandles_{}
 	, backGroundHandle_(-1)
@@ -61,9 +60,6 @@ void ScenePause::EndLoad(void)
 void ScenePause::Initialize(void)
 {
 	SceneBase::Initialize();
-
-	yesNoItems_ = { "はい", "いいえ" };
-	menuItems_ = { "ゲームに戻る", "タイトルに戻る" };
 	inputIntervalCounter_ = 0;
 
 	auto& collisionController = CollisionController::GetInstance();
@@ -190,13 +186,11 @@ void ScenePause::ProcessNormal(void)
 {
 	auto& inputManager = KeyConfInputManager::GetInstance();
 	auto& collisionController = CollisionController::GetInstance();
+	using TAG = Collider2DBase::TAG_2D;
 
 	Vector2 mousePosition = inputManager.GetMousePosition();
-	Vector2F mousePositionF(static_cast<float>(mousePosition.x),
-		static_cast<float>(mousePosition.y));
+	Vector2F mousePositionF(static_cast<float>(mousePosition.x), static_cast<float>(mousePosition.y));
 	cursorCollider_->SetCenterPos(mousePositionF);
-
-	using TAG = Collider2DBase::TAG_2D;
 
 	// マウスによるホバー処理
 	if (collisionController.IsTagCollidingWithTag2D(TAG::PAUSE_MAOUSE_CURSOR, TAG::PAUSE_GAME_BUTTON))
@@ -208,41 +202,34 @@ void ScenePause::ProcessNormal(void)
 		selectedIndex_ = static_cast<int>(MENU_ITEM::RETURN_TITLE);
 	}
 
-	// コントローラースティックの取得
-	Vector2F leftStick = inputManager.GetLeftStickRaw();
-
+	// インターバルのカウントダウン
 	if (inputIntervalCounter_ > 0)
 	{
 		inputIntervalCounter_ = inputIntervalCounter_ - 1;
-
-		if (std::abs(leftStick.y) <= STICK_THRESHOLD && std::abs(leftStick.x) <= STICK_THRESHOLD)
-		{
-			inputIntervalCounter_ = 0;
-		}
 	}
 
-	// キーボード・パッド操作
+	// キーボード・パッド・スティック操作
 	if (inputIntervalCounter_ <= 0)
 	{
-		if (leftStick.y > STICK_THRESHOLD || inputManager.isTrigerDown("UP"))
+		if (inputManager.isPressed("UP"))
 		{
-			selectedIndex_ = (selectedIndex_ + static_cast<int>(MENU_ITEM::COUNT) - 1) %
+			selectedIndex_ = (selectedIndex_ + static_cast<int>(MENU_ITEM::COUNT) - 1) % 
 				static_cast<int>(MENU_ITEM::COUNT);
 
-			if (leftStick.y > STICK_THRESHOLD)
-			{
-				inputIntervalCounter_ = STICK_INTERVAL;
-			}
+			inputIntervalCounter_ = STICK_INTERVAL;
 		}
-		else if (leftStick.y < -STICK_THRESHOLD || inputManager.isTrigerDown("DOWN"))
+		else if (inputManager.isPressed("DOWN"))
 		{
 			selectedIndex_ = (selectedIndex_ + 1) % static_cast<int>(MENU_ITEM::COUNT);
 
-			if (leftStick.y < -STICK_THRESHOLD)
-			{
-				inputIntervalCounter_ = STICK_INTERVAL;
-			}
+			inputIntervalCounter_ = STICK_INTERVAL;
 		}
+	}
+
+	// 上下の入力が全くない場合はインターバルをリセットする
+	if (inputManager.isPressed("UP") == false && inputManager.isPressed("DOWN") == false)
+	{
+		inputIntervalCounter_ = 0;
 	}
 
 	if (inputManager.isTrigerDown("PAUSE") || inputManager.isTrigerDown("CANCEL"))
@@ -276,7 +263,6 @@ void ScenePause::ProcessMenuState(void)
 		break;
 
 	case MENU_ITEM::RETURN_TITLE:
-		yesNoTitle_ = "タイトルに戻る";
 		currentPhase_ = PHASE::YES_NO;
 		isPhaseChanged_ = true;
 		break;
@@ -312,6 +298,7 @@ void ScenePause::ProcessYesNo(void)
 		return;
 	}
 
+	// マウスによるホバー処理
 	if (collisionController.IsTagCollidingWithTag2D(TAG::PAUSE_MAOUSE_CURSOR, TAG::PAUSE_YESNO_BOTTON))
 	{
 		isYes_ = true;
@@ -321,30 +308,27 @@ void ScenePause::ProcessYesNo(void)
 		isYes_ = false;
 	}
 
-	Vector2F leftStick = inputManager.GetLeftStickRaw();
-
+	// インターバルのカウントダウン
 	if (inputIntervalCounter_ > 0)
 	{
 		inputIntervalCounter_ = inputIntervalCounter_ - 1;
-
-		if (std::abs(leftStick.x) <= STICK_THRESHOLD && std::abs(leftStick.y) <= STICK_THRESHOLD)
-		{
-			inputIntervalCounter_ = 0;
-		}
 	}
 
+	// キーボード・パッド・スティック操作
 	if (inputIntervalCounter_ <= 0)
 	{
-		if (leftStick.x < -STICK_THRESHOLD || inputManager.isTrigerDown("LEFT") ||
-			leftStick.x > STICK_THRESHOLD || inputManager.isTrigerDown("RIGHT"))
+		if (inputManager.isPressed("LEFT") || inputManager.isPressed("RIGHT"))
 		{
 			isYes_ = !isYes_;
 
-			if (std::abs(leftStick.x) > STICK_THRESHOLD)
-			{
-				inputIntervalCounter_ = STICK_INTERVAL;
-			}
+			inputIntervalCounter_ = STICK_INTERVAL;
 		}
+	}
+
+	// 左右の入力が全くない場合はインターバルをリセットする
+	if (inputManager.isPressed("LEFT") == false && inputManager.isPressed("RIGHT") == false)
+	{
+		inputIntervalCounter_ = 0;
 	}
 
 	if (inputManager.isTrigerDown("CANCEL"))
@@ -446,7 +430,7 @@ void ScenePause::DrawMenu(void)
 
 	int drawY = MENU_TOP_OFFSET; 
 
-	for (size_t i = 0; i < menuItems_.size(); ++i)
+	for (size_t i = 0; i < static_cast<size_t>(MENU_ITEM::COUNT); ++i)
 	{
 		auto currentMenuItem = static_cast<MENU_ITEM>(i);
 		bool isSelected = (selectedIndex_ == static_cast<int>(i));

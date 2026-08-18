@@ -39,6 +39,7 @@ public:
 		IMG_SELECT_MULTI_BACK,
 		IMG_SELECTED_MULTI_BACK,
 		IMG_OPERATION,
+		IMG_TEXT_LEAVE_ROOM,
 
 		/* ï°êîâÊëú */
 		IMGS_TEXTS,
@@ -112,6 +113,7 @@ public:
 		BGM_TITLE_THUNDER,
 		BGM_GAME,
 		BGM_RESULT,
+		BGM_LOBBY,
 
 		/* å¯â âπ */
 		SE_SELECT,

@@ -1,6 +1,5 @@
 
 #include "../../Manager/Generic/SceneManager.h"
-#include "../../Manager/Generic/InputManager.h"
 #include "../../Manager/Generic/ResourceManager.h"
 #include "../../Manager/Decoration/SoundManager.h"
 #include "../../Manager/System/TimeManager.h"
@@ -72,7 +71,6 @@ void SceneGameBoss::Update(void)
 	if (Loading::GetInstance()->IsLoading()) { return; }
 
 	auto& sound = SoundManager::GetInstance();
-	auto& input = InputManager::GetInstance();
 	auto& time = TimeManager::GetInstance();
 	auto& camera = sceneManager_.GetCamera();
 	auto loader = Loading::GetInstance();

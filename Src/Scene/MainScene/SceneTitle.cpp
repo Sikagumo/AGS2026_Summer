@@ -302,23 +302,41 @@ void SceneTitle::Update(void)
 
     if (isSelectMenu_)
     {
-
+        // インターバルのカウントダウン
         if (inputIntervalCounter_ > 0)
         {
             inputIntervalCounter_--;
         }
-        else if (std::abs(stick.y) > THRESHOLD)
+
+        // インターバルが0の時に入力を受け付ける
+        if (inputIntervalCounter_ <= 0)
         {
-            if (stick.y < 0.0f)
+            // 下入力
+            if (keyConfInputManager.isPressed("DOWN"))
             {
                 selectedIdx_ = (selectedIdx_ + 1) % MENU_BUTTON_NUM;
+
+                // 次の連続入力までのインターバル
+                const int STICK_INTERVAL = 15;
+                inputIntervalCounter_ = STICK_INTERVAL;
             }
-            else
+            // 上入力
+            else if (keyConfInputManager.isPressed("UP"))
             {
                 selectedIdx_ = (selectedIdx_ - 1 + MENU_BUTTON_NUM) % MENU_BUTTON_NUM;
+
+                // 次の連続入力までのインターバル
+                const int STICK_INTERVAL = 15;
+                inputIntervalCounter_ = STICK_INTERVAL;
             }
-            inputIntervalCounter_ = STICK_TINERVAL;
         }
+
+        // 上下の入力が全くない場合はインターバルをリセットする
+        if (!keyConfInputManager.isPressed("DOWN") && !keyConfInputManager.isPressed("UP"))
+        {
+            inputIntervalCounter_ = 0;
+        }
+
 
         // マウスが動いたときはパッドの選択カーソルも追従させる
         for (int i = 0; i < MENU_BUTTON_NUM; ++i)

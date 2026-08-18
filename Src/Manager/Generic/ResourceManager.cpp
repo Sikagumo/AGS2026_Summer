@@ -96,6 +96,9 @@ void ResourceManager::Initialize(void)
 
 	// マルチ選択中UI背景
 	_SetResource(LOAD_TYPE::IMAGE, SRC::IMG_SELECTED_MULTI_BACK, PATH_IMAGE + "wakuPick.png");
+	
+	// 部屋の退出文字
+	_SetResource(LOAD_TYPE::IMAGE, SRC::IMG_TEXT_LEAVE_ROOM, PATH_IMAGE + "heyaderu.png");
 
 	// 操作説明
 	_SetResource(LOAD_TYPE::IMAGE, SRC::IMG_OPERATION, PATH_IMAGE + "Operation.png");
@@ -272,6 +275,7 @@ void ResourceManager::Initialize(void)
 	_SetResource(LOAD_TYPE::SOUND, SRC::BGM_TITLE_THUNDER, PATH_BGM + "Thunderstorm.mp3");
 	_SetResource(LOAD_TYPE::SOUND, SRC::BGM_GAME, PATH_BGM + "GameBGM.mp3");
 	_SetResource(LOAD_TYPE::SOUND, SRC::BGM_RESULT, PATH_BGM + "Result.mp3");
+	_SetResource(LOAD_TYPE::SOUND, SRC::BGM_LOBBY, PATH_BGM + "BGM_LOBBY.mp3");
 
 	/* 効果音 */
 	_SetResource(LOAD_TYPE::SOUND, SRC::SE_SELECT, PATH_SE + "Select.mp3");

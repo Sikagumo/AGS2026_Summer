@@ -3,7 +3,6 @@
 #include <algorithm>
 #include <math.h>
 #include "../../Manager/Generic/SceneManager.h"
-#include "../../Manager/Generic/InputManager.h"
 #include "../../Manager/Generic/ResourceManager.h"
 #include "../../Manager/Decoration/SoundManager.h"
 #include "../../Object/Collision/CollisionController.h"
@@ -581,7 +580,6 @@ void SceneGame::ChangeGameEnd(void)
 void SceneGame::UpdateGame(void)
 {
 	auto& sound = SoundManager::GetInstance();
-	auto& input = InputManager::GetInstance();
 	auto& camera = SceneManager::GetInstance().GetCamera();
 
 	if (Loading::GetInstance()->IsLoading()) { return; }

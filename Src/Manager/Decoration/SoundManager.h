@@ -25,6 +25,7 @@ public:
 		BGM_TITLE_THUNDER,
 		BGM_GAME,
 		BGM_RESULT,
+		BGM_LOBBY,
 
 		// SE
 		SE_SELECT,
