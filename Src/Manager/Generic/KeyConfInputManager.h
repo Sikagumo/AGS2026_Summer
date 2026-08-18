@@ -11,38 +11,6 @@ class KeyConfInputManager
 {
 public:
 
-    /// @brief 入力デバイス名
-    enum class INPUT_TYPE
-    {
-        KEY_BOARD,  // キーボード
-        MOUSE,      // マウス
-        JOYPAD,     // ジョイパット
-    };
-
-    /// @brief 実入力情報
-    struct InputInfo
-    {
-        INPUT_TYPE type = INPUT_TYPE::KEY_BOARD; // 入力デバイスの種類
-        unsigned int id = -1; // キーコードやボタンIDなどの識別子
-    };
-
-    /// @brief 保存データのヘッダ構造
-    struct KeyConfigHeader
-    {
-        char     signature[4] = { "" };  // ファイル識別ようのシグネチャ
-        float    version = 1.0f;       // バージョン
-        uint32_t dataNum = 0;          // 入力イベントの数
-    };
-
-    /// @brief スティックの入力値
-    struct StickInfo
-    {
-        int lx = 0;     // 左スティック 左右
-        int ly = 0;     // 左スティック 上下
-        int rx = 0;     // 右スティック 左右
-        int ry = 0;     // 右スティック 上下
-    };
-
     /// @brief マウスの感度設定
     struct MouseSensitivity
     {
@@ -59,21 +27,8 @@ public:
         float y = 1.0f;          // Y軸感度
         bool invertX = false;    // X軸反転
         bool invertY = false;    // Y軸反転
-        float deadZone = 0.35f; // デットゾーンのしきい値
+        float deadZone = 0.35f;  // デットゾーンのしきい値
     };
-
-    /// @brief 感度設定ファイルのヘッダ構造
-    struct SensitivityHeader
-    {
-        char  signature[4] = { "" };   // ファイル識別用のシグネチャ
-        float version = 1.0f;        // バージョン
-    };
-
-    // XInputのアナログ値の最大値
-    static constexpr float XINPUT_VAL_MAX = 32767.0f;
-
-    /// @brief 左スティックのデッドゾーンしきい値
-    static constexpr float LEFT_STICK_DEAD_ZONE = 0.35f;
 
     /// @brief インスタンの生成
     static void CreateInstance(void);
@@ -162,6 +117,67 @@ public:
 	
 private:
 
+    /// @brief 入力デバイス名
+    enum class INPUT_TYPE
+    {
+        KEY_BOARD,  // キーボード
+        MOUSE,      // マウス
+        JOYPAD,     // ジョイパット
+        XINPUT_ANALOG,  // XInputのアナログ入力
+    };
+
+    /// @brief 実入力情報
+    struct InputInfo
+    {
+        INPUT_TYPE type = INPUT_TYPE::KEY_BOARD; // 入力デバイスの種類
+        unsigned int id = -1;                    // キーコードやボタンIDなどの識別子
+    };
+
+    /// @brief 保存データのヘッダ構造
+    struct KeyConfigHeader
+    {
+        char     signature[4] = { "" };  // ファイル識別ようのシグネチャ
+        float    version = 1.0f;         // バージョン
+        uint32_t dataNum = 0;            // 入力イベントの数
+    };
+
+    /// @brief スティックの入力値
+    struct StickInfo
+    {
+        int lx = 0;     // 左スティック 左右
+        int ly = 0;     // 左スティック 上下
+        int rx = 0;     // 右スティック 左右
+        int ry = 0;     // 右スティック 上下
+    };
+
+    /// @brief 感度設定ファイルのヘッダ構造
+    struct SensitivityHeader
+    {
+        char  signature[4] = { "" };   // ファイル識別用のシグネチャ
+        float version = 1.0f;          // バージョン
+    };
+
+    /// @brief XInputのアナログ入力をボタンとして扱うためのID
+    enum class XINPUT_ANALOG_ID
+    {
+        LEFT_TRIGGER,      // 左トリガー
+        RIGHT_TRIGGER,     // 右トリガー
+        LEFT_STICK_UP,     // 左ステック上
+        LEFT_STICK_DOWN,   // 左ステック下
+        LEFT_STICK_LEFT,   // 左ステック左
+        LEFT_STICK_RIGHT,  // 左ステック右
+        RIGHT_STICK_UP,    // 右スティック上
+        RIGHT_STICK_DOWN,  // 右スティック下
+        RIGHT_STICK_LEFT,  // 右スティック左
+        RIGHT_STICK_RIGHT, // 右スティック右
+    };
+
+    // XInputのアナログ値の最大値
+    static constexpr float XINPUT_VAL_MAX = 32767.0f;
+
+    /// @brief 左スティックのデッドゾーンしきい値
+    static constexpr float LEFT_STICK_DEAD_ZONE = 0.35f;
+
     // 入力テーブル関連
     using InputTable_t = std::unordered_map<std::string, std::vector<InputInfo>>;
     InputTable_t inputTable_;                                    // イベント名と実入力のマッピングテーブル
@@ -197,6 +213,19 @@ private:
     /// @param outX 処理後のX値
     /// @param outY 処理後のY値
     void ApplyRightStickSensitivity(int _x, int _y, float& _outX, float& _outY) const;
+
+    /// @brief キーボードの入力判定を行う
+    /// @param _inputInfo 判定する入力情報
+    /// @param _keyState キーボードの生データ
+    /// @return 押されていれば true
+    bool CheckKeyboardInput(const InputInfo& _inputInfo, 
+        const std::array<char, 256>& _keyState) const;
+
+    /// @brief XInputのアナログ入力（トリガーやスティック）の判定を行う
+    /// @param _inputInfo 判定する入力情報
+    /// @param _xInputState XInputの生データ
+    /// @return 閾値を超えていれば true
+    bool CheckXInputAnalog(const InputInfo& _inputInfo, const XINPUT_STATE& _xInputState) const;
 
     // コピー禁止 
     KeyConfInputManager(const KeyConfInputManager&) = delete;
