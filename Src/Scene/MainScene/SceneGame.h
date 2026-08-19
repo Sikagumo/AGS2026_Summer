@@ -57,7 +57,7 @@ private:
 
     // ÉQÅ[ÉÄéûä‘
     static constexpr float GAME_TIME = 500.0f;
-    static constexpr float GAME_TIME_DEFEAT_DEC = 75.0f;
+    static constexpr float GAME_TIME_DEFEAT_DEC = 35.0f;
 
     const std::vector<VECTOR> ENEMY_POS = {
         {0,0,0},{100,0,100},{200,0,200},{300,0,300},
