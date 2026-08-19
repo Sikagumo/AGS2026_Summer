@@ -27,12 +27,20 @@ void NetSend::Send(NET_DATA_TYPE _type)
 		SendActionHisAll();
 		break;
 
+	case NET_DATA_TYPE::ACTION_HIST_RELAY: 
+		SendAllClientActions();
+		break;
+
 	case NET_DATA_TYPE::BOSS_ACTOION:
 		SendBossAction();
 		break;
 
 	case NET_DATA_TYPE::GO_GAME_SCENE:
 		SendGoGameScene();
+		break;
+
+	case NET_DATA_TYPE::LEAVE_ROOM:
+		SendLeaveRoom();
 		break;
 	}
 }
@@ -51,7 +59,7 @@ NET_BASIC_DATA NetSend::MakeBasicData(NET_DATA_TYPE _type, std::uint32_t _crc)
 
 void NetSend::SendUser(void)
 {
-	// 【クライアント用】自分の情報をホストへ送る
+	// クライアント用自分の情報をホストへ送る
 	NET_JOIN_USER self = NetManager::GetInstance().GetSelfUser();
 	uint32_t crc = CRC::Calculate(&self, sizeof(NET_JOIN_USER), CRC::CRC_32());
 	NET_BASIC_DATA basicData = MakeBasicData(NET_DATA_TYPE::USER, 0);
@@ -187,4 +195,48 @@ void NetSend::SendGoGameScene(void)
 	memcpy(buffer, &basicData, sizeof(NET_BASIC_DATA));
 
 	SendUDP_Client(buffer, sizeof(NET_BASIC_DATA));
+}
+
+void NetSend::SendAllClientActions(void)
+{
+	// ホストしか送らない
+	if (!NetManager::GetInstance().IsHost()) { return; }
+
+	// ホストが収集している全クライアントのアクション履歴を取得
+	auto remoteHisMap = NetManager::GetInstance().GetRemoteActionHis();
+
+	if (remoteHisMap.empty()) { return; }
+
+	NET_ACTION_HIS_ALL allHis;
+	allHis.count = 0;
+
+	for (const auto& pair : remoteHisMap)
+	{
+		if (allHis.count >= MAX_PLAYERS) { break; }
+		allHis.histories[allHis.count] = pair.second;
+		allHis.count++;
+	}
+
+	uint32_t crc = CRC::Calculate(&allHis, sizeof(NET_ACTION_HIS_ALL), CRC::CRC_32());
+
+	NET_BASIC_DATA basicData = MakeBasicData(NET_DATA_TYPE::ACTION_HIST_RELAY, crc);
+
+	char buffer[MAX_SEND_BYTES];
+	memcpy(buffer, &basicData, sizeof(NET_BASIC_DATA));
+	memcpy(buffer + sizeof(NET_BASIC_DATA), &allHis, sizeof(NET_ACTION_HIS_ALL));
+
+	int sendSize = sizeof(NET_BASIC_DATA) + sizeof(NET_ACTION_HIS_ALL);
+
+	SendUDP_Client(buffer, sendSize);
+}
+
+void NetSend::SendLeaveRoom(void)
+{
+	// ヘッダーのみ
+	NET_BASIC_DATA basicData = MakeBasicData(NET_DATA_TYPE::LEAVE_ROOM, 0);
+	char buffer[sizeof(NET_BASIC_DATA)];
+	memcpy(buffer, &basicData, sizeof(NET_BASIC_DATA));
+
+	// ホストへ送信
+	SendUDP_Host(buffer, sizeof(NET_BASIC_DATA));
 }

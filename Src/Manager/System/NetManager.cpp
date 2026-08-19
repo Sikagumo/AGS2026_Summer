@@ -2,6 +2,7 @@
 #include "../../Net/NetHost.h"
 #include "../../Net/NetClient.h"
 #include "../../Net/NetSend.h"
+#include "../../Common/CRC.h"
 #include "TimeManager.h" 
 #include <cstdlib>
 
@@ -38,6 +39,7 @@ NetManager::NetManager(void)
 	, hasReceivedGoGame_(false)
 	, gameTime_(500.0f)
 	, hostTimeoutTimer_(0.0f)
+	, connectionTimeout_(CONNECTION_TIMEOUT)
 {
 	selfActionHis_.key = -1;
 	for (int i = 0; i < NUM_FRAME; ++i) 
@@ -136,6 +138,20 @@ void NetManager::Update(void)
 		{
 			pair.second += delta;
 		}
+
+		for (auto it = clientTimeoutTimers_.begin(); it != clientTimeoutTimers_.end(); )
+		{
+			if (it->second > connectionTimeout_)
+			{
+				pool_.remoteUsers_.erase(it->first);
+				remoteActionHis_.erase(it->first);
+				it = clientTimeoutTimers_.erase(it);
+			}
+			else
+			{
+				++it;
+			}
+		}
 	}
 
 
@@ -231,7 +247,6 @@ void NetManager::SetBossAction(const NET_BOSS_ACTION& action)
 
 void NetManager::UdpReceiveData(void)
 {
-
 	while (CheckNetWorkRecvUDP(recvSocketId_) == true)
 	{
 		IPDATA senderIp;
@@ -334,6 +349,36 @@ void NetManager::UdpReceiveData(void)
 					}
 				}
 			}
+			else if (header->type == NET_DATA_TYPE::ACTION_HIST_RELAY)
+			{
+				NET_ACTION_HIS_ALL* allHis = reinterpret_cast<NET_ACTION_HIS_ALL*>(buffer + sizeof(NET_BASIC_DATA));
+				std::lock_guard<std::mutex> lock(poolMutex_);
+
+				// クライアントのみが受信・処理する
+				if (!IsHost())
+				{
+					for (int i = 0; i < allHis->count; ++i)
+					{
+						int key = allHis->histories[i].key;
+						// 自分自身のデータは無視する
+						if (key == GetMyKey()) { continue; }
+						remoteActionHis_[key] = allHis->histories[i];
+					}
+				}
+			}
+			else if (header->type == NET_DATA_TYPE::LEAVE_ROOM)
+			{
+				std::lock_guard<std::mutex> lock(poolMutex_);
+
+				// 送信者のkeyを使って即座にリストから削除する
+				int senderKey = header->key;
+				if (pool_.remoteUsers_.find(senderKey) != pool_.remoteUsers_.end())
+				{
+					pool_.remoteUsers_.erase(senderKey);
+					remoteActionHis_.erase(senderKey);
+					clientTimeoutTimers_.erase(senderKey);
+				}
+			}
 		}
 	}
 }
@@ -369,4 +414,9 @@ bool NetManager::GetIsConnectionLost(void) const
 	}
 
 	return false;
+}
+
+void NetManager::SetConnectionTimeout(float _timeout)
+{
+	connectionTimeout_ = _timeout;
 }

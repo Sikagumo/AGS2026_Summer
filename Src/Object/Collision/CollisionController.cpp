@@ -622,6 +622,9 @@ void CollisionController::UpdateCollisionPars(void)
 
 								if (CheckCollision(colA, colB, info))
 								{
+									bool isWallHit = (colA->GetCollisionTag() == ColliderBase::TAG::WALL ||
+										colB->GetCollisionTag() == ColliderBase::TAG::WALL);
+
 									actorA->AddHitCollider(colB);
 									actorB->AddHitCollider(colA);
 
@@ -971,6 +974,6 @@ void CollisionController::DrawDebug2D(void)
 		}
 
 		// 各コライダーが自分で持っている DrawDebug を呼び出して実際の形を描画
-		collider->DrawDebug(drawColor);
+		//collider->DrawDebug(drawColor);
 	}
 }

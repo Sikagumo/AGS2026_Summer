@@ -123,6 +123,8 @@ void SceneGame::Initialize(void)
 
 	if (Loading::GetInstance()->IsLoading()) { return; }
 
+	NetManager::GetInstance().SetConnectionTimeout(5.0f);
+
 	// マウスを表示しない設定にする
 	SetMouseDispFlag(false);
 	
@@ -338,6 +340,8 @@ void SceneGame::Release(void)
 	}
 
 	boss_->Release();
+
+	NetManager::GetInstance().Stop();
 }
 
 void SceneGame::DrawHpBerPlayer(void)
@@ -792,9 +796,6 @@ void SceneGame::DrawGameEnd(void)
 		}
 		
 	}
-
-
-
 }
 
 

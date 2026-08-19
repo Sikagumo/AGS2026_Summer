@@ -12,7 +12,7 @@ static constexpr int MAX_PLAYERS = 4;
 static constexpr int NUM_FRAME = 10;
 
 // 最大送信バイト数
-static constexpr int MAX_SEND_BYTES = 1024;
+static constexpr int MAX_SEND_BYTES = 4096;
 
 // ホストの受信ポート番号
 static constexpr int HOST_PORT = 65000;
@@ -34,12 +34,14 @@ enum class NET_MODE
 /// @brief 通信パケットのデータ種別識別子
 enum class NET_DATA_TYPE
 {
-	NONE,             // 未設定
-	USER,             // 単一ユーザー情報
-	USERS,            // 全ユーザーのリスト情報
-	ACTION_HIST_ALL,  // 全員の過去アクション履歴
-	BOSS_ACTOION,     // ボスの行動情報
-	GO_GAME_SCENE     // 全員が準備完了かどうか
+	NONE,              // 未設定
+	USER,              // 単一ユーザー情報
+	USERS,             // 全ユーザーのリスト情報
+	ACTION_HIST_ALL,   // 全員の過去アクション履歴
+	ACTION_HIST_RELAY, // ホストが他クライアントのアクションを中継する
+	BOSS_ACTOION,      // ボスの行動情報
+	GO_GAME_SCENE,     // 全員が準備完了かどうか
+	LEAVE_ROOM         // 退出通知
 };
 
 /// @brief 同期するゲームの進行ステート
@@ -113,17 +115,18 @@ struct NET_BOSS_ACTION
 	unsigned int frameNo = 0;
 
 	// トランスフォーム関連
-	VECTOR pos = { 0.0f, 0.0f, 0.0f };   // 位置座標
-	Quaternion quaRot;                   // 回転（クォータニオン）
+	VECTOR pos = { 0.0f, 0.0f, 0.0f };
+	Quaternion quaRot;
 
 	// ターゲット・状態関連
-	int targetPlayerId = -1;  // 狙っているプレイヤーのID
-	int animId = 0;           // 再生中のアニメーションID
-	int bossHp = 2000;           // ボスの現在HP
-
+	int targetPlayerId = -1;
+	int animId = 0;
+	int bossHp = 2000;
 	int mpTargetId = 0;
-
 	int cannonTargetId = 0;
+
+	// ホストが選んだ攻撃タイプ
+	int attackSelect = -1;
 
 	// 各ウェポンHP関連
 	int weaponMglHp = 1250;
@@ -143,4 +146,11 @@ struct NET_ACTION_HIS
 
 	// 過去数フレーム分のデータ配列
 	NET_ACTION actions[NUM_FRAME];
+};
+
+/// @brief 複数プレイヤーのアクション履歴をまとめた中継パケット
+struct NET_ACTION_HIS_ALL
+{
+	int count = 0;
+	NET_ACTION_HIS histories[MAX_PLAYERS];
 };

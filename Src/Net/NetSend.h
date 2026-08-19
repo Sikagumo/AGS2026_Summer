@@ -26,6 +26,10 @@ private:
 
 	void SendGoGameScene(void);
 
+	void SendAllClientActions(void);
+
+	void SendLeaveRoom(void);
+
 	NET_BASIC_DATA MakeBasicData(NET_DATA_TYPE _type, std::uint32_t _crc);
 
 	void SendUDP_Host(const void* _bufferPointer, int _dataSize);

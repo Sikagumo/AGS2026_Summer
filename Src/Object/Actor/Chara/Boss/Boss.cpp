@@ -492,11 +492,45 @@ void Boss::ChangeStateEnd(void)
 
 void Boss::BossTransformUpdate(void)
 {
-
-	
+	transformFeetCar_.pos = transform_.pos;
+	transformFeetCar_.quaRot = transform_.quaRot;
 
 	transform_.Update();
 	transformFeetCar_.Update();
+
+	if (state_ == STATE::ROADATTACK)
+	{
+		// タイヤの座標を各ジョイントに合わせる
+		transformWheelFrontL_.pos = MV1GetFramePosition(transform_.modelId, JOINT_CAR_WHEEL_FRONT_L);
+		transformWheelFrontR_.pos = MV1GetFramePosition(transform_.modelId, JOINT_CAR_WHEEL_FRONT_R);
+		transformWheelBackFrontL_.pos = MV1GetFramePosition(transform_.modelId, JOINT_CAR_WHEEL_BACK_FRONT_L);
+		transformWheelBackFrontR_.pos = MV1GetFramePosition(transform_.modelId, JOINT_CAR_WHEEL_BACK_FRONT_R);
+		transformWheelBackL_.pos = MV1GetFramePosition(transform_.modelId, JOINT_CAR_WHEEL_BACK_L);
+		transformWheelBackR_.pos = MV1GetFramePosition(transform_.modelId, JOINT_CAR_WHEEL_BACK_R);
+
+		// タイヤの向きを本体に合わせる
+		transformWheelBackFrontL_.quaRot = transform_.quaRot;
+		transformWheelBackFrontR_.quaRot = transform_.quaRot;
+		transformWheelFrontL_.quaRot = transform_.quaRot;
+		transformWheelFrontR_.quaRot = transform_.quaRot;
+		transformWheelBackL_.quaRot = transform_.quaRot;
+		transformWheelBackR_.quaRot = transform_.quaRot;
+
+		// タイヤを回転させる
+		transformWheelFrontL_.quaRotLocal = Quaternion::Mult(transformWheelFrontL_.quaRotLocal,
+			Quaternion::AngleAxis(UtilityMath::Deg2RadF(WHEEL_ROT), UtilityMath::AXIS_X));
+		transformWheelFrontR_.quaRotLocal = Quaternion::Mult(transformWheelFrontR_.quaRotLocal,
+			Quaternion::AngleAxis(UtilityMath::Deg2RadF(-WHEEL_ROT), UtilityMath::AXIS_X));
+		transformWheelBackFrontL_.quaRotLocal = Quaternion::Mult(transformWheelBackFrontL_.quaRotLocal,
+			Quaternion::AngleAxis(UtilityMath::Deg2RadF(WHEEL_ROT), UtilityMath::AXIS_X));
+		transformWheelBackFrontR_.quaRotLocal = Quaternion::Mult(transformWheelBackFrontR_.quaRotLocal,
+			Quaternion::AngleAxis(UtilityMath::Deg2RadF(-WHEEL_ROT), UtilityMath::AXIS_X));
+		transformWheelBackL_.quaRotLocal = Quaternion::Mult(transformWheelBackL_.quaRotLocal,
+			Quaternion::AngleAxis(UtilityMath::Deg2RadF(WHEEL_ROT), UtilityMath::AXIS_X));
+		transformWheelBackR_.quaRotLocal = Quaternion::Mult(transformWheelBackR_.quaRotLocal,
+			Quaternion::AngleAxis(UtilityMath::Deg2RadF(-WHEEL_ROT), UtilityMath::AXIS_X));
+	}
+
 	transformWheelBackFrontL_.Update();
 	transformWheelBackFrontR_.Update();
 	transformWheelBackL_.Update();
@@ -534,18 +568,17 @@ void Boss::UpdateProcess(void)
 		
 		if (state_ != STATE::END)
 		{
-			ChangeState(STATE::END);
+			if (isHostControl_)
+			{
+				ChangeState(STATE::END);
+			}
 		}
 	}
-	//stateUpdate_();
 
-
-	isLanging_ = false;
-	isMGFire_ = false;
-	isRoadFire_ = false;
-
-	if (isHostControl_ == true)
+	if (isHostControl_)
 	{
+		stateUpdate_();
+
 		if (weaponMGL_->IsAttack() == true || weaponMGR_->IsAttack() == true)
 		{
 			if (SoundManager::GetInstance().IsPlaying(SoundManager::SOUND::SE_BOSS_MG_FIRE) == false)
@@ -553,9 +586,11 @@ void Boss::UpdateProcess(void)
 				isMGFire_ = true;
 			}
 		}
-
-		stateUpdate_();
 	}
+
+	isLanging_ = false;
+	isMGFire_ = false;
+	isRoadFire_ = false;
 
 	currentWaveScl = VAdd(currentWaveScl, WAVE_SCL_UP);
 	EffectManager::GetInstance().UpdateScl(EffectManager::EFFECT::EFFECT_WAVE, this, currentWaveScl);
@@ -721,6 +756,7 @@ void Boss::UpdateRoadAttack(void)
 	SoundManager::GetInstance().Set3DPosition(SoundManager::SOUND::SE_BOSS_ROAD, transform_.pos);
 	
 	transformBody_.pos = MV1GetFramePosition(transform_.modelId, JOINT_CAR_BODY);
+	/* マルチのためコメント化
 	transformWheelFrontL_.pos = MV1GetFramePosition(transform_.modelId, JOINT_CAR_WHEEL_FRONT_L);
 	transformWheelFrontR_.pos = MV1GetFramePosition(transform_.modelId, JOINT_CAR_WHEEL_FRONT_R);
 	transformWheelBackFrontL_.pos = MV1GetFramePosition(transform_.modelId, JOINT_CAR_WHEEL_BACK_FRONT_L);
@@ -741,7 +777,7 @@ void Boss::UpdateRoadAttack(void)
 		Quaternion::AngleAxis(UtilityMath::Deg2RadF(WHEEL_ROT), UtilityMath::AXIS_X));
 	transformWheelBackR_.quaRotLocal = Quaternion::Mult(transformWheelBackR_.quaRotLocal,
 		Quaternion::AngleAxis(UtilityMath::Deg2RadF(-WHEEL_ROT), UtilityMath::AXIS_X));
-
+	*/
 	if (!roadIsAttack_)
 	{
 		LookPlayer();
@@ -749,13 +785,15 @@ void Boss::UpdateRoadAttack(void)
 		roadLockTime_++;
 		
 		transform_.quaRot = transformFeetCar_.quaRot;
+
+		/*　マルチのためコメント化
 		transformWheelBackFrontL_.quaRot = transform_.quaRot;
 		transformWheelBackFrontR_.quaRot = transform_.quaRot;
 		transformWheelFrontL_.quaRot = transform_.quaRot;
 		transformWheelFrontR_.quaRot = transform_.quaRot;
 		transformWheelBackL_.quaRot = transform_.quaRot;
 		transformWheelBackR_.quaRot = transform_.quaRot;
-		
+		*/
 		
 
 		if (roadLockTime_ >= MAX_ROAD_LOCK_TIME)
@@ -1044,6 +1082,9 @@ NET_BOSS_ACTION Boss::GetNetworkAction(void) const
 	action.mpTargetId = mpIdx_;
 	action.cannonTargetId = cannonIdx_;
 
+	// 追加：最後に選ばれた攻撃のタイプを送信する
+	action.attackSelect = static_cast<int>(lastAttackType_);
+
 	action.weaponMglHp = weaponMGL_->GetHp();
 	action.weaponMgrHp = weaponMGR_->GetHp();
 	action.weaponMpLHp = weaponMPL_->GetHp();
@@ -1061,13 +1102,13 @@ void Boss::SetNetworkAction(const NET_BOSS_ACTION& _action)
 
 	hp_ = _action.bossHp;
 
-	const int diff = PREV_HP - hp_;
+	const int difference = PREV_HP - hp_;
 
 	transform_.pos = _action.pos;
 
 	transformBody_.quaRot = _action.quaRot;
 
-	if (diff > EFFECT_PLAEY_DAMEGE)
+	if (difference > EFFECT_PLAEY_DAMEGE)
 	{
 		PlayEffect();
 	}
@@ -1090,8 +1131,87 @@ void Boss::SetNetworkAction(const NET_BOSS_ACTION& _action)
 	weaponCannonL_->SetHp(_action.weaponCannonLHp);
 	weaponCannonR_->SetHp(_action.weaponCannonRHp);
 
+	// クライアント側の場合、攻撃の変更を検知して武器を発射する
+	if (isHostControl_ == false)
+	{
+		if (_action.attackSelect != static_cast<int>(lastAttackType_))
+		{
+			lastAttackType_ = static_cast<ATTACK_TYPE>(_action.attackSelect);
+
+			switch (lastAttackType_)
+			{
+			case ATTACK_TYPE::MG:
+				if (weaponMGL_->GetIsAlive() == true)
+				{
+					weaponMGL_->ChangeState(WeaponMGL::STATE::ATTACK);
+				}
+				if (weaponMGR_->GetIsAlive() == true)
+				{
+					weaponMGR_->ChangeState(WeaponMGR::STATE::ATTACK);
+				}
+				break;
+
+			case ATTACK_TYPE::CANNON:
+				if (weaponCannonL_->GetIsAlive() == true)
+				{
+					weaponCannonL_->ChangeState(WeaponCannon::STATE::ATTACK);
+				}
+				if (weaponCannonR_->GetIsAlive() == true)
+				{
+					weaponCannonR_->ChangeState(WeaponCannon::STATE::ATTACK);
+				}
+				break;
+
+			case ATTACK_TYPE::MISSILE:
+				if (weaponMPL_->GetIsAlive() == true)
+				{
+					weaponMPL_->ChangeState(WeaponMP::STATE::ATTACK);
+					weaponMPL_->IsLR(true);
+				}
+				if (weaponMPR_->GetIsAlive() == true)
+				{
+					weaponMPR_->ChangeState(WeaponMP::STATE::ATTACK);
+					weaponMPR_->IsLR(false);
+				}
+				break;
+			default:
+				break;
+			}
+		}
+	}
 	if (static_cast<int>(state_) != _action.animId)
 	{
+		// ジャンプからIDLEに戻った瞬間の処理
+		if (state_ == STATE::JUMP)
+		{
+			if (static_cast<STATE>(_action.animId) == STATE::IDLE)
+			{
+				currentWaveScl = WAVE_SCL;
+				EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_WAVE, transform_.pos, currentWaveScl, LANDING_SCL, EFFECT_PLAEY_SPEED, this);
+				EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_LANDING, transform_.pos, { 0.0f, 0.0f, 0.0f }, LANDING_SCL, EFFECT_PLAEY_SPEED, this);
+
+				// クライアント側でも衝撃波の当たり判定を有効にする
+				wave_->SetIsAttack(true);
+			}
+		}
+
+		// 突進から他のステートに戻った瞬間の処理
+		if (state_ == STATE::ROADATTACK)
+		{
+			if (static_cast<STATE>(_action.animId) != STATE::ROADATTACK)
+			{
+				// モデルとスケールを元の足に戻す
+				transform_.modelId = transformFeet_.modelId;
+				transform_.scl = transformFeet_.scl;
+
+				// 突進の当たり判定をオフにする
+				CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::ROAD_ATTACK, false);
+
+				// 突進のSEを止める
+				SoundManager::GetInstance().Stop(SoundManager::SOUND::SE_BOSS_ROAD);
+			}
+		}
+
 		ChangeState(static_cast<STATE>(_action.animId));
 	}
 

@@ -5,7 +5,6 @@
 
 #include "ShaderParameters.h"
 #include "ShaderRenderer.h"
-#include "ShaderLibrary.h"
 #include "RenderCommand.h"
 #include "../Manager/Generic/ResourceManager.h" 
 

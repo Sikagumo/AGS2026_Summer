@@ -335,9 +335,11 @@ Vector2F KeyConfInputManager::GetMouseVelocityAndFixCenter(void)
 
 	SetMousePoint(centerX, centerY);
 
-	mousePosition_ = Vector2(centerX, centerY);
+	//mousePosition_ = Vector2(centerX, centerY);
 
-	return Vector2F(diffX, diffY);
+	SetMouseDispFlag(false);
+
+	return  Vector2F(0.0f, 0.0f);//Vector2F(diffX, diffY);
 }
 
 void KeyConfInputManager::SetMouseSensitivity(const MouseSensitivity& _sensitivity)
