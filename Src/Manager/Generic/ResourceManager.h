@@ -25,6 +25,7 @@ public:
 		IMG_FALLING_POINT,
 		IMG_NOTMALMAP_TITLE,
 		IMG_BUCGROUND_TITLE,
+		IMG_BUCG_NORMALMAP_TITLE,
 
 		IMG_RESULT_WIN,
 		IMG_RESULT_BUT,
@@ -106,6 +107,13 @@ public:
 		EFFECT_PLAYER_RECOVERY,
 		EFFECT_PLAYER_POISON,
 
+		/* シェーダ */
+		VS_NORMAL_MAP,
+		PS_NORMAL_MAP,
+		PS_RAINY,
+		PS_TEX_SCALE,
+		VS_TEX_SCALE,
+
 		/* 映像 */
 
 		/* BGM */
@@ -153,6 +161,9 @@ public:
 
 	// 動画ファイルパス
 	static const std::string PATH_MOVIE;
+
+	// シェーダファイルパス
+	static const std::string PATH_SHADER;
 
 
 	static void CreateInstance(void);

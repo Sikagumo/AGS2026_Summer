@@ -1,17 +1,17 @@
 #include "ShaderEditorComponent.h"
 #include "../../Lib/ImGUI/imgui.h"
 
-ShaderEditorComponent::ShaderEditorComponent(const std::string& _name, 
-	ShaderMaterial* _material)
+ShaderEditorComponent::ShaderEditorComponent(const std::string& _name,
+	NormalWaveShaderParams* _params)
 	: name_(_name)
-	, material_(_material)
+	, params_(_params)
 {
 }
 
 void ShaderEditorComponent::DrawUI(void)
 {
-	// マテリアルが存在しない場合は安全のために処理を抜ける
-	if (material_ == nullptr)
+	// パラメータが存在しない場合は安全のために処理を抜ける
+	if (params_ == nullptr)
 	{
 		return;
 	}
@@ -23,22 +23,23 @@ void ShaderEditorComponent::DrawUI(void)
 	if (ImGui::CollapsingHeader("Lighting", ImGuiTreeNodeFlags_DefaultOpen))
 	{
 		float lightDir[3] = {
-			material_->GetLightDirX(),
-			material_->GetLightDirY(),
-			material_->GetLightDirZ()
+			params_->lightVectorX,
+			params_->lightVectorY,
+			params_->lightVectorZ
 		};
 
 		if (ImGui::SliderFloat3("Light Direction", lightDir, -1.0f, 1.0f))
 		{
-			// 変更があればマテリアルにセットする
-			material_->SetLightDirection(lightDir[0], lightDir[1], lightDir[2]);
+			// 変更があれば構造体に直接セットする
+			params_->lightVectorX = lightDir[0];
+			params_->lightVectorY = lightDir[1];
+			params_->lightVectorZ = lightDir[2];
 		}
 
 		// 環境光
-		float ambient = material_->GetAmbient();
-		if (ImGui::SliderFloat("Ambient", &ambient, 0.0f, 1.0f))
+		if (ImGui::SliderFloat("Ambient", &params_->ambientRate, 0.0f, 1.0f))
 		{
-			material_->SetAmbient(ambient);
+			// 変更はそのまま反映される
 		}
 	}
 
@@ -46,31 +47,26 @@ void ShaderEditorComponent::DrawUI(void)
 	if (ImGui::CollapsingHeader("Wave Effect", ImGuiTreeNodeFlags_DefaultOpen))
 	{
 		// 波の速さ
-		float speed = material_->GetWaveSpeed();
-		if (ImGui::SliderFloat("Wave Speed", &speed, 0.0f, 5.0f))
+		if (ImGui::SliderFloat("Wave Speed", &params_->waveSpeedValue, 0.0f, 5.0f))
 		{
-			material_->SetWaveSpeed(speed);
 		}
 
 		// 波の強さ
-		float force = material_->GetWaveForce();
-		if (ImGui::SliderFloat("Wave Force", &force, 0.0f, 0.1f))
+		if (ImGui::SliderFloat("Wave Force", &params_->waveForceValue, 0.0f, 0.1f))
 		{
-			material_->SetWaveForce(force);
 		}
 
-		float currentTime = material_->GetTime();
-		ImGui::Text("Current Time: %.3f", currentTime);
+		ImGui::Text("Current Time: %.3f", params_->timeValue);
 	}
 
 	// フラグ設定
 	if (ImGui::CollapsingHeader("Flags"))
 	{
-		// ノーマルマップのON/OFF
-		bool useNormal = material_->IsUseNormalMap();
+		// ノーマルマップのON/OFF（useNormalMapFlag は float なので bool に変換して扱う）
+		bool useNormal = (params_->useNormalMapFlag > 0.5f);
 		if (ImGui::Checkbox("Use NormalMap", &useNormal))
 		{
-			material_->SetUseNormalMap(useNormal);
+			params_->useNormalMapFlag = useNormal ? 1.0f : 0.0f;
 		}
 	}
 

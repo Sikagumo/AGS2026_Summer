@@ -84,14 +84,10 @@
     <ClCompile Include="Src\Object\Actor\Chara\Weapon\Bullet\Player\PBulletPoison.cpp" />
     <ClCompile Include="Src\Object\Actor\Chara\Weapon\Bullet\Player\PBulletNormal.cpp" />
     <ClCompile Include="Src\Object\Actor\Chara\Enemy\EnemyRobo.cpp" />
-    <ClCompile Include="Src\Shader\ShaderPixel\ShaderPixel.cpp" />
     <ClCompile Include="Src\Shader\ShaderController.cpp" />
-    <ClCompile Include="Src\Shader\ShaderBase.cpp" />
-    <ClCompile Include="Src\Shader\ShaderLibrary.cpp" />
     <ClCompile Include="Src\Shader\ShaderRenderer.cpp" />
     <ClCompile Include="Src\ImGUI\ShaderEditorComponent.cpp" />
     <ClCompile Include="Src\ImGUI\GuiController.cpp" />
-    <ClCompile Include="Src\Shader\ShaderMaterial.cpp" />
     <ClCompile Include="Src\ImGUI\ImGuiWrapper.cpp" />
     <ClCompile Include="Lib\ImGUI\backends\imgui_impl_dx11.cpp" />
     <ClCompile Include="Lib\ImGUI\backends\imgui_impl_win32.cpp" />
@@ -103,7 +99,6 @@
     <ClCompile Include="Src\Common\GameTimer.cpp" />
     <ClCompile Include="Src\Scene\SubScene\ScenePause.cpp" />
     <ClCompile Include="Src\Scene\SubScene\SceneOperation.cpp" />
-    <ClCompile Include="Src\Shader\ShaderVertex\ShaderVertex.cpp" />
     <ClCompile Include="Src\Manager\Generic\StatusManager.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -198,20 +193,16 @@
     <ClInclude Include="Src\Object\Actor\Chara\Enemy\EnemyBase.h" />
     <ClInclude Include="Src\Object\Actor\Chara\Enemy\EnemyRobo.h" />
     <ClInclude Include="Src\Shader\ShaderParameters.h" />
-    <ClInclude Include="Src\Shader\ShaderPixel\ShaderPixel.h" />
     <ClInclude Include="Src\Shader\ShaderController.h" />
-    <ClInclude Include="Src\Shader\ShaderBase.h" />
-    <ClInclude Include="Src\Shader\ShaderLibrary.h" />
     <ClInclude Include="Src\Shader\ShaderRenderer.h" />
     <ClInclude Include="Src\ImGUI\ShaderEditorComponent.h" />
     <ClInclude Include="Src\ImGUI\GuiController.h" />
-    <ClInclude Include="Src\Shader\ShaderMaterial.h" />
     <ClInclude Include="Src\Common\GameTimer.h" />
     <ClInclude Include="Src\Manager\Decoration\EffectManager.h" />
     <ClInclude Include="Src\Scene\SubScene\ScenePause.h" />
     <ClInclude Include="Src\Scene\SubScene\SceneOperation.h" />
-    <ClInclude Include="Src\Shader\ShaderVertex\ShaderVertex.h" />
     <ClInclude Include="Src\Manager\Generic\StatusManager.h" />
+    <ClInclude Include="Src\Shader\RenderCommand.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="srcGraphics\Common\Pixel\PixelShader2DHeader.hlsli" />

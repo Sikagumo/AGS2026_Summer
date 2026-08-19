@@ -78,8 +78,9 @@ void Camera::InitPost(void)
 
 void Camera::Update(void)
 {
-	if (InputManager::GetInstance().IsTrgDown(KEY_INPUT_E)
-		|| InputManager::GetInstance().IsPadBtnTrgDown(InputManager::JOYPAD_NO::PAD1, InputManager::JOYPAD_BTN::R_STICK))
+	auto& keyConfInputManager = KeyConfInputManager::GetInstance();
+
+	if (keyConfInputManager.isTrigerDown("LOCK_ON"))
 	{
 		if (!isLockOn_)
 		{
@@ -95,9 +96,10 @@ void Camera::Update(void)
 	// ロックオン時、常に追従位置を取得する
 	if (isLockOn_)
 	{
-		if (InputManager::GetInstance().GetMouseWheel() != 0
-			|| InputManager::GetInstance().IsPadBtnTrgDown(InputManager::JOYPAD_NO::PAD1, InputManager::JOYPAD_BTN::L_BUTTON)
-			|| InputManager::GetInstance().IsPadBtnTrgDown(InputManager::JOYPAD_NO::PAD1, InputManager::JOYPAD_BTN::R_BUTTON))
+		// マウスホイールの取得
+		if (keyConfInputManager.GetMouseWheel() != 0
+			|| keyConfInputManager.isTrigerDown("TARGET_CHANGE_LEFT")  
+			|| keyConfInputManager.isTrigerDown("TARGET_CHANGE_RIGHT"))
 		{
 			LockOnChoice();
 		}
@@ -491,8 +493,9 @@ void Camera::SetBeforeDrawFree(void)
 
 void Camera::SetBeforeDrawFollowPlayer(void)
 {
-	if (InputManager::GetInstance().IsTrgDown(KEY_INPUT_E)
-		|| InputManager::GetInstance().IsPadBtnTrgDown(InputManager::JOYPAD_NO::PAD1, InputManager::JOYPAD_BTN::R_STICK))
+	auto& keyConfInputManager = KeyConfInputManager::GetInstance();
+
+	if (keyConfInputManager.isTrigerDown("LOCK_ON"))
 	{
 		if (!isLockOn_)
 		{
@@ -508,9 +511,9 @@ void Camera::SetBeforeDrawFollowPlayer(void)
 	// ロックオン時、常に追従位置を取得する
 	if (isLockOn_)
 	{
-		if (InputManager::GetInstance().GetMouseWheel() != 0
-			|| InputManager::GetInstance().IsPadBtnTrgDown(InputManager::JOYPAD_NO::PAD1, InputManager::JOYPAD_BTN::L_BUTTON)
-			|| InputManager::GetInstance().IsPadBtnTrgDown(InputManager::JOYPAD_NO::PAD1, InputManager::JOYPAD_BTN::R_BUTTON))
+		if (keyConfInputManager.GetMouseWheel() != 0
+			|| keyConfInputManager.isTrigerDown("TARGET_CHANGE_LEFT")
+			|| keyConfInputManager.isTrigerDown("TARGET_CHANGE_RIGHT"))
 		{
 			LockOnChoice();
 		}

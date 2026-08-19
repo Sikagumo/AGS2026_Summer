@@ -93,6 +93,11 @@ bool StatusManager::ConvertPlayerCsv(const std::string& csvPath, const std::stri
     return true;
 }
 
+bool StatusManager::ConvertEnemyCsv(const std::string& csvPath, const std::string& datPath)
+{
+    return false;
+}
+
 PlayerStatus StatusManager::LoadPlayerStatus(const std::string& datPath) {
     PlayerStatus st{};
     std::ifstream inFile(datPath, std::ios::binary);
@@ -109,6 +114,11 @@ PlayerStatus StatusManager::LoadPlayerStatus(const std::string& datPath) {
         inFile.read(reinterpret_cast<char*>(&st.hp), sizeof(st.hp));
     }
     return st;
+}
+
+EnemyStatus StatusManager::LoadEnemyStatus(const std::string& datPath)
+{
+    return EnemyStatus();
 }
 
 // --------------------------------------------------

@@ -17,6 +17,8 @@ public:
 		ANIM,   // アニメーションファイル
 		EFFECT, // エフェクト
 		SOUND,  // 音声
+		VERTEX_SHADER, // 頂点シェーダ
+		PIXEL_SHADER,  // ピクセルシェーダ
 	};
 
 
@@ -98,6 +100,8 @@ private:
 	void Load_ModelAndAnim(void);
 	void Load_Effect(void);
 	void Load_Sound(void);
+	void Load_VertexShader(void);
+	void Load_PixelShader(void);
 
 	/* 解放処理 */
 	void Release_ImageAndMovie(void)const;
@@ -105,4 +109,6 @@ private:
 	void Release_ModelAndAnim(void)const;
 	void Release_Effect(void)const;
 	void Release_Sound(void)const;
+	void Release_VertexShader(void)const;
+	void Release_PixelShader(void)const;
 };

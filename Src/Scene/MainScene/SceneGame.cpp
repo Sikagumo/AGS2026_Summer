@@ -176,7 +176,12 @@ void SceneGame::Initialize(void)
 	// 雨シェーダ導入
 	constexpr float RAIN_POW = 1.0f;
 	constexpr float RAIN_POW_BACK = 1.0f;
-	rainyMaterial_.SetUseRainy(RAIN_POW, RAIN_POW_BACK);
+
+	rainyParams_.rainIntensity = RAIN_POW;
+	rainyParams_.rainIntensityBack = RAIN_POW_BACK;
+	rainyParams_.rainColor = GetColorF(0.75f, 0.82f, 0.9f, 1.0f);
+	rainyParams_.resolutionX = static_cast<float>(Application::SCREEN_SIZE_X);
+	rainyParams_.resolutionY = static_cast<float>(Application::SCREEN_SIZE_Y);
 
 	SetMouseDispFlag(true);
 
@@ -314,7 +319,8 @@ void SceneGame::UpdateGameTime(void)
 		ChangeState(GAME_STATE::GAME_END);
 	}
 
-	rainyMaterial_.SetTime(TimeManager::GetInstance().GetGameTime());
+	rainyTime_ = TimeManager::GetInstance().GetGameTime();
+	rainyParams_.timeValue = rainyTime_;
 }
 
 void SceneGame::Draw(void)
@@ -716,6 +722,14 @@ void SceneGame::DrawGame(void)
 
 	stage_->Draw();
 
+	ShaderController::GetInstance().Draw2D(
+		ResourceManager::SRC::PS_RAINY,
+		0, 0, 1.0f,
+		rainyParams_
+	);
+
+	ShaderController::GetInstance().ExecuteDrawCommands();
+
 	for (auto& player : players_)
 	{
 		player->Draw();
@@ -730,9 +744,6 @@ void SceneGame::DrawGame(void)
 	auto& effect = EffectManager::GetInstance();
 	effect.Draw();
 
-	ShaderController::GetInstance()
-		.CreateShaderDrawRainy(0, 0, rainyMaterial_);
-
 	DrawHpBerBoss();
 
 	gameTimer_->Draw();
@@ -745,20 +756,28 @@ void SceneGame::DrawGame(void)
 
 #ifdef _DEBUG
 	DrawDebug();
-#endif // _DEBUG
-
 	SceneManager::GetInstance().GetCamera()->DrawDebug();
+#endif // _DEBUG
 }
+
+	
 
 void SceneGame::DrawGameEnd(void)
 {
 	stage_->Draw();
+
+
+	ShaderController::GetInstance().Draw2D(
+		ResourceManager::SRC::PS_RAINY,
+		0, 0, 1.0f,
+		rainyParams_
+	);
+
+	ShaderController::GetInstance().ExecuteDrawCommands();
+
 	boss_->Draw();
 	auto& effect = EffectManager::GetInstance();
 	effect.Draw();
-
-	ShaderController::GetInstance()
-		.CreateShaderDrawRainy(0, 0, rainyMaterial_);
 
 	const int IMAGET_TITLE_Y = Application::SCREEN_SIZE_Y / 3;
 	if (slowCount_ >= SLOW_COUNT_MAX * 30)
@@ -773,6 +792,8 @@ void SceneGame::DrawGameEnd(void)
 		}
 		
 	}
+
+
 
 }
 

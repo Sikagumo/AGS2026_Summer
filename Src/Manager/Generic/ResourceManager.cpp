@@ -28,6 +28,7 @@ const std::string ResourceManager::PATH_ANIM   = PATH_DATA + "Model/Animation/";
 const std::string ResourceManager::PATH_SE     = PATH_DATA + "Sound/SE/";
 const std::string ResourceManager::PATH_BGM    = PATH_DATA + "Sound/BGM/";
 const std::string ResourceManager::PATH_MOVIE  = PATH_DATA + "Movie/";
+const std::string ResourceManager::PATH_SHADER = PATH_DATA + "Shader/";
 
 
 void ResourceManager::CreateInstance(void)
@@ -75,6 +76,9 @@ void ResourceManager::Initialize(void)
 
 	// タイトル背景の画像
 	_SetResource(LOAD_TYPE::IMAGE, SRC::IMG_BUCGROUND_TITLE, PATH_MODEL + "SkyDome/Skydome.png");
+
+	// タイトルの背景のノーマルマップ
+	_SetResource(LOAD_TYPE::IMAGE, SRC::IMG_BUCG_NORMALMAP_TITLE, PATH_IMAGE + "Skydome_n.png");
 
 	// 鬼ヶ島のノーマルマップ
 	_SetResource(LOAD_TYPE::IMAGE, SRC::IMG_NOMALMAP_ONIGASIMA, PATH_IMAGE + "OnigaSima_n.png");
@@ -290,6 +294,12 @@ void ResourceManager::Initialize(void)
 	_SetResource(LOAD_TYPE::SOUND, SRC::SE_LOBBY_SELCET, PATH_SE + "LobbySelect.mp3");
 	_SetResource(LOAD_TYPE::SOUND, SRC::SE_UI_SELECT, PATH_SE + "UIselect.mp3");
 	_SetResource(LOAD_TYPE::SOUND, SRC::SE_UI_CANCEL, PATH_SE + "Cancel.mp3");
+
+	/* シェーダ */
+	_SetResource(LOAD_TYPE::PIXEL_SHADER, SRC::PS_NORMAL_MAP, PATH_SHADER + "NormalMap.cso");
+	_SetResource(LOAD_TYPE::PIXEL_SHADER, SRC::PS_RAINY, PATH_SHADER + "Rainy.cso");
+	_SetResource(LOAD_TYPE::PIXEL_SHADER, SRC::PS_TEX_SCALE, PATH_SHADER + "TexScalePS.cso");
+	_SetResource(LOAD_TYPE::VERTEX_SHADER, SRC::VS_TEX_SCALE, PATH_SHADER + "TexScaleVS.cso");
 
 }
 void ResourceManager::_SetResource(Resource::LOAD_TYPE _loadType, SRC _src, std::string _path

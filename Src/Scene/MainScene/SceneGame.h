@@ -12,7 +12,7 @@
 #include "../../Object/Actor/Stage/Stage.h"
 #include "../../Object/Common/DamageController.h"
 #include "../../Common/GameTimer.h"
-#include "../../Shader/ShaderMaterial.h"
+#include "../../Shader/ShaderParameters.h"
 
 
 /// @brief ゲーム本編のメインロジックを管理するシーンクラス
@@ -100,9 +100,6 @@ private:
 
     std::unique_ptr<GameTimer> gameTimer_;
 
-
-    ShaderMaterial rainyMaterial_;
-
     int targetHpImage_;
     int targetHpBerImage_;
     int infoImage_;
@@ -126,6 +123,9 @@ private:
     // エンド
     std::array<int, 4> imageResult_;
     bool isGameOver_;
+
+    RainShaderParams rainyParams_;
+    float rainyTime_ = 0.0f;
 
 
     float CalcHpBarScale(const VECTOR& _targetPos);

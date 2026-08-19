@@ -2,7 +2,7 @@
 #include <string>
 #include <vector>
 #include "../../Actor/ActorBase.h"
-#include "../../../Shader/ShaderMaterial.h"
+#include "../../../Shader/ShaderParameters.h"
 
 class Stage : public ActorBase
 {
@@ -47,8 +47,7 @@ private:
 	int viewStageTexHandle_;
 
 	Transform skyDome_;
-
-	ShaderMaterial texScaleMaterial_;
+	TextureScaleShaderParams texScaleParams_;
 
 	// –Ø‚Ìƒ‚ƒfƒ‹
 	Transform treePosModel_;

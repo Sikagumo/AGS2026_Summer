@@ -3,15 +3,15 @@
 #include <string>
 
 #include "IGuiComponent.h"
-#include "../Shader/ShaderMaterial.h"
+#include "../Shader/ShaderParameters.h" 
 
 class ShaderEditorComponent : public IGuiComponent
 {
 public:
 	/// @brief コンストラクタ
 	/// @param _name ImGuiで表示するウィンドウ名
-	/// @param _material 編集対象のマテリアル（ファサード）へのポインタ
-	ShaderEditorComponent(const std::string& _name, ShaderMaterial* _material);
+	/// @param _params 編集対象のパラメータ構造体へのポインタ
+	ShaderEditorComponent(const std::string& _name, NormalWaveShaderParams* _params);
 
 	/// @brief デストラクタ
 	~ShaderEditorComponent(void) override = default;
@@ -24,7 +24,6 @@ private:
 	// GUIの表示名
 	std::string name_;
 
-	// 編集対象のデータへのポインタ
-	ShaderMaterial* material_;
+	// 編集対象のパラメータ構造体へのポインタ
+	NormalWaveShaderParams* params_;
 };
-

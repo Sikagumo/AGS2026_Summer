@@ -8,6 +8,7 @@
 #include "../../../Shader/ShaderController.h"
 
 
+
 Stage::Stage(void)
 	: viewStageTexHandle_(-1)
 {
@@ -155,7 +156,8 @@ void Stage::InitAnimation(void)
 void Stage::InitPost(void)
 {
 	float SCALE = 50.0f;
-	texScaleMaterial_.SetTexScale(SCALE, SCALE);
+	texScaleParams_.scaleX = SCALE;
+	texScaleParams_.scaleY = SCALE;
 }
 
 void Stage::Update(void)
@@ -167,9 +169,15 @@ void Stage::Draw(void)
 {
 	MV1DrawModel(skyDome_.modelId);
 
-	ShaderController::GetInstance()
-		.CreateShaderDrawTexScale(0, 0, viewTrans_.modelId, viewStageTexHandle_, texScaleMaterial_);
-
+	ShaderController::GetInstance().Draw3D(
+		ResourceManager::SRC::VS_TEX_SCALE,
+		ResourceManager::SRC::PS_TEX_SCALE,
+		viewTrans_.modelId,
+		texScaleParams_,
+		texScaleParams_,
+		0,
+		viewStageTexHandle_
+	);
 
 	for (auto& treeFront : treesFront_)
 	{
@@ -182,9 +190,6 @@ void Stage::Draw(void)
 	}
 
 #ifdef _DEBUG
-	//ActorBase::Draw();
-
-	// 以前の MV1DrawModel(collisionTrans_.modelId); はこれと被るので消すかコメントアウト
 	// 自分が持っているすべてのコライダーを描画する
 	for (const auto& [tagId, colliderList] : ownColliders_)
 	{
@@ -192,7 +197,6 @@ void Stage::Draw(void)
 		{
 			if (collider != nullptr)
 			{
-				// 例として緑色を指定（タグごとに色を変えてもOKです）
 				collider->Draw();
 			}
 		}

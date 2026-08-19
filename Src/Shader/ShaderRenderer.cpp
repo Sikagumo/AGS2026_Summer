@@ -1,242 +1,169 @@
 #include "ShaderRenderer.h"
-
 #include <cstring>
-
-#include "../Application.h"
+#include "../Application.h" 
 
 ShaderRenderer::ShaderRenderer(void)
-	: constBufferHandle_(-1), constBufferHandleRain_(-1), constBufferHandleTexScale_(-1)
 {
 }
 
 ShaderRenderer::~ShaderRenderer(void)
 {
-	Release();
+    Release();
 }
 
 void ShaderRenderer::Initialize(void)
 {
-	constBufferHandle_ = CreateShaderConstantBuffer(sizeof(IntegratedGpuBuffer));
-	constBufferHandleRain_ = CreateShaderConstantBuffer(sizeof(IntegratedGpuBufferRain));
-	constBufferHandleTexScale_ = CreateShaderConstantBuffer(sizeof(IntegratedGpuBufferTexScale));
 }
 
-void ShaderRenderer::PixelShaderDraw(ShaderBase* _shader, const DrawRequest& _request) const
+void ShaderRenderer::ExecuteCommand(const RenderCommand& _renderCommand)
 {
-	if (!_shader || constBufferHandle_ == -1 || _request.textureHandle == -1)
-	{
-		return;
-	}
+    // 頂点シェーダ用定数バッファの更新と設定
+    if (_renderCommand.vertexShaderHandleId != -1 && _renderCommand.vertexParameterSize > 0)
+    {
+        UpdateAndSetConstantBuffer(_renderCommand.vertexParameterData.data(), _renderCommand.vertexParameterSize, DX_SHADERTYPE_VERTEX, CONSTANT_BUFFER_SLOT_BEGIN_VERTEX_SHADER);
+    }
 
-	void* gpuBuffer = GetBufferShaderConstantBuffer(constBufferHandle_);
-	if (gpuBuffer)
-	{
-		std::memcpy(gpuBuffer, &_request.buffer, sizeof(IntegratedGpuBuffer));
-		UpdateShaderConstantBuffer(constBufferHandle_);
-	}
+    // ピクセルシェーダ用定数バッファの更新と設定
+    if (_renderCommand.pixelParameterSize > 0)
+    {
+        UpdateAndSetConstantBuffer(_renderCommand.pixelParameterData.data(), _renderCommand.pixelParameterSize, DX_SHADERTYPE_PIXEL, CONSTANT_BUFFER_SLOT_BEGIN_PIXEL_SHADER);
+    }
 
-	const float width = static_cast<float>(Application::SCREEN_SIZE_X) * _request.scale;
-	const float height = static_cast<float>(Application::SCREEN_SIZE_Y) * _request.scale;
+    // テクスチャのバインド
+    if (_renderCommand.textureHandleId != -1)
+    {
+        SetUseTextureToShader(0, _renderCommand.textureHandleId);
+    }
 
-	std::array<VERTEX2DSHADER, 4> vertices;
-	ApplyVertices(vertices, width, height);
+    if (_renderCommand.normalMapHandleId != -1)
+    {
+        SetUseTextureToShader(1, _renderCommand.normalMapHandleId);
+    }
 
-	for (auto& v : vertices)
-	{
-		v.pos.x += static_cast<float>(_request.x);
-		v.pos.y += static_cast<float>(_request.y);
-	}
+    // シェーダの設定
+    if (_renderCommand.vertexShaderHandleId != -1)
+    {
+        SetUseVertexShader(_renderCommand.vertexShaderHandleId);
+    }
 
-	SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255);
-	SetShaderConstantBuffer(constBufferHandle_, DX_SHADERTYPE_PIXEL, CONSTANT_BUF_SLOT_PS);
-	SetUseTextureToShader(0, _request.textureHandle);
+    SetUsePixelShader(_renderCommand.pixelShaderHandleId);
+    SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255);
 
-	if (_request.normalMapHandle != -1)
-	{
-		SetUseTextureToShader(1, _request.normalMapHandle);
-	}
+    // 描画タイプの分岐
+    if (_renderCommand.renderType == RENDER_TYPE::DRAW_2D)
+    {
+        float drawWidth = static_cast<float>(Application::SCREEN_SIZE_X) * _renderCommand.scaleSize;
+        float drawHeight = static_cast<float>(Application::SCREEN_SIZE_Y) * _renderCommand.scaleSize;
 
-	_shader->Apply();
-	DrawPrimitive2DToShader(vertices.data(), 4, DX_PRIMTYPE_TRIANGLESTRIP);
-	_shader->UnApply();
+        std::array<VERTEX2DSHADER, 4> vertices;
+        ApplyVertices(vertices, drawWidth, drawHeight);
 
-	if (_request.normalMapHandle != -1)
-	{
-		SetUseTextureToShader(1, -1);
-	}
-	SetUseTextureToShader(0, -1);
-	SetShaderConstantBuffer(-1, DX_SHADERTYPE_PIXEL, 0);
-	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
-}
+        for (auto& vertex : vertices)
+        {
+            vertex.pos.x += _renderCommand.positionX;
+            vertex.pos.y += _renderCommand.positionY;
+        }
 
-void ShaderRenderer::RainyShaderDraw(ShaderBase* _shader, const DrawRequest& _request) const
-{
-	if (!_shader || constBufferHandleRain_ == -1)
-	{
-		return;
-	}
+        DrawPrimitive2DToShader(vertices.data(), 4, DX_PRIMTYPE_TRIANGLESTRIP);
+    }
+    else if (_renderCommand.renderType == RENDER_TYPE::DRAW_3D)
+    {
+        MV1SetUseOrigShader(true);
+        MV1DrawModel(_renderCommand.modelHandleId);
+        MV1SetUseOrigShader(false);
+    }
 
-	void* gpuBuffer = GetBufferShaderConstantBuffer(constBufferHandleRain_);
-	if (gpuBuffer)
-	{
-		std::memcpy(gpuBuffer, &_request.bufferRain, sizeof(IntegratedGpuBufferRain));
-		UpdateShaderConstantBuffer(constBufferHandleRain_);
-	}
+    // 状態のアンバインド（状態リーク防止のための後始末）
+    SetUseTextureToShader(0, -1);
+    SetUseTextureToShader(1, -1);
+    SetUsePixelShader(-1);
 
-	const float width = static_cast<float>(Application::SCREEN_SIZE_X) * _request.scale;
-	const float height = static_cast<float>(Application::SCREEN_SIZE_Y) * _request.scale;
+    if (_renderCommand.vertexShaderHandleId != -1)
+    {
+        SetUseVertexShader(-1);
+    }
 
-	std::array<VERTEX2DSHADER, 4> vertices;
-	ApplyVertices(vertices, width, height);
-
-	for (auto& v : vertices)
-	{
-		v.pos.x += static_cast<float>(_request.x);
-		v.pos.y += static_cast<float>(_request.y);
-	}
-
-	SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255);
-	SetShaderConstantBuffer(constBufferHandleRain_, DX_SHADERTYPE_PIXEL, CONSTANT_BUF_SLOT_PS);
-
-	if (_request.textureHandle != -1)
-	{
-		SetUseTextureToShader(0, _request.textureHandle);
-	}
-
-	if (_request.normalMapHandle != -1)
-	{
-		SetUseTextureToShader(1, _request.normalMapHandle);
-	}
-
-	_shader->Apply();
-	DrawPrimitive2DToShader(vertices.data(), 4, DX_PRIMTYPE_TRIANGLESTRIP);
-	_shader->UnApply();
-
-	if (_request.normalMapHandle != -1)
-	{
-		SetUseTextureToShader(1, -1);
-	}
-
-	SetUseTextureToShader(0, -1);
-	SetShaderConstantBuffer(-1, DX_SHADERTYPE_PIXEL, 0);
-	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
-}
-
-
-void ShaderRenderer::TexScaleShaderDraw(ShaderBase* _shaderPS, ShaderBase* _shaderVS, const DrawRequest& _request) const
-{
-	if (!_shaderVS || !_shaderPS || constBufferHandleTexScale_ == -1 || _request.modelId == -1)
-	{
-		return;
-	}
-
-	// 定数バッファへUVスケール値を書き込む
-	void* gpuBuffer = GetBufferShaderConstantBuffer(constBufferHandleTexScale_);
-	if (gpuBuffer)
-	{
-		std::memcpy(gpuBuffer, &_request.bufferTexScale, sizeof(IntegratedGpuBufferTexScale));
-		UpdateShaderConstantBuffer(constBufferHandleTexScale_);
-	}
-
-	// オリジナルシェーダ設定(ON)
-	MV1SetUseOrigShader(true);
-
-	// 頂点シェーダー用の定数バッファを定数バッファレジスタ(b7)にセット
-	SetShaderConstantBuffer(constBufferHandleTexScale_, DX_SHADERTYPE_VERTEX, CONSTANT_BUF_SLOT_VS);
-
-	// 頂点シェーダ設定
-	_shaderVS->Apply();
-
-	// テクスチャの設定
-	if (_request.textureHandle != -1)
-	{
-		SetUseTextureToShader(0, _request.textureHandle);
-	}
-
-	// ピクセルシェーダ設定
-	_shaderPS->Apply();
-
-	// テクスチャアドレスタイプをWRAPに変更
-	SetTextureAddressModeUV(DX_TEXADDRESS_WRAP, DX_TEXADDRESS_WRAP);
-
-	// モデル描画
-	MV1DrawModel(_request.modelId);
-
-
-	// 後始末
-	//-----------------------------------------
-
-	// テクスチャ解除
-	SetUseTextureToShader(0, -1);
-
-	// テクスチャアドレスタイプを元に戻す
-	SetTextureAddressModeUV(DX_TEXADDRESS_CLAMP, DX_TEXADDRESS_CLAMP);
-
-	// ピクセルシェーダ解除
-	_shaderPS->UnApply();
-
-	// 頂点シェーダ解除
-	_shaderVS->UnApply();
-
-	// 頂点シェーダー用の定数バッファレジスタを解除
-	SetShaderConstantBuffer(-1, DX_SHADERTYPE_VERTEX, CONSTANT_BUF_SLOT_VS);
-
-	// オリジナルシェーダ設定(OFF)
-	MV1SetUseOrigShader(false);
-	//-----------------------------------------
+    SetShaderConstantBuffer(-1, DX_SHADERTYPE_VERTEX, CONSTANT_BUFFER_SLOT_BEGIN_VERTEX_SHADER);
+    SetShaderConstantBuffer(-1, DX_SHADERTYPE_PIXEL, CONSTANT_BUFFER_SLOT_BEGIN_PIXEL_SHADER);
+    SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 }
 
 void ShaderRenderer::Release(void)
 {
-	if (constBufferHandle_ != -1)
-	{
-		DeleteShaderConstantBuffer(constBufferHandle_);
-		constBufferHandle_ = - 1;
-	}
-
-	if (constBufferHandleRain_ != -1)
-	{
-		DeleteShaderConstantBuffer(constBufferHandleRain_);
-		constBufferHandleRain_ = - 1;
-	}
-
-	if (constBufferHandleTexScale_ != -1)
-	{
-		DeleteShaderConstantBuffer(constBufferHandleTexScale_);
-		constBufferHandleTexScale_ = - 1;
-	}
+    for (auto& pair : constantBufferMap_)
+    {
+        if (pair.second != -1)
+        {
+            DeleteShaderConstantBuffer(pair.second);
+        }
+    }
+    constantBufferMap_.clear();
 }
 
-void ShaderRenderer::ApplyVertices(std::array<VERTEX2DSHADER, 4>& _vertices, 
-	float _width, float _height) const
+int ShaderRenderer::UpdateAndSetConstantBuffer(const void* _parameterPointer, int _parameterSize, int _shaderType, int _slotBegin)
 {
-	for (auto& v : _vertices)
-	{
-		v.rhw = 1.0f;
-		v.pos.z = 0.0f;
-		v.dif = GetColorU8(255, 255, 255, 255);
-		v.spc = GetColorU8(0, 0, 0, 0);
-		v.su = 1.0f;
-		v.sv = 1.0f;
-	}
+    if (_parameterPointer == nullptr || _parameterSize <= 0)
+    {
+        return -1;
+    }
 
-	// 左上
-	_vertices[0].pos = VGet(0.0f, 0.0f, 0.0f);
-	_vertices[0].u = 0.0f;
-	_vertices[0].v = 0.0f;
+    int constantBufferHandle = -1;
 
-	// 右上
-	_vertices[1].pos = VGet(_width, 0.0f, 0.0f);
-	_vertices[1].u = 1.0f;
-	_vertices[1].v = 0.0f;
+    if (constantBufferMap_.find(_parameterSize) == constantBufferMap_.end())
+    {
+        constantBufferHandle = CreateShaderConstantBuffer(_parameterSize);
+        constantBufferMap_[_parameterSize] = constantBufferHandle;
+    }
+    else
+    {
+        constantBufferHandle = constantBufferMap_[_parameterSize];
+    }
 
-	// 左下
-	_vertices[2].pos = VGet(0.0f, _height, 0.0f);
-	_vertices[2].u = 0.0f;
-	_vertices[2].v = 1.0f;
+    if (constantBufferHandle == -1)
+    {
+        return -1;
+    }
 
-	// 右下
-	_vertices[3].pos = VGet(_width, _height, 0.0f);
-	_vertices[3].u = 1.0f;
-	_vertices[3].v = 1.0f;
+    void* bufferPointer = GetBufferShaderConstantBuffer(constantBufferHandle);
+    if (bufferPointer != nullptr)
+    {
+        std::memcpy(bufferPointer, _parameterPointer, _parameterSize);
+        UpdateShaderConstantBuffer(constantBufferHandle);
+        SetShaderConstantBuffer(constantBufferHandle, _shaderType, _slotBegin);
+    }
+
+    return constantBufferHandle;
+}
+
+void ShaderRenderer::ApplyVertices(std::array<VERTEX2DSHADER, 4>& _vertices, float _width, float _height) const
+{
+    for (auto& vertex : _vertices)
+    {
+        vertex.rhw = 1.0f;
+        vertex.pos.z = 0.0f;
+        vertex.dif = GetColorU8(255, 255, 255, 255);
+        vertex.spc = GetColorU8(0, 0, 0, 0);
+        vertex.su = 1.0f;
+        vertex.sv = 1.0f;
+    }
+
+    // 左上
+    _vertices[0].pos = VGet(0.0f, 0.0f, 0.0f);
+    _vertices[0].u = 0.0f;
+    _vertices[0].v = 0.0f;
+
+    // 右上
+    _vertices[1].pos = VGet(_width, 0.0f, 0.0f);
+    _vertices[1].u = 1.0f;
+    _vertices[1].v = 0.0f;
+
+    // 左下
+    _vertices[2].pos = VGet(0.0f, _height, 0.0f);
+    _vertices[2].u = 0.0f;
+    _vertices[2].v = 1.0f;
+
+    // 右下
+    _vertices[3].pos = VGet(_width, _height, 0.0f);
+    _vertices[3].u = 1.0f;
+    _vertices[3].v = 1.0f;
 }
