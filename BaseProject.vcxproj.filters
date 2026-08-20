@@ -100,6 +100,8 @@
     <ClCompile Include="Src\Scene\SubScene\ScenePause.cpp" />
     <ClCompile Include="Src\Scene\SubScene\SceneOperation.cpp" />
     <ClCompile Include="Src\Manager\Generic\StatusManager.cpp" />
+    <ClCompile Include="Src\Shader\ShaderVertex\ShaderVertex.cpp" />
+    <ClCompile Include="Src\Object\Actor\Stage\Tree.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\Shader\ShaderParameters.h" />
@@ -203,6 +205,8 @@
     <ClInclude Include="Src\Scene\SubScene\SceneOperation.h" />
     <ClInclude Include="Src\Manager\Generic\StatusManager.h" />
     <ClInclude Include="Src\Shader\RenderCommand.h" />
+    <ClInclude Include="Src\Shader\ShaderVertex\ShaderVertex.h" />
+    <ClInclude Include="Src\Object\Actor\Stage\Tree.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="srcGraphics\Common\Pixel\PixelShader2DHeader.hlsli" />

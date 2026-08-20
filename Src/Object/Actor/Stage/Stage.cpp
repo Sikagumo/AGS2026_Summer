@@ -28,9 +28,8 @@ void Stage::Load(void)
 
 	for (int i = 0; i < maxFront; i++)
 	{
-		Transform tree = Transform();
-		tree.modelId = ResourceManager::GetInstance().
-			LoadModelDuplicate(ResourceManager::SRC::MODEL_TREE);
+		std::shared_ptr<Tree> tree = std::make_shared<Tree>();
+		tree->Load();
 
 		treesFront_.emplace_back(tree);
 	}
@@ -87,7 +86,7 @@ void Stage::InitTransform(void)
 		VECTOR pos = MV1GetFramePosition(treePosModel_.modelId, (frameFront + (i + 1)));
 		pos.y = TREE_POS_Y;
 
-		treesFront_.at(i).InitTransform(TREE_SCALE
+		treesFront_.at(i)->GetTransform().InitTransform(TREE_SCALE
 			, Quaternion::Identity(), Quaternion::AngleAxis(UtilityMath::Deg2RadF(rot), UtilityMath::AXIS_Y)
 			, pos);
 	}
@@ -135,17 +134,6 @@ void Stage::InitCollider(void)
 	}
 
 	CollisionController::GetInstance().RegisterActor(this);
-
-	for (auto& tree : treesFront_)
-	{
-		// •Ç‚ÌƒRƒ‰ƒCƒ_Š„‚è“–‚Ä
-		VECTOR posEnd = UtilityMath::VECTOR_ZERO;
-		posEnd.y = 250.0f;
-		constexpr float TREE_RADIUS = 27.5f;
-
-		ColliderCapsule* treeCol = new ColliderCapsule(ColliderBase::TAG::WALL, &tree, UtilityMath::VECTOR_ZERO, posEnd, TREE_RADIUS);
-		ownColliders_[static_cast<int>(ColliderBase::TAG::WALL)].push_back(treeCol);
-	}
 }
 
 
@@ -156,13 +144,27 @@ void Stage::InitAnimation(void)
 void Stage::InitPost(void)
 {
 	float SCALE = 50.0f;
+
 	texScaleParams_.scaleX = SCALE;
 	texScaleParams_.scaleY = SCALE;
+	//texScaleMaterial_.SetTexScale(SCALE, SCALE);
+
+	for (auto& tree : treesFront_)
+	{
+		tree->Init();
+	}
 }
 
 void Stage::Update(void)
 {
 	skyDome_.Rotate(UtilityMath::AXIS_Y, 0.001f);
+
+	for (auto& frontTree : treesFront_)
+	{
+		if (!frontTree->GetIsActive()) { continue; }
+
+		frontTree->Update();
+	}
 }
 
 void Stage::Draw(void)
@@ -181,7 +183,9 @@ void Stage::Draw(void)
 
 	for (auto& treeFront : treesFront_)
 	{
-		MV1DrawModel(treeFront.modelId);
+		if (!treeFront->GetIsActive()) { continue; }
+
+		MV1DrawModel(treeFront->GetTransform().modelId);
 	}
 
 	for (auto& treeBack : treesBack_)

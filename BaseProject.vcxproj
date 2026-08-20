@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Src\Object\Actor\Stage\Tree.cpp" />
     <ClCompile Include="Src\Scene\SubScene\SceneOperation.cpp" />
     <ClCompile Include="Src\Scene\SubScene\ScenePause.cpp" />
     <ClCompile Include="Src\Object\Actor\Chara\Enemy\EnemyRobo.cpp" />
@@ -114,6 +115,7 @@
     <ClCompile Include="Src\Manager\Generic\StatusManager.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Src\Object\Actor\Stage\Tree.h" />
     <ClInclude Include="Src\Scene\SubScene\SceneOperation.h" />
     <ClInclude Include="Src\Shader\RenderCommand.h" />
     <ClInclude Include="Src\Scene\SubScene\ScenePause.h" />

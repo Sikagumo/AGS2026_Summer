@@ -3,6 +3,8 @@
 #include <vector>
 #include "../../Actor/ActorBase.h"
 #include "../../../Shader/ShaderParameters.h"
+#include "../../../Shader/ShaderMaterial.h"
+#include "./Tree.h"
 
 class Stage : public ActorBase
 {
@@ -26,6 +28,7 @@ public:
 	void Draw(void)override;
 
 	VECTOR GetPos(void) { return transform_.pos; }
+
 
 protected:
 
@@ -51,7 +54,7 @@ private:
 
 	// 木のモデル
 	Transform treePosModel_;
-	std::vector<Transform> treesFront_;
+	std::vector<std::shared_ptr<Tree>> treesFront_;
 	std::vector<Transform> treesBack_;
 
 	// 壁の除外フレーム名称

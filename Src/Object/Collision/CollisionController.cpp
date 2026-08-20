@@ -752,7 +752,7 @@ bool CollisionController::CanCollide(int _tagA, int _tagB) const
 		}
 	}
 
-	if (tagHit == TAG::STAGE || tagHit == TAG::TREE)
+	if (tagHit == TAG::STAGE)
 	{
 		if (tagHurt == TAG::PLAYER || tagHurt == TAG::PLAYER_BULLET || tagHurt == TAG::PLAYER_BLAST
 			|| tagHurt == TAG::BOSS || tagHurt == TAG::ENEMYROBO
@@ -765,6 +765,15 @@ bool CollisionController::CanCollide(int _tagA, int _tagB) const
 			return true;
 		}
 		
+	}
+
+	if (tagHit == TAG::TREE)
+	{
+		if (tagHurt == TAG::PLAYER || tagHurt == TAG::LASER || tagHurt == TAG::ENEMYROBO
+			|| tagHurt == TAG::BOSS)
+		{
+			return true;
+		}
 	}
 
 	if (tagHit == TAG::WALL)
