@@ -686,6 +686,8 @@ void Player::ProcessMove(void)
 
 void Player::DrawShotOrbit(void)
 {
+	if (shotType_ == SHOT_TYPE::NONE) { return; }
+
 	constexpr float ORBIT_RADIUS = 1.0f;
 	constexpr float ORBIT_RADIUS_UP = 0.65f;
 	constexpr int SPHERE_DIV = 12;
@@ -953,7 +955,7 @@ void Player::ProcessAttack(void)
 }
 
 void Player::ProcShotNormal(void)
-{
+{	
 	// ƒRƒ“ƒ{‚ð‚·‚é‚©”Û‚©
 	const bool IS_COMBO = (attackNumMax_ != 0);
 
@@ -975,6 +977,8 @@ void Player::ProcShotNormal(void)
 
 		
 		shotType_ = SHOT_TYPE_NORMAL[static_cast<int>(jobType_)];
+
+		if (shotType_ == SHOT_TYPE::NONE) { return; }
 
 		CreateBullet();
 
@@ -999,6 +1003,8 @@ void Player::ProcShotSpecial(void)
 	if (canAttack)
 	{
 		shotType_ = SHOT_TYPE_SPECIAL[static_cast<int>(jobType_)];
+
+		if (shotType_ == SHOT_TYPE::NONE) { return; }
 
 		CreateBullet();
 
@@ -1155,6 +1161,7 @@ void Player::CreateBullet(void)
 		break;
 
 		default:
+			return;
 		break;
 
 	}
