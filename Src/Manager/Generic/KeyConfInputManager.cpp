@@ -136,6 +136,7 @@ void KeyConfInputManager::InitInputTable(void)
 	inputTable_["PAUSE"] =
 	{
 	  {INPUT_TYPE::KEY_BOARD, KEY_INPUT_ESCAPE},
+		{INPUT_TYPE::JOYPAD, PAD_INPUT_START}
 	};
 
 	inputTable_["LOCK_ON"] =

@@ -696,7 +696,8 @@ bool CollisionController::CanCollide(int _tagA, int _tagB) const
 			|| tagHurt == TAG::PLAYER_RECOVERY
 			|| tagHurt == TAG::WALL
 			|| tagHurt == TAG::ENEMYROBO
-			|| tagHurt == TAG::ENEMY_ATTACK)
+			|| tagHurt == TAG::ENEMY_ATTACK
+			|| tagHurt == TAG::TREE)
 		{
 			return true;
 		}
@@ -793,6 +794,15 @@ bool CollisionController::CanCollide(int _tagA, int _tagB) const
 		}
 	}
 
+	if (tagHit == TAG::TREE)
+	{
+		if (tagHurt == TAG::PLAYER
+			|| tagHurt == TAG::ENEMY)
+		{
+			return true;
+		}
+	}
+		
 	return false;
 }
 

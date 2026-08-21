@@ -109,7 +109,7 @@ private:
 
 	static constexpr std::array<SHOT_TYPE, static_cast<int>(JOB_TYPE::MAX)>
 		SHOT_TYPE_SPECIAL
-		= { SHOT_TYPE::BOMB_FINISH, SHOT_TYPE::NONE, SHOT_TYPE::CLUSTER, SHOT_TYPE::RECOVERY };
+		= { SHOT_TYPE::NONE, SHOT_TYPE::NONE, SHOT_TYPE::NONE, SHOT_TYPE::RECOVERY };
 
 	// 連射パラメータ
 	static constexpr float SCALE_RAPID = 0.85f;

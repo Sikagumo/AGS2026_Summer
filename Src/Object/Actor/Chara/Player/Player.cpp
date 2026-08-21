@@ -686,6 +686,11 @@ void Player::ProcessMove(void)
 
 void Player::DrawShotOrbit(void)
 {
+	if (shotType_ == SHOT_TYPE::NONE)
+	{
+		return;
+	}
+
 	constexpr float ORBIT_RADIUS = 1.0f;
 	constexpr float ORBIT_RADIUS_UP = 0.65f;
 	constexpr int SPHERE_DIV = 12;
@@ -976,6 +981,11 @@ void Player::ProcShotNormal(void)
 		
 		shotType_ = SHOT_TYPE_NORMAL[static_cast<int>(jobType_)];
 
+		if (shotType_ == SHOT_TYPE::NONE)
+		{
+			return;
+		}
+
 		CreateBullet();
 
 		// コンボ時、登録した攻撃コンボアクションを呼び出す
@@ -999,6 +1009,11 @@ void Player::ProcShotSpecial(void)
 	if (canAttack)
 	{
 		shotType_ = SHOT_TYPE_SPECIAL[static_cast<int>(jobType_)];
+
+		if (shotType_ == SHOT_TYPE::NONE)
+		{
+			return;
+		}
 
 		CreateBullet();
 
@@ -1155,6 +1170,7 @@ void Player::CreateBullet(void)
 		break;
 
 		default:
+			return;
 		break;
 
 	}
