@@ -17,10 +17,8 @@
 #include "../../Utility/UtilityMath.h"
 #include "../../Shader/ShaderController.h"
 #include "../../ImGUI/GuiController.h"
-#include "../../Shader/ShaderLibrary.h"
 #include "../SubScene/SceneOperation.h"
 #include "../../Shader/ShaderParameters.h"
-
 
 SceneTitle::SceneTitle(void)
     : imageTitle_(-1)

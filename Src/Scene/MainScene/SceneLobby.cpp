@@ -157,6 +157,10 @@ void SceneLobby::Initialize(void)
 {
     NetManager::GetInstance().Stop();
 
+    isLeaveWindow_ = false;
+    leaveSelectIndex_ = 1;
+    myReadyState_ = false;
+
     selectedJobIndex_ = 0;
     selectedSkinIndex_ = 0;
 
@@ -1017,6 +1021,7 @@ void SceneLobby::UpdateSelectMode(void)
             auto& netManager = NetManager::GetInstance();
             netManager.SetRoomWordId(roomWordId);
             netManager.Run(NET_MODE::HOST);
+            NetManager::GetInstance().SetConnectionTimeout(15.0f);
 
             multiState_ = LOBBY_STATE::CONNECTING;
             return;
@@ -1035,6 +1040,7 @@ void SceneLobby::UpdateSelectMode(void)
             NetManager::GetInstance().SetHostIp(hostIp);
             netManager.SetRoomWordId(roomWordId);
             netManager.Run(NET_MODE::CLIENT);
+            NetManager::GetInstance().SetConnectionTimeout(15.0f);
 
             multiState_ = LOBBY_STATE::CONNECTING;
             return;
@@ -1130,6 +1136,7 @@ void SceneLobby::UpdateInRoom(void)
             if (leaveSelectIndex_ == 0)
             {
                 // はいを選択した場合は部屋を抜ける
+                NetManager::GetInstance().Send(NET_DATA_TYPE::LEAVE_ROOM);
                 NetManager::GetInstance().Stop();
                 isLeaveWindow_ = false;
                 Initialize();
@@ -1356,6 +1363,7 @@ void SceneLobby::DrawInRoom(void)
     auto netUsers = NetManager::GetInstance().GetNetUsers();
     for (const auto& pair : netUsers)
     {
+        if (static_cast<int>(allPlayers.size()) >= MAX_PLAYERS) { break; }
         allPlayers.push_back(pair.second);
     }
 
@@ -1461,15 +1469,18 @@ void SceneLobby::MoveToGameScene(std::map<int, NET_JOIN_USER>& _users)
 {
     std::vector<SceneGame::PlayerSelectType> playerSelectTypes;
 
-    {
-        SceneGame::PlayerSelectType myType;
-        myType.job = static_cast<PlayerBase::JOB_TYPE>(selectedJobIndex_);
-        myType.skin = static_cast<PlayerBase::SKIN_TYPE>(selectedSkinIndex_);
-        playerSelectTypes.push_back(myType);
-    }
+    // 自分
+    SceneGame::PlayerSelectType myType;
+    myType.job = static_cast<PlayerBase::JOB_TYPE>(selectedJobIndex_);
+    myType.skin = static_cast<PlayerBase::SKIN_TYPE>(selectedSkinIndex_);
+    playerSelectTypes.push_back(myType);
 
+    // 他人
     for (auto iterator = _users.begin(); iterator != _users.end(); ++iterator)
     {
+        // 自分を含めてMAX_PLAYERSを超えないようにガード
+        if (static_cast<int>(playerSelectTypes.size()) >= MAX_PLAYERS) { break; }
+
         SceneGame::PlayerSelectType otherType;
         otherType.job = static_cast<PlayerBase::JOB_TYPE>(iterator->second.selectedJobType);
         otherType.skin = static_cast<PlayerBase::SKIN_TYPE>(iterator->second.selectedSkinType);

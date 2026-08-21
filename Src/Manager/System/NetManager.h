@@ -54,6 +54,8 @@ public:
 	/// @brief 通信相手とのタイムアウトを検知する
 	bool GetIsConnectionLost(void) const;
 
+	void SetConnectionTimeout(float _timeout);
+
 private:
 
 	// 接続ロストと判定するまでの秒数
@@ -74,6 +76,7 @@ private:
 	float gameTime_;
 	IPDATA hostIp_;
 	float hostTimeoutTimer_;
+	float connectionTimeout_;
 	std::map<int, float> clientTimeoutTimers_;
 
 	std::map<int, NET_ACTION_HIS> remoteActionHis_;

@@ -115,7 +115,7 @@ public:
     void SetUsePadNo(int _padNo);
 
     /// @brief マウスホイールの回転量を取得する
-    /// @return 前フレームからの回転量 (奥に回すとプラス、手前に回すとマイナス)
+    /// @return 前フレームからの回転量 
     int GetMouseWheel(void) const;
 	
 private:

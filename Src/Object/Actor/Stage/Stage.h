@@ -3,7 +3,6 @@
 #include <vector>
 #include "../../Actor/ActorBase.h"
 #include "../../../Shader/ShaderParameters.h"
-#include "../../../Shader/ShaderMaterial.h"
 #include "./Tree.h"
 
 class Stage : public ActorBase

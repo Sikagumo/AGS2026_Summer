@@ -78,42 +78,6 @@ void Camera::InitPost(void)
 
 void Camera::Update(void)
 {
-	auto& keyConfInputManager = KeyConfInputManager::GetInstance();
-
-	if (keyConfInputManager.isTrigerDown("LOCK_ON"))
-	{
-		if (!isLockOn_)
-		{
-			// ロックオン有効化
-			LockOnChoice();
-		}
-		else
-		{
-			SetIsLockOn(false);
-		}
-	}
-
-	// ロックオン時、常に追従位置を取得する
-	if (isLockOn_)
-	{
-		// マウスホイールの取得
-		if (keyConfInputManager.GetMouseWheel() != 0
-			|| keyConfInputManager.isTrigerDown("TARGET_CHANGE_LEFT")  
-			|| keyConfInputManager.isTrigerDown("TARGET_CHANGE_RIGHT"))
-		{
-			LockOnChoice();
-		}
-
-		FollowLockOnPosition();
-	}
-
-	// ターゲット対象切替時のイージング進行
-	if (easingTerm_ < 1.0f)
-	{
-		easingTerm_ += TimeManager::GetInstance().GetDeltaTime() / LOCKON_DURATION;
-		easingTerm_ = std::clamp(easingTerm_, 0.0f, 1.0f);
-	}
-
 	// 更新前情報
 	prePos_ = transform_.pos;
 
