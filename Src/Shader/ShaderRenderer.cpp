@@ -134,17 +134,18 @@ void ShaderRenderer::ExecuteCommand(const RenderCommand& _renderCommand)
     {
         if (_renderCommand.isClamp)
         {
-            SetTextureAddressMode(DX_TEXADDRESS_CLAMP, DX_TEXADDRESS_CLAMP);
+            SetTextureAddressModeUV(DX_TEXADDRESS_CLAMP, DX_TEXADDRESS_CLAMP);
+        }
+        else
+        {
+            SetTextureAddressModeUV(DX_TEXADDRESS_WRAP, DX_TEXADDRESS_WRAP);
         }
 
         MV1SetUseOrigShader(true);
         MV1DrawModel(_renderCommand.modelHandleId);
         MV1SetUseOrigShader(false);
 
-        if (_renderCommand.isClamp)
-        {
-            SetTextureAddressMode(DX_TEXADDRESS_WRAP, DX_TEXADDRESS_WRAP);
-        }
+        SetTextureAddressModeUV(DX_TEXADDRESS_CLAMP, DX_TEXADDRESS_CLAMP);
     }
 }
 
