@@ -64,10 +64,14 @@ void ShaderController::ExecuteDrawCommands(void)
             return leftCommand.pixelShaderHandleId < rightCommand.pixelShaderHandleId;
         });
 
+    shaderRenderer_->BeginBatch();
+
     for (const auto& renderCommand : renderCommandQueue_)
     {
         shaderRenderer_->ExecuteCommand(renderCommand);
     }
+
+    shaderRenderer_->EndBatch();
 
     renderCommandQueue_.clear();
 }

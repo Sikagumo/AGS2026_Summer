@@ -87,7 +87,7 @@ public:
     template <typename VertexParameterType, typename PixelParameterType>
     void Draw3D(ResourceManager::SRC _vertexShaderSource, ResourceManager::SRC _pixelShaderSource,
         int _modelHandle, const VertexParameterType& _vertexParameters, const PixelParameterType& _pixelParameters,
-        int _textureSlot = -1, int _textureHandle = -1)
+        int _textureSlot = -1, int _textureHandle = -1, bool _isClamp = false)
     {
         const Resource& vertexShaderResource = ResourceManager::GetInstance().Load(_vertexShaderSource);
         const Resource& pixelShaderResource = ResourceManager::GetInstance().Load(_pixelShaderSource);
@@ -109,6 +109,7 @@ public:
 
         renderCommand.textureHandleId = _textureHandle;
         renderCommand.normalMapHandleId = -1;
+        renderCommand.isClamp = _isClamp;
 
         // 頂点パラメータ関連
         const unsigned char* vertexBytePointer = reinterpret_cast<const unsigned char*>(&_vertexParameters);

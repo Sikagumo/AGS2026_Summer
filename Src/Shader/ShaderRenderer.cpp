@@ -3,6 +3,10 @@
 #include "../Application.h" 
 
 ShaderRenderer::ShaderRenderer(void)
+    : currentVertexShaderHandleId_(-1)
+    , currentPixelShaderHandleId_(-1)
+    , currentTexture0HandleId_(-1)
+    , currentTexture1HandleId_(-1)
 {
 }
 
@@ -15,15 +19,22 @@ void ShaderRenderer::Initialize(void)
 {
 }
 
+void ShaderRenderer::BeginBatch(void)
+{
+    // キャッシュを初期化する
+    currentVertexShaderHandleId_ = -1;
+    currentPixelShaderHandleId_ = -1;
+    currentTexture0HandleId_ = -1;
+    currentTexture1HandleId_ = -1;
+}
+
 void ShaderRenderer::ExecuteCommand(const RenderCommand& _renderCommand)
 {
-    // 頂点シェーダ用定数バッファの更新と設定
     if (_renderCommand.vertexShaderHandleId != -1 && _renderCommand.vertexParameterSize > 0)
     {
         UpdateAndSetConstantBuffer(_renderCommand.vertexParameterData.data(), _renderCommand.vertexParameterSize, DX_SHADERTYPE_VERTEX, CONSTANT_BUFFER_SLOT_BEGIN_VERTEX_SHADER);
     }
 
-    // ピクセルシェーダ用定数バッファの更新と設定
     if (_renderCommand.pixelParameterSize > 0)
     {
         UpdateAndSetConstantBuffer(_renderCommand.pixelParameterData.data(), _renderCommand.pixelParameterSize, DX_SHADERTYPE_PIXEL, CONSTANT_BUFFER_SLOT_BEGIN_PIXEL_SHADER);
@@ -32,24 +43,77 @@ void ShaderRenderer::ExecuteCommand(const RenderCommand& _renderCommand)
     // テクスチャのバインド
     if (_renderCommand.textureHandleId != -1)
     {
-        SetUseTextureToShader(0, _renderCommand.textureHandleId);
+        if (currentTexture0HandleId_ != _renderCommand.textureHandleId)
+        {
+            SetUseTextureToShader(0, _renderCommand.textureHandleId);
+            currentTexture0HandleId_ = _renderCommand.textureHandleId;
+        }
+    }
+    else
+    {
+        if (currentTexture0HandleId_ != -1)
+        {
+            SetUseTextureToShader(0, -1);
+            currentTexture0HandleId_ = -1;
+        }
     }
 
     if (_renderCommand.normalMapHandleId != -1)
     {
-        SetUseTextureToShader(1, _renderCommand.normalMapHandleId);
+        if (currentTexture1HandleId_ != _renderCommand.normalMapHandleId)
+        {
+            SetUseTextureToShader(1, _renderCommand.normalMapHandleId);
+            currentTexture1HandleId_ = _renderCommand.normalMapHandleId;
+        }
+    }
+    else
+    {
+        if (currentTexture1HandleId_ != -1)
+        {
+            SetUseTextureToShader(1, -1);
+            currentTexture1HandleId_ = -1;
+        }
     }
 
-    // シェーダの設定
+    // 頂点シェーダの設定
     if (_renderCommand.vertexShaderHandleId != -1)
     {
-        SetUseVertexShader(_renderCommand.vertexShaderHandleId);
+        if (currentVertexShaderHandleId_ != _renderCommand.vertexShaderHandleId)
+        {
+            SetUseVertexShader(_renderCommand.vertexShaderHandleId);
+            currentVertexShaderHandleId_ = _renderCommand.vertexShaderHandleId;
+        }
+    }
+    else
+    {
+        if (currentVertexShaderHandleId_ != -1)
+        {
+            SetUseVertexShader(-1);
+            currentVertexShaderHandleId_ = -1;
+        }
     }
 
-    SetUsePixelShader(_renderCommand.pixelShaderHandleId);
+    // ピクセルシェーダの設定
+    if (_renderCommand.pixelShaderHandleId != -1)
+    {
+        // 前回と違うシェーダが指定された時だけセットする
+        if (currentPixelShaderHandleId_ != _renderCommand.pixelShaderHandleId)
+        {
+            SetUsePixelShader(_renderCommand.pixelShaderHandleId);
+            currentPixelShaderHandleId_ = _renderCommand.pixelShaderHandleId;
+        }
+    }
+    else
+    {
+        if (currentPixelShaderHandleId_ != -1)
+        {
+            SetUsePixelShader(-1);
+            currentPixelShaderHandleId_ = -1;
+        }
+    }
+
     SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255);
 
-    // 描画タイプの分岐
     if (_renderCommand.renderType == RENDER_TYPE::DRAW_2D)
     {
         float drawWidth = static_cast<float>(Application::SCREEN_SIZE_X) * _renderCommand.scaleSize;
@@ -68,24 +132,39 @@ void ShaderRenderer::ExecuteCommand(const RenderCommand& _renderCommand)
     }
     else if (_renderCommand.renderType == RENDER_TYPE::DRAW_3D)
     {
+        if (_renderCommand.isClamp)
+        {
+            SetTextureAddressMode(DX_TEXADDRESS_CLAMP, DX_TEXADDRESS_CLAMP);
+        }
+
         MV1SetUseOrigShader(true);
         MV1DrawModel(_renderCommand.modelHandleId);
         MV1SetUseOrigShader(false);
-    }
 
-    // 状態のアンバインド（状態リーク防止のための後始末）
+        if (_renderCommand.isClamp)
+        {
+            SetTextureAddressMode(DX_TEXADDRESS_WRAP, DX_TEXADDRESS_WRAP);
+        }
+    }
+}
+
+void ShaderRenderer::EndBatch(void)
+{
+    // 全ての描画が終わった後にまとめて状態をアンバインドする
     SetUseTextureToShader(0, -1);
     SetUseTextureToShader(1, -1);
     SetUsePixelShader(-1);
-
-    if (_renderCommand.vertexShaderHandleId != -1)
-    {
-        SetUseVertexShader(-1);
-    }
+    SetUseVertexShader(-1);
 
     SetShaderConstantBuffer(-1, DX_SHADERTYPE_VERTEX, CONSTANT_BUFFER_SLOT_BEGIN_VERTEX_SHADER);
     SetShaderConstantBuffer(-1, DX_SHADERTYPE_PIXEL, CONSTANT_BUFFER_SLOT_BEGIN_PIXEL_SHADER);
     SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+
+    // キャッシュをリセットする
+    currentVertexShaderHandleId_ = -1;
+    currentPixelShaderHandleId_ = -1;
+    currentTexture0HandleId_ = -1;
+    currentTexture1HandleId_ = -1;
 }
 
 void ShaderRenderer::Release(void)

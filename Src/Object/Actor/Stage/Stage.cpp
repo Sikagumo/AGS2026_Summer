@@ -176,7 +176,8 @@ void Stage::Draw(void)
 		texScaleParams_,
 		texScaleParams_,
 		0,
-		viewStageTexHandle_
+		viewStageTexHandle_,
+		true
 	);
 
 	for (auto& treeFront : treesFront_)

@@ -11,8 +11,8 @@ enum class RENDER_TYPE
 /// @brief 描画命令を保持する構造体
 struct RenderCommand
 {
-    // 描画タイプ関連
-    RENDER_TYPE renderType; // 2Dか3Dかの判別
+    // 2Dか3Dかの判別
+    RENDER_TYPE renderType; 
 
     // リソース関連
     int vertexShaderHandleId; // 頂点シェーダのID（-1で不使用）
@@ -33,4 +33,7 @@ struct RenderCommand
     int vertexParameterSize;                        // 頂点シェーダ用パラメータのサイズ
     std::vector<unsigned char> pixelParameterData;  // ピクセルシェーダ用定数バッファのデータ
     int pixelParameterSize;                         // ピクセルシェーダ用パラメータのサイズ
+
+    // クランプするかどうかのフラグ
+    bool isClamp = false;
 };
