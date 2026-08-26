@@ -125,7 +125,6 @@ private:
 	int curAttackNum_;
 
 	int shotIndex_;
-	int shadowHandle_;
 
 	ANIM_TYPE animType_;
 
@@ -161,6 +160,10 @@ private:
 	bool isNetAttack_;
 
 	bool isAttackSend_;
+
+	// ’…’e’n“_
+	std::array<VERTEX3D, 4> shotPointVertex_;
+
 
 
 	// ‘€ì
@@ -201,7 +204,11 @@ private:
 
 	void DelayRotate(void)override;
 
+	/// @brief ’e‚Ì‹O“¹‚ğ•`‰æ
 	void DrawShotOrbit(void);
+
+	/// @brief ’e‚Ì’…’e’n“_
+	void DrawShotOrbitPoint(const VECTOR& _shotPos);
 
 	VECTOR CalcShotDir(void);
 
