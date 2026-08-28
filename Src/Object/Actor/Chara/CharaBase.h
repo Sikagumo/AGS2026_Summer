@@ -1,5 +1,4 @@
 #pragma once
-#include <array>
 #include "../ActorBase.h"
 #include "../../Common/AnimationController.h"
 #include "../../../Utility/UtilityMath.h"
@@ -40,7 +39,7 @@ protected:
 	static constexpr float COLLISION_BACK_DIS = 1.0f;
 
 	//影の描画する高さ式（前が高さ)(後ろが補正値)
-	static constexpr float SHADOW_POS_Y = -7.0f + -0.5;
+	static constexpr float SHADOW_POS_Y = -7.0f + 0.5;
 	//影の濃さの最大値
 	static constexpr int MAX_SHADOW_COL = 255;
 	//影を完全に消す高さ
@@ -67,13 +66,13 @@ protected:
 	int shadowHandle_;
 	
 	// 頂点番号の定数
-	static constexpr int LEFT_BACK	   = 0;
-	static constexpr int LEFT_FORWARD  = 1;
-	static constexpr int RIGHT_BACK	   = 2;
+	static constexpr int LEFT_BACK = 0;
+	static constexpr int LEFT_FORWARD = 1;
+	static constexpr int RIGHT_BACK = 2;
 	static constexpr int RIGHT_FORWARD = 3;
 
 	// 頂点配列
-	std::array<VERTEX3D, 4> imageShadowVertex_;
+	VERTEX3D imageVertex_[4];
 
 
 	virtual void InitAnimation(void)override;

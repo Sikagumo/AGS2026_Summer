@@ -167,6 +167,10 @@ void Stage::Draw(void)
 {
 	MV1DrawModel(skyDome_.modelId);
 
+	ShaderController::GetInstance()
+		.CreateShaderDrawTexScale(0, 0, viewTrans_.modelId, viewStageTexHandle_, texScaleMaterial_);
+
+
 	for (auto& treeFront : treesFront_)
 	{
 		if (!treeFront->GetIsActive()) { continue; }
@@ -178,10 +182,6 @@ void Stage::Draw(void)
 	{
 		MV1DrawModel(treeBack.modelId);
 	}
-
-	ShaderController::GetInstance()
-		.CreateShaderDrawTexScale(0, 0, viewTrans_.modelId, viewStageTexHandle_, texScaleMaterial_);
-
 
 #ifdef _DEBUG
 	//ActorBase::Draw();

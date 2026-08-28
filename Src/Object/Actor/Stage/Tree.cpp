@@ -43,14 +43,13 @@ void Tree::InitCollider(void)
 
 void Tree::Update(void)
 {
-	/*
 	// レーザー衝突時、無効化
 	if (CollisionController::GetInstance()
-		.IsActorCollidingWithTag(this, ColliderBase::TAG::LASER))
+		.IsTagCollidingWithTag(ColliderBase::TAG::TREE, ColliderBase::TAG::LASER))
 	{
 		CollisionController::GetInstance()
 			.SetCollisionActive(this, ColliderBase::TAG::TREE, false);
 
 		isActive_ = false;
-	}*/
+	}
 }
