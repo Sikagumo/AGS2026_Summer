@@ -609,7 +609,7 @@ void SceneGame::UpdateGame(void)
 
 	stage_->Update();
 
-	auto remoteHisMap = NetManager::GetInstance().GetRemoteActionHis();
+	auto remoteHisMap = NetManager::GetInstance().GetRemoteActionHistory();
 
 	for (auto& player : players_)
 	{
@@ -621,7 +621,7 @@ void SceneGame::UpdateGame(void)
 		{
 			NET_ACTION latestAction = remoteHisMap[key].actions[0];
 
-			player->SetNetworkAction(latestAction.pos, latestAction.quaRot, latestAction.animId, latestAction.isAttack, latestAction.currentHp);
+			player->SetNetworkAction(latestAction.position, latestAction.rotation, latestAction.animationId, latestAction.isAttack, latestAction.currentHp);
 		}
 	}
 

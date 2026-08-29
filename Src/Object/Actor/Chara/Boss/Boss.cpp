@@ -1073,25 +1073,25 @@ void Boss::SetHostControl(bool _isHostControl)
 NET_BOSS_ACTION Boss::GetNetworkAction(void) const
 {
 	NET_BOSS_ACTION action;
-	action.pos = transform_.pos;
-	action.quaRot = transformBody_.quaRot;
+	action.position = transform_.pos;
+	action.rotation = transformBody_.quaRot;
 	action.bossHp = hp_;
-	action.animId = static_cast<int>(state_);
+	action.animationId = static_cast<int>(state_);
 	action.targetPlayerId = mainIdx_;
 
-	action.mpTargetId = mpIdx_;
+	action.missilePodTargetId = mpIdx_;
 	action.cannonTargetId = cannonIdx_;
 
 	// 追加：最後に選ばれた攻撃のタイプを送信する
 	action.attackSelect = static_cast<int>(lastAttackType_);
 
-	action.weaponMglHp = weaponMGL_->GetHp();
-	action.weaponMgrHp = weaponMGR_->GetHp();
-	action.weaponMpLHp = weaponMPL_->GetHp();
-	action.weaponMpRHp = weaponMPR_->GetHp();
-	action.weaponRgHp = weaponRG_->GetHp();
-	action.weaponCannonLHp = weaponCannonL_->GetHp();
-	action.weaponCannonRHp = weaponCannonR_->GetHp();
+	action.weaponMachineGunLeftHp = weaponMGL_->GetHp();
+	action.weaponMachineGunRightHp = weaponMGR_->GetHp();
+	action.weaponMissilePodLeftHp = weaponMPL_->GetHp();
+	action.weaponMissilePodRightHp = weaponMPR_->GetHp();
+	action.weaponRailGunHp = weaponRG_->GetHp();
+	action.weaponCannonLeftHp = weaponCannonL_->GetHp();
+	action.weaponCannonRightHp = weaponCannonR_->GetHp();
 
 	return action;
 }
@@ -1104,18 +1104,18 @@ void Boss::SetNetworkAction(const NET_BOSS_ACTION& _action)
 
 	const int difference = PREV_HP - hp_;
 
-	transform_.pos = _action.pos;
+	transform_.pos = _action.position;
 
-	transformBody_.quaRot = _action.quaRot;
+	transformBody_.quaRot = _action.rotation;
 
 	if (difference > EFFECT_PLAEY_DAMEGE)
 	{
 		PlayEffect();
 	}
 
-	if (_action.mpTargetId >= 0 && _action.mpTargetId < playerSize_)
+	if (_action.missilePodTargetId >= 0 && _action.missilePodTargetId < playerSize_)
 	{
-		mpIdx_ = _action.mpTargetId;
+		mpIdx_ = _action.missilePodTargetId;
 	}
 	if (_action.cannonTargetId >= 0 && _action.cannonTargetId < playerSize_)
 	{
@@ -1123,13 +1123,13 @@ void Boss::SetNetworkAction(const NET_BOSS_ACTION& _action)
 	}
 
 	// クライアント側のウェポンHPをホストと同期する
-	weaponMGL_->SetHp(_action.weaponMglHp);
-	weaponMGR_->SetHp(_action.weaponMgrHp);
-	weaponMPL_->SetHp(_action.weaponMpLHp);
-	weaponMPR_->SetHp(_action.weaponMpRHp);
-	weaponRG_->SetHp(_action.weaponRgHp);
-	weaponCannonL_->SetHp(_action.weaponCannonLHp);
-	weaponCannonR_->SetHp(_action.weaponCannonRHp);
+	weaponMGL_->SetHp(_action.weaponMachineGunLeftHp);
+	weaponMGR_->SetHp(_action.weaponMachineGunRightHp);
+	weaponMPL_->SetHp(_action.weaponMissilePodLeftHp);
+	weaponMPR_->SetHp(_action.weaponMissilePodRightHp);
+	weaponRG_->SetHp(_action.weaponRailGunHp);
+	weaponCannonL_->SetHp(_action.weaponCannonLeftHp);
+	weaponCannonR_->SetHp(_action.weaponCannonRightHp);
 
 	// クライアント側の場合、攻撃の変更を検知して武器を発射する
 	if (isHostControl_ == false)
@@ -1179,12 +1179,12 @@ void Boss::SetNetworkAction(const NET_BOSS_ACTION& _action)
 			}
 		}
 	}
-	if (static_cast<int>(state_) != _action.animId)
+	if (static_cast<int>(state_) != _action.animationId)
 	{
 		// ジャンプからIDLEに戻った瞬間の処理
 		if (state_ == STATE::JUMP)
 		{
-			if (static_cast<STATE>(_action.animId) == STATE::IDLE)
+			if (static_cast<STATE>(_action.animationId) == STATE::IDLE)
 			{
 				currentWaveScl = WAVE_SCL;
 				EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_WAVE, transform_.pos, currentWaveScl, LANDING_SCL, EFFECT_PLAEY_SPEED, this);
@@ -1198,7 +1198,7 @@ void Boss::SetNetworkAction(const NET_BOSS_ACTION& _action)
 		// 突進から他のステートに戻った瞬間の処理
 		if (state_ == STATE::ROADATTACK)
 		{
-			if (static_cast<STATE>(_action.animId) != STATE::ROADATTACK)
+			if (static_cast<STATE>(_action.animationId) != STATE::ROADATTACK)
 			{
 				// モデルとスケールを元の足に戻す
 				transform_.modelId = transformFeet_.modelId;
@@ -1212,7 +1212,7 @@ void Boss::SetNetworkAction(const NET_BOSS_ACTION& _action)
 			}
 		}
 
-		ChangeState(static_cast<STATE>(_action.animId));
+		ChangeState(static_cast<STATE>(_action.animationId));
 	}
 
 	if (_action.targetPlayerId >= 0 && _action.targetPlayerId < playerSize_)

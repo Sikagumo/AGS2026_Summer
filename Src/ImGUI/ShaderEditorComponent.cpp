@@ -1,7 +1,7 @@
 #include "ShaderEditorComponent.h"
 #include "../../Lib/ImGUI/imgui.h"
 
-ShaderEditorComponent::ShaderEditorComponent(const std::string& _name,
+ShaderEditorComponent::ShaderEditorComponent(const std::string& _name, 
 	NormalWaveShaderParams* _params)
 	: name_(_name)
 	, params_(_params)
@@ -22,22 +22,28 @@ void ShaderEditorComponent::DrawUI(void)
 	// ライティング設定
 	if (ImGui::CollapsingHeader("Lighting", ImGuiTreeNodeFlags_DefaultOpen))
 	{
-		float lightDir[3] = {
+		const float SLIDER_MIN_DIRECTION = -1.0f; // ライト方向スライダーの最小値
+		const float SLIDER_MAX_DIRECTION = 1.0f;  // ライト方向スライダーの最大値
+		const float SLIDER_MIN_RATE = 0.0f;       // 割合スライダーの最小値
+		const float SLIDER_MAX_RATE = 1.0f;       // 割合スライダーの最大値
+
+		float lightDirection[3] = {               // ライトの方向ベクトル
 			params_->lightVectorX,
 			params_->lightVectorY,
 			params_->lightVectorZ
 		};
 
-		if (ImGui::SliderFloat3("Light Direction", lightDir, -1.0f, 1.0f))
+		if (ImGui::SliderFloat3("Light Direction", lightDirection, SLIDER_MIN_DIRECTION, 
+			SLIDER_MAX_DIRECTION))
 		{
 			// 変更があれば構造体に直接セットする
-			params_->lightVectorX = lightDir[0];
-			params_->lightVectorY = lightDir[1];
-			params_->lightVectorZ = lightDir[2];
+			params_->lightVectorX = lightDirection[0];
+			params_->lightVectorY = lightDirection[1];
+			params_->lightVectorZ = lightDirection[2];
 		}
 
 		// 環境光
-		if (ImGui::SliderFloat("Ambient", &params_->ambientRate, 0.0f, 1.0f))
+		if (ImGui::SliderFloat("Ambient", &params_->ambientRate, SLIDER_MIN_RATE, SLIDER_MAX_RATE))
 		{
 			// 変更はそのまま反映される
 		}
@@ -46,13 +52,19 @@ void ShaderEditorComponent::DrawUI(void)
 	// 波エフェクト設定
 	if (ImGui::CollapsingHeader("Wave Effect", ImGuiTreeNodeFlags_DefaultOpen))
 	{
+		const float SLIDER_MIN_WAVE = 0.0f;  // 波パラメータスライダーの最小値
+		const float SLIDER_MAX_SPEED = 5.0f; // 波速度スライダーの最大値
+		const float SLIDER_MAX_FORCE = 0.1f; // 波強度スライダーの最大値
+
 		// 波の速さ
-		if (ImGui::SliderFloat("Wave Speed", &params_->waveSpeedValue, 0.0f, 5.0f))
+		if (ImGui::SliderFloat("Wave Speed", &params_->waveSpeedValue, SLIDER_MIN_WAVE, 
+			SLIDER_MAX_SPEED))
 		{
 		}
 
 		// 波の強さ
-		if (ImGui::SliderFloat("Wave Force", &params_->waveForceValue, 0.0f, 0.1f))
+		if (ImGui::SliderFloat("Wave Force", &params_->waveForceValue, SLIDER_MIN_WAVE,
+			SLIDER_MAX_FORCE))
 		{
 		}
 
@@ -62,11 +74,15 @@ void ShaderEditorComponent::DrawUI(void)
 	// フラグ設定
 	if (ImGui::CollapsingHeader("Flags"))
 	{
-		// ノーマルマップのON/OFF（useNormalMapFlag は float なので bool に変換して扱う）
-		bool useNormal = (params_->useNormalMapFlag > 0.5f);
-		if (ImGui::Checkbox("Use NormalMap", &useNormal))
+		const float THRESHOLD_FLAG = 0.5f; // フラグ判定のしきい値
+		const float FLAG_ON = 1.0f;        // フラグONの値
+		const float FLAG_OFF = 0.0f;       // フラグOFFの値
+
+		// ノーマルマップのON/OFF
+		bool isUseNormalMap = (params_->useNormalMapFlag > THRESHOLD_FLAG);
+		if (ImGui::Checkbox("Use NormalMap", &isUseNormalMap))
 		{
-			params_->useNormalMapFlag = useNormal ? 1.0f : 0.0f;
+			params_->useNormalMapFlag = isUseNormalMap ? FLAG_ON : FLAG_OFF;
 		}
 	}
 

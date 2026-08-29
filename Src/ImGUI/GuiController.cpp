@@ -18,7 +18,7 @@ GuiController& GuiController::GetInstance(void)
 
 void GuiController::DestroyInstance(void)
 {
-	if (instance_)
+	if (instance_ != nullptr)
 	{
 		delete instance_;
 		instance_ = nullptr;
@@ -27,7 +27,7 @@ void GuiController::DestroyInstance(void)
 
 void GuiController::SetActiveGui(std::shared_ptr<IGuiComponent> _gui)
 {
-	// 渡されたコンポーネントをアクティブ（表示対象）にする
+	// 渡されたコンポーネントをアクティブにする
 	activeGui_ = _gui;
 }
 
