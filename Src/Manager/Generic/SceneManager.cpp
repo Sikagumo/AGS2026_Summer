@@ -208,9 +208,9 @@ void SceneManager::Update(void)
 
         fader_->LoadFadeImage();
 
-        //auto jobs = { SceneGame::PlayerSelectType(PlayerBase::JOB_TYPE::SUPPORT, PlayerBase::SKIN_TYPE::DOG) };
-        //ChangeScene(std::make_shared<SceneGame>(jobs));
-        ChangeScene(std::make_shared<SceneTitle>());
+        auto jobs = { SceneGame::PlayerSelectType(PlayerBase::JOB_TYPE::CANNON, PlayerBase::SKIN_TYPE::DOG) };
+        ChangeScene(std::make_shared<SceneGame>(jobs));
+        //ChangeScene(std::make_shared<SceneTitle>());
     }
 
     TimeManager::GetInstance().Update();

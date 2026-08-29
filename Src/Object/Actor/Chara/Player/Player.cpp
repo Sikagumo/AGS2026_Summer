@@ -58,12 +58,13 @@ namespace
 	constexpr int CLUSTER_POWER = 10;
 	constexpr float CLUSTER_SHOT_SPEED = 20.0f;
 	constexpr float CLUSTER_ALIVE_TIME = 0.25f;
+
+	constexpr float SHADOW_SCALE = 30.0f;
 };
 
 
 Player::Player(int _playerNo, JOB_TYPE _jobType, SKIN_TYPE _skinType, const VECTOR& _startPos)
 	: PlayerBase::PlayerBase(_playerNo, _jobType, _startPos, _skinType)
-	, shadowHandle_(-1)
 	, animType_(ANIM_TYPE::IDLE)
 	, curAttackNum_(0)
 	, throwPos_(UtilityMath::VECTOR_ZERO), throwDir_(UtilityMath::VECTOR_ZERO)
@@ -78,6 +79,7 @@ Player::Player(int _playerNo, JOB_TYPE _jobType, SKIN_TYPE _skinType, const VECT
 	, netKey_(0)
 	, isNetAttack_(false)
 	, isAttackSend_(false)
+	, shotPointVertex_{}
 {
 	if (_jobType == JOB_TYPE::CANNON)
 	{
@@ -94,6 +96,23 @@ Player::Player(int _playerNo, JOB_TYPE _jobType, SKIN_TYPE _skinType, const VECT
 	moveSpeed_ = MOVE_SPEED;
 
 	std::fill(clusterBullets_.begin(), clusterBullets_.end(), nullptr);
+
+
+	// 弾の衝突の範囲
+	const VECTOR INIT_NORM = UtilityMath::DIR_UP;
+	const COLOR_U8 INIT_DIFUSECOLOR = GetColorU8(255, 255, 255, 255);
+
+	for (auto& vertex : shotPointVertex_)
+	{
+		vertex.norm = INIT_NORM;
+		vertex.dif = INIT_DIFUSECOLOR;
+	}
+
+	// UV座標の割り当て
+	shotPointVertex_[LEFT_BACK].u = 0.0f; shotPointVertex_[LEFT_BACK].v = 1.0f;
+	shotPointVertex_[LEFT_FORWARD].u = 0.0f; shotPointVertex_[LEFT_FORWARD].v = 0.0f;
+	shotPointVertex_[RIGHT_BACK].u = 1.0f; shotPointVertex_[RIGHT_BACK].v = 1.0f;
+	shotPointVertex_[RIGHT_FORWARD].u = 1.0f; shotPointVertex_[RIGHT_FORWARD].v = 0.0f;
 }
 
 
@@ -466,7 +485,7 @@ void Player::Draw(void)
 
 	ActorBase::Draw();
 
-	CharaBase::DrawShadowRound(30.0f);
+	CharaBase::DrawShadowRound(SHADOW_SCALE);
 }
 
 void Player::DrawDebug(void)
@@ -672,10 +691,10 @@ void Player::ProcessMove(void)
 
 void Player::DrawShotOrbit(void)
 {
-	constexpr float ORBIT_RADIUS = 1.0f;
-	constexpr float ORBIT_RADIUS_UP = 0.65f;
 	constexpr int SPHERE_DIV = 12;
 	constexpr int ORBIT_MAX = 50;
+	constexpr float ORBIT_RADIUS_DOWN = 0.75f;
+	constexpr float ORBIT_RADIUS = 0.125f;
 
 	// 軌道の色
 	constexpr COLOR_F ORBIT_COLOR = { 150, 150,150, 0.25f };
@@ -714,7 +733,7 @@ void Player::DrawShotOrbit(void)
 	shotDir = UtilityMath::VNormalize(CalcShotDir());
 
 	// 経過時間
-	float radius = ORBIT_RADIUS;
+	float radius = ((ORBIT_RADIUS * ORBIT_MAX));
 
 	const VECTOR SHOT_LOCAL_POS = VGet(0.0f, 25.0f, 0.0f);
 	VECTOR viewPos = VAdd(transform_.pos, SHOT_LOCAL_POS);
@@ -738,13 +757,84 @@ void Player::DrawShotOrbit(void)
 		// 発射位置からの移動量を積算する
 		viewPos = VAdd(viewPos, pos);
 
-		if (viewPos.y < 0.0f) { break; }
+		if (viewPos.y < 0.0f)
+		{
+			// 着弾位置描画
+			VECTOR viewPosLate = VSub(viewPos, pos);
+			if (shotType_ != SHOT_TYPE::RAPID_FIRE && shotType_ != SHOT_TYPE::CLUSTER)
+			{
+				viewPosLate.y += (Application::GetInstance().GetGravityPow() * (ORBIT_DELTA * ORBIT_STEP_SCALE * i));
+			}
+
+			// 補正値 = (指定位置までの距離 / 視点と終点の長さ)
+			constexpr float GROUND_POS_Y = 0.0f;
+			float term = (GROUND_POS_Y - viewPosLate.y / (viewPos.y - viewPosLate.y));
+			VECTOR groundPos = UtilityMath::Lerp(viewPosLate, viewPos, term);
+			
+			DrawShotOrbitPoint(groundPos);
+			break;
+		}
 
 		
 		DrawSphere3D(viewPos, radius, SPHERE_DIV, color, color, true);
 
-		radius += ORBIT_RADIUS_UP;
+		radius -= ORBIT_RADIUS_DOWN;
 	}
+}
+void Player::DrawShotOrbitPoint(const VECTOR& _shotPos)
+{
+	// 衝突範囲
+	const float SHADOW_SIZE = 150.0f;
+
+	// 範囲の透明度
+	constexpr int POINT_ALPHA = static_cast<int>(255 * 1.0f);
+
+
+	// 範囲の位置
+	shotPointVertex_[LEFT_BACK].pos = VGet(_shotPos.x - SHADOW_SIZE
+											, _shotPos.y
+											, _shotPos.z - SHADOW_SIZE);
+
+	shotPointVertex_[LEFT_FORWARD].pos = VGet(_shotPos.x - SHADOW_SIZE
+												, _shotPos.y
+												, _shotPos.z + SHADOW_SIZE);
+
+	shotPointVertex_[RIGHT_BACK].pos = VGet(_shotPos.x + SHADOW_SIZE
+											, _shotPos.y
+											, _shotPos.z - SHADOW_SIZE);
+
+	shotPointVertex_[RIGHT_FORWARD].pos = VGet(_shotPos.x + SHADOW_SIZE
+												, _shotPos.y
+												, _shotPos.z + SHADOW_SIZE);
+
+	// アルファ値を各頂点に適用
+	for (auto& vertex : shotPointVertex_)
+	{
+		vertex.dif.a = POINT_ALPHA;
+	}
+
+	// 描画環境のセットアップ
+	SetUseLighting(FALSE);
+	SetUseZBuffer3D(TRUE);
+	SetWriteZBuffer3D(FALSE);
+	SetTextureAddressMode(DX_TEXADDRESS_CLAMP);
+	SetDrawBlendMode(DX_BLENDMODE_ALPHA, POINT_ALPHA);
+
+	// インデックス配列の定義
+	constexpr int POINT_CNT = 6;
+	constexpr int TRIANGLE_CNT = 2;
+	WORD index[POINT_CNT] = {};
+
+	index[0] = LEFT_BACK;	  index[1] = LEFT_FORWARD; index[2] = RIGHT_BACK;
+	index[3] = RIGHT_FORWARD; index[4] = RIGHT_BACK;   index[5] = LEFT_FORWARD;
+
+	// 描画
+	DrawPolygonIndexed3D(shotPointVertex_.data(), shotPointVertex_.size(), index, TRIANGLE_CNT, shadowHandle_, TRUE);
+
+	// グラフィック設定の復元
+	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+	SetWriteZBuffer3D(TRUE);
+	SetUseLighting(TRUE);
 }
 
 void Player::ProcessJump(void)
@@ -1258,6 +1348,7 @@ void Player::ShotBullet(void)
 	bullets_[shotIndex_]->Shot(CalcShotDir());
 	shotIndex_ = -1;
 }
+
 VECTOR Player::CalcShotDir(void)
 {
 	VECTOR shotDir = transform_.GetForward();
