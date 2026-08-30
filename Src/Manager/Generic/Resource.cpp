@@ -55,6 +55,14 @@ void Resource::Load(void)
 		case LOAD_TYPE::SOUND:
 			Load_Sound();
 		break;
+
+		case LOAD_TYPE::VERTEX_SHADER:
+			Load_VertexShader();
+			break;
+
+		case LOAD_TYPE::PIXEL_SHADER:
+			Load_PixelShader();
+			break;
 	}
 
 }
@@ -104,6 +112,18 @@ void Resource::Load_Sound(void)
 	handleId_ = LoadSoundMem(path_.c_str());
 }
 
+void Resource::Load_VertexShader(void)
+{
+	/* 頂点シェーダファイルの読み込み */
+	handleId_ = LoadVertexShader(path_.c_str());
+}
+
+void Resource::Load_PixelShader(void)
+{
+	/* ピクセルシェーダファイルの読み込み */
+	handleId_ = LoadPixelShader(path_.c_str());
+}
+
 
 void Resource::Release(void)
 {
@@ -130,6 +150,14 @@ void Resource::Release(void)
 		case LOAD_TYPE::SOUND:
 			Release_Sound();
 		break;
+
+		case LOAD_TYPE::VERTEX_SHADER:
+			Release_VertexShader();
+			break;
+
+		case LOAD_TYPE::PIXEL_SHADER:
+			Release_PixelShader();
+			break;
 	}
 }
 void Resource::Release_ImageAndMovie(void)const
@@ -179,6 +207,18 @@ void Resource::Release_Sound(void)const
 
 	// 音声ファイルを解放
 	DeleteSoundMem(handleId_);
+}
+
+void Resource::Release_VertexShader(void) const
+{
+	/* 頂点シェーダの解放 */
+	DeleteShader(handleId_);
+}
+
+void Resource::Release_PixelShader(void) const
+{
+	/* ピクセルシェーダの解放 */
+	DeleteShader(handleId_);
 }
 
 

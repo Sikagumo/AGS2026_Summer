@@ -17,9 +17,8 @@
 #include "../../Utility/UtilityMath.h"
 #include "../../Shader/ShaderController.h"
 #include "../../ImGUI/GuiController.h"
-#include "../../Shader/ShaderLibrary.h"
 #include "../SubScene/SceneOperation.h"
-
+#include "../../Shader/ShaderParameters.h"
 
 SceneTitle::SceneTitle(void)
     : imageTitle_(-1)
@@ -29,6 +28,8 @@ SceneTitle::SceneTitle(void)
     , waveNormalHandle_(-1)
     , oniSimaHandle_(-1)
     , oniSimaNormalHandle_(-1)
+    , backgroundHandle_(-1)
+    , backNormalHandle_(-1)
     , time_(0)
     , selectedIdx_(0)
     , cursorCollider_(nullptr)
@@ -62,6 +63,12 @@ void SceneTitle::Load(void)
     SoundManager::GetInstance()
         .Add(SoundManager::TYPE::BGM, SoundManager::SOUND::BGM_TITLE_THUNDER
             , ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::BGM_TITLE_THUNDER));
+
+    SoundManager::GetInstance().Add(SoundManager::TYPE::SE, SoundManager::SOUND::SE_UI_SELECT
+        , ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::SE_UI_SELECT));
+
+    SoundManager::GetInstance().Add(SoundManager::TYPE::SE, SoundManager::SOUND::SE_UI_CANCEL
+        , ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::SE_UI_CANCEL));
             
     // 音量調整
 
@@ -100,6 +107,10 @@ void SceneTitle::Load(void)
     // 背景画像
     backgroundHandle_ = ResourceManager::GetInstance().
         LoadHandleId(ResourceManager::SRC::IMG_BUCGROUND_TITLE);
+
+    // 背景画像のノーマルマップ
+    backNormalHandle_ = ResourceManager::GetInstance().
+        LoadHandleId(ResourceManager::SRC::IMG_BUCG_NORMALMAP_TITLE);
 
     // その他画像
 
@@ -195,22 +206,22 @@ void SceneTitle::InitUI(void)
     
 #ifdef _DEBUG
 
-    // 定数バッファの初期化
-    peachMaterial_.SetAmbient(0.8f);
-    waveMaterial_.SetAmbient(0.8f);
-    titleMaterial_.SetAmbient(0.8f);
-    titleMaterial_.SetLightDirection(0.0f, 0.0f, 0.0f);
-    titleMaterial_.SetWaveSpeed(0.0f);
-    titleMaterial_.SetWaveForce(0.0f);
-    oniSimaMaterial_.SetAmbient(0.8f);
-    waveMaterial_.SetWaveSpeed(3.0f);
-    waveMaterial_.SetWaveForce(0.015f);
+    //// 定数バッファの初期化
+    //peachMaterial_.SetAmbient(0.8f);
+    //waveMaterial_.SetAmbient(0.8f);
+    //titleMaterial_.SetAmbient(0.8f);
+    //titleMaterial_.SetLightDirection(0.0f, 0.0f, 0.0f);
+    //titleMaterial_.SetWaveSpeed(0.0f);
+    //titleMaterial_.SetWaveForce(0.0f);
+    //oniSimaMaterial_.SetAmbient(0.8f);
+    //waveMaterial_.SetWaveSpeed(3.0f);
+    //waveMaterial_.SetWaveForce(0.015f);
 
-    // GUIの初期化
-    peachGui_ = std::make_shared<ShaderEditorComponent>("Peach", &peachMaterial_);
-    waveGui_ = std::make_shared<ShaderEditorComponent>("Wave", &waveMaterial_);
-    oniSimaGui_ = std::make_shared<ShaderEditorComponent>("OniGashima", &oniSimaMaterial_);
-    titleGui_ = std::make_shared<ShaderEditorComponent>("Title", &titleMaterial_);
+    //// GUIの初期化
+    //peachGui_ = std::make_shared<ShaderEditorComponent>("Peach", &peachMaterial_);
+    //waveGui_ = std::make_shared<ShaderEditorComponent>("Wave", &waveMaterial_);
+    //oniSimaGui_ = std::make_shared<ShaderEditorComponent>("OniGashima", &oniSimaMaterial_);
+    //titleGui_ = std::make_shared<ShaderEditorComponent>("Title", &titleMaterial_);
 
     // 座標の初期化
     Vector2F peachPos = Vector2F(100.0f, Application::SCREEN_HALF_Y + 100);
@@ -296,23 +307,41 @@ void SceneTitle::Update(void)
 
     if (isSelectMenu_)
     {
-
+        // インターバルのカウントダウン
         if (inputIntervalCounter_ > 0)
         {
             inputIntervalCounter_--;
         }
-        else if (std::abs(stick.y) > THRESHOLD)
+
+        // インターバルが0の時に入力を受け付ける
+        if (inputIntervalCounter_ <= 0)
         {
-            if (stick.y < 0.0f)
+            // 下入力
+            if (keyConfInputManager.isPressed("DOWN"))
             {
                 selectedIdx_ = (selectedIdx_ + 1) % MENU_BUTTON_NUM;
+
+                // 次の連続入力までのインターバル
+                const int STICK_INTERVAL = 15;
+                inputIntervalCounter_ = STICK_INTERVAL;
             }
-            else
+            // 上入力
+            else if (keyConfInputManager.isPressed("UP"))
             {
                 selectedIdx_ = (selectedIdx_ - 1 + MENU_BUTTON_NUM) % MENU_BUTTON_NUM;
+
+                // 次の連続入力までのインターバル
+                const int STICK_INTERVAL = 15;
+                inputIntervalCounter_ = STICK_INTERVAL;
             }
-            inputIntervalCounter_ = STICK_TINERVAL;
         }
+
+        // 上下の入力が全くない場合はインターバルをリセットする
+        if (!keyConfInputManager.isPressed("DOWN") && !keyConfInputManager.isPressed("UP"))
+        {
+            inputIntervalCounter_ = 0;
+        }
+
 
         // マウスが動いたときはパッドの選択カーソルも追従させる
         for (int i = 0; i < MENU_BUTTON_NUM; ++i)
@@ -359,9 +388,7 @@ void SceneTitle::Update(void)
 
 void SceneTitle::Draw(void)
 {
-
     time_ += 0.02f;
-    waveMaterial_.SetTime(time_);
 
     const float PEACH_SCALE = 0.5f;
     const float WAVE_SCALE = 1.0f;
@@ -373,33 +400,110 @@ void SceneTitle::Draw(void)
 
     auto& shaderCtrl = ShaderController::GetInstance();
 
+    // 背景のパラメータ設定と描画
+    NormalWaveShaderParams backgroundParams_;
+    backgroundParams_.lightVectorX = 0.5f;
+    backgroundParams_.lightVectorY = 0.5f;
+    backgroundParams_.lightVectorZ = 0.5f;
+    backgroundParams_.ambientRate = 0.8f;
+    backgroundParams_.timeValue = 0;
+    backgroundParams_.useNormalMapFlag = 1.0f;
 
-    DrawRotaGraph(0, 0, 1.0f, 0.0f, backgroundHandle_, true);
+    shaderCtrl.Draw2D(
+        ResourceManager::SRC::PS_NORMAL_MAP,
+        0.0f, 0.0f,
+        1.0f,
+        backgroundParams_,
+        backgroundHandle_,
+        backNormalHandle_
+    );
 
-    // 鬼ヶ島の描画
-    shaderCtrl.CreateShaderDraw(ShaderLibrary::SHADER_TYPE::NORMAL, Application::SCREEN_HALF_X - 100, 30,
-        oniSimaHandle_, ONISIMA_SCALE, oniSimaMaterial_, oniSimaNormalHandle_);
+    // 鬼ヶ島のパラメータ設定と描画
+    NormalWaveShaderParams oniSimaParams_;
+    oniSimaParams_.lightVectorX = 0.5f;
+    oniSimaParams_.lightVectorY = 0.5f;
+    oniSimaParams_.lightVectorZ = 0.5f;
+    oniSimaParams_.ambientRate = 0.8f;
+    oniSimaParams_.timeValue = 0;
+    oniSimaParams_.useNormalMapFlag = 1.0f;
 
-    // 波の描画
-    shaderCtrl.CreateShaderDraw(ShaderLibrary::SHADER_TYPE::NORMAL_WAVE,
-        0, 20, waveHandle_, WAVE_SCALE, waveMaterial_, waveNormalHandle_);
+    shaderCtrl.Draw2D(
+        ResourceManager::SRC::PS_NORMAL_MAP,
+        static_cast<int>(Application::SCREEN_HALF_X - 100), 30,
+        ONISIMA_SCALE,
+        oniSimaParams_,
+        oniSimaHandle_,
+        oniSimaNormalHandle_
+    );
 
-    // 桃の描画
-    shaderCtrl.CreateShaderDraw(ShaderLibrary::SHADER_TYPE::NORMAL, -20, static_cast<int>(Application::SCREEN_HALF_Y + offsetY),
-        peachHandle_, PEACH_SCALE, peachMaterial_, peachNormalHandle_);
+    // 波のパラメータ設定と描画
+    NormalWaveShaderParams waveParams_;
+    waveParams_.lightVectorX = 0.5f;
+    waveParams_.lightVectorY = 0.5f;
+    waveParams_.lightVectorZ = 0.5f;
+    waveParams_.ambientRate = 0.8f;
+    waveParams_.timeValue = time_;
+    waveParams_.waveSpeedValue = 3.0f;
+    waveParams_.waveForceValue = 0.015f;
+    waveParams_.useNormalMapFlag = 1.0f;
 
-    const int IMAGET_TITLE_Y = 0;
-    const int IMAGET_TITLE_X = (Application::SCREEN_HALF_X / 2) + 20;
+    shaderCtrl.Draw2D(
+        ResourceManager::SRC::PS_NORMAL_MAP,
+        0, 20,
+        WAVE_SCALE,
+        waveParams_,
+        waveHandle_,
+        waveNormalHandle_
+    );
 
-    // タイトル画像の描画
-    shaderCtrl.CreateShaderDraw(ShaderLibrary::SHADER_TYPE::NORMAL, IMAGET_TITLE_X,
-        IMAGET_TITLE_Y, imageTitle_, PEACH_SCALE, titleMaterial_, titleNormalHandle_);
+    // 桃のパラメータ設定と描画
+    NormalWaveShaderParams peachParams_;
+    peachParams_.lightVectorX = 0.5f;
+    peachParams_.lightVectorY = 0.5f;
+    peachParams_.lightVectorZ = 0.5f;
+    peachParams_.ambientRate = 0.8f;
+    peachParams_.timeValue = time_;
+    peachParams_.useNormalMapFlag = 1.0f;
+
+    shaderCtrl.Draw2D(
+        ResourceManager::SRC::PS_NORMAL_MAP,
+        -20, static_cast<int>(Application::SCREEN_HALF_Y + offsetY),
+        PEACH_SCALE,
+        peachParams_,
+        peachHandle_,
+        peachNormalHandle_
+    );
+
+    const int IMAGE_TITLE_Y = 0;
+    const int IMAGE_TITLE_X = (Application::SCREEN_HALF_X / 2) + 20;
+
+    // タイトル画像のパラメータ設定と描画
+    NormalWaveShaderParams titleParams_;
+    titleParams_.lightVectorX = 0.0f;
+    titleParams_.lightVectorY = 0.0f;
+    titleParams_.lightVectorZ = 0.0f;
+    titleParams_.ambientRate = 0.8f;
+    titleParams_.timeValue = time_;
+    titleParams_.waveSpeedValue = 0.0f;
+    titleParams_.waveForceValue = 0.0f;
+    titleParams_.useNormalMapFlag = 1.0f;
+
+    shaderCtrl.Draw2D(
+        ResourceManager::SRC::PS_NORMAL_MAP,
+        IMAGE_TITLE_X, IMAGE_TITLE_Y,
+        PEACH_SCALE,
+        titleParams_,
+        imageTitle_,
+        titleNormalHandle_
+    );
+
+    // キューに溜まった描画命令を一括ソート＆実行
+    shaderCtrl.ExecuteDrawCommands();
 
     const float DEFAULT_SCALE = 0.5f;
     using TAG_2D = Collider2DBase::TAG_2D;
 
-    // 各ボタンの情報を配列にまとめる
-    std::array<Collider2DBox*, 4> colliders = 
+    std::array<Collider2DBox*, 4> colliders =
     {
         soloPlayButtonCollider_.get(),
         multiPlayButtonCollider_.get(),
@@ -409,24 +513,21 @@ void SceneTitle::Draw(void)
 
     for (int i = 0; i < MENU_BUTTON_NUM; ++i)
     {
-        // マウスホバー OR パッドで選択中
         bool isSelected = CollisionController::GetInstance().
             IsTagCollidingWithTag2D(TAG_2D::MOUSE_CURSOR, buttonTags[i])
             || (selectedIdx_ == i);
 
-        // 選択状態に応じて画像インデックスを切り替え
         int imgIdx = isSelected ? (i * 2 + 1) : (i * 2);
 
-        // 描画
         Vector2F pos = colliders[i]->GetCenterPos();
         DrawRotaGraph(static_cast<int>(pos.x), static_cast<int>(pos.y), DEFAULT_SCALE,
             UtilityMath::DEG2RAD, imageMenu_[imgIdx], true);
-
     }
 
 #ifdef _DEBUG
     DrawDebug();
 #endif
+
 }
 
 void SceneTitle::Release(void)

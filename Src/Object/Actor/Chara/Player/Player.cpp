@@ -5,7 +5,7 @@
 #include "../../../Common/AnimationController.h"
 
 #include "../../../../Utility/UtilityMath.h"
-#include "../../../../Manager/Generic/InputManager.h"
+#include "../../../../Manager/Generic/KeyConfInputManager.h"
 #include "../../../../Manager/Generic/SceneManager.h"
 #include "../../../../Manager/System/TimeManager.h"
 #include "../../../../Manager/Decoration/SoundManager.h"
@@ -608,7 +608,7 @@ void Player::SetSoundData(VECTOR _pos, float _radius, bool _isLanging,bool _isMG
 
 bool Player::GetIsRespawn(void) const
 {
-	// 撃破アニメーション終了の瞬間true
+	// 撃破アニメーション終了の瞬間、有効
 	return (actionController_->GetCurActionNum() == static_cast<int>(ACTION_TYPE::DEFEAT)
 			&& animation_->GetPlayType() == static_cast<int>(ANIM_TYPE::DEFEAT)
 			&& animation_->IsEnd());
@@ -621,21 +621,35 @@ void Player::ReleasePost(void)
 
 void Player::ProcessMove(void)
 {
-	VECTOR dir = UtilityMath::VECTOR_ZERO;
 
-	InputManager& input = InputManager::GetInstance();
+	auto& keyConfInputManager = KeyConfInputManager::GetInstance();
 
-	// 接続されているゲームパッド１の情報を取得
-	InputManager::JOYPAD_IN_STATE padState = input.GetJPadInputState(InputManager::JOYPAD_NO::PAD1);
+	// 左スティックの入力方向を取得
+	VECTOR direction = keyConfInputManager.GetLeftStickDirection();
 
-	// 右スティックの傾き
-	dir = input.GetDirectionXZAKey(padState.AKeyLX, padState.AKeyLY);
+	// スティック入力がない場合はキーボード入力を適用
+	if (VSquareSize(direction) < 0.01f)
+	{
+		// 完全にゼロにリセットする
+		direction = UtilityMath::VECTOR_ZERO;
 
-	if (input.IsNew(KEY_INPUT_W)) { dir.z += 1.0f; }
-	if (input.IsNew(KEY_INPUT_S)) { dir.z += -1.0f; }
-	if (input.IsNew(KEY_INPUT_A)) { dir.x += -1.0f; }
-	if (input.IsNew(KEY_INPUT_D)) { dir.x += 1.0f; }
-
+		if (keyConfInputManager.isPressed("UP"))
+		{
+			direction.z++;
+		}
+		if (keyConfInputManager.isPressed("DOWN"))
+		{
+			direction.z--;
+		}
+		if (keyConfInputManager.isPressed("LEFT"))
+		{
+			direction.x--;
+		}
+		if (keyConfInputManager.isPressed("RIGHT"))
+		{
+			direction.x++;
+		}
+	}
 
 	// ジャンプ行動有効時に行動前の時、処理終了
 	if (!actionController_->IsEndActionActive()
@@ -654,17 +668,17 @@ void Player::ProcessMove(void)
 	// カメラの方向で進行
 	Quaternion cameraRot = SceneManager::GetInstance().GetCamera()->GetQuaRotY();
 
-	if (!UtilityMath::EqualsVZero(dir))
+	if (!UtilityMath::EqualsVZero(direction))
 	{
 		// 攻撃中は移動速度を低下
 		moveSpeed_ = ((shotIndex_ != -1)
 			? MOVE_SPEED_SHOT : MOVE_SPEED);
 
-		dir = UtilityMath::VNormalize(dir);
+		direction = UtilityMath::VNormalize(direction);
 		movePow_ = UtilityMath::VECTOR_ZERO;
 
 		// 移動方向を取得
-		moveDir_ = Quaternion::PosAxis(cameraRot, dir);
+		moveDir_ = Quaternion::PosAxis(cameraRot, direction);
 		moveDir_.y = 0.0f;
 
 		// 加速度に割り当て
@@ -678,7 +692,7 @@ void Player::ProcessMove(void)
 	if (!isJump_
 		&& actionController_->GetActionState() == PActionController::PACTION_STATE::NONE)
 	{
-		if (!UtilityMath::EqualsVZero(dir))
+		if (!UtilityMath::EqualsVZero(direction))
 		{
 			PlayAnimation(ANIM_TYPE::RUN);
 		}
@@ -691,6 +705,11 @@ void Player::ProcessMove(void)
 
 void Player::DrawShotOrbit(void)
 {
+	if (shotType_ == SHOT_TYPE::NONE)
+	{
+		return;
+	}
+
 	constexpr int SPHERE_DIV = 12;
 	constexpr int ORBIT_MAX = 50;
 	constexpr float ORBIT_RADIUS_DOWN = 0.75f;
@@ -733,7 +752,7 @@ void Player::DrawShotOrbit(void)
 	shotDir = UtilityMath::VNormalize(CalcShotDir());
 
 	// 経過時間
-	float radius = ((ORBIT_RADIUS * ORBIT_MAX));
+	float radius = (ORBIT_RADIUS * ORBIT_MAX);
 
 	const VECTOR SHOT_LOCAL_POS = VGet(0.0f, 25.0f, 0.0f);
 	VECTOR viewPos = VAdd(transform_.pos, SHOT_LOCAL_POS);
@@ -842,10 +861,10 @@ void Player::ProcessJump(void)
 	if (!actionController_->IsActiveAction() &&
 		actionController_->GetActionState() == PActionController::PACTION_STATE::NONE)
 	{
-		bool isHitTrg = InputManager::GetInstance().IsTrgDown(KEY_INPUT_SPACE)
-					 || InputManager::GetInstance().IsPadBtnTrgDown(InputManager::JOYPAD_NO::PAD1, InputManager::JOYPAD_BTN::RB_BOTTOM);
+		bool isJumpTriggered = KeyConfInputManager::GetInstance().isTrigerDown("JUMP");
+		
 		// ジャンプ
-		if (isHitTrg && !isJump_)
+		if (isJumpTriggered && !isJump_)
 		{
 			PlayAnimation(ANIM_TYPE::JUMP, false);
 			actionController_->Active(static_cast<int>(ACTION_TYPE::JUMP));
@@ -859,6 +878,7 @@ void Player::ProcessJump(void)
 		transform_.pos.y = -(LIMIT_POS_Y);
 	}
 }
+
 void Player::Jump(void)
 {
 	isJump_ = true;
@@ -887,8 +907,9 @@ void Player::ProcessDodge(void)
 			return;
 		}
 
-		if (InputManager::GetInstance().IsTrgDown(KEY_INPUT_LSHIFT)
-			|| InputManager::GetInstance().IsPadBtnTrgDown(InputManager::JOYPAD_NO::PAD1, InputManager::JOYPAD_BTN::RB_LEFT))
+		bool isDodgeTriggered = KeyConfInputManager::GetInstance().isTrigerDown("DODGE");
+
+		if (isDodgeTriggered)
 		{
 			PlayAnimation(ANIM_TYPE::DODGE, false, false);
 			actionController_->Active(static_cast<int>(ACTION_TYPE::DODGE));
@@ -899,6 +920,7 @@ void Player::ProcessDodge(void)
 		curTimeWaitDodge_ -= TimeManager::GetInstance().GetDeltaTime();
 	}
 }
+
 void Player::Dodge(void)
 {
 	dodgePowXZ_ = Vector2F(moveDir_.x, moveDir_.z);
@@ -976,20 +998,20 @@ void Player::ProcessKnock(void)
 void Player::ProcessAttack(void)
 {
 	// 連射弾型
+	auto& keyConfInputManager = KeyConfInputManager::GetInstance();
+
 	if (jobType_ == JOB_TYPE::RAPID_FIRE)
 	{
 		if (shotTerm_ <= 0.0f)
 		{
-			// 
-			if (InputManager::GetInstance().IsClickMouseLeft()
-				|| InputManager::GetInstance().IsPadBtnNew(InputManager::JOYPAD_NO::PAD1, InputManager::JOYPAD_BTN::R_TRIGGER))
+			// 押しっぱなしでの連射判定
+			if (keyConfInputManager.isPressed("ATTACK_NORMAL"))
 			{
 				ProcShotNormal();
 				shotTerm_ = SHOT_RAPID_TERM;
 			}
 
-			if (InputManager::GetInstance().IsTrgMouseRight()
-				|| InputManager::GetInstance().IsPadBtnTrgDown(InputManager::JOYPAD_NO::PAD1, InputManager::JOYPAD_BTN::L_TRIGGER))
+			if (keyConfInputManager.isPressed("ATTACK_SPECIAL"))
 			{
 				// 弾が生存中は拡散弾を有効にしない
 				if (clusterBullets_.at(0) != nullptr)
@@ -1012,19 +1034,19 @@ void Player::ProcessAttack(void)
 
 	else
 	{
-		if (InputManager::GetInstance().IsTrgMouseLeft()
-			|| InputManager::GetInstance().IsPadBtnTrgDown(InputManager::JOYPAD_NO::PAD1, InputManager::JOYPAD_BTN::R_TRIGGER))
+		// 押した瞬間の単発判定
+		if (keyConfInputManager.isTrigerDown("ATTACK_NORMAL"))
 		{
 			ProcShotNormal();
 		}
 
-		if (InputManager::GetInstance().IsTrgMouseRight()
-			|| InputManager::GetInstance().IsPadBtnTrgDown(InputManager::JOYPAD_NO::PAD1, InputManager::JOYPAD_BTN::L_TRIGGER))
+		if (keyConfInputManager.isTrigerDown("ATTACK_SPECIAL"))
 		{
 			ProcShotSpecial();
 		}
 	}
 }
+
 void Player::ProcShotNormal(void)
 {
 	// コンボをするか否か
@@ -1049,6 +1071,11 @@ void Player::ProcShotNormal(void)
 		
 		shotType_ = SHOT_TYPE_NORMAL[static_cast<int>(jobType_)];
 
+		if (shotType_ == SHOT_TYPE::NONE)
+		{
+			return;
+		}
+
 		CreateBullet();
 
 		// コンボ時、登録した攻撃コンボアクションを呼び出す
@@ -1072,6 +1099,11 @@ void Player::ProcShotSpecial(void)
 	if (canAttack)
 	{
 		shotType_ = SHOT_TYPE_SPECIAL[static_cast<int>(jobType_)];
+
+		if (shotType_ == SHOT_TYPE::NONE)
+		{
+			return;
+		}
 
 		CreateBullet();
 
@@ -1228,6 +1260,7 @@ void Player::CreateBullet(void)
 		break;
 
 		default:
+			return;
 		break;
 
 	}
@@ -1450,12 +1483,12 @@ void Player::SendMyActionToNetManager(void)
 
 	NET_ACTION myAction;
 	myAction.key = NetManager::GetInstance().GetMyKey();
-	myAction.frameNo = 0;
-	myAction.pos = transform_.pos;
-	myAction.quaRot = transform_.quaRot;
-	myAction.animId = static_cast<int>(animType_);
+	myAction.frameNumber = 0;
+	myAction.position = transform_.pos;
+	myAction.rotation = transform_.quaRot;
+	myAction.animationId = static_cast<int>(animType_);
 	myAction.currentHp = hp_;
-	myAction.actBits = 0;
+	myAction.actionBits = 0;
 	myAction.isAttack = isAttackSend_;
 
 	NetManager::GetInstance().AddSelfAction(myAction);

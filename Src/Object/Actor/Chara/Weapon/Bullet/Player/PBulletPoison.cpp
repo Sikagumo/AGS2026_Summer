@@ -27,6 +27,12 @@ void PBulletPoison::Load(void)
 		, ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::SE_PBULLET_POISON));
 }
 
+void PBulletPoison::InitTransform(void)
+{
+	transform_.InitTransform(SCALE_POISON
+		, transform_.quaRot, Quaternion::Identity());
+}
+
 void PBulletPoison::UpdatePost(void)
 {
 	if (bulletState_ == BULLET_STATE::BLAST)
@@ -72,8 +78,6 @@ void PBulletPoison::SetParam(void)
 
 
 	power_ = POWER_POISON;
-	transform_.InitTransform(SCALE_POISON
-		, transform_.quaRot, Quaternion::Identity());
 }
 
 void PBulletPoison::BlastAction(void)

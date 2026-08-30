@@ -31,7 +31,7 @@ void TimeManager::Reset(void)
 {
 	gameTime_ = 0.0f;
 	timers_.clear();
-	prevTime_ = std::chrono::steady_clock::now();
+	previousTime_ = std::chrono::steady_clock::now();
 }
 
 void TimeManager::Initialize(void)
@@ -43,17 +43,17 @@ void TimeManager::Initialize(void)
 	deltaTime_ = 0.0f;
 
 	// 初期化時の時間を記録
-	prevTime_ = std::chrono::steady_clock::now();
+	previousTime_ = std::chrono::steady_clock::now();
 }
 
 void TimeManager::Update(void)
 {
-	// 現在時刻を取得し、前フレームからの経過時間（デルタタイム）を計算
-	auto now = std::chrono::steady_clock::now();
+	// 現在時刻を取得し、前フレームからの経過時間を計算
+	auto currentTime = std::chrono::steady_clock::now();
 
-	std::chrono::duration<float> delta = now - prevTime_;
+	std::chrono::duration<float> elapsedTime = currentTime - previousTime_;
 
-	prevTime_ = now;
+	previousTime_ = currentTime;
 
 	if (isPaused_)
 	{
@@ -61,7 +61,7 @@ void TimeManager::Update(void)
 		return;
 	}
 
-	deltaTime_ = delta.count();
+	deltaTime_ = elapsedTime.count();
 
 	// ゲーム内時間の更新
 	gameTime_ += deltaTime_ * gameSpeed_;
@@ -84,37 +84,37 @@ float TimeManager::GetGameTime(void) const
 
 int TimeManager::GetGameHour(void) const
 {
-	static constexpr int SECONDS_PER_HOUR = 3600;
+	const int SECONDS_PER_HOUR = 3600; 
 	return static_cast<int>(gameTime_) / SECONDS_PER_HOUR;
 }
 
 int TimeManager::GetGameMinute(void) const
 {
-	static constexpr int SECONDS_PER_MINUTE = 60;
-	static constexpr int MINUTES_PER_HOUR = 60;
+	const int SECONDS_PER_MINUTE = 60; 
+	const int MINUTES_PER_HOUR = 60;   
 	return (static_cast<int>(gameTime_) / SECONDS_PER_MINUTE) % MINUTES_PER_HOUR;
 }
 
 int TimeManager::GetGameSecond(void) const
 {
-	static constexpr int SECONDS_PER_MINUTE = 60;
+	const int SECONDS_PER_MINUTE = 60;
 	return static_cast<int>(gameTime_) % SECONDS_PER_MINUTE;
 }
 
-void TimeManager::SetGameTime(float time)
+void TimeManager::SetGameTime(float _time)
 {
-	gameTime_ = time;
+	gameTime_ = _time;
 }
 
-void TimeManager::StartTimer(const std::string& id, float duration)
+void TimeManager::StartTimer(const std::string& _timerId, float _duration)
 {
 	// 新規追加または上書きでタイマーを開始
-	timers_[id] = { duration, duration };
+	timers_[_timerId] = { _duration, _duration };
 }
 
-bool TimeManager::IsTimerFinished(const std::string& id) const
+bool TimeManager::IsTimerFinished(const std::string& _timerId) const
 {
-	auto it = timers_.find(id);
+	auto it = timers_.find(_timerId);
 
 	// タイマーが存在しない場合は終了しているとみなす
 	if (it == timers_.end())
@@ -125,9 +125,9 @@ bool TimeManager::IsTimerFinished(const std::string& id) const
 	return it->second.timeLeft <= 0.0f;
 }
 
-void TimeManager::ResetTimer(const std::string& id)
+void TimeManager::ResetTimer(const std::string& _timerId)
 {
-	auto it = timers_.find(id);
+	auto it = timers_.find(_timerId);
 	if (it != timers_.end())
 	{
 		// 開始時の持続時間で残り時間をリセット
@@ -138,7 +138,9 @@ void TimeManager::ResetTimer(const std::string& id)
 float TimeManager::GetDeltaTime(void) const
 {
 #ifdef _DEBUG
-	return (1.0f / 60.0f);
+	// デバッグ用の固定デルタタイム
+	const float FIXED_DELTA_TIME = 1.0f / 60.0f; 
+	return FIXED_DELTA_TIME;
 #else
 	return deltaTime_;
 #endif

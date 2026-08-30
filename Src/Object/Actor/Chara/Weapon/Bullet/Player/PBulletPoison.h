@@ -21,7 +21,7 @@ public:
 
 protected:
 
-	void InitTransform(void)override {};
+	void InitTransform(void)override;
 
 	void UpdatePost(void)override;
 

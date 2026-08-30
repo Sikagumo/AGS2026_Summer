@@ -55,9 +55,6 @@ void PBulletRecovery::SetParam(void)
 	radiusBullet_ = RADIUS_BULLET;
 	radiusBlast_ = 0.0f;
 
-	transform_.InitTransform(SCALE_RECOVERY
-		, transform_.quaRot, Quaternion::Identity());
-
 	CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::PLAYER_RECOVERY, false);
 }
 

@@ -1,59 +1,62 @@
 #pragma once
 
 #include <DxLib.h>
+#include <unordered_map>
 #include <array>
-
-#include "ShaderBase.h"
-#include "ShaderParameters.h"
+#include "RenderCommand.h"
 
 class ShaderRenderer
 {
 public:
-	/// @brief コンストラクタ
-	ShaderRenderer(void);
 
-	/// @brief デストラクタ 
-	~ShaderRenderer(void);
+    // スロット関連
+    static constexpr int CONSTANT_BUFFER_SLOT_BEGIN_VERTEX_SHADER = 7;
+    static constexpr int CONSTANT_BUFFER_SLOT_BEGIN_PIXEL_SHADER = 4;
 
-	/// @brief 初期化 
-	void Initialize(void);
+    /// @brief コンストラクタ
+    ShaderRenderer(void);
 
-	/// @brief ピクセルシェーダの描画
-	/// @param _shader 使用するピクセルシェーダのポインタ
-	/// @param request 描画のリクエスト情報
-	void PixelShaderDraw(ShaderBase* _shader, const DrawRequest& _request) const;
+    /// @brief デストラクタ
+    ~ShaderRenderer(void);
 
-	/// @brief 雨シェーダの描画
-	/// @param _shader 使用するピクセルシェーダのポインタ
-	/// @param request 描画のリクエスト情報
-	void RainyShaderDraw(ShaderBase* _shader, const DrawRequest& _request) const;
+    /// @brief 初期化処理
+    void Initialize(void);
 
-	/// @brief テクスチャスケールシェーダの描画
-	/// @param _shaderPS 使用するピクセルシェーダのポインタ
-	/// @param _shaderVS 使用する頂点シェーダのポインタ
-	/// @param request 描画のリクエスト情報
-	void TexScaleShaderDraw(ShaderBase* _shaderPS, ShaderBase* _shaderVS, const DrawRequest& _request) const;
+    /// @brief バッチ処理の開始（描画ループの直前に呼ぶ）
+    void BeginBatch(void);
 
-	/// @brief 解放処理 
-	void Release(void);
+    /// @brief 描画コマンドの実行
+    /// @param _renderCommand 描画コマンド情報
+    void ExecuteCommand(const RenderCommand& _renderCommand);
+
+    /// @brief バッチ処理の終了（すべての描画が終わった後に呼ぶ）
+    void EndBatch(void);
+
+    /// @brief 解放処理
+    void Release(void);
 
 private:
 
-	// MV1モデル用 オリジナルピクセルシェーダ定数バッファの使用開始スロット
-	static constexpr int CONSTANT_BUF_SLOT_PS = 4;
+    /// @brief 定数バッファを更新してシェーダに設定
+    /// @param _parameterPointer パラメータデータへのポインタ
+    /// @param _parameterSize パラメータサイズ
+    /// @param _shaderType シェーダタイプ
+    /// @param _slotBegin スロット開始番号
+    /// @return 使用した定数バッファハンドル
+    int UpdateAndSetConstantBuffer(const void* _parameterPointer, int _parameterSize, int _shaderType, int _slotBegin);
 
-	// MV1モデル用 オリジナル頂点シェーダ定数バッファの使用開始スロット
-	static constexpr int CONSTANT_BUF_SLOT_VS = 7;
-	
-	// 定数バッファのハンドル
-	int constBufferHandle_;
-	int constBufferHandleRain_;
-	int constBufferHandleTexScale_;
+    /// @brief 2D描画用の頂点データを適用
+    /// @param _vertices 頂点配列
+    /// @param _width 描画幅
+    /// @param _height 描画高さ
+    void ApplyVertices(std::array<VERTEX2DSHADER, 4>& _vertices, float _width, float _height) const;
 
-	/// @brief 頂点情報の適用
-	/// @param _v 頂点情報の配列
-	/// @param _w 画像の幅
-	/// @param _h 画像の高さ
-	void ApplyVertices(std::array<VERTEX2DSHADER, 4>& _v, float _w, float _h) const;
+    std::unordered_map<int, int> constantBufferMap_;
+
+    // バッチ処理関連
+    int currentVertexShaderHandleId_;   // 現在設定されている頂点シェーダのハンドル
+    int currentPixelShaderHandleId_;    // 現在設定されているピクセルシェーダのハンドル
+    int currentTexture0HandleId_;       // 現在設定されているテクスチャ0のハンドル
+    int currentTexture1HandleId_;       // 現在設定されているテクスチャ1のハンドル
+
 };
-

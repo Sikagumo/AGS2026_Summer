@@ -8,6 +8,7 @@
 #include "../../Object/Collider2D/Collider2DBase.h"
 #include "../../Object/Collider2D/Collider2DCircle.h"
 #include "../../Object/Collider2D/Collider2DBox.h"
+#include "../../Object/Common/AnimationController.h"
 #include "../../Net/NetStructures.h"
 #include "../../Application.h"
 
@@ -102,6 +103,8 @@ private:
     std::array<std::unique_ptr<Collider2DBase>, UI_SINGLE_MAX> uiCollisions_;
     std::array<Collider2DBase::TAG_2D, UI_SINGLE_MAX> uiCollisionTags_;
     std::unique_ptr<Collider2DBase> readyButtonCollision_;
+    std::unique_ptr<Collider2DBase> leaveYesCollider_;
+    std::unique_ptr<Collider2DBase> leaveNoCollider_;
 
     int previewModelHandle_; // 表示用3Dモデルハンドル
     int currentModelIndex_;   // 現在読み込まれているモデルのインデックス
@@ -167,12 +170,22 @@ private:
         MAX
     };
 
+    enum class CONFIRM_TEXT
+    {
+        YES, 
+        NO,
+        MAX
+    };
+
     static constexpr int HOST_BUTTON_Y = Application::SCREEN_HALF_Y + 70;
     static constexpr int CLIENT_BUTTON_Y = Application::SCREEN_SIZE_Y - 100;
     static constexpr int PASSCODE_NUM_MAX = 10;
 
     std::array<int, static_cast<int>(UI_MAIN_TEXT::MAX)> uiTexHandles_;
     std::array<int, static_cast<int>(UI_RADY_TEXT::MAX)> uiRadyHandles_;
+    std::array<int, static_cast<size_t>(CONFIRM_TEXT::MAX)> selectConfTextHandles_;
+    std::array<int, static_cast<size_t>(CONFIRM_TEXT::MAX)> noSelectConfTextHandles_;
+    std::unique_ptr<AnimationController> animController_;
 
     LOBBY_STATE multiState_;
     int buttonSelectIndex_;
@@ -186,6 +199,7 @@ private:
     int multiTitleHandle_;
     int connectTexHandle_;
     int allReadyImageHandle_;
+    int leaveRoomTextHandle_;
 
     std::array<int, PASSCODE_NUM_MAX> passcodeTextHandles_; 
 
@@ -231,7 +245,7 @@ private:
     // ミニウィンドウの状態
     enum class SELECT_STATE
     {
-        MAIN,           // 左右メインUI（武器 / 見た目）選択
+        MAIN,           // 左右メインUI選択
         WEAPON_WINDOW,  // 中央：武器選択ミニウィンドウ表示中
         SKIN_WINDOW     // 中央：スキン選択ミニウィンドウ表示中
     };
@@ -241,7 +255,7 @@ private:
     // メインUI用
     std::array<std::unique_ptr<Collider2DBase>, 2> mainUiCollisions_;
 
-    // ミニウィンドウ内のボタン用（武器4つ、スキン4つ）
+    // ミニウィンドウ内のボタン用
     std::array<std::unique_ptr<Collider2DBase>, 
         static_cast<size_t>(PlayerBase::JOB_TYPE::MAX)> weaponUiCollisions_;
     std::array<std::unique_ptr<Collider2DBase>, 
@@ -258,12 +272,19 @@ private:
 
     int uiBackHeight_;
 
+    bool isLeaveWindow_;
+    int leaveSelectIndex_;
+
+    void DrawLeaveConfirmWindow(void);
+
     void DrawWeaponWindow(void);
 
     void DrawSkinWindow(void);
 
     // ロビー表示用: 4種類のスキンモデルをすべて保持
     std::array<int, static_cast<size_t>(PlayerBase::SKIN_TYPE::MAX)> lobbySkinHandles_;
+
+    std::array<std::unique_ptr<AnimationController>, static_cast<size_t>(PlayerBase::SKIN_TYPE::MAX)> lobbyAnimControllers_;
 
     // スキンインデックスに応じたロビー用モデルハンドルを取得
     int GetLobbySkinModelHandle(int _skinIndex) const;

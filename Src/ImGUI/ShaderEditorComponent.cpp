@@ -2,16 +2,16 @@
 #include "../../Lib/ImGUI/imgui.h"
 
 ShaderEditorComponent::ShaderEditorComponent(const std::string& _name, 
-	ShaderMaterial* _material)
+	NormalWaveShaderParams* _params)
 	: name_(_name)
-	, material_(_material)
+	, params_(_params)
 {
 }
 
 void ShaderEditorComponent::DrawUI(void)
 {
-	// マテリアルが存在しない場合は安全のために処理を抜ける
-	if (material_ == nullptr)
+	// パラメータが存在しない場合は安全のために処理を抜ける
+	if (params_ == nullptr)
 	{
 		return;
 	}
@@ -22,55 +22,67 @@ void ShaderEditorComponent::DrawUI(void)
 	// ライティング設定
 	if (ImGui::CollapsingHeader("Lighting", ImGuiTreeNodeFlags_DefaultOpen))
 	{
-		float lightDir[3] = {
-			material_->GetLightDirX(),
-			material_->GetLightDirY(),
-			material_->GetLightDirZ()
+		const float SLIDER_MIN_DIRECTION = -1.0f; // ライト方向スライダーの最小値
+		const float SLIDER_MAX_DIRECTION = 1.0f;  // ライト方向スライダーの最大値
+		const float SLIDER_MIN_RATE = 0.0f;       // 割合スライダーの最小値
+		const float SLIDER_MAX_RATE = 1.0f;       // 割合スライダーの最大値
+
+		float lightDirection[3] = {               // ライトの方向ベクトル
+			params_->lightVectorX,
+			params_->lightVectorY,
+			params_->lightVectorZ
 		};
 
-		if (ImGui::SliderFloat3("Light Direction", lightDir, -1.0f, 1.0f))
+		if (ImGui::SliderFloat3("Light Direction", lightDirection, SLIDER_MIN_DIRECTION, 
+			SLIDER_MAX_DIRECTION))
 		{
-			// 変更があればマテリアルにセットする
-			material_->SetLightDirection(lightDir[0], lightDir[1], lightDir[2]);
+			// 変更があれば構造体に直接セットする
+			params_->lightVectorX = lightDirection[0];
+			params_->lightVectorY = lightDirection[1];
+			params_->lightVectorZ = lightDirection[2];
 		}
 
 		// 環境光
-		float ambient = material_->GetAmbient();
-		if (ImGui::SliderFloat("Ambient", &ambient, 0.0f, 1.0f))
+		if (ImGui::SliderFloat("Ambient", &params_->ambientRate, SLIDER_MIN_RATE, SLIDER_MAX_RATE))
 		{
-			material_->SetAmbient(ambient);
+			// 変更はそのまま反映される
 		}
 	}
 
 	// 波エフェクト設定
 	if (ImGui::CollapsingHeader("Wave Effect", ImGuiTreeNodeFlags_DefaultOpen))
 	{
+		const float SLIDER_MIN_WAVE = 0.0f;  // 波パラメータスライダーの最小値
+		const float SLIDER_MAX_SPEED = 5.0f; // 波速度スライダーの最大値
+		const float SLIDER_MAX_FORCE = 0.1f; // 波強度スライダーの最大値
+
 		// 波の速さ
-		float speed = material_->GetWaveSpeed();
-		if (ImGui::SliderFloat("Wave Speed", &speed, 0.0f, 5.0f))
+		if (ImGui::SliderFloat("Wave Speed", &params_->waveSpeedValue, SLIDER_MIN_WAVE, 
+			SLIDER_MAX_SPEED))
 		{
-			material_->SetWaveSpeed(speed);
 		}
 
 		// 波の強さ
-		float force = material_->GetWaveForce();
-		if (ImGui::SliderFloat("Wave Force", &force, 0.0f, 0.1f))
+		if (ImGui::SliderFloat("Wave Force", &params_->waveForceValue, SLIDER_MIN_WAVE,
+			SLIDER_MAX_FORCE))
 		{
-			material_->SetWaveForce(force);
 		}
 
-		float currentTime = material_->GetTime();
-		ImGui::Text("Current Time: %.3f", currentTime);
+		ImGui::Text("Current Time: %.3f", params_->timeValue);
 	}
 
 	// フラグ設定
 	if (ImGui::CollapsingHeader("Flags"))
 	{
+		const float THRESHOLD_FLAG = 0.5f; // フラグ判定のしきい値
+		const float FLAG_ON = 1.0f;        // フラグONの値
+		const float FLAG_OFF = 0.0f;       // フラグOFFの値
+
 		// ノーマルマップのON/OFF
-		bool useNormal = material_->IsUseNormalMap();
-		if (ImGui::Checkbox("Use NormalMap", &useNormal))
+		bool isUseNormalMap = (params_->useNormalMapFlag > THRESHOLD_FLAG);
+		if (ImGui::Checkbox("Use NormalMap", &isUseNormalMap))
 		{
-			material_->SetUseNormalMap(useNormal);
+			params_->useNormalMapFlag = isUseNormalMap ? FLAG_ON : FLAG_OFF;
 		}
 	}
 

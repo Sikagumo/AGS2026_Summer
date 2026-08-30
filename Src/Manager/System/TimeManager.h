@@ -25,7 +25,7 @@ public:
 	/// @brief 初期化処理
 	void Initialize(void);
 
-	/// @brief 時間更新処理（毎フレーム呼び出し）
+	/// @brief 時間更新処理
 	void Update(void);
 
 	/// @brief 現在のゲーム内総時間を取得する
@@ -45,26 +45,26 @@ public:
 	int GetGameSecond(void) const;
 
 	/// @brief ゲーム内時間を直接設定する
-	/// @param time 設定する時間
-	void SetGameTime(float time);
+	/// @param _time 設定する時間
+	void SetGameTime(float _time);
 
 	/// @brief 指定したIDでタイマーを開始する
-	/// @param id タイマー識別用文字列
-	/// @param duration 持続時間
-	void StartTimer(const std::string& id, float duration);
+	/// @param _timerId タイマー識別用文字列
+	/// @param _duration 持続時間
+	void StartTimer(const std::string& _timerId, float _duration);
 
 	/// @brief タイマーが終了しているか確認する
-	/// @param id タイマー識別用文字列
+	/// @param _timerId タイマー識別用文字列
 	/// @return 終了していればtrue
-	bool IsTimerFinished(const std::string& id) const;
+	bool IsTimerFinished(const std::string& _timerId) const;
 
 	/// @brief タイマーをリセットする
-	/// @param id タイマー識別用文字列
-	void ResetTimer(const std::string& id);
+	/// @param _timerId タイマー識別用文字列
+	void ResetTimer(const std::string& _timerId);
 
 	/// @brief ポーズ状態を設定する
-	/// @param paused ポーズ中ならtrue
-	void SetPaused(bool paused) { isPaused_ = paused; }
+	/// @param _isPaused ポーズ中ならtrue
+	void SetPaused(bool _isPaused) { isPaused_ = _isPaused; }
 
 	/// @brief 現在ポーズ中か取得する
 	/// @return ポーズ中ならtrue
@@ -83,21 +83,20 @@ private:
 		float duration; // 設定された持続時間
 	};
 
-	// 静的インスタンス本体
-	static TimeManager* instance_;
+	// シングルトン用インスタンス
+	static TimeManager* instance_; 
 
-	// ゲーム内時間管理関連
-	float gameTime_;   // ゲーム開始時からの累積時間
-	float gameSpeed_;  // 時間の進行速度（1.0が等倍）
-	float deltaTime_;  // 前フレームからの経過時間
+	// 時間管理関連
+	std::chrono::steady_clock::time_point previousTime_; // 前フレームのシステム時刻
+	float gameTime_;                                     // ゲーム開始時からの累積時間
+	float gameSpeed_;                                    // 時間の進行速度（1.0が等倍）
+	float deltaTime_;                                    // 前フレームからの経過時間
 
-	bool isPaused_;    // ポーズフラグ
-
-	// 前フレームのシステム時刻
-	std::chrono::steady_clock::time_point prevTime_;
+	// ポーズフラグ
+	bool isPaused_; 
 
 	// 実行中のタイマーリスト
-	std::unordered_map < std::string, Timer> timers_;
+	std::unordered_map < std::string, Timer> timers_; 
 
 	/// @brief コンストラクタ
 	TimeManager(void) = default;
@@ -105,11 +104,10 @@ private:
 	/// @brief デストラクタ
 	~TimeManager(void) = default;
 
-	/// @brief インすタスのコピー禁止
+	/// @brief インスタンスのコピー禁止
 	TimeManager(const TimeManager&) = delete;
 
 	/// @brief 代入演算子の禁止
 	TimeManager& operator=(const TimeManager&) = delete;
 
 };
-

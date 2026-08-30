@@ -25,10 +25,13 @@ public:
 		BGM_TITLE_THUNDER,
 		BGM_GAME,
 		BGM_RESULT,
+		BGM_LOBBY,
 
 		// SE
 		SE_SELECT,
 		SE_LOBBY_SELECT,
+		SE_UI_SELECT,
+		SE_UI_CANCEL,
 
 		SE_DAMAGE_PLAYER, // プレイヤー被ダメージ処理
 		SE_RECOVERY_PLAYER, // プレイヤー回復処理

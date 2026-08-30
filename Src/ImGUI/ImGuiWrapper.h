@@ -1,41 +1,61 @@
 #pragma once
 #include <Windows.h>
 
+/// @brief ImGuiのラッパークラス
 class ImGuiWrapper
 {
 
 public:
 
-	// インスタンスの生成
+	/// @brief インスタンスの生成
 	static void CreateInstance(void);
 
-	// インスタンスの取得
+	/// @brief インスタンスの取得
+	/// @return ImGuiWrapperの参照
 	static ImGuiWrapper& GetInstance(void);
 
+	/// @brief 初期化
 	void Init(void);
+
+	/// @brief 更新
 	void Update(void);
+
+	/// @brief 描画
 	void Draw(void);
+
+	/// @brief 破棄
 	void Destroy(void);
 
 private:
 
-	// 静的インスタンス
-	static ImGuiWrapper* instance_;
+	// シングルトン関連
+	static ImGuiWrapper* instance_; // 静的インスタンス
 
-	// ウインドウプロージャ
+	/// @brief ウインドウプロシージャ
+	/// @param _windowHandle ウィンドウハンドル
+	/// @param _message メッセージ
+	/// @param _wParam 追加のメッセージ情報
+	/// @param _lParam 追加のメッセージ情報
+	/// @return メッセージ処理の結果
 	static LRESULT CALLBACK WndProc(
-		HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+		HWND _windowHandle, UINT _message, WPARAM _wParam, LPARAM _lParam);
 
-	// デフォルトコンストラクタをprivateにして、
-	// 外部から生成できない様にする
+	/// @brief デフォルトコンストラクタをprivateにして、外部から生成できない様にする
 	ImGuiWrapper(void);
-	// コピーコンストラクタも同様
-	ImGuiWrapper(const ImGuiWrapper&);
-	// デストラクタも同様
+
+	/// @brief デストラクタ
 	~ImGuiWrapper(void);
 
+	// コピーと代入を禁止
+	ImGuiWrapper(const ImGuiWrapper&) = delete;
+	ImGuiWrapper& operator=(const ImGuiWrapper&) = delete;
+	ImGuiWrapper(ImGuiWrapper&&) = delete;
+	ImGuiWrapper& operator=(ImGuiWrapper&&) = delete;
+
+	/// @brief マウス入力の更新
 	void UpdateInputMouse(void);
+
+	/// @brief ImGuiの新しいフレームの更新
 	void UpdateNewFrame(void);
 
 };
-

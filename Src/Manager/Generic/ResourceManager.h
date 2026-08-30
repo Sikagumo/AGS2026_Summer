@@ -25,6 +25,7 @@ public:
 		IMG_FALLING_POINT,
 		IMG_NOTMALMAP_TITLE,
 		IMG_BUCGROUND_TITLE,
+		IMG_BUCG_NORMALMAP_TITLE,
 
 		IMG_RESULT_WIN,
 		IMG_RESULT_BUT,
@@ -39,6 +40,7 @@ public:
 		IMG_SELECT_MULTI_BACK,
 		IMG_SELECTED_MULTI_BACK,
 		IMG_OPERATION,
+		IMG_TEXT_LEAVE_ROOM,
 
 		/* 複数画像 */
 		IMGS_TEXTS,
@@ -105,6 +107,13 @@ public:
 		EFFECT_PLAYER_RECOVERY,
 		EFFECT_PLAYER_POISON,
 
+		/* シェーダ */
+		VS_NORMAL_MAP,
+		PS_NORMAL_MAP,
+		PS_RAINY,
+		PS_TEX_SCALE,
+		VS_TEX_SCALE,
+
 		/* 映像 */
 
 		/* BGM */
@@ -112,6 +121,7 @@ public:
 		BGM_TITLE_THUNDER,
 		BGM_GAME,
 		BGM_RESULT,
+		BGM_LOBBY,
 
 		/* 効果音 */
 		SE_SELECT,
@@ -123,7 +133,9 @@ public:
 		SE_BOSS_LANDING,
 		SE_BOSS_ROAD,
 		SE_HIT_BLAST,
-		SE_LOBBY_SELCET
+		SE_LOBBY_SELCET,
+		SE_UI_SELECT,
+		SE_UI_CANCEL,
 	};
 
 
@@ -149,6 +161,9 @@ public:
 
 	// 動画ファイルパス
 	static const std::string PATH_MOVIE;
+
+	// シェーダファイルパス
+	static const std::string PATH_SHADER;
 
 
 	static void CreateInstance(void);

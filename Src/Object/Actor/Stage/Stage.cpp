@@ -7,6 +7,9 @@
 #include "../../Collider/ColliderCapsule.h"
 #include "../../../Shader/ShaderController.h"
 
+constexpr float TREE_SCALE = 1.25f;
+constexpr float TREE_POS_Y = -25.0f;
+
 
 Stage::Stage(void)
 	: viewStageTexHandle_(-1)
@@ -75,21 +78,7 @@ void Stage::InitTransform(void)
 		localPos);
 
 
-	constexpr float TREE_SCALE = 1.25f;
-	constexpr float TREE_POS_Y = -25.0f;
-	int frameFront = MV1SearchFrame(treePosModel_.modelId, POS_FRAME_NAME_FRONT.c_str());
-	int maxFront = MV1GetFrameChildNum(treePosModel_.modelId, frameFront);
-	for (int i = 0; i < maxFront; i++)
-	{
-		float rot = static_cast<float>(360 - GetRand(360 * 2));
-		VECTOR pos = MV1GetFramePosition(treePosModel_.modelId, (frameFront + (i + 1)));
-		pos.y = TREE_POS_Y;
-
-		treesFront_.at(i)->GetTransform().InitTransform(TREE_SCALE
-			, Quaternion::Identity(), Quaternion::AngleAxis(UtilityMath::Deg2RadF(rot), UtilityMath::AXIS_Y)
-			, pos);
-	}
-
+	// 背景の木
 	int frameBack = MV1SearchFrame(treePosModel_.modelId, POS_FRAME_NAME_BACK.c_str());
 	int maxBack = MV1GetFrameChildNum(treePosModel_.modelId, frameBack);
 	for (int i = 0; i < maxBack; i++)
@@ -142,13 +131,31 @@ void Stage::InitAnimation(void)
 
 void Stage::InitPost(void)
 {
-	float SCALE = 50.0f;
-	texScaleMaterial_.SetTexScale(SCALE, SCALE);
-
+	float STAGE_SCALE = 50.0f;
+	
+	texScaleParams_.scaleX = STAGE_SCALE;
+	texScaleParams_.scaleY = STAGE_SCALE;
+	
 	for (auto& tree : treesFront_)
 	{
 		tree->Init();
 	}
+
+	// 木の位置を割り当て
+	int frameFront = MV1SearchFrame(treePosModel_.modelId, POS_FRAME_NAME_FRONT.c_str());
+	int maxFront = MV1GetFrameChildNum(treePosModel_.modelId, frameFront);
+	for (int i = 0; i < maxFront; i++)
+	{
+		// ランダムで角度を変更
+		float rot = static_cast<float>(360 - GetRand(360 * 2));
+		VECTOR pos = MV1GetFramePosition(treePosModel_.modelId, (frameFront + (i + 1)));
+		pos.y = TREE_POS_Y;
+
+		treesFront_.at(i)->GetTransform().InitTransform(TREE_SCALE
+			, Quaternion::Identity(), Quaternion::AngleAxis(UtilityMath::Deg2RadF(rot), UtilityMath::AXIS_Y)
+			, pos);
+	}
+
 }
 
 void Stage::Update(void)
@@ -167,6 +174,17 @@ void Stage::Draw(void)
 {
 	MV1DrawModel(skyDome_.modelId);
 
+	ShaderController::GetInstance().Draw3D(
+		ResourceManager::SRC::VS_TEX_SCALE,
+		ResourceManager::SRC::PS_TEX_SCALE,
+		viewTrans_.modelId,
+		texScaleParams_,
+		texScaleParams_,
+		0,
+		viewStageTexHandle_,
+		false
+	);
+	
 	for (auto& treeFront : treesFront_)
 	{
 		if (!treeFront->GetIsActive()) { continue; }
@@ -179,14 +197,8 @@ void Stage::Draw(void)
 		MV1DrawModel(treeBack.modelId);
 	}
 
-	ShaderController::GetInstance()
-		.CreateShaderDrawTexScale(0, 0, viewTrans_.modelId, viewStageTexHandle_, texScaleMaterial_);
-
 
 #ifdef _DEBUG
-	//ActorBase::Draw();
-
-	// 以前の MV1DrawModel(collisionTrans_.modelId); はこれと被るので消すかコメントアウト
 	// 自分が持っているすべてのコライダーを描画する
 	for (const auto& [tagId, colliderList] : ownColliders_)
 	{
@@ -194,7 +206,6 @@ void Stage::Draw(void)
 		{
 			if (collider != nullptr)
 			{
-				// 例として緑色を指定（タグごとに色を変えてもOKです）
 				collider->Draw();
 			}
 		}

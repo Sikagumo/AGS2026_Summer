@@ -2,16 +2,15 @@
 
 #include <DxLib.h>
 
-#include "../Manager/Generic/InputManager.h"
 #include "../Manager/Generic/KeyConfInputManager.h"
 #include "../../Lib/ImGUI/backends/imgui_impl_dx11.h"
 #include "../../Lib/ImGUI/backends/imgui_impl_win32.h"
 
-
 ImGuiWrapper* ImGuiWrapper::instance_ = nullptr;
 
-// Forward declare message handler from imgui_impl_win32.cpp
-extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+// imgui_impl_win32.cppからのメッセージハンドラのプロトタイプ宣言
+extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND _windowHandle, UINT _message, 
+	WPARAM _wParam, LPARAM _lParam);
 
 void ImGuiWrapper::CreateInstance(void)
 {
@@ -29,9 +28,7 @@ ImGuiWrapper& ImGuiWrapper::GetInstance(void)
 
 void ImGuiWrapper::Init(void)
 {
-
-	// ウインドウへのメッセージ(イベント)を
-	// フックするウインドウプロージャを登録する
+	// ウインドウへのメッセージをフックするウインドウプロージャを登録する
 	DxLib::SetHookWinProc(WndProc);
 
 	// ImGuiの初期化
@@ -42,7 +39,6 @@ void ImGuiWrapper::Init(void)
 	ImGui_ImplDX11_Init(
 		(ID3D11Device*)DxLib::GetUseDirect3D11Device(),
 		(ID3D11DeviceContext*)DxLib::GetUseDirect3D11DeviceContext());
-
 }
 
 void ImGuiWrapper::Update(void)
@@ -58,6 +54,7 @@ void ImGuiWrapper::Draw(void)
 	// ImGui描画
 	ImGui::Render();
 	ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
+
 	// 他の描画処理から、DxLib描画に戻る時に必要な処理
 	DxLib::RefreshDxLibDirect3DSetting();
 }
@@ -72,36 +69,44 @@ void ImGuiWrapper::Destroy(void)
 	delete instance_;
 }
 
-LRESULT ImGuiWrapper::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+LRESULT ImGuiWrapper::WndProc(HWND _windowHandle, UINT _message, WPARAM _wParam, LPARAM _lParam)
 {
-
 	// このウインドウプロージャの戻り値を使用しない
 	DxLib::SetUseHookWinProcReturnValue(false);
 
 	// ImGuiにウィンドウイベントを渡す
-	if (ImGui_ImplWin32_WndProcHandler(hWnd, msg, wParam, lParam))
+	if (ImGui_ImplWin32_WndProcHandler(_windowHandle, _message, _wParam, _lParam))
 	{
 		return true;
 	}
 
-	switch (msg)
+	const UINT SYSTEM_COMMAND_MASK = 0xfff0; 
+
+	switch (_message)
 	{
 	case WM_SIZE:
-		if (wParam == SIZE_MINIMIZED)
+	{
+		if (_wParam == SIZE_MINIMIZED)
+		{
 			return 0;
-		//g_ResizeWidth = (UINT)LOWORD(lParam); // Queue resize
-		//g_ResizeHeight = (UINT)HIWORD(lParam);
+		}
 		return 0;
+	}
 	case WM_SYSCOMMAND:
-		if ((wParam & 0xfff0) == SC_KEYMENU) // Disable ALT application menu
+	{
+		if ((_wParam & SYSTEM_COMMAND_MASK) == SC_KEYMENU) 
+		{
 			return 0;
+		}
 		break;
+	}
 	case WM_DESTROY:
+	{
 		::PostQuitMessage(0);
 		return 0;
 	}
-	return ::DefWindowProcW(hWnd, msg, wParam, lParam);
-
+	}
+	return ::DefWindowProcW(_windowHandle, _message, _wParam, _lParam);
 }
 
 ImGuiWrapper::~ImGuiWrapper(void)
@@ -110,39 +115,28 @@ ImGuiWrapper::~ImGuiWrapper(void)
 
 void ImGuiWrapper::UpdateInputMouse(void)
 {
+	// マウス情報をImGuiに渡す
+	ImGuiIO& imguiIO = ImGui::GetIO(); 
 
-	// マウス情報をImGuiに渡す(InputManager使用)
-	ImGuiIO& io = ImGui::GetIO();
-	auto mousePos = InputManager::GetInstance().GetMousePos();
-	io.AddMousePosEvent(mousePos.x, mousePos.y);
-	io.AddMouseButtonEvent(ImGuiMouseButton_Left, InputManager::GetInstance().IsClickMouseLeft());
-	io.AddMouseButtonEvent(ImGuiMouseButton_Right, InputManager::GetInstance().IsClickMouseRight());
+	// KeyConfInputManagerからマウス座標を取得
+	Vector2 mousePosition = KeyConfInputManager::GetInstance().GetMousePosition(); 
+	imguiIO.AddMousePosEvent(static_cast<float>(mousePosition.x), 
+		static_cast<float>(mousePosition.y));
 
-	// マウス情報をImGuiに渡す(KeyConfInputManager使用)
-
-	// マウス情報をImGuiに渡す(InputManager未使用、DxLib使用)
-	//ImGuiIO& io = ImGui::GetIO();
-	//auto mouseInput = DxLib::GetMouseInput();
-	//int mousePosX = 0;
-	//int mousePosY = 0;
-	//DxLib::GetMousePoint(&mousePosX, &mousePosY);
-	//io.AddMousePosEvent(mousePosX, mousePosY);
-	//io.AddMouseButtonEvent(ImGuiMouseButton_Left, mouseInput & MOUSE_INPUT_LEFT);
-	//io.AddMouseButtonEvent(ImGuiMouseButton_Right, mouseInput & MOUSE_INPUT_RIGHT);
-
+	// クリック状態はDxLibの関数から直接取得して判定
+	int mouseInput = GetMouseInput(); 
+	imguiIO.AddMouseButtonEvent(ImGuiMouseButton_Left, (mouseInput & MOUSE_INPUT_LEFT) != 0);
+	imguiIO.AddMouseButtonEvent(ImGuiMouseButton_Right, (mouseInput & MOUSE_INPUT_RIGHT) != 0);
 }
 
 void ImGuiWrapper::UpdateNewFrame(void)
 {
-
 	// ImGui操作前準備
 	ImGui_ImplDX11_NewFrame();
 	ImGui_ImplWin32_NewFrame();
 	ImGui::NewFrame();
-
 }
 
 ImGuiWrapper::ImGuiWrapper(void)
 {
 }
-

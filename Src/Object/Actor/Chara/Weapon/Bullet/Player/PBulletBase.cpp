@@ -24,10 +24,6 @@ PBulletBase::PBulletBase(int _shotType, bool _isGravity)
 	, IS_GRAVITY(_isGravity)
 {
 }
-
-void PBulletBase::InitTransform(void)
-{
-}
 void PBulletBase::InitCollider(void)
 {
 	// Ä‰Šú‰»Aˆ—‚ğI—¹

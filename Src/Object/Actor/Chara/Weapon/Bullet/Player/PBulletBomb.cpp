@@ -22,7 +22,8 @@ void PBulletBomb::Load(void)
 
 void PBulletBomb::InitTransform(void)
 {
-	
+	transform_.InitTransform(SCALE_BOMB
+		, transform_.quaRot, Quaternion::Identity());
 }
 
 
@@ -65,8 +66,6 @@ void PBulletBomb::SetParam(void)
 	radiusBlast_ = 0.0f;
 
 	power_ = POWER_BOMB;
-	transform_.InitTransform(SCALE_BOMB
-		, transform_.quaRot, Quaternion::Identity());
 }
 
 void PBulletBomb::BlastAction(void)

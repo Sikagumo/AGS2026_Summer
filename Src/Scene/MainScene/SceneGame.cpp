@@ -3,7 +3,6 @@
 #include <algorithm>
 #include <math.h>
 #include "../../Manager/Generic/SceneManager.h"
-#include "../../Manager/Generic/InputManager.h"
 #include "../../Manager/Generic/ResourceManager.h"
 #include "../../Manager/Decoration/SoundManager.h"
 #include "../../Object/Collision/CollisionController.h"
@@ -33,6 +32,11 @@ SceneGame::SceneGame(std::vector<PlayerSelectType> _playerSelectType)
 	, gameTimer_(nullptr)
 	, slowCount_(0)
 	, infoImage_(-1)
+	, rainyTime_(0.0f)
+	, uiGame_{}, imageResult_{} , isGameOver_(false)
+	, playerHpImage_(-1), playerHpImageBack_(-1)
+	, state_(GAME_STATE::NONE), stateBase_(0)
+	
 {
 	for (int i = 0; i < _playerSelectType.size(); i++)
 	{
@@ -124,6 +128,8 @@ void SceneGame::Initialize(void)
 
 	if (Loading::GetInstance()->IsLoading()) { return; }
 
+	NetManager::GetInstance().SetConnectionTimeout(5.0f);
+
 	// マウスを表示しない設定にする
 	SetMouseDispFlag(false);
 	
@@ -177,7 +183,12 @@ void SceneGame::Initialize(void)
 	// 雨シェーダ導入
 	constexpr float RAIN_POW = 1.0f;
 	constexpr float RAIN_POW_BACK = 1.0f;
-	rainyMaterial_.SetUseRainy(RAIN_POW, RAIN_POW_BACK);
+
+	rainyParams_.rainIntensity = RAIN_POW;
+	rainyParams_.rainIntensityBack = RAIN_POW_BACK;
+	rainyParams_.rainColor = GetColorF(0.75f, 0.82f, 0.9f, 1.0f);
+	rainyParams_.resolutionX = static_cast<float>(Application::SCREEN_SIZE_X);
+	rainyParams_.resolutionY = static_cast<float>(Application::SCREEN_SIZE_Y);
 
 	SetMouseDispFlag(true);
 
@@ -315,7 +326,8 @@ void SceneGame::UpdateGameTime(void)
 		ChangeState(GAME_STATE::GAME_END);
 	}
 
-	rainyMaterial_.SetTime(TimeManager::GetInstance().GetGameTime());
+	rainyTime_ = TimeManager::GetInstance().GetGameTime();
+	rainyParams_.timeValue = rainyTime_;
 }
 
 void SceneGame::Draw(void)
@@ -333,6 +345,8 @@ void SceneGame::Release(void)
 	}
 
 	boss_->Release();
+
+	NetManager::GetInstance().Stop();
 }
 
 void SceneGame::DrawHpBerPlayer(void)
@@ -354,8 +368,8 @@ void SceneGame::DrawHpBerPlayer(void)
 	constexpr float DISPLAY_RATIO_MIN = 0.05f;
 	constexpr float DISPLAY_RATIO_MAX = 0.815f;
 
-	const int PLAYER_NUM = static_cast<int>(players_.size() + 1);
-	for (int i = 1; i < PLAYER_NUM; i++)
+	const int PLAYER_NUM = static_cast<int>(players_.size());
+	for (int i = 0; i < PLAYER_NUM; i++)
 	{
 		// バー背景描画
 		DrawRotaGraph(
@@ -365,7 +379,7 @@ void SceneGame::DrawHpBerPlayer(void)
 		);
 
 		const float hpRatio
-			= (static_cast<float>(players_.at(i - 1)->GetCurHp()) / static_cast<float>(players_.at(i - 1)->GetMaxHp()));
+			= (static_cast<float>(players_.at(i)->GetCurHp()) / static_cast<float>(players_.at(i)->GetMaxHp()));
 		const float RATIO = std::clamp(hpRatio, 0.0f, 1.0f);
 
 
@@ -407,8 +421,8 @@ void SceneGame::DrawHpBerPlayer(void)
 		berPos.y += (backSize.y + BER_OFFSET_Y);
 
 #ifdef _DEBUG
-		DrawFormatString(10, Application::SCREEN_SIZE_Y - (16 * (PLAYER_NUM - i)), 0xff0000, "プレイヤーHP：%d"
-			, players_.at(i - 1)->GetCurHp());
+		DrawFormatString(10, Application::SCREEN_SIZE_Y - (16 * (PLAYER_NUM - (i + 1))), 0xff0000, "プレイヤーHP：%d"
+			, players_.at(i)->GetCurHp());
 #endif
 	}
 }
@@ -580,7 +594,6 @@ void SceneGame::ChangeGameEnd(void)
 void SceneGame::UpdateGame(void)
 {
 	auto& sound = SoundManager::GetInstance();
-	auto& input = InputManager::GetInstance();
 	auto& camera = SceneManager::GetInstance().GetCamera();
 
 	if (Loading::GetInstance()->IsLoading()) { return; }
@@ -601,7 +614,7 @@ void SceneGame::UpdateGame(void)
 
 	stage_->Update();
 
-	auto remoteHisMap = NetManager::GetInstance().GetRemoteActionHis();
+	auto remoteHisMap = NetManager::GetInstance().GetRemoteActionHistory();
 
 	for (auto& player : players_)
 	{
@@ -613,7 +626,7 @@ void SceneGame::UpdateGame(void)
 		{
 			NET_ACTION latestAction = remoteHisMap[key].actions[0];
 
-			player->SetNetworkAction(latestAction.pos, latestAction.quaRot, latestAction.animId, latestAction.isAttack, latestAction.currentHp);
+			player->SetNetworkAction(latestAction.position, latestAction.rotation, latestAction.animationId, latestAction.isAttack, latestAction.currentHp);
 		}
 	}
 
@@ -718,6 +731,14 @@ void SceneGame::DrawGame(void)
 
 	stage_->Draw();
 
+	ShaderController::GetInstance().Draw2D(
+		ResourceManager::SRC::PS_RAINY,
+		0, 0, 1.0f,
+		rainyParams_
+	);
+
+	ShaderController::GetInstance().ExecuteDrawCommands();
+
 	for (auto& player : players_)
 	{
 		player->Draw();
@@ -732,9 +753,6 @@ void SceneGame::DrawGame(void)
 	auto& effect = EffectManager::GetInstance();
 	effect.Draw();
 
-	ShaderController::GetInstance()
-		.CreateShaderDrawRainy(0, 0, rainyMaterial_);
-
 	DrawHpBerBoss();
 
 	gameTimer_->Draw();
@@ -747,20 +765,28 @@ void SceneGame::DrawGame(void)
 
 #ifdef _DEBUG
 	DrawDebug();
-#endif // _DEBUG
-
 	SceneManager::GetInstance().GetCamera()->DrawDebug();
+#endif // _DEBUG
 }
+
+	
 
 void SceneGame::DrawGameEnd(void)
 {
 	stage_->Draw();
+
+
+	ShaderController::GetInstance().Draw2D(
+		ResourceManager::SRC::PS_RAINY,
+		0, 0, 1.0f,
+		rainyParams_
+	);
+
+	ShaderController::GetInstance().ExecuteDrawCommands();
+
 	boss_->Draw();
 	auto& effect = EffectManager::GetInstance();
 	effect.Draw();
-
-	ShaderController::GetInstance()
-		.CreateShaderDrawRainy(0, 0, rainyMaterial_);
 
 	const int IMAGET_TITLE_Y = Application::SCREEN_SIZE_Y / 3;
 	if (slowCount_ >= SLOW_COUNT_MAX * 30)
@@ -775,7 +801,6 @@ void SceneGame::DrawGameEnd(void)
 		}
 		
 	}
-
 }
 
 

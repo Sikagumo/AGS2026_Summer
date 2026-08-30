@@ -7,25 +7,25 @@
 
 void NetClient::UpdateConnecting(void)
 {
-    timerUser_ += SEND_INTERVAL_ACTION;
-    if (timerUser_ >= 0.1f)
-    {
-        timerUser_ = 0.0f;
-        netManager_.Send(NET_DATA_TYPE::USER);
-    }
+	timerUser_ += SEND_INTERVAL_ACTION;
+	if (timerUser_ >= SEND_INTERVAL_LIMIT)
+	{
+		timerUser_ = 0.0f;
+		netManager_.Send(NET_DATA_TYPE::USER);
+	}
 }
 
 void NetClient::UpdateGotoGame(void)
 {
-    timerUser_ += SEND_INTERVAL_ACTION;
-    if (timerUser_ >= 0.1f)
-    {
-        timerUser_ = 0.0f;
-        netManager_.Send(NET_DATA_TYPE::USER);
-    }
+	timerUser_ += SEND_INTERVAL_ACTION;
+	if (timerUser_ >= SEND_INTERVAL_LIMIT)
+	{
+		timerUser_ = 0.0f;
+		netManager_.Send(NET_DATA_TYPE::USER);
+	}
 }
 
 void NetClient::UpdateGamePlaying(void)
 {
-    netManager_.Send(NET_DATA_TYPE::ACTION_HIST_ALL);
+	netManager_.Send(NET_DATA_TYPE::ACTION_HIST_ALL);
 }

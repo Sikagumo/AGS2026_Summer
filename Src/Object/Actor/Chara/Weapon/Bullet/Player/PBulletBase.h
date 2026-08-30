@@ -109,7 +109,7 @@ protected:
 	std::function<void(void)> updateProc_;
 
 
-	void InitTransform(void)override;
+	void InitTransform(void)override = 0;
 
 	void InitCollider(void)override final;
 
