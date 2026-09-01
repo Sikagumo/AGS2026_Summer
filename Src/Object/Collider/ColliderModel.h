@@ -5,15 +5,15 @@
 
 #include "ColliderBase.h"
 
-/// @brief モデルベースのコライダクラス（フレーム単位で当たり判定を制御）
+/// @brief モデルベースのコライダクラス
 class ColliderModel : public ColliderBase
 {
 public:
 
     /// @brief コンストラクタ
-    /// @param collisionTag 衝突種別
-    /// @param followTarget 追従対象のTransform
-    ColliderModel(TAG collisionTag, const Transform* followTarget);
+    /// @param _collisionTag 衝突種別
+    /// @param _followTarget 追従対象のTransform
+    ColliderModel(TAG _collisionTag, const Transform* _followTarget);
 
     /// @brief デストラクタ
     ~ColliderModel(void) override = default;
@@ -23,20 +23,21 @@ public:
     int GetModelHandle(void) const;
 
     /// @brief 指定文字列を含むフレームを当たり判定から除外
-    /// @param exclusionName 除外対象フレーム名に含まれる文字列
-    void AddExcludeFrameIds(const std::string& exclusionName);
+    /// @param _exclusionName 除外対象フレーム名に含まれる文字列
+    void AddExcludeFrameIds(const std::string& _exclusionName);
 
     /// @brief 除外フレームのクリア
     void ClearExcludedFrames(void);
 
     /// @brief フレームが除外対象か判定
-    /// @param frameIndex フレーム番号
+    /// @param _frameIndex フレーム番号
     /// @return 除外対象ならtrue
-    bool IsExcludedFrame(int frameIndex) const;
+    bool IsExcludedFrame(int _frameIndex) const;
 
 protected:
-    /// @brief デバッグ描画（モデルコライダは描画しない）
-    void DrawDebug(int debugColor) const override;
+    /// @brief デバッグ描画
+    /// @param _debugColor 描画色
+    void DrawDebug(int _debugColor) const override;
 
 private:
     // 衝突判定から除外するフレーム番号

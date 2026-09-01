@@ -21,9 +21,7 @@ public:
 
 private:
 
-	// GUIの表示名
-	std::string name_;
-
-	// 編集対象のパラメータ構造体へのポインタ
-	NormalWaveShaderParams* params_;
+	// 情報関連
+	std::string name_;               // GUIの表示名
+	NormalWaveShaderParams* params_; // 編集対象のパラメータ構造体へのポインタ
 };

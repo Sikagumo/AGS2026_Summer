@@ -46,6 +46,7 @@ SceneManager::SceneManager(void)
     : isSceneChanging_(false)
     , isFirstFrame_(true)
     , sceneMutex_()
+    , firstFadeImageHandle_(-1)
 {
     camera_ = std::make_unique<Camera>();
     fader_ = std::make_unique<Fader>();
@@ -77,28 +78,17 @@ void SceneManager::Initialize(void)
 
 void SceneManager::Init3D(void)
 {
-    // 背景色
-    constexpr COLOR_F BACK_COLOR = { 0,0,0 };
-
-    // 環境光の強さ
-    const float AmbientVal = 0.8f;
-
-    // 鏡面光・環境光のベース値
-    const float LightMidVal = 0.5f;
-
-    // フォグの色
-    const int FogCol = 5;
-
-    // フォグ開始距離
-    const float FogStart = 10000.0f;
-
-    // フォグ終了距離
-    const float FogEnd = 20000.0f;
+    constexpr COLOR_F BACK_COLOR = { 0.0f, 0.0f, 0.0f }; // 背景色
+    const float AMBIENT_VAL = 0.8f;                      // 環境光の強さ
+    const float LIGHT_MID_VAL = 0.5f;                    // 鏡面光・環境光のベース値
+    const int FOG_COL = 5;                               // フォグの色
+    const float FOG_START = 10000.0f;                    // フォグ開始距離
+    const float FOG_END = 20000.0f;                      // フォグ終了距離
 
     // 背景色を設定する
     SetBackgroundColor(static_cast<int>(BACK_COLOR.r)
-                       , static_cast<int>(BACK_COLOR.g)
-                       , static_cast<int>(BACK_COLOR.b));
+        , static_cast<int>(BACK_COLOR.g)
+        , static_cast<int>(BACK_COLOR.b));
 
     // Zバッファを有効にする
     SetUseZBuffer3D(true);
@@ -113,20 +103,20 @@ void SceneManager::Init3D(void)
     SetUseLighting(true);
     SetLightEnable(true);
 
-    SetGlobalAmbientLight(GetColorF(AmbientVal, AmbientVal, AmbientVal, 1.0f));
+    SetGlobalAmbientLight(GetColorF(AMBIENT_VAL, AMBIENT_VAL, AMBIENT_VAL, 1.0f));
 
-    ChangeLightTypeDir(VGet(0.0f, -1.0f, 1.0f));                               // ライトの方向
-    SetLightDifColor(GetColorF(1.0f, 1.0f, 1.0f, 1.0f));                       // 拡散光
-    SetLightSpcColor(GetColorF(LightMidVal, LightMidVal, LightMidVal, 1.0f));  // 鏡面光
-    SetLightAmbColor(GetColorF(LightMidVal, LightMidVal, LightMidVal, 1.0f));  // 環境光
+    ChangeLightTypeDir(VGet(0.0f, -1.0f, 1.0f));                                     // ライトの方向
+    SetLightDifColor(GetColorF(1.0f, 1.0f, 1.0f, 1.0f));                             // 拡散光
+    SetLightSpcColor(GetColorF(LIGHT_MID_VAL, LIGHT_MID_VAL, LIGHT_MID_VAL, 1.0f));  // 鏡面光
+    SetLightAmbColor(GetColorF(LIGHT_MID_VAL, LIGHT_MID_VAL, LIGHT_MID_VAL, 1.0f));  // 環境光
 
     // フォグを設定する
     SetFogEnable(true);
-    SetFogColor(FogCol, FogCol, FogCol);
-    SetFogStartEnd(FogStart, FogEnd);
+    SetFogColor(FOG_COL, FOG_COL, FOG_COL);
+    SetFogStartEnd(FOG_START, FOG_END);
 }
 
-void SceneManager::ChangeScene(std::shared_ptr<SceneBase> scene)
+void SceneManager::ChangeScene(std::shared_ptr<SceneBase> _scene)
 {
     // CollisionControllerをクリア
     CollisionController::GetInstance().Clear();
@@ -140,32 +130,31 @@ void SceneManager::ChangeScene(std::shared_ptr<SceneBase> scene)
     SoundManager::GetInstance().StopAllBGM();
 
     // 新しいシーンを設定
-    nextScene_ = scene;
+    nextScene_ = _scene;
     isSceneChanging_ = true;
 
-    // フェードアウト(暗転)を開始
+    // フェードアウトを開始
     fader_->SetFade(Fader::STATE::FADE_OUT);
 
     // 非同期ロード開始
-    Loading::GetInstance()->StartAsyncLoad([scene]()
+    Loading::GetInstance()->StartAsyncLoad([_scene]()
         {
-            scene->Load();
+            _scene->Load();
         });
 }
 
-void SceneManager::PushScene(std::shared_ptr<SceneBase> scene)
+void SceneManager::PushScene(std::shared_ptr<SceneBase> _scene)
 {
-    scenes_.push_back(scene);
+    scenes_.push_back(_scene);
 
     // 即時ロード・初期化
-    scene->Load();
-    scene->EndLoad();
-    scene->Initialize();
+    _scene->Load();
+    _scene->EndLoad();
+    _scene->Initialize();
 }
 
 void SceneManager::PopScene(void)
 {
-
     if (scenes_.size() > 1)
     {
         scenes_.back()->Release();
@@ -173,7 +162,7 @@ void SceneManager::PopScene(void)
     }
 }
 
-void SceneManager::JumpScene(std::shared_ptr<SceneBase> scene)
+void SceneManager::JumpScene(std::shared_ptr<SceneBase> _scene)
 {
     scenes_.clear();
 
@@ -184,12 +173,12 @@ void SceneManager::JumpScene(std::shared_ptr<SceneBase> scene)
     SoundManager::GetInstance().StopAllBGM();
 
     isSceneChanging_ = true;
-    scenes_.push_back(scene);
+    scenes_.push_back(_scene);
 
     // 非同期ロードを開始する
-    Loading::GetInstance()->StartAsyncLoad([scene]()
+    Loading::GetInstance()->StartAsyncLoad([_scene]()
         {
-        scene->Load();
+            _scene->Load();
         });
 }
 
@@ -208,8 +197,6 @@ void SceneManager::Update(void)
 
         fader_->LoadFadeImage();
 
-        //auto jobs = { SceneGame::PlayerSelectType(PlayerBase::JOB_TYPE::SUPPORT, PlayerBase::SKIN_TYPE::DOG) };
-        //ChangeScene(std::make_shared<SceneGame>(jobs));
         ChangeScene(std::make_shared<SceneTitle>());
     }
 
@@ -229,7 +216,8 @@ void SceneManager::Update(void)
         return;
     }
 
-    constexpr float LoadCompleteThreshold = 100.0f;
+    // ロード完了とみなす進捗のしきい値
+    constexpr float LOAD_COMPLETE_THRESHOLD = 100.0f; 
 
     // ロード中の処理を完全に分離する
     if (isSceneChanging_)
@@ -240,7 +228,7 @@ void SceneManager::Update(void)
         loader->Update();
 
         // ロードが完了しており、かつフェードアウトが完了しているか
-        const bool isLoadFinished = (loader->GetProgress() >= LoadCompleteThreshold && !loader->IsLoading());
+        const bool isLoadFinished = (loader->GetProgress() >= LOAD_COMPLETE_THRESHOLD && !loader->IsLoading());
         const bool isFadeOutFinished = (fader_->GetState() == Fader::STATE::FADE_OUT && fader_->IsEnd());
 
         if (isLoadFinished && isFadeOutFinished && nextScene_ != nullptr)
@@ -261,7 +249,6 @@ void SceneManager::Update(void)
 
             nextScene_ = nullptr;
 
-            // シーン切り替えが終わったら、今度は画面を明るくする（フェードイン）を開始
             fader_->SetFade(Fader::STATE::FADE_IN);
         }
 
@@ -287,10 +274,10 @@ void SceneManager::Update(void)
         return;
     }
 
-    auto& current = scenes_.back();
-    if (current)
+    auto& currentScene = scenes_.back();
+    if (currentScene)
     {
-        current->Update();
+        currentScene->Update();
     }
 
     CollisionController::GetInstance().Update();
@@ -336,12 +323,11 @@ void SceneManager::Draw(void)
     // フェードを先に描画する
     fader_->Draw();
 
-    // フェードアウトが完全に終わって「画面が真っ黒」になってからロード画面を上に重ねる
+    // フェードアウトが終わってロード画面を上に重ねる
     auto loader = Loading::GetInstance();
 
     if (isSceneChanging_)
     {
-        // 状態がFADE_OUTであり、かつIsEnd()がtrueの時のみロード画面を描画する
         if (fader_->GetState() == Fader::STATE::FADE_OUT && fader_->IsEnd())
         {
             if (loader)

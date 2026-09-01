@@ -34,7 +34,7 @@ void Loading::DestroyInstance(void)
 
 Loading::Loading(void)
 	: isLoading_(false)
-	, progress_(0.0f)
+	, progress_(MIN_PROGRESS)
 	, imageHandle_(-1)
 {
 	imageHandle_ = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::IMG_PEACH);
@@ -47,10 +47,10 @@ Loading::~Loading(void)
 void Loading::Initialize(void)
 {
 	isLoading_ = false;
-	progress_ = 0.0f;
+	progress_ = MIN_PROGRESS;
 }
 
-void Loading::StartAsyncLoad(std::function<void()> loadFunc)
+void Loading::StartAsyncLoad(std::function<void()> _loadFunc)
 {
 	SetUseASyncLoadFlag(true);
 	if (isLoading_)
@@ -61,9 +61,9 @@ void Loading::StartAsyncLoad(std::function<void()> loadFunc)
 	Initialize();
 	isLoading_ = true;
 
-	if (loadFunc)
+	if (_loadFunc)
 	{
-		loadFunc();
+		_loadFunc();
 	}
 	SetUseASyncLoadFlag(false);
 }
@@ -75,14 +75,16 @@ void Loading::Update(void)
 		return;
 	}
 
-	const int LOAD_COUNT = GetASyncLoadNum(); 
+	const int LOAD_COUNT = GetASyncLoadNum();  // 残りの非同期ロード数
+	const float PROGRESS_SPEED = 0.5f;         // 1フレームごとの進捗増加量
+	const float WAIT_PROGRESS = 99.9f;         // ロード完了待ちの進捗率
 
-	if (progress_ < 100.0f)
+	if (progress_ < MAX_PROGRESS)
 	{
-		progress_ += 0.5f;
+		progress_ += PROGRESS_SPEED;
 	}
 
-	if (progress_ >= 100.0f)
+	if (progress_ >= MAX_PROGRESS)
 	{
 		if (LOAD_COUNT == 0)
 		{
@@ -90,39 +92,36 @@ void Loading::Update(void)
 		}
 		else
 		{
-			progress_ = 99.9f;
+			progress_ = WAIT_PROGRESS;
 		}
 	}
-
-	//if (progress_ >= 100.0f && LOAD_COUNT == 0)
-	//{
-	//	EndAsyncLoad();
-	//}
 }
 
 void Loading::Draw(void)
 {
+	const unsigned int BLACK_COLOR = GetColor(0, 0, 0);
+
 	// 背景を黒で塗りつぶす
-	DrawBox(0, 0, Application::SCREEN_SIZE_X, Application::SCREEN_SIZE_Y, GetColor(0, 0, 0), true);
+	DrawBox(0, 0, Application::SCREEN_SIZE_X, Application::SCREEN_SIZE_Y, BLACK_COLOR, true);
 
-	float time = TimeManager::GetInstance().GetGameTime();
-	float speed = 3.0f;
-	float radius = 350.0f;
-	float currentAngle = time * speed;
+	const float ROTATION_SPEED = 3.0f;  // 回転速度
+	const float CIRCLE_RADIUS = 350.0f; // 回転の半径
 
-	VECTOR center = VGet(Application::SCREEN_HALF_X, Application::SCREEN_HALF_Y, 0.0f);
+	float gameTime = TimeManager::GetInstance().GetGameTime(); // ゲームの経過時間
+	float currentAngle = gameTime * ROTATION_SPEED;            // 現在の角度
 
-	VECTOR pos = UtilityMath::GetCirclePos(center, radius, time * speed);
+	VECTOR centerPos = VGet(Application::SCREEN_HALF_X, Application::SCREEN_HALF_Y, 0.0f); 
+	VECTOR drawPos = UtilityMath::GetCirclePos(centerPos, CIRCLE_RADIUS, currentAngle);    
 
-	float rotationAngle = currentAngle + (DX_PI_F / 2.0f);
+	float rotationAngle = currentAngle + (DX_PI_F / 2.0f); 
 
-	DrawRotaGraph(static_cast<int>(pos.x), static_cast<int>(pos.y), 0.2f, rotationAngle, imageHandle_, true);
+	DrawRotaGraph(static_cast<int>(drawPos.x), static_cast<int>(drawPos.y), 0.2f, rotationAngle, imageHandle_, true);
 }
 
 void Loading::EndAsyncLoad(void)
 {
 	isLoading_ = false;
-	progress_ = 100.0f;
+	progress_ = MAX_PROGRESS;
 }
 
 bool Loading::IsLoading(void) const
@@ -135,15 +134,15 @@ int Loading::GetProgress(void) const
 	return static_cast<int>(progress_);
 }
 
-void Loading::SetProgress(float progress)
+void Loading::SetProgress(float _progress)
 {
-	if (progress < 0.0f)
+	if (_progress < MIN_PROGRESS)
 	{
-		progress = 0.0f;
+		_progress = MIN_PROGRESS;
 	}
-	if (progress > 100.0f)
+	if (_progress > MAX_PROGRESS)
 	{
-		progress = 100.0f;
+		_progress = MAX_PROGRESS;
 	}
-	progress_ = progress;
+	progress_ = _progress;
 }

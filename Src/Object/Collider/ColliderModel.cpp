@@ -1,7 +1,7 @@
 #include "ColliderModel.h"
 
-ColliderModel::ColliderModel(TAG tag, const Transform* followTarget)
-    : ColliderBase(SHAPE::MODEL, tag, followTarget)
+ColliderModel::ColliderModel(TAG _collisionTag, const Transform* _followTarget)
+    : ColliderBase(SHAPE::MODEL, _collisionTag, _followTarget)
 {
 }
 
@@ -53,12 +53,18 @@ bool ColliderModel::IsExcludedFrame(int frameIdx) const
 void ColliderModel::DrawDebug(int debugColor) const
 {
     int modelHandle = GetModelHandle();
-    if (modelHandle == -1) return;
+    if (modelHandle == -1)
+    {
+        return;
+    }
+
+    const int ALPHA_BLEND_PARAM = 1; // 半透明のブレンドパラメータ
+    const int NO_BLEND_PARAM = 0;    // ブレンドなしのパラメータ
 
     // 半透明にして描画する
-    SetDrawBlendMode(DX_BLENDMODE_ALPHA, 1); 
+    SetDrawBlendMode(DX_BLENDMODE_ALPHA, ALPHA_BLEND_PARAM);
 
     MV1DrawModel(modelHandle);
 
-    SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0); 
+    SetDrawBlendMode(DX_BLENDMODE_NOBLEND, NO_BLEND_PARAM);
 }

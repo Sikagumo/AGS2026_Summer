@@ -608,24 +608,24 @@ void Player::ProcessMove(void)
 	// 左スティックの入力方向を取得
 	VECTOR direction = keyConfInputManager.GetLeftStickDirection();
 
-	// スティック入力がない場合はキーボードや十字キーのデジタル入力を適用
-	if (UtilityMath::EqualsVZero(direction))
+	// スティック入力がない場合はキーボード入力を適用
+	if (VSquareSize(direction) < 0.01f)
 	{
+		// 完全にゼロにリセットする
+		direction = UtilityMath::VECTOR_ZERO;
+
 		if (keyConfInputManager.isPressed("UP"))
 		{
 			direction.z += 1.0f;
 		}
-
 		if (keyConfInputManager.isPressed("DOWN"))
 		{
 			direction.z += -1.0f;
 		}
-
 		if (keyConfInputManager.isPressed("LEFT"))
 		{
 			direction.x += -1.0f;
 		}
-
 		if (keyConfInputManager.isPressed("RIGHT"))
 		{
 			direction.x += 1.0f;
@@ -1385,10 +1385,10 @@ void Player::SendMyActionToNetManager(void)
 	myAction.key = NetManager::GetInstance().GetMyKey();
 	myAction.frameNo = 0;
 	myAction.pos = transform_.pos;
-	myAction.quaRot = transform_.quaRot;
+	myAction.rot = transform_.quaRot;
 	myAction.animId = static_cast<int>(animType_);
 	myAction.currentHp = hp_;
-	myAction.actBits = 0;
+	myAction.actionBits = 0;
 	myAction.isAttack = isAttackSend_;
 
 	NetManager::GetInstance().AddSelfAction(myAction);

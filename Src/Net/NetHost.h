@@ -1,14 +1,25 @@
 #pragma once
 #include "NetBase.h"
 
+/// @brief ネットワークホストの処理を管理するクラス
 class NetHost : public NetBase
 {
 public:
-    using NetBase::NetBase;
+	// ベースクラスのコンストラクタを使用
+	using NetBase::NetBase;
 
-    void UpdateConnecting(void) override;
+	/// @brief 接続中の更新処理
+	void UpdateConnecting(void) override;
 
-    void UpdateGotoGame(void) override;
+	/// @brief ゲームシーン遷移時の更新処理
+	void UpdateGotoGame(void) override;
 
-    void UpdateGamePlaying(void) override;
+	/// @brief ゲームプレイ中の更新処理
+	void UpdateGamePlaying(void) override;
+
+private:
+
+	// ユーザー情報送信のしきい値時間
+	static constexpr float SEND_INTERVAL_LIMIT = 0.1f;
+
 };

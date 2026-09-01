@@ -1,59 +1,64 @@
 #include "CollisionSphere.h"
+
+#include <cmath>
+
 #include "../Collider/ColliderSphere.h"
 #include "../Collider/ColliderCapsule.h"
 #include "../Collider/ColliderModel.h"
 #include "../Collision/CollisionController.h"
 #include "../../Utility/UtilityMath.h"
 
-
 bool CollisionSphere::CheckSphereVsSphere(const ColliderBase* _colliderA,
 	const ColliderBase* _colliderB, CollisionInfo& _outInfo)
 {
-	if (!_colliderA || !_colliderB) { return false; }
+	if (!_colliderA || !_colliderB)
+	{
+		return false;
+	}
 
-	const auto* sphereA =  static_cast<const ColliderSphere*>(_colliderA);
-	const auto* sphereB =  static_cast<const ColliderSphere*>(_colliderB);
+	const auto* SPHERE_A = static_cast<const ColliderSphere*>(_colliderA);
+	const auto* SPHERE_B = static_cast<const ColliderSphere*>(_colliderB);
 
-	if (sphereA == nullptr || sphereB == nullptr)
+	if (SPHERE_A == nullptr || SPHERE_B == nullptr)
 	{
 		return false;
 	}
 
 	// 距離計算
-	VECTOR positionA = sphereA->GetWorldPosition();
-	VECTOR positionB = sphereB->GetWorldPosition();
+	const VECTOR POS_A = SPHERE_A->GetWorldPosition();
+	const VECTOR POS_B = SPHERE_B->GetWorldPosition();
 
-	float distanceX = positionA.x - positionB.x;
-	float distanceY = positionA.y - positionB.y;
-	float distanceZ = positionA.z - positionB.z;
+	const float DIST_X = POS_A.x - POS_B.x;
+	const float DIST_Y = POS_A.y - POS_B.y;
+	const float DIST_Z = POS_A.z - POS_B.z;
 
 	// 距離の二乗を計算
-	float distSquare = (distanceX * distanceX) + (distanceY * distanceY) + (distanceZ * distanceZ);
+	const float DIST_SQUARE = (DIST_X * DIST_X) + (DIST_Y * DIST_Y) + (DIST_Z * DIST_Z);
 
-	// 半径の合計値と比較
-	float radiusSum = sphereA->GetRadius() + sphereB->GetRadius();
-	float radiusSumSq = radiusSum * radiusSum;
+	// 半径の合計値
+	const float RADIUS_SUM = SPHERE_A->GetRadius() + SPHERE_B->GetRadius();
 
 	// 衝突判定
-	if (distSquare < radiusSumSq)
+	if (DIST_SQUARE < (RADIUS_SUM * RADIUS_SUM))
 	{
-		float distance = sqrtf(distSquare);
+		const float DISTANCE = sqrtf(DIST_SQUARE);
 
 		// 衝突情報の設定
 		_outInfo.myCollider = _colliderA;
 		_outInfo.hitCollider = _colliderB;
 		_outInfo.isActive = true;
+
 		// 衝突位置の計算
-		_outInfo.hitPosition = VAdd(positionB, VScale(VSub(positionA, positionB), 0.5f));
+		_outInfo.hitPosition = VAdd(POS_B, VScale(VSub(POS_A, POS_B), 0.5f));
 
 		// 法線ベクトルと押し出し量の計算
-		if (distance > 0.0f)
+		if (DISTANCE > 0.0f)
 		{
-			_outInfo.hitNormal = VScale(VSub(positionA, positionB), 1.0f / distance);
+			_outInfo.hitNormal = VScale(VSub(POS_A, POS_B), 1.0f / DISTANCE);
 		}
 
 		// めり込んでいる距離を算出
-		_outInfo.penetration = radiusSum - distance;
+		_outInfo.penetration = RADIUS_SUM - DISTANCE;
 
 		return true;
 	}
@@ -64,35 +69,37 @@ bool CollisionSphere::CheckSphereVsSphere(const ColliderBase* _colliderA,
 bool CollisionSphere::CheckSphereVsCapsule(const ColliderBase* _sphereCol,
 	const ColliderBase* _capsuleCol, CollisionInfo& _outInfo)
 {
-	if (!_sphereCol || !_capsuleCol) { return false; }
+	if (!_sphereCol || !_capsuleCol)
+	{
+		return false;
+	}
 
-	const auto* sphereHit =  static_cast<const ColliderSphere*>(_sphereCol);
-	const auto* capsuleHit =  static_cast<const ColliderCapsule*>(_capsuleCol);
+	const auto* SPHERE = static_cast<const ColliderSphere*>(_sphereCol);
+	const auto* CAPSULE = static_cast<const ColliderCapsule*>(_capsuleCol);
 
-	if (sphereHit == nullptr || capsuleHit == nullptr)
+	if (SPHERE == nullptr || CAPSULE == nullptr)
 	{
 		return false;
 	}
 
 	// 各形状のパラメータ取得
-	VECTOR spherePos = sphereHit->GetWorldPosition();
-	VECTOR capStartPos = capsuleHit->GetWorldStartPos();
-	VECTOR capEndPos = capsuleHit->GetWorldEndPos();
-	float sphereRadius = sphereHit->GetRadius();
-	float capsuleRadius = capsuleHit->GetRadius();
+	const VECTOR SPHERE_POS = SPHERE->GetWorldPosition();
+	const VECTOR CAP_START_POS = CAPSULE->GetWorldStartPos();
+	const VECTOR CAP_END_POS = CAPSULE->GetWorldEndPos();
+	const float SPHERE_RADIUS = SPHERE->GetRadius();
+	const float CAPSULE_RADIUS = CAPSULE->GetRadius();
 
 	// カプセルの線分上で、球体に最も近い点を算出
-	VECTOR nearestPos = UtilityMath::GetNearestPointOnSegment(capStartPos, capEndPos, spherePos);
+	const VECTOR NEAREST_POS = UtilityMath::GetNearestPointOnSegment(CAP_START_POS, CAP_END_POS, SPHERE_POS);
 
 	// 最近接点と球体の中心距離による判定
-	float distSquare = static_cast<float>(UtilityMath::SqrMagnitude(spherePos, nearestPos));
-	float radiusSum = sphereRadius + capsuleRadius;
-	float radiusSumSq = radiusSum * radiusSum;
+	const float DIST_SQUARE = static_cast<float>(UtilityMath::SqrMagnitude(SPHERE_POS, NEAREST_POS));
+	const float RADIUS_SUM = SPHERE_RADIUS + CAPSULE_RADIUS;
 
 	// 衝突判定
-	if (distSquare < radiusSumSq)
+	if (DIST_SQUARE < (RADIUS_SUM * RADIUS_SUM))
 	{
-		float distance = sqrtf(distSquare);
+		const float DISTANCE = sqrtf(DIST_SQUARE);
 
 		// 衝突情報の設定
 		_outInfo.myCollider = _sphereCol;
@@ -100,14 +107,14 @@ bool CollisionSphere::CheckSphereVsCapsule(const ColliderBase* _sphereCol,
 		_outInfo.isActive = true;
 
 		// 衝突位置の計算
-		_outInfo.hitPosition = UtilityMath::Lerp(nearestPos, spherePos, UtilityMath::HALF_NUM);
+		_outInfo.hitPosition = UtilityMath::Lerp(NEAREST_POS, SPHERE_POS, UtilityMath::HALF_NUM);
 
 		// 法線ベクトルと押し出し量の計算
-		if (distance > 0.0f)
+		if (DISTANCE > 0.0f)
 		{
-			_outInfo.hitNormal = VScale(VSub(spherePos, nearestPos), 1.0f / distance);
+			_outInfo.hitNormal = VScale(VSub(SPHERE_POS, NEAREST_POS), 1.0f / DISTANCE);
 		}
-		_outInfo.penetration = radiusSum - distance;
+		_outInfo.penetration = RADIUS_SUM - DISTANCE;
 
 		return true;
 	}
@@ -115,23 +122,29 @@ bool CollisionSphere::CheckSphereVsCapsule(const ColliderBase* _sphereCol,
 	return false;
 }
 
-bool CollisionSphere::CheckSphereVsModel(const ColliderBase* _sphereCol, 
+bool CollisionSphere::CheckSphereVsModel(const ColliderBase* _sphereCol,
 	const ColliderBase* _modelCol, CollisionInfo& _outInfo)
 {
-	if (!_sphereCol || !_modelCol) { return false; }
+	if (!_sphereCol || !_modelCol)
+	{
+		return false;
+	}
 
-	const auto* sphere = static_cast<const ColliderSphere*>(_sphereCol);
-	if (sphere == nullptr) { return false; }
+	const auto* SPHERE = static_cast<const ColliderSphere*>(_sphereCol);
+	if (SPHERE == nullptr)
+	{
+		return false;
+	}
 
-	bool isHit = CheckSphereVsModelCore(sphere->GetWorldPosition(), sphere->GetRadius(),
+	const bool IS_HIT = CheckSphereVsModelCore(SPHERE->GetWorldPosition(), SPHERE->GetRadius(),
 		_modelCol, &_outInfo);
 
-	if (isHit)
+	if (IS_HIT)
 	{
 		_outInfo.myCollider = _sphereCol;
 	}
 
-	return isHit;
+	return IS_HIT;
 }
 
 bool CollisionSphere::CheckHitWave(const ColliderBase* _hitCapsuleCol, ColliderBase* _waveCol)
@@ -141,45 +154,39 @@ bool CollisionSphere::CheckHitWave(const ColliderBase* _hitCapsuleCol, ColliderB
 		return false;
 	}
 
-	const auto* capsule =  static_cast <const ColliderCapsule*>(_hitCapsuleCol);
-	const auto* wave =  static_cast<const ColliderSphere*>(_waveCol);
+	const auto* CAPSULE = static_cast <const ColliderCapsule*>(_hitCapsuleCol);
+	const auto* WAVE = static_cast<const ColliderSphere*>(_waveCol);
 
-	if (capsule == nullptr || wave == nullptr)
+	if (CAPSULE == nullptr || WAVE == nullptr)
 	{
 		return false;
 	}
 
-	VECTOR wavePos = wave->GetWorldPosition();
+	const VECTOR WAVE_POS = WAVE->GetWorldPosition();
+	const VECTOR CAP_START_POS = CAPSULE->GetWorldStartPos();
+	const VECTOR CAP_END_POS = CAPSULE->GetWorldEndPos();
 
-	VECTOR capStartPos = capsule->GetWorldStartPos();
-	VECTOR capEndPos = capsule->GetWorldEndPos();
+	const VECTOR NEAREST_POS = UtilityMath::GetNearestPointOnSegment(CAP_START_POS, CAP_END_POS, WAVE_POS);
 
-	VECTOR nearestPos = UtilityMath::GetNearestPointOnSegment(capStartPos, capEndPos, wavePos);
+	// Y軸を無視したXZ平面での位置
+	const VECTOR WAVE_POS_XZ = VGet(WAVE_POS.x, 0.0f, WAVE_POS.z);
+	const VECTOR NEAREST_POS_XZ = VGet(NEAREST_POS.x, 0.0f, NEAREST_POS.z);
 
-	VECTOR wavePosXZ = wavePos;
-	VECTOR nearestPosXZ = nearestPos;
+	const float DISTANCE = static_cast<float>(UtilityMath::Distance(NEAREST_POS_XZ, WAVE_POS_XZ));
+	const float WAVE_RADIUS = WAVE->GetRadius();
+	const float TOTAL_THICKNESS = HIT_WAVE_THICKNESS + CAPSULE->GetRadius();
 
-	wavePosXZ.y = 0.0f;
-	nearestPosXZ.y = 0.0f;
+	const bool IS_HIT = std::abs(DISTANCE - WAVE_RADIUS) < TOTAL_THICKNESS;
 
-	float distance = static_cast<float>(UtilityMath::Distance(nearestPosXZ, wavePosXZ));
-
-	float waveRadius = wave->GetRadius();
-
-	float totalThickness = HIT_WAVE_THICKNESS + capsule->GetRadius();
-
-	bool isHit = abs(distance - waveRadius) < totalThickness;
-
-	if (!isHit)
+	if (!IS_HIT)
 	{
 		return false;
 	}
 
-	float capsuleFootY = (capStartPos.y < capEndPos.y ? capStartPos.y : capEndPos.y) - capsule->GetRadius();
+	const float CAPSULE_FOOT_Y = (CAP_START_POS.y < CAP_END_POS.y ? CAP_START_POS.y : CAP_END_POS.y) - CAPSULE->GetRadius();
+	const float DIFFERENCE_Y = NEAREST_POS.y - WAVE_POS.y;
 
-	float differenceY = nearestPos.y - wavePos.y;
-
-	if (capsuleFootY > (wavePos.y + HIT_WAVE_HEIGHT))
+	if (CAPSULE_FOOT_Y > (WAVE_POS.y + HIT_WAVE_HEIGHT))
 	{
 		return false;
 	}
@@ -187,85 +194,107 @@ bool CollisionSphere::CheckHitWave(const ColliderBase* _hitCapsuleCol, ColliderB
 	return true;
 }
 
-bool CollisionSphere::CheckSphereVsModelCore(const VECTOR& _centerPos, float _radius, 
+bool CollisionSphere::CheckSphereVsModelCore(const VECTOR& _centerPos, float _radius,
 	const ColliderBase* _modelCol, CollisionInfo* _outInfo)
 {
-	if (!_modelCol) { return false; }
-
-	const auto* model = static_cast<const ColliderModel*>(_modelCol);
-	if (model == nullptr) { return false; }
-
-	int modelHandle = model->GetModelHandle();
-	if (modelHandle == -1) { return false; }
-
-	MV1_COLL_RESULT_POLY_DIM hitResult = MV1CollCheck_Sphere(modelHandle, -1, _centerPos, _radius);
-
-	if (hitResult.HitNum <= 0)
+	if (!_modelCol)
 	{
-		MV1CollResultPolyDimTerminate(hitResult);
+		return false;
+	}
+
+	const auto* MODEL = static_cast<const ColliderModel*>(_modelCol);
+	if (MODEL == nullptr)
+	{
+		return false;
+	}
+
+	const int MODEL_HANDLE = MODEL->GetModelHandle();
+	if (MODEL_HANDLE == -1)
+	{
+		return false;
+	}
+
+	const MV1_COLL_RESULT_POLY_DIM HIT_RESULT = MV1CollCheck_Sphere(MODEL_HANDLE, -1, _centerPos, _radius);
+
+	if (HIT_RESULT.HitNum <= 0)
+	{
+		MV1CollResultPolyDimTerminate(HIT_RESULT);
 		return false;
 	}
 
 	float maxPenetration = -1.0f;
 	int bestIndex = -1;
 
-	ColliderBase::TAG modelTag = _modelCol->GetCollisionTag();
+	const ColliderBase::TAG MODEL_TAG = _modelCol->GetCollisionTag();
 
-	for (int i = 0; i < hitResult.HitNum; ++i)
+	for (int i = 0; i < HIT_RESULT.HitNum; ++i)
 	{
-		if (model->IsExcludedFrame(hitResult.Dim[i].FrameIndex)) { continue; }
+		if (MODEL->IsExcludedFrame(HIT_RESULT.Dim[i].FrameIndex))
+		{
+			continue;
+		}
 
-		const auto& poly = hitResult.Dim[i];
+		const auto& POLY = HIT_RESULT.Dim[i];
 
 		// タグによる法線フィルタ(カプセル版と同じ基準)
-		if (modelTag == ColliderBase::TAG::STAGE && poly.Normal.y <= 0.5f) { continue; }
-		if (modelTag == ColliderBase::TAG::WALL && poly.Normal.y > 0.5f) { continue; }
-
-		VECTOR polyPoint = poly.Position[0];
-		VECTOR toHit = VSub(polyPoint, _centerPos);
-		float distAlongNormal = VDot(toHit, poly.Normal);
-		float polyPenetration = _radius - distAlongNormal;
-
-		if (polyPenetration > maxPenetration)
+		if (MODEL_TAG == ColliderBase::TAG::STAGE && POLY.Normal.y <= 0.5f)
 		{
-			maxPenetration = polyPenetration;
+			continue;
+		}
+		if (MODEL_TAG == ColliderBase::TAG::WALL && POLY.Normal.y > 0.5f)
+		{
+			continue;
+		}
+
+		const VECTOR POLY_POINT = POLY.Position[0];
+		const VECTOR TO_HIT = VSub(POLY_POINT, _centerPos);
+		const float DIST_ALONG_NORMAL = VDot(TO_HIT, POLY.Normal);
+		const float POLY_PENETRATION = _radius - DIST_ALONG_NORMAL;
+
+		if (POLY_PENETRATION > maxPenetration)
+		{
+			maxPenetration = POLY_PENETRATION;
 			bestIndex = i;
 		}
 	}
 
 	if (bestIndex == -1)
 	{
-		MV1CollResultPolyDimTerminate(hitResult);
+		MV1CollResultPolyDimTerminate(HIT_RESULT);
 		return false;
 	}
 
-	// 呼び出し側が衝突情報を必要としない場合(スイープ判定など)はここで終了
+	// 呼び出し側が衝突情報を必要としない場合はここで終了
 	if (_outInfo == nullptr)
 	{
-		MV1CollResultPolyDimTerminate(hitResult);
+		MV1CollResultPolyDimTerminate(HIT_RESULT);
 		return true;
 	}
 
-	const auto& bestHit = hitResult.Dim[bestIndex];
+	const auto& BEST_HIT = HIT_RESULT.Dim[bestIndex];
 
 	// 呼び出し側で設定する
 	_outInfo->myCollider = nullptr;
 	_outInfo->hitCollider = _modelCol;
 
-	VECTOR bestPolyPoint = VScale(
-		VAdd(VAdd(bestHit.Position[0], bestHit.Position[1]), bestHit.Position[2]),
+	const VECTOR BEST_POLY_POINT = VScale(
+		VAdd(VAdd(BEST_HIT.Position[0], BEST_HIT.Position[1]), BEST_HIT.Position[2]),
 		1.0f / 3.0f);
 
-	_outInfo->hitPosition = bestPolyPoint;
-	_outInfo->hitNormal = bestHit.Normal;
+	_outInfo->hitPosition = BEST_POLY_POINT;
+	_outInfo->hitNormal = BEST_HIT.Normal;
 	_outInfo->isActive = true;
 
-	VECTOR toHit = VSub(bestPolyPoint, _centerPos);
-	float distAlongNormal = VDot(toHit, bestHit.Normal);
-	_outInfo->penetration = _radius - distAlongNormal;
+	const VECTOR TO_HIT = VSub(BEST_POLY_POINT, _centerPos);
+	const float DIST_ALONG_NORMAL = VDot(TO_HIT, BEST_HIT.Normal);
 
-	if (_outInfo->penetration < 0.0f) { _outInfo->penetration = 0.0f; }
+	_outInfo->penetration = _radius - DIST_ALONG_NORMAL;
 
-	MV1CollResultPolyDimTerminate(hitResult);
+	if (_outInfo->penetration < 0.0f)
+	{
+		_outInfo->penetration = 0.0f;
+	}
+
+	MV1CollResultPolyDimTerminate(HIT_RESULT);
 	return true;
 }

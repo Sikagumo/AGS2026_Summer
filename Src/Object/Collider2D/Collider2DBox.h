@@ -8,7 +8,7 @@ class Collider2DBox : public Collider2DBase
 {
 public:
 
-	/// @brief コンストラクタ（座標直接指定）
+	/// @brief コンストラクタ
 	/// @param _centerPos 初期の中央座標
 	/// @param _width 矩形の横幅
 	/// @param _height 矩形の縦幅
@@ -60,6 +60,6 @@ private:
 	float width_;            // 矩形の横幅
 	float height_;           // 矩形の縦幅
 
-	// 座標関連
-	Vector2F centerPos_;      // 中央座標
+	// 中央座標
+	Vector2F centerPos_;    
 };

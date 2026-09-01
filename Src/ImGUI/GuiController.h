@@ -17,22 +17,23 @@ public:
 	/// @brief インスタンスの破棄
 	static void DestroyInstance(void);
 
-	/// @brief 画面に表示するGUIをセットする（切り替える）
+	/// @brief 画面に表示するGUIをセットする
 	/// @param _gui 表示したいGUIコンポーネントの共有ポインタ
 	void SetActiveGui(std::shared_ptr<IGuiComponent> _gui);
 
-	/// @brief 現在表示中のGUIを閉じる（クリアする）
+	/// @brief 現在表示中のGUIを閉じる
 	void ClearGui(void);
 
 	/// @brief アクティブなGUIがセットされていれば描画する
 	void DrawUI(void);
 
 private:
-	// 静的メンバ変数
-	static GuiController* instance_;
 
-	// 現在アクティブな（表示中の）GUIコンポーネント
-	std::shared_ptr<IGuiComponent> activeGui_;
+	// シングルトンインスタンス
+	static GuiController* instance_;           
+
+	// 現在アクティブなGUIコンポーネント
+	std::shared_ptr<IGuiComponent> activeGui_; 
 
 	/// @brief コンストラクタ
 	GuiController(void) = default;

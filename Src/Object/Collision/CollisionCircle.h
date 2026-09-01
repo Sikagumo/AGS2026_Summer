@@ -2,6 +2,7 @@
 
 class Collider2DBase;
 
+/// @brief 円と他の2D形状の衝突判定を行うクラス
 class CollisionCircle
 {
 public:
@@ -18,4 +19,3 @@ public:
 	/// @return 衝突しているか
 	static bool CheckCircleVsBox(const Collider2DBase* _circle, const Collider2DBase* _box);
 };
-

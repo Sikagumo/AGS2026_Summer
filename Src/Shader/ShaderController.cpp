@@ -1,73 +1,79 @@
 #include "ShaderController.h"
+
 #include <algorithm>
 
 ShaderController* ShaderController::instance_ = nullptr;
 
 void ShaderController::CreateInstance(void)
 {
-    if (instance_ == nullptr)
-    {
-        instance_ = new ShaderController();
-    }
+	if (instance_ == nullptr)
+	{
+		instance_ = new ShaderController();
+	}
 }
 
 ShaderController& ShaderController::GetInstance(void)
 {
-    return *instance_;
+	return *instance_;
 }
 
 void ShaderController::DestroyInstance(void)
 {
-    if (instance_ != nullptr)
-    {
-        delete instance_;
-        instance_ = nullptr;
-    }
+	if (instance_ != nullptr)
+	{
+		delete instance_;
+		instance_ = nullptr;
+	}
 }
 
 ShaderController::ShaderController(void)
-    : shaderRenderer_(nullptr)
+	: shaderRenderer_(nullptr)
+	, renderCommandQueue_()
 {
-    shaderRenderer_ = std::make_unique<ShaderRenderer>();
+	shaderRenderer_ = std::make_unique<ShaderRenderer>();
 }
 
 ShaderController::~ShaderController(void)
 {
-    Release();
+	Release();
 }
 
 void ShaderController::Initialize(void)
 {
-    shaderRenderer_->Initialize();
+	shaderRenderer_->Initialize();
 }
 
 void ShaderController::Release(void)
 {
-    shaderRenderer_->Release();
-    renderCommandQueue_.clear();
+	shaderRenderer_->Release();
+	renderCommandQueue_.clear();
 }
 
 void ShaderController::ExecuteDrawCommands(void)
 {
-    if (renderCommandQueue_.empty())
-    {
-        return;
-    }
+	if (renderCommandQueue_.empty())
+	{
+		return;
+	}
 
-    std::sort(renderCommandQueue_.begin(), renderCommandQueue_.end(),
-        [](const RenderCommand& leftCommand, const RenderCommand& rightCommand)
-        {
-            if (leftCommand.vertexShaderHandleId != rightCommand.vertexShaderHandleId)
-            {
-                return leftCommand.vertexShaderHandleId < rightCommand.vertexShaderHandleId;
-            }
-            return leftCommand.pixelShaderHandleId < rightCommand.pixelShaderHandleId;
-        });
+	std::sort(renderCommandQueue_.begin(), renderCommandQueue_.end(),
+		[](const RenderCommand& _leftCommand, const RenderCommand& _rightCommand)
+		{
+			if (_leftCommand.vertexShaderHandleId != _rightCommand.vertexShaderHandleId)
+			{
+				return _leftCommand.vertexShaderHandleId < _rightCommand.vertexShaderHandleId;
+			}
+			return _leftCommand.pixelShaderHandleId < _rightCommand.pixelShaderHandleId;
+		});
 
-    for (const auto& renderCommand : renderCommandQueue_)
-    {
-        shaderRenderer_->ExecuteCommand(renderCommand);
-    }
+	shaderRenderer_->BeginBatch();
 
-    renderCommandQueue_.clear();
+	for (const auto& renderCommand : renderCommandQueue_)
+	{
+		shaderRenderer_->ExecuteCommand(renderCommand);
+	}
+
+	shaderRenderer_->EndBatch();
+
+	renderCommandQueue_.clear();
 }

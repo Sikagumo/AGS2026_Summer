@@ -4,10 +4,12 @@
 
 #include "../SceneBase.h"
 
+/// @brief リザルト画面シーンクラス
 class SceneResult : public SceneBase
 {
 public:
 
+	/// @brief デフォルトコンストラクタ
 	SceneResult(void) = default;
 
 	/// @brief コンストラクタ
@@ -37,14 +39,13 @@ public:
 
 private:
 
-	std::array<int, 4> imageResult_;
+	// 画像ハンドル関連
+	std::array<int, 4> imageResult_; // リザルト用テキスト等の画像ハンドル配列
+	int img_;                        // 背景または結果表示の画像ハンドル
 
-	int img_;
-
-	bool isGameOver_;
+	// ゲームオーバーかどうか
+	bool isGameOver_;                
 
 	/// @brief Gui用の更新処理
 	void UpdateGui(void) override;
-
 };
-

@@ -1,9 +1,9 @@
 #include "ColliderBase.h"
 
-ColliderBase::ColliderBase(SHAPE shapeType, TAG collisionTag, const Transform* followTarget)
-	: shapeType_(shapeType)
-	, collisionTag_(collisionTag)
-	, followTarget_(followTarget)
+ColliderBase::ColliderBase(SHAPE _shapeType, TAG _collisionTag, const Transform* _followTarget)
+	: shapeType_(_shapeType)
+	, collisionTag_(_collisionTag)
+	, followTarget_(_followTarget)
 	, isActive_(true)
 	, isTrigger_(true)
 {
@@ -22,10 +22,10 @@ void ColliderBase::Draw(void) const
 	DrawDebug(color);
 }
 
-VECTOR ColliderBase::TransformLocalToWorld(const VECTOR& localPos) const
+VECTOR ColliderBase::TransformLocalToWorld(const VECTOR& _localPos) const
 {
 	// ローカル座標を回転させてワールド座標へ変換
-	VECTOR localRotPos = followTarget_->quaRot.PosAxis(localPos);
+	VECTOR localRotPos = followTarget_->quaRot.PosAxis(_localPos);
 
 	// 位置を加算して最終的なワールド座標にする
 	return VAdd(followTarget_->pos, localRotPos);
@@ -56,12 +56,12 @@ bool ColliderBase::IsActive(void) const
 	return isActive_;
 }
 
-void ColliderBase::SetActive(bool isActive)
+void ColliderBase::SetActive(bool _isActive)
 {
-	isActive_ = isActive;
+	isActive_ = _isActive;
 }
 
-void ColliderBase::SetTriger(bool isTrigger)
+void ColliderBase::SetTriger(bool _isTrigger)
 {
-	isTrigger_ = isTrigger;
+	isTrigger_ = _isTrigger;
 }

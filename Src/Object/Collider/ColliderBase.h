@@ -6,8 +6,6 @@
 
 
 /// @brief コライダーの基底クラス
-/// @details
-/// 各種コライダーの共通インターフェースを定義する
 class ColliderBase
 {
 public:
@@ -54,10 +52,10 @@ public:
 	};
 
 	/// @brief コンストラクタ
-	/// @param shape コライダー形状
-	/// @param tag 衝突種別
-	/// @param follow 追従対象Transform
-	ColliderBase(SHAPE shapeType, TAG collisionTag, const Transform* followTarget);
+	/// @param _shapeType コライダー形状
+	/// @param _collisionTag 衝突種別
+	/// @param _followTarget 追従対象Transform
+	ColliderBase(SHAPE _shapeType, TAG _collisionTag, const Transform* _followTarget);
 
 	/// @brief デストラクタ
 	virtual ~ColliderBase(void) = default;
@@ -71,7 +69,7 @@ public:
 
 	/// @brief 追従先を設定する
 	/// @param followTarget 新しいTransform
-	void SetFollowTarget(Transform* followTarget);
+	void SetFollowTarget(Transform* _followTarget);
 
 	/// @brief コライダー形状を取得する
 	/// @return 形状種別
@@ -95,7 +93,7 @@ public:
 
 	/// @brief 押し出し判定の設定
 	/// @param isTrigger trueなら押し出す、falseなら押し出さない
-	void SetTriger(bool isTrigger);
+	void SetTriger(bool _isTrigger);
 
 	/// @brief 半径を設定する
 	/// @param _radius 新しい半径の値
@@ -124,10 +122,10 @@ protected:
 	/// @brief ローカル座標をワールド座標に変換する
 	/// @param localPos ローカル座標
 	/// @return ワールド座標
-	VECTOR TransformLocalToWorld(const VECTOR& localPos) const;
+	VECTOR TransformLocalToWorld(const VECTOR& _localPos) const;
 
-	/// @brief デバッグ描画（派生クラスで実装）
+	/// @brief デバッグ描画
 	/// @param color 描画色
-	virtual void DrawDebug(int color) const = 0;
+	virtual void DrawDebug(int _color) const = 0;
 };
 

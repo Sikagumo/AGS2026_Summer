@@ -39,24 +39,38 @@ void SceneOperation::Update(void)
 
 void SceneOperation::Draw(void)
 {
-	int width = 0;
-	int height = 0;
+	int graphWidth = 0;
+	int graphHeight = 0;
 
-	float uiBackScaleX = 1.0f;
+	constexpr float UI_BACK_SCALE_X = 1.0f;
+	constexpr float UI_BACK_SCALE_Y = 1.5f;
 
-	float uiBackScaleY = 1.5f;
-
-	GetGraphSize(backGroundHandle_, &width, &height);
+	GetGraphSize(backGroundHandle_, &graphWidth, &graphHeight);
 
 	SetDrawBlendMode(DX_BLENDMODE_ALPHA, 128);
 	DrawBox(0, 0, Application::SCREEN_SIZE_X, Application::SCREEN_SIZE_Y, 0x000000, true);
 	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 
-	DrawRotaGraph3(Application::SCREEN_HALF_X, Application::SCREEN_HALF_Y, width / 2, height / 2,
-		uiBackScaleX, uiBackScaleY, 0.0f, backGroundHandle_, true);
+	DrawRotaGraph3(
+		static_cast<float>(Application::SCREEN_HALF_X),
+		static_cast<float>(Application::SCREEN_HALF_Y),
+		static_cast<float>(graphWidth / 2),
+		static_cast<float>(graphHeight / 2),
+		UI_BACK_SCALE_X,
+		UI_BACK_SCALE_Y,
+		0.0f,
+		backGroundHandle_,
+		true
+	);
 
-	DrawRotaGraph(Application::SCREEN_HALF_X, Application::SCREEN_HALF_Y, 0.5f, 0.0f,
-		operationImageHandle_, true);
+	DrawRotaGraph(
+		Application::SCREEN_HALF_X,
+		Application::SCREEN_HALF_Y,
+		0.5f,
+		0.0f,
+		operationImageHandle_,
+		true
+	);
 }
 
 void SceneOperation::Release(void)

@@ -1,4 +1,5 @@
 #pragma once
+
 #include <vector>
 #include <string>
 #include <memory>
@@ -10,9 +11,11 @@
 class Collider2DCircle;
 class Collider2DBox;
 
+/// @brief ポーズ画面シーンクラス
 class ScenePause : public SceneBase
 {
 public:
+
 	/// @brief コンストラクタ
 	ScenePause(void);
 
@@ -54,53 +57,56 @@ private:
 	static constexpr float YES_NO_BUTTON_HEIGHT = 35.0f;                              // YES/NOボタンの当たり判定の縦幅
 	static constexpr int STICK_INTERVAL = 15;                                         // スティック入力のインターバル
 
+	// ポーズ画面の進行フェーズ関連
 	enum class PHASE
 	{
-		APPEAR,
-		NORMAL,
-		DISAPPEAR,
-		YES_NO
+		APPEAR,    // 出現中フェーズ
+		NORMAL,    // 通常操作フェーズ
+		DISAPPEAR, // 消滅中フェーズ
+		YES_NO     // 確認ダイアログ
 	};
 
+	// メニュー項目の種類関連
 	enum class MENU_ITEM
 	{
 		RETURN_GAME,   // ゲームに戻る
 		RETURN_TITLE,  // タイトルに戻る
-		COUNT
+		COUNT          // 項目数
 	};
 
 	// UI文字画像の識別列挙型
 	enum class PAUSE_TEXT_UI
 	{
-		RETURN_GAME,   // 1. ゲームに戻る
-		RETURN_TITLE,  // 2. タイトルに戻る
-		YES,           // 3. はい
-		NO,            // 4. いいえ
+		RETURN_GAME,   // ゲームに戻る
+		RETURN_TITLE,  // タイトルに戻る
+		YES,           // はい
+		NO,            // いいえ
 		MAX
 	};
 
 	// 状態関連
-	PHASE currentPhase_;     // 現在のフェーズ
-	int frame_;              // 経過フレーム
-	int selectedIndex_;      // 選択中のインデックス
-	bool isYes_;             // YESが選択されているか
+	PHASE currentPhase_;       // 現在のフェーズ
+	int frame_;                // 経過フレーム
+	int selectedIndex_;        // 選択中のインデックス
+	bool isYes_;               // YESが選択されているか
 
 	// 入力関連
 	int inputIntervalCounter_; // スティックの入力間隔カウンター
 	bool isPhaseChanged_;      // フェーズ変更直後の入力無効化フラグ
 
-	// 画像関連
-	std::array<int, static_cast<size_t>(PAUSE_TEXT_UI::MAX)> selectTextHandles_;    // 選択中文字画像配列
-	std::array<int, static_cast<size_t>(PAUSE_TEXT_UI::MAX)> noSelectTextHandles_;  // 非選択中文字画像配列 
-	int backGroundHandle_;                                                          // 背景画像
+	// 画像ハンドル関連
+	std::array<int, static_cast<size_t>(PAUSE_TEXT_UI::MAX)> selectTextHandles_;     // 選択中文字画像配列
+	std::array<int, static_cast<size_t>(PAUSE_TEXT_UI::MAX)> noSelectTextHandles_;   // 非選択中文字画像配列 
+	int backGroundHandle_;                                                           // 背景画像ハンドル
 
 	// 当たり判定関連
-	std::unique_ptr<Collider2DCircle> cursorCollider_;             // マウスカーソル用
-	std::unique_ptr<Collider2DBox> returnGameButtonCollider_;      // ゲームに戻るボタン用
-	std::unique_ptr<Collider2DBox> returnTitleButtonCollider_;     // タイトルに戻るボタン用
-	std::unique_ptr<Collider2DBox> yesButtonCollider_;             // 「はい」ボタン用
-	std::unique_ptr<Collider2DBox> noButtonCollider_;              // 「いいえ」ボタン用
+	std::unique_ptr<Collider2DCircle> cursorCollider_;         // マウスカーソル用コライダー
+	std::unique_ptr<Collider2DBox> returnGameButtonCollider_;  // ゲームに戻るボタン用コライダー
+	std::unique_ptr<Collider2DBox> returnTitleButtonCollider_; // タイトルに戻るボタン用コライダー
+	std::unique_ptr<Collider2DBox> yesButtonCollider_;         // 「はい」ボタン用コライダー
+	std::unique_ptr<Collider2DBox> noButtonCollider_;          // 「いいえ」ボタン用コライダー
 
+	// 更新処理関数関連
 	/// @brief 出現時の更新処理
 	void ProcessAppear(void);
 
@@ -119,6 +125,7 @@ private:
 	/// @brief YESを選択した時の処理
 	void ExecuteYesAction(void);
 
+	// 描画処理関数関連
 	/// @brief 出現時の描画処理
 	void DrawAppear(void);
 
@@ -129,7 +136,7 @@ private:
 	void DrawYesNo(void);
 
 	/// @brief 背景枠の描画処理
-	/// @param _rate 枠の広がり具合(0.0f～1.0f)
+	/// @param _rate 枠の広がり具合
 	void DrawFrame(float _rate);
 
 	/// @brief メニュー項目の描画処理
@@ -140,5 +147,4 @@ private:
 	/// @param _isSelected 選択中かどうか
 	/// @return 画像ハンドル
 	int GetTextUIHandle(PAUSE_TEXT_UI _textType, bool _isSelected) const;
-
 };

@@ -1074,22 +1074,22 @@ NET_BOSS_ACTION Boss::GetNetworkAction(void) const
 {
 	NET_BOSS_ACTION action;
 	action.pos = transform_.pos;
-	action.quaRot = transformBody_.quaRot;
+	action.rot = transformBody_.quaRot;
 	action.bossHp = hp_;
 	action.animId = static_cast<int>(state_);
 	action.targetPlayerId = mainIdx_;
 
-	action.mpTargetId = mpIdx_;
+	action.missilePodTargetId = mpIdx_;
 	action.cannonTargetId = cannonIdx_;
 
 	// 追加：最後に選ばれた攻撃のタイプを送信する
 	action.attackSelect = static_cast<int>(lastAttackType_);
 
-	action.weaponMglHp = weaponMGL_->GetHp();
-	action.weaponMgrHp = weaponMGR_->GetHp();
-	action.weaponMpLHp = weaponMPL_->GetHp();
-	action.weaponMpRHp = weaponMPR_->GetHp();
-	action.weaponRgHp = weaponRG_->GetHp();
+	action.weaponMachineGunLHp = weaponMGL_->GetHp();
+	action.weaponMachineGunRHp = weaponMGR_->GetHp();
+	action.weaponMissilePodLHp = weaponMPL_->GetHp();
+	action.weaponMissilePodRHp = weaponMPR_->GetHp();
+	action.weaponRailGunHp = weaponRG_->GetHp();
 	action.weaponCannonLHp = weaponCannonL_->GetHp();
 	action.weaponCannonRHp = weaponCannonR_->GetHp();
 
@@ -1106,16 +1106,16 @@ void Boss::SetNetworkAction(const NET_BOSS_ACTION& _action)
 
 	transform_.pos = _action.pos;
 
-	transformBody_.quaRot = _action.quaRot;
+	transformBody_.quaRot = _action.rot;
 
 	if (difference > EFFECT_PLAEY_DAMEGE)
 	{
 		PlayEffect();
 	}
 
-	if (_action.mpTargetId >= 0 && _action.mpTargetId < playerSize_)
+	if (_action.missilePodTargetId >= 0 && _action.missilePodTargetId < playerSize_)
 	{
-		mpIdx_ = _action.mpTargetId;
+		mpIdx_ = _action.missilePodTargetId;
 	}
 	if (_action.cannonTargetId >= 0 && _action.cannonTargetId < playerSize_)
 	{
@@ -1123,11 +1123,11 @@ void Boss::SetNetworkAction(const NET_BOSS_ACTION& _action)
 	}
 
 	// クライアント側のウェポンHPをホストと同期する
-	weaponMGL_->SetHp(_action.weaponMglHp);
-	weaponMGR_->SetHp(_action.weaponMgrHp);
-	weaponMPL_->SetHp(_action.weaponMpLHp);
-	weaponMPR_->SetHp(_action.weaponMpRHp);
-	weaponRG_->SetHp(_action.weaponRgHp);
+	weaponMGL_->SetHp(_action.weaponMachineGunLHp);
+	weaponMGR_->SetHp(_action.weaponMachineGunRHp);
+	weaponMPL_->SetHp(_action.weaponMissilePodLHp);
+	weaponMPR_->SetHp(_action.weaponMissilePodRHp);
+	weaponRG_->SetHp(_action.weaponRailGunHp);
 	weaponCannonL_->SetHp(_action.weaponCannonLHp);
 	weaponCannonR_->SetHp(_action.weaponCannonRHp);
 
