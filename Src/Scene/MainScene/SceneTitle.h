@@ -10,9 +10,11 @@
 #include "../../Object/Collider2D/Collider2DBox.h"
 #include "../../ImGUI/ShaderEditorComponent.h"
 
+/// @brief タイトル画面シーンクラス
 class SceneTitle : public SceneBase
 {
 public:
+
 	/// @brief コンストラクタ
 	SceneTitle(void);
 
@@ -39,90 +41,60 @@ public:
 
 private:
 
+	// メニュー項目の列挙型
 	enum class MENU_ITEM
 	{
-		SOLO,
-		MULTI,
-		OPTION,
-		EXIT,
-		COUNT
+		SOLO,   // ソロプレイ
+		MULTI,  // マルチプレイ
+		OPTION, // オプション
+		EXIT,   // 終了
+		COUNT   // 項目数
 	};
 
-	// メニュー数
-	static constexpr int MENU_BUTTON_NUM = 4;
+	// 定数関連
+	static constexpr int MENU_BUTTON_NUM = 4; // メニューボタンの数
 
-	// タイトルロゴの画像ハンドル
-	int imageTitle_;
+	// 画像ハンドル関連
+	int imageTitle_;                               // タイトルロゴの画像ハンドル
+	std::array<int, 8> imageMenu_;                 // メニュー項目（4つ × 選択/非選択）の画像ハンドル
+	std::array<Collider2DBase::TAG_2D, 4> buttonTags; // ボタンのタグ配列
+	int peachHandle_;                              // 桃の画像
+	int peachNormalHandle_;                        // 桃のノーマルマップ
+	int waveHandle_;                               // 波の画像
+	int waveNormalHandle_;                         // 波のノーマルマップ
+	int oniSimaHandle_;                            // 鬼ヶ島の画像
+	int oniSimaNormalHandle_;                      // 鬼ヶ島のノーマルマップ
+	int titleNormalHandle_;                        // タイトルのノーマルマップ
+	int backgroundHandle_;                         // 背景の画像
+	int backNormalHandle_;                         // 背景のノーマルマップ
 
-	// メニュー項目（4つ）の画像ハンドル
-	std::array<int, 8> imageMenu_;
+	// 制御・状態関連
+	float time_;                 // 経過時間
+	int selectedIdx_;            // 選択中のメニューインデックス
+	int inputIntervalCounter_;   // 入力間隔調整用カウンター
+	Vector2F prevMousePos_;      // 前回のマウス座標
+	bool isSelectMenu_;          // メニュー選択中かどうか
 
-	std::array<Collider2DBase::TAG_2D, 4> buttonTags;
+	// GUIコンポーネント関連
+	std::shared_ptr<ShaderEditorComponent> peachGui_;   // 桃用GUI
+	std::shared_ptr<ShaderEditorComponent> waveGui_;    // 波用GUI
+	std::shared_ptr<ShaderEditorComponent> oniSimaGui_; // 鬼ヶ島用GUI
+	std::shared_ptr<ShaderEditorComponent> titleGui_;   // タイトル用GUI
 
-	// 桃の画像
-	int peachHandle_;
-
-	// 桃のノーマルマップ
-	int peachNormalHandle_;
-
-	// 波の画像
-	int waveHandle_;
-
-	// 波のノーマルマップ
-	int waveNormalHandle_;
-
-	// 鬼ヶ島の画像
-	int oniSimaHandle_;
-
-	// 鬼ヶ島のノーマルマップ
-	int oniSimaNormalHandle_;
-
-	int titleNormalHandle_;
-
-	int backgroundHandle_;
-
-	int backNormalHandle_;
-
-	// 時間
-	float time_;
-
-	// 選択インデックス
-	int selectedIdx_;
-	int inputIntervalCounter_;
-
-	// 前回のマウス座標
-	Vector2F prevMousePos_;
-	
-	// GUIコンポーネント
-	std::shared_ptr<ShaderEditorComponent> peachGui_;
-	std::shared_ptr<ShaderEditorComponent> waveGui_;
-	std::shared_ptr<ShaderEditorComponent> oniSimaGui_;
-	std::shared_ptr<ShaderEditorComponent> titleGui_;
-
-	// マウスカーソル用の円コライダー
-	std::unique_ptr<Collider2DCircle> cursorCollider_;
-
-	// ソロプレイボタン用の矩形コライダー
-	std::unique_ptr<Collider2DBox> soloPlayButtonCollider_;
-
-	// マルチプレイボタン用の矩形コライダー
-	std::unique_ptr<Collider2DBox> multiPlayButtonCollider_;
-
-	// 設定ボタン用の矩形コライダー
-	std::unique_ptr<Collider2DBox> optionButtonCollider_;
-
-	// 終了ボタン用の矩形コライダー
-	std::unique_ptr<Collider2DBox> exitButtonCollider_;
-	std::unique_ptr<Collider2DBox> peachCollider_;
-	std::unique_ptr<Collider2DBox> waveCollider_;
-	std::unique_ptr<Collider2DBox> oniSimaCollider_;
-
-	bool isSelectMenu_;
+	// コライダー関連
+	std::unique_ptr<Collider2DCircle> cursorCollider_;     // マウスカーソル用の円コライダー
+	std::unique_ptr<Collider2DBox> soloPlayButtonCollider_; // ソロプレイボタン用コライダー
+	std::unique_ptr<Collider2DBox> multiPlayButtonCollider_; // マルチプレイボタン用コライダー
+	std::unique_ptr<Collider2DBox> optionButtonCollider_;  // 設定ボタン用コライダー
+	std::unique_ptr<Collider2DBox> exitButtonCollider_;    // 終了ボタン用コライダー
+	std::unique_ptr<Collider2DBox> peachCollider_;         // 桃用コライダー
+	std::unique_ptr<Collider2DBox> waveCollider_;          // 波用コライダー
+	std::unique_ptr<Collider2DBox> oniSimaCollider_;       // 鬼ヶ島用コライダー
 
 	/// @brief UI初期化処理
 	void InitUI(void);
 
-	/// @brief デバック描画 
+	/// @brief デバッグ描画 
 	void DrawDebug(void);
 
 	/// @brief タイトルメニュー別遷移処理

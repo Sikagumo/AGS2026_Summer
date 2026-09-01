@@ -12,7 +12,7 @@ class ColliderCapsule : public ColliderBase
 public:
 
     /// @brief コンストラクタ
-    /// @param collisionTag 衝突種別（プレイヤー・敵など）
+    /// @param collisionTag 衝突種別
     /// @param followTarget 追従対象のTransform
     /// @param localStartPos ローカル空間での開始位置
     /// @param localEndPos ローカル空間での終了位置
@@ -46,7 +46,7 @@ public:
     /// @return ワールド空間での開始位置
     VECTOR GetWorldStartPos(void) const;
 
-    /// @brief ワールド開始位置の取得
+    /// @brief ワールド終了位置の取得
     /// @return ワールド空間での開始位置
     VECTOR GetWorldEndPos(void) const;
 
@@ -57,18 +57,14 @@ public:
 protected:
     /// @brief デバッグ描画
     /// @param debugColor 描画色
-    void DrawDebug(int debugColor) const override;
+    void DrawDebug(int _debugColor) const override;
 
 private:
     // デバッグ表示の球体・カプセルポリゴン分割数
     static constexpr int DEBUG_SEGMENT_COUNT = 8;
 
-    // カプセルの開始座標(ローカル)
-    VECTOR localStartPos_;
-
-    // カプセルの終了座標(ローカル)
-    VECTOR localEndPos_;
-
-    // カプセルの半径
-    float radius_;
+    // コライダーの形状パラメータ関連
+    VECTOR localStartPos_; // カプセルの開始座標
+    VECTOR localEndPos_;   // カプセルの終了座標
+    float radius_;         // カプセルの半径
 };

@@ -1,7 +1,7 @@
 #include "NetSend.h"
 
 #include <cstring>
-#include <Dxlib.h>
+#include <DxLib.h>
 
 #include "../Manager/System/NetManager.h"
 #include "../Common/CRC.h" 
@@ -78,7 +78,7 @@ void NetSend::SendUser(void)
 
 	int sendSize = sizeof(NET_BASIC_DATA) + sizeof(NET_JOIN_USER); 
 
-	// ホストへ向けて発射
+	// ホストへ向けて発信
 	SendUDP_Host(buffer, sendSize);
 }
 
@@ -93,7 +93,7 @@ void NetSend::SendUsers(void)
 		usersData.users[i].mode = NET_MODE::NONE;
 	}
 
-	// 自分の情報（ホスト）を配列にセット
+	// 自分の情報を配列にセット
 	NET_JOIN_USER selfUser = NetManager::GetInstance().GetSelfUser();
 	usersData.users[0] = selfUser;
 

@@ -2,6 +2,7 @@
 
 class Collider2DBase;
 
+/// @brief ‹éŒ`“¯m‚ÌÕ“Ë”»’è‚ğŠÇ—‚·‚éƒNƒ‰ƒX
 class CollisionBox
 {
 public:

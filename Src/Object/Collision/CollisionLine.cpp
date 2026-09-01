@@ -7,24 +7,35 @@
 bool CollisionLine::CheckLineVsModel(const ColliderBase* _lineCol,
 	const ColliderBase* _modelCol, CollisionInfo& _outInfo)
 {
-	if (!_lineCol || !_modelCol) { return false; }
-
-	const auto* line =  static_cast<const ColliderLine*>(_lineCol);
-	const auto* model =  static_cast<const ColliderModel*>(_modelCol);
-
-	if (!line || !model) { return false; }
-
-	int modelHandle = model->GetModelHandle();
-	if (modelHandle == -1) { return false; }
-
-	VECTOR startPos = line->GetWorldStartPos();
-	VECTOR endPos = line->GetWorldEndPos();
-
-	MV1_COLL_RESULT_POLY hitResult = MV1CollCheck_Line(modelHandle, -1, startPos, endPos);
-
-	if (hitResult.HitFlag == 1)
+	if (!_lineCol || !_modelCol)
 	{
-		if (model->IsExcludedFrame(hitResult.FrameIndex))
+		return false;
+	}
+
+	const auto* LINE = static_cast<const ColliderLine*>(_lineCol);    
+	const auto* MODEL = static_cast<const ColliderModel*>(_modelCol); 
+
+	if (!LINE || !MODEL)
+	{
+		return false;
+	}
+
+	const int MODEL_HANDLE = MODEL->GetModelHandle(); 
+	if (MODEL_HANDLE == -1)
+	{
+		return false;
+	}
+
+	const VECTOR START_POS = LINE->GetWorldStartPos(); 
+	const VECTOR END_POS = LINE->GetWorldEndPos();     
+
+	// 線分とモデルの衝突判定
+	const MV1_COLL_RESULT_POLY HIT_RESULT = MV1CollCheck_Line(MODEL_HANDLE, -1, START_POS, END_POS);
+
+	if (HIT_RESULT.HitFlag == 1)
+	{
+		// 判定から除外するフレームに当たった場合は無視する
+		if (MODEL->IsExcludedFrame(HIT_RESULT.FrameIndex))
 		{
 			return false;
 		}
@@ -33,9 +44,9 @@ bool CollisionLine::CheckLineVsModel(const ColliderBase* _lineCol,
 		_outInfo.hitCollider = _modelCol;
 		_outInfo.isActive = true;
 
-		_outInfo.hitPosition = hitResult.HitPosition;
-		_outInfo.hitNormal = hitResult.Normal;
-		_outInfo.penetration = UtilityMath::MagnitudeF(VSub(endPos, hitResult.HitPosition));
+		_outInfo.hitPosition = HIT_RESULT.HitPosition;
+		_outInfo.hitNormal = HIT_RESULT.Normal;
+		_outInfo.penetration = UtilityMath::MagnitudeF(VSub(END_POS, HIT_RESULT.HitPosition));
 
 		return true;
 	}

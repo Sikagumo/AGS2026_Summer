@@ -19,8 +19,8 @@ public:
 
 private:
 
-	// 通信パラメータ関連
-	int sendSocketId_; // 送信用ソケットID
+	// 送信用ソケットID
+	int sendSocketId_;
 
 	/// @brief 自分のユーザー情報を送信する
 	void SendUser(void);

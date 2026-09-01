@@ -1,5 +1,6 @@
 #pragma once
 
+/// @brief シーンの基底クラス
 class SceneBase
 {
 public:
@@ -9,7 +10,6 @@ public:
 
 	/// @brief デストラクタ
 	virtual ~SceneBase(void) = 0;
-
 
 	/// @brief リソースロード開始
 	virtual void Load(void) = 0;
@@ -30,20 +30,21 @@ public:
 	virtual void Release(void) = 0;
 
 	/// @brief ロード中か
+	/// @return ロード中ならtrue
 	bool IsLoading(void) const;
 
-	/// @brief デバックモードフラグの取得 
-	/// @return デバックモードフラグ
-	bool GetDebugMode(void) const { return isDebugMode_; }
+	/// @brief デバッグモードフラグの取得 
+	/// @return デバッグモードフラグ
+	bool GetDebugMode(void) const{return isDebugMode_;}
 
 protected:
-	// デバックモードかどうか
-	bool isDebugMode_;
+	// デバッグモードかどうか
+	bool isDebugMode_; 
 
 	/// @brief Gui用の更新処理
 	virtual void UpdateGui(void) = 0;
 
 private:
 	// ロード中かどうか
-	bool isLoading_;
+	bool isLoading_; 
 };

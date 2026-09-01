@@ -23,7 +23,7 @@ public:
 	static void DestroyInstance(void);
 
 	/// @brief 実行を開始する
-	/// @param _mode ネットワークのモード（HOST/CLIENT）
+	/// @param _mode ネットワークのモード
 	void Run(NET_MODE _mode);
 
 	/// @brief 実行を停止する
@@ -117,6 +117,14 @@ public:
 
 private:
 
+	// ネットワークプール構造体
+	struct NET_POOL
+	{
+		NET_JOIN_USER selfUser;                   // 自分のユーザー情報
+		NET_BOSS_ACTION bossAction;               // ボスのアクション情報
+		std::map<int, NET_JOIN_USER> remoteUsers; // 他のユーザー情報
+	};
+
 	// 定数関連
 	static constexpr float CONNECTION_TIMEOUT_DEFAULT = 5.0f; // デフォルトの接続ロスト判定秒数
 	static constexpr float DEFAULT_GAME_TIME = 500.0f;        // デフォルトのゲーム時間
@@ -150,13 +158,6 @@ private:
 	std::map<int, float> clientTimeoutTimers_; // クライアントごとのタイムアウト計測タイマー
 
 	// ネットワークプール関連
-	struct NET_POOL
-	{
-		NET_JOIN_USER selfUser;                   // 自分のユーザー情報
-		NET_BOSS_ACTION bossAction;               // ボスのアクション情報
-		std::map<int, NET_JOIN_USER> remoteUsers; // 他のユーザー情報
-	};
-
 	NET_POOL netPool_;             // ネットワークプールのインスタンス
 	mutable std::mutex poolMutex_; // プールアクセスを保護するミューテックス
 

@@ -1,3 +1,4 @@
+#include "SceneGameBoss.h"
 
 #include "../../Manager/Generic/SceneManager.h"
 #include "../../Manager/Generic/ResourceManager.h"
@@ -7,10 +8,9 @@
 #include "../../Camera/Camera.h"
 #include "../../Object/Actor/Chara/Boss/Boss.h"
 
-#include "SceneGameBoss.h"
-
 SceneGameBoss::SceneGameBoss(void)
 	: sceneManager_(SceneManager::GetInstance())
+	, boss_(nullptr)
 {
 }
 
@@ -25,27 +25,19 @@ void SceneGameBoss::Load(void)
 	SceneBase::Load();
 
 	Loading::GetInstance()->SetProgress(15.0f);
-
 	Loading::GetInstance()->SetProgress(25.0f);
 
 	boss_ = std::make_unique<Boss>();
 	boss_->Load();
 
 	Loading::GetInstance()->SetProgress(45.0f);
-
-
 	Loading::GetInstance()->SetProgress(60.0f);
-
-
 	Loading::GetInstance()->SetProgress(80.0f);
 
-	//時間カウントリセット
+	// 時間カウントリセット
 	TimeManager::GetInstance().Reset();
 
-
 	Loading::GetInstance()->SetProgress(100.0f);
-
-
 }
 
 void SceneGameBoss::EndLoad(void)
@@ -57,26 +49,28 @@ void SceneGameBoss::Initialize(void)
 {
 	sceneManager_.GetCamera()->ChangeMode(Camera::MODE::FREE);
 
-
-
-	if (Loading::GetInstance()->IsLoading()) { return; }
+	if (Loading::GetInstance()->IsLoading())
+	{
+		return;
+	}
 
 	boss_->Init();
-
-
 }
 
 void SceneGameBoss::Update(void)
 {
-	if (Loading::GetInstance()->IsLoading()) { return; }
+	if (Loading::GetInstance()->IsLoading())
+	{
+		return;
+	}
 
 	auto& sound = SoundManager::GetInstance();
 	auto& time = TimeManager::GetInstance();
 	auto& camera = sceneManager_.GetCamera();
-	auto loader = Loading::GetInstance();
+	auto* loader = Loading::GetInstance();
 
 	// 時間を取得
-	float times = time.GetGameTime();
+	const float TIMES = time.GetGameTime();
 
 	boss_->Update();
 }
@@ -90,15 +84,12 @@ void SceneGameBoss::Draw(void)
 #ifdef _DEBUG
 	DrawDebug();
 #endif // _DEBUG
-
 }
 
 void SceneGameBoss::Release(void)
 {
-
 }
 
 void SceneGameBoss::DrawDebug(void)
 {
-
 }

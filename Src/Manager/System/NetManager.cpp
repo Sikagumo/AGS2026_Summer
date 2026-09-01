@@ -48,8 +48,8 @@ NetManager::NetManager(void)
 	for (int i = 0; i < NUM_FRAME; ++i)
 	{
 		selfActionHistory_.actions[i].key = -1;
-		selfActionHistory_.actions[i].frameNumber = 0;
-		selfActionHistory_.actions[i].animationId = 0;
+		selfActionHistory_.actions[i].frameNo = 0;
+		selfActionHistory_.actions[i].animId = 0;
 	}
 }
 
@@ -68,7 +68,9 @@ void NetManager::Run(NET_MODE _mode)
 	mode_ = _mode;
 	isRunning_ = true;
 
-	const int RANDOM_MAX_KEY = 99999; // ランダム生成するキーの最大値（Run関数内でのみ使用）
+	// ランダム生成するキーの最大値
+	const int RANDOM_MAX_KEY = 99999;
+
 	netPool_.selfUser.key = (rand() + GetNowCount()) % RANDOM_MAX_KEY + 1;
 
 	netPool_.selfUser.mode = mode_;
@@ -333,7 +335,7 @@ void NetManager::UdpReceiveData(void)
 			{
 				// 受信したアクション履歴
 				NET_ACTION_HIS* history = reinterpret_cast<NET_ACTION_HIS*>(buffer + sizeof(NET_BASIC_DATA));
-				std::lock_guard<std::mutex> look(poolMutex_);
+				std::lock_guard<std::mutex> lock(poolMutex_);
 
 				// 自分の送ったデータが跳ね返って来たものは無視し、他人のデータを保存する
 				if (history->key != GetMyKey())

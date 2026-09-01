@@ -1,7 +1,9 @@
 #define NOMINMAX
 #include "SceneGame.h"
+
 #include <algorithm>
-#include <math.h>
+#include <cmath>
+
 #include "../../Manager/Generic/SceneManager.h"
 #include "../../Manager/Generic/ResourceManager.h"
 #include "../../Manager/Decoration/SoundManager.h"
@@ -24,27 +26,37 @@ SceneGame::SceneGame(std::vector<PlayerSelectType> _playerSelectType)
 	: players_()
 	, boss_(std::make_unique<Boss>())
 	, enemyRobots_()
-	, gameTexts_()
 	, stage_(std::make_unique<Stage>())
 	, damageController_(std::make_unique<DamageController>())
+	, gameTimer_(nullptr)
 	, targetHpImage_(-1)
 	, targetHpBerImage_(-1)
-	, gameTimer_(nullptr)
-	, slowCount_(0)
 	, infoImage_(-1)
+	, gameTexts_()
+	, uiGame_()
+	, playerHpImage_(-1)
+	, playerHpImageBack_(-1)
+	, tempTime_(0.0f)
+	, slowCount_(0)
+	, imageResult_()
+	, isGameOver_(false)
+	, rainyParams_()
+	, rainyTime_(0.0f)
+	, state_(GAME_STATE::NONE)
+	, stateBase_(0)
+	, stateChanges_()
+	, stateUpdate_(nullptr)
+	, stateDraw_(nullptr)
 {
-	for (int i = 0; i < _playerSelectType.size(); i++)
+	for (size_t i = 0; i < _playerSelectType.size(); i++)
 	{
-		auto job = _playerSelectType.at(i).job;
-		auto skin = _playerSelectType.at(i).skin;
-		std::unique_ptr<Player> player
-			= std::make_unique<Player>(i, job, skin
-									  , PLAYER_INIT_POS[i]);
+		const auto JOB = _playerSelectType.at(i).job;
+		const auto SKIN = _playerSelectType.at(i).skin;
+		std::unique_ptr<Player> player = std::make_unique<Player>(static_cast<int>(i), JOB, SKIN, PLAYER_INIT_POS[i]);
 
 		players_.emplace_back(std::move(player));
-		
 	}
-	
+
 	for (int i = 0; i < ENEMYS_POP; i++)
 	{
 		std::unique_ptr<EnemyRobo> enemy = std::make_unique<EnemyRobo>(ENEMY_POS[i]);
@@ -67,7 +79,6 @@ void SceneGame::Load(void)
 
 	ResourceManager::GetInstance().LoadHandleIds(ResourceManager::SRC::IMGS_GAME_TEXT, uiGame_.data());
 
-
 	for (auto& player : players_)
 	{
 		player->Load();
@@ -77,24 +88,10 @@ void SceneGame::Load(void)
 	{
 		enemyRobo->Load();
 	}
-	
-	playerHpImageBack_ = ResourceManager::GetInstance().LoadHandleIdsOnce(ResourceManager::SRC::IMGS_HP_PLAYER, 0);
-	playerHpImage_ = ResourceManager::GetInstance().LoadHandleIdsOnce(ResourceManager::SRC::IMGS_HP_PLAYER, 1);
-
-	targetHpBerImage_ = ResourceManager::GetInstance().LoadHandleIdsOnce(ResourceManager::SRC::IMGS_HP_TARGET, 0);
-	targetHpImage_ = ResourceManager::GetInstance().LoadHandleIdsOnce(ResourceManager::SRC::IMGS_HP_TARGET, 1);
 
 	infoImage_ = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::IMG_INFO);
 
-	ResourceManager::GetInstance().LoadHandleIds(ResourceManager::SRC::IMGS_GAME_TEXT, uiGame_.data());
-
-	for (auto& enemyRobo : enemyRobots_)
-	{
-		enemyRobo->Load();
-	}
-
 	boss_->Load();
-
 	stage_->Load();
 
 	gameTimer_ = std::make_unique<GameTimer>(GAME_TIME);
@@ -103,14 +100,13 @@ void SceneGame::Load(void)
 		, ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::BGM_GAME));
 
 	SoundManager::GetInstance().Add(SoundManager::TYPE::BGM, SoundManager::SOUND::BGM_TITLE_THUNDER
-			, ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::BGM_TITLE_THUNDER));
+		, ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::BGM_TITLE_THUNDER));
 
 	SoundManager::GetInstance().Add(SoundManager::TYPE::SE, SoundManager::SOUND::SE_HIT_BLAST
 		, ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::SE_HIT_BLAST));
 
-	//時間カウントリセット
+	// 時間カウントリセット
 	TimeManager::GetInstance().Reset();
-
 }
 
 void SceneGame::EndLoad(void)
@@ -120,42 +116,44 @@ void SceneGame::EndLoad(void)
 
 void SceneGame::Initialize(void)
 {
-
-	if (Loading::GetInstance()->IsLoading()) { return; }
+	if (Loading::GetInstance()->IsLoading())
+	{
+		return;
+	}
 
 	NetManager::GetInstance().SetConnectionTimeout(5.0f);
 
 	// マウスを表示しない設定にする
 	SetMouseDispFlag(false);
-	
+
 	auto& camera = SceneManager::GetInstance().GetCamera();
 	camera->ChangeMode(Camera::MODE::PLAYER_FOLLOW);
 	camera->SetFollow(&players_.at(0)->GetTransform());
 
-	NET_JOIN_USER selfUser = NetManager::GetInstance().GetSelfUser();
-	auto remoteUsers = NetManager::GetInstance().GetNetUsers();
-	bool isBossLocalControl = (NetManager::GetInstance().GetMode() != NET_MODE::CLIENT);
-	boss_->SetHostControl(isBossLocalControl);
+	const NET_JOIN_USER SELF_USER = NetManager::GetInstance().GetSelfUser();
+	const auto REMOTE_USERS = NetManager::GetInstance().GetNetUsers();
+	const bool IS_BOSS_LOCAL_CONTROL = (NetManager::GetInstance().GetMode() != NET_MODE::CLIENT);
+	boss_->SetHostControl(IS_BOSS_LOCAL_CONTROL);
 
 	// 自分の設定
 	players_.at(0)->SetHostControl(true);
-	players_.at(0)->SetNetKey(selfUser.key);
+	players_.at(0)->SetNetKey(SELF_USER.key);
 
 	// 他人の設定
 	int idx = 1;
-	for (const auto& pair : remoteUsers)
+	for (const auto& pair : REMOTE_USERS)
 	{
-		if (idx >= players_.size())
+		if (idx >= static_cast<int>(players_.size()))
 		{
 			break;
 		}
 
 		// ラジコンにする
-		players_.at(idx)->SetHostControl(false); 
+		players_.at(idx)->SetHostControl(false);
 		players_.at(idx)->SetNetKey(pair.second.key);
 		idx++;
 	}
-	
+
 	for (auto& player : players_)
 	{
 		player->Init();
@@ -164,6 +162,7 @@ void SceneGame::Initialize(void)
 	{
 		enemyRobo->Init();
 	}
+
 	boss_->Init();
 	stage_->Init();
 
@@ -173,8 +172,7 @@ void SceneGame::Initialize(void)
 	damageController_->SetPlayerMaxHp(players_.at(0)->GetMaxHp());
 	SoundManager::GetInstance().Play(SoundManager::SOUND::BGM_GAME);
 	SoundManager::GetInstance().Play(SoundManager::SOUND::BGM_TITLE_THUNDER);
-	
-	
+
 	// 雨シェーダ導入
 	constexpr float RAIN_POW = 1.0f;
 	constexpr float RAIN_POW_BACK = 1.0f;
@@ -194,10 +192,9 @@ void SceneGame::Initialize(void)
 
 	ResourceManager::GetInstance().LoadHandleIds(ResourceManager::SRC::IMGS_RESULT, imageResult_.data());
 
-	
 	stateChanges_.emplace(static_cast<int>(GAME_STATE::GAME), std::bind(&SceneGame::ChangeGame, this));
 	stateChanges_.emplace(static_cast<int>(GAME_STATE::GAME_END), std::bind(&SceneGame::ChangeGameEnd, this));
-	
+
 	ChangeState(GAME_STATE::GAME);
 }
 
@@ -232,33 +229,33 @@ void SceneGame::DamageProcess(void)
 		keyPosList.emplace_back(player->GetNetKey(), player->GetBodyPos());
 	}
 
-	std::sort(keyPosList.begin(), keyPosList.end(), [](const auto& a, const auto& b)
+	std::sort(keyPosList.begin(), keyPosList.end(), [](const auto& _a, const auto& _b)
 		{
-			return a.first < b.first; 
+			return _a.first < _b.first;
 		});
 
-	const int playerCount = static_cast<int>(keyPosList.size());
+	const int PLAYER_COUNT = static_cast<int>(keyPosList.size());
 
-	if (playerCount >= 1)
+	if (PLAYER_COUNT >= 1)
 	{
 		boss_->SetPlayer1Pos(keyPosList[0].second);
 	}
 
-	if (playerCount >= 2)
+	if (PLAYER_COUNT >= 2)
 	{
 		boss_->SetPlayer2Pos(keyPosList[1].second);
 	}
 
-	if (playerCount >= 3)
+	if (PLAYER_COUNT >= 3)
 	{
 		boss_->SetPlayer3Pos(keyPosList[2].second);
 	}
 
-	if (playerCount >= 4)
+	if (PLAYER_COUNT >= 4)
 	{
 		boss_->SetPlayer4Pos(keyPosList[3].second);
 	}
-	
+
 	if (NetManager::GetInstance().GetMode() != NET_MODE::CLIENT)
 	{
 		// ボスへのダメージ適用をホストのみに限定する
@@ -271,7 +268,6 @@ void SceneGame::DamageProcess(void)
 		boss_->SetWeaponMPRDamage(damageController_->GetWeaponMPRDamage());
 		boss_->SetWeaponRGDamage(damageController_->GetWeaponRGDamage());
 	}
-
 
 	if (damageController_->GetBossDamage() > 0
 		|| damageController_->GetWeaponCannonLDamage() > 0
@@ -288,10 +284,13 @@ void SceneGame::DamageProcess(void)
 	// プレイヤー被ダメージ処理
 	for (auto& player : players_)
 	{
-		if (!player->GetHostControl()) { continue; }
+		if (!player->GetHostControl())
+		{
+			continue;
+		}
 
 		player->SetDamage(damageController_->GetPlayerDamage()
-						  , damageController_->GetInvincible());
+			, damageController_->GetInvincible());
 	}
 }
 
@@ -304,7 +303,10 @@ void SceneGame::UpdateGameTime(void)
 		// プレイヤー撃破時、制限時間の減少
 		for (auto& player : players_)
 		{
-			if (!player->GetIsRespawn()) { continue; }
+			if (!player->GetIsRespawn())
+			{
+				continue;
+			}
 			gameTimer_->SetTime(gameTimer_->GetTime() - GAME_TIME_DEFEAT_DEC);
 		}
 
@@ -333,7 +335,7 @@ void SceneGame::Draw(void)
 void SceneGame::Release(void)
 {
 	stage_->Release();
-	
+
 	for (auto& player : players_)
 	{
 		player->Release();
@@ -359,9 +361,8 @@ void SceneGame::DrawHpBerPlayer(void)
 	constexpr Vector2 BER_POS_MIDDLE = { 200, 500 };
 	Vector2 berPos = BER_POS_MIDDLE;
 
-	// 表示幅のリマップ範囲（数値で調整可能）
-	constexpr float DISPLAY_RATIO_MIN = 0.05f;
-	constexpr float DISPLAY_RATIO_MAX = 0.815f;
+	constexpr float DISPLAY_RATIO_MIN = 0.0f;
+	constexpr float DISPLAY_RATIO_MAX = 1.0f;
 
 	const int PLAYER_NUM = static_cast<int>(players_.size() + 1);
 	for (int i = 1; i < PLAYER_NUM; i++)
@@ -373,16 +374,11 @@ void SceneGame::DrawHpBerPlayer(void)
 			playerHpImageBack_, true
 		);
 
-		const float hpRatio
-			= (static_cast<float>(players_.at(i - 1)->GetCurHp()) / static_cast<float>(players_.at(i - 1)->GetMaxHp()));
-		const float RATIO = std::clamp(hpRatio, 0.0f, 1.0f);
-
+		const float HP_RATIO = (static_cast<float>(players_.at(i - 1)->GetCurHp()) / static_cast<float>(players_.at(i - 1)->GetMaxHp()));
+		const float RATIO = std::clamp(HP_RATIO, 0.0f, 1.0f);
 
 		// 減少範囲にリマップ
 		const float DISPLAY_RATIO = std::lerp(DISPLAY_RATIO_MIN, DISPLAY_RATIO_MAX, RATIO);
-
-		constexpr int HP_POS_X = 48;
-		berPos.x += HP_POS_X;
 
 		// 左上座標
 		const Vector2 POS_UPPER_LEFT
@@ -394,16 +390,16 @@ void SceneGame::DrawHpBerPlayer(void)
 			= { (POS_UPPER_LEFT.x + static_cast<int>(backSize.x * DISPLAY_RATIO)),
 				(POS_UPPER_LEFT.y + backSize.y) };
 
-
 		// 切り取り幅
 		const int IMAGE_WIDTH = static_cast<int>(imageSize.x * DISPLAY_RATIO);
 
 		if (IMAGE_WIDTH > 0)
 		{
-			// UV描画位置
-			const Vector2 HP_UV_POS = { 175, 0 };
+		
+			const Vector2 HP_UV_POS = { 0, 0 }; 
+
 			DrawRectExtendGraph(
-				POS_UPPER_LEFT.x , POS_UPPER_LEFT.y,
+				POS_UPPER_LEFT.x, POS_UPPER_LEFT.y,
 				POS_LOWER_RIGHT.x, POS_LOWER_RIGHT.y,
 				HP_UV_POS.x, HP_UV_POS.y,
 				IMAGE_WIDTH, imageSize.y,
@@ -421,10 +417,11 @@ void SceneGame::DrawHpBerPlayer(void)
 #endif
 	}
 }
+
 void SceneGame::DrawHpBerBoss(void)
 {
-	const std::unique_ptr<Camera>& camera = SceneManager::GetInstance().GetCamera();
-	constexpr float    BER_SCALE = 0.5f;
+	const std::unique_ptr<Camera>& CAMERA = SceneManager::GetInstance().GetCamera();
+	constexpr float BER_SCALE = 0.5f;
 	constexpr Vector2F BER_OFFSET = { 0.0f, -100.0f };
 
 	// 表示幅としてのRATIOのリマップ範囲（数値で調整可能）
@@ -434,9 +431,9 @@ void SceneGame::DrawHpBerBoss(void)
 	Vector2 backSize = Vector2();
 	GetGraphSize(targetHpBerImage_, &backSize.x, &backSize.y);
 
-	if (camera->GetIsLockOn() && !camera->IsEasingState())
+	if (CAMERA->GetIsLockOn() && !CAMERA->IsEasingState())
 	{
-		VECTOR  viewPos = ConvWorldPosToScreenPos(camera->GetTargetPos());
+		VECTOR viewPos = ConvWorldPosToScreenPos(CAMERA->GetTargetPos());
 		viewPos.x += BER_OFFSET.x;
 		viewPos.y += BER_OFFSET.y;
 
@@ -447,28 +444,25 @@ void SceneGame::DrawHpBerBoss(void)
 			targetHpBerImage_, true
 		);
 
-
 		Vector2 imageSize = Vector2();
 		GetGraphSize(targetHpImage_, &imageSize.x, &imageSize.y);
-
 
 		// スクリーン上でのゲージ画像全体のサイズ（BER_SIZE倍）
 		const Vector2F BER_SIZE = { (imageSize.x * BER_SCALE), (imageSize.y * BER_SCALE) };
 
 		// 追従先のHPが残っている場合に割合を計算
-		const float hpRatio = (camera->GetLockOnMaxHp() > 0)
-			? static_cast<float>(camera->GetLockOnHp()) / static_cast<float>(camera->GetLockOnMaxHp())
+		const float HP_RATIO = (CAMERA->GetLockOnMaxHp() > 0)
+			? static_cast<float>(CAMERA->GetLockOnHp()) / static_cast<float>(CAMERA->GetLockOnMaxHp())
 			: 0.0f;
 
-		const float RATIO = std::clamp(hpRatio, 0.0f, 1.0f);
+		const float RATIO = std::clamp(HP_RATIO, 0.0f, 1.0f);
 
 		// HP割合を範囲にリマップ
 		const float DISPLAY_RATIO = std::lerp(DISPLAY_RATIO_MIN, DISPLAY_RATIO_MAX, RATIO);
 
-
 		// スクリーン上でのゲージ画像全体のサイズ
-		const float scaledW = (imageSize.x * BER_SIZE.x);
-		const float scaledH = (imageSize.y * BER_SIZE.y);
+		const float SCALED_W = (imageSize.x * BER_SIZE.x);
+		const float SCALED_H = (imageSize.y * BER_SIZE.y);
 
 		// 左上座標
 		const Vector2 POS_UPPER_LEFT
@@ -499,7 +493,7 @@ void SceneGame::DrawHpBerBoss(void)
 #ifdef _DEBUG
 		DrawFormatString(10, 60, GetColor(255, 255, 255),
 			"Boss HP: %d / %d  Ratio: %.2f",
-			camera->GetLockOnHp(), camera->GetLockOnMaxHp(), RATIO);
+			CAMERA->GetLockOnHp(), CAMERA->GetLockOnMaxHp(), RATIO);
 #endif
 	}
 }
@@ -513,8 +507,8 @@ float SceneGame::CalcHpBarScale(const VECTOR& _targetPos)
 	constexpr float HP_BAR_MIN_SCALE = 0.375f;
 	constexpr float HP_BAR_MAX_SCALE = 1.5f;
 
-	const VECTOR cameraPos = SceneManager::GetInstance().GetCamera()->GetPos();
-	VECTOR distVec = VSub(_targetPos, cameraPos);
+	const VECTOR CAMERA_POS = SceneManager::GetInstance().GetCamera()->GetPos();
+	VECTOR distVec = VSub(_targetPos, CAMERA_POS);
 	distVec.y = 0.0f;
 	const float DIST = VSize(distVec);
 
@@ -532,9 +526,9 @@ void SceneGame::DrawDebug(void)
 	SceneManager::GetInstance().GetCamera()->DrawDebug();
 	damageController_->DebugDraw();
 
-	bool isHit = CollisionController::GetInstance().IsTagCollidingWithTag(ColliderBase::TAG::CAMERA, ColliderBase::TAG::WALL);
+	const bool IS_HIT = CollisionController::GetInstance().IsTagCollidingWithTag(ColliderBase::TAG::CAMERA, ColliderBase::TAG::WALL);
 
-	if (isHit)
+	if (IS_HIT)
 	{
 		DrawString(0, 600, "当たってる", 0x000000);
 	}
@@ -548,15 +542,15 @@ void SceneGame::ChangeState(GAME_STATE _state)
 {
 	state_ = _state;
 
-	int state = static_cast<int>(state_);
+	const int STATE = static_cast<int>(state_);
 
 	// 各状態遷移の初期処理
-	ChangeState(state);
+	ChangeState(STATE);
 }
 
-void SceneGame::ChangeState(int state)
+void SceneGame::ChangeState(int _state)
 {
-	stateBase_ = state;
+	stateBase_ = _state;
 	// 各状態遷移の初期処理
 	stateChanges_[stateBase_]();
 }
@@ -569,8 +563,6 @@ void SceneGame::ChangeGame(void)
 	auto& camera = SceneManager::GetInstance().GetCamera();
 	camera->ChangeMode(Camera::MODE::PLAYER_FOLLOW);
 	camera->SetFollow(&players_.at(0)->GetTransform());
-
-
 }
 
 void SceneGame::ChangeGameEnd(void)
@@ -581,9 +573,6 @@ void SceneGame::ChangeGameEnd(void)
 	auto& camera = SceneManager::GetInstance().GetCamera();
 	camera->ChangeMode(Camera::MODE::BOSS_FOLLOW);
 	camera->SetFollow(&boss_->GetBodyTransform());
-	
-
-
 }
 
 void SceneGame::UpdateGame(void)
@@ -591,7 +580,10 @@ void SceneGame::UpdateGame(void)
 	auto& sound = SoundManager::GetInstance();
 	auto& camera = SceneManager::GetInstance().GetCamera();
 
-	if (Loading::GetInstance()->IsLoading()) { return; }
+	if (Loading::GetInstance()->IsLoading())
+	{
+		return;
+	}
 
 	damageController_->Update();
 	DamageProcess();
@@ -613,23 +605,26 @@ void SceneGame::UpdateGame(void)
 
 	for (auto& player : players_)
 	{
-		if (player->GetHostControl()) { continue; }
-
-		int key = player->GetNetKey();
-
-		if (remoteHisMap.find(key) != remoteHisMap.end())
+		if (player->GetHostControl())
 		{
-			NET_ACTION latestAction = remoteHisMap[key].actions[0];
+			continue;
+		}
 
-			player->SetNetworkAction(latestAction.position, latestAction.rotation, latestAction.animationId, latestAction.isAttack, latestAction.currentHp);
+		const int KEY = player->GetNetKey();
+
+		if (remoteHisMap.find(KEY) != remoteHisMap.end())
+		{
+			const NET_ACTION LATEST_ACTION = remoteHisMap[KEY].actions[0];
+
+			player->SetNetworkAction(LATEST_ACTION.pos, LATEST_ACTION.rot, LATEST_ACTION.animId, LATEST_ACTION.isAttack, LATEST_ACTION.currentHp);
 		}
 	}
-
 
 	for (auto& enemyRobo : enemyRobots_)
 	{
 		enemyRobo->Update();
 	}
+
 	for (auto& player : players_)
 	{
 		player->Update();
@@ -651,13 +646,12 @@ void SceneGame::UpdateGame(void)
 		// 拡散弾
 		for (auto& bullet : player->GetBulletsCluster())
 		{
-			if (bullet == nullptr) { continue; }
+			if (bullet == nullptr)
+			{
+				continue;
+			}
 			attackPower = std::max(attackPower, bullet->GetPowerBullet());
 			attackBlast = std::max(attackBlast, bullet->GetPowerBlast());
-			if (bullet->GetPowerBullet() > 0)
-			{
-				int temp = 0;
-			}
 		}
 	}
 	damageController_->SetPlayerAttack(attackPower, attackBlast);
@@ -669,7 +663,6 @@ void SceneGame::UpdateGame(void)
 	// ボスHPが０の時、ゲームクリア
 	if (boss_->GetHP() <= 0 || gameTimer_->GetTime() <= 0.0f)
 	{
-		//SoundManager::GetInstance().Stop(SoundManager::SOUND::BGM_GAME);
 		ChangeState(GAME_STATE::GAME_END);
 	}
 
@@ -687,7 +680,6 @@ void SceneGame::UpdateGameEnd(void)
 			if (slowCount_ % SLOW_COUNT_MAX == 0)
 			{
 				boss_->Update();
-
 			}
 		}
 		else
@@ -702,7 +694,6 @@ void SceneGame::UpdateGameEnd(void)
 		EffectManager::GetInstance().Update();
 	}
 
-
 	if (slowCount_ >= SLOW_COUNT_MAX * 100)
 	{
 		if (boss_->GetHP() >= 0)
@@ -713,17 +704,13 @@ void SceneGame::UpdateGameEnd(void)
 		{
 			SceneManager::GetInstance().ChangeScene(std::make_shared<SceneResult>(false));
 		}
-		
 	}
 
 	stage_->Update();
-	
 }
 
 void SceneGame::DrawGame(void)
 {
-
-
 	stage_->Draw();
 
 	ShaderController::GetInstance().Draw2D(
@@ -740,11 +727,16 @@ void SceneGame::DrawGame(void)
 	}
 
 	boss_->Draw();
+
 	for (auto& enemyRobo : enemyRobots_)
 	{
-		if (!enemyRobo->IsAlive()) continue;
+		if (!enemyRobo->IsAlive())
+		{
+			continue;
+		}
 		enemyRobo->Draw();
 	}
+
 	auto& effect = EffectManager::GetInstance();
 	effect.Draw();
 
@@ -753,7 +745,6 @@ void SceneGame::DrawGame(void)
 	gameTimer_->Draw();
 
 	DrawRotaGraph((Application::SCREEN_SIZE_X - (770 / 6)), (587 / 6), 0.25, 0.0, infoImage_, true);
-
 	DrawRotaGraph((Application::SCREEN_HALF_X - 300), 35, 0.5, 0.0, uiGame_.at(0), true);
 
 	DrawHpBerPlayer();
@@ -764,12 +755,9 @@ void SceneGame::DrawGame(void)
 #endif // _DEBUG
 }
 
-	
-
 void SceneGame::DrawGameEnd(void)
 {
 	stage_->Draw();
-
 
 	ShaderController::GetInstance().Draw2D(
 		ResourceManager::SRC::PS_RAINY,
@@ -783,19 +771,16 @@ void SceneGame::DrawGameEnd(void)
 	auto& effect = EffectManager::GetInstance();
 	effect.Draw();
 
-	const int IMAGET_TITLE_Y = Application::SCREEN_SIZE_Y / 3;
+	const int IMAGE_TITLE_Y = Application::SCREEN_SIZE_Y / 3;
 	if (slowCount_ >= SLOW_COUNT_MAX * 30)
 	{
 		if (boss_->GetHP() > 0)
 		{
-			DrawRotaGraph(Application::SCREEN_HALF_X, IMAGET_TITLE_Y, 2.0f, UtilityMath::DEG2RAD, imageResult_[3], true);
+			DrawRotaGraph(Application::SCREEN_HALF_X, IMAGE_TITLE_Y, 2.0f, UtilityMath::DEG2RAD, imageResult_[3], true);
 		}
 		else
 		{
-			DrawRotaGraph(Application::SCREEN_HALF_X, IMAGET_TITLE_Y, 2.0f, UtilityMath::DEG2RAD, imageResult_[1], true);
+			DrawRotaGraph(Application::SCREEN_HALF_X, IMAGE_TITLE_Y, 2.0f, UtilityMath::DEG2RAD, imageResult_[1], true);
 		}
-		
 	}
 }
-
-

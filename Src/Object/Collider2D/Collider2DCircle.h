@@ -8,7 +8,7 @@ class Collider2DCircle : public Collider2DBase
 {
 public:
 
-	/// @brief コンストラクタ（座標直接指定）
+	/// @brief コンストラクタ
 	/// @param _centerPos 初期の中央座標
 	/// @param _radius 円の半径
 	/// @param _collisionTag 衝突の2D識別タグ
@@ -41,9 +41,9 @@ protected:
 
 private:
 
-	// 円の設定関連
-	float radius_;            // 円の半径
+	// 円の半径
+	float radius_;           
 
-	// 座標関連
-	Vector2F centerPos_;      // 中央座標
+	// 中央座標
+	Vector2F centerPos_;      
 };

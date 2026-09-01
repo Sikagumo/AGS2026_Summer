@@ -1073,10 +1073,10 @@ void Boss::SetHostControl(bool _isHostControl)
 NET_BOSS_ACTION Boss::GetNetworkAction(void) const
 {
 	NET_BOSS_ACTION action;
-	action.position = transform_.pos;
-	action.rotation = transformBody_.quaRot;
+	action.pos = transform_.pos;
+	action.rot = transformBody_.quaRot;
 	action.bossHp = hp_;
-	action.animationId = static_cast<int>(state_);
+	action.animId = static_cast<int>(state_);
 	action.targetPlayerId = mainIdx_;
 
 	action.missilePodTargetId = mpIdx_;
@@ -1085,13 +1085,13 @@ NET_BOSS_ACTION Boss::GetNetworkAction(void) const
 	// 追加：最後に選ばれた攻撃のタイプを送信する
 	action.attackSelect = static_cast<int>(lastAttackType_);
 
-	action.weaponMachineGunLeftHp = weaponMGL_->GetHp();
-	action.weaponMachineGunRightHp = weaponMGR_->GetHp();
-	action.weaponMissilePodLeftHp = weaponMPL_->GetHp();
-	action.weaponMissilePodRightHp = weaponMPR_->GetHp();
+	action.weaponMachineGunLHp = weaponMGL_->GetHp();
+	action.weaponMachineGunRHp = weaponMGR_->GetHp();
+	action.weaponMissilePodLHp = weaponMPL_->GetHp();
+	action.weaponMissilePodRHp = weaponMPR_->GetHp();
 	action.weaponRailGunHp = weaponRG_->GetHp();
-	action.weaponCannonLeftHp = weaponCannonL_->GetHp();
-	action.weaponCannonRightHp = weaponCannonR_->GetHp();
+	action.weaponCannonLHp = weaponCannonL_->GetHp();
+	action.weaponCannonRHp = weaponCannonR_->GetHp();
 
 	return action;
 }
@@ -1104,9 +1104,9 @@ void Boss::SetNetworkAction(const NET_BOSS_ACTION& _action)
 
 	const int difference = PREV_HP - hp_;
 
-	transform_.pos = _action.position;
+	transform_.pos = _action.pos;
 
-	transformBody_.quaRot = _action.rotation;
+	transformBody_.quaRot = _action.rot;
 
 	if (difference > EFFECT_PLAEY_DAMEGE)
 	{
@@ -1123,13 +1123,13 @@ void Boss::SetNetworkAction(const NET_BOSS_ACTION& _action)
 	}
 
 	// クライアント側のウェポンHPをホストと同期する
-	weaponMGL_->SetHp(_action.weaponMachineGunLeftHp);
-	weaponMGR_->SetHp(_action.weaponMachineGunRightHp);
-	weaponMPL_->SetHp(_action.weaponMissilePodLeftHp);
-	weaponMPR_->SetHp(_action.weaponMissilePodRightHp);
+	weaponMGL_->SetHp(_action.weaponMachineGunLHp);
+	weaponMGR_->SetHp(_action.weaponMachineGunRHp);
+	weaponMPL_->SetHp(_action.weaponMissilePodLHp);
+	weaponMPR_->SetHp(_action.weaponMissilePodRHp);
 	weaponRG_->SetHp(_action.weaponRailGunHp);
-	weaponCannonL_->SetHp(_action.weaponCannonLeftHp);
-	weaponCannonR_->SetHp(_action.weaponCannonRightHp);
+	weaponCannonL_->SetHp(_action.weaponCannonLHp);
+	weaponCannonR_->SetHp(_action.weaponCannonRHp);
 
 	// クライアント側の場合、攻撃の変更を検知して武器を発射する
 	if (isHostControl_ == false)
@@ -1179,12 +1179,12 @@ void Boss::SetNetworkAction(const NET_BOSS_ACTION& _action)
 			}
 		}
 	}
-	if (static_cast<int>(state_) != _action.animationId)
+	if (static_cast<int>(state_) != _action.animId)
 	{
 		// ジャンプからIDLEに戻った瞬間の処理
 		if (state_ == STATE::JUMP)
 		{
-			if (static_cast<STATE>(_action.animationId) == STATE::IDLE)
+			if (static_cast<STATE>(_action.animId) == STATE::IDLE)
 			{
 				currentWaveScl = WAVE_SCL;
 				EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_WAVE, transform_.pos, currentWaveScl, LANDING_SCL, EFFECT_PLAEY_SPEED, this);
@@ -1198,7 +1198,7 @@ void Boss::SetNetworkAction(const NET_BOSS_ACTION& _action)
 		// 突進から他のステートに戻った瞬間の処理
 		if (state_ == STATE::ROADATTACK)
 		{
-			if (static_cast<STATE>(_action.animationId) != STATE::ROADATTACK)
+			if (static_cast<STATE>(_action.animId) != STATE::ROADATTACK)
 			{
 				// モデルとスケールを元の足に戻す
 				transform_.modelId = transformFeet_.modelId;
@@ -1212,7 +1212,7 @@ void Boss::SetNetworkAction(const NET_BOSS_ACTION& _action)
 			}
 		}
 
-		ChangeState(static_cast<STATE>(_action.animationId));
+		ChangeState(static_cast<STATE>(_action.animId));
 	}
 
 	if (_action.targetPlayerId >= 0 && _action.targetPlayerId < playerSize_)

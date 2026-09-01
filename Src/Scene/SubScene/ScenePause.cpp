@@ -17,19 +17,18 @@ ScenePause::ScenePause(void)
 	, selectedIndex_(0)
 	, isYes_(false)
 	, inputIntervalCounter_(0)
-	, selectTextHandles_{}
-	, noSelectTextHandles_{}
-	, backGroundHandle_(-1)
 	, isPhaseChanged_(false)
+	, selectTextHandles_()
+	, noSelectTextHandles_()
+	, backGroundHandle_(-1)
+	, cursorCollider_(nullptr)
+	, returnGameButtonCollider_(nullptr)
+	, returnTitleButtonCollider_(nullptr)
+	, yesButtonCollider_(nullptr)
+	, noButtonCollider_(nullptr)
 {
-	for (auto& handle : selectTextHandles_)
-	{
-		handle = -1;
-	}
-	for (auto& handle : noSelectTextHandles_)
-	{
-		handle = -1;
-	}
+	selectTextHandles_.fill(-1);
+	noSelectTextHandles_.fill(-1);
 }
 
 ScenePause::~ScenePause(void)
@@ -40,10 +39,8 @@ void ScenePause::Load(void)
 {
 	SceneBase::Load();
 
-	
 	ResourceManager::GetInstance().LoadHandleIds(
 		ResourceManager::SRC::IMGS_SELECT_PUSE_TEX, selectTextHandles_.data());
-
 
 	ResourceManager::GetInstance().LoadHandleIds(
 		ResourceManager::SRC::IMGS_POUSE_TEX, noSelectTextHandles_.data());
@@ -66,34 +63,34 @@ void ScenePause::Initialize(void)
 
 	// マウスカーソル用の円コライダー
 	cursorCollider_ = std::make_unique<Collider2DCircle>(
-		Vector2F(0.0f, 0.0f), 10.0f, Collider2DBase::TAG_2D::PAUSE_MAOUSE_CURSOR);
+		Vector2F(0.0f, 0.0f), 10.0f, Collider2DBase::TAG_2D::PAUSE_MOUSE_CURSOR);
 
-	Vector2F gameIn(Application::SCREEN_HALF_X, (Application::SCREEN_HALF_Y - 50));
+	const Vector2F GAME_IN(static_cast<float>(Application::SCREEN_HALF_X), static_cast<float>(Application::SCREEN_HALF_Y - 50));
 
-	returnGameButtonCollider_ = std::make_unique<Collider2DBox>(gameIn,
+	returnGameButtonCollider_ = std::make_unique<Collider2DBox>(GAME_IN,
 		BUTTON_WIDTH, BUTTON_HEIGHT, Collider2DBase::TAG_2D::PAUSE_GAME_BUTTON);
 
-	Vector2F returnTitle(Application::SCREEN_HALF_X, (Application::SCREEN_HALF_Y + 50));
+	const Vector2F RETURN_TITLE(static_cast<float>(Application::SCREEN_HALF_X), static_cast<float>(Application::SCREEN_HALF_Y + 50));
 
-	returnTitleButtonCollider_ = std::make_unique<Collider2DBox>(returnTitle,
-		BUTTON_WIDTH, BUTTON_HEIGHT,Collider2DBase::TAG_2D::PAUSE_TITLE_BUTTON);
+	returnTitleButtonCollider_ = std::make_unique<Collider2DBox>(RETURN_TITLE,
+		BUTTON_WIDTH, BUTTON_HEIGHT, Collider2DBase::TAG_2D::PAUSE_TITLE_BUTTON);
 
 	// YES/NOダイアログ用のボタンの中心座標を計算
-	int centerX = Application::SCREEN_HALF_X;
-	int centerY = Application::SCREEN_HALF_Y;
-	int top = centerY - 150 / 2;
-	int left = centerX - 300 / 2;
-	int drawX = left + 50;
-	int drawY = top + 60;
+	const int CENTER_X = Application::SCREEN_HALF_X;
+	const int CENTER_Y = Application::SCREEN_HALF_Y;
+	const int TOP = CENTER_Y - 150 / 2;
+	const int LEFT = CENTER_X - 300 / 2;
+	const int DRAW_X = LEFT + 50;
+	const int DRAW_Y = TOP + 60;
 
-	Vector2F yesButtonCenter(static_cast<float>(drawX + 20), static_cast<float>(drawY + 15));
+	const Vector2F YES_BUTTON_CENTER(static_cast<float>(DRAW_X + 20), static_cast<float>(DRAW_Y + 15));
 	yesButtonCollider_ = std::make_unique<Collider2DBox>(
-		yesButtonCenter, YES_NO_BUTTON_WIDTH, YES_NO_BUTTON_HEIGHT,
-		Collider2DBase::TAG_2D::PAUSE_YESNO_BOTTON);
+		YES_BUTTON_CENTER, YES_NO_BUTTON_WIDTH, YES_NO_BUTTON_HEIGHT,
+		Collider2DBase::TAG_2D::PAUSE_YESNO_BUTTON);
 
-	Vector2F noButtonCenter(static_cast<float>(drawX + 200), static_cast<float>(drawY + 15));
+	const Vector2F NO_BUTTON_CENTER(static_cast<float>(DRAW_X + 200), static_cast<float>(DRAW_Y + 15));
 	noButtonCollider_ = std::make_unique<Collider2DBox>(
-		noButtonCenter, YES_NO_BUTTON_WIDTH, YES_NO_BUTTON_HEIGHT, 
+		NO_BUTTON_CENTER, YES_NO_BUTTON_WIDTH, YES_NO_BUTTON_HEIGHT,
 		Collider2DBase::TAG_2D::SELECT_SINGLE_BIG);
 
 	// コライダーの登録
@@ -104,13 +101,13 @@ void ScenePause::Initialize(void)
 	collisionController.RegisterCollider2D(noButtonCollider_.get());
 
 	// YES/NO用のタグとマウスカーソルの当たり判定を有効化する
-	collisionController.SetCollisionGroup2D(Collider2DBase::TAG_2D::PAUSE_MAOUSE_CURSOR,
+	collisionController.SetCollisionGroup2D(Collider2DBase::TAG_2D::PAUSE_MOUSE_CURSOR,
 		Collider2DBase::TAG_2D::PAUSE_GAME_BUTTON, true);
-	collisionController.SetCollisionGroup2D(Collider2DBase::TAG_2D::PAUSE_MAOUSE_CURSOR,
+	collisionController.SetCollisionGroup2D(Collider2DBase::TAG_2D::PAUSE_MOUSE_CURSOR,
 		Collider2DBase::TAG_2D::PAUSE_TITLE_BUTTON, true);
-	collisionController.SetCollisionGroup2D(Collider2DBase::TAG_2D::PAUSE_MAOUSE_CURSOR,
-		Collider2DBase::TAG_2D::PAUSE_YESNO_BOTTON, true);
-	collisionController.SetCollisionGroup2D(Collider2DBase::TAG_2D::PAUSE_MAOUSE_CURSOR,
+	collisionController.SetCollisionGroup2D(Collider2DBase::TAG_2D::PAUSE_MOUSE_CURSOR,
+		Collider2DBase::TAG_2D::PAUSE_YESNO_BUTTON, true);
+	collisionController.SetCollisionGroup2D(Collider2DBase::TAG_2D::PAUSE_MOUSE_CURSOR,
 		Collider2DBase::TAG_2D::SELECT_SINGLE_BIG, true);
 }
 
@@ -188,16 +185,19 @@ void ScenePause::ProcessNormal(void)
 	auto& collisionController = CollisionController::GetInstance();
 	using TAG = Collider2DBase::TAG_2D;
 
-	Vector2 mousePosition = inputManager.GetMousePosition();
-	Vector2F mousePositionF(static_cast<float>(mousePosition.x), static_cast<float>(mousePosition.y));
-	cursorCollider_->SetCenterPos(mousePositionF);
+	const Vector2 MOUSE_POSITION = inputManager.GetMousePosition();
+	const Vector2F MOUSE_POSITION_F(static_cast<float>(MOUSE_POSITION.x), static_cast<float>(MOUSE_POSITION.y));
+	cursorCollider_->SetCenterPos(MOUSE_POSITION_F);
 
 	// マウスによるホバー処理
-	if (collisionController.IsTagCollidingWithTag2D(TAG::PAUSE_MAOUSE_CURSOR, TAG::PAUSE_GAME_BUTTON))
+	bool isHoverGame = collisionController.IsTagCollidingWithTag2D(TAG::PAUSE_MOUSE_CURSOR, TAG::PAUSE_GAME_BUTTON);
+	bool isHoverTitle = collisionController.IsTagCollidingWithTag2D(TAG::PAUSE_MOUSE_CURSOR, TAG::PAUSE_TITLE_BUTTON);
+
+	if (isHoverGame)
 	{
 		selectedIndex_ = static_cast<int>(MENU_ITEM::RETURN_GAME);
 	}
-	else if (collisionController.IsTagCollidingWithTag2D(TAG::PAUSE_MAOUSE_CURSOR, TAG::PAUSE_TITLE_BUTTON))
+	else if (isHoverTitle)
 	{
 		selectedIndex_ = static_cast<int>(MENU_ITEM::RETURN_TITLE);
 	}
@@ -213,7 +213,7 @@ void ScenePause::ProcessNormal(void)
 	{
 		if (inputManager.isPressed("UP"))
 		{
-			selectedIndex_ = (selectedIndex_ + static_cast<int>(MENU_ITEM::COUNT) - 1) % 
+			selectedIndex_ = (selectedIndex_ + static_cast<int>(MENU_ITEM::COUNT) - 1) %
 				static_cast<int>(MENU_ITEM::COUNT);
 
 			inputIntervalCounter_ = STICK_INTERVAL;
@@ -241,8 +241,7 @@ void ScenePause::ProcessNormal(void)
 	bool isMouseClicked = false;
 	if ((GetMouseInput() & MOUSE_INPUT_LEFT) != 0)
 	{
-		if (collisionController.IsTagCollidingWithTag2D(TAG::PAUSE_MAOUSE_CURSOR, TAG::PAUSE_GAME_BUTTON) ||
-			collisionController.IsTagCollidingWithTag2D(TAG::PAUSE_MAOUSE_CURSOR, TAG::PAUSE_TITLE_BUTTON))
+		if (isHoverGame || isHoverTitle)
 		{
 			isMouseClicked = true;
 		}
@@ -288,9 +287,9 @@ void ScenePause::ProcessYesNo(void)
 	auto& collisionController = CollisionController::GetInstance();
 	using TAG = Collider2DBase::TAG_2D;
 
-	Vector2 mousePosition = inputManager.GetMousePosition();
-	Vector2F mousePositionF(static_cast<float>(mousePosition.x), static_cast<float>(mousePosition.y));
-	cursorCollider_->SetCenterPos(mousePositionF);
+	const Vector2 MOUSE_POSITION = inputManager.GetMousePosition();
+	const Vector2F MOUSE_POSITION_F(static_cast<float>(MOUSE_POSITION.x), static_cast<float>(MOUSE_POSITION.y));
+	cursorCollider_->SetCenterPos(MOUSE_POSITION_F);
 
 	if (isPhaseChanged_)
 	{
@@ -299,11 +298,14 @@ void ScenePause::ProcessYesNo(void)
 	}
 
 	// マウスによるホバー処理
-	if (collisionController.IsTagCollidingWithTag2D(TAG::PAUSE_MAOUSE_CURSOR, TAG::PAUSE_YESNO_BOTTON))
+	bool isHoverYes = collisionController.IsTagCollidingWithTag2D(TAG::PAUSE_MOUSE_CURSOR, TAG::PAUSE_YESNO_BUTTON);
+	bool isHoverNo = collisionController.IsTagCollidingWithTag2D(TAG::PAUSE_MOUSE_CURSOR, TAG::SELECT_SINGLE_BIG);
+
+	if (isHoverYes)
 	{
 		isYes_ = true;
 	}
-	else if (collisionController.IsTagCollidingWithTag2D(TAG::PAUSE_MAOUSE_CURSOR, TAG::SELECT_SINGLE_BIG))
+	else if (isHoverNo)
 	{
 		isYes_ = false;
 	}
@@ -340,8 +342,7 @@ void ScenePause::ProcessYesNo(void)
 	bool isMouseClicked = false;
 	if ((GetMouseInput() & MOUSE_INPUT_LEFT) != 0)
 	{
-		if (collisionController.IsTagCollidingWithTag2D(TAG::PAUSE_MAOUSE_CURSOR, TAG::PAUSE_YESNO_BOTTON) ||
-			collisionController.IsTagCollidingWithTag2D(TAG::PAUSE_MAOUSE_CURSOR, TAG::SELECT_SINGLE_BIG))
+		if (isHoverYes || isHoverNo)
 		{
 			isMouseClicked = true;
 		}
@@ -380,95 +381,99 @@ void ScenePause::DrawYesNo(void)
 {
 	DrawNormal();
 
-	int drawY = Application::SCREEN_HALF_Y;
-	int drawX = Application::SCREEN_HALF_X- 100;
+	const int DRAW_Y = Application::SCREEN_HALF_Y;
+	int drawX = Application::SCREEN_HALF_X - 100;
 
-
-	DrawRotaGraph(Application::SCREEN_HALF_X, Application::SCREEN_HALF_Y,
+	DrawRotaGraph(static_cast<float>(Application::SCREEN_HALF_X), static_cast<float>(Application::SCREEN_HALF_Y),
 		0.7f, 0.0f, backGroundHandle_, true);
 
 	// はい描画
-	int yesHandle = GetTextUIHandle(PAUSE_TEXT_UI::YES, isYes_);
-	if (yesHandle != -1)
+	const int YES_HANDLE = GetTextUIHandle(PAUSE_TEXT_UI::YES, isYes_);
+	if (YES_HANDLE != -1)
 	{
-		DrawRotaGraph(drawX, drawY, 0.6f, 0.0f, yesHandle, true);
+		DrawRotaGraph(static_cast<float>(drawX), static_cast<float>(DRAW_Y), 0.6f, 0.0f, YES_HANDLE, true);
 	}
-
 
 	// いいえ描画
 	drawX = drawX + 200;
 
-	int noHandle = GetTextUIHandle(PAUSE_TEXT_UI::NO, !isYes_);
-	if (noHandle != -1)
+	const int NO_HANDLE = GetTextUIHandle(PAUSE_TEXT_UI::NO, !isYes_);
+	if (NO_HANDLE != -1)
 	{
-		DrawRotaGraph(drawX, drawY, 0.6f, 0.0f, noHandle, true);
+		DrawRotaGraph(static_cast<float>(drawX), static_cast<float>(DRAW_Y), 0.6f, 0.0f, NO_HANDLE, true);
 	}
-
 }
 
-void ScenePause::DrawFrame(float rate)
+void ScenePause::DrawFrame(float _rate)
 {
 	int width = 0;
 	int height = 0;
 
-	float uiBackScaleX = 1.0f;
+	constexpr float UI_BACK_SCALE_X = 1.0f;
+	constexpr float UI_BACK_SCALE_Y = 1.5f;
 
-	float uiBackScaleY = 1.5f;
-	
 	GetGraphSize(backGroundHandle_, &width, &height);
 
 	SetDrawBlendMode(DX_BLENDMODE_ALPHA, 128);
 	DrawBox(0, 0, Application::SCREEN_SIZE_X, Application::SCREEN_SIZE_Y, 0x000000, true);
 	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 
-	DrawRotaGraph3(Application::SCREEN_HALF_X, Application::SCREEN_HALF_Y, width / 2, height / 2,
-		uiBackScaleX, uiBackScaleY, 0.0f, backGroundHandle_, true);
+	DrawRotaGraph3(
+		static_cast<float>(Application::SCREEN_HALF_X),
+		static_cast<float>(Application::SCREEN_HALF_Y),
+		static_cast<float>(width / 2),
+		static_cast<float>(height / 2),
+		UI_BACK_SCALE_X,
+		UI_BACK_SCALE_Y,
+		0.0f,
+		backGroundHandle_,
+		true
+	);
 }
 
 void ScenePause::DrawMenu(void)
 {
-
-	int drawY = MENU_TOP_OFFSET; 
+	int drawY = MENU_TOP_OFFSET;
 
 	for (size_t i = 0; i < static_cast<size_t>(MENU_ITEM::COUNT); ++i)
 	{
-		auto currentMenuItem = static_cast<MENU_ITEM>(i);
-		bool isSelected = (selectedIndex_ == static_cast<int>(i));
+		const auto CURRENT_MENU_ITEM = static_cast<MENU_ITEM>(i);
+		const bool IS_SELECTED = (selectedIndex_ == static_cast<int>(i));
 
 		PAUSE_TEXT_UI textType = PAUSE_TEXT_UI::RETURN_GAME;
-		if (currentMenuItem == MENU_ITEM::RETURN_TITLE)
+		if (CURRENT_MENU_ITEM == MENU_ITEM::RETURN_TITLE)
 		{
 			textType = PAUSE_TEXT_UI::RETURN_TITLE;
 		}
 
-		int uiHandle = GetTextUIHandle(textType, isSelected);
+		const int UI_HANDLE = GetTextUIHandle(textType, IS_SELECTED);
 
-		if (uiHandle != -1)
+		if (UI_HANDLE != -1)
 		{
-			DrawRotaGraph(Application::SCREEN_HALF_X, drawY,
-				0.6f, 0.0f, uiHandle, true);
+			DrawRotaGraph(static_cast<float>(Application::SCREEN_HALF_X), static_cast<float>(drawY),
+				0.6f, 0.0f, UI_HANDLE, true);
 		}
 
 		drawY = drawY + MENU_ITEM_HEIGHT;
 	}
 }
 
-int ScenePause::GetTextUIHandle(PAUSE_TEXT_UI textType, bool isSelected) const
+int ScenePause::GetTextUIHandle(PAUSE_TEXT_UI _textType, bool _isSelected) const
 {
-	size_t index = static_cast<size_t>(textType);
+	const size_t INDEX = static_cast<size_t>(_textType);
 
-	if (isSelected)
+	if (_isSelected)
 	{
-		if (index < selectTextHandles_.size())
+		if (INDEX < selectTextHandles_.size())
 		{
-			return selectTextHandles_.at(index);
+			return selectTextHandles_.at(INDEX);
 		}
 	}
 	else
 	{
-		if (index < noSelectTextHandles_.size())
+		if (INDEX < noSelectTextHandles_.size())
 		{
-			return noSelectTextHandles_.at(index);
+			return noSelectTextHandles_.at(INDEX);
 		}
 	}
 

@@ -1392,10 +1392,10 @@ void Player::SendMyActionToNetManager(void)
 
 	NET_ACTION myAction;
 	myAction.key = NetManager::GetInstance().GetMyKey();
-	myAction.frameNumber = 0;
-	myAction.position = transform_.pos;
-	myAction.rotation = transform_.quaRot;
-	myAction.animationId = static_cast<int>(animType_);
+	myAction.frameNo = 0;
+	myAction.pos = transform_.pos;
+	myAction.rot = transform_.quaRot;
+	myAction.animId = static_cast<int>(animType_);
 	myAction.currentHp = hp_;
 	myAction.actionBits = 0;
 	myAction.isAttack = isAttackSend_;

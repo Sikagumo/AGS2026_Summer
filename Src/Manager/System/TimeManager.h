@@ -25,22 +25,22 @@ public:
 	/// @brief 初期化処理
 	void Initialize(void);
 
-	/// @brief 時間更新処理
+	/// @brief 更新処理
 	void Update(void);
 
 	/// @brief 現在のゲーム内総時間を取得する
 	/// @return 総時間（秒）
 	float GetGameTime(void) const;
 
-	/// @brief 現在のゲーム内「時」を取得する
+	/// @brief 現在のゲーム内(時)を取得する
 	/// @return 時間
 	int GetGameHour(void) const;
 
-	/// @brief 現在のゲーム内「分」を取得する
+	/// @brief 現在のゲーム内(分)を取得する
 	/// @return 分
 	int GetGameMinute(void) const;
 
-	/// @brief 現在のゲーム内「秒」を取得する
+	/// @brief 現在のゲーム内(秒)を取得する
 	/// @return 秒
 	int GetGameSecond(void) const;
 
@@ -76,12 +76,17 @@ public:
 
 private:
 
-	// タイマー構造体定義
+	// タイマー構造体
 	struct Timer
 	{
 		float timeLeft; // 残り時間
 		float duration; // 設定された持続時間
 	};
+
+	// 定数関連
+	static constexpr int SECONDS_PER_MINUTE = 60; // 1分あたりの秒数
+	static constexpr int MINUTES_PER_HOUR = 60;   // 1時間あたりの分数
+	static constexpr int SECONDS_PER_HOUR = 3600; // 1時間あたりの秒数
 
 	// シングルトン用インスタンス
 	static TimeManager* instance_; 

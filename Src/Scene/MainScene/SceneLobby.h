@@ -1,8 +1,11 @@
 #pragma once
-#include "../SceneBase.h"
-#include <DxLib.h>
+
 #include <array>
 #include <memory>
+#include <map>
+#include <DxLib.h>
+
+#include "../SceneBase.h"
 #include "../../Common/Vector2.h"
 #include "../../Object/Actor/Chara/Player/PlayerBase.h"
 #include "../../Object/Collider2D/Collider2DBase.h"
@@ -12,286 +15,298 @@
 #include "../../Net/NetStructures.h"
 #include "../../Application.h"
 
+/// @brief ロビー画面シーンクラス
 class SceneLobby : public SceneBase
 {
 public:
 
-    /// @brief コンストラクタ
-    /// @param _isMulti マルチプレイか否か
-    SceneLobby(bool _isMulti);
+	/// @brief コンストラクタ
+	/// @param _isMulti マルチプレイか否か
+	SceneLobby(bool _isMulti);
 
-    /// @brief デストラクタ
-    ~SceneLobby(void) override;
+	/// @brief デストラクタ
+	~SceneLobby(void) override;
 
-    /// @brief リソースの読み込み開始
-    void Load(void) override;
+	/// @brief リソースの読み込み開始
+	void Load(void) override;
 
-    /// @brief リソースの読み込み完了処理
-    void EndLoad(void) override;
+	/// @brief リソースの読み込み完了処理
+	void EndLoad(void) override;
 
-    /// @brief 初期化処理
-    void Initialize(void) override;
+	/// @brief 初期化処理
+	void Initialize(void) override;
 
-    /// @brief 更新処理
-    void Update(void) override;
+	/// @brief 更新処理
+	void Update(void) override;
 
-    /// @brief 描画処理
-    void Draw(void) override;
+	/// @brief 描画処理
+	void Draw(void) override;
 
-    /// @brief 解放処理
-    void Release(void) override;
+	/// @brief 解放処理
+	void Release(void) override;
 
 protected:
 
-    /// @brief GUIの更新処理
-    void UpdateGui(void) override {};
+	/// @brief GUIの更新処理
+	void UpdateGui(void) override
+	{
+	}
 
 private:
 
-    // UI配置計算定数
-   static constexpr float BUTTON_SCALE = 0.3f;
-   static constexpr Vector2F BUTTON_SIZE = { 600.0f * BUTTON_SCALE, 250.0f * BUTTON_SCALE };
+	/// @brief シングルプレイUI画像種別
+	enum class UI_SINGLE
+	{
+		NONE = -1,                 /// 未選択
+		SELECT_BOMB,               /// 選択中：爆弾
+		NOT_SELECT_BOMB,           /// 非選択：爆弾
+		SELECT_BIG,                /// 選択中：巨大化
+		NOT_SELECT_BIG,            /// 非選択：巨大化
+		SELECT_RECOVERY,           /// 選択中：回復
+		NOT_SELECT_RECOVERY,       /// 非選択：回復
+		SELECT_RAPID_FIRE,         /// 選択中：連射
+		NOT_SELECT_RAPID_FIRE,     /// 非選択：連射
+		SELECT_SKIN_MOMO,          /// 選択中：スキン桃
+		NOT_SELECT_SKIN_MOMO,      /// 非選択：スキン桃
+		SELECT_SKIN_SARU,          /// 選択中：スキン猿
+		NOT_SELECT_SKIN_SARU,      /// 非選択：スキン猿
+		SELECT_SKIN_KIGI,          /// 選択中：スキンキジ
+		NOT_SELECT_SKIN_KIGI,      /// 非選択：スキンキジ
+		SELECT_SKIN_INU,           /// 選択中：スキン犬
+		NOT_SELECT_SKIN_INU,       /// 非選択：スキン犬
+		GAME_START,                /// ゲーム開始ボタン
+		FORMATION,                 /// 編成ボタン
+		MAX                        /// 要素数
+	};
 
-    // レイアウト座標設定
-    const int LEFT_PANEL_X = Application::SCREEN_HALF_X - 500;
-    const int RIGHT_PANEL_X = Application::SCREEN_HALF_X + 500;
-    const int PANEL_START_Y = Application::SCREEN_HALF_Y - 50;
-    const int PANEL_INTERVAL_Y = 120;
+	/// @brief マルチプレイ用UIタイプ
+	enum class MULTI_UI_TYPE
+	{
+		PASSCODE_BOX,              /// パスコード入力ボックス
+		HOST_BUTTON,               /// ホスト作成ボタン
+		CLIENT_BUTTON,             /// クライアント参加ボタン
+		MAX                        /// 要素数
+	};
 
-    // UIコライダー用定数
-    static constexpr size_t UI_SINGLE_MAX = 8;
+	/// @brief マルチプレイ進行状態
+	enum class LOBBY_STATE
+	{
+		SELECT_EQUIPMENT,          /// 装備・スキン選択フェーズ
+		SELECT_MODE,               /// ホスト/クライアント選択・IP入力フェーズ
+		CONNECTING,                /// サーバー/ホストへの接続中
+		IN_ROOM                    /// ルーム待機中
+	};
 
-    // モード設定関連
-    const bool IS_MULTI;
+	/// @brief ロビーのUIメインテキスト種別
+	enum class UI_MAIN_TEXT
+	{
+		WEAPON,                    /// 武器選択テキスト
+		SKIN,                      /// スキン選択テキスト
+		ROOM,                      /// ルーム作成テキスト
+		JOIN,                      /// ルーム参加テキスト
+		MAX                        /// 要素数
+	};
 
-    // UI選択状態関連
-    bool isSelectMenu_;
-    int mainSelectIndex_;
-    int selectedJobIndex_;
-    int selectedSkinIndex_;
-    int inputIntervalCounter_;
+	/// @brief ロビーの準備状態テキスト種別
+	enum class UI_READY_TEXT
+	{
+		WAITING,                   /// 待機中テキスト
+		READY,                     /// 準備完了テキスト
+		PASSWORD,                  /// パスワードテキスト
+		GO,                        /// 出撃可能テキスト
+		MAX                        /// 要素数
+	};
 
-    // シングルプレイUI画像関連
-    enum class UI_SINGLE
-    {
-        NONE = -1,
-        SELECT_BOMB,
-        NOT_SELECT_BOMB,
-        SELECT_BIG,
-        NOT_SELECT_BIG,
-        SELECT_RECOVERY,
-        NOT_SELECT_RECOVERY,
-        SELECT_RAPID_FIRE,
-        NOT_SELECT_RAPID_FIRE,
-        SELECT_SKIN_MOMO,
-        NOT_SELECT_SKIN_MOMO,
-        SELECT_SKIN_SARU,
-        NOT_SELECT_SKIN_SARU,
-        SELECT_SKIN_KIGI,
-        NOT_SELECT_SKIN_KIGI,
-        SELECT_SKIN_INU,
-        NOT_SELECT_SKIN_INU,
-        GAME_START,
-        FORMATION,
+	/// @brief 確認ウィンドウ用テキスト種別
+	enum class CONFIRM_TEXT
+	{
+		YES,                       /// はい
+		NO,                        /// いいえ
+		MAX                        /// 要素数
+	};
 
-        MAX
-    };
-    std::array<int, static_cast<int>(UI_SINGLE::MAX)> uiHandles_;
-   
-    // コライダー関連
-    std::unique_ptr<Collider2DCircle> cursorCollider_;
-    std::array<std::unique_ptr<Collider2DBase>, UI_SINGLE_MAX> uiCollisions_;
-    std::array<Collider2DBase::TAG_2D, UI_SINGLE_MAX> uiCollisionTags_;
-    std::unique_ptr<Collider2DBase> readyButtonCollision_;
-    std::unique_ptr<Collider2DBase> leaveYesCollider_;
-    std::unique_ptr<Collider2DBase> leaveNoCollider_;
+	/// @brief ミニウィンドウ選択状態
+	enum class SELECT_STATE
+	{
+		MAIN,                      /// 左右メインUI選択状態
+		WEAPON_WINDOW,             /// 中央：武器選択ミニウィンドウ表示状態
+		SKIN_WINDOW                /// 中央：スキン選択ミニウィンドウ表示状態
+	};
 
-    int previewModelHandle_; // 表示用3Dモデルハンドル
-    int currentModelIndex_;   // 現在読み込まれているモデルのインデックス
+	// UI配置計算関連の定数
+	static constexpr float BUTTON_SCALE = 0.3f;                                               // ボタンの拡大率
+	static constexpr Vector2F BUTTON_SIZE = { 600.0f * BUTTON_SCALE, 250.0f * BUTTON_SCALE }; // ボタンのサイズ
 
-    // マルチプレイ用UIコライダー関連
-    enum class MULTI_UI_TYPE
-    {
-        PASSCODE_BOX,
-        HOST_BUTTON,
-        CLIENT_BUTTON,
+	// レイアウト座標関連の定数
+	static constexpr int LEFT_PANEL_X = Application::SCREEN_HALF_X - 500;   // 左パネルのX座標
+	static constexpr int RIGHT_PANEL_X = Application::SCREEN_HALF_X + 500;  // 右パネルのX座標
+	static constexpr int PANEL_START_Y = Application::SCREEN_HALF_Y - 50;   // パネルの開始Y座標
+	static constexpr int PANEL_INTERVAL_Y = 120;                            // パネルの間隔Y座標
 
-        MAX
-    };
-    std::array<std::unique_ptr<Collider2DBase>,
-        static_cast<size_t>(MULTI_UI_TYPE::MAX)> multiUiCollisions_;
+	// シングルプレイUIの最大数
+	static constexpr size_t UI_SINGLE_MAX = 8; 
 
-    // 初期化処理関連
-    /// @brief シングルプレイ用UI初期化処理
-    void InitUISingle(void);
+	// マルチプレイフラグ
+	const bool IS_MULTI; 
 
-    /// @brief マルチプレイ用UI初期化処理
-    void InitUIMulti(void);
+	// UI選択状態関連
+	bool isSelectMenu_;          // メニュー選択中フラグ
+	int mainSelectIndex_;        // メイン選択インデックス
+	int selectedJobIndex_;       // 選択中のジョブインデックス
+	int selectedSkinIndex_;      // 選択中のスキンインデックス
+	int inputIntervalCounter_;   // 入力インターバルカウンター
 
-    // 更新処理関連
-    /// @brief シングルプレイ用更新処理
-    void UpdateSingle(void);
+	// シングルUIのハンドル配列
+	std::array<int, static_cast<int>(UI_SINGLE::MAX)> uiHandles_; 
 
-    /// @brief プレビュー用3Dモデルの更新・読み込み
-    void UpdatePreviewModel(void);
+	// コライダー関連
+	std::unique_ptr<Collider2DCircle> cursorCollider_;                         // カーソルのコライダー
+	std::array<std::unique_ptr<Collider2DBase>, UI_SINGLE_MAX> uiCollisions_;  // UIコライダー配列
+	std::array<Collider2DBase::TAG_2D, UI_SINGLE_MAX> uiCollisionTags_;        // UIコライダータグ配列
+	std::unique_ptr<Collider2DBase> readyButtonCollision_;                     // 準備ボタンのコライダー
+	std::unique_ptr<Collider2DBase> leaveYesCollider_;                         // 退出確認「はい」コライダー
+	std::unique_ptr<Collider2DBase> leaveNoCollider_;                          // 退出確認「いいえ」コライダー
 
-    // 描画処理関連
-    /// @brief 中央モデル・画像描画処理
-    void DrawCenterModel(void);
+	// モデル表示関連
+	int previewModelHandle_; // 表示用3Dモデルハンドル
+	int currentModelIndex_;  // 現在読み込まれているモデルのインデックス
 
-    /// @brief 選択UI（左右パネル）描画処理
-    void DrawSelectionPanels(void);
+	// マルチUIコライダー配列
+	std::array<std::unique_ptr<Collider2DBase>, static_cast<size_t>(MULTI_UI_TYPE::MAX)> multiUiCollisions_;
 
-    // マルチプレイ状態関連
-    enum class LOBBY_STATE
-    {
-        SELECT_EQUIPMENT, // 装備・スキン選択フェーズ
-        SELECT_MODE,      // ホスト/クライアント選択・IP入力
-        CONNECTING,       // 接続中
-        IN_ROOM           // ルーム内
-    };
+	// マルチプレイ配置関連の定数
+	static constexpr int HOST_BUTTON_Y = Application::SCREEN_HALF_Y + 70;    // ホストボタンのY座標
+	static constexpr int CLIENT_BUTTON_Y = Application::SCREEN_SIZE_Y - 100; // クライアントボタンのY座標
+	static constexpr int PASSCODE_NUM_MAX = 10;                              // パスコード最大文字数
 
-    // ロビーのUIテキスト
-    enum class UI_MAIN_TEXT
-    {
-        WEAPON,
-        SKIN,
-        ROOM,
-        JOIN,
-        MAX
-    };
+	// マルチプレイ用画像・テキストハンドル関連
+	std::array<int, static_cast<int>(UI_MAIN_TEXT::MAX)> uiTexHandles_;                  // メインUIテキストハンドル
+	std::array<int, static_cast<int>(UI_READY_TEXT::MAX)> uiReadyHandles_;               // 準備テキストハンドル
+	std::array<int, static_cast<size_t>(CONFIRM_TEXT::MAX)> selectConfTextHandles_;      // 選択済み確認テキストハンドル
+	std::array<int, static_cast<size_t>(CONFIRM_TEXT::MAX)> noSelectConfTextHandles_;    // 未選択確認テキストハンドル
+	std::array<int, PASSCODE_NUM_MAX> passcodeTextHandles_;                              // パスコード用テキストハンドル
+	int roomBackHandle_;                                                                 // ルーム背景ハンドル
+	int selectedMultiHandle_;                                                            // 選択済みマルチUIハンドル
+	int selectMultiHandle_;                                                              // 選択中マルチUIハンドル
+	int multiTitleHandle_;                                                               // マルチタイトル画像ハンドル
+	int connectTexHandle_;                                                               // 接続中テキストハンドル
+	int allReadyImageHandle_;                                                            // 全員準備完了画像ハンドル
+	int leaveRoomTextHandle_;                                                            // ルーム退出テキストハンドル
 
-    enum class UI_RADY_TEXT
-    {
-        WAITING,
-        RADY,
-        PASSWORLD,
-        GO,
-        MAX
-    };
+	// アニメーションコントローラー
+	std::unique_ptr<AnimationController> animController_; 
 
-    enum class CONFIRM_TEXT
-    {
-        YES, 
-        NO,
-        MAX
-    };
+	// マルチプレイ状態管理関連
+	LOBBY_STATE multiState_; // マルチプレイの状態
+	int buttonSelectIndex_;  // ボタン選択インデックス
+	int passcode_[4];        // パスコード配列
+	int selectOctet_;        // 選択中のオクテット
+	bool isEditing_;         // 編集状態フラグ
+	bool myReadyState_;      // 自身の準備状態
 
-    static constexpr int HOST_BUTTON_Y = Application::SCREEN_HALF_Y + 70;
-    static constexpr int CLIENT_BUTTON_Y = Application::SCREEN_SIZE_Y - 100;
-    static constexpr int PASSCODE_NUM_MAX = 10;
+	// カラー関連の定数
+	const unsigned int COLOR_WHITE = GetColor(255, 255, 255);   // 白色
+	const unsigned int COLOR_YELLOW = GetColor(255, 255, 0);    // 黄色
+	const unsigned int COLOR_GRAY = GetColor(100, 100, 100);    // 灰色
+	const unsigned int COLOR_GREEN = GetColor(0, 255, 0);       // 緑色
 
-    std::array<int, static_cast<int>(UI_MAIN_TEXT::MAX)> uiTexHandles_;
-    std::array<int, static_cast<int>(UI_RADY_TEXT::MAX)> uiRadyHandles_;
-    std::array<int, static_cast<size_t>(CONFIRM_TEXT::MAX)> selectConfTextHandles_;
-    std::array<int, static_cast<size_t>(CONFIRM_TEXT::MAX)> noSelectConfTextHandles_;
-    std::unique_ptr<AnimationController> animController_;
+	// ウィンドウ選択状態関連
+	SELECT_STATE selectState_; // ミニウィンドウ選択状態
 
-    LOBBY_STATE multiState_;
-    int buttonSelectIndex_;
-    int passcode_[4];
-    int selectOctet_;
-    bool isEditing_;
-    bool myReadyState_;
-    int roomBackHandle_;
-    int selectedMultiHandle_;
-    int selectMultiHandle_;
-    int multiTitleHandle_;
-    int connectTexHandle_;
-    int allReadyImageHandle_;
-    int leaveRoomTextHandle_;
+	// メインUI用コライダー配列
+	std::array<std::unique_ptr<Collider2DBase>, 2> mainUiCollisions_; 
 
-    std::array<int, PASSCODE_NUM_MAX> passcodeTextHandles_; 
+	// ミニウィンドウUIコライダー関連
+	std::array<std::unique_ptr<Collider2DBase>, static_cast<size_t>(PlayerBase::JOB_TYPE::MAX)> weaponUiCollisions_;  // 武器用コライダー配列
+	std::array<std::unique_ptr<Collider2DBase>, static_cast<size_t>(PlayerBase::SKIN_TYPE::MAX)> skinUiCollisions_;   // スキン用コライダー配列
 
-    // カラー定数関連
-    const unsigned int COLOR_WHITE = GetColor(255, 255, 255);
-    const unsigned int COLOR_YELLOW = GetColor(255, 255, 0);
-    const unsigned int COLOR_GRAY = GetColor(100, 100, 100);
-    const unsigned int COLOR_GREEN = GetColor(0, 255, 0);
+	// 背景画像関連
+	int backgroundHandle_;      // 背景画像ハンドル
+	int selectUIBackHandle_;    // 選択UI背景ハンドル
+	int selectedUIBackHandle_;  // 選択済みUI背景ハンドル
+	int uiBackWidth_;           // UI背景の幅
+	int uiBackHeight_;          // UI背景の高さ
 
-    // マルチプレイ処理関数関連
-    /// @brief マルチプレイ用更新処理
-    void UpdateMulti(void);
+	// 退出確認ウィンドウ関連
+	bool isLeaveWindow_;     // 退出確認ウィンドウ表示フラグ
+	int leaveSelectIndex_;   // 退出確認選択インデックス
 
-    /// @brief モード選択時更新処理
-    void UpdateSelectMode(void);
+	// ロビー表示用モデル関連
+	std::array<int, static_cast<size_t>(PlayerBase::SKIN_TYPE::MAX)> lobbySkinHandles_;                                      // ロビー用スキンモデルハンドル配列
+	std::array<std::unique_ptr<AnimationController>, static_cast<size_t>(PlayerBase::SKIN_TYPE::MAX)> lobbyAnimControllers_; // ロビー用アニメーションコントローラー配列
 
-    /// @brief 接続中更新処理
-    void UpdateConnecting(void);
+	/// @brief シングルプレイ用UI初期化処理
+	void InitUISingle(void);
 
-    /// @brief ルーム内更新処理
-    void UpdateInRoom(void);
+	/// @brief マルチプレイ用UI初期化処理
+	void InitUIMulti(void);
 
-    /// @brief マルチプレイ用描画処理
-    void DrawMulti(void);
+	/// @brief シングルプレイ用更新処理
+	void UpdateSingle(void);
 
-    /// @brief モード選択時描画処理
-    void DrawSelectMode(void);
+	/// @brief プレビュー用3Dモデルの更新・読み込み
+	void UpdatePreviewModel(void);
 
-    /// @brief 接続中描画処理
-    void DrawConnecting(void);
+	/// @brief 中央モデル・画像描画処理
+	void DrawCenterModel(void);
 
-    /// @brief ルーム内描画処理
-    void DrawInRoom(void);
+	/// @brief 選択UI描画処理
+	void DrawSelectionPanels(void);
 
-    /// @brief ゲームシーンへの遷移処理
-    /// @param _users ネットワーク参加ユーザーマップ
-    void MoveToGameScene(std::map<int, NET_JOIN_USER>& _users);
+	/// @brief マルチプレイ用更新処理
+	void UpdateMulti(void);
 
-    /// @brief 武器とスキンをネットに登録する
-    /// @param  
-    void SetJobToSKin(void);
+	/// @brief モード選択時更新処理
+	void UpdateSelectMode(void);
 
-    // ミニウィンドウの状態
-    enum class SELECT_STATE
-    {
-        MAIN,           // 左右メインUI選択
-        WEAPON_WINDOW,  // 中央：武器選択ミニウィンドウ表示中
-        SKIN_WINDOW     // 中央：スキン選択ミニウィンドウ表示中
-    };
+	/// @brief 接続中更新処理
+	void UpdateConnecting(void);
 
-    SELECT_STATE selectState_;
+	/// @brief ルーム内更新処理
+	void UpdateInRoom(void);
 
-    // メインUI用
-    std::array<std::unique_ptr<Collider2DBase>, 2> mainUiCollisions_;
+	/// @brief マルチプレイ用描画処理
+	void DrawMulti(void);
 
-    // ミニウィンドウ内のボタン用
-    std::array<std::unique_ptr<Collider2DBase>, 
-        static_cast<size_t>(PlayerBase::JOB_TYPE::MAX)> weaponUiCollisions_;
-    std::array<std::unique_ptr<Collider2DBase>, 
-        static_cast<size_t>(PlayerBase::SKIN_TYPE::MAX)> skinUiCollisions_;
+	/// @brief モード選択時描画処理
+	void DrawSelectMode(void);
 
-    // 背景画像
-    int backgroundHandle_;
+	/// @brief 接続中描画処理
+	void DrawConnecting(void);
 
-    int selectUIBackHandle_;
+	/// @brief ルーム内描画処理
+	void DrawInRoom(void);
 
-    int selectedUIBackHandle_;
+	/// @brief ゲームシーンへの遷移処理
+	/// @param _users ネットワーク参加ユーザーマップ
+	void MoveToGameScene(std::map<int, NET_JOIN_USER>& _users);
 
-    int uiBackWidth_;
+	/// @brief 武器とスキンをネットに登録する
+	void SetJobToSKin(void);
 
-    int uiBackHeight_;
+	/// @brief 退出確認ウィンドウの描画処理
+	void DrawLeaveConfirmWindow(void);
 
-    bool isLeaveWindow_;
-    int leaveSelectIndex_;
+	/// @brief 武器選択ウィンドウの描画処理
+	void DrawWeaponWindow(void);
 
-    void DrawLeaveConfirmWindow(void);
+	/// @brief スキン選択ウィンドウの描画処理
+	void DrawSkinWindow(void);
 
-    void DrawWeaponWindow(void);
+	/// @brief スキンインデックスに応じたロビー用モデルハンドルを取得
+	/// @param _skinIndex スキンのインデックス
+	/// @return モデルハンドル
+	int GetLobbySkinModelHandle(int _skinIndex) const;
 
-    void DrawSkinWindow(void);
+	/// @brief 武器の描画用ハンドル取得
+	/// @param _jobType ジョブタイプ
+	/// @param _isSelected 選択状態か否か
+	/// @return 武器UIのハンドル
+	int GetWeaponUIHandle(PlayerBase::JOB_TYPE _jobType, bool _isSelected) const;
 
-    // ロビー表示用: 4種類のスキンモデルをすべて保持
-    std::array<int, static_cast<size_t>(PlayerBase::SKIN_TYPE::MAX)> lobbySkinHandles_;
-
-    std::array<std::unique_ptr<AnimationController>, static_cast<size_t>(PlayerBase::SKIN_TYPE::MAX)> lobbyAnimControllers_;
-
-    // スキンインデックスに応じたロビー用モデルハンドルを取得
-    int GetLobbySkinModelHandle(int _skinIndex) const;
-
-    // 武器の描画用ハンドル取得
-    int GetWeaponUIHandle(PlayerBase::JOB_TYPE _jobType, bool _isSelected) const;
-
-    // スキンの描画用ハンドル取得
-    int GetSkinUIHandle(PlayerBase::SKIN_TYPE _skinType, bool _isSelected) const;
+	/// @brief スキンの描画用ハンドル取得
+	/// @param _skinType スキンタイプ
+	/// @param _isSelected 選択状態か否か
+	/// @return スキンUIのハンドル
+	int GetSkinUIHandle(PlayerBase::SKIN_TYPE _skinType, bool _isSelected) const;
 };

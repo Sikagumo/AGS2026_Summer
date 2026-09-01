@@ -84,20 +84,16 @@ float TimeManager::GetGameTime(void) const
 
 int TimeManager::GetGameHour(void) const
 {
-	const int SECONDS_PER_HOUR = 3600; 
 	return static_cast<int>(gameTime_) / SECONDS_PER_HOUR;
 }
 
 int TimeManager::GetGameMinute(void) const
 {
-	const int SECONDS_PER_MINUTE = 60; 
-	const int MINUTES_PER_HOUR = 60;   
 	return (static_cast<int>(gameTime_) / SECONDS_PER_MINUTE) % MINUTES_PER_HOUR;
 }
 
 int TimeManager::GetGameSecond(void) const
 {
-	const int SECONDS_PER_MINUTE = 60;
 	return static_cast<int>(gameTime_) % SECONDS_PER_MINUTE;
 }
 

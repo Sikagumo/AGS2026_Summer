@@ -8,9 +8,6 @@ class Fader
 
 public:
 
-    // フェードが進む速さ
-    static constexpr float SPEED_ALPHA = 4.0f;
-
     // 状態
     enum class STATE
     {
@@ -18,6 +15,9 @@ public:
         FADE_OUT,   // 徐々に暗転
         FADE_IN     // 徐々に明転
     };
+
+    // フェードが進む速さ
+    static constexpr float SPEED_ALPHA = 4.0f;
 
     /// @brief コンストラクタ
     Fader(void);

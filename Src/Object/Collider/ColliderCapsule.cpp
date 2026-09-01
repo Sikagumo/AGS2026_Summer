@@ -49,11 +49,11 @@ float ColliderCapsule::GetRadius(void) const
     return radius_;
 }
 
-void ColliderCapsule::DrawDebug(int debugColor) const
+void ColliderCapsule::DrawDebug(int _debugColor) const
 {
-    const VECTOR startPos = GetWorldStartPos();
-    const VECTOR endPos = GetWorldEndPos();
+    const VECTOR WORLD_START_POS = GetWorldStartPos();
+    const VECTOR WORLD_END_POS = GetWorldEndPos();
 
     // ƒJƒvƒZƒ‹‚ð•`‰æ
-    DrawCapsule3D(startPos, endPos, radius_, DEBUG_SEGMENT_COUNT, debugColor, debugColor, false);
+    DrawCapsule3D(WORLD_START_POS, WORLD_END_POS, radius_, DEBUG_SEGMENT_COUNT, _debugColor, _debugColor, false);
 }

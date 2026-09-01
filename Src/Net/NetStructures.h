@@ -10,7 +10,7 @@ static constexpr int MAX_PLAYERS = 4;                    // 最大接続プレイヤー数
 static constexpr int NUM_FRAME = 10;                     // アクション履歴を保持するフレーム数
 static constexpr int MAX_SEND_BYTES = 4096;              // 最大送信バイト数
 static constexpr int HOST_PORT = 65000;                  // ホストの受信ポート番号
-static constexpr int CLIENT_PORT = 65001;                // クライアントポート番号(現状は自動割当のため未使用)
+static constexpr int CLIENT_PORT = 65001;                // クライアントポート番号
 static constexpr IPDATA LOCALHOST_IP = { 127, 0, 0, 1 }; // ローカルホストIP
 
 /// @brief ネットワーク接続の役割モード
@@ -29,7 +29,7 @@ enum class NET_DATA_TYPE
 	USERS,             // 全ユーザーのリスト情報
 	ACTION_HIST_ALL,   // 全員の過去アクション履歴
 	ACTION_HIST_RELAY, // ホストが他クライアントのアクションを中継する
-	BOSS_ACTION,       // ボスの行動情報（タイポ修正: ACTOION -> ACTION）
+	BOSS_ACTION,       // ボスの行動情報
 	GO_GAME_SCENE,     // 全員が準備完了かどうか
 	LEAVE_ROOM         // 退出通知
 };
@@ -87,22 +87,22 @@ struct NET_JOIN_USER
 struct NET_JOIN_USERS
 {
 	// 全ユーザーの配列
-	NET_JOIN_USER users[MAX_PLAYERS]; 
+	NET_JOIN_USER users[MAX_PLAYERS];
 };
 
-/// @brief プレイヤーの1フレーム分の同期アクションデータ構造体（3D対応）
+/// @brief プレイヤーの1フレーム分の同期アクションデータ構造体
 struct NET_ACTION
 {
 	// 識別関連
-	int key = -1;                 // ユーザー識別子
-	unsigned int frameNumber = 0; // フレーム番号
+	int key = -1;             // ユーザー識別子
+	unsigned int frameNo = 0; // フレーム番号
 
 	// トランスフォーム関連
-	VECTOR position = { 0.0f, 0.0f, 0.0f }; // 座標
-	Quaternion rotation;                    // 回転（クォータニオン）
+	VECTOR pos = { 0.0f, 0.0f, 0.0f }; // 座標
+	Quaternion rot;                    // 回転
 
 	// 状態関連
-	int animationId = 0;         // 再生中のアニメーションID
+	int animId = 0;              // 再生中のアニメーションID
 	int currentHp = 0;           // 現在のHP
 	unsigned int actionBits = 0; // アクション状態のビットフラグ
 	bool isAttack = false;       // 攻撃中かどうか
@@ -112,28 +112,28 @@ struct NET_ACTION
 struct NET_BOSS_ACTION
 {
 	// フレーム番号
-	unsigned int frameNumber = 0; 
+	unsigned int frameNo = 0;
 
 	// トランスフォーム関連
-	VECTOR position = { 0.0f, 0.0f, 0.0f }; // 座標
-	Quaternion rotation;                    // 回転（クォータニオン）
+	VECTOR pos = { 0.0f, 0.0f, 0.0f }; // 座標
+	Quaternion rot;                    // 回転
 
 	// ターゲット・状態関連
 	int targetPlayerId = -1;     // 狙っているプレイヤーのID
-	int animationId = 0;         // 再生中のアニメーションID
+	int animId = 0;              // 再生中のアニメーションID
 	int bossHp = 2000;           // ボス本体のHP
 	int missilePodTargetId = 0;  // ミサイルポッドのターゲットID
 	int cannonTargetId = 0;      // キャノンのターゲットID
 	int attackSelect = -1;       // ホストが選んだ攻撃タイプ
 
-	// 各部位（ウェポン）のHP関連
-	int weaponMachineGunLeftHp = 1250;  // 左マシンガンのHP
-	int weaponMachineGunRightHp = 1250; // 右マシンガンのHP
-	int weaponMissilePodLeftHp = 750;   // 左ミサイルポッドのHP
-	int weaponMissilePodRightHp = 750;  // 右ミサイルポッドのHP
-	int weaponRailGunHp = 2000;         // レールガンのHP
-	int weaponCannonLeftHp = 1000;      // 左キャノンのHP
-	int weaponCannonRightHp = 1000;     // 右キャノンのHP
+	// 各部位のHP関連
+	int weaponMachineGunLHp = 1250; // 左マシンガンのHP
+	int weaponMachineGunRHp = 1250; // 右マシンガンのHP
+	int weaponMissilePodLHp = 750;  // 左ミサイルポッドのHP
+	int weaponMissilePodRHp = 750;  // 右ミサイルポッドのHP
+	int weaponRailGunHp = 2000;     // レールガンのHP
+	int weaponCannonLHp = 1000;     // 左キャノンのHP
+	int weaponCannonRHp = 1000;     // 右キャノンのHP
 };
 
 /// @brief 複数フレーム分のプレイヤーアクション履歴構造体
@@ -143,7 +143,7 @@ struct NET_ACTION_HIS
 	int key = -1;
 
 	// 過去数フレーム分のアクションデータ配列
-	NET_ACTION actions[NUM_FRAME]; 
+	NET_ACTION actions[NUM_FRAME];
 };
 
 /// @brief 複数プレイヤーのアクション履歴をまとめた中継パケット

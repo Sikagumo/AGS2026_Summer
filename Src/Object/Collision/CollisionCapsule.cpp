@@ -9,41 +9,43 @@
 bool CollisionCapsule::CheckCapsuleVsCapsule(const ColliderBase* _colliderA,
 	const ColliderBase* _colliderB, CollisionInfo& _outInfo)
 {
-	const auto* capsuleA =  static_cast<const ColliderCapsule*>(_colliderA);
-	const auto* capsuleB =  static_cast<const ColliderCapsule*>(_colliderB);
+	const auto* CAPSULE_A = static_cast<const ColliderCapsule*>(_colliderA);
+	const auto* CAPSULE_B = static_cast<const ColliderCapsule*>(_colliderB);
 
-	if (!capsuleA || !capsuleB) { return false; }
+	if (!CAPSULE_A || !CAPSULE_B)
+	{
+		return false;
+	}
 
-	// それぞれのカプセルのワールド座標（線分）を取得
-	VECTOR startPositionA = capsuleA->GetWorldStartPos();
-	VECTOR endPositionA = capsuleA->GetWorldEndPos();
+	// それぞれのカプセルのワールド座標を取得
+	const VECTOR START_POS_A = CAPSULE_A->GetWorldStartPos();
+	const VECTOR END_POS_A = CAPSULE_A->GetWorldEndPos();
 
-	VECTOR startPositionB = capsuleB->GetWorldStartPos();
-	VECTOR endPositionB = capsuleB->GetWorldEndPos();
+	const VECTOR START_POS_B = CAPSULE_B->GetWorldStartPos();
+	const VECTOR END_POS_B = CAPSULE_B->GetWorldEndPos();
 
 	// カプセルAの中点を仮のターゲットにする
-	VECTOR centerA = VScale(VAdd(startPositionA, endPositionA), 0.5f);
+	const VECTOR CENTER_A = VScale(VAdd(START_POS_A, END_POS_A), 0.5f);
 
-	VECTOR nearestPositionB = UtilityMath::GetNearestPointOnSegment(startPositionB, endPositionB, 
-		centerA);
-	VECTOR nearestPositionA = UtilityMath::GetNearestPointOnSegment(startPositionA, endPositionA,
-		nearestPositionB);
+	VECTOR nearestPosB = UtilityMath::GetNearestPointOnSegment(START_POS_B, END_POS_B,
+		CENTER_A);
+	VECTOR nearestPosA = UtilityMath::GetNearestPointOnSegment(START_POS_A, END_POS_A,
+		nearestPosB);
 
-	nearestPositionB = UtilityMath::GetNearestPointOnSegment(startPositionB, endPositionB, 
-		nearestPositionA);
+	nearestPosB = UtilityMath::GetNearestPointOnSegment(START_POS_B, END_POS_B,
+		nearestPosA);
 
 	// 割り出した2点間の距離の2乗を計算する
-	VECTOR distanceVec = VSub(nearestPositionA, nearestPositionB);
-	float distSquare = static_cast<float>(UtilityMath::SqrMagnitude(distanceVec));
+	const VECTOR DISTANCE_VEC = VSub(nearestPosA, nearestPosB);
+	const float DIST_SQUARE = static_cast<float>(UtilityMath::SqrMagnitude(DISTANCE_VEC));
 
-	// お互いの半径の合計値と比較
-	float radiusSum = capsuleA->GetRadius() + capsuleB->GetRadius();
-	float radiusSumSq = radiusSum * radiusSum;
+	// お互いの半径の合計値
+	const float RADIUS_SUM = CAPSULE_A->GetRadius() + CAPSULE_B->GetRadius();
 
 	// 衝突判定
-	if (distSquare < radiusSumSq)
+	if (DIST_SQUARE < (RADIUS_SUM * RADIUS_SUM))
 	{
-		float distance = sqrtf(distSquare);
+		const float DISTANCE = sqrtf(DIST_SQUARE);
 
 		// 衝突情報の設定
 		_outInfo.myCollider = _colliderA;
@@ -51,13 +53,13 @@ bool CollisionCapsule::CheckCapsuleVsCapsule(const ColliderBase* _colliderA,
 		_outInfo.isActive = true;
 
 		// 衝突位置は、お互いの最近接点の中間地点
-		_outInfo.hitPosition = VAdd(nearestPositionA, VScale(VSub(nearestPositionB, 
-			nearestPositionA), 0.5f));
+		_outInfo.hitPosition = VAdd(nearestPosA, VScale(VSub(nearestPosB,
+			nearestPosA), 0.5f));
 
-		// 法線ベクトル（AからBへ向かう方向）の計算
-		if (distance > 0.0f)
+		// 法線ベクトルの計算
+		if (DISTANCE > 0.0f)
 		{
-			_outInfo.hitNormal = VScale(VSub(nearestPositionA, nearestPositionB), 1.0f / distance);
+			_outInfo.hitNormal = VScale(VSub(nearestPosA, nearestPosB), 1.0f / DISTANCE);
 		}
 		else
 		{
@@ -65,7 +67,7 @@ bool CollisionCapsule::CheckCapsuleVsCapsule(const ColliderBase* _colliderA,
 		}
 
 		// めり込んでいる距離を算出
-		_outInfo.penetration = radiusSum - distance;
+		_outInfo.penetration = RADIUS_SUM - DISTANCE;
 
 		return true;
 	}
@@ -73,7 +75,7 @@ bool CollisionCapsule::CheckCapsuleVsCapsule(const ColliderBase* _colliderA,
 	return false;
 }
 
-bool CollisionCapsule::CheckCapsuleVsSphere(const ColliderBase* _capsuleCol, 
+bool CollisionCapsule::CheckCapsuleVsSphere(const ColliderBase* _capsuleCol,
 	const ColliderBase* _sphereCol, CollisionInfo& _outInfo)
 {
 	return CollisionSphere::CheckSphereVsCapsule(_sphereCol, _capsuleCol, _outInfo);
@@ -87,61 +89,68 @@ bool CollisionCapsule::CheckCapsuleVsModel(const ColliderBase* _capsuleCol,
 		return false;
 	}
 
-	const auto* capsule = static_cast<const ColliderCapsule*>(_capsuleCol);
-	const auto* model = static_cast<const ColliderModel*>(_modelCol);
+	const auto* CAPSULE = static_cast<const ColliderCapsule*>(_capsuleCol);
+	const auto* MODEL = static_cast<const ColliderModel*>(_modelCol);
 
-	if (capsule == nullptr || model == nullptr)
+	if (CAPSULE == nullptr || MODEL == nullptr)
 	{
 		return false;
 	}
 
-	int modelHandle = model->GetModelHandle();
-	if (modelHandle == -1)
+	const int MODEL_HANDLE = MODEL->GetModelHandle(); 
+
+	if (MODEL_HANDLE == -1)
 	{
 		return false;
 	}
 
-	VECTOR startPos = capsule->GetWorldStartPos();
-	VECTOR endPos = capsule->GetWorldEndPos();
-	float radius = capsule->GetRadius();
+	const VECTOR START_POS = CAPSULE->GetWorldStartPos();
+	const VECTOR END_POS = CAPSULE->GetWorldEndPos();
+	const float RADIUS = CAPSULE->GetRadius();
 
 	// カプセルとモデル全体の衝突判定
-	MV1_COLL_RESULT_POLY_DIM hitResult = MV1CollCheck_Capsule(modelHandle, -1,
-		startPos, endPos, radius);
+	MV1_COLL_RESULT_POLY_DIM hitResult = MV1CollCheck_Capsule(MODEL_HANDLE, -1,
+		START_POS, END_POS, RADIUS);
 
 	if (hitResult.HitNum > 0)
 	{
 		float maxPenetration = -1.0f;
 		int bestIndex = -1;
 
-		ColliderBase::TAG modelTag = _modelCol->GetCollisionTag();
+		const ColliderBase::TAG MODEL_TAG = _modelCol->GetCollisionTag(); // モデルのタグ
 
 		for (int i = 0; i < hitResult.HitNum; ++i)
 		{
-			if (model->IsExcludedFrame(hitResult.Dim[i].FrameIndex))
+			if (MODEL->IsExcludedFrame(hitResult.Dim[i].FrameIndex))
 			{
 				continue;
 			}
 
-			const auto& poly = hitResult.Dim[i];
+			const auto& POLY = hitResult.Dim[i]; // ポリゴン情報
 
-			if (modelTag == ColliderBase::TAG::STAGE && poly.Normal.y <= 0.5f) { continue; }
-			if (modelTag == ColliderBase::TAG::WALL && poly.Normal.y > 0.5f) { continue; }
-
-			VECTOR polyPoint = poly.Position[0];
-
-			VECTOR nearestOnAxis = UtilityMath::GetNearestPointOnSegment(startPos, endPos, polyPoint);
-			VECTOR toHit = VSub(polyPoint, nearestOnAxis);
-			float distAlongNormal = VDot(toHit, poly.Normal);
-			float polyPenetration = radius - distAlongNormal;
-
-			if (polyPenetration > maxPenetration)
+			if (MODEL_TAG == ColliderBase::TAG::STAGE && POLY.Normal.y <= 0.5f)
 			{
-				maxPenetration = polyPenetration;
+				continue;
+			}
+
+			if (MODEL_TAG == ColliderBase::TAG::WALL && POLY.Normal.y > 0.5f)
+			{
+				continue;
+			}
+
+			const VECTOR POLY_POINT = POLY.Position[0];
+
+			const VECTOR NEAREST_ON_AXIS = UtilityMath::GetNearestPointOnSegment(START_POS, END_POS, POLY_POINT);
+			const VECTOR TO_HIT = VSub(POLY_POINT, NEAREST_ON_AXIS);
+			const float DIST_ALONG_NORMAL = VDot(TO_HIT, POLY.Normal);
+			const float POLY_PENETRATION = RADIUS - DIST_ALONG_NORMAL;
+
+			if (POLY_PENETRATION > maxPenetration)
+			{
+				maxPenetration = POLY_PENETRATION;
 				bestIndex = i;
 			}
 		}
-
 
 		if (bestIndex == -1)
 		{
@@ -149,23 +158,24 @@ bool CollisionCapsule::CheckCapsuleVsModel(const ColliderBase* _capsuleCol,
 			return false;
 		}
 
-		const auto& bestHit = hitResult.Dim[bestIndex];
+		const auto& BEST_HIT = hitResult.Dim[bestIndex];
 
 		_outInfo.myCollider = _capsuleCol;
 		_outInfo.hitCollider = _modelCol;
 
-		VECTOR bestPolyPoint = VScale(
-			VAdd(VAdd(bestHit.Position[0], bestHit.Position[1]), bestHit.Position[2]),
+		const VECTOR BEST_POLY_POINT = VScale(
+			VAdd(VAdd(BEST_HIT.Position[0], BEST_HIT.Position[1]), BEST_HIT.Position[2]),
 			1.0f / 3.0f);
 
-		_outInfo.hitPosition = bestPolyPoint;
-		_outInfo.hitNormal = bestHit.Normal;
+		_outInfo.hitPosition = BEST_POLY_POINT;
+		_outInfo.hitNormal = BEST_HIT.Normal;
 		_outInfo.isActive = true;
 
-		VECTOR nearestOnAxis = UtilityMath::GetNearestPointOnSegment(startPos, endPos, bestPolyPoint);
-		VECTOR toHit = VSub(bestPolyPoint, nearestOnAxis);
-		float distAlongNormal = VDot(toHit, bestHit.Normal);
-		_outInfo.penetration = radius - distAlongNormal;
+		const VECTOR NEAREST_ON_AXIS = UtilityMath::GetNearestPointOnSegment(START_POS, END_POS, BEST_POLY_POINT);
+		const VECTOR TO_HIT = VSub(BEST_POLY_POINT, NEAREST_ON_AXIS);
+		const float DIST_ALONG_NORMAL = VDot(TO_HIT, BEST_HIT.Normal);
+
+		_outInfo.penetration = RADIUS - DIST_ALONG_NORMAL;
 
 		if (_outInfo.penetration < 0.0f)
 		{

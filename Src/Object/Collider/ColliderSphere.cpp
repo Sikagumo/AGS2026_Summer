@@ -2,16 +2,15 @@
 #include "ColliderSphere.h"
 #include "../Common/Transform.h"
 
-ColliderSphere::ColliderSphere(TAG _collisionTag, const Transform* _followTarget, const VECTOR& _localPosition, float _radius)
+ColliderSphere::ColliderSphere(TAG _collisionTag, const Transform* _followTarget, const VECTOR& _localPos, float _radius)
     : ColliderBase(SHAPE::SPHERE, _collisionTag, _followTarget)
-    , localPosition_(_localPosition)
+    , localPos_(_localPos)
     , radius_(_radius)
 {
 }
-
 void ColliderSphere::SetLocalPosition(const VECTOR& _position)
 {
-    localPosition_ = _position;
+    localPos_ = _position;
 }
 
 void ColliderSphere::SetRadius(float _radius)
@@ -22,13 +21,13 @@ void ColliderSphere::SetRadius(float _radius)
 
 const VECTOR& ColliderSphere::GetLocalPosition(void) const
 {
-    return localPosition_;
+    return localPos_;
 }
 
 VECTOR ColliderSphere::GetWorldPosition(void) const
 {
     // ローカル座標をワールド座標へ変換
-    return TransformLocalToWorld(localPosition_);
+    return TransformLocalToWorld(localPos_);
 }
 
 float ColliderSphere::GetRadius(void) const

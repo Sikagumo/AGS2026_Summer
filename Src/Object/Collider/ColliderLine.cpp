@@ -1,21 +1,22 @@
 #include "ColliderLine.h"
 #include "../Common/Transform.h"
 
-ColliderLine::ColliderLine(TAG collisionTag, const Transform* followTarget, const VECTOR& localStartPos, const VECTOR& localEndPos)
-    : ColliderBase(SHAPE::LINE, collisionTag, followTarget)
-    , localStartPos_(localStartPos)
-    , localEndPos_(localEndPos)
+ColliderLine::ColliderLine(TAG _collisionTag, const Transform* _followTarget, 
+    const VECTOR& _localStartPos, const VECTOR& _localEndPos)
+    : ColliderBase(SHAPE::LINE, _collisionTag, _followTarget)
+    , localStartPos_(_localStartPos)
+    , localEndPos_(_localEndPos)
 {
 }
 
-void ColliderLine::SetLocalStartPos(const VECTOR& position)
+void ColliderLine::SetLocalStartPos(const VECTOR& _position)
 {
-    localStartPos_ = position;
+    localStartPos_ = _position;
 }
 
-void ColliderLine::SetLocalEndPos(const VECTOR& position)
+void ColliderLine::SetLocalEndPos(const VECTOR& _position)
 {
-    localEndPos_ = position;
+    localEndPos_ = _position;
 }
 
 const VECTOR& ColliderLine::GetLocalStartPos(void) const
@@ -30,25 +31,25 @@ const VECTOR& ColliderLine::GetLocalEndPos(void) const
 
 VECTOR ColliderLine::GetWorldStartPos(void) const
 {
-    // ローカル座標 → ワールド座標へ変換（開始点）
+    // ローカル座標 → ワールド座標へ変換
     return TransformLocalToWorld(localStartPos_);
 }
 
 VECTOR ColliderLine::GetWorldEndPos(void) const
 {
-    // ローカル座標 → ワールド座標へ変換（終了点）
+    // ローカル座標 → ワールド座標へ変換
     return TransformLocalToWorld(localEndPos_);
 }
 
-void ColliderLine::DrawDebug(int debugColor) const
+void ColliderLine::DrawDebug(int _debugColor) const
 {
-    const VECTOR start = GetWorldStartPos();
-    const VECTOR end = GetWorldEndPos();
+    const VECTOR WORLD_START_POS = GetWorldStartPos(); 
+    const VECTOR WORLD_END_POS = GetWorldEndPos();     
 
     // 線分を描画
-    DrawLine3D(start, end, debugColor);
+    DrawLine3D(WORLD_START_POS, WORLD_END_POS, _debugColor);
 
-    // 始点・終点を球体で補助表示
-    DrawSphere3D(start, DEBUG_POINT_RADIUS, DEBUG_SEGMENT_COUNT, debugColor, debugColor, false);
-    DrawSphere3D(end, DEBUG_POINT_RADIUS, DEBUG_SEGMENT_COUNT, debugColor, debugColor, false);
+    // 開始点と終了点に分かりやすく球体を描画
+    DrawSphere3D(WORLD_START_POS, DEBUG_POINT_RADIUS, DEBUG_SEGMENT_COUNT, _debugColor, _debugColor, false);
+    DrawSphere3D(WORLD_END_POS, DEBUG_POINT_RADIUS, DEBUG_SEGMENT_COUNT, _debugColor, _debugColor, false);
 }

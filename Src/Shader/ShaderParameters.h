@@ -3,45 +3,46 @@
 #include <DxLib.h>
 
 /// @brief ノーマルマップ・波・ライティングシェーダ用パラメータ
-struct alignas(16) NormalWaveShaderParams
+struct NormalWaveShaderParams
 {
-    // 1ブロック目（16バイト）：ライティング情報
-    float lightVectorX = 0.5f;
-    float lightVectorY = 0.5f;
-    float lightVectorZ = 0.5f;
-    float ambientRate = 0.1f;
+	// ライティング情報
+	float lightVectorX = 0.5f;     // ライトベクトルX
+	float lightVectorY = 0.5f;     // ライトベクトルY
+	float lightVectorZ = 0.5f;     // ライトベクトルZ
+	float ambientRate = 0.1f;      // アンビエント係数
 
-    // 2ブロック目（16バイト）：波・制御フラグ情報
-    float timeValue = 0.0f;
-    float waveSpeedValue = 1.0f;
-    float waveForceValue = 0.01f;
-    float useNormalMapFlag = 1.0f;
+	// 波・制御フラグ情報
+	float timeValue = 0.0f;        // 経過時間
+	float waveSpeedValue = 1.0f;   // 波のスピード
+	float waveForceValue = 0.01f;  // 波の強さ
+	float useNormalMapFlag = 1.0f; // ノーマルマップ使用フラグ
 };
 
 /// @brief 雨エフェクトシェーダ用パラメータ
-struct alignas(16) RainShaderParams
+struct RainShaderParams
 {
-    // 画面解像度 (px)
-    float resolutionX = 0.0f;
-    float resolutionY = 0.0f;
-    float timeValue = 0.0f;
-    float padding1 = 0.0f;
+	// 解像度・時間情報
+	float resolutionX = 0.0f;      // 画面解像度X
+	float resolutionY = 0.0f;      // 画面解像度Y
+	float timeValue = 0.0f;        // 経過時間
+	float padding1 = 0.0f;         // パディング1
 
-    // 雨の強さ(0.0～1.0)
-    float rainIntensity = 0.0f;
-    float rainIntensityBack = 0.0f;
-    float padding2 = 0.0f;
-    float padding3 = 0.0f;
+	// 雨の強度情報
+	float rainIntensity = 0.0f;    // 雨の強さ
+	float rainIntensityBack = 0.0f;// 背景の雨の強さ
+	float padding2 = 0.0f;         // パディング2
+	float padding3 = 0.0f;         // パディング3
 
-    COLOR_F rainColor = COLOR_F();
+	// カラー情報
+	COLOR_F rainColor = COLOR_F(); // 雨の色
 };
 
 /// @brief テクスチャスケールシェーダ用パラメータ
-struct alignas(16) TextureScaleShaderParams
+struct TextureScaleShaderParams
 {
-    // スケール
-    float scaleX = 1.0f;
-    float scaleY = 1.0f;
-    float padding1 = 0.0f;
-    float padding2 = 0.0f;
+	// スケール情報
+	float scaleX = 1.0f;           // スケールX
+	float scaleY = 1.0f;           // スケールY
+	float padding1 = 0.0f;         // パディング1
+	float padding2 = 0.0f;         // パディング2
 };

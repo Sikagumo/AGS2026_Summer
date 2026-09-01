@@ -4,23 +4,44 @@
 
 bool CollisionBox::CheckBoxVsBox(const Collider2DBase* _boxA, const Collider2DBase* _boxB)
 {
-	if (!_boxA || !_boxB) { return false; }
+	if (!_boxA || !_boxB)
+	{
+		return false;
+	}
 
-	const auto* boxA = dynamic_cast<const Collider2DBox*>(_boxA);
-	const auto* boxB = dynamic_cast<const Collider2DBox*>(_boxB);
+	const auto* BOX_A = dynamic_cast<const Collider2DBox*>(_boxA); 
+	const auto* BOX_B = dynamic_cast<const Collider2DBox*>(_boxB); 
 
-	if (boxA == nullptr || boxB == nullptr) { return false; }
+	if (BOX_A == nullptr || BOX_B == nullptr)
+	{
+		return false;
+	}
 
-	Vector2F leftTopA = boxA->GetLeftTop();
-	Vector2F rightBottomA = boxA->GetRightBottom();
+	const Vector2F LEFT_TOP_A = BOX_A->GetLeftTop();         // 矩形Aの左上座標
+	const Vector2F RIGHT_BOTTOM_A = BOX_A->GetRightBottom(); // 矩形Aの右下座標
 
-	Vector2F leftTopB = boxB->GetLeftTop();
-	Vector2F rightBottomB = boxB->GetRightBottom();
+	const Vector2F LEFT_TOP_B = BOX_B->GetLeftTop();         // 矩形Bの左上座標
+	const Vector2F RIGHT_BOTTOM_B = BOX_B->GetRightBottom(); // 矩形Bの右下座標
 
-	if (rightBottomA.x < leftTopB.x) { return false; }
-	if (leftTopA.x > rightBottomB.x) { return false; }
-	if (rightBottomA.y < leftTopB.y) { return false; }
-	if (leftTopA.y > rightBottomB.y) { return false; }
+	// X軸の判定
+	if (RIGHT_BOTTOM_A.x < LEFT_TOP_B.x)
+	{
+		return false;
+	}
+	if (LEFT_TOP_A.x > RIGHT_BOTTOM_B.x)
+	{
+		return false;
+	}
+
+	// Y軸の判定
+	if (RIGHT_BOTTOM_A.y < LEFT_TOP_B.y)
+	{
+		return false;
+	}
+	if (LEFT_TOP_A.y > RIGHT_BOTTOM_B.y)
+	{
+		return false;
+	}
 
 	return true;
 }
