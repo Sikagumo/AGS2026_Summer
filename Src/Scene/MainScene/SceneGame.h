@@ -100,6 +100,7 @@ private:
 
     std::unique_ptr<GameTimer> gameTimer_;
 
+
     int targetHpImage_;
     int targetHpBerImage_;
     int infoImage_;

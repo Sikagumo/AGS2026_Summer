@@ -43,7 +43,9 @@ SceneLobby::SceneLobby(bool _isMulti)
     ,leaveRoomTextHandle_(-1)
     , isLeaveWindow_(false)
     , leaveSelectIndex_(1)
+    , weaponInfoHandle_{}
 {
+    std::fill(weaponInfoHandle_.begin(), weaponInfoHandle_.end(), -1);
 }
 
 SceneLobby::~SceneLobby(void)
@@ -87,6 +89,10 @@ void SceneLobby::Load(void)
 
     ResourceManager::GetInstance().LoadHandleIds(ResourceManager::SRC::IMGS_SELECT_PUSE_TEX, tempSelectHandles.data());
     ResourceManager::GetInstance().LoadHandleIds(ResourceManager::SRC::IMGS_POUSE_TEX, tempNormalHandles.data());
+
+    // 武器説明
+    ResourceManager::GetInstance().
+        LoadHandleIds(ResourceManager::SRC::IMGS_PLAYER_WEAPON_INFO, weaponInfoHandle_.data());
 
     selectConfTextHandles_.at(static_cast<size_t>(CONFIRM_TEXT::YES)) = tempSelectHandles.at(2);
     selectConfTextHandles_.at(static_cast<size_t>(CONFIRM_TEXT::NO)) = tempSelectHandles.at(3);
@@ -1554,9 +1560,10 @@ void SceneLobby::DrawWeaponWindow(void)
         uiBackHeight_ / 2, 1.0f, 1.2f, 0.0f, selectUIBackHandle_, true);
 
     // 選択肢描画用のレイアウト設定
-    const float itemCenterX = Application::SCREEN_HALF_X;
+    const float itemCenterX = Application::SCREEN_HALF_X - 265.0f;
     const float itemStartY = Application::SCREEN_HALF_Y - 200.0f;
     const float itemIntervalY = 150.0f;
+    constexpr float JOB_SCALE = 0.565f;
 
     constexpr int jobMaximum = static_cast<int>(PlayerBase::JOB_TYPE::MAX);
 
@@ -1571,9 +1578,15 @@ void SceneLobby::DrawWeaponWindow(void)
         if (optionHandle != -1)
         {
             DrawRotaGraph(static_cast<int>(itemCenterX), static_cast<int>(currentItemY),
-                0.6f, 0.0f, optionHandle, true);
+                JOB_SCALE, 0.0f, optionHandle, true);
         }
     }
+
+    // 武器説明
+    constexpr float INFO_SCALE = 0.435f;
+    const int infoCenter = static_cast<int>(itemCenterX) + 563;
+    DrawRotaGraph(infoCenter, Application::SCREEN_HALF_Y,
+        INFO_SCALE, 0.0f, weaponInfoHandle_.at(selectedJobIndex_), true);
 }
 
 void SceneLobby::DrawSkinWindow(void)

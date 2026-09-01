@@ -11,7 +11,7 @@ constexpr float RADIUS_BULLET = 5.0f;
 constexpr float RADIUS_POISON = 100.0f;
 constexpr float SCALE_POISON = 1.0f;
 constexpr float TIME_ALIVE_POISON = 7.5f;
-constexpr int POWER_POISON = 2;
+constexpr int POWER_POISON = 1;
 constexpr float ACTIVE_TIME = 2.5f;
 
 

@@ -40,6 +40,10 @@ void Tree::InitCollider(void)
 		.SetCollisionActive(this, ColliderBase::TAG::TREE, true);
 }
 
+void Tree::InitPost(void)
+{
+}
+
 
 void Tree::Update(void)
 {

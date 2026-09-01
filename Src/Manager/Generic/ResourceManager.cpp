@@ -190,6 +190,13 @@ void ResourceManager::Initialize(void)
 	_SetResource(LOAD_TYPE::IMAGES, SRC::IMGS_LOBBY_UI_TEX, PATH_IMAGE + "sentakuTex.png"
 		, imagesAllNum, imagesNumX, imagesNumY);
 
+	// 武器説明の文字
+	imagesAllNum = 4;
+	imagesNumX = 1;
+	imagesNumY = 4;
+	_SetResource(LOAD_TYPE::IMAGES, SRC::IMGS_PLAYER_WEAPON_INFO, PATH_IMAGE + "WeaponInfo.png"
+		, imagesAllNum, imagesNumX, imagesNumY);
+
 	// マルチ用の文字
 	imagesAllNum = 4;
 	imagesNumX = 1;
@@ -368,7 +375,8 @@ const int ResourceManager::LoadHandleId(SRC _src)
 void ResourceManager::LoadHandleIds(SRC _src, int* _target)
 {
 	// 複数画像ではない場合、処理終了
-	if (resourcesMap_[_src].GetLoadType() != Resource::LOAD_TYPE::IMAGES) { return; }
+	Resource::LOAD_TYPE loadType = resourcesMap_[_src].GetLoadType();
+	if (loadType != Resource::LOAD_TYPE::IMAGES) { return; }
 
 	// 複数画像の対象にコピー
 	Load(_src).CopyHandle(_target);

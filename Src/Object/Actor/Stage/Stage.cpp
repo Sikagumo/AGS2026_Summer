@@ -18,9 +18,11 @@ Stage::Stage(void)
 
 void Stage::Load(void)
 {
+	skyDome_.modelId = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::MODEL_SKYDOME);
+
+	// ステージモデル
 	transform_.modelId = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::MODEL_STAGE_COLLISION);
 	viewTrans_.modelId = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::MODEL_STAGE);
-	skyDome_.modelId = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::MODEL_SKYDOME);
 
 	treePosModel_.modelId = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::MODEL_TREE_POSITION);
 
@@ -54,23 +56,25 @@ void Stage::Load(void)
 
 void Stage::InitTransform(void)
 {
+	// スカイドーム初期化
+	constexpr float SKYDOME_SCALE = 150.0f;
+	skyDome_.InitTransform(SKYDOME_SCALE,
+		Quaternion::Identity(), Quaternion::Identity());
+
+	// 描画用ステージ
 	constexpr float SCALE = 0.425f;
 	constexpr VECTOR LOCAL_POS = { 0.0f, 10.0f, 0.0f };
 	VECTOR localPos = LOCAL_POS;
-
 	viewTrans_.InitTransform(SCALE,
 		Quaternion::Identity(), Quaternion::Identity(),
 		localPos);
 
+	// 当たり判定用ステージ
 	constexpr float COLLISION_POS_Y = -117.5f;
 	localPos.y += COLLISION_POS_Y;
 	transform_.InitTransform(SCALE,
 		Quaternion::Identity(), Quaternion::Identity(),
 		localPos);
-	
-	constexpr float SKYDOME_SCALE = 150.0f;
-	skyDome_.InitTransform(SKYDOME_SCALE,
-		Quaternion::Identity(), Quaternion::Identity());
 
 
 	treePosModel_.InitTransform(SCALE,
@@ -160,7 +164,54 @@ void Stage::InitPost(void)
 
 void Stage::Update(void)
 {
-	skyDome_.Rotate(UtilityMath::AXIS_Y, 0.001f);
+	// スカイドーム
+	constexpr float SKYDOME_ROT_SPEED = 0.0005f;
+	skyDome_.Rotate(UtilityMath::AXIS_Y, SKYDOME_ROT_SPEED);
+
+
+	// カメラの現在位置を取得
+	VECTOR cameraPos = GetCameraPosition();
+
+	// カメラから「遠い順（降順）」にソート
+	std::sort(treesFront_.begin(), treesFront_.end(),
+		[&cameraPos](const std::shared_ptr<Tree>& a, const std::shared_ptr<Tree>& b) {
+			// 非アクティブなものは後ろへ追いやる
+			if (!a->GetIsActive()) { return false; }
+			if (!b->GetIsActive()) { return true; }
+
+			VECTOR posA = a->GetTransform().pos;
+			VECTOR posB = b->GetTransform().pos;
+
+			// 平方根(sqrt)計算を避けるため、距離の2乗で比較
+			float distSqA = (posA.x - cameraPos.x) * (posA.x - cameraPos.x) +
+				(posA.y - cameraPos.y) * (posA.y - cameraPos.y) +
+				(posA.z - cameraPos.z) * (posA.z - cameraPos.z);
+
+			float distSqB = (posB.x - cameraPos.x) * (posB.x - cameraPos.x) +
+				(posB.y - cameraPos.y) * (posB.y - cameraPos.y) +
+				(posB.z - cameraPos.z) * (posB.z - cameraPos.z);
+
+			// 遠いもの(距離が大きいもの)を先頭にする
+			return distSqA > distSqB;
+		});
+	// カメラから「遠い順（降順）」にソート
+	std::sort(treesBack_.begin(), treesBack_.end(),
+		[&cameraPos](const Transform& a, const Transform& b) {
+			VECTOR posA = a.pos;
+			VECTOR posB = b.pos;
+
+			// 平方根(sqrt)計算を避けるため、距離の2乗で比較
+			float distSqA = (posA.x - cameraPos.x) * (posA.x - cameraPos.x) +
+				(posA.y - cameraPos.y) * (posA.y - cameraPos.y) +
+				(posA.z - cameraPos.z) * (posA.z - cameraPos.z);
+
+			float distSqB = (posB.x - cameraPos.x) * (posB.x - cameraPos.x) +
+				(posB.y - cameraPos.y) * (posB.y - cameraPos.y) +
+				(posB.z - cameraPos.z) * (posB.z - cameraPos.z);
+
+			// 遠いもの(距離が大きいもの)を先頭にする
+			return distSqA > distSqB;
+		});
 
 	for (auto& frontTree : treesFront_)
 	{
@@ -168,12 +219,20 @@ void Stage::Update(void)
 
 		frontTree->Update();
 	}
+
+	for (auto& backTree : treesBack_)
+	{
+		backTree.Update();
+	}
 }
 
 void Stage::Draw(void)
 {
+	// スカイドーム
 	MV1DrawModel(skyDome_.modelId);
 
+
+	// ステージ描画
 	ShaderController::GetInstance().Draw3D(
 		ResourceManager::SRC::VS_TEX_SCALE,
 		ResourceManager::SRC::PS_TEX_SCALE,
@@ -184,19 +243,6 @@ void Stage::Draw(void)
 		viewStageTexHandle_,
 		false
 	);
-	
-	for (auto& treeFront : treesFront_)
-	{
-		if (!treeFront->GetIsActive()) { continue; }
-
-		MV1DrawModel(treeFront->GetTransform().modelId);
-	}
-
-	for (auto& treeBack : treesBack_)
-	{
-		MV1DrawModel(treeBack.modelId);
-	}
-
 
 #ifdef _DEBUG
 	// 自分が持っているすべてのコライダーを描画する
@@ -206,11 +252,31 @@ void Stage::Draw(void)
 		{
 			if (collider != nullptr)
 			{
-				collider->Draw();
+				//collider->Draw();
 			}
 		}
 	}
 
 	DrawFormatString(10, 120, 0xffffff, "ステージの座標：%f,%f,%f", transform_.pos.x, transform_.pos.y, transform_.pos.z);
 #endif
+}
+void Stage::DrawTree(void)
+{
+	SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255);
+
+	// 場外の木
+	for (auto& treeBack : treesBack_)
+	{
+		MV1DrawModel(treeBack.modelId);
+	}
+
+	// 当たり判定ありの木
+	for (auto& treeFront : treesFront_)
+	{
+		if (!treeFront->GetIsActive()) { continue; }
+		
+		MV1DrawModel(treeFront->GetTransform().modelId);
+	}
+
+	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 }

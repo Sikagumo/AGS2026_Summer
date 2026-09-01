@@ -97,6 +97,7 @@ private:
         MAX
     };
     std::array<int, static_cast<int>(UI_SINGLE::MAX)> uiHandles_;
+
    
     // コライダー関連
     std::unique_ptr<Collider2DCircle> cursorCollider_;
@@ -260,6 +261,9 @@ private:
         static_cast<size_t>(PlayerBase::JOB_TYPE::MAX)> weaponUiCollisions_;
     std::array<std::unique_ptr<Collider2DBase>, 
         static_cast<size_t>(PlayerBase::SKIN_TYPE::MAX)> skinUiCollisions_;
+
+    // 武器説明画像
+    std::array<int, static_cast<size_t>(PlayerBase::JOB_TYPE::MAX)> weaponInfoHandle_;
 
     // 背景画像
     int backgroundHandle_;

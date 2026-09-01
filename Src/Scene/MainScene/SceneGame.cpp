@@ -727,10 +727,7 @@ void SceneGame::UpdateGameEnd(void)
 
 void SceneGame::DrawGame(void)
 {
-
-
-	stage_->Draw();
-
+	// 雨シェーダ
 	ShaderController::GetInstance().Draw2D(
 		ResourceManager::SRC::PS_RAINY,
 		0, 0, 1.0f,
@@ -738,6 +735,8 @@ void SceneGame::DrawGame(void)
 	);
 
 	ShaderController::GetInstance().ExecuteDrawCommands();
+
+	stage_->Draw();
 
 	for (auto& player : players_)
 	{
@@ -750,6 +749,10 @@ void SceneGame::DrawGame(void)
 		if (!enemyRobo->IsAlive()) continue;
 		enemyRobo->Draw();
 	}
+
+	// 木
+	stage_->DrawTree();
+
 	auto& effect = EffectManager::GetInstance();
 	effect.Draw();
 

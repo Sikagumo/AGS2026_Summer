@@ -24,7 +24,9 @@ public:
 
 	void Update(void)override;
 
+	// •`‰æˆ—
 	void Draw(void)override;
+	void DrawTree(void);
 
 	VECTOR GetPos(void) { return transform_.pos; }
 
