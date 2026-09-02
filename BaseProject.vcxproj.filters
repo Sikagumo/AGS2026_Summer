@@ -203,11 +203,10 @@
     <ClInclude Include="Src\Manager\Decoration\EffectManager.h" />
     <ClInclude Include="Src\Scene\SubScene\ScenePause.h" />
     <ClInclude Include="Src\Scene\SubScene\SceneOperation.h" />
-    <ClInclude Include="Src\Manager\Generic\StatusManager.h" />
-    <ClInclude Include="Src\Shader\RenderCommand.h" />
     <ClInclude Include="Src\Shader\ShaderVertex\ShaderVertex.h" />
     <ClInclude Include="Src\Object\Actor\Stage\Tree.h" />
-  </ItemGroup>
+    <ClInclude Include="Src\Manager\Generic\StatusManager.h" />
+    <ClInclude Include="Src\Shader\RenderCommand.h" />
   <ItemGroup>
     <None Include="srcGraphics\Common\Pixel\PixelShader2DHeader.hlsli" />
     <None Include="srcGraphics\Common\Pixel\PixelShader3DHeader.hlsli" />

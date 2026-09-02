@@ -2,8 +2,8 @@
 #include <string>
 #include <vector>
 #include "../../Actor/ActorBase.h"
-#include "../../../Shader/ShaderParameters.h"
 #include "./Tree.h"
+#include "../../../Shader/ShaderParameters.h"
 
 class Stage : public ActorBase
 {
@@ -24,7 +24,9 @@ public:
 
 	void Update(void)override;
 
+	// •`‰æˆ—
 	void Draw(void)override;
+	void DrawTree(void);
 
 	VECTOR GetPos(void) { return transform_.pos; }
 

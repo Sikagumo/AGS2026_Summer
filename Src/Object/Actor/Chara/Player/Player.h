@@ -109,7 +109,7 @@ private:
 
 	static constexpr std::array<SHOT_TYPE, static_cast<int>(JOB_TYPE::MAX)>
 		SHOT_TYPE_SPECIAL
-		= { SHOT_TYPE::NONE, SHOT_TYPE::NONE, SHOT_TYPE::NONE, SHOT_TYPE::RECOVERY };
+			= { SHOT_TYPE::NONE, SHOT_TYPE::NONE, SHOT_TYPE::CLUSTER, SHOT_TYPE::RECOVERY };
 
 	// 連射パラメータ
 	static constexpr float SCALE_RAPID = 0.85f;
@@ -125,7 +125,6 @@ private:
 	int curAttackNum_;
 
 	int shotIndex_;
-	int shadowHandle_;
 
 	ANIM_TYPE animType_;
 
@@ -161,6 +160,10 @@ private:
 	bool isNetAttack_;
 
 	bool isAttackSend_;
+
+	// 着弾地点
+	std::array<VERTEX3D, 4> shotPointVertex_;
+
 
 
 	// 操作
@@ -201,7 +204,11 @@ private:
 
 	void DelayRotate(void)override;
 
+	/// @brief 弾の軌道を描画
 	void DrawShotOrbit(void);
+
+	/// @brief 弾の着弾地点
+	void DrawShotOrbitPoint(const VECTOR& _shotPos);
 
 	VECTOR CalcShotDir(void);
 

@@ -118,7 +118,7 @@ private:
 	};
 	std::array<int, static_cast<int>(UI_GAME::MAX)> uiGame_; // ゲーム用UIハンドル配列
 
-	// 制御・パラメータ関連
+    // 制御・パラメータ関連
 	float tempTime_;                                     // 一時的な時間保持用
 	int slowCount_;                                      // スロー演出用カウンター
 	std::array<int, 4> imageResult_;                     // リザルト用画像ハンドル配列

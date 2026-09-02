@@ -361,11 +361,12 @@ void SceneGame::DrawHpBerPlayer(void)
 	constexpr Vector2 BER_POS_MIDDLE = { 200, 500 };
 	Vector2 berPos = BER_POS_MIDDLE;
 
+	// 表示幅のリマップ範囲
 	constexpr float DISPLAY_RATIO_MIN = 0.0f;
 	constexpr float DISPLAY_RATIO_MAX = 1.0f;
 
-	const int PLAYER_NUM = static_cast<int>(players_.size() + 1);
-	for (int i = 1; i < PLAYER_NUM; i++)
+	const int PLAYER_NUM = static_cast<int>(players_.size());
+	for (int i = 0; i < PLAYER_NUM; i++)
 	{
 		// バー背景描画
 		DrawRotaGraph(
@@ -374,8 +375,9 @@ void SceneGame::DrawHpBerPlayer(void)
 			playerHpImageBack_, true
 		);
 
-		const float HP_RATIO = (static_cast<float>(players_.at(i - 1)->GetCurHp()) / static_cast<float>(players_.at(i - 1)->GetMaxHp()));
+		const float HP_RATIO = (static_cast<float>(players_.at(i)->GetCurHp()) / static_cast<float>(players_.at(i)->GetMaxHp()));
 		const float RATIO = std::clamp(HP_RATIO, 0.0f, 1.0f);
+
 
 		// 減少範囲にリマップ
 		const float DISPLAY_RATIO = std::lerp(DISPLAY_RATIO_MIN, DISPLAY_RATIO_MAX, RATIO);
@@ -395,7 +397,6 @@ void SceneGame::DrawHpBerPlayer(void)
 
 		if (IMAGE_WIDTH > 0)
 		{
-		
 			const Vector2 HP_UV_POS = { 0, 0 }; 
 
 			DrawRectExtendGraph(
@@ -412,8 +413,8 @@ void SceneGame::DrawHpBerPlayer(void)
 		berPos.y += (backSize.y + BER_OFFSET_Y);
 
 #ifdef _DEBUG
-		DrawFormatString(10, Application::SCREEN_SIZE_Y - (16 * (PLAYER_NUM - i)), 0xff0000, "プレイヤーHP：%d"
-			, players_.at(i - 1)->GetCurHp());
+		DrawFormatString(10, Application::SCREEN_SIZE_Y - (16 * (PLAYER_NUM - (i + 1))), 0xff0000, "プレイヤーHP：%d"
+			, players_.at(i)->GetCurHp());
 #endif
 	}
 }
@@ -713,6 +714,7 @@ void SceneGame::DrawGame(void)
 {
 	stage_->Draw();
 
+	// 雨シェーダ
 	ShaderController::GetInstance().Draw2D(
 		ResourceManager::SRC::PS_RAINY,
 		0, 0, 1.0f,
@@ -736,6 +738,9 @@ void SceneGame::DrawGame(void)
 		}
 		enemyRobo->Draw();
 	}
+
+	// 木
+	stage_->DrawTree();
 
 	auto& effect = EffectManager::GetInstance();
 	effect.Draw();

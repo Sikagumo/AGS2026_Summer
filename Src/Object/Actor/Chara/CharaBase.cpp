@@ -24,20 +24,20 @@ CharaBase::CharaBase(void)
 {
 	shadowHandle_ = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::IMG_SHADOW);
 
-	const VECTOR INIT_NORM = VGet(0.0f, 1.0f, 0.0f);
+	const VECTOR INIT_NORM = UtilityMath::DIR_UP;
 	const COLOR_U8 INIT_DIFUSECOLOR = GetColorU8(255, 255, 255, 255);
 
-	for (int i = 0; i < 4; ++i)
+	for (auto& vertex : imageShadowVertex_)
 	{
-		imageVertex_[i].norm = INIT_NORM;
-		imageVertex_[i].dif = INIT_DIFUSECOLOR;
+		vertex.norm = INIT_NORM;
+		vertex.dif  = INIT_DIFUSECOLOR;
 	}
 
 	// UV座標の割り当て
-	imageVertex_[LEFT_BACK].u = 0.0f; imageVertex_[LEFT_BACK].v = 1.0f;
-	imageVertex_[LEFT_FORWARD].u = 0.0f; imageVertex_[LEFT_FORWARD].v = 0.0f;
-	imageVertex_[RIGHT_BACK].u = 1.0f; imageVertex_[RIGHT_BACK].v = 1.0f;
-	imageVertex_[RIGHT_FORWARD].u = 1.0f; imageVertex_[RIGHT_FORWARD].v = 0.0f;
+	imageShadowVertex_[LEFT_BACK].u	    = 0.0f; imageShadowVertex_[LEFT_BACK].v		= 1.0f;
+	imageShadowVertex_[LEFT_FORWARD].u  = 0.0f; imageShadowVertex_[LEFT_FORWARD].v	= 0.0f;
+	imageShadowVertex_[RIGHT_BACK].u    = 1.0f; imageShadowVertex_[RIGHT_BACK].v	= 1.0f;
+	imageShadowVertex_[RIGHT_FORWARD].u = 1.0f; imageShadowVertex_[RIGHT_FORWARD].v = 0.0f;
 }
 
 
@@ -161,15 +161,15 @@ void CharaBase::DrawShadowRound(float shadowScl)
 
 
 	// キャラクターの現在位置
-	imageVertex_[LEFT_BACK].pos = VGet(transform_.pos.x - SHADOW_SIZE, shadowY, transform_.pos.z - SHADOW_SIZE);
-	imageVertex_[LEFT_FORWARD].pos = VGet(transform_.pos.x - SHADOW_SIZE, shadowY, transform_.pos.z + SHADOW_SIZE);
-	imageVertex_[RIGHT_BACK].pos = VGet(transform_.pos.x + SHADOW_SIZE, shadowY, transform_.pos.z - SHADOW_SIZE);
-	imageVertex_[RIGHT_FORWARD].pos = VGet(transform_.pos.x + SHADOW_SIZE, shadowY, transform_.pos.z + SHADOW_SIZE);
+	imageShadowVertex_[LEFT_BACK].pos	  = VGet(transform_.pos.x - SHADOW_SIZE, shadowY, transform_.pos.z - SHADOW_SIZE);
+	imageShadowVertex_[LEFT_FORWARD].pos  = VGet(transform_.pos.x - SHADOW_SIZE, shadowY, transform_.pos.z + SHADOW_SIZE);
+	imageShadowVertex_[RIGHT_BACK].pos    = VGet(transform_.pos.x + SHADOW_SIZE, shadowY, transform_.pos.z - SHADOW_SIZE);
+	imageShadowVertex_[RIGHT_FORWARD].pos = VGet(transform_.pos.x + SHADOW_SIZE, shadowY, transform_.pos.z + SHADOW_SIZE);
 
 	// アルファ値を各頂点に適用
-	for (int i = 0; i < 4; ++i)
+	for (auto& vertex : imageShadowVertex_)
 	{
-		imageVertex_[i].dif.a = alpha;
+		vertex.dif.a = alpha;
 	}
 
 	// 描画環境のセットアップ
@@ -182,13 +182,13 @@ void CharaBase::DrawShadowRound(float shadowScl)
 	// インデックス配列の定義
 	const int POINT_CNT = 6;
 	const int TRIANGLE_CNT = 2;
-	WORD index[POINT_CNT];
+	WORD index[POINT_CNT] = {};
 
-	index[0] = LEFT_BACK; index[1] = LEFT_FORWARD; index[2] = RIGHT_BACK;
-	index[3] = RIGHT_FORWARD; index[4] = RIGHT_BACK; index[5] = LEFT_FORWARD;
+	index[0] = LEFT_BACK; 	  index[1] = LEFT_FORWARD; index[2] = RIGHT_BACK;
+	index[3] = RIGHT_FORWARD; index[4] = RIGHT_BACK;   index[5] = LEFT_FORWARD;
 
 	// 描画
-	DrawPolygonIndexed3D(imageVertex_, 4, index, TRIANGLE_CNT, shadowHandle_, TRUE);
+	DrawPolygonIndexed3D(imageShadowVertex_.data(), 4, index, TRIANGLE_CNT, shadowHandle_, TRUE);
 
 	// グラフィック設定の復元
 	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);

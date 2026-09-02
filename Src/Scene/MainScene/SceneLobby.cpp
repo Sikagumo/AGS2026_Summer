@@ -45,6 +45,7 @@ SceneLobby::SceneLobby(bool _isMulti)
 	, animController_(nullptr)
 	, isLeaveWindow_(false)
 	, leaveSelectIndex_(1)
+	, weaponInfoHandle_{}
 {
 	uiHandles_.fill(-1);
 	uiTexHandles_.fill(-1);
@@ -53,6 +54,7 @@ SceneLobby::SceneLobby(bool _isMulti)
 	noSelectConfTextHandles_.fill(-1);
 	passcodeTextHandles_.fill(-1);
 	lobbySkinHandles_.fill(-1);
+	weaponInfoHandle_.fill(-1);
 }
 
 SceneLobby::~SceneLobby(void)
@@ -96,6 +98,10 @@ void SceneLobby::Load(void)
 
 	ResourceManager::GetInstance().LoadHandleIds(ResourceManager::SRC::IMGS_SELECT_PUSE_TEX, TEMP_SELECT_HANDLES.data());
 	ResourceManager::GetInstance().LoadHandleIds(ResourceManager::SRC::IMGS_POUSE_TEX, TEMP_NORMAL_HANDLES.data());
+
+	// 武器説明
+	ResourceManager::GetInstance().
+		LoadHandleIds(ResourceManager::SRC::IMGS_PLAYER_WEAPON_INFO, weaponInfoHandle_.data());
 
 	selectConfTextHandles_.at(static_cast<size_t>(CONFIRM_TEXT::YES)) = TEMP_SELECT_HANDLES.at(2);
 	selectConfTextHandles_.at(static_cast<size_t>(CONFIRM_TEXT::NO)) = TEMP_SELECT_HANDLES.at(3);
@@ -1571,10 +1577,11 @@ void SceneLobby::DrawWeaponWindow(void)
 		static_cast<float>(Application::SCREEN_HALF_Y), static_cast<float>(uiBackWidth_ / 2),
 		static_cast<float>(uiBackHeight_ / 2), 1.0f, 1.2f, 0.0f, selectUIBackHandle_, true);
 
-	// 選択肢描画用のレイアウト設定
-	const float ITEM_CENTER_X = static_cast<float>(Application::SCREEN_HALF_X);
+    // 選択肢描画用のレイアウト設定
+	const float ITEM_CENTER_X = static_cast<float>(Application::SCREEN_HALF_X) - 265.0f;
 	const float ITEM_START_Y = static_cast<float>(Application::SCREEN_HALF_Y) - 200.0f;
 	const float ITEM_INTERVAL_Y = 150.0f;
+	constexpr float JOB_SCALE = 0.565f;
 
 	const int JOB_MAXIMUM = static_cast<int>(PlayerBase::JOB_TYPE::MAX);
 
@@ -1592,6 +1599,12 @@ void SceneLobby::DrawWeaponWindow(void)
 				0.6f, 0.0f, OPTION_HANDLE, true);
 		}
 	}
+
+	// 武器説明
+	constexpr float INFO_SCALE = 0.435f;
+	const int INFO_CENTER_X = static_cast<int>(ITEM_CENTER_X) + 563;
+	DrawRotaGraph(INFO_CENTER_X, Application::SCREEN_HALF_Y,
+		INFO_SCALE, 0.0f, weaponInfoHandle_.at(selectedJobIndex_), true);
 }
 
 void SceneLobby::DrawSkinWindow(void)

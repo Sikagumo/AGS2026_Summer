@@ -220,6 +220,9 @@ private:
 	std::array<std::unique_ptr<Collider2DBase>, static_cast<size_t>(PlayerBase::JOB_TYPE::MAX)> weaponUiCollisions_;  // 武器用コライダー配列
 	std::array<std::unique_ptr<Collider2DBase>, static_cast<size_t>(PlayerBase::SKIN_TYPE::MAX)> skinUiCollisions_;   // スキン用コライダー配列
 
+	// 武器説明画像
+	std::array<int, static_cast<size_t>(PlayerBase::JOB_TYPE::MAX)> weaponInfoHandle_;
+	
 	// 背景画像関連
 	int backgroundHandle_;      // 背景画像ハンドル
 	int selectUIBackHandle_;    // 選択UI背景ハンドル

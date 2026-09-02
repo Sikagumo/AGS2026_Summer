@@ -9,7 +9,7 @@ public:
 	static constexpr float SHOT_SPEED_RECOVERY_Y = 5.0f;
 
 	// âÒïúäÑçá(0.0Å`1.0)
-	static constexpr float RECOVERY_RATE = 0.25f;
+	static constexpr float RECOVERY_RATE = 0.175f;
 
 
 	PBulletRecovery(int _shotType);
