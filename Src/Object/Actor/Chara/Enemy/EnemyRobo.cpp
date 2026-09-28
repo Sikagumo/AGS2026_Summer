@@ -17,8 +17,14 @@
 #include "EnemyRobo.h"
 
 EnemyRobo::EnemyRobo(VECTOR _pos)
-	:poizun_(false)
-
+	: poizun_(false)
+	, hp_(MAX_HP)
+	, playerPos_({ 0.0f, 0.0f, 0.0f })
+	, moveDir_({ 0.0f, 0.0f, 0.0f })
+	, count_(0)
+	, state_(STATE::IDLE)
+	, stateBase_(-1)
+	, stateUpdate_(nullptr)
 {
 	transform_.pos = _pos;
 }
@@ -35,11 +41,9 @@ void EnemyRobo::Load(void)
 
 void EnemyRobo::InitTransform(void)
 {
-	
-
-	transform_.scl = { 2,2,2};
+	transform_.scl = INIT_SCALE;
 	transform_.quaRot = Quaternion::Identity();
-	transform_.quaRotLocal = Quaternion::AngleAxis(UtilityMath::Deg2RadF(180.0f), UtilityMath::AXIS_Y);
+	transform_.quaRotLocal = Quaternion::AngleAxis(UtilityMath::Deg2RadF(INIT_ROT_Y), UtilityMath::AXIS_Y);
 
 	transform_.Update();
 }
@@ -55,15 +59,15 @@ void EnemyRobo::InitCollider(void)
 	ownColliders_[static_cast<int>(ColliderBase::TAG::ENEMYROBO)].push_back(colCapsule);
 	colCapsule->SetTriger(false);
 
-	ColliderSphere* colSphere = new ColliderSphere(ColliderBase::TAG::ENEMYROBO, &transform_, {0,40,40}, 20.0f);
+	ColliderSphere* colSphere = new ColliderSphere(ColliderBase::TAG::ENEMYROBO, &transform_, COL_SPHERE_POS, COL_SPHERE_RADIUS);
 	ownColliders_[static_cast<int>(ColliderBase::TAG::ENEMYROBO)].push_back(colSphere);
 	colSphere->SetTriger(true);
 
-
-	VECTOR handPos= MV1GetFramePosition(transform_.modelId, 52);
+	// 手のボーン座標から攻撃コライダー位置を算出
+	VECTOR handPos = MV1GetFramePosition(transform_.modelId, BONE_HAND_INDEX);
 	VECTOR handLocalPos = VSub(handPos, transform_.pos);
 
-	ColliderSphere* colAttackSphere = new ColliderSphere(ColliderBase::TAG::ENEMY_ATTACK, &transform_, handLocalPos, 20.0f);
+	ColliderSphere* colAttackSphere = new ColliderSphere(ColliderBase::TAG::ENEMY_ATTACK, &transform_, handLocalPos, COL_ATTACK_SPHERE_RADIUS);
 	ownColliders_[static_cast<int>(ColliderBase::TAG::ENEMY_ATTACK)].push_back(colAttackSphere);
 	colAttackSphere->SetTriger(false);
 
@@ -76,14 +80,14 @@ void EnemyRobo::InitAnimation(void)
 	CharaBase::InitAnimation();
 	for (int i = 0; i < static_cast<int>(ANIM_TYPE::MAX); i++)
 	{
-		animation_->AddInternal(i, {0, 0, -0.25}, 20.0f);
+		animation_->AddInternal(i, ANIM_OFFSET, ANIM_SPEED);
 	}
 	animation_->Play(static_cast<int>(ANIM_TYPE::DIR));
 }
 
 void EnemyRobo::InitPost(void)
 {
-	hp_ = 200;
+	hp_ = MAX_HP;
 
 	stateChanges_.emplace(static_cast<int>(STATE::IDLE), std::bind(&EnemyRobo::ChangeStateIdle, this));
 	stateChanges_.emplace(static_cast<int>(STATE::ATTACK), std::bind(&EnemyRobo::ChangeStateAttack, this));
@@ -100,9 +104,8 @@ void EnemyRobo::UpdateProcess(void)
 		{
 			ChangeState(STATE::END);
 		}
-		
 	}
-	else if(hp_ > 0)
+	else if (hp_ > 0)
 	{
 		bool isAttack = CollisionController::GetInstance().IsActorCollidingWithTag(this, ColliderBase::TAG::PLAYER);
 		if (isAttack == true)
@@ -111,7 +114,6 @@ void EnemyRobo::UpdateProcess(void)
 			{
 				ChangeState(STATE::ATTACK);
 			}
-			
 		}
 	}
 
@@ -127,7 +129,6 @@ void EnemyRobo::UpdateProcessPost(void)
 void EnemyRobo::DrawPre(void)
 {
 	MV1DrawModel(transform_.modelId);
-
 
 #ifdef _DEBUG
 	for (auto& [id, colliderVector] : ownColliders_)
@@ -145,7 +146,6 @@ void EnemyRobo::DrawPre(void)
 
 	DrawFormatString(10, 200, 0xffffff, "enemyの座標：%f,%f,%f", transform_.pos.x, transform_.pos.y, transform_.pos.z);
 #endif
-
 }
 
 void EnemyRobo::ChangeState(STATE _state)
@@ -160,7 +160,6 @@ void EnemyRobo::ChangeState(STATE _state)
 
 void EnemyRobo::ChangeState(int state)
 {
-
 	stateBase_ = state;
 	// 各状態遷移の初期処理
 	stateChanges_[stateBase_]();
@@ -180,7 +179,7 @@ void EnemyRobo::ChangeStateAttack(void)
 	CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::ENEMY_ATTACK, true);
 
 	float time = TimeManager::GetInstance().GetGameTime();
-	if ((static_cast<int>(time) % 2) == 0)
+	if ((static_cast<int>(time) % ATTACK_ANIM_DIVISOR) == 0)
 	{
 		animation_->Play(static_cast<int>(ANIM_TYPE::ATTACKA), false);
 	}
@@ -188,15 +187,12 @@ void EnemyRobo::ChangeStateAttack(void)
 	{
 		animation_->Play(static_cast<int>(ANIM_TYPE::ATTACKB), false);
 	}
-	
-
 }
 
 void EnemyRobo::ChangeStateMove(void)
 {
 	stateUpdate_ = std::bind(&EnemyRobo::UpdateStateMove, this);
 	animation_->Play(static_cast<int>(ANIM_TYPE::WARK));
-
 }
 
 void EnemyRobo::ChangeStateEnd(void)
@@ -204,8 +200,7 @@ void EnemyRobo::ChangeStateEnd(void)
 	stateUpdate_ = std::bind(&EnemyRobo::UpdateEnd, this);
 	count_ = 0;
 
-	EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_MISSILE, transform_.pos, { 0,0,0 }, { 50,50,50 }, 1, this);
-
+	EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_MISSILE, transform_.pos, END_EFFECT_ROT, END_EFFECT_SCALE, END_EFFECT_SPEED, this);
 
 	CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::ENEMYROBO, false);
 	CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::ENEMY_ATTACK, false);
@@ -213,20 +208,12 @@ void EnemyRobo::ChangeStateEnd(void)
 
 void EnemyRobo::UpdateIdle(void)
 {
-	
-
 	ChangeState(STATE::MOVE);
-	
-	
 }
 
 void EnemyRobo::UpdateAttack(void)
 {
-
-
-	/*VECTOR handPos = MV1GetFramePosition(transform_.modelId, 52);
-	VECTOR handLocalPos = VSub(handPos, transform_.pos);*/
-	VECTOR handPos = MV1GetFramePosition(transform_.modelId, 52);
+	VECTOR handPos = MV1GetFramePosition(transform_.modelId, BONE_HAND_INDEX);
 	VECTOR worldOffset = VSub(handPos, transform_.pos);
 
 	// ワールド回転を打ち消してローカル空間に戻す
@@ -235,9 +222,7 @@ void EnemyRobo::UpdateAttack(void)
 
 	CollisionController::GetInstance().SetActorSphereLocalPos(this, ColliderBase::TAG::ENEMY_ATTACK, handLocalPos);
 
-
-
-	if (animation_->IsEnd()==true)
+	if (animation_->IsEnd() == true)
 	{
 		ChangeState(STATE::IDLE);
 	}
@@ -266,7 +251,6 @@ void EnemyRobo::UpdateEnd(void)
 
 void EnemyRobo::LockPlayer(void)
 {
-	
 	VECTOR moveDir = VSub(playerPos_, transform_.pos);
 	moveDir.y = 0.0f;
 	moveDir = VNorm(moveDir);
@@ -277,20 +261,20 @@ void EnemyRobo::LockPlayer(void)
 
 void EnemyRobo::Damage(void)
 {
-	
-
-
-	if (CollisionController::GetInstance().IsActorCollidingWithTag(this, ColliderBase::TAG::PLAYER_BLAST) || CollisionController::GetInstance().IsActorCollidingWithTag(this, ColliderBase::TAG::PLAYER_BULLET) || CollisionController::GetInstance().IsActorCollidingWithTag(this, ColliderBase::TAG::LASER))
+	if (CollisionController::GetInstance().IsActorCollidingWithTag(this, ColliderBase::TAG::PLAYER_BLAST) ||
+		CollisionController::GetInstance().IsActorCollidingWithTag(this, ColliderBase::TAG::PLAYER_BULLET) ||
+		CollisionController::GetInstance().IsActorCollidingWithTag(this, ColliderBase::TAG::LASER))
 	{
-		hp_ = hp_ - 200;
+		hp_ -= NORMAL_DAMAGE;
 	}
+
 	if (CollisionController::GetInstance().IsActorCollidingWithTag(this, ColliderBase::TAG::PLAYER_RECOVERY))
 	{
-		poizun_ == true;
+		poizun_ = true; 
 	}
 
 	if (poizun_)
 	{
-		hp_ -= 1;
+		hp_ -= POISON_DAMAGE;
 	}
 }

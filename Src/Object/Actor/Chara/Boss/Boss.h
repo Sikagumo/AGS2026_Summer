@@ -457,18 +457,30 @@ private:
 	/// @brief 終了状態を更新する
 	void UpdateEnd(void);
 
+	/// @brief エフェクトを更新する
+	void UpdateEffect(void);
+
+	/// @brief タイヤの情報を更新する
+	void UpdateWheel(void);
+
+	/// @brief サウンドの情報を更新する
+	void UpdateSound(void);
+
 
 	// 機能関数
 	/// @brief プレイヤーの方向を向く
 	void LookPlayer(void);
+	/// @brief ターゲットの選定
+	void SelectTarget(void);
+
 
 
 	// Effect
 	/// @brief エフェクトを再生する
 	void PlayEffect(void);
 
-	/// @brief エフェクトを更新する
-	void UpdateEffect(void);
+	
+
 
 
 protected:

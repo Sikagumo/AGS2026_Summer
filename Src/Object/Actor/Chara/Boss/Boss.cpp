@@ -220,6 +220,39 @@ void Boss::UpdateEffect(void)
 	EffectManager::GetInstance().UpdateRot(EffectManager::EFFECT::EFFECT_BOSS_HIT, this, hitEffectRot3, EFFECT_NO_THREE);
 }
 
+void Boss::UpdateWheel(void)
+{
+	// タイヤの座標を各ジョイントに合わせる
+	transformWheelFrontL_.pos = MV1GetFramePosition(transform_.modelId, JOINT_CAR_WHEEL_FRONT_L);
+	transformWheelFrontR_.pos = MV1GetFramePosition(transform_.modelId, JOINT_CAR_WHEEL_FRONT_R);
+	transformWheelBackFrontL_.pos = MV1GetFramePosition(transform_.modelId, JOINT_CAR_WHEEL_BACK_FRONT_L);
+	transformWheelBackFrontR_.pos = MV1GetFramePosition(transform_.modelId, JOINT_CAR_WHEEL_BACK_FRONT_R);
+	transformWheelBackL_.pos = MV1GetFramePosition(transform_.modelId, JOINT_CAR_WHEEL_BACK_L);
+	transformWheelBackR_.pos = MV1GetFramePosition(transform_.modelId, JOINT_CAR_WHEEL_BACK_R);
+
+	// タイヤの向きを本体に合わせる
+	transformWheelBackFrontL_.quaRot = transform_.quaRot;
+	transformWheelBackFrontR_.quaRot = transform_.quaRot;
+	transformWheelFrontL_.quaRot = transform_.quaRot;
+	transformWheelFrontR_.quaRot = transform_.quaRot;
+	transformWheelBackL_.quaRot = transform_.quaRot;
+	transformWheelBackR_.quaRot = transform_.quaRot;
+
+	// タイヤを回転させる
+	transformWheelFrontL_.quaRotLocal = Quaternion::Mult(transformWheelFrontL_.quaRotLocal, Quaternion::AngleAxis(UtilityMath::Deg2RadF(WHEEL_ROT), UtilityMath::AXIS_X));
+	transformWheelFrontR_.quaRotLocal = Quaternion::Mult(transformWheelFrontR_.quaRotLocal, Quaternion::AngleAxis(UtilityMath::Deg2RadF(-WHEEL_ROT), UtilityMath::AXIS_X));
+	transformWheelBackFrontL_.quaRotLocal = Quaternion::Mult(transformWheelBackFrontL_.quaRotLocal, Quaternion::AngleAxis(UtilityMath::Deg2RadF(WHEEL_ROT), UtilityMath::AXIS_X));
+	transformWheelBackFrontR_.quaRotLocal = Quaternion::Mult(transformWheelBackFrontR_.quaRotLocal, Quaternion::AngleAxis(UtilityMath::Deg2RadF(-WHEEL_ROT), UtilityMath::AXIS_X));
+	transformWheelBackL_.quaRotLocal = Quaternion::Mult(transformWheelBackL_.quaRotLocal, Quaternion::AngleAxis(UtilityMath::Deg2RadF(WHEEL_ROT), UtilityMath::AXIS_X));
+	transformWheelBackR_.quaRotLocal = Quaternion::Mult(transformWheelBackR_.quaRotLocal, Quaternion::AngleAxis(UtilityMath::Deg2RadF(-WHEEL_ROT), UtilityMath::AXIS_X));
+}
+
+void Boss::UpdateSound(void)
+{
+	SoundManager::GetInstance().Set3DPosition(SoundManager::SOUND::SE_BOSS_LANDING, transform_.pos);
+	SoundManager::GetInstance().Set3DPosition(SoundManager::SOUND::SE_BOSS_ROAD, transform_.pos);
+}
+
 void Boss::InitTransform(void)
 {
 	//ベース
@@ -367,14 +400,18 @@ void Boss::ChangeState(int state)
 void Boss::ChangeStateIdle(void)
 {
 	stateUpdate_ = std::bind(&Boss::UpdateIdle, this);
+
 	attackCount_ = 0;
+
 	animation_->Play(static_cast<int>(ANIM_TYPE::DIR));
+
 	weaponRG_->ChangeState(WeaponRG::STATE::IDLE);
 }
 
 void Boss::ChangeStateAttack(void)
 {
 	stateUpdate_ = std::bind(&Boss::UpdateAttack, this);
+
 	attackCount_ = 0;
 
 	if (laserShotHp_ == (MAX_HP + (MAX_HP_HALF * playerSize_)))
@@ -388,7 +425,9 @@ void Boss::ChangeStateAttack(void)
 void Boss::ChangeStateJump(void)
 {
 	stateUpdate_ = std::bind(&Boss::UpdateJump, this);
+
 	animation_->Play(static_cast<int>(ANIM_TYPE::JUMP));
+
 	// ジャンプ量の計算
 	float jumpSpeed = POW_JUMP_INIT * TimeManager::GetInstance().GetDeltaTime();
 	jumpPow_ = jumpSpeed;
@@ -398,16 +437,19 @@ void Boss::ChangeStateJump(void)
 void Boss::ChangeStateJumpBefore(void)
 {
 	stateUpdate_ = std::bind(&Boss::UpdateJumpBefore, this);
+
 	animation_->Play(static_cast<int>(ANIM_TYPE::JUMPBEFORE),false);
 }
 
 void Boss::ChangeStateRoadAttack(void)
 {
 	stateUpdate_ = std::bind(&Boss::UpdateRoadAttack, this);
+
 	transform_.modelId = transformFeetCar_.modelId;
 	transform_.scl = transformFeetCar_.scl;
 	transform_.quaRot = transformFeetCar_.quaRot;
 	transform_.Update();
+
 	transformBody_.pos = MV1GetFramePosition(transform_.modelId, JOINT_CAR_BODY);
 	transformWheelFrontL_.pos = MV1GetFramePosition(transform_.modelId, JOINT_CAR_WHEEL_FRONT_L);
 	transformWheelFrontR_.pos = MV1GetFramePosition(transform_.modelId, JOINT_CAR_WHEEL_FRONT_R);
@@ -415,12 +457,14 @@ void Boss::ChangeStateRoadAttack(void)
 	transformWheelBackFrontR_.pos = MV1GetFramePosition(transform_.modelId, JOINT_CAR_WHEEL_BACK_FRONT_R);
 	transformWheelBackL_.pos = MV1GetFramePosition(transform_.modelId, JOINT_CAR_WHEEL_BACK_L);
 	transformWheelBackR_.pos = MV1GetFramePosition(transform_.modelId, JOINT_CAR_WHEEL_BACK_R);
+
 	transformWheelBackFrontL_.quaRot = transform_.quaRot;
 	transformWheelBackFrontR_.quaRot = transform_.quaRot;
 	transformWheelFrontL_.quaRot = transform_.quaRot;
 	transformWheelFrontR_.quaRot = transform_.quaRot;
 	transformWheelBackL_.quaRot = transform_.quaRot;
 	transformWheelBackR_.quaRot = transform_.quaRot;
+
 	transformWheelBackFrontL_.Update();
 	transformWheelBackFrontR_.Update();
 	transformWheelBackL_.Update();
@@ -428,8 +472,11 @@ void Boss::ChangeStateRoadAttack(void)
 	transformWheelFrontL_.Update();
 	transformWheelFrontR_.Update();
 	transformBody_.Update();
+
 	roadIsAttack_ = true;
+
 	roadCount_ = 0;
+
 	roadAttackTime_ = 0;
 
 	CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::ROAD_ATTACK, true);
@@ -438,6 +485,7 @@ void Boss::ChangeStateRoadAttack(void)
 void Boss::ChangeStateLaserAttack(void)
 {
 	stateUpdate_ = std::bind(&Boss::UpdateStateLaserAttack , this);
+
 	weaponRG_->ChangeState(WeaponRG::STATE::PREPARATION);
 
 	animation_->Play(static_cast<int>(ANIM_TYPE::JUMPBEFORE), false);
@@ -451,8 +499,11 @@ void Boss::ChangeStateLaserAttack(void)
 void Boss::ChangeStateEnd(void)
 {
 	stateUpdate_ = std::bind(&Boss::UpdateEnd, this);
+
 	animation_->Play(static_cast<int>(ANIM_TYPE::JUMPBEFORE), false);
+
 	EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_PLAYER_BLAST, transformBody_.pos, { 0,0,0 }, EFFECT_SCL_LASER, EFFECT_PLAEY_SPEED, this);
+
 	SoundManager::GetInstance().Play(SoundManager::SOUND::SE_HIT_BLAST);
 
 	weaponCannonL_->SetHp(0);
@@ -471,33 +522,12 @@ void Boss::BossTransformUpdate(void)
 	transformFeetCar_.quaRot = transform_.quaRot;
 
 	transform_.Update();
+
 	transformFeetCar_.Update();
 
 	if (state_ == STATE::ROADATTACK)
 	{
-		// タイヤの座標を各ジョイントに合わせる
-		transformWheelFrontL_.pos = MV1GetFramePosition(transform_.modelId, JOINT_CAR_WHEEL_FRONT_L);
-		transformWheelFrontR_.pos = MV1GetFramePosition(transform_.modelId, JOINT_CAR_WHEEL_FRONT_R);
-		transformWheelBackFrontL_.pos = MV1GetFramePosition(transform_.modelId, JOINT_CAR_WHEEL_BACK_FRONT_L);
-		transformWheelBackFrontR_.pos = MV1GetFramePosition(transform_.modelId, JOINT_CAR_WHEEL_BACK_FRONT_R);
-		transformWheelBackL_.pos = MV1GetFramePosition(transform_.modelId, JOINT_CAR_WHEEL_BACK_L);
-		transformWheelBackR_.pos = MV1GetFramePosition(transform_.modelId, JOINT_CAR_WHEEL_BACK_R);
-
-		// タイヤの向きを本体に合わせる
-		transformWheelBackFrontL_.quaRot = transform_.quaRot;
-		transformWheelBackFrontR_.quaRot = transform_.quaRot;
-		transformWheelFrontL_.quaRot = transform_.quaRot;
-		transformWheelFrontR_.quaRot = transform_.quaRot;
-		transformWheelBackL_.quaRot = transform_.quaRot;
-		transformWheelBackR_.quaRot = transform_.quaRot;
-
-		// タイヤを回転させる
-		transformWheelFrontL_.quaRotLocal = Quaternion::Mult(transformWheelFrontL_.quaRotLocal,Quaternion::AngleAxis(UtilityMath::Deg2RadF(WHEEL_ROT), UtilityMath::AXIS_X));
-		transformWheelFrontR_.quaRotLocal = Quaternion::Mult(transformWheelFrontR_.quaRotLocal,Quaternion::AngleAxis(UtilityMath::Deg2RadF(-WHEEL_ROT), UtilityMath::AXIS_X));
-		transformWheelBackFrontL_.quaRotLocal = Quaternion::Mult(transformWheelBackFrontL_.quaRotLocal,Quaternion::AngleAxis(UtilityMath::Deg2RadF(WHEEL_ROT), UtilityMath::AXIS_X));
-		transformWheelBackFrontR_.quaRotLocal = Quaternion::Mult(transformWheelBackFrontR_.quaRotLocal,Quaternion::AngleAxis(UtilityMath::Deg2RadF(-WHEEL_ROT), UtilityMath::AXIS_X));
-		transformWheelBackL_.quaRotLocal = Quaternion::Mult(transformWheelBackL_.quaRotLocal,Quaternion::AngleAxis(UtilityMath::Deg2RadF(WHEEL_ROT), UtilityMath::AXIS_X));
-		transformWheelBackR_.quaRotLocal = Quaternion::Mult(transformWheelBackR_.quaRotLocal,Quaternion::AngleAxis(UtilityMath::Deg2RadF(-WHEEL_ROT), UtilityMath::AXIS_X));
+		UpdateWheel();
 	}
 
 	transformWheelBackFrontL_.Update();
@@ -506,16 +536,8 @@ void Boss::BossTransformUpdate(void)
 	transformWheelBackR_.Update();
 	transformWheelFrontL_.Update();
 	transformWheelFrontR_.Update();
-
 	transformBody_.Update();
-	BoneParam();
-	
-	WeaponSet();
 
-	WeaponUpdate();
-
-	SoundManager::GetInstance().Set3DPosition(SoundManager::SOUND::SE_BOSS_LANDING, transform_.pos);
-	SoundManager::GetInstance().Set3DPosition(SoundManager::SOUND::SE_BOSS_ROAD, transform_.pos);
 }
 
 void Boss::UpdateProcess(void)
@@ -524,6 +546,9 @@ void Boss::UpdateProcess(void)
 	const std::unique_ptr<Camera>& camera = SceneManager::GetInstance().GetCamera();
 	
 	cameraPos_ = camera->GetPos();
+
+	SelectTarget();
+
 
 	if (transform_.pos.y < DOWU_POS)
 	{
@@ -563,6 +588,14 @@ void Boss::UpdateProcess(void)
 	EffectManager::GetInstance().UpdateScl(EffectManager::EFFECT::EFFECT_WAVE, this, currentWaveScl);
 
 	BossTransformUpdate();
+
+	WeaponSet();
+
+	BoneParam();
+
+	WeaponUpdate();
+
+	UpdateSound();
 
 	wave_->SetPos(transform_.pos);
 	wave_->Update();
@@ -882,17 +915,6 @@ void Boss::LookPlayer(void)
 		return;
 	}
 
-	if (isHostControl_)
-	{
-		int gameTime = TimeManager::GetInstance().GetGameTime();
-		if (static_cast<int>(gameTime) >= nextChangeMainTime_)
-		{
-
-			mainIdx_ = std::rand() % playerSize_;
-			nextChangeMainTime_ = static_cast<int>(gameTime) + INTERVAL_SEC;
-		}
-	}
-	
 	mainPos_ = playerPos_[mainIdx_];
 	VECTOR moveDir = VSub(mainPos_, transformBody_.pos);
 	moveDir.y = 0.0f;
@@ -906,36 +928,23 @@ void Boss::LookPlayer(void)
 	roadDir_ = moveDir;
 }
 
-//ウェポンの呼び出し纏めよう＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝
-void Boss::WeaponSet(void)
+void Boss::SelectTarget(void)
 {
-	// 各武器にボーン情報を設定（ここはそのまま）
-	weaponMGL_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MGL_L)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MGL_L)].transform, ColliderBase::TAG::WEAPON_MG_L, mainPos_);
-	weaponMGR_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MGL_R)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MGL_R)].transform, ColliderBase::TAG::WEAPON_MG_R, mainPos_);
-
-	int gameTime = TimeManager::GetInstance().GetGameTime();
-
 	if (isHostControl_)
 	{
 		int gameTime = TimeManager::GetInstance().GetGameTime();
+		if (static_cast<int>(gameTime) >= nextChangeMainTime_)
+		{
 
+			mainIdx_ = std::rand() % playerSize_;
+			nextChangeMainTime_ = static_cast<int>(gameTime) + INTERVAL_SEC;
+		}
 		if (static_cast<int>(gameTime) >= nextChangeMpTime_)
 		{
 
 			mpIdx_ = std::rand() % playerSize_;
 			nextChangeMpTime_ = static_cast<int>(gameTime) + INTERVAL_SEC_MP;
 		}
-	}
-	
-	mpPos_ = playerPos_[mpIdx_];
-	weaponMPL_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MP_L)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MP_L)].transform, ColliderBase::TAG::WEAPON_MP_L, mpPos_);
-	weaponMPR_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MP_R)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MP_R)].transform, ColliderBase::TAG::WEAPON_MP_R, mainPos_);
-	weaponRG_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_RG)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_RG)].transform, ColliderBase::TAG::WEAPON_RG, mainPos_);
-
-	if (isHostControl_)
-	{
-		int gameTime = TimeManager::GetInstance().GetGameTime();
-
 		if (static_cast<int>(gameTime) >= nextChangeCannonTime_)
 		{
 
@@ -943,6 +952,20 @@ void Boss::WeaponSet(void)
 			nextChangeCannonTime_ = static_cast<int>(gameTime) + INTERVAL_SEC_CANNON;
 		}
 	}
+}
+
+//ウェポンの呼び出し纏めよう＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝
+void Boss::WeaponSet(void)
+{
+	
+	weaponMGL_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MGL_L)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MGL_L)].transform, ColliderBase::TAG::WEAPON_MG_L, mainPos_);
+	weaponMGR_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MGL_R)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MGL_R)].transform, ColliderBase::TAG::WEAPON_MG_R, mainPos_);
+	int gameTime = TimeManager::GetInstance().GetGameTime();
+
+	mpPos_ = playerPos_[mpIdx_];
+	weaponMPL_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MP_L)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MP_L)].transform, ColliderBase::TAG::WEAPON_MP_L, mpPos_);
+	weaponMPR_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MP_R)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MP_R)].transform, ColliderBase::TAG::WEAPON_MP_R, mainPos_);
+	weaponRG_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_RG)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_RG)].transform, ColliderBase::TAG::WEAPON_RG, mainPos_);
 	
 	CannonPos_ = playerPos_[cannonIdx_];
 	weaponCannonL_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_CANNON_L)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_CANNON_L)].transform, ColliderBase::TAG::WEAPON_CANNON_L, mainPos_);

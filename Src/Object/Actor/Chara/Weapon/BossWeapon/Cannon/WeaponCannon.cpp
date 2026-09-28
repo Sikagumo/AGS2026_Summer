@@ -199,6 +199,17 @@ void WeaponCannon::ChangeStateEnd(void)
 	moveDir_ = VNorm(moveDir_);
 }
 
+void WeaponCannon::UpdateEnd(void)
+{
+	speed_ = MOVE_SPEED;
+	VECTOR movePow = VScale(moveDir_, speed_);
+	// à⁄ìÆèàóù
+	if (isJump_)
+	{
+		transform_.pos = VAdd(transform_.pos, movePow);
+	}
+}
+
 void WeaponCannon::UpdateAttack(void)
 {
 	transform_.pos = MV1GetFramePosition(bone_.transform.modelId, bone_.id);
@@ -220,22 +231,7 @@ void WeaponCannon::UpdateIdle(void)
 	transform_.pos = MV1GetFramePosition(bone_.transform.modelId, bone_.id);
 }
 
-void WeaponCannon::UpdateEnd(void)
-{
 
-	
-
-	speed_ = MOVE_SPEED;
-	VECTOR movePow = VScale(moveDir_, speed_);
-	// à⁄ìÆèàóù
-	if (isJump_)
-	{
-		transform_.pos = VAdd(transform_.pos, movePow);
-	}
-	
-
-
-}
 
 void WeaponCannon::CreateBullets(void)
 {
