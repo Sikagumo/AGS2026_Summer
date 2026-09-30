@@ -177,10 +177,8 @@ void BBulletMissile::DrawAreaAlert(void)
 
 	float shadowY = SHADOW_POS_Y;
 
-	/*float distance = transform_.pos.y - shadowY;
-	if (distance < 0) distance = 0;
-	if (distance > SHADOW_FADE_HEIGHT) distance = SHADOW_FADE_HEIGHT;*/
-	int alpha = 125;//(int)((1.0f - (distance / SHADOW_FADE_HEIGHT)) * MAX_SHADOW_COL);
+	
+	int alpha = 125;
 
 
 	// キャラクターの現在位置

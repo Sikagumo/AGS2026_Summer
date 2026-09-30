@@ -8,17 +8,14 @@
 MGBase::MGBase(void)
     : bulletDir_{ 0.0f, 0.0f, 0.0f }
     , bulletCount_(MAX_BULLET_COUNT)
-    , muzzlePos_{ 0.0f, 0.0f, 0.0f }
+    , muzzlePos_{}
     , muzzleCount_(0)
     , isAttack_(false)
+    , look_(1)
 {
 }
 
-MGBase::~MGBase(void)
-{
-}
-
-void MGBase::SetBone(int _id, Transform _trans, ColliderBase::TAG _tag, VECTOR _playerPos)
+void MGBase::SetBone(int _id, const Transform& _trans, ColliderBase::TAG _tag, const VECTOR& _playerPos)
 {
     bone_.id = _id;
     bone_.transform = _trans;
@@ -32,33 +29,24 @@ const VECTOR MGBase::GetPos(void) const
     return VAdd(transform_.pos, localRotPos);
 }
 
-void MGBase::ChangeState(STATE _state)
-{
-    state_ = _state;
-
-    int state = static_cast<int>(state_);
-
-    // 各状態遷移の初期処理
-    ChangeState(state);
-}
-
 void MGBase::UpdateCommon(void)
 {
- 
     // HPがなくなったら死亡処理（左右共通）
     if (hp_ <= 0 && isAlive_)
     {
-        ChangeState(static_cast<int>(STATE::END));
+        ChangeState(STATE::END);
     }
-   
-    for (std::shared_ptr<BBulletBase>  bullet : bullets_)
+
+    // 弾の更新処理（参照渡しで高速化）
+    for (const auto& bullet : bullets_)
     {
         bullet->Update();
-        
     }
-    
+
+    if (stateUpdate_)
+    {
         stateUpdate_();
-  
+    }
 }
 
 void MGBase::LookPlayer(void)
@@ -69,7 +57,7 @@ void MGBase::LookPlayer(void)
     float horizontalDistance = sqrtf(moveDir.z * moveDir.z + moveDir.x * moveDir.x);
     float targetAngleRad = atan2(moveDir.y, horizontalDistance);
 
-    // 度数法に変換して制限をかける
+    // 度数法に変換して回転制限をかける
     float targetAngleDeg = UtilityMath::Rad2DegF(targetAngleRad);
     targetAngleDeg = std::clamp(targetAngleDeg, LIMIT_MIN_ANGLE, LIMIT_MAX_ANGLE);
 
@@ -77,31 +65,44 @@ void MGBase::LookPlayer(void)
     targetAngleRad = UtilityMath::Deg2RadF(targetAngleDeg);
     Quaternion quaRot = Quaternion::AngleAxis(-targetAngleRad, UtilityMath::AXIS_X);
 
-    quaRot = Quaternion::Mult(quaRot, Quaternion::AngleAxis((targetAngleRad*look), UtilityMath::AXIS_Y));
+    quaRot = Quaternion::Mult(quaRot, Quaternion::AngleAxis((targetAngleRad * look_), UtilityMath::AXIS_Y));
 
     transform_.quaRot = Quaternion::Mult(bone_.transform.quaRot, quaRot);
 
     Quaternion bulletRot = transform_.quaRot;
 
-    //発射向きのランダム化
-    float randDirX = UtilityMath::RandRangeF(-5, 5);
+    // 発射向きのランダム化（マジックナンバーを定数化）
+    float randDirX = UtilityMath::RandRangeF(RAND_DIR_MIN, RAND_DIR_MAX);
     bulletRot = Quaternion::Mult(bulletRot, Quaternion::AngleAxis(UtilityMath::Deg2RadF(randDirX), UtilityMath::AXIS_X));
-    float randDirY = UtilityMath::RandRangeF(-5, 5);
+    float randDirY = UtilityMath::RandRangeF(RAND_DIR_MIN, RAND_DIR_MAX);
     bulletRot = Quaternion::Mult(bulletRot, Quaternion::AngleAxis(UtilityMath::Deg2RadF(randDirY), UtilityMath::AXIS_Y));
 
-
-    //発射方向の計算
+    // 発射方向の計算
     VECTOR forward = VGet(0.0f, 0.0f, 1.0f);
     MATRIX rotationMatrix = Quaternion::ToMatrix(bulletRot);
     VECTOR bulletDir = VTransformSR(forward, rotationMatrix);
     bulletDir_ = VNorm(bulletDir);
 }
 
-void MGBase::ChangeState(int state)
+void MGBase::ChangeState(STATE _state)
 {
-    stateBase_ = state;
-    // 各状態遷移の初期処理
-    stateChanges_[stateBase_]();
+    state_ = _state;
+    int state = static_cast<int>(state_);
+
+    // 内部用のChangeStateを実行
+    ChangeState(state);
+}
+
+void MGBase::ChangeState(int _state)
+{
+    stateBase_ = _state;
+
+    // イテレータで安全・高速に検索して実行
+    auto it = stateChanges_.find(stateBase_);
+    if (it != stateChanges_.end())
+    {
+        it->second();
+    }
 }
 
 void MGBase::ChangeStateIdle(void)
@@ -114,11 +115,10 @@ void MGBase::ChangeStateAttack(void)
     stateUpdate_ = std::bind(&MGBase::UpdateAttack, this);
     bulletCount_ = MAX_BULLET_COUNT;
     isAttack_ = true;
-    
 
-    VECTOR effectRot=transform_.quaRot.GetForward();
+    VECTOR effectRot = transform_.quaRot.GetForward();
 
-    EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_MG, effectPos_, effectRot, { 10.0f,10.0f,10.0f }, 1.0f,this);
+    EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_MG, effectPos_, effectRot, EFFECT_SCALE, 1.0f, this);
 }
 
 void MGBase::ChangeStateEnd(void)
@@ -126,7 +126,7 @@ void MGBase::ChangeStateEnd(void)
     stateUpdate_ = std::bind(&MGBase::UpdateEnd, this);
     isAlive_ = false;
     CollisionController::GetInstance().SetCollisionActive(this, tag_, false);
-    jumpPow_ = JUNP_POW;
+    jumpPow_ = JUMP_POW;
     isJump_ = true;
     moveDir_ = VSub(transform_.pos, bone_.transform.pos);
     moveDir_.y = 0.0f;
@@ -145,31 +145,14 @@ void MGBase::UpdateAttack(void)
     transform_.pos = MV1GetFramePosition(bone_.transform.modelId, bone_.id);
     LookPlayer();
 
-    // ローカル座標を回転させてワールド座標へ変換
-    VECTOR localRotPos = transform_.quaRot.PosAxis(muzzlePos_[1]);
-    // 位置を加算して最終的なワールド座標にする
-    effectPos_ = VAdd(transform_.pos, localRotPos);
-    EffectManager::GetInstance().UpdatePos(EffectManager::EFFECT::EFFECT_MG, this, effectPos_);
-    Quaternion effectquaRot = Quaternion::Mult(transform_.quaRot, Quaternion::AngleAxis(UtilityMath::Deg2RadF(-90.0f), UtilityMath::AXIS_X));
-
-    VECTOR effectRot = effectquaRot.ToEuler();
-    effectRot.x = UtilityMath::Rad2DegF(effectRot.x);
-    effectRot.y = UtilityMath::Rad2DegF(effectRot.y);
-    effectRot.z = UtilityMath::Rad2DegF(effectRot.z);
-    EffectManager::GetInstance().UpdateRot(EffectManager::EFFECT::EFFECT_MG, this, effectRot);
-    bool isPlay = EffectManager::GetInstance().IsPlaying(EffectManager::EFFECT::EFFECT_MG, this);
-
-    if (!isPlay)
+    UpdateAttackEffect();
+    UpdateAttackSound();
+    if (bulletCount_ >= 0)
     {
-        EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_MG, effectPos_, effectRot, { 10.0f,10.0f,10.0f }, 1.0f, this);
-    }
-    
-
-    SoundManager::GetInstance().Set3DPosition(SoundManager::SOUND::SE_BOSS_MG_FIRE, transform_.pos);
-    if (bulletCount_ >= 0) {
         CreateBullets();
     }
-    if (bulletCount_ <= 0) {
+    if (bulletCount_ <= 0)
+    {
         isAttack_ = false;
         SoundManager::GetInstance().Stop(SoundManager::SOUND::SE_BOSS_MG_FIRE);
         ChangeState(STATE::IDLE);
@@ -178,9 +161,9 @@ void MGBase::UpdateAttack(void)
 
 void MGBase::UpdateEnd(void)
 {
- 
     speed_ = MOVE_SPEED;
     VECTOR movePow = VScale(moveDir_, speed_);
+
     // 移動処理
     if (isJump_)
     {
@@ -188,13 +171,46 @@ void MGBase::UpdateEnd(void)
     }
 }
 
+void MGBase::UpdateAttackEffect(void)
+{
+    // ローカル座標を回転させてワールド座標へ変換
+    VECTOR localRotPos = transform_.quaRot.PosAxis(muzzlePos_[1]);
+
+    // 位置を加算して最終的なワールド座標にする
+    effectPos_ = VAdd(transform_.pos, localRotPos);
+    EffectManager::GetInstance().UpdatePos(EffectManager::EFFECT::EFFECT_MG, this, effectPos_);
+
+    Quaternion effectquaRot = Quaternion::Mult(transform_.quaRot, Quaternion::AngleAxis(UtilityMath::Deg2RadF(EFFECT_ROT_X_OFFSET), UtilityMath::AXIS_X));
+
+    VECTOR effectRot = effectquaRot.ToEuler();
+    effectRot.x = UtilityMath::Rad2DegF(effectRot.x);
+    effectRot.y = UtilityMath::Rad2DegF(effectRot.y);
+    effectRot.z = UtilityMath::Rad2DegF(effectRot.z);
+    EffectManager::GetInstance().UpdateRot(EffectManager::EFFECT::EFFECT_MG, this, effectRot);
+
+    bool isPlay = EffectManager::GetInstance().IsPlaying(EffectManager::EFFECT::EFFECT_MG, this);
+    if (!isPlay)
+    {
+        EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_MG, effectPos_, effectRot, EFFECT_SCALE, 1.0f, this);
+    }
+
+}
+
+void MGBase::UpdateAttackSound(void)
+{
+    SoundManager::GetInstance().Set3DPosition(SoundManager::SOUND::SE_BOSS_MG_FIRE, transform_.pos);
+}
+
 void MGBase::CreateBullets(void)
 {
     muzzleCount_++;
-    if (muzzleCount_ > MUZZLE_MAX_COUNT - 1) {
+    if (muzzleCount_ >= MUZZLE_MAX_COUNT)
+    {
         muzzleCount_ = 0;
     }
+
     std::shared_ptr<BBulletBase> bullet = GetValidBullet();
+
     // ローカル座標を回転させてワールド座標へ変換
     VECTOR localRotPos = transform_.quaRot.PosAxis(muzzlePos_[muzzleCount_]);
 
@@ -208,10 +224,11 @@ void MGBase::CreateBullets(void)
 
 std::shared_ptr<BBulletBase> MGBase::GetValidBullet(void)
 {
-    
-    for (auto& bullet : bullets_) {
+    for (const auto& bullet : bullets_)
+    {
         if (!bullet->GetIsAlive()) return bullet;
     }
+
     std::shared_ptr<BBulletBase> bullet = std::make_shared<BBulletMG>();
     bullets_.emplace_back(bullet);
     bullet->Load();

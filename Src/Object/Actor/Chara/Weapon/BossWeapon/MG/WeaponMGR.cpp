@@ -9,14 +9,10 @@
 #include "../../Bullet/Boss/BBulletMG.h"
 #include "WeaponMGR.h"
 
-WeaponMGR::WeaponMGR():MGBase()
+WeaponMGR::WeaponMGR(void)
+	: MGBase()
 {
-	
 }
-
-
-
-
 
 void WeaponMGR::Load(void)
 {
@@ -28,16 +24,13 @@ void WeaponMGR::ReleasePost(void)
 {
 }
 
-
-
 void WeaponMGR::InitTransform(void)
 {
 	transform_.scl = WEAPON_SIZE;
 	transform_.quaRot = Quaternion::Mult(transform_.quaRot,
 		Quaternion::AngleAxis(UtilityMath::Deg2RadF(WEAPON_ROT), UtilityMath::AXIS_Y));
-	transform_.quaRotLocal =
-		Quaternion::Mult(transform_.quaRotLocal,
-			Quaternion::AngleAxis(UtilityMath::Deg2RadF(WEAPON_ROT), UtilityMath::AXIS_Y));
+	transform_.quaRotLocal = Quaternion::Mult(transform_.quaRotLocal,
+		Quaternion::AngleAxis(UtilityMath::Deg2RadF(WEAPON_ROT), UtilityMath::AXIS_Y));
 
 	transform_.pos = MV1GetFramePosition(bone_.transform.modelId, bone_.id);
 	transform_.Update();
@@ -46,8 +39,9 @@ void WeaponMGR::InitTransform(void)
 void WeaponMGR::InitCollider(void)
 {
 	ColliderLine* colLine = new ColliderLine(ColliderBase::TAG::STAGE, &transform_, LINE_START_POS, LINE_END_POS);
-	ownColliders_[static_cast<int>(ColliderBase::SHAPE::LINE)].push_back(colLine);
-
+	// èCê≥É|ÉCÉìÉg: SHAPE::LINE Ç≈ÇÕÇ»Ç≠ TAG::STAGE Ç…èCê≥
+	ownColliders_[static_cast<int>(ColliderBase::TAG::STAGE)].push_back(colLine);
+	colLine->SetTriger(false);
 
 	ColliderCapsule* colCapsule = new ColliderCapsule(
 		tag_, &transform_, CAPSULE_START_POS, CAPSULE_END_POS, CAPSULE_RADIUS);
@@ -63,16 +57,14 @@ void WeaponMGR::InitAnimation(void)
 
 void WeaponMGR::InitPost(void)
 {
-	hp_ = 1250;
 	isAlive_ = true;
 	localPos_ = LINE_START_POS;
-	look = 1;
+	look_ = 1;
 	for (int i = 0; i < MUZZLE_MAX_COUNT; ++i)
 	{
 		muzzlePos_[i] = MUZZLE_POS[i];
 	}
-	stateChanges_.emplace(static_cast<int>(STATE::IDLE),
-		std::bind(&WeaponMGR::ChangeStateIdle, this));
+	stateChanges_.emplace(static_cast<int>(STATE::IDLE), std::bind(&WeaponMGR::ChangeStateIdle, this));
 	stateChanges_.emplace(static_cast<int>(STATE::ATTACK), std::bind(&WeaponMGR::ChangeStateAttack, this));
 	stateChanges_.emplace(static_cast<int>(STATE::END), std::bind(&WeaponMGR::ChangeStateEnd, this));
 	ChangeState(STATE::IDLE);
@@ -80,35 +72,20 @@ void WeaponMGR::InitPost(void)
 
 void WeaponMGR::UpdateProcess(void)
 {
-	
 	MGBase::UpdateCommon();
 }
 
 void WeaponMGR::UpdateProcessPost(void)
 {
-	
 }
-
-
 
 void WeaponMGR::DrawPre(void)
 {
-
-	
-	for (std::shared_ptr<BBulletBase> shot : bullets_)
+	for (const auto& shot : bullets_)
 	{
-		if (shot->GetIsAlive() == true)
+		if (shot->GetIsAlive())
 		{
 			shot->Draw();
 		}
-		
 	}
-
-#ifdef _DEBUG
-
-
-	
-
-#endif
 }
-
