@@ -95,7 +95,7 @@ public:
 
 	/// @brief MGの発射音を鳴らすかどうかを取得する
 	/// @return MGの発射音を鳴らすかどうかのフラグ
-	const bool& GetMGFireFlag(void) const { return isMGFire_; }
+	const bool& GetMGFireFlag(void) const { return isMGSoundFire_; }
 
 	/// @brief 走行音を鳴らすかどうかを取得する
 	/// @return 走行音を鳴らすかどうかのフラグ
@@ -266,7 +266,7 @@ private:
 
 	//ジャンプ力
 	static constexpr float POW_JUMP_INIT = 3000.0f;					//ジャンプ初速
-	static constexpr float JUMP_MAX_UP = POW_JUMP_INIT + 500.0f;	//ジャンプ上昇力の最大値
+	static constexpr float JUMP_MAX_POS_Y = POW_JUMP_INIT + 500.0f;	//ジャンプ上昇の最大位置
 	static constexpr float MOVE_SPEED_INIT = 20.0f;					//ジャンプ時の初期移動速度
 	static constexpr float POW_JUMP_DOUN = -50.0f;					//落下時の加速度
 	static constexpr VECTOR WAVE_SCL = { 1.0f,50.0f,1.0f };			//ジャンプ波エフェクトの大きさ
@@ -288,7 +288,8 @@ private:
 	//カプセル
 	static constexpr VECTOR COL_CAPSULE_START_POS = { 0.0f,130.0f,0.0f };	//カプセル判定の始点
 	static constexpr VECTOR COL_CAPSULE_END_POS = { 0.0f,80.0f,0.0f };		//カプセル判定の終点
-	static constexpr float COL_CAPSULE_END_RADIUS = 80.0f;					//カプセル判定の半径
+	static constexpr float COL_CAPSULE_BODY_RADIUS = 80.0f;					//本体カプセル判定の半径
+	static constexpr float COL_CAPSULE_ROAD_ATTACK_RADIUS = 200.0f;			//カプセル判定の半径
 
 	//ボーンの番号
 	static constexpr int JOINT_FEET_BODY = 12;								//足本体のボーン番号
@@ -342,7 +343,7 @@ private:
 	bool roadIsAttack_;						//体当たり攻撃中かのフラグ
 	float soundRadius_;						//音の聞こえる範囲
 	bool isLanging_;						//着地音を鳴らすかのフラグ
-	bool isMGFire_;							//MG発射音を鳴らすかのフラグ
+	bool isMGSoundFire_;					//MG発射音を鳴らすかのフラグ
 	bool isRoadFire_;						//走行音を鳴らすかのフラグ
 
 	//攻撃関連
@@ -392,7 +393,7 @@ private:
 	void BoneParam(void);							//ボーン情報を初期化
 
 	//ボーンアプデ
-	void BossTransformUpdate(void);					//ボーンのトランスフォームを更新
+	void UpdateBossTransform(void);					//ボーンのトランスフォームを更新
 
 	// 状態
 	STATE state_;									//現在の状態
@@ -518,18 +519,18 @@ protected:
 
 	// 武器関連
 	/// @brief 武器のセット処理をまとめて呼び出す
-	void WeaponSet(void);
+	void SetWeapon(void);
 
 	/// @brief 武器のロード処理をまとめて呼び出す
-	void WeaponLoad(void);
+	void LoadWeapon(void);
 
 	/// @brief 武器の初期化処理をまとめて呼び出す
-	void WeaponInit(void);
+	void InitWeapon(void);
 
 	/// @brief 武器の更新処理をまとめて呼び出す
-	void WeaponUpdate(void);
+	void UpdateWeapon(void);
 
 	/// @brief 武器の描画処理をまとめて呼び出す
-	void WeaponDraw(void);
+	void DrawWeapon(void);
 };
 
