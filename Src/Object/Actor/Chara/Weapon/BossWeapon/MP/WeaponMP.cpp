@@ -221,7 +221,7 @@ void WeaponMP::CreateBullets(void)
 	// 左右に応じた落下高度のオフセット計算（定数化適用）
 	int stepOffset = isLR_ ? EVEN_OFFSET : ODD_OFFSET;
 	float maxPos = MIN_FALL_POS + (UP_FALL_POS * (muzzleCount_ * INDEX_STEP + stepOffset));
-	bullet->SetUpMaxPos_(maxPos);
+	bullet->SetUpMaxPos(maxPos);
 
 	muzzleCount_++;
 	if (muzzleCount_ >= MUZZLE_MAX_COUNT / HALF_MUZZLE_DIVISOR)

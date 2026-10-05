@@ -130,7 +130,6 @@ void Application::Run(void)
 		
 		KeyConfInputManager::GetInstance().Update();
 
-
 		sceneManager.Draw();
 		
 		ImGuiWrapper::GetInstance().Draw();
@@ -145,6 +144,7 @@ void Application::Run(void)
 		// —‘zFPSŒo‰ß‘Ò‚¿
 		fpsController_->Wait();
 	}
+
 	netManager.DestroyInstance();
 }
 
