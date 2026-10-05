@@ -8,7 +8,7 @@ class AnimationController
 {
 public:
 
-	enum class ANIM_TYPE
+	enum class ANIMATION_TYPE
 	{
 		NONE,
 		INTERNAL, // 内部アニメーション
@@ -18,7 +18,7 @@ public:
 	// アニメーションデータ
 	struct Animation
 	{
-		ANIM_TYPE type = ANIM_TYPE::NONE;
+		ANIMATION_TYPE type = ANIMATION_TYPE::NONE;
 		int modelId		= -1; // アニメーションモデル
 		int attachNo	= -1;
 		int animIndex	= 0;	 // モデル内アニメーション番号

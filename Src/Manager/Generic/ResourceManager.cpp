@@ -9,16 +9,7 @@
 ResourceManager* ResourceManager::instance_ = nullptr;
 
 // リソースファイルのパス
-#ifdef _DEBUG
 const std::string PATH_DATA = "Data/";
-
-// 暗号化済みのリソースフォルダパス
-#else
-
-//const std::string PATH_DATA = "Data/ResourceData/";
-const std::string PATH_DATA = "Data/";
-#endif
-
 
 // ファイルパスの割り当て
 const std::string ResourceManager::PATH_EFFECT = PATH_DATA + "Effect/";
@@ -273,7 +264,7 @@ void ResourceManager::Initialize(void)
 
 	/* アニメーション */
 	_SetResource(LOAD_TYPE::ANIM, SRC::ANIM_IDLE, PATH_ANIM + "Idle.mv1");
-	_SetResource(LOAD_TYPE::ANIM, SRC::ANIM_RUN, PATH_ANIM + "Run.mv1");
+	_SetResource(LOAD_TYPE::ANIM, SRC::ANIM_WALK, PATH_ANIM + "Run.mv1");
 	_SetResource(LOAD_TYPE::ANIM, SRC::ANIM_THROW_RUN, PATH_ANIM + "Throw_Run.mv1");
 	_SetResource(LOAD_TYPE::ANIM, SRC::ANIM_THROW_LEFT, PATH_ANIM + "Throw_Left.mv1");
 	_SetResource(LOAD_TYPE::ANIM, SRC::ANIM_THROW_RIGHT, PATH_ANIM + "Throw_Right.mv1");

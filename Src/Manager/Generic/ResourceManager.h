@@ -89,7 +89,7 @@ public:
 
 		/* 外部アニメーション */
 		ANIM_IDLE,
-		ANIM_RUN,
+		ANIM_WALK,
 		ANIM_THROW_RUN,
 		ANIM_THROW_LEFT,
 		ANIM_THROW_RIGHT,

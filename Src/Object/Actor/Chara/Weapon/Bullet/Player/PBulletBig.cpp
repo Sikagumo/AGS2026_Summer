@@ -3,26 +3,30 @@
 #include "../../../../../../Manager/System/TimeManager.h"
 #include "../../../../../Collision/CollisionController.h"
 
-constexpr float RADIUS_BIG = 9.0f;
-constexpr float RADIUS_INCREMENT = 27.5f;
-constexpr float RADIUS_BIG_BLAST = RADIUS_BIG + (RADIUS_INCREMENT * 4);
-constexpr float SCALE_BIG = 1.5f;
-constexpr float SCALE_BIG_INCREMENT = 2.5f;
-constexpr float TIME_ALIVE_BIG = 5.0f;
+namespace
+{
+	constexpr float RADIUS_BIG = 9.0f;
+	constexpr float RADIUS_INCREMENT = 27.5f;
+	constexpr float RADIUS_BIG_BLAST = RADIUS_BIG + (RADIUS_INCREMENT * 4);
+	constexpr float SCALE_BIG = 1.5f;
+	constexpr float SCALE_BIG_INCREMENT = 2.5f;
+	constexpr float TIME_ALIVE_BIG = 5.0f;
 
-// çUåÇóÕ
-constexpr int POWER_START = 50;
-constexpr int POWER_INCREMENT = 75;
+	// çUåÇóÕ
+	constexpr int POWER_START = 50;
+	constexpr int POWER_INCREMENT = 75;
 
-// ägëÂäÆóπÇ‹Ç≈ÇÃéûä‘
-constexpr float RADIUS_DURATION = 1.0f;
-
+	// ägëÂäÆóπÇ‹Ç≈ÇÃéûä‘
+	constexpr float RADIUS_DURATION = 1.0f;
+}
 
 
 PBulletBig::PBulletBig(int _shotType)
 	: PBulletBase::PBulletBase(_shotType)
-	, radiusMax_(0.0f), scaleMax_(0.0f)
-	, scaleUpTime_(0.0f), isScaleUp_(false)
+	, radiusMax_(0.0f)
+	, scaleMax_(0.0f)
+	, scaleUpTime_(0.0f)
+	, isScaleUp_(false)
 {
 }
 

@@ -7,23 +7,44 @@
 #include "../../../../../Collider/ColliderSphere.h"
 #include "../../../../../Collision/CollisionController.h"
 
+namespace
+{
+	// 弾の球の分割数
+	constexpr int SPHERE_DIV = 16;
+
+	// 弾が着弾(爆発)する対象タグ。毎フレーム生成しないよう静的に保持
+	constexpr std::array<ColliderBase::TAG, 10> HIT_TARGET_TAGS =
+	{
+		ColliderBase::TAG::BOSS, ColliderBase::TAG::ENEMY, ColliderBase::TAG::ENEMYROBO,
+		ColliderBase::TAG::WEAPON_CANNON_L, ColliderBase::TAG::WEAPON_CANNON_R,
+		ColliderBase::TAG::WEAPON_MG_L, ColliderBase::TAG::WEAPON_MG_R,
+		ColliderBase::TAG::WEAPON_MP_L, ColliderBase::TAG::WEAPON_MP_R,
+		ColliderBase::TAG::WEAPON_RG
+	};
+}
+
 PBulletBase::PBulletBase(int _shotType, bool _isGravity)
 	: ActorBase::ActorBase()
 	, shotType_(_shotType)
 	, bulletState_(BULLET_STATE::INACTIVE)
-	, radiusBullet_(0.0f) , radiusBlast_(0.0f)
-	, shotSpeedXZ_(0.0f), shotSpeedY_(0.0f)
+	, radiusBullet_(0.0f)
+	, radiusBlast_(0.0f)
+	, shotSpeedXZ_(0.0f)
+	, shotSpeedY_(0.0f)
 	, throwPow_(UtilityMath::VECTOR_ZERO)
+	, throwDir_(UtilityMath::VECTOR_ZERO)
 	, curGravityPow_(0.0f)
 	, aliveTime_(0.0f)
 	, shotCnt_(0)
 	, isVisible_(false)
-	, isFinish_(false)
-	, power_(0), activePowerBullet_(0), activePowerBlast_(0)
+	, power_(0)
+	, activePowerBullet_(0)
+	, activePowerBlast_(0)
 	, isActiveDestroy_(false)
 	, IS_GRAVITY(_isGravity)
 {
 }
+
 void PBulletBase::InitCollider(void)
 {
 	// 再初期化時、処理を終了
@@ -50,9 +71,14 @@ void PBulletBase::InitCollider(void)
 void PBulletBase::InitPost(void)
 {
 	isVisible_ = true;
+
 	bulletState_ = BULLET_STATE::INACTIVE;
-	activePowerBullet_ = activePowerBlast_ = 0;
+
+	activePowerBullet_ = 0;
+	activePowerBlast_  = 0;
+
 	isActiveDestroy_ = false;
+
 	radiusBlast_ = 0.0f;
 
 	SetParam();
@@ -60,7 +86,6 @@ void PBulletBase::InitPost(void)
 	ownColliders_.at(static_cast<int>(COLLISION_TYPE::BLAST))
 		.at(0)->SetRadius(radiusBlast_);
 }
-
 
 void PBulletBase::Update(void)
 {
@@ -86,6 +111,7 @@ void PBulletBase::Update(void)
 		}
 	}
 
+	// 弾別の更新処理
 	UpdatePost();
 
 
@@ -95,18 +121,9 @@ void PBulletBase::Update(void)
 	}
 
 
-	const std::vector<ColliderBase::TAG> BOSS_TAG
-		= { ColliderBase::TAG::BOSS, ColliderBase::TAG::ENEMY, ColliderBase::TAG::ENEMYROBO
-			, ColliderBase::TAG::WEAPON_CANNON_L, ColliderBase::TAG::WEAPON_CANNON_R
-			, ColliderBase::TAG::WEAPON_MG_L, ColliderBase::TAG::WEAPON_MG_R
-			, ColliderBase::TAG::WEAPON_MP_L, ColliderBase::TAG::WEAPON_MP_R
-			, ColliderBase::TAG::WEAPON_RG};
-
-	CollisionController& colMng = CollisionController::GetInstance();
-
-	for (auto tag : BOSS_TAG)
+	for (auto tag : HIT_TARGET_TAGS)
 	{
-		if (colMng.IsActorCollidingWithTag(this, tag))
+		if (CollisionController::GetInstance().IsActorCollidingWithTag(this, tag))
 		{
 			BlastAction();
 			return;
@@ -114,7 +131,7 @@ void PBulletBase::Update(void)
 	}
 
 	// ステージに衝突時、爆発処理
-	if (colMng.IsActorCollidingWithTag(this, ColliderBase::TAG::STAGE)
+	if (CollisionController::GetInstance().IsActorCollidingWithTag(this, ColliderBase::TAG::STAGE)
 		|| throwPow_.y < 0.0f)
 	{
 		BlastAction();
@@ -123,8 +140,6 @@ void PBulletBase::Update(void)
 
 void PBulletBase::Draw(void)
 {
-	constexpr int SPHERE_DIV = 16;
-
 	if (transform_.modelId == -1
 		&& isVisible_)
 	{
@@ -152,7 +167,7 @@ void PBulletBase::ChangeBulletState(BULLET_STATE _state)
 }
 
 
-void PBulletBase::Create(const VECTOR& _pos, const VECTOR& _throwDir, int _shotCnt, bool _isFinish)
+void PBulletBase::Create(const VECTOR& _pos, const VECTOR& _throwDir, int _shotCnt)
 {
 	shotCnt_ = _shotCnt;
 
@@ -163,8 +178,6 @@ void PBulletBase::Create(const VECTOR& _pos, const VECTOR& _throwDir, int _shotC
 	curGravityPow_ = 0.0f;
 	throwDir_ = _throwDir;
 	transform_.pos = VAdd(_pos, VScale(_throwDir, radiusBullet_));
-
-	isFinish_ = _isFinish;
 
 	transform_.Update();
 
@@ -206,8 +219,7 @@ void PBulletBase::Shot(const VECTOR& _shotDir)
 
 bool PBulletBase::IsAlive(void) const
 {
-	return(bulletState_ != BULLET_STATE::INACTIVE
-			&& !isActiveDestroy_);
+	return(bulletState_ != BULLET_STATE::INACTIVE && !isActiveDestroy_);
 }
 void PBulletBase::SetFollow(const VECTOR& _pos, const VECTOR& _offsetDir)
 {
