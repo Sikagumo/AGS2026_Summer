@@ -9,9 +9,6 @@ class Quaternion
 {
 public:
 
-	// 正規化時の極小値（ゼロ割防止）
-	static constexpr float kEpsilonNorMalSqrt = 1e-15F;
-
 	// クォータニオンのスカラー成分（回転量の余弦）
 	double w;
 
@@ -221,6 +218,9 @@ public:
 	void ToAngleAxis(float* angle, VECTOR* axis);
 
 private:
+
+	// 正規化時の極小値（ゼロ割防止）
+	static constexpr float KEPSILON_NORMAL_SQRT = 1e-15F;
 
 	// @brief 指定方向を回転
 	// @param dir 入力方向

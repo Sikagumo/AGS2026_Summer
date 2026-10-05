@@ -13,6 +13,7 @@
 #include "../Collider/ColliderCapsule.h"
 #include "../Collider/ColliderSphere.h"
 #include "../Collider/ColliderModel.h"
+#include "../Actor/Chara/CharaBase.h"
 
 CollisionController* CollisionController::instance_ = nullptr;
 
@@ -462,20 +463,50 @@ void CollisionController::ResolveCollision(ActorBase* _actorA, ActorBase* _actor
 	{
 		if (fabsf(_info.hitNormal.y) < 0.5f)
 		{
-			pushVector.y = 0.0f;
-		}
+			CharaBase* charaA = static_cast<CharaBase*>(_actorA);
 
-		_actorA->GetTransform().Translate(pushVector);
+			if (charaA != nullptr)
+			{
+				VECTOR prev = charaA->GetPrevPos();
+
+				_actorA->GetTransform().pos.x = prev.x;
+				_actorA->GetTransform().pos.z = prev.z;
+			}
+			else
+			{
+				pushVector.y = 0.0f;
+				_actorA->GetTransform().Translate(pushVector);
+			}
+		}
+		else
+		{
+			_actorA->GetTransform().Translate(pushVector);
+		}
 		return;
 	}
 	else if (isActorAStatic && !isActorBStatic)
 	{
 		if (fabsf(_info.hitNormal.y) < 0.5f)
 		{
-			pushVector.y = 0.0f;
-		}
+			CharaBase* charaB = static_cast<CharaBase*>(_actorB);
 
-		_actorB->GetTransform().Translate(VScale(pushVector, -1.0f));
+			if (charaB != nullptr)
+			{
+				VECTOR prev = charaB->GetPrevPos();
+
+				_actorB->GetTransform().pos.x = prev.x;
+				_actorB->GetTransform().pos.z = prev.z;
+			}
+			else
+			{
+				pushVector.y = 0.0f;
+				_actorB->GetTransform().Translate(VScale(pushVector, -1.0f));
+			}
+		}
+		else
+		{
+			_actorB->GetTransform().Translate(VScale(pushVector, -1.0f));
+		}
 		return;
 	}
 

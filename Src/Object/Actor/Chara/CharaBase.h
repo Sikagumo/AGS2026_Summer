@@ -1,5 +1,6 @@
 #pragma once
 #include <array>
+#include <DxLib.h>
 #include "../ActorBase.h"
 #include "../../Common/AnimationController.h"
 #include "../../../Utility/UtilityMath.h"
@@ -27,6 +28,9 @@ public:
 	void Update(void)override final;
 
 	virtual void DrawDebug(void);
+
+	// @brief ˆÚ“®‘O‚ÌÀ•W‚ğæ“¾
+	VECTOR GetPrevPos(void) const { return prevPos_; } 
 
 protected:
 
