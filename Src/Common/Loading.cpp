@@ -25,7 +25,7 @@ Loading* Loading::GetInstance(void)
 
 void Loading::DestroyInstance(void)
 {
-	if (instance_)
+	if (instance_ != nullptr)
 	{
 		delete instance_;
 		instance_ = nullptr;
@@ -53,6 +53,7 @@ void Loading::Initialize(void)
 void Loading::StartAsyncLoad(std::function<void()> _loadFunc)
 {
 	SetUseASyncLoadFlag(true);
+
 	if (isLoading_)
 	{
 		return;
@@ -65,16 +66,15 @@ void Loading::StartAsyncLoad(std::function<void()> _loadFunc)
 	{
 		_loadFunc();
 	}
+
 	SetUseASyncLoadFlag(false);
 }
 
 void Loading::Update(void)
 {
-	if (!isLoading_)
-	{
-		return;
-	}
+	if (!isLoading_) { return; }
 
+	// 進捗率関連
 	const int LOAD_COUNT = GetASyncLoadNum();  // 残りの非同期ロード数
 	const float PROGRESS_SPEED = 0.5f;         // 1フレームごとの進捗増加量
 	const float WAIT_PROGRESS = 99.9f;         // ロード完了待ちの進捗率

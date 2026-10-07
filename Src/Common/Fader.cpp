@@ -1,11 +1,20 @@
-#include <DxLib.h>
-#include "../Application.h"
 #include "Fader.h"
+
+#include <DxLib.h>
+
+#include "../Application.h"
 #include "../Manager/Generic/ResourceManager.h"
+
+namespace
+{
+    // アルファ値定義関連
+    constexpr float ALPHA_MAX = 255.0f; // 透明度の最大値
+    constexpr float ALPHA_MIN = 0.0f;   // 透明度の最小値
+}
 
 Fader::Fader(void)
     : state_(STATE::NONE)
-    , alpha_(0.0f)
+    , alpha_(ALPHA_MIN)
     , isPreEnd_(true)
     , isEnd_(true)
     , fadeImageHandle_(-1)
@@ -62,9 +71,6 @@ void Fader::Update(void)
         return;
     }
 
-    const float MAX_ALPHA = 255.0f; // 透明度の最大値
-    const float MIN_ALPHA = 0.0f;   // 透明度の最小値
-
     switch (state_)
     {
     case STATE::NONE:
@@ -74,10 +80,10 @@ void Fader::Update(void)
     case STATE::FADE_OUT:
     {
         alpha_ += SPEED_ALPHA;
-        if (alpha_ > MAX_ALPHA)
+        if (alpha_ > ALPHA_MAX)
         {
             // フェード終了
-            alpha_ = MAX_ALPHA;
+            alpha_ = ALPHA_MAX;
             if (isPreEnd_)
             {
                 // 1フレーム後に終了とする
@@ -91,10 +97,10 @@ void Fader::Update(void)
     case STATE::FADE_IN:
     {
         alpha_ -= SPEED_ALPHA;
-        if (alpha_ < MIN_ALPHA)
+        if (alpha_ < ALPHA_MIN)
         {
             // フェード終了
-            alpha_ = MIN_ALPHA;
+            alpha_ = ALPHA_MIN;
             if (isPreEnd_)
             {
                 // 1フレーム後に終了とする
@@ -113,7 +119,6 @@ void Fader::Update(void)
 
 void Fader::Draw(void)
 {
-    const unsigned int BLACK_COLOR = 0x000000; 
 
     switch (state_)
     {
@@ -124,19 +129,39 @@ void Fader::Draw(void)
     case STATE::FADE_OUT:
     case STATE::FADE_IN:
     {
+        // 描画関連
+        constexpr unsigned int COLOR_BLACK = 0x000000;  // 黒色
+        constexpr float IMAGE_SCALE = 1.0f;             // 画像の描画スケール
+        constexpr float IMAGE_ROTATION = 0.0f;          // 画像の回転角
+        constexpr int DRAW_POSITION_X = 0;              // 描画開始X座標
+        constexpr int DRAW_POSITION_Y = 0;              // 描画開始Y座標
+        constexpr int SCREEN_HALF_DIVISOR = 2;          // 画面中央を求めるための除数
+        constexpr int BLEND_NO_BLEND_PARAM = 0;         // ノーブレンド時のパラメータ
+
         SetDrawBlendMode(DX_BLENDMODE_ALPHA, static_cast<int>(alpha_));
 
         if (fadeImageHandle_ != -1)
         {
-            // 画像がある場合は背景を黒フェードで塗り、その上に画像を描画
             DrawBox(
-                0, 0,
+                DRAW_POSITION_X,
+                DRAW_POSITION_Y,
                 Application::SCREEN_SIZE_X,
                 Application::SCREEN_SIZE_Y,
-                BLACK_COLOR, true);
+                COLOR_BLACK,
+                true
+            );
 
-            DrawRotaGraph(Application::SCREEN_HALF_X, Application::SCREEN_HALF_Y,
-                1.0f, 0.0f, fadeImageHandle_, true);
+            int centerX = Application::SCREEN_SIZE_X / SCREEN_HALF_DIVISOR;
+            int centerY = Application::SCREEN_SIZE_Y / SCREEN_HALF_DIVISOR;
+
+            DrawRotaGraph(
+                centerX,
+                centerY,
+                IMAGE_SCALE,
+                IMAGE_ROTATION,
+                fadeImageHandle_,
+                true
+            );
         }
         else
         {
@@ -145,10 +170,10 @@ void Fader::Draw(void)
                 0, 0,
                 Application::SCREEN_SIZE_X,
                 Application::SCREEN_SIZE_Y,
-                BLACK_COLOR, true);
+                COLOR_BLACK, true);
         }
 
-        SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+        SetDrawBlendMode(DX_BLENDMODE_NOBLEND, BLEND_NO_BLEND_PARAM);
         break;
     }
     }
