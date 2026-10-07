@@ -728,7 +728,7 @@ void Player::DrawShotOrbit(void)
 	if (shotType_ == SHOT_TYPE::NONE) { return; }
 
 	constexpr int SPHERE_DIV = 12;
-	constexpr int ORBIT_MAX = 50;
+	constexpr int ORBIT_MAX = 60;
 	constexpr float ORBIT_RADIUS_DOWN = 0.75f;
 	constexpr float ORBIT_RADIUS = 0.125f;
 
