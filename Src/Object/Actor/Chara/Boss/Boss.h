@@ -245,7 +245,7 @@ private:
 
 	//エフェクト
 	static constexpr float EFFECT_PLAEY_DAMEGE = 5.0f;			//プレイヤーへのエフェクトダメージ
-	static constexpr VECTOR EFFECT_SCL = { 10,10,10 };			//通常エフェクトの大きさ
+	static constexpr VECTOR EFFECT_SCL = { 30,30,30 };			//通常エフェクトの大きさ
 	static constexpr VECTOR EFFECT_SCL_LASER = { 35,35,35 };	//レーザーエフェクトの大きさ
 	static constexpr float EFFECT_PLAEY_SPEED = 1.0f;			//エフェクトの再生速度
 	static constexpr VECTOR EFFECT_ROT = { 90.0f,0.0f,0.0f };	//エフェクトの回転

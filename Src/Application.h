@@ -8,8 +8,8 @@ class Application
 private:
 
 	// èdóÕ
-	static constexpr float GRAVITY = 9.81f;
-	static constexpr float GRAVITY_SCALE = 0.7f;
+	static constexpr float GRAVITY = (9.81f + 0.2f);
+	static constexpr float GRAVITY_SCALE = (0.7f + 0.075f);
 
 public:
 

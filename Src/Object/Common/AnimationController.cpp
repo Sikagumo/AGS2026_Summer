@@ -39,7 +39,7 @@ void AnimationController::AddInternal(int _type, float _speed)
 	animation.speed = _speed;
 
 	// アニメーション状態割り当て
-	animation.type = ANIM_TYPE::INTERNAL;
+	animation.type = ANIMATION_TYPE::INTERNAL;
 
 	animation.step = 0.0f;
 
@@ -59,7 +59,7 @@ void AnimationController::AddInternal(int _type, const VECTOR& _localPos, float 
 	animation.speed = _speed;
 
 	// アニメーション状態割り当て
-	animation.type = ANIM_TYPE::INTERNAL;
+	animation.type = ANIMATION_TYPE::INTERNAL;
 
 	animation.step = 0.0f;
 
@@ -87,7 +87,7 @@ void AnimationController::AddExternal(int _type, int _handle, float _speed)
 	animation.speed = _speed;
 
 	// アニメーション状態割り当て
-	animation.type = ANIM_TYPE::EXTERNAL;
+	animation.type = ANIMATION_TYPE::EXTERNAL;
 
 	animation.step = 0.0f;
 
@@ -108,7 +108,7 @@ void AnimationController::AddExternal(int _type, int _handle
 	animation.speed = _speed;
 
 	// アニメーション状態割り当て
-	animation.type = ANIM_TYPE::EXTERNAL;
+	animation.type = ANIMATION_TYPE::EXTERNAL;
 
 	animation.step = 0.0f;
 
@@ -135,7 +135,7 @@ void AnimationController::AddExternal(int _type, int _handle
 	animation.speed = _speed;
 
 	// アニメーション状態割り当て
-	animation.type = ANIM_TYPE::EXTERNAL;
+	animation.type = ANIMATION_TYPE::EXTERNAL;
 
 	animation.step = 0.0f;
 
@@ -212,7 +212,7 @@ void AnimationController::Play(int _type, bool _isLoop, float _playSpeed, float 
 	
 
 	// モデルにアニメーションを付ける
-	if (playAnim.type == ANIM_TYPE::INTERNAL)
+	if (playAnim.type == ANIMATION_TYPE::INTERNAL)
 	{
 		// モデルと同じファイルからアニメーションをアタッチする
 		playAnim.attachNo = MV1AttachAnim(modelId_, playAnim.animIndex);
@@ -411,7 +411,7 @@ void AnimationController::Release(void)
 		MV1DetachAnim(modelId_, anim.attachNo);
 
 		// パス読み込みでの外部アニメーション時
-		if (anim.type == ANIM_TYPE::EXTERNAL &&
+		if (anim.type == ANIMATION_TYPE::EXTERNAL &&
 			anim.isLoadPath)
 		{
 			// アニメーション解放

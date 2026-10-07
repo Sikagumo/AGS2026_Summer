@@ -7,12 +7,15 @@
 #include "../../../../../../Manager/System/TimeManager.h"
 #include "../../../../../../Manager/Decoration/EffectManager.h"
 
+namespace
+{
+	constexpr float RADIUS_BULLET = 10.0f;
+	constexpr float RADIUS_RECOVERY = 250.0f;
+	constexpr float SCALE_RECOVERY = 1.5f;
+	constexpr float TIME_ALIVE_RECOVERY = 15.0f;
+	constexpr float ACTIVE_TIME = 1.5f;
 
-constexpr float RADIUS_BULLET = 10.0f;
-constexpr float RADIUS_RECOVERY = 250.0f;
-constexpr float SCALE_RECOVERY = 1.5f;
-constexpr float TIME_ALIVE_RECOVERY = 15.0f;
-constexpr float ACTIVE_TIME = 1.5f;
+}
 
 PBulletRecovery::PBulletRecovery(int _shotType)
 	: PBulletBase::PBulletBase(_shotType)

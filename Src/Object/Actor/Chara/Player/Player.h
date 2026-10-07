@@ -14,11 +14,11 @@ private:
 
 public:
 
-	enum class ANIM_TYPE
+	enum class ANIMATION_TYPE
 	{
 		NONE = -1,
 		IDLE,
-		RUN,
+		WALK,
 		THROW_LEFT,
 		THROW_RIGHT,
 		THROW_RUN,
@@ -122,11 +122,11 @@ private:
 
 	// 攻撃回数
 	int attackNumMax_;
-	int curAttackNum_;
+	int curAttackCount_;
 
 	int shotIndex_;
 
-	ANIM_TYPE animType_;
+	ANIMATION_TYPE animationType_;
 
 	// 投げる位置
 	VECTOR throwPos_;
@@ -153,7 +153,7 @@ private:
 	// 自分が操作するかどうか
 	bool isHostControl_;
 
-	// 誰のキャラクターかを識別key
+	// 誰のキャラクターかの識別キー
 	int netKey_;
 
 	// 攻撃したかどうか
@@ -177,21 +177,19 @@ private:
 	void ProcessDodge(void);
 	void Dodge(void);
 
-	/// @brief 回避処理
 	void ProcessDefeat(void);
-
-	void ProcessKnock(void);
-
+	void ProcessKnockback(void);
 	void ProcessAttack(void);
 
 	void SetRespawn(void);
 
+	void InitActions(void);
 
 	/// @brief アニメーション再生
 	/// @param _type アニメーションの種類
 	/// @param _isLoop ループ再生するか否か
 	/// @param _animSpeed 再生速度指定(任意)
-	void PlayAnimation(ANIM_TYPE _type, bool _isLoop = true, bool _isAnimBlend = true, float _animSpeed = -1.0f);
+	void PlayAnimation(ANIMATION_TYPE _type, bool _isLoop = true, bool _isAnimBlend = true, float _animSpeed = -1.0f);
 
 	void CreateBullet(void);
 	void ShotBullet(void);
