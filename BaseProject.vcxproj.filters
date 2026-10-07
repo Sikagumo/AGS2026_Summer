@@ -43,7 +43,6 @@
     <ClCompile Include="Src\Scene\SceneBase.cpp" />
     <ClCompile Include="Src\Scene\MainScene\SceneGame.cpp" />
     <ClCompile Include="Src\Scene\MainScene\SceneTitle.cpp" />
-    <ClCompile Include="Src\Scene\MainScene\SceneGameBoss.cpp" />
     <ClCompile Include="Src\Scene\MainScene\SceneResult.cpp" />
     <ClCompile Include="Src\Scene\MainScene\SceneLobby.cpp" />
     <ClCompile Include="Src\Common\Loading.cpp" />
@@ -100,7 +99,6 @@
     <ClCompile Include="Src\Scene\SubScene\ScenePause.cpp" />
     <ClCompile Include="Src\Scene\SubScene\SceneOperation.cpp" />
     <ClCompile Include="Src\Manager\Generic\StatusManager.cpp" />
-    <ClCompile Include="Src\Shader\ShaderVertex\ShaderVertex.cpp" />
     <ClCompile Include="Src\Object\Actor\Stage\Tree.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -115,7 +113,6 @@
     <ClInclude Include="Src\Object\Collision\CollisionCapsule.h" />
     <ClInclude Include="Src\Object\Collision\CollisionSphere.h" />
     <ClInclude Include="Src\Manager\Generic\KeyConfInputManager.h" />
-    <ClInclude Include="Src\Scene\MainScene\SceneGameBoss.h" />
     <ClInclude Include="Src\Scene\MainScene\SceneResult.h" />
     <ClInclude Include="Src\Object\Collider2D\Collider2DBox.h" />
     <ClInclude Include="Src\Object\Collider2D\Collider2DCircle.h" />
@@ -203,10 +200,10 @@
     <ClInclude Include="Src\Manager\Decoration\EffectManager.h" />
     <ClInclude Include="Src\Scene\SubScene\ScenePause.h" />
     <ClInclude Include="Src\Scene\SubScene\SceneOperation.h" />
-    <ClInclude Include="Src\Shader\ShaderVertex\ShaderVertex.h" />
     <ClInclude Include="Src\Object\Actor\Stage\Tree.h" />
     <ClInclude Include="Src\Manager\Generic\StatusManager.h" />
     <ClInclude Include="Src\Shader\RenderCommand.h" />
+  </ItemGroup>
   <ItemGroup>
     <None Include="srcGraphics\Common\Pixel\PixelShader2DHeader.hlsli" />
     <None Include="srcGraphics\Common\Pixel\PixelShader3DHeader.hlsli" />
