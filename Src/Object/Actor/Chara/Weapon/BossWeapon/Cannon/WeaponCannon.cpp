@@ -175,6 +175,10 @@ void WeaponCannon::ChangeStateIdle(void)
 	stateUpdate_ = std::bind(&WeaponCannon::UpdateIdle, this);
 }
 
+void WeaponCannon::ChangeStateAttackWindup(void)
+{
+}
+
 void WeaponCannon::ChangeStateAttack(void)
 {
 	stateUpdate_ = std::bind(&WeaponCannon::UpdateAttack, this);
@@ -193,6 +197,10 @@ void WeaponCannon::ChangeStateEnd(void)
 	moveDir_ = VSub(transform_.pos, bone_.transform.pos);
 	moveDir_.y = 0.0f;
 	moveDir_ = VNorm(moveDir_);
+}
+
+void WeaponCannon::UpdateAttackWindup(void)
+{
 }
 
 void WeaponCannon::UpdateEnd(void)

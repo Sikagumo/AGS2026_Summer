@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include <DxLib.h>
 #include <memory>
 #include <array>
@@ -13,518 +13,523 @@ class WeaponCannon;
 class WeaponMP;
 class WeaponRG;
 class BBulletWave;
-
+/// @brief ãƒœã‚¹ã‚­ãƒ£ãƒ©ã‚¯ã‚¿ãƒ¼æœ¬ä½“ã‚¯ãƒ©ã‚¹
 class Boss : public CharaBase
 {
 public:
 
-	/// ƒXƒe[ƒgƒpƒ^[ƒ“
+	/// @brief ãƒœã‚¹ã®çŠ¶æ…‹ï¼ˆã‚¹ãƒ†ãƒ¼ãƒˆï¼‰ãƒ‘ã‚¿ãƒ¼ãƒ³åˆ—æŒ™å‹
 	enum class STATE
 	{
-		IDLE,
-		ATTACK,
-		JUMP,
-		JUMPBEFORE,
-		ROADATTACK,
-		LASER,
-		END,
+		IDLE,			// å¾…æ©ŸçŠ¶æ…‹
+		ATTACK,			// é€šå¸¸æ”»æ’ƒçŠ¶æ…‹
+		JUMP,			// ã‚¸ãƒ£ãƒ³ãƒ—æ»ç©ºçŠ¶æ…‹
+		JUMPBEFORE,		// ã‚¸ãƒ£ãƒ³ãƒ—æºœã‚ï¼ˆäºˆå‚™å‹•ä½œï¼‰çŠ¶æ…‹
+		ROADATTACK,		// ëŒì§„ï¼ˆçªé€²ï¼‰æ”»æ’ƒçŠ¶æ…‹
+		LASER,			// ç…§å°„ãƒ¬ãƒ¼ã‚¶ãƒ¼æ”»æ’ƒçŠ¶æ…‹
+		END,			// æ’ƒç ´ãƒ»æ­»äº¡çŠ¶æ…‹
 	};
 
-	/// UŒ‚ƒpƒ^[ƒ“
+	/// @brief ãƒœã‚¹ã®æ”»æ’ƒæŠ€ç¨®åˆ¥åˆ—æŒ™å‹
 	enum class ATTACK_TYPE
 	{
-		JUMP,
-		MG,
-		ROAD,
-		CANNON,
-		MISSILE,
-		LASER,
-		MAX,
+		JUMP,			// ã‚¸ãƒ£ãƒ³ãƒ—è¸ã¿ã¤ã¶ã—æ”»æ’ƒ
+		MG,				// ãƒã‚·ãƒ³ã‚¬ãƒ³é€£å°„æ”»æ’ƒ
+		ROAD,			// çªé€²æ”»æ’ƒ
+		CANNON,			// ã‚­ãƒ£ãƒãƒ³ç ²æ’ƒ
+		MISSILE,		// ä¸€æ–‰ãƒŸã‚µã‚¤ãƒ«é£›ç¿”æ”»æ’ƒ
+		LASER,			// ãªãæ‰•ã„ãƒ¬ãƒ¼ã‚¶ãƒ¼æ”»æ’ƒ
+		MAX,			// æ”»æ’ƒç¨®é¡ã®ç·æ•°
 	};
 
-	/// ƒEƒFƒ|ƒ“‚ÌÚ‘±ƒ{[ƒ“‚Ì–¼‘O
+	/// @brief æ­¦å™¨æ¥ç¶šå…ˆã®ãƒœãƒ¼ãƒ³ï¼ˆé–¢ç¯€ï¼‰ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹åˆ—æŒ™å‹
 	enum class BONE_NAME
 	{
-		WEAPON_JOINT_MGL_L = 0,
-		WEAPON_JOINT_MGL_R,
-		WEAPON_JOINT_CANNON_L,
-		WEAPON_JOINT_CANNON_R,
-		WEAPON_JOINT_MP_L,
-		WEAPON_JOINT_MP_R,
-		WEAPON_JOINT_RG,
-		MAX,
+		WEAPON_JOINT_MGL_L = 0,	// å·¦ãƒã‚·ãƒ³ã‚¬ãƒ³å–ã‚Šä»˜ã‘ãƒœãƒ¼ãƒ³
+		WEAPON_JOINT_MGL_R,		// å³ãƒã‚·ãƒ³ã‚¬ãƒ³å–ã‚Šä»˜ã‘ãƒœãƒ¼ãƒ³
+		WEAPON_JOINT_CANNON_L,	// å·¦ã‚­ãƒ£ãƒãƒ³ç ²å–ã‚Šä»˜ã‘ãƒœãƒ¼ãƒ³
+		WEAPON_JOINT_CANNON_R,	// å³ã‚­ãƒ£ãƒãƒ³ç ²å–ã‚Šä»˜ã‘ãƒœãƒ¼ãƒ³
+		WEAPON_JOINT_MP_L,		// å·¦ãƒŸã‚µã‚¤ãƒ«ãƒãƒƒãƒ‰å–ã‚Šä»˜ã‘ãƒœãƒ¼ãƒ³
+		WEAPON_JOINT_MP_R,		// å³ãƒŸã‚µã‚¤ãƒ«ãƒãƒƒãƒ‰å–ã‚Šä»˜ã‘ãƒœãƒ¼ãƒ³
+		WEAPON_JOINT_RG,		// ãƒ¬ãƒ¼ãƒ«ã‚¬ãƒ³å–ã‚Šä»˜ã‘ãƒœãƒ¼ãƒ³
+		MAX,					// æ¥ç¶šãƒœãƒ¼ãƒ³ã®ç·æ•°
 	};
 
-	/// ƒAƒjƒ[ƒVƒ‡ƒ“ƒpƒ^[ƒ“
+	/// @brief ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ç¨®åˆ¥åˆ—æŒ™å‹
 	enum class ANIM_TYPE
 	{
-		ATTACK,
-		DIR,
-		JUMP,
-		JUMPBEFORE,
-		MAX,
+		ATTACK,			// æ”»æ’ƒãƒ¢ãƒ¼ã‚·ãƒ§ãƒ³
+		DIR,			// ç§»å‹•ãƒ»å‘ãå¤‰æ›´ãƒ¢ãƒ¼ã‚·ãƒ§ãƒ³
+		JUMP,			// ã‚¸ãƒ£ãƒ³ãƒ—ä¸­ãƒ¢ãƒ¼ã‚·ãƒ§ãƒ³
+		JUMPBEFORE,		// ã‚¸ãƒ£ãƒ³ãƒ—äºˆå‚™å‹•ä½œãƒ¢ãƒ¼ã‚·ãƒ§ãƒ³
+		MAX,			// ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ç¨®é¡ã®ç·æ•°
 	};
 
-	/// Šeƒ{[ƒ“‚Ìî•ñ
-	struct Bone {
-		int id = 0;
-		Transform transform;
-
+	/// @brief æ¥ç¶šãƒœãƒ¼ãƒ³ã®å€‹åˆ¥ãƒˆãƒ©ãƒ³ã‚¹ãƒ•ã‚©ãƒ¼ãƒ æƒ…å ±æ§‹é€ ä½“
+	struct Bone 
+	{
+		int id = 0;             // ãƒ¢ãƒ‡ãƒ«ãƒ•ãƒ¬ãƒ¼ãƒ ï¼ˆãƒœãƒ¼ãƒ³ï¼‰ã®è­˜åˆ¥ID
+		Transform transform;    // ãƒœãƒ¼ãƒ³ã®ãƒˆãƒ©ãƒ³ã‚¹ãƒ•ã‚©ãƒ¼ãƒ ï¼ˆä½ç½®ãƒ»å›è»¢ãƒ»ã‚¹ã‚±ãƒ¼ãƒ«ï¼‰
 	};
 
+	/// @brief ãƒœã‚¹ã®ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 	Boss(void);
+
+	/// @brief ãƒœã‚¹ã®ãƒ‡ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 	~Boss(void) override;
 
-	// ƒŠƒ\[ƒXƒ[ƒh
+	// ãƒªã‚½ãƒ¼ã‚¹ãƒ­ãƒ¼ãƒ‰
 
-	/// @brief ƒ{ƒX‚ÌƒŠƒ\[ƒX‚ğƒ[ƒh‚·‚é
+	/// @brief ãƒœã‚¹ã®ãƒªã‚½ãƒ¼ã‚¹ã‚’ãƒ­ãƒ¼ãƒ‰ã™ã‚‹
 	void Load(void) override;
 
-	// ƒQƒbƒgEƒZƒbƒg
+	// ã‚²ãƒƒãƒˆãƒ»ã‚»ãƒƒãƒˆ
 
-	/// @brief ƒ{ƒX‚ÌŒ»İÀ•W‚ğæ“¾‚·‚é
-	/// @return ƒ{ƒX‚ÌŒ»İÀ•W
+	/// @brief ãƒœã‚¹ã®ç¾åœ¨åº§æ¨™ã‚’å–å¾—ã™ã‚‹
+	/// @return ãƒœã‚¹ã®ç¾åœ¨åº§æ¨™
 	const VECTOR& GetBossPos(void) const { return transform_.pos; }
 
-	/// @brief ƒ{ƒX‚Ì‰¹‚ª•·‚±‚¦‚é”ÍˆÍ‚ğæ“¾‚·‚é
-	/// @return ‰¹‚ª•·‚±‚¦‚é”ÍˆÍ
+	/// @brief ãƒœã‚¹ã®éŸ³ãŒèã“ãˆã‚‹ç¯„å›²ã‚’å–å¾—ã™ã‚‹
+	/// @return éŸ³ãŒèã“ãˆã‚‹ç¯„å›²
 	const float& GetSoundRadius(void) const { return soundRadius_; }
 
-	/// @brief ’…’n‰¹‚ğ–Â‚ç‚·‚©‚Ç‚¤‚©‚ğæ“¾‚·‚é
-	/// @return ’…’n‰¹‚ğ–Â‚ç‚·‚©‚Ç‚¤‚©‚Ìƒtƒ‰ƒO
+	/// @brief ç€åœ°éŸ³ã‚’é³´ã‚‰ã™ã‹ã©ã†ã‹ã‚’å–å¾—ã™ã‚‹
+	/// @return ç€åœ°éŸ³ã‚’é³´ã‚‰ã™ã‹ã©ã†ã‹ã®ãƒ•ãƒ©ã‚°
 	const bool& GetLandingFlag(void) const { return isLanging_; }
 
-	/// @brief MG‚Ì”­Ë‰¹‚ğ–Â‚ç‚·‚©‚Ç‚¤‚©‚ğæ“¾‚·‚é
-	/// @return MG‚Ì”­Ë‰¹‚ğ–Â‚ç‚·‚©‚Ç‚¤‚©‚Ìƒtƒ‰ƒO
+	/// @brief MGã®ç™ºå°„éŸ³ã‚’é³´ã‚‰ã™ã‹ã©ã†ã‹ã‚’å–å¾—ã™ã‚‹
+	/// @return MGã®ç™ºå°„éŸ³ã‚’é³´ã‚‰ã™ã‹ã©ã†ã‹ã®ãƒ•ãƒ©ã‚°
 	const bool& GetMGFireFlag(void) const { return isMGSoundFire_; }
 
-	/// @brief ‘–s‰¹‚ğ–Â‚ç‚·‚©‚Ç‚¤‚©‚ğæ“¾‚·‚é
-	/// @return ‘–s‰¹‚ğ–Â‚ç‚·‚©‚Ç‚¤‚©‚Ìƒtƒ‰ƒO
+	/// @brief èµ°è¡ŒéŸ³ã‚’é³´ã‚‰ã™ã‹ã©ã†ã‹ã‚’å–å¾—ã™ã‚‹
+	/// @return èµ°è¡ŒéŸ³ã‚’é³´ã‚‰ã™ã‹ã©ã†ã‹ã®ãƒ•ãƒ©ã‚°
 	const bool& GetRoadFlag(void) const { return isRoadFire_; }
 
 
-	// Še•Ší‚Ìƒ_ƒ[ƒWó‚¯æ‚è—pŠÖ”
+	// å„æ­¦å™¨ã®ãƒ€ãƒ¡ãƒ¼ã‚¸å—ã‘å–ã‚Šç”¨é–¢æ•°
 
-	// ƒKƒgƒŠƒ“ƒO
+	// ã‚¬ãƒˆãƒªãƒ³ã‚°
 
-	/// @brief ¶ƒKƒgƒŠƒ“ƒO‚Ìƒ_ƒ[ƒW‚ğİ’è‚·‚é
-	/// @param _damage ó‚¯‚½ƒ_ƒ[ƒW—Ê
+	/// @brief å·¦ã‚¬ãƒˆãƒªãƒ³ã‚°ã®ãƒ€ãƒ¡ãƒ¼ã‚¸ã‚’è¨­å®šã™ã‚‹
+	/// @param _damage å—ã‘ãŸãƒ€ãƒ¡ãƒ¼ã‚¸é‡
 	void SetWeaponMGLDamage(int _damage);
 
-	/// @brief ‰EƒKƒgƒŠƒ“ƒO‚Ìƒ_ƒ[ƒW‚ğİ’è‚·‚é
-	/// @param _damage ó‚¯‚½ƒ_ƒ[ƒW—Ê
+	/// @brief å³ã‚¬ãƒˆãƒªãƒ³ã‚°ã®ãƒ€ãƒ¡ãƒ¼ã‚¸ã‚’è¨­å®šã™ã‚‹
+	/// @param _damage å—ã‘ãŸãƒ€ãƒ¡ãƒ¼ã‚¸é‡
 	void SetWeaponMGRDamage(int _damage);
 
 
-	// ƒ~ƒTƒCƒ‹ƒ|ƒbƒh
+	// ãƒŸã‚µã‚¤ãƒ«ãƒãƒƒãƒ‰
 
-	/// @brief ¶ƒ~ƒTƒCƒ‹ƒ|ƒbƒh‚Ìƒ_ƒ[ƒW‚ğİ’è‚·‚é
-	/// @param _damage ó‚¯‚½ƒ_ƒ[ƒW—Ê
+	/// @brief å·¦ãƒŸã‚µã‚¤ãƒ«ãƒãƒƒãƒ‰ã®ãƒ€ãƒ¡ãƒ¼ã‚¸ã‚’è¨­å®šã™ã‚‹
+	/// @param _damage å—ã‘ãŸãƒ€ãƒ¡ãƒ¼ã‚¸é‡
 	void SetWeaponMPLDamage(int _damage);
 
-	/// @brief ‰Eƒ~ƒTƒCƒ‹ƒ|ƒbƒh‚Ìƒ_ƒ[ƒW‚ğİ’è‚·‚é
-	/// @param _damage ó‚¯‚½ƒ_ƒ[ƒW—Ê
+	/// @brief å³ãƒŸã‚µã‚¤ãƒ«ãƒãƒƒãƒ‰ã®ãƒ€ãƒ¡ãƒ¼ã‚¸ã‚’è¨­å®šã™ã‚‹
+	/// @param _damage å—ã‘ãŸãƒ€ãƒ¡ãƒ¼ã‚¸é‡
 	void SetWeaponMPRDamage(int _damage);
 
 
-	// ƒLƒƒƒmƒ“
+	// ã‚­ãƒ£ãƒãƒ³
 
-	/// @brief ¶ƒLƒƒƒmƒ“‚Ìƒ_ƒ[ƒW‚ğİ’è‚·‚é
-	/// @param _damage ó‚¯‚½ƒ_ƒ[ƒW—Ê
+	/// @brief å·¦ã‚­ãƒ£ãƒãƒ³ã®ãƒ€ãƒ¡ãƒ¼ã‚¸ã‚’è¨­å®šã™ã‚‹
+	/// @param _damage å—ã‘ãŸãƒ€ãƒ¡ãƒ¼ã‚¸é‡
 	void SetWeaponCannonLDamage(int _damage);
 
-	/// @brief ‰EƒLƒƒƒmƒ“‚Ìƒ_ƒ[ƒW‚ğİ’è‚·‚é
-	/// @param _damage ó‚¯‚½ƒ_ƒ[ƒW—Ê
+	/// @brief å³ã‚­ãƒ£ãƒãƒ³ã®ãƒ€ãƒ¡ãƒ¼ã‚¸ã‚’è¨­å®šã™ã‚‹
+	/// @param _damage å—ã‘ãŸãƒ€ãƒ¡ãƒ¼ã‚¸é‡
 	void SetWeaponCannonRDamage(int _damage);
 
 
-	// ƒŒ[ƒ‹ƒKƒ“
+	// ãƒ¬ãƒ¼ãƒ«ã‚¬ãƒ³
 
-	/// @brief ƒŒ[ƒ‹ƒKƒ“‚Ìƒ_ƒ[ƒW‚ğİ’è‚·‚é
-	/// @param _damage ó‚¯‚½ƒ_ƒ[ƒW—Ê
+	/// @brief ãƒ¬ãƒ¼ãƒ«ã‚¬ãƒ³ã®ãƒ€ãƒ¡ãƒ¼ã‚¸ã‚’è¨­å®šã™ã‚‹
+	/// @param _damage å—ã‘ãŸãƒ€ãƒ¡ãƒ¼ã‚¸é‡
 	void SetWeaponRGDamage(int _damage);
 
 
-	// ƒ{ƒX–{‘Ì‚Ö‚Ìƒ_ƒ[ƒWó‚¯æ‚è—p
+	// ãƒœã‚¹æœ¬ä½“ã¸ã®ãƒ€ãƒ¡ãƒ¼ã‚¸å—ã‘å–ã‚Šç”¨
 
-	/// @brief ƒ{ƒX–{‘Ì‚Ìƒ_ƒ[ƒW‚ğİ’è‚·‚é
-	/// @param _damage ó‚¯‚½ƒ_ƒ[ƒW—Ê
+	/// @brief ãƒœã‚¹æœ¬ä½“ã®ãƒ€ãƒ¡ãƒ¼ã‚¸ã‚’è¨­å®šã™ã‚‹
+	/// @param _damage å—ã‘ãŸãƒ€ãƒ¡ãƒ¼ã‚¸é‡
 	void SetBossDamage(int _damage);
 
-	/// @brief ƒ{ƒX‚ÌŒ»İHP‚ğæ“¾‚·‚é
-	/// @return ƒ{ƒX‚ÌŒ»İHP
+	/// @brief ãƒœã‚¹ã®ç¾åœ¨HPã‚’å–å¾—ã™ã‚‹
+	/// @return ãƒœã‚¹ã®ç¾åœ¨HP
 	int GetHP(void) const { return hp_; }
 
-	/// @brief ƒ{ƒX–{‘Ì‚Ìƒgƒ‰ƒ“ƒXƒtƒH[ƒ€‚ğæ“¾‚·‚é
-	/// @return ƒ{ƒX–{‘Ì‚Ìƒgƒ‰ƒ“ƒXƒtƒH[ƒ€
+	/// @brief ãƒœã‚¹æœ¬ä½“ã®ãƒˆãƒ©ãƒ³ã‚¹ãƒ•ã‚©ãƒ¼ãƒ ã‚’å–å¾—ã™ã‚‹
+	/// @return ãƒœã‚¹æœ¬ä½“ã®ãƒˆãƒ©ãƒ³ã‚¹ãƒ•ã‚©ãƒ¼ãƒ 
 	Transform& GetBodyTransform(void) { return transformBody_; }
 
 
-	// ƒvƒŒƒCƒ„[À•W
+	// ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼åº§æ¨™
 
-	/// @brief ƒvƒŒƒCƒ„[1‚ÌÀ•W‚ğİ’è‚·‚é
-	/// @param _playerPos ƒvƒŒƒCƒ„[1‚ÌÀ•W
+	/// @brief ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼1ã®åº§æ¨™ã‚’è¨­å®šã™ã‚‹
+	/// @param _playerPos ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼1ã®åº§æ¨™
 	void SetPlayer1Pos(VECTOR _playerPos) { playerPos_[0] = _playerPos; }
 
-	/// @brief ƒvƒŒƒCƒ„[2‚ÌÀ•W‚ğİ’è‚·‚é
-	/// @param _playerPos ƒvƒŒƒCƒ„[2‚ÌÀ•W
+	/// @brief ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼2ã®åº§æ¨™ã‚’è¨­å®šã™ã‚‹
+	/// @param _playerPos ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼2ã®åº§æ¨™
 	void SetPlayer2Pos(VECTOR _playerPos) { playerPos_[1] = _playerPos; }
 
-	/// @brief ƒvƒŒƒCƒ„[3‚ÌÀ•W‚ğİ’è‚·‚é
-	/// @param _playerPos ƒvƒŒƒCƒ„[3‚ÌÀ•W
+	/// @brief ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼3ã®åº§æ¨™ã‚’è¨­å®šã™ã‚‹
+	/// @param _playerPos ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼3ã®åº§æ¨™
 	void SetPlayer3Pos(VECTOR _playerPos) { playerPos_[2] = _playerPos; }
 
-	/// @brief ƒvƒŒƒCƒ„[4‚ÌÀ•W‚ğİ’è‚·‚é
-	/// @param _playerPos ƒvƒŒƒCƒ„[4‚ÌÀ•W
+	/// @brief ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼4ã®åº§æ¨™ã‚’è¨­å®šã™ã‚‹
+	/// @param _playerPos ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼4ã®åº§æ¨™
 	void SetPlayer4Pos(VECTOR _playerPos) { playerPos_[3] = _playerPos; }
 
-	/// @brief ƒvƒŒƒCƒ„[‚Ìl”‚ğİ’è‚·‚é
-	/// @param _size ƒvƒŒƒCƒ„[‚Ìl”
+	/// @brief ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã®äººæ•°ã‚’è¨­å®šã™ã‚‹
+	/// @param _size ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã®äººæ•°
 	void SetPlayerSize(int _size) { playerSize_ = _size; }
 
 
-	// ƒzƒXƒg§Œä
+	// ãƒ›ã‚¹ãƒˆåˆ¶å¾¡
 
-	/// @brief ƒzƒXƒg§Œä‚©‚Ç‚¤‚©‚ğİ’è‚·‚é
-	/// @param _isHostControl ƒzƒXƒg§Œä‚©‚Ç‚¤‚©‚Ìƒtƒ‰ƒO
+	/// @brief ãƒ›ã‚¹ãƒˆåˆ¶å¾¡ã‹ã©ã†ã‹ã‚’è¨­å®šã™ã‚‹
+	/// @param _isHostControl ãƒ›ã‚¹ãƒˆåˆ¶å¾¡ã‹ã©ã†ã‹ã®ãƒ•ãƒ©ã‚°
 	void SetHostControl(bool _isHostControl);
 
-	/// @brief ƒzƒXƒg§Œä‚©‚Ç‚¤‚©‚ğæ“¾‚·‚é
-	/// @return ƒzƒXƒg§Œä‚©‚Ç‚¤‚©‚Ìƒtƒ‰ƒO
+	/// @brief ãƒ›ã‚¹ãƒˆåˆ¶å¾¡ã‹ã©ã†ã‹ã‚’å–å¾—ã™ã‚‹
+	/// @return ãƒ›ã‚¹ãƒˆåˆ¶å¾¡ã‹ã©ã†ã‹ã®ãƒ•ãƒ©ã‚°
 	bool GetHostControl(void) const { return isHostControl_; }
 
 
-	// ƒlƒbƒgƒ[ƒN
+	// ãƒãƒƒãƒˆãƒ¯ãƒ¼ã‚¯
 
-	/// @brief Œ»İ‚Ìƒ{ƒX‚Ìƒlƒbƒgƒ[ƒNƒAƒNƒVƒ‡ƒ“î•ñ‚ğæ“¾‚·‚é
-	/// @return ƒlƒbƒgƒ[ƒN—pƒ{ƒXƒAƒNƒVƒ‡ƒ“ƒf[ƒ^
+	/// @brief ç¾åœ¨ã®ãƒœã‚¹ã®ãƒãƒƒãƒˆãƒ¯ãƒ¼ã‚¯ã‚¢ã‚¯ã‚·ãƒ§ãƒ³æƒ…å ±ã‚’å–å¾—ã™ã‚‹
+	/// @return ãƒãƒƒãƒˆãƒ¯ãƒ¼ã‚¯ç”¨ãƒœã‚¹ã‚¢ã‚¯ã‚·ãƒ§ãƒ³ãƒ‡ãƒ¼ã‚¿
 	NET_BOSS_ACTION GetNetworkAction(void) const;
 
-	/// @brief ƒlƒbƒgƒ[ƒN‚©‚ç‚ÌƒAƒNƒVƒ‡ƒ“î•ñ‚ğƒ{ƒX‚É“K—p‚·‚é
-	/// @param _action óM‚µ‚½ƒlƒbƒgƒ[ƒN—pƒ{ƒXƒAƒNƒVƒ‡ƒ“ƒf[ƒ^
+	/// @brief ãƒãƒƒãƒˆãƒ¯ãƒ¼ã‚¯ã‹ã‚‰ã®ã‚¢ã‚¯ã‚·ãƒ§ãƒ³æƒ…å ±ã‚’ãƒœã‚¹ã«é©ç”¨ã™ã‚‹
+	/// @param _action å—ä¿¡ã—ãŸãƒãƒƒãƒˆãƒ¯ãƒ¼ã‚¯ç”¨ãƒœã‚¹ã‚¢ã‚¯ã‚·ãƒ§ãƒ³ãƒ‡ãƒ¼ã‚¿
 	void SetNetworkAction(const NET_BOSS_ACTION& _action);
 
 
-	// ƒƒCƒ“ƒ^[ƒQƒbƒg
+	// ãƒ¡ã‚¤ãƒ³ã‚¿ãƒ¼ã‚²ãƒƒãƒˆ
 
-	/// @brief ƒƒCƒ“ƒ^[ƒQƒbƒg‚ÌÀ•W‚ğæ“¾‚·‚é
-	/// @return ƒƒCƒ“ƒ^[ƒQƒbƒg‚ÌÀ•W
+	/// @brief ãƒ¡ã‚¤ãƒ³ã‚¿ãƒ¼ã‚²ãƒƒãƒˆã®åº§æ¨™ã‚’å–å¾—ã™ã‚‹
+	/// @return ãƒ¡ã‚¤ãƒ³ã‚¿ãƒ¼ã‚²ãƒƒãƒˆã®åº§æ¨™
 	VECTOR GetMainTargetPos(void) { return mainPos_; }
 
-	/// @brief ƒƒCƒ“ƒ^[ƒQƒbƒg‚ÌÀ•W‚ğİ’è‚·‚é
-	/// @param _pos ƒƒCƒ“ƒ^[ƒQƒbƒg‚ÌÀ•W
+	/// @brief ãƒ¡ã‚¤ãƒ³ã‚¿ãƒ¼ã‚²ãƒƒãƒˆã®åº§æ¨™ã‚’è¨­å®šã™ã‚‹
+	/// @param _pos ãƒ¡ã‚¤ãƒ³ã‚¿ãƒ¼ã‚²ãƒƒãƒˆã®åº§æ¨™
 	void SetMainTargetPos(VECTOR _pos) { mainPos_ = _pos; }
 
 protected:
 
-	// ‰Šú‰»
-	/// @brief ‘å‚«‚³A‰ñ“]AÀ•W‚ğ‰Šú‰»‚·‚é
+	// åˆæœŸåŒ–
+	/// @brief å¤§ãã•ã€å›è»¢ã€åº§æ¨™ã‚’åˆæœŸåŒ–ã™ã‚‹
 	void InitTransform(void) override;
 
-	/// @brief Õ“Ë”»’è‚ğ‰Šú‰»‚·‚é
+	/// @brief è¡çªåˆ¤å®šã‚’åˆæœŸåŒ–ã™ã‚‹
 	void InitCollider(void) override;
 
-	/// @brief ƒAƒjƒ[ƒVƒ‡ƒ“‚ğ‰Šú‰»‚·‚é
+	/// @brief ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã‚’åˆæœŸåŒ–ã™ã‚‹
 	void InitAnimation(void) override;
 
-	/// @brief ‰Šú‰»Œã‚ÌŒÂ•Êˆ—‚ğs‚¤
+	/// @brief åˆæœŸåŒ–å¾Œã®å€‹åˆ¥å‡¦ç†ã‚’è¡Œã†
 	void InitPost(void) override;
 
-	// XV
-	/// @brief ƒ{ƒX‚ÌXVˆ—‚ğs‚¤
+	// æ›´æ–°
+	/// @brief ãƒœã‚¹ã®æ›´æ–°å‡¦ç†ã‚’è¡Œã†
 	void UpdateProcess(void) override;
 
-	/// @brief XVˆ—Œã‚ÌŒÂ•Êˆ—‚ğs‚¤
+	/// @brief æ›´æ–°å‡¦ç†å¾Œã®å€‹åˆ¥å‡¦ç†ã‚’è¡Œã†
 	void UpdateProcessPost(void) override;
 
-	// •`‰æ
-	/// @brief •`‰æ‘O‚Ìˆ—‚ğs‚¤
+	// æç”»
+	/// @brief æç”»å‰ã®å‡¦ç†ã‚’è¡Œã†
 	void DrawPre(void) override;
 
-	// ‰ğ•ú
-	/// @brief ƒŠƒ\[ƒX‰ğ•úŒã‚ÌŒÂ•Êˆ—‚ğs‚¤
+	// è§£æ”¾
+	/// @brief ãƒªã‚½ãƒ¼ã‚¹è§£æ”¾å¾Œã®å€‹åˆ¥å‡¦ç†ã‚’è¡Œã†
 	void ReleasePost(void) override;
 
-	// Õ“Ë”»’è
-	/// @brief Õ“Ë”»’è‚Ì—\–ñˆ—‚ğs‚¤
+	// è¡çªåˆ¤å®š
+	/// @brief è¡çªåˆ¤å®šã®äºˆç´„å‡¦ç†ã‚’è¡Œã†
 	void CollisionReserve(void) override {};
 
-	// •ŠíŠÖ˜A
-	/// @brief •Ší‚ÌƒZƒbƒgˆ—‚ğ‚Ü‚Æ‚ß‚ÄŒÄ‚Ño‚·
+	// æ­¦å™¨é–¢é€£
+	/// @brief æ­¦å™¨ã®ã‚»ãƒƒãƒˆå‡¦ç†ã‚’ã¾ã¨ã‚ã¦å‘¼ã³å‡ºã™
 	void SetWeapon(void);
 
-	/// @brief •Ší‚Ìƒ[ƒhˆ—‚ğ‚Ü‚Æ‚ß‚ÄŒÄ‚Ño‚·
+	/// @brief æ­¦å™¨ã®ãƒ­ãƒ¼ãƒ‰å‡¦ç†ã‚’ã¾ã¨ã‚ã¦å‘¼ã³å‡ºã™
 	void LoadWeapon(void);
 
-	/// @brief •Ší‚Ì‰Šú‰»ˆ—‚ğ‚Ü‚Æ‚ß‚ÄŒÄ‚Ño‚·
+	/// @brief æ­¦å™¨ã®åˆæœŸåŒ–å‡¦ç†ã‚’ã¾ã¨ã‚ã¦å‘¼ã³å‡ºã™
 	void InitWeapon(void);
 
-	/// @brief •Ší‚ÌXVˆ—‚ğ‚Ü‚Æ‚ß‚ÄŒÄ‚Ño‚·
+	/// @brief æ­¦å™¨ã®æ›´æ–°å‡¦ç†ã‚’ã¾ã¨ã‚ã¦å‘¼ã³å‡ºã™
 	void UpdateWeapon(void);
 
-	/// @brief •Ší‚Ì•`‰æˆ—‚ğ‚Ü‚Æ‚ß‚ÄŒÄ‚Ño‚·
+	/// @brief æ­¦å™¨ã®æç”»å‡¦ç†ã‚’ã¾ã¨ã‚ã¦å‘¼ã³å‡ºã™
 	void DrawWeapon(void);
 
 private:
 
-	// ”Ä—p
-	static constexpr int HALF = 2;							// 2•ª‚Ì1‚ğ•\‚·’l
+	// æ±ç”¨
+	static constexpr int HALF = 2;							// 2åˆ†ã®1ã‚’è¡¨ã™å€¤
 
-	// boss‚Ì‘å‚«‚³
-	static constexpr VECTOR BOSS_SIZE = { 3.0f, 3.0f, 3.0f };				// ƒ{ƒX–{‘Ì‚Ì‘å‚«‚³
-	static constexpr VECTOR BOSS_CAR_SIZE = { 5.0f, 5.0f, 5.0f };			// ÔŒ`‘Ô‚Ì‘å‚«‚³
+	// bossã®å¤§ãã•
+	static constexpr VECTOR BOSS_SIZE = { 3.0f, 3.0f, 3.0f };				// ãƒœã‚¹æœ¬ä½“ã®å¤§ãã•
+	static constexpr VECTOR BOSS_CAR_SIZE = { 5.0f, 5.0f, 5.0f };			// è»Šå½¢æ…‹ã®å¤§ãã•
 
-	// boss‚Ì‰ŠúÀ•W
-	static constexpr VECTOR BOSS_INIT_POS = { 500.0f, 0.0f, 200.0f };		// ƒ{ƒX‚Ì‰ŠúˆÊ’u
+	// bossã®åˆæœŸåº§æ¨™
+	static constexpr VECTOR BOSS_INIT_POS = { 500.0f, 0.0f, 200.0f };		// ãƒœã‚¹ã®åˆæœŸä½ç½®
 
-	// ‰ñ“]
-	static constexpr float INIT_ROT = 180.0f;				// ƒ{ƒX‚Ì‰Šú‰ñ“]Šp“x
+	// å›è»¢
+	static constexpr float INIT_ROT = 180.0f;				// ãƒœã‚¹ã®åˆæœŸå›è»¢è§’åº¦
 
-	// UŒ‚
-	static constexpr float FIRST_ATTACK_INTERVAL = 580;		// ‰‰ñUŒ‚‚Ü‚Å‚Ì‘Ò‹@ŠÔ
-	static constexpr float MAX_ATTACK_INTERVAL = 600;		// UŒ‚ŠÔŠu‚ÌÅ‘å’l
-	static constexpr float DOUN_ATTACK_INTERVAL = 50;		// UŒ‚Œã‚Ì‘Ò‹@ŠÔ
-	static constexpr int INTERVAL_SEC = 20;					// UŒ‚‘ÎÛ•ÏX‚ÌŠÔŠu
-	static constexpr int INTERVAL_SEC_MP = 4;				// MPUŒ‚‚ÌŠÔŠu
-	static constexpr int INTERVAL_SEC_CANNON = 10;			// ƒLƒƒƒmƒ“UŒ‚‚ÌŠÔŠu
-	static constexpr float FIRST_LASER_ROT_SPEED = 5.0f;	// ƒŒ[ƒU[‰‰ñ‰ñ“]‘¬“x
-	static constexpr float LASER_ROT_SPEED = 2.0f;			// ƒŒ[ƒU[‰ñ“]‘¬“x
-	static constexpr float LASER_END = 0.2f;				// ƒŒ[ƒU[I—¹”»’è’l
-	static constexpr float LASER_MAX_ROT = 360.0f;			// ƒŒ[ƒU[‚ÌÅ‘å‰ñ“]Šp“x
+	// æ”»æ’ƒ
+	static constexpr float FIRST_ATTACK_INTERVAL = 580;		// åˆå›æ”»æ’ƒã¾ã§ã®å¾…æ©Ÿæ™‚é–“
+	static constexpr float MAX_ATTACK_INTERVAL = 600;		// æ”»æ’ƒé–“éš”ã®æœ€å¤§å€¤
+	static constexpr float DOUN_ATTACK_INTERVAL = 50;		// æ”»æ’ƒå¾Œã®å¾…æ©Ÿæ™‚é–“
+	static constexpr int INTERVAL_SEC = 20;					// æ”»æ’ƒå¯¾è±¡å¤‰æ›´ã®é–“éš”
+	static constexpr int INTERVAL_SEC_MP = 4;				// MPæ”»æ’ƒã®é–“éš”
+	static constexpr int INTERVAL_SEC_CANNON = 10;			// ã‚­ãƒ£ãƒãƒ³æ”»æ’ƒã®é–“éš”
+	static constexpr float FIRST_LASER_ROT_SPEED = 5.0f;	// ãƒ¬ãƒ¼ã‚¶ãƒ¼åˆå›å›è»¢é€Ÿåº¦
+	static constexpr float LASER_ROT_SPEED = 2.0f;			// ãƒ¬ãƒ¼ã‚¶ãƒ¼å›è»¢é€Ÿåº¦
+	static constexpr float LASER_END = 0.2f;				// ãƒ¬ãƒ¼ã‚¶ãƒ¼çµ‚äº†åˆ¤å®šå€¤
+	static constexpr float LASER_MAX_ROT = 360.0f;			// ãƒ¬ãƒ¼ã‚¶ãƒ¼ã®æœ€å¤§å›è»¢è§’åº¦
 
-	// ‰¹
-	static constexpr float SOUND_RADIUS = 2000.0f;			// ‰¹‚ª•·‚±‚¦‚é”ÍˆÍ
+	// éŸ³
+	static constexpr float SOUND_RADIUS = 2000.0f;			// éŸ³ãŒèã“ãˆã‚‹ç¯„å›²
 
-	// ƒGƒtƒFƒNƒg
-	static constexpr float EFFECT_PLAEY_DAMEGE = 5.0f;			// ƒvƒŒƒCƒ„[‚Ö‚ÌƒGƒtƒFƒNƒgƒ_ƒ[ƒW
-	static constexpr VECTOR EFFECT_SCL = { 10,10,10 };			// ’ÊíƒGƒtƒFƒNƒg‚Ì‘å‚«‚³
-	static constexpr VECTOR EFFECT_SCL_LASER = { 35,35,35 };	// ƒŒ[ƒU[ƒGƒtƒFƒNƒg‚Ì‘å‚«‚³
-	static constexpr float EFFECT_PLAEY_SPEED = 1.0f;			// ƒGƒtƒFƒNƒg‚ÌÄ¶‘¬“x
-	static constexpr VECTOR EFFECT_ROT = { 90.0f,0.0f,0.0f };	// ƒGƒtƒFƒNƒg‚Ì‰ñ“]
-	static constexpr int EFFECT_NO_ZERO = 0;					// ƒGƒtƒFƒNƒg”Ô†0
-	static constexpr int EFFECT_NO_ONE = 1;						// ƒGƒtƒFƒNƒg”Ô†1
-	static constexpr int EFFECT_NO_TWO = 2;						// ƒGƒtƒFƒNƒg”Ô†2
-	static constexpr int EFFECT_NO_THREE = 3;					// ƒGƒtƒFƒNƒg”Ô†3
+	// ã‚¨ãƒ•ã‚§ã‚¯ãƒˆ
+	static constexpr float EFFECT_PLAEY_DAMEGE = 5.0f;			// ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã¸ã®ã‚¨ãƒ•ã‚§ã‚¯ãƒˆãƒ€ãƒ¡ãƒ¼ã‚¸
+	static constexpr VECTOR EFFECT_SCL = { 10,10,10 };			// é€šå¸¸ã‚¨ãƒ•ã‚§ã‚¯ãƒˆã®å¤§ãã•
+	static constexpr VECTOR EFFECT_SCL_LASER = { 35,35,35 };	// ãƒ¬ãƒ¼ã‚¶ãƒ¼ã‚¨ãƒ•ã‚§ã‚¯ãƒˆã®å¤§ãã•
+	static constexpr float EFFECT_PLAEY_SPEED = 1.0f;			// ã‚¨ãƒ•ã‚§ã‚¯ãƒˆã®å†ç”Ÿé€Ÿåº¦
+	static constexpr VECTOR EFFECT_ROT = { 90.0f,0.0f,0.0f };	// ã‚¨ãƒ•ã‚§ã‚¯ãƒˆã®å›è»¢
+	static constexpr int EFFECT_NO_ZERO = 0;					// ã‚¨ãƒ•ã‚§ã‚¯ãƒˆç•ªå·0
+	static constexpr int EFFECT_NO_ONE = 1;						// ã‚¨ãƒ•ã‚§ã‚¯ãƒˆç•ªå·1
+	static constexpr int EFFECT_NO_TWO = 2;						// ã‚¨ãƒ•ã‚§ã‚¯ãƒˆç•ªå·2
+	static constexpr int EFFECT_NO_THREE = 3;					// ã‚¨ãƒ•ã‚§ã‚¯ãƒˆç•ªå·3
 
-	// ƒAƒjƒ[ƒVƒ‡ƒ“
-	static constexpr float ANIM_SPEED = 20.0f;				// ƒAƒjƒ[ƒVƒ‡ƒ“Ä¶‘¬“x
+	// ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³
+	static constexpr float ANIM_SPEED = 20.0f;				// ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³å†ç”Ÿé€Ÿåº¦
 
 	// HP
-	static constexpr int MAX_HP = 2000;						// ƒ{ƒX‚ÌÅ‘åHP
-	static constexpr float MAX_HP_HALF = MAX_HP / 2.0f;		// ƒ{ƒXHP‚Ì”¼•ª
-	static constexpr float WEAPON_HP_CANNON = 0.5f;			// ƒLƒƒƒmƒ“‚Ìƒ_ƒ[ƒW”{—¦
-	static constexpr float WEAPON_HP_MP = 0.7f;				// MP‚Ìƒ_ƒ[ƒW”{—¦
-	static constexpr float WEAPON_HP_MG = 0.8f;				// MG‚Ìƒ_ƒ[ƒW”{—¦
+	static constexpr int MAX_HP = 2000;						// ãƒœã‚¹ã®æœ€å¤§HP
+	static constexpr float MAX_HP_HALF = MAX_HP / 2.0f;		// ãƒœã‚¹HPã®åŠåˆ†
+	static constexpr float WEAPON_HP_CANNON = 0.5f;			// ã‚­ãƒ£ãƒãƒ³ã®HPå€ç‡
+	static constexpr float WEAPON_HP_MP = 0.7f;				// MPã®HPå€ç‡
+	static constexpr float WEAPON_HP_MG = 0.8f;				// MGã®HPå€ç‡
 
-	// ƒWƒƒƒ“ƒv—Í
-	static constexpr float POW_JUMP_INIT = 3000.0f;					// ƒWƒƒƒ“ƒv‰‘¬
-	static constexpr float JUMP_MAX_POS_Y = POW_JUMP_INIT + 500.0f;	// ƒWƒƒƒ“ƒvã¸‚ÌÅ‘åˆÊ’u
-	static constexpr float MOVE_SPEED_INIT = 20.0f;					// ƒWƒƒƒ“ƒv‚Ì‰ŠúˆÚ“®‘¬“x
-	static constexpr float POW_JUMP_DOUN = -50.0f;					// —‰º‚Ì‰Á‘¬“x
-	static constexpr VECTOR WAVE_SCL = { 1.0f,50.0f,1.0f };			// ƒWƒƒƒ“ƒv”gƒGƒtƒFƒNƒg‚Ì‘å‚«‚³
-	static constexpr VECTOR WAVE_SCL_UP = { 4.0f,0.0f,4.0f };		// ã¸”gƒGƒtƒFƒNƒg‚Ì‘å‚«‚³
-	static constexpr VECTOR LANDING_SCL = { 100.0f,50.0f,100.0f };	// ’…’nƒGƒtƒFƒNƒg‚Ì‘å‚«‚³
+	// ã‚¸ãƒ£ãƒ³ãƒ—åŠ›
+	static constexpr float POW_JUMP_INIT = 3000.0f;					// ã‚¸ãƒ£ãƒ³ãƒ—åˆé€Ÿ
+	static constexpr float JUMP_MAX_POS_Y = POW_JUMP_INIT + 500.0f;	// ã‚¸ãƒ£ãƒ³ãƒ—ä¸Šæ˜‡ã®æœ€å¤§ä½ç½®
+	static constexpr float MOVE_SPEED_INIT = 20.0f;					// ã‚¸ãƒ£ãƒ³ãƒ—æ™‚ã®åˆæœŸç§»å‹•é€Ÿåº¦
+	static constexpr float POW_JUMP_DOUN = -50.0f;					// è½ä¸‹æ™‚ã®åˆæœŸåŠ é€Ÿåº¦
+	static constexpr float MAX_DOUN_SPEED = -500.0f;					// è½ä¸‹æ™‚ã®æœ€å¤§é€Ÿåº¦
+	static constexpr VECTOR WAVE_SCL = { 1.0f,50.0f,1.0f };			// ã‚¸ãƒ£ãƒ³ãƒ—æ³¢ã‚¨ãƒ•ã‚§ã‚¯ãƒˆã®å¤§ãã•
+	static constexpr VECTOR WAVE_SCL_UP = { 4.0f,0.0f,4.0f };		// ä¸Šæ˜‡æ³¢ã‚¨ãƒ•ã‚§ã‚¯ãƒˆã®å¤§ãã•
+	static constexpr VECTOR LANDING_SCL = { 100.0f,50.0f,100.0f };	// ç€åœ°ã‚¨ãƒ•ã‚§ã‚¯ãƒˆã®å¤§ãã•
 
-	// ƒ[ƒhƒAƒbƒ^ƒN
-	static constexpr float WHEEL_ROT = 10.0f;				// “Ëi‚ÌÔ—Ö‰ñ“]‘¬“x
-	static constexpr float MOVE_SPEED_ROAD = 20.0f;			// “Ëi‚ÌˆÚ“®‘¬“x
-	static constexpr int MAX_ROAD_ATTACK_TIME = 80;			// “ËiUŒ‚‚ÌÅ‘åŠÔ
-	static constexpr int MAX_ROAD_LOCK_TIME = 30;			// “Ëi‚ÌƒƒbƒNƒIƒ“ŠÔ
-	static constexpr int MAX_ROAD_COUNT = 3;				// “ËiUŒ‚‚ÌÅ‘å‰ñ”
+	// ãƒ­ãƒ¼ãƒ‰ã‚¢ãƒƒã‚¿ã‚¯
+	static constexpr float WHEEL_ROT = 10.0f;				// çªé€²æ™‚ã®è»Šè¼ªå›è»¢é€Ÿåº¦
+	static constexpr float MOVE_SPEED_ROAD = 20.0f;			// çªé€²æ™‚ã®ç§»å‹•é€Ÿåº¦
+	static constexpr int MAX_ROAD_ATTACK_TIME = 80;			// çªé€²æ”»æ’ƒã®æœ€å¤§æ™‚é–“
+	static constexpr int MAX_ROAD_LOCK_TIME = 30;			// çªé€²æ™‚ã®ãƒ­ãƒƒã‚¯ã‚ªãƒ³æ™‚é–“
+	static constexpr int MAX_ROAD_COUNT = 3;				// çªé€²æ”»æ’ƒã®æœ€å¤§å›æ•°
 
-	// “–‚½‚è”»’è‚ÌÀ•W
-	// ƒ‰ƒCƒ“
-	static constexpr VECTOR COL_LINE_START_POS = { 0.0f,60.0f,0.0f };	// ƒ‰ƒCƒ“”»’è‚Ìn“_
-	static constexpr VECTOR COL_LINE_END_POS = { 0.0f,-1.0f,0.0f };		// ƒ‰ƒCƒ“”»’è‚ÌI“_
+	// å½“ãŸã‚Šåˆ¤å®šã®åº§æ¨™
+	// ãƒ©ã‚¤ãƒ³
+	static constexpr VECTOR COL_LINE_START_POS = { 0.0f,60.0f,0.0f };	// ãƒ©ã‚¤ãƒ³åˆ¤å®šã®å§‹ç‚¹
+	static constexpr VECTOR COL_LINE_END_POS = { 0.0f,-1.0f,0.0f };		// ãƒ©ã‚¤ãƒ³åˆ¤å®šã®çµ‚ç‚¹
 
-	// ƒJƒvƒZƒ‹
-	static constexpr VECTOR COL_CAPSULE_START_POS = { 0.0f,130.0f,0.0f };	// ƒJƒvƒZƒ‹”»’è‚Ìn“_
-	static constexpr VECTOR COL_CAPSULE_END_POS = { 0.0f,80.0f,0.0f };		// ƒJƒvƒZƒ‹”»’è‚ÌI“_
-	static constexpr float COL_CAPSULE_BODY_RADIUS = 80.0f;					// –{‘ÌƒJƒvƒZƒ‹”»’è‚Ì”¼Œa
-	static constexpr float COL_CAPSULE_ROAD_ATTACK_RADIUS = 200.0f;			// ƒJƒvƒZƒ‹”»’è‚Ì”¼Œa
+	// ã‚«ãƒ—ã‚»ãƒ«
+	static constexpr VECTOR COL_CAPSULE_START_POS = { 0.0f,130.0f,0.0f };	// ã‚«ãƒ—ã‚»ãƒ«åˆ¤å®šã®å§‹ç‚¹
+	static constexpr VECTOR COL_CAPSULE_END_POS = { 0.0f,80.0f,0.0f };		// ã‚«ãƒ—ã‚»ãƒ«åˆ¤å®šã®çµ‚ç‚¹
+	static constexpr float COL_CAPSULE_BODY_RADIUS = 80.0f;					// æœ¬ä½“ã‚«ãƒ—ã‚»ãƒ«åˆ¤å®šã®åŠå¾„
+	static constexpr float COL_CAPSULE_ROAD_ATTACK_RADIUS = 200.0f;			// ã‚«ãƒ—ã‚»ãƒ«åˆ¤å®šã®åŠå¾„
 
-	// ƒ{[ƒ“‚Ì”Ô†
-	static constexpr int JOINT_FEET_BODY = 12;								// ‘«–{‘Ì‚Ìƒ{[ƒ“”Ô†
-	static constexpr int JOINT_CAR_BODY = 4;								// Ô‘Ì‚Ìƒ{[ƒ“”Ô†
-	static constexpr int JOINT_CAR_WHEEL_FRONT_L = 6;						// ‘O—Ö¶‚Ìƒ{[ƒ“”Ô†
-	static constexpr int JOINT_CAR_WHEEL_FRONT_R = JOINT_FEET_BODY;			// ‘O—Ö‰E‚Ìƒ{[ƒ“”Ô†
-	static constexpr int JOINT_CAR_WHEEL_BACK_FRONT_L = 8;					// Œã•û‘O‘¤¶‚Ìƒ{[ƒ“”Ô†
-	static constexpr int JOINT_CAR_WHEEL_BACK_FRONT_R = 16;					// Œã•û‘O‘¤‰E‚Ìƒ{[ƒ“”Ô†
-	static constexpr int JOINT_CAR_WHEEL_BACK_L = 10;						// Œã—Ö¶‚Ìƒ{[ƒ“”Ô†
-	static constexpr int JOINT_CAR_WHEEL_BACK_R = 14;						// Œã—Ö‰E‚Ìƒ{[ƒ“”Ô†
-	static constexpr int JOINT_WAEAPON_MG_L = JOINT_CAR_BODY;				// ¶MG‚Ìƒ{[ƒ“”Ô†
-	static constexpr int JOINT_WAEAPON_MG_R = 10;							// ‰EMG‚Ìƒ{[ƒ“”Ô†
-	static constexpr int JOINT_WAEAPON_CANNON_L = 6;						// ¶ƒLƒƒƒmƒ“‚Ìƒ{[ƒ“”Ô†
-	static constexpr int JOINT_WAEAPON_CANNON_R = JOINT_FEET_BODY;			// ‰EƒLƒƒƒmƒ“‚Ìƒ{[ƒ“”Ô†
-	static constexpr int JOINT_WAEAPON_MP_L = JOINT_CAR_WHEEL_BACK_FRONT_L;	// ¶MP‚Ìƒ{[ƒ“”Ô†
-	static constexpr int JOINT_WAEAPON_MP_R = JOINT_CAR_WHEEL_BACK_R;		// ‰EMP‚Ìƒ{[ƒ“”Ô†
-	static constexpr int JOINT_WAEAPON_RG = JOINT_CAR_WHEEL_BACK_FRONT_R;	// RG‚Ìƒ{[ƒ“”Ô†
+	// ãƒœãƒ¼ãƒ³ã®ç•ªå·
+	static constexpr int JOINT_FEET_BODY = 12;								// è¶³æœ¬ä½“ã®ãƒœãƒ¼ãƒ³ç•ªå·
+	static constexpr int JOINT_CAR_BODY = 4;								// è»Šä½“ã®ãƒœãƒ¼ãƒ³ç•ªå·
+	static constexpr int JOINT_CAR_WHEEL_FRONT_L = 6;						// å‰è¼ªå·¦ã®ãƒœãƒ¼ãƒ³ç•ªå·
+	static constexpr int JOINT_CAR_WHEEL_FRONT_R = JOINT_FEET_BODY;			// å‰è¼ªå³ã®ãƒœãƒ¼ãƒ³ç•ªå·
+	static constexpr int JOINT_CAR_WHEEL_BACK_FRONT_L = 8;					// å¾Œæ–¹å‰å´å·¦ã®ãƒœãƒ¼ãƒ³ç•ªå·
+	static constexpr int JOINT_CAR_WHEEL_BACK_FRONT_R = 16;					// å¾Œæ–¹å‰å´å³ã®ãƒœãƒ¼ãƒ³ç•ªå·
+	static constexpr int JOINT_CAR_WHEEL_BACK_L = 10;						// å¾Œè¼ªå·¦ã®ãƒœãƒ¼ãƒ³ç•ªå·
+	static constexpr int JOINT_CAR_WHEEL_BACK_R = 14;						// å¾Œè¼ªå³ã®ãƒœãƒ¼ãƒ³ç•ªå·
+	static constexpr int JOINT_WAEAPON_MG_L = JOINT_CAR_BODY;				// å·¦MGã®ãƒœãƒ¼ãƒ³ç•ªå·
+	static constexpr int JOINT_WAEAPON_MG_R = 10;							// å³MGã®ãƒœãƒ¼ãƒ³ç•ªå·
+	static constexpr int JOINT_WAEAPON_CANNON_L = 6;						// å·¦ã‚­ãƒ£ãƒãƒ³ã®ãƒœãƒ¼ãƒ³ç•ªå·
+	static constexpr int JOINT_WAEAPON_CANNON_R = JOINT_FEET_BODY;			// å³ã‚­ãƒ£ãƒãƒ³ã®ãƒœãƒ¼ãƒ³ç•ªå·
+	static constexpr int JOINT_WAEAPON_MP_L = JOINT_CAR_WHEEL_BACK_FRONT_L;	// å·¦MPã®ãƒœãƒ¼ãƒ³ç•ªå·
+	static constexpr int JOINT_WAEAPON_MP_R = JOINT_CAR_WHEEL_BACK_R;		// å³MPã®ãƒœãƒ¼ãƒ³ç•ªå·
+	static constexpr int JOINT_WAEAPON_RG = JOINT_CAR_WHEEL_BACK_FRONT_R;	// RGã®ãƒœãƒ¼ãƒ³ç•ªå·
 
-	// •œ‹A
-	static constexpr int DOWU_POS = -50;						// —‰º‚Ì•œ‹A”»’èˆÊ’u
-	static constexpr VECTOR POP_POS = { 0, 2000,0 };			// •œ‹A‚ÌˆÊ’u
+	// å¾©å¸°
+	static constexpr int DOWU_POS = -50;						// è½ä¸‹æ™‚ã®å¾©å¸°åˆ¤å®šä½ç½®
+	static constexpr VECTOR POP_POS = { 0, 2000,0 };			// å¾©å¸°æ™‚ã®ä½ç½®
 
-	// €–S
-	static constexpr int END_MAX_COUNT = 4;					// €–S‰‰o‚ÌÅ‘åƒJƒEƒ“ƒg
-	static constexpr int END_COUNT = 3;						// €–S‰‰o‚ÌI—¹ƒJƒEƒ“ƒg
-	static constexpr int MOVE_SPEED = 30;					// €–S‚ÌˆÚ“®‘¬“x
+	// æ­»äº¡æ™‚
+	static constexpr int END_MAX_COUNT = 4;					// æ­»äº¡æ¼”å‡ºã®æœ€å¤§ã‚«ã‚¦ãƒ³ãƒˆ
+	static constexpr int END_COUNT = 3;						// æ­»äº¡æ¼”å‡ºã®çµ‚äº†ã‚«ã‚¦ãƒ³ãƒˆ
+	static constexpr int MOVE_SPEED = 30;					// æ­»äº¡æ™‚ã®ç§»å‹•é€Ÿåº¦
 
 
-	// ƒ{ƒX–{‘Ì‚ÌŠeƒgƒ‰ƒ“ƒXƒtƒH[ƒ€
-	Transform transformFeet_;					// ‘«•”•ª‚Ìƒgƒ‰ƒ“ƒXƒtƒH[ƒ€
-	Transform transformBody_;					// ‘Ì•”•ª‚Ìƒgƒ‰ƒ“ƒXƒtƒH[ƒ€
-	Transform transformFeetCar_;				// Ô‘Ì‚Ìƒgƒ‰ƒ“ƒXƒtƒH[ƒ€
-	Transform transformWheelBackL_;				// Œã—Ö¶‚Ìƒgƒ‰ƒ“ƒXƒtƒH[ƒ€
-	Transform transformWheelBackFrontL_;		// Œã•û‘O‘¤¶—Ö‚Ìƒgƒ‰ƒ“ƒXƒtƒH[ƒ€
-	Transform transformWheelFrontL_;			// ‘O—Ö¶‚Ìƒgƒ‰ƒ“ƒXƒtƒH[ƒ€
-	Transform transformWheelBackR_;				// Œã—Ö‰E‚Ìƒgƒ‰ƒ“ƒXƒtƒH[ƒ€
-	Transform transformWheelBackFrontR_;		// Œã•û‘O‘¤‰E—Ö‚Ìƒgƒ‰ƒ“ƒXƒtƒH[ƒ€
-	Transform transformWheelFrontR_;			// ‘O—Ö‰E‚Ìƒgƒ‰ƒ“ƒXƒtƒH[ƒ€
+	// ãƒœã‚¹æœ¬ä½“ã®å„ãƒˆãƒ©ãƒ³ã‚¹ãƒ•ã‚©ãƒ¼ãƒ 
+	Transform transformFeet_;					// è¶³éƒ¨åˆ†ã®ãƒˆãƒ©ãƒ³ã‚¹ãƒ•ã‚©ãƒ¼ãƒ 
+	Transform transformBody_;					// ä½“éƒ¨åˆ†ã®ãƒˆãƒ©ãƒ³ã‚¹ãƒ•ã‚©ãƒ¼ãƒ 
+	Transform transformFeetCar_;				// è»Šä½“ã®ãƒˆãƒ©ãƒ³ã‚¹ãƒ•ã‚©ãƒ¼ãƒ 
+	Transform transformWheelBackL_;				// å¾Œè¼ªå·¦ã®ãƒˆãƒ©ãƒ³ã‚¹ãƒ•ã‚©ãƒ¼ãƒ 
+	Transform transformWheelBackFrontL_;		// å¾Œæ–¹å‰å´å·¦è¼ªã®ãƒˆãƒ©ãƒ³ã‚¹ãƒ•ã‚©ãƒ¼ãƒ 
+	Transform transformWheelFrontL_;			// å‰è¼ªå·¦ã®ãƒˆãƒ©ãƒ³ã‚¹ãƒ•ã‚©ãƒ¼ãƒ 
+	Transform transformWheelBackR_;				// å¾Œè¼ªå³ã®ãƒˆãƒ©ãƒ³ã‚¹ãƒ•ã‚©ãƒ¼ãƒ 
+	Transform transformWheelBackFrontR_;		// å¾Œæ–¹å‰å´å³è¼ªã®ãƒˆãƒ©ãƒ³ã‚¹ãƒ•ã‚©ãƒ¼ãƒ 
+	Transform transformWheelFrontR_;			// å‰è¼ªå³ã®ãƒˆãƒ©ãƒ³ã‚¹ãƒ•ã‚©ãƒ¼ãƒ 
 
-	// ƒXƒe[ƒ^ƒX
+	// ã‚¹ãƒ†ãƒ¼ã‚¿ã‚¹
 	int hp_;								// HP
-	std::array<Bone, 7> boneId_;			// Šeƒ{[ƒ“
-	BONE_NAME boneName_;					// ƒ{[ƒ“‚Ì–¼‘O
-	VECTOR wallStopPos_;					// •Ç‚ÉÚG‚µ‚½ˆÊ’u
-	VECTOR jumpDir_;						// ƒWƒƒƒ“ƒv’†‚ÌˆÚ“®•ûŒü
-	VECTOR roadDir_;						// ‘Ì“–‚½‚è’†‚ÌˆÚ“®•ûŒü
-	float speed_;							// ˆÚ“®ƒXƒs[ƒh
-	int roadCount_;							// ‘Ì“–‚½‚è‚Ì‰ñ”
-	int roadAttackTime_;					// ‘Ì“–‚½‚è‚Ì“ËiŠÔ
-	int roadLockTime_;						// ‘Ì“–‚½‚è‚ÌƒƒbƒNƒIƒ“ŠÔ
-	bool roadIsAttack_;						// ‘Ì“–‚½‚èUŒ‚’†‚©‚Ìƒtƒ‰ƒO
-	float soundRadius_;						// ‰¹‚Ì•·‚±‚¦‚é”ÍˆÍ
-	bool isLanging_;						// ’…’n‰¹‚ğ–Â‚ç‚·‚©‚Ìƒtƒ‰ƒO
-	bool isMGSoundFire_;					// MG”­Ë‰¹‚ğ–Â‚ç‚·‚©‚Ìƒtƒ‰ƒO
-	bool isRoadFire_;						// ‘–s‰¹‚ğ–Â‚ç‚·‚©‚Ìƒtƒ‰ƒO
+	std::array<Bone, 7> boneId_;			// å„ãƒœãƒ¼ãƒ³
+	BONE_NAME boneName_;					// ãƒœãƒ¼ãƒ³ã®åå‰
+	VECTOR wallStopPos_;					// å£ã«æ¥è§¦ã—ãŸä½ç½®
+	VECTOR jumpDir_;						// ã‚¸ãƒ£ãƒ³ãƒ—ä¸­ã®ç§»å‹•æ–¹å‘
+	VECTOR roadDir_;						// ä½“å½“ãŸã‚Šä¸­ã®ç§»å‹•æ–¹å‘
+	float speed_;							// ç§»å‹•ã‚¹ãƒ”ãƒ¼ãƒ‰
+	int roadCount_;							// ä½“å½“ãŸã‚Šã®å›æ•°
+	int roadAttackTime_;					// ä½“å½“ãŸã‚Šã®çªé€²æ™‚é–“
+	int roadLockTime_;						// ä½“å½“ãŸã‚Šã®ãƒ­ãƒƒã‚¯ã‚ªãƒ³æ™‚é–“
+	bool roadIsAttack_;						// ä½“å½“ãŸã‚Šæ”»æ’ƒä¸­ã‹ã®ãƒ•ãƒ©ã‚°
+	float soundRadius_;						// éŸ³ã®èã“ãˆã‚‹ç¯„å›²
+	bool isLanging_;						// ç€åœ°éŸ³ã‚’é³´ã‚‰ã™ã‹ã®ãƒ•ãƒ©ã‚°
+	bool isMGSoundFire_;					// MGç™ºå°„éŸ³ã‚’é³´ã‚‰ã™ã‹ã®ãƒ•ãƒ©ã‚°
+	bool isRoadFire_;						// èµ°è¡ŒéŸ³ã‚’é³´ã‚‰ã™ã‹ã®ãƒ•ãƒ©ã‚°
 
-	// UŒ‚ŠÖ˜A
-	int jumpCount_;							// ƒWƒƒƒ“ƒv‰ñ”
-	int attackCount_;						// UŒ‚‰ñ”
-	int attackInterval_;					// UŒ‚ŠÔŠu
-	VECTOR currentWaveScl;					// Œ»İ‚Ì”gƒGƒtƒFƒNƒgƒTƒCƒY
-	float laserAttackRot_;					// ƒŒ[ƒU[UŒ‚‚Ì‰ñ“]Šp“x
-	float laserShotHp_;						// ƒŒ[ƒU[”­Ë‚ÌHP
-	float laserRotSpeed_;					// ƒŒ[ƒU[‚Ì‰ñ“]‘¬“x
-	ATTACK_TYPE lastAttackType_;			// ‘O‰ñ‚ÌUŒ‚í—Ş
-	ATTACK_TYPE attackSelect_;				// Œ»İ‘I‘ğ’†‚ÌUŒ‚í—Ş
+	// æ”»æ’ƒé–¢é€£
+	int jumpCount_;							// ã‚¸ãƒ£ãƒ³ãƒ—å›æ•°
+	int attackCount_;						// æ”»æ’ƒå›æ•°
+	int attackInterval_;					// æ”»æ’ƒé–“éš”
+	VECTOR currentWaveScl;					// ç¾åœ¨ã®æ³¢ã‚¨ãƒ•ã‚§ã‚¯ãƒˆã‚µã‚¤ã‚º
+	float laserAttackRot_;					// ãƒ¬ãƒ¼ã‚¶ãƒ¼æ”»æ’ƒã®å›è»¢è§’åº¦
+	float laserShotHp_;						// ãƒ¬ãƒ¼ã‚¶ãƒ¼ç™ºå°„æ™‚ã®HP
+	float laserRotSpeed_;					// ãƒ¬ãƒ¼ã‚¶ãƒ¼ã®å›è»¢é€Ÿåº¦
+	ATTACK_TYPE lastAttackType_;			// å‰å›ã®æ”»æ’ƒç¨®é¡
+	ATTACK_TYPE attackSelect_;				// ç¾åœ¨é¸æŠä¸­ã®æ”»æ’ƒç¨®é¡
 
-	//UŒ‚‘ÎÛî•ñ
-	VECTOR mainPos_;						// ƒƒCƒ“ƒ^[ƒQƒbƒg‚ÌˆÊ’u
-	int mainIdx_;							// ƒƒCƒ“ƒ^[ƒQƒbƒg‚Ì”Ô†
-	int nextChangeMainTime_;				// ƒƒCƒ“ƒ^[ƒQƒbƒg•ÏX‚Ü‚Å‚ÌŠÔ
-	VECTOR mpPos_;							// MPƒ^[ƒQƒbƒg‚ÌˆÊ’u
-	int mpIdx_;								// MPƒ^[ƒQƒbƒg‚Ì”Ô†
-	int nextChangeMpTime_;					// MPƒ^[ƒQƒbƒg•ÏX‚Ü‚Å‚ÌŠÔ
-	VECTOR CannonPos_;						// ƒLƒƒƒmƒ“ƒ^[ƒQƒbƒg‚ÌˆÊ’u
-	int cannonIdx_;							// ƒLƒƒƒmƒ“ƒ^[ƒQƒbƒg‚Ì”Ô†
-	int nextChangeCannonTime_;				// ƒLƒƒƒmƒ“ƒ^[ƒQƒbƒg•ÏX‚Ü‚Å‚ÌŠÔ
-	VECTOR playerPos_[4];					// ŠeƒvƒŒƒCƒ„[‚ÌˆÊ’u
-	int playerSize_;						// ƒvƒŒƒCƒ„[l”
+	//æ”»æ’ƒå¯¾è±¡æƒ…å ±
+	VECTOR mainPos_;						// ãƒ¡ã‚¤ãƒ³ã‚¿ãƒ¼ã‚²ãƒƒãƒˆã®ä½ç½®
+	int mainIdx_;							// ãƒ¡ã‚¤ãƒ³ã‚¿ãƒ¼ã‚²ãƒƒãƒˆã®ç•ªå·
+	int nextChangeMainTime_;				// ãƒ¡ã‚¤ãƒ³ã‚¿ãƒ¼ã‚²ãƒƒãƒˆå¤‰æ›´ã¾ã§ã®æ™‚é–“
+	VECTOR mpPos_;							// MPã‚¿ãƒ¼ã‚²ãƒƒãƒˆã®ä½ç½®
+	int mpIdx_;								// MPã‚¿ãƒ¼ã‚²ãƒƒãƒˆã®ç•ªå·
+	int nextChangeMpTime_;					// MPã‚¿ãƒ¼ã‚²ãƒƒãƒˆå¤‰æ›´ã¾ã§ã®æ™‚é–“
+	VECTOR CannonPos_;						// ã‚­ãƒ£ãƒãƒ³ã‚¿ãƒ¼ã‚²ãƒƒãƒˆã®ä½ç½®
+	int cannonIdx_;							// ã‚­ãƒ£ãƒãƒ³ã‚¿ãƒ¼ã‚²ãƒƒãƒˆã®ç•ªå·
+	int nextChangeCannonTime_;				// ã‚­ãƒ£ãƒãƒ³ã‚¿ãƒ¼ã‚²ãƒƒãƒˆå¤‰æ›´ã¾ã§ã®æ™‚é–“
+	VECTOR playerPos_[4];					// å„ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã®ä½ç½®
+	int playerSize_;						// ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼äººæ•°
 
-	// •Ší‚Ìƒ|ƒCƒ“ƒ^[éŒ¾
-	std::unique_ptr<WeaponMGL> weaponMGL_;			// ¶MG‚Ì•Šíƒ|ƒCƒ“ƒ^[
-	std::unique_ptr<WeaponMGR> weaponMGR_;			// ‰EMG‚Ì•Šíƒ|ƒCƒ“ƒ^[
-	std::unique_ptr<WeaponCannon> weaponCannonL_;	// ¶ƒLƒƒƒmƒ“‚Ì•Šíƒ|ƒCƒ“ƒ^[
-	std::unique_ptr<WeaponCannon> weaponCannonR_;	// ‰EƒLƒƒƒmƒ“‚Ì•Šíƒ|ƒCƒ“ƒ^[
-	std::unique_ptr<WeaponMP> weaponMPL_;			// ¶MP‚Ì•Šíƒ|ƒCƒ“ƒ^[
-	std::unique_ptr<WeaponMP> weaponMPR_;			// ‰EMP‚Ì•Šíƒ|ƒCƒ“ƒ^[
-	std::unique_ptr<WeaponRG> weaponRG_;			// RG‚Ì•Šíƒ|ƒCƒ“ƒ^[
-	std::unique_ptr<BBulletWave> wave_;				// ”gUŒ‚‚Ìƒ|ƒCƒ“ƒ^[
+	// æ­¦å™¨ã®ãƒã‚¤ãƒ³ã‚¿ãƒ¼å®£è¨€
+	std::unique_ptr<WeaponMGL> weaponMGL_;			// å·¦MGã®æ­¦å™¨ãƒã‚¤ãƒ³ã‚¿ãƒ¼
+	std::unique_ptr<WeaponMGR> weaponMGR_;			// å³MGã®æ­¦å™¨ãƒã‚¤ãƒ³ã‚¿ãƒ¼
+	std::unique_ptr<WeaponCannon> weaponCannonL_;	// å·¦ã‚­ãƒ£ãƒãƒ³ã®æ­¦å™¨ãƒã‚¤ãƒ³ã‚¿ãƒ¼
+	std::unique_ptr<WeaponCannon> weaponCannonR_;	// å³ã‚­ãƒ£ãƒãƒ³ã®æ­¦å™¨ãƒã‚¤ãƒ³ã‚¿ãƒ¼
+	std::unique_ptr<WeaponMP> weaponMPL_;			// å·¦MPã®æ­¦å™¨ãƒã‚¤ãƒ³ã‚¿ãƒ¼
+	std::unique_ptr<WeaponMP> weaponMPR_;			// å³MPã®æ­¦å™¨ãƒã‚¤ãƒ³ã‚¿ãƒ¼
+	std::unique_ptr<WeaponRG> weaponRG_;			// RGã®æ­¦å™¨ãƒã‚¤ãƒ³ã‚¿ãƒ¼
+	std::unique_ptr<BBulletWave> wave_;				// æ³¢æ”»æ’ƒã®ãƒã‚¤ãƒ³ã‚¿ãƒ¼
 
-	// ƒzƒXƒg‚©‚Ç‚¤‚©	
-	bool isHostControl_;							// ƒzƒXƒg‚ª‘€ì‚ğ’S“–‚·‚é‚©‚Ìƒtƒ‰ƒO
+	// ãƒ›ã‚¹ãƒˆã‹ã©ã†ã‹	
+	bool isHostControl_;							// ãƒ›ã‚¹ãƒˆãŒæ“ä½œã‚’æ‹…å½“ã™ã‚‹ã‹ã®ãƒ•ãƒ©ã‚°
 
-	// €–S
-	VECTOR bodyDir_;								// €–S‚ÌˆÚ“®•ûŒü
-	float moveSpeed_;								// €–S‚ÌˆÚ“®‘¬“x
-	int endCount_;									// €–S‰‰o‚ÌƒJƒEƒ“ƒg
-	VECTOR cameraPos_;								// €–S‰‰o‚ÌƒJƒƒ‰ˆÊ’u
+	// æ­»äº¡æ™‚
+	VECTOR bodyDir_;								// æ­»äº¡æ™‚ã®ç§»å‹•æ–¹å‘
+	float moveSpeed_;								// æ­»äº¡æ™‚ã®ç§»å‹•é€Ÿåº¦
+	int endCount_;									// æ­»äº¡æ¼”å‡ºã®ã‚«ã‚¦ãƒ³ãƒˆ
+	VECTOR cameraPos_;								// æ­»äº¡æ¼”å‡ºæ™‚ã®ã‚«ãƒ¡ãƒ©ä½ç½®
 
-	// ƒ{[ƒ“‰Šú‰»
-	void BoneParam(void);							// ƒ{[ƒ“î•ñ‚ğ‰Šú‰»
+	// ãƒœãƒ¼ãƒ³åˆæœŸåŒ–
+	void BoneParam(void);							// ãƒœãƒ¼ãƒ³æƒ…å ±ã‚’åˆæœŸåŒ–
 
-	//ƒ{[ƒ“ƒAƒvƒf
-	void UpdateBossTransform(void);					// ƒ{[ƒ“‚Ìƒgƒ‰ƒ“ƒXƒtƒH[ƒ€‚ğXV
+	//ãƒœãƒ¼ãƒ³ã‚¢ãƒ—ãƒ‡
+	void UpdateBossTransform(void);					// ãƒœãƒ¼ãƒ³ã®ãƒˆãƒ©ãƒ³ã‚¹ãƒ•ã‚©ãƒ¼ãƒ ã‚’æ›´æ–°
 
-	// ó‘Ô
-	STATE state_;									// Œ»İ‚Ìó‘Ô
-	// ó‘ÔŠÇ—
-	int stateBase_;									// ó‘Ô‚ÌŠî€’l
+	// çŠ¶æ…‹
+	STATE state_;									// ç¾åœ¨ã®çŠ¶æ…‹
 
-	// ó‘ÔŠÇ—
-	std::map<int, std::function<void(void)>> stateChanges_;	// ó‘Ô‘JˆÚ‚Ì‰Šúˆ—‚ğŠÇ—‚·‚é
+	// çŠ¶æ…‹ç®¡ç†
+	int stateBase_;									// çŠ¶æ…‹ã®åŸºæº–å€¤
 
-	/// @brief ƒ{ƒX‚Ìó‘Ô‚ğ•ÏX‚·‚é
-	/// @param _state •ÏX‚·‚éó‘Ô
+	// çŠ¶æ…‹ç®¡ç†
+	std::map<int, std::function<void(void)>> stateChanges_;	// çŠ¶æ…‹é·ç§»æ™‚ã®åˆæœŸå‡¦ç†ã‚’ç®¡ç†ã™ã‚‹
+
+	/// @brief ãƒœã‚¹ã®çŠ¶æ…‹ã‚’å¤‰æ›´ã™ã‚‹
+	/// @param _state å¤‰æ›´ã™ã‚‹çŠ¶æ…‹
 	void ChangeState(STATE _state);
 
-	/// @brief ƒ{ƒX‚Ìó‘Ô‚ğ•ÏX‚·‚é
-	/// @param state •ÏX‚·‚éó‘Ô”Ô†
+	/// @brief ãƒœã‚¹ã®çŠ¶æ…‹ã‚’å¤‰æ›´ã™ã‚‹
+	/// @param state å¤‰æ›´ã™ã‚‹çŠ¶æ…‹ç•ªå·
 	void ChangeState(int state);
 
-	/// @brief ‘Ò‹@ó‘Ô‚Ö‘JˆÚ‚·‚é
+	/// @brief å¾…æ©ŸçŠ¶æ…‹ã¸é·ç§»ã™ã‚‹
 	void ChangeStateIdle(void);
 
-	/// @brief UŒ‚ó‘Ô‚Ö‘JˆÚ‚·‚é
+	/// @brief æ”»æ’ƒçŠ¶æ…‹ã¸é·ç§»ã™ã‚‹
 	void ChangeStateAttack(void);
 
-	/// @brief ƒWƒƒƒ“ƒvó‘Ô‚Ö‘JˆÚ‚·‚é
+	/// @brief ã‚¸ãƒ£ãƒ³ãƒ—çŠ¶æ…‹ã¸é·ç§»ã™ã‚‹
 	void ChangeStateJump(void);
 
-	/// @brief ƒWƒƒƒ“ƒv‘Oó‘Ô‚Ö‘JˆÚ‚·‚é
+	/// @brief ã‚¸ãƒ£ãƒ³ãƒ—å‰çŠ¶æ…‹ã¸é·ç§»ã™ã‚‹
 	void ChangeStateJumpBefore(void);
 
-	/// @brief “ËiUŒ‚ó‘Ô‚Ö‘JˆÚ‚·‚é
+	/// @brief çªé€²æ”»æ’ƒçŠ¶æ…‹ã¸é·ç§»ã™ã‚‹
 	void ChangeStateRoadAttack(void);
 
-	/// @brief ƒŒ[ƒU[UŒ‚ó‘Ô‚Ö‘JˆÚ‚·‚é
+	/// @brief ãƒ¬ãƒ¼ã‚¶ãƒ¼æ”»æ’ƒçŠ¶æ…‹ã¸é·ç§»ã™ã‚‹
 	void ChangeStateLaserAttack(void);
 
-	/// @brief I—¹ó‘Ô‚Ö‘JˆÚ‚·‚é
+	/// @brief çµ‚äº†çŠ¶æ…‹ã¸é·ç§»ã™ã‚‹
 	void ChangeStateEnd(void);
 
-	// XVŒn
-	// ó‘ÔŠÇ—
-	std::function<void(void)> stateUpdate_;	// Œ»İ‚Ìó‘Ô‚ÌXVˆ—‚ğŠÇ—‚·‚é
+	// æ›´æ–°ç³»
+	// çŠ¶æ…‹ç®¡ç†
+	std::function<void(void)> stateUpdate_;	// ç¾åœ¨ã®çŠ¶æ…‹ã®æ›´æ–°å‡¦ç†ã‚’ç®¡ç†ã™ã‚‹
 
-	/// @brief ‘Ò‹@ó‘Ô‚ğXV‚·‚é
+	/// @brief å¾…æ©ŸçŠ¶æ…‹ã‚’æ›´æ–°ã™ã‚‹
 	void UpdateIdle(void);
 
-	/// @brief UŒ‚ó‘Ô‚ğXV‚·‚é
+	/// @brief æ”»æ’ƒçŠ¶æ…‹ã‚’æ›´æ–°ã™ã‚‹
 	void UpdateAttack(void);
 
-	/// @brief ƒWƒƒƒ“ƒvó‘Ô‚ğXV‚·‚é
+	/// @brief ã‚¸ãƒ£ãƒ³ãƒ—çŠ¶æ…‹ã‚’æ›´æ–°ã™ã‚‹
 	void UpdateJump(void);
 
-	/// @brief ƒWƒƒƒ“ƒv‘Oó‘Ô‚ğXV‚·‚é
+	/// @brief ã‚¸ãƒ£ãƒ³ãƒ—å‰çŠ¶æ…‹ã‚’æ›´æ–°ã™ã‚‹
 	void UpdateJumpBefore(void);
 
-	/// @brief “ËiUŒ‚ó‘Ô‚ğXV‚·‚é
+	/// @brief çªé€²æ”»æ’ƒçŠ¶æ…‹ã‚’æ›´æ–°ã™ã‚‹
 	void UpdateRoadAttack(void);
 
-	/// @brief ƒŒ[ƒU[UŒ‚ó‘Ô‚ğXV‚·‚é
+	/// @brief ãƒ¬ãƒ¼ã‚¶ãƒ¼æ”»æ’ƒçŠ¶æ…‹ã‚’æ›´æ–°ã™ã‚‹
 	void UpdateStateLaserAttack(void);
 
-	/// @brief I—¹ó‘Ô‚ğXV‚·‚é
+	/// @brief çµ‚äº†çŠ¶æ…‹ã‚’æ›´æ–°ã™ã‚‹
 	void UpdateEnd(void);
 
-	/// @brief ƒGƒtƒFƒNƒg‚ğXV‚·‚é
+	/// @brief ã‚¨ãƒ•ã‚§ã‚¯ãƒˆã‚’æ›´æ–°ã™ã‚‹
 	void UpdateEffect(void);
 
-	/// @brief ƒ^ƒCƒ„‚Ìî•ñ‚ğXV‚·‚é
+	/// @brief ã‚¿ã‚¤ãƒ¤ã®æƒ…å ±ã‚’æ›´æ–°ã™ã‚‹
 	void UpdateWheel(void);
 
-	/// @brief ƒTƒEƒ“ƒh‚Ìî•ñ‚ğXV‚·‚é
+	/// @brief ã‚µã‚¦ãƒ³ãƒ‰ã®æƒ…å ±ã‚’æ›´æ–°ã™ã‚‹
 	void UpdateSound(void);
 
-	// ‹@”\ŠÖ”
-	/// @brief ƒvƒŒƒCƒ„[‚Ì•ûŒü‚ğŒü‚­
+	// æ©Ÿèƒ½é–¢æ•°
+	/// @brief ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã®æ–¹å‘ã‚’å‘ã
 	void LookPlayer(void);
-	/// @brief ƒ^[ƒQƒbƒg‚Ì‘I’è
+	/// @brief ã‚¿ãƒ¼ã‚²ãƒƒãƒˆã®é¸å®š
 	void SelectTarget(void);
 
 	// Effect
-	/// @brief ƒGƒtƒFƒNƒg‚ğÄ¶‚·‚é
+	/// @brief ã‚¨ãƒ•ã‚§ã‚¯ãƒˆã‚’å†ç”Ÿã™ã‚‹
 	void PlayEffect(void);
 };

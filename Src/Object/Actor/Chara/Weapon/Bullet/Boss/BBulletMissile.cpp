@@ -20,6 +20,7 @@ BBulletMissile::BBulletMissile(void)
 	const VECTOR INIT_NORM = VGet(0.0f, 1.0f, 0.0f);
 	const COLOR_U8 INIT_DIFUSECOLOR = GetColorU8(255, 255, 255, 255);
 
+	// 警告エリア用ポリゴンの4頂点に対して初期法線とディフューズ色を設定する
 	for (int i = 0; i < 4; ++i)
 	{
 		imageVertex_[i].norm = INIT_NORM;
@@ -84,17 +85,21 @@ void BBulletMissile::InitPost(void)
 
 void BBulletMissile::UpdateProcess(void)
 {
+	// 弾が死亡（非非生存）状態の場合は更新処理を行わずスキップする
 	if (!isAlive_) return;
 
+	// 上昇中の場合は上昇移動処理を実行する
 	if (isUp_)
 	{
 		MoveUp();
 	}
+	// 降下中の場合は降下移動処理を実行する
 	else
 	{
 		MoveDown();
 	}
 
+	// 着地後の攻撃フラグが有効な場合は攻撃持続処理を実行する
 	if (isAttack_)
 	{
 		Attack();
@@ -107,11 +112,13 @@ void BBulletMissile::UpdateProcessPost(void)
 
 void BBulletMissile::DrawPre(void)
 {
+	// 生存している場合のみミサイルの3Dモデルを描画する
 	if (isAlive_)
 	{
 		MV1DrawModel(transform_.modelId);
 	}
 
+	// 降下フェーズ（isUp_がfalse）に入っている場合は地面に着弾警告描画を行う
 	if (!isUp_)
 	{
 		DrawAreaAlert();
@@ -122,6 +129,7 @@ void BBulletMissile::MoveUp(void)
 {
 	transform_.pos.y += MOVE_UP_SPEED;
 
+	// 上昇限界高度を超えた場合にプレイヤーの頭上へワープして降下準備を行う
 	if (transform_.pos.y > maxPos_)
 	{
 		isUp_ = false;
@@ -136,13 +144,14 @@ void BBulletMissile::MoveDown(void)
 {
 	transform_.pos.y -= MOVE_DOWN_SPEED;
 
+	// 地面に到達した場合に位置を固定して攻撃判定とエフェクトを発生させる
 	if (transform_.pos.y <= GROUND_POS_Y)
 	{
 		transform_.pos.y = GROUND_POS_Y; // 地上に位置固定
 
 		CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::MISSILE_ATTACK, true);
 		CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::MISSILE_PUSH, true);
-		EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_MISSILE, transform_.pos, { 0.0f, 0.0f, 0.0f }, { 90.0f, 90.0f, 90.0f }, 20.0f, this);
+		EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_MISSILE, transform_.pos, EFFECT_ZERO_ROT, MISSILE_EFFECT_SCALE, MISSILE_EFFECT_SPEED, this);
 		isAttack_ = true;
 	}
 }
@@ -150,6 +159,7 @@ void BBulletMissile::MoveDown(void)
 void BBulletMissile::Attack(void)
 {
 	attackCount_++;
+	// 攻撃持続フレーム数が上限に達した場合に各種判定とエフェクトを停止しアクター登録を解除する
 	if (attackCount_ >= MAX_ATTACK_COUNT)
 	{
 		attackCount_ = 0;
@@ -177,7 +187,7 @@ void BBulletMissile::DrawAreaAlert(void)
 	imageVertex_[RIGHT_BACK].pos = VGet(transform_.pos.x + SHADOW_SIZE, shadowY, transform_.pos.z - SHADOW_SIZE);
 	imageVertex_[RIGHT_FORWARD].pos = VGet(transform_.pos.x + SHADOW_SIZE, shadowY, transform_.pos.z + SHADOW_SIZE);
 
-	// アルファ値を各頂点に適用
+	// 警告表示ポリゴンの4つの頂点に透明度（アルファ値）を設定する
 	for (int i = 0; i < 4; ++i)
 	{
 		imageVertex_[i].dif.a = ALERT_ALPHA;
@@ -202,7 +212,8 @@ void BBulletMissile::DrawAreaAlert(void)
 	DrawPolygonIndexed3D(imageVertex_, 4, index, TRIANGLE_CNT, fallingHandle_, TRUE);
 
 	// グラフィック設定の復元
-	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
 	SetWriteZBuffer3D(TRUE);
 	SetUseLighting(TRUE);
+	SetTextureAddressMode(DX_TEXADDRESS_WRAP);
 }

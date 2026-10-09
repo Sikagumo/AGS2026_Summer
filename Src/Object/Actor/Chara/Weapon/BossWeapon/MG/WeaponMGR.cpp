@@ -65,6 +65,7 @@ void WeaponMGR::InitPost(void)
 		muzzlePos_[i] = MUZZLE_POS[i];
 	}
 	stateChanges_.emplace(static_cast<int>(STATE::IDLE), std::bind(&WeaponMGR::ChangeStateIdle, this));
+	stateChanges_.emplace(static_cast<int>(STATE::ATTACKWINDUP), std::bind(&WeaponMGR::ChangeStateAttackWindup, this));
 	stateChanges_.emplace(static_cast<int>(STATE::ATTACK), std::bind(&WeaponMGR::ChangeStateAttack, this));
 	stateChanges_.emplace(static_cast<int>(STATE::END), std::bind(&WeaponMGR::ChangeStateEnd, this));
 	ChangeState(STATE::IDLE);

@@ -110,6 +110,12 @@ void MGBase::ChangeStateIdle(void)
     stateUpdate_ = std::bind(&MGBase::UpdateIdle, this);
 }
 
+void MGBase::ChangeStateAttackWindup(void)
+{
+    stateUpdate_ = std::bind(&MGBase::UpdateAttackWindup, this);
+	timeCount_ = 0.0f;
+}
+
 void MGBase::ChangeStateAttack(void)
 {
     stateUpdate_ = std::bind(&MGBase::UpdateAttack, this);
@@ -137,6 +143,20 @@ void MGBase::UpdateIdle(void)
 {
     transform_.pos = MV1GetFramePosition(bone_.transform.modelId, bone_.id);
     LookPlayer();
+}
+
+void MGBase::UpdateAttackWindup(void)
+{
+    if (timeCount_ >= ATTACK_WINDUP_TIME)
+    {
+		ChangeState(STATE::ATTACK);
+	}
+    else
+    {
+        timeCount_++;
+    }
+
+    UpdateAttackEffect();
 }
 
 void MGBase::UpdateAttack(void)

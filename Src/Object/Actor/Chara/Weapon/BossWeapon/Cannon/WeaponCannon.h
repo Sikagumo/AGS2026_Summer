@@ -86,11 +86,17 @@ protected:
 	/// @brief アイドル状態変更時の処理
 	void ChangeStateIdle(void) override;
 
+	/// @brief 攻撃予備動作状態変更時の処理
+	void ChangeStateAttackWindup(void) override;
+
 	/// @brief 攻撃状態変更時の処理
 	void ChangeStateAttack(void) override;
 
 	/// @brief 終了（破壊）状態変更時の処理
 	void ChangeStateEnd(void) override;
+
+	/// @brief 攻撃予備動作状態の更新処理
+	void UpdateAttackWindup(void) override;
 
 	/// @brief 攻撃状態の更新処理
 	void UpdateAttack(void) override;

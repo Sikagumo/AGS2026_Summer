@@ -82,6 +82,11 @@ private:
 	static constexpr VECTOR MISSILE_SCALE = { 0.07f, 0.07f, 0.07f };		// ミサイルモデルのスケール
 	static constexpr VECTOR COLLIDER_OFFSET = { 0.0f, 0.0f, 0.0f };		// コライダーのローカルオフセット
 
+	// エフェクト演出に関する定数
+	static constexpr VECTOR EFFECT_ZERO_ROT = { 0.0f, 0.0f, 0.0f };			// エフェクトの回転オフセット無し
+	static constexpr VECTOR MISSILE_EFFECT_SCALE = { 90.0f, 90.0f, 90.0f };// 着弾エフェクトのスケール
+	static constexpr float MISSILE_EFFECT_SPEED = 20.0f;					// 着弾エフェクトの再生速度
+
 	// コライダーの半径倍率
 	static constexpr float ATTACK_COLLIDER_RADIUS_RATE = 0.8f;				// 攻撃判定コライダー半径の倍率
 	static constexpr float PUSH_COLLIDER_RADIUS_RATE = 1.1f;				// 押し出し判定コライダー半径の倍率

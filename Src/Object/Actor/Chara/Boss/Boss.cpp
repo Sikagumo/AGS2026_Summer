@@ -482,7 +482,7 @@ void Boss::ChangeStateRoadAttack(void)
 	transformWheelFrontR_.Update();
 	transformBody_.Update();
 
-	roadIsAttack_ = true;
+	roadIsAttack_ = false;
 	roadCount_ = 0;
 	roadAttackTime_ = 0;
 
@@ -688,12 +688,12 @@ void Boss::UpdateAttack(void)
 
 		if (weaponMGL_->GetIsAlive() == true)
 		{
-			weaponMGL_->ChangeState(WeaponMGL::STATE::ATTACK);
+			weaponMGL_->ChangeState(WeaponMGL::STATE::ATTACKWINDUP);
 		}
 		
 		if (weaponMGR_->GetIsAlive() == true)
 		{
-			weaponMGR_->ChangeState(WeaponMGR::STATE::ATTACK);
+			weaponMGR_->ChangeState(WeaponMGR::STATE::ATTACKWINDUP);
 		}
 		
 		isMGSoundFire_ = true;

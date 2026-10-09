@@ -19,6 +19,7 @@ WeaponBase::WeaponBase(void)
 	, tag_(ColliderBase::TAG::STAGE)
 	, state_(STATE::IDLE)
 	, stateBase_(0)
+	, timeCount_(0.0f)
 {
 }
 
@@ -94,6 +95,10 @@ void WeaponBase::ChangeState(STATE _state)
 {
 }
 
+void WeaponBase::ChangeStateAttackWindup(void)
+{
+}
+
 void WeaponBase::ChangeState(int _state)
 {
 }
@@ -119,5 +124,9 @@ void WeaponBase::UpdateIdle(void)
 }
 
 void WeaponBase::UpdateEnd(void)
+{
+}
+
+void WeaponBase::UpdateAttackWindup(void)
 {
 }

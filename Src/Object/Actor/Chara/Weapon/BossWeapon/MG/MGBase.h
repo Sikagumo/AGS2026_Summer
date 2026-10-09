@@ -96,6 +96,9 @@ protected:
 	/// @brief 待機ステート開始処理
 	void ChangeStateIdle(void) override;
 
+	/// @brief 攻撃予備動作ステート開始処理
+	void ChangeStateAttackWindup(void) override;
+
 	/// @brief 攻撃ステート開始処理
 	void ChangeStateAttack(void) override;
 
@@ -104,6 +107,9 @@ protected:
 
 	/// @brief 待機ステートの毎フレーム更新
 	void UpdateIdle(void) override;
+
+	/// @brief 攻撃予備動作ステートの毎フレーム更新
+	void UpdateAttackWindup(void) override;
 
 	/// @brief 攻撃ステートの毎フレーム更新
 	void UpdateAttack(void) override;

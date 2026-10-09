@@ -15,6 +15,7 @@ public:
 	enum class STATE
 	{
 		IDLE,			// アイドル（待機）
+		ATTACKWINDUP,	// 攻撃予備動作
 		ATTACK,			// 攻撃
 		END,			// 終了・破壊
 		PREPARATION,	// 攻撃準備
@@ -22,9 +23,9 @@ public:
 
 	/// @brief ボーン情報の受け取り構造体
 	struct Bone {
-		int id = 0;				// ボーンID
-		Transform transform;	// ボーンを持つ対象のトランスフォーム
-		VECTOR playerPos;		// プレイヤーの位置座標
+		int id = 0;						// ボーンID
+		Transform transform = {};			// ボーンを持つ対象のトランスフォーム
+		VECTOR playerPos = { 0,0,0 };	// プレイヤーの位置座標
 	};
 
 	WeaponBase(void);
@@ -74,7 +75,9 @@ protected:
 	static constexpr float WEAPON_ROT = 180.0f;					// 武器の基本回転角度
 	static constexpr float MOVE_SPEED = 5.0f;					// 吹っ飛び等の移動速度
 	static constexpr float JUMP_POW = 10.0f;					// 吹っ飛び等のジャンプ初速
+	static constexpr float ATTACK_WINDUP_TIME = 60.0f;				// 攻撃予備動作の時間
 
+	float timeCount_;			// 経過時間カウント
 	int hp_;					// ウェポンのHP
 	bool isAlive_;				// ウェポンの生存フラグ
 	VECTOR movePow_;			// 重力・移動用ベクトル
@@ -125,14 +128,20 @@ protected:
 	/// @brief アイドル状態変更時の処理
 	virtual void ChangeStateIdle(void);
 
+	/// @brief 攻撃予備動作状態変更時の処理
+	virtual void ChangeStateAttackWindup(void);
+
 	/// @brief 攻撃状態変更時の処理
 	virtual void ChangeStateAttack(void);
 
 	/// @brief 終了状態変更時の処理
 	virtual void ChangeStateEnd(void);
 
-	// ステート毎の更新関数ポインタ
-	std::function<void(void)> stateUpdate_;
+	
+	std::function<void(void)> stateUpdate_;// ステート毎の更新関数ポインタ
+
+	/// @brief 攻撃予備動作状態の更新処理
+	virtual void UpdateAttackWindup(void);
 
 	/// @brief 攻撃状態の更新処理
 	virtual void UpdateAttack(void);
