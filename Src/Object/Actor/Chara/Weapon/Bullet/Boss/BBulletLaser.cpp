@@ -37,9 +37,8 @@ void BBulletLaser::InitTransform(void)
 void BBulletLaser::InitCollider(void)
 {
 	ColliderCapsule* colCapsule = new ColliderCapsule(
-		ColliderBase::TAG::LASER, &transform_, { 0.0f,0.0f,0.0f }, { 0.0f,8000.0f,0.0f }, 300.0f);
+		ColliderBase::TAG::LASER, &transform_, CAPSULE_START_POS, CAPSULE_END_POS, CAPSULE_RADIUS);
 	ownColliders_[static_cast<int>(ColliderBase::TAG::LASER)].push_back(colCapsule);
-
 
 	CollisionController::GetInstance().RegisterActor(this);
 	CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::LASER, false);
@@ -55,8 +54,10 @@ void BBulletLaser::InitPost(void)
 
 void BBulletLaser::UpdateProcess(void)
 {
-
+	// •Ší‚Ì‰ñ“]‚ğ’Ç]
 	transform_.quaRot = weaponTrans_.quaRot;
+
+	// UŒ‚ƒtƒ‰ƒO‚É‰‚¶‚Ä“–‚½‚è”»’è‚Ì—LŒø/–³Œø‚ğØ‘Ö
 	if (isAttack_)
 	{
 		CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::LASER, true);
@@ -65,8 +66,6 @@ void BBulletLaser::UpdateProcess(void)
 	{
 		CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::LASER, false);
 	}
-	
-
 }
 
 void BBulletLaser::UpdateProcessPost(void)
@@ -75,5 +74,4 @@ void BBulletLaser::UpdateProcessPost(void)
 
 void BBulletLaser::DrawPre(void)
 {
-
 }

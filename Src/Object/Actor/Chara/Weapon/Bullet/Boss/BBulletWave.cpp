@@ -4,13 +4,11 @@
 #include "../../../../../Collision/CollisionController.h"
 #include "BBulletWave.h"
 
-BBulletWave::BBulletWave(Transform& _transform):
-	bossTransform_(_transform),
-	radius_(INIT_RADIUS),
-	
-
-	BBulletBase()
+BBulletWave::BBulletWave(const Transform& _transform)
+	: BBulletBase()
+	, bossTransform_(_transform)
 {
+	radius_ = INIT_RADIUS;
 }
 
 BBulletWave::~BBulletWave(void)
@@ -42,9 +40,9 @@ void BBulletWave::InitTransform(void)
 void BBulletWave::InitCollider(void)
 {
 	transform_.pos = bossTransform_.pos;
-	ColliderSphere* colHitSphere = new ColliderSphere(ColliderBase::TAG::HIT_WAVE, &transform_, { 0.0f,0.0f,0.0f }, radius_);
+	ColliderSphere* colHitSphere = new ColliderSphere(
+		ColliderBase::TAG::HIT_WAVE, &transform_, COLLIDER_OFFSET, radius_);
 	ownColliders_[static_cast<int>(ColliderBase::TAG::HIT_WAVE)].push_back(colHitSphere);
-
 
 	CollisionController::GetInstance().RegisterActor(this);
 	CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::HIT_WAVE, false);
@@ -60,20 +58,22 @@ void BBulletWave::InitPost(void)
 
 void BBulletWave::UpdateProcess(void)
 {
-	
 	if (isAttack_)
 	{
+		// 衝撃波の判定を徐々に広げる
 		radius_ += INCREASE_RADIUS;
 		CollisionController::GetInstance().SetActorColliderRadius(this, ColliderBase::TAG::HIT_WAVE, radius_);
 		CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::HIT_WAVE, true);
 	}
+
+	// 最大サイズに達したら初期化して判定をオフにする
 	if (radius_ >= MAX_RADIUS)
 	{
 		radius_ = INIT_RADIUS;
 
 		CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::HIT_WAVE, false);
 		CollisionController::GetInstance().SetActorColliderRadius(this, ColliderBase::TAG::HIT_WAVE, radius_);
-		isAttack_ = false;		
+		isAttack_ = false;
 	}
 }
 
@@ -83,5 +83,4 @@ void BBulletWave::UpdateProcessPost(void)
 
 void BBulletWave::DrawPre(void)
 {
-	
 }

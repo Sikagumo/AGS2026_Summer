@@ -1,3 +1,5 @@
+
+#include "Boss.h"
 #include "../../../../Manager/Generic/ResourceManager.h"
 #include "../../../../Manager/Generic/InputManager.h"
 #include "../../../../Manager/Generic/SceneManager.h"
@@ -21,7 +23,6 @@
 #include "../Weapon/BossWeapon/RG/WeaponRG.h"
 #include "../Weapon/BossWeapon/Cannon/WeaponCannon.h"
 #include "../Weapon/Bullet/Boss/BBulletWave.h"
-#include "Boss.h"
 
 Boss::Boss(void)
 	: hp_(MAX_HP)
@@ -36,7 +37,7 @@ Boss::Boss(void)
 	, roadIsAttack_(false)
 	, soundRadius_(SOUND_RADIUS)
 	, isLanging_(false)
-	, isMGFire_(false)
+	, isMGSoundFire_(false)
 	, isRoadFire_(false)
 	, jumpCount_(0)
 	, attackCount_(0)
@@ -104,8 +105,6 @@ void Boss::ReleasePost(void)
 {
 }
 
-//各武器のダメージ受け取り用＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝
-
 void Boss::SetWeaponMGLDamage(int _damage)
 {
 	weaponMGL_->SetDamage(_damage);
@@ -145,15 +144,16 @@ void Boss::SetBossDamage(int _damage)
 {
 	hp_ -= _damage;
 
+	// ダメージが一定以上ならエフェクトを再生
 	if (_damage > EFFECT_PLAEY_DAMEGE)
 	{
 		PlayEffect();
 	}
 }
 
-//＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝
 void Boss::BoneParam(void)
 {
+	// 武器のジョイントの座標を取得して、ボーンIDに登録
 	boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MGL_L)]={JOINT_WAEAPON_MG_L, transformBody_ };
 	boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MGL_R)]={ JOINT_WAEAPON_MG_R, transformBody_ };
 	boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_CANNON_L)]={JOINT_WAEAPON_CANNON_L, transformBody_ };
@@ -165,6 +165,7 @@ void Boss::BoneParam(void)
 
 void Boss::Load(void)
 {
+	// 各トランスフォームのモデルIDがロードされる
 	transformFeet_.modelId = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::MODEL_BOSS_FEET);
 	transformBody_.modelId = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::MODEL_BOSS_BODY);
 	transformFeetCar_.modelId = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::MODEL_BOSS_CAR);
@@ -175,16 +176,16 @@ void Boss::Load(void)
 	transformWheelBackFrontR_.modelId = ResourceManager::GetInstance().LoadModelDuplicate(ResourceManager::SRC::MODEL_BOSS_WHEEL_BACK);
 	transformWheelFrontR_.modelId = ResourceManager::GetInstance().LoadModelDuplicate(ResourceManager::SRC::MODEL_BOSS_WHEEL_FRONT);
 
-	WeaponLoad();
+	LoadWeapon();
 	
-	//SE
+	// SEのロード
 	SoundManager::GetInstance().Add(SoundManager::TYPE::SE, SoundManager::SOUND::SE_BOSS_LANDING, ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::SE_BOSS_LANDING));
-
 	SoundManager::GetInstance().Add(SoundManager::TYPE::SE, SoundManager::SOUND::SE_BOSS_ROAD, ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::SE_BOSS_ROAD));
 }
 
 void Boss::PlayEffect(void)
 {
+	// 各エフェクトの再生
 	EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_BOSS_HIT, { 0,0,0 }, EFFECT_ROT, EFFECT_SCL, EFFECT_PLAEY_SPEED, this, EFFECT_NO_ONE);
 	EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_BOSS_HIT, { 0,0,0 }, { 0,0,0 }, EFFECT_SCL, EFFECT_PLAEY_SPEED, this, EFFECT_NO_TWO);
 	EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_BOSS_HIT, { 0,0,0 }, { 0,0,0 }, EFFECT_SCL, EFFECT_PLAEY_SPEED, this, EFFECT_NO_THREE);
@@ -192,15 +193,15 @@ void Boss::PlayEffect(void)
 
 void Boss::UpdateEffect(void)
 {
+	// 各エフェクトの座標を更新
 	VECTOR hitEffectPos1= MV1GetFramePosition(transform_.modelId, JOINT_FEET_BODY);
 	EffectManager::GetInstance().UpdatePos(EffectManager::EFFECT::EFFECT_BOSS_HIT, this, hitEffectPos1, EFFECT_NO_ONE);
-
 	VECTOR hitEffectPos2 = MV1GetFramePosition(transformBody_.modelId, JOINT_WAEAPON_MP_L);
 	EffectManager::GetInstance().UpdatePos(EffectManager::EFFECT::EFFECT_BOSS_HIT, this, hitEffectPos2, EFFECT_NO_TWO);
-
 	VECTOR hitEffectPos3 = MV1GetFramePosition(transformBody_.modelId, JOINT_WAEAPON_MP_R);
 	EffectManager::GetInstance().UpdatePos(EffectManager::EFFECT::EFFECT_BOSS_HIT, this, hitEffectPos3, EFFECT_NO_THREE);
 
+	// 各エフェクトの回転を更新
 	VECTOR hitEffectRot1 = Quaternion::Mult(transformBody_.quaRot, Quaternion::AngleAxis(UtilityMath::Deg2RadF(90.0f), UtilityMath::AXIS_X)).ToEuler();
 	hitEffectRot1.x = UtilityMath::Rad2DegF(hitEffectRot1.x);
 	hitEffectRot1.y = UtilityMath::Rad2DegF(hitEffectRot1.y);
@@ -255,65 +256,65 @@ void Boss::UpdateSound(void)
 
 void Boss::InitTransform(void)
 {
-	//ベース
+	// ベース
 	transform_.modelId = transformFeet_.modelId;
 	transform_.scl = BOSS_SIZE;
 	transform_.quaRot = Quaternion::Identity();
-	transform_.quaRotLocal =Quaternion::Mult(transform_.quaRotLocal,Quaternion::AngleAxis(UtilityMath::Deg2RadF(INIT_ROT), UtilityMath::AXIS_Y));
+	transform_.quaRotLocal = Quaternion::Mult(transform_.quaRotLocal, Quaternion::AngleAxis(UtilityMath::Deg2RadF(INIT_ROT), UtilityMath::AXIS_Y));
 	transform_.pos = BOSS_INIT_POS;
 	transform_.Update();
 
-	//足
+	// 足
 	transformFeet_.scl = BOSS_SIZE;
 	transformFeet_.Update();
 
-	//車体
+	// 車体
 	transformFeetCar_.scl = BOSS_CAR_SIZE;
 	transformFeetCar_.quaRot = Quaternion::Identity();
-	transformFeetCar_.quaRotLocal =Quaternion::Mult(transformFeetCar_.quaRotLocal,Quaternion::AngleAxis(UtilityMath::Deg2RadF(INIT_ROT), UtilityMath::AXIS_Y));
+	transformFeetCar_.quaRotLocal = Quaternion::Mult(transformFeetCar_.quaRotLocal, Quaternion::AngleAxis(UtilityMath::Deg2RadF(INIT_ROT), UtilityMath::AXIS_Y));
 	transformFeetCar_.pos = transform_.pos;
 	transformFeetCar_.Update();
 
-	//前輪L
+	// 前輪L
 	transformWheelFrontL_.scl = BOSS_CAR_SIZE;
 	transformWheelFrontL_.quaRot = Quaternion::Identity();
-	transformWheelFrontL_.quaRotLocal =Quaternion::Mult(transformWheelFrontL_.quaRotLocal,Quaternion::AngleAxis(UtilityMath::Deg2RadF(INIT_ROT), UtilityMath::AXIS_Y));
+	transformWheelFrontL_.quaRotLocal = Quaternion::Mult(transformWheelFrontL_.quaRotLocal, Quaternion::AngleAxis(UtilityMath::Deg2RadF(INIT_ROT), UtilityMath::AXIS_Y));
 	transformWheelFrontL_.Update();
 
-	//前輪R
+	// 前輪R
 	transformWheelFrontR_.scl = BOSS_CAR_SIZE;
 	transformWheelFrontR_.quaRot = Quaternion::Identity();
-	transformWheelFrontR_.quaRotLocal =Quaternion::Mult(transformWheelFrontR_.quaRotLocal,Quaternion::AngleAxis(UtilityMath::Deg2RadF(0.0f), UtilityMath::AXIS_Y));
+	transformWheelFrontR_.quaRotLocal = Quaternion::Mult(transformWheelFrontR_.quaRotLocal, Quaternion::AngleAxis(UtilityMath::Deg2RadF(0.0f), UtilityMath::AXIS_Y));
 	transformWheelFrontR_.Update();
 
-	//後輪前L
+	// 後輪前L
 	transformWheelBackFrontL_.scl = BOSS_CAR_SIZE;
 	transformWheelBackFrontL_.quaRot = Quaternion::Identity();
-	transformWheelBackFrontL_.quaRotLocal =Quaternion::Mult(transformWheelBackFrontL_.quaRotLocal,Quaternion::AngleAxis(UtilityMath::Deg2RadF(INIT_ROT), UtilityMath::AXIS_Y));
+	transformWheelBackFrontL_.quaRotLocal = Quaternion::Mult(transformWheelBackFrontL_.quaRotLocal, Quaternion::AngleAxis(UtilityMath::Deg2RadF(INIT_ROT), UtilityMath::AXIS_Y));
 	transformWheelBackFrontL_.Update();
 
-	//後輪前R
+	// 後輪前R
 	transformWheelBackFrontR_.scl = BOSS_CAR_SIZE;
 	transformWheelBackFrontR_.quaRot = Quaternion::Identity();
-	transformWheelBackFrontR_.quaRotLocal =Quaternion::Mult(transformWheelBackFrontR_.quaRotLocal,Quaternion::AngleAxis(UtilityMath::Deg2RadF(0.0f), UtilityMath::AXIS_Y));
+	transformWheelBackFrontR_.quaRotLocal = Quaternion::Mult(transformWheelBackFrontR_.quaRotLocal, Quaternion::AngleAxis(UtilityMath::Deg2RadF(0.0f), UtilityMath::AXIS_Y));
 	transformWheelBackFrontR_.Update();
 
-	//後輪L
+	// 後輪L
 	transformWheelBackL_.scl = BOSS_CAR_SIZE;
 	transformWheelBackL_.quaRot = Quaternion::Identity();
-	transformWheelBackL_.quaRotLocal =Quaternion::Mult(transformWheelBackL_.quaRotLocal,Quaternion::AngleAxis(UtilityMath::Deg2RadF(INIT_ROT), UtilityMath::AXIS_Y));
+	transformWheelBackL_.quaRotLocal = Quaternion::Mult(transformWheelBackL_.quaRotLocal, Quaternion::AngleAxis(UtilityMath::Deg2RadF(INIT_ROT), UtilityMath::AXIS_Y));
 	transformWheelBackL_.Update();
 
-	//後輪R
+	// 後輪R
 	transformWheelBackR_.scl = BOSS_CAR_SIZE;
 	transformWheelBackR_.quaRot = Quaternion::Identity();
-	transformWheelBackR_.quaRotLocal =Quaternion::Mult(transformWheelBackR_.quaRotLocal,Quaternion::AngleAxis(UtilityMath::Deg2RadF(0.0f), UtilityMath::AXIS_Y));
+	transformWheelBackR_.quaRotLocal = Quaternion::Mult(transformWheelBackR_.quaRotLocal, Quaternion::AngleAxis(UtilityMath::Deg2RadF(0.0f), UtilityMath::AXIS_Y));
 	transformWheelBackR_.Update();
 
-	//胴体
+	// 胴体
 	transformBody_.scl = BOSS_SIZE;
 	transformBody_.quaRot = Quaternion::Identity();
-	transformBody_.quaRotLocal =Quaternion::Mult(transformBody_.quaRotLocal,Quaternion::AngleAxis(UtilityMath::Deg2RadF(INIT_ROT), UtilityMath::AXIS_Y));
+	transformBody_.quaRotLocal = Quaternion::Mult(transformBody_.quaRotLocal, Quaternion::AngleAxis(UtilityMath::Deg2RadF(INIT_ROT), UtilityMath::AXIS_Y));
 	transformBody_.pos = MV1GetFramePosition(transform_.modelId, JOINT_FEET_BODY);
 	transformBody_.Update();
 
@@ -322,25 +323,28 @@ void Boss::InitTransform(void)
 
 void Boss::InitCollider(void)
 {
+	// 地面との当たり判定用のラインコライダーを作成
 	ColliderLine* colLine = new ColliderLine(ColliderBase::TAG::BOSS, &transform_, COL_LINE_START_POS, COL_LINE_END_POS);
 	ownColliders_[static_cast<int>(ColliderBase::TAG::BOSS)].push_back(colLine);
 	colLine->SetTriger(false);
 
-	ColliderCapsule* colCapsule = new ColliderCapsule(ColliderBase::TAG::BOSS, &transform_, COL_CAPSULE_START_POS, COL_CAPSULE_END_POS, COL_CAPSULE_END_RADIUS);
+	// その他との当たり判定用のカプセルコライダーを作成
+	ColliderCapsule* colCapsule = new ColliderCapsule(ColliderBase::TAG::BOSS, &transform_, COL_CAPSULE_START_POS, COL_CAPSULE_END_POS, COL_CAPSULE_BODY_RADIUS);
 	ownColliders_[static_cast<int>(ColliderBase::TAG::BOSS)].push_back(colCapsule);
 	colCapsule->SetTriger(false);
 
-	ColliderSphere* colSphere = new ColliderSphere(ColliderBase::TAG::ROAD_ATTACK, &transform_, { 0.0f,0.0f,0.0f }, 200.0f);
+	// 攻撃用の球コライダーを作成
+	ColliderSphere* colSphere = new ColliderSphere(ColliderBase::TAG::ROAD_ATTACK, &transform_, { 0.0f,0.0f,0.0f }, COL_CAPSULE_ROAD_ATTACK_RADIUS);
 	ownColliders_[static_cast<int>(ColliderBase::TAG::ROAD_ATTACK)].push_back(colSphere);
 	
 	CollisionController::GetInstance().RegisterActor(this);
-
 	CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::ROAD_ATTACK, false);
 }
 
 void Boss::InitAnimation(void)
 {
 	CharaBase::InitAnimation();
+	// アニメーションの内部登録
 	for (int i = 0; i < static_cast<int>(ANIM_TYPE::MAX); i++)
 	{
 		animation_->AddInternal(i, ANIM_SPEED);
@@ -350,15 +354,19 @@ void Boss::InitAnimation(void)
 
 void Boss::InitPost(void)
 {
-	//make_uniqueで初期化
 	wave_ = std::make_unique< BBulletWave>(transform_);
+	wave_->Init();
 
-	WeaponSet();
+	SetWeapon();
 
-	WeaponInit();
+	InitWeapon();
 
+	// HPの設定
+	// ボス
 	hp_ = MAX_HP + (MAX_HP_HALF * playerSize_);
 	laserShotHp_ = hp_;
+
+	// 武器
 	weaponCannonL_->SetHp(hp_ * WEAPON_HP_CANNON);
 	weaponCannonR_->SetHp(hp_ * WEAPON_HP_CANNON);
 	weaponMGL_->SetHp(hp_ * WEAPON_HP_MG);
@@ -367,8 +375,7 @@ void Boss::InitPost(void)
 	weaponMPR_->SetHp(hp_ * WEAPON_HP_MP);
 	weaponRG_->SetHp(hp_);
 
-	wave_->Init();
-
+	//ステートチェンジ関数の登録
 	stateChanges_.emplace(static_cast<int>(STATE::IDLE),std::bind(&Boss::ChangeStateIdle, this));
 	stateChanges_.emplace(static_cast<int>(STATE::ATTACK), std::bind(&Boss::ChangeStateAttack, this));
 	stateChanges_.emplace(static_cast<int>(STATE::JUMP), std::bind(&Boss::ChangeStateJump, this));
@@ -376,6 +383,8 @@ void Boss::InitPost(void)
 	stateChanges_.emplace(static_cast<int>(STATE::ROADATTACK), std::bind(&Boss::ChangeStateRoadAttack, this));
 	stateChanges_.emplace(static_cast<int>(STATE::LASER), std::bind(&Boss::ChangeStateLaserAttack, this));
 	stateChanges_.emplace(static_cast<int>(STATE::END), std::bind(&Boss::ChangeStateEnd, this));
+
+	//ステートの初期設定
 	ChangeState(STATE::IDLE);
 }
 
@@ -385,14 +394,13 @@ void Boss::ChangeState(STATE _state)
 
 	int state = static_cast<int>(state_);
 
-	// 各状態遷移の初期処理
 	Boss::ChangeState(state);
 }
 
 void Boss::ChangeState(int state)
 {
 	stateBase_ = state;
-	// 各状態遷移の初期処理
+
 	stateChanges_[stateBase_]();
 }
 
@@ -411,21 +419,19 @@ void Boss::ChangeStateIdle(void)
 void Boss::ChangeStateAttack(void)
 {
 	stateUpdate_ = std::bind(&Boss::UpdateAttack, this);
-
 	attackCount_ = 0;
 
+	//レーザー攻撃用HPの値と最大HPの値が同じ場合は、初回のレーザー攻撃の間隔を設定する
 	if (laserShotHp_ == (MAX_HP + (MAX_HP_HALF * playerSize_)))
 	{
 		attackCount_ = FIRST_ATTACK_INTERVAL;
 	}
-
 	animation_->Play(static_cast<int>(ANIM_TYPE::ATTACK));
 }
 
 void Boss::ChangeStateJump(void)
 {
 	stateUpdate_ = std::bind(&Boss::UpdateJump, this);
-
 	animation_->Play(static_cast<int>(ANIM_TYPE::JUMP));
 
 	// ジャンプ量の計算
@@ -437,7 +443,6 @@ void Boss::ChangeStateJump(void)
 void Boss::ChangeStateJumpBefore(void)
 {
 	stateUpdate_ = std::bind(&Boss::UpdateJumpBefore, this);
-
 	animation_->Play(static_cast<int>(ANIM_TYPE::JUMPBEFORE),false);
 }
 
@@ -445,11 +450,13 @@ void Boss::ChangeStateRoadAttack(void)
 {
 	stateUpdate_ = std::bind(&Boss::UpdateRoadAttack, this);
 
+	//トランスフォームのモデルIDを車体に変更し、スケールと回転を車体に合わせる
 	transform_.modelId = transformFeetCar_.modelId;
 	transform_.scl = transformFeetCar_.scl;
 	transform_.quaRot = transformFeetCar_.quaRot;
 	transform_.Update();
 
+	//各トランスフォームの座標をジョイントに合わせる
 	transformBody_.pos = MV1GetFramePosition(transform_.modelId, JOINT_CAR_BODY);
 	transformWheelFrontL_.pos = MV1GetFramePosition(transform_.modelId, JOINT_CAR_WHEEL_FRONT_L);
 	transformWheelFrontR_.pos = MV1GetFramePosition(transform_.modelId, JOINT_CAR_WHEEL_FRONT_R);
@@ -458,6 +465,7 @@ void Boss::ChangeStateRoadAttack(void)
 	transformWheelBackL_.pos = MV1GetFramePosition(transform_.modelId, JOINT_CAR_WHEEL_BACK_L);
 	transformWheelBackR_.pos = MV1GetFramePosition(transform_.modelId, JOINT_CAR_WHEEL_BACK_R);
 
+	//各トランスフォームの回転を本体に合わせる
 	transformWheelBackFrontL_.quaRot = transform_.quaRot;
 	transformWheelBackFrontR_.quaRot = transform_.quaRot;
 	transformWheelFrontL_.quaRot = transform_.quaRot;
@@ -465,6 +473,7 @@ void Boss::ChangeStateRoadAttack(void)
 	transformWheelBackL_.quaRot = transform_.quaRot;
 	transformWheelBackR_.quaRot = transform_.quaRot;
 
+	//各トランスフォームの更新
 	transformWheelBackFrontL_.Update();
 	transformWheelBackFrontR_.Update();
 	transformWheelBackL_.Update();
@@ -474,9 +483,7 @@ void Boss::ChangeStateRoadAttack(void)
 	transformBody_.Update();
 
 	roadIsAttack_ = true;
-
 	roadCount_ = 0;
-
 	roadAttackTime_ = 0;
 
 	CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::ROAD_ATTACK, true);
@@ -485,11 +492,10 @@ void Boss::ChangeStateRoadAttack(void)
 void Boss::ChangeStateLaserAttack(void)
 {
 	stateUpdate_ = std::bind(&Boss::UpdateStateLaserAttack , this);
-
 	weaponRG_->ChangeState(WeaponRG::STATE::PREPARATION);
-
 	animation_->Play(static_cast<int>(ANIM_TYPE::JUMPBEFORE), false);
 
+	//初レーザー攻撃の回転速度を初期化
 	if (laserShotHp_ != (MAX_HP + (MAX_HP_HALF * playerSize_)))
 	{
 		laserRotSpeed_ = FIRST_LASER_ROT_SPEED;
@@ -500,10 +506,9 @@ void Boss::ChangeStateEnd(void)
 {
 	stateUpdate_ = std::bind(&Boss::UpdateEnd, this);
 
+	// 再生処理
 	animation_->Play(static_cast<int>(ANIM_TYPE::JUMPBEFORE), false);
-
 	EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_PLAYER_BLAST, transformBody_.pos, { 0,0,0 }, EFFECT_SCL_LASER, EFFECT_PLAEY_SPEED, this);
-
 	SoundManager::GetInstance().Play(SoundManager::SOUND::SE_HIT_BLAST);
 
 	weaponCannonL_->SetHp(0);
@@ -516,7 +521,7 @@ void Boss::ChangeStateEnd(void)
 }
 //===========================================================================================================================================================================================================================================================
 
-void Boss::BossTransformUpdate(void)
+void Boss::UpdateBossTransform(void)
 {
 	transformFeetCar_.pos = transform_.pos;
 	transformFeetCar_.quaRot = transform_.quaRot;
@@ -525,6 +530,7 @@ void Boss::BossTransformUpdate(void)
 
 	transformFeetCar_.Update();
 
+	//攻撃時タイヤの座標を各ジョイントに合わせる
 	if (state_ == STATE::ROADATTACK)
 	{
 		UpdateWheel();
@@ -549,12 +555,13 @@ void Boss::UpdateProcess(void)
 
 	SelectTarget();
 
-
+	//ステー外に出たり地面貫通した際にステージ内に戻す
 	if (transform_.pos.y < DOWU_POS)
 	{
 		transform_.pos = POP_POS;
 	}
 	
+	//死亡時ステートをENDに変更
 	if (hp_ <= 0)
 	{
 		
@@ -571,35 +578,37 @@ void Boss::UpdateProcess(void)
 	{
 		stateUpdate_();
 
+		//MG武器の攻撃中かどうかを判定し、攻撃中であればMGの発射音を再生するフラグを立てる
 		if (weaponMGL_->IsAttack() == true || weaponMGR_->IsAttack() == true)
 		{
 			if (SoundManager::GetInstance().IsPlaying(SoundManager::SOUND::SE_BOSS_MG_FIRE) == false)
 			{
-				isMGFire_ = true;
+				isMGSoundFire_ = true;
 			}
 		}
 	}
 
 	isLanging_ = false;
-	isMGFire_ = false;
+	isMGSoundFire_ = false;
 	isRoadFire_ = false;
 
 	currentWaveScl = VAdd(currentWaveScl, WAVE_SCL_UP);
 	EffectManager::GetInstance().UpdateScl(EffectManager::EFFECT::EFFECT_WAVE, this, currentWaveScl);
 
-	BossTransformUpdate();
+	UpdateBossTransform();
 
-	WeaponSet();
+	SetWeapon();
 
 	BoneParam();
 
-	WeaponUpdate();
+	UpdateWeapon();
 
 	UpdateSound();
 
 	wave_->SetPos(transform_.pos);
 	wave_->Update();
 
+	//カメラのロックオン追従対象に登録
 	camera->SetLockOnTargets(Camera::LOCKON_TARGET::BOSS_BODY, transformBody_.pos, hp_);
 	camera->SetLockOnTargets(Camera::LOCKON_TARGET::BOSS_WEAPON_MGL_L, weaponMGL_->GetPos(), weaponMGL_->GetHp());
 	camera->SetLockOnTargets(Camera::LOCKON_TARGET::BOSS_WEAPON_MGL_R, weaponMGR_->GetPos(), weaponMGR_->GetHp());
@@ -621,11 +630,11 @@ void Boss::UpdateIdle(void)
 	transformBody_.pos = MV1GetFramePosition(transform_.modelId, JOINT_FEET_BODY);
 	LookPlayer();
 	attackCount_++;
-
+	//現在HPがレーザー攻撃HP以下で、攻撃間隔が経過している場合はレーザー攻撃ステートに変更する
 	if (hp_ <= laserShotHp_ && attackCount_ >= attackInterval_)
 	{
 		ChangeState(STATE::LASER);
-
+		//レーザー攻撃HPの値を変更する
 		if (laserShotHp_== (MAX_HP + (MAX_HP_HALF * playerSize_)))
 		{
 			laserShotHp_ = (MAX_HP + (MAX_HP_HALF * playerSize_)) / HALF;
@@ -641,6 +650,7 @@ void Boss::UpdateIdle(void)
 			laserShotHp_ = -MAX_HP_HALF;
 		}
 	}
+	//攻撃間隔が経過している場合は攻撃ステートに変更する
 	else if (attackCount_ >= attackInterval_)
 	{
 		ChangeState(STATE::ATTACK);
@@ -652,19 +662,22 @@ void Boss::UpdateAttack(void)
 	LookPlayer();
 	transformBody_.pos = MV1GetFramePosition(transform_.modelId, JOINT_FEET_BODY);
 
+	//攻撃タイプをランダムで選択する
 	if (static_cast<int>(ATTACK_TYPE::MAX) > 1)
 	{
+		//前回と同じ攻撃タイプが選択されないようにするためのループ
 		do
 		{
 			int randomAttack = static_cast<int>(UtilityMath::RandRangeF(0.0f, static_cast<float>(ATTACK_TYPE::MAX)));
 			 attackSelect_ = static_cast<ATTACK_TYPE>(randomAttack);
 		} 
-
+		
 		while (attackSelect_ == lastAttackType_); 
 	}
 
 	lastAttackType_ = attackSelect_;
 
+	//攻撃タイプに応じてそれぞれのステートを変更する
 	switch (attackSelect_)
 	{
 	case ATTACK_TYPE::JUMP:
@@ -673,11 +686,17 @@ void Boss::UpdateAttack(void)
 
 	case ATTACK_TYPE::MG:
 
-		if (weaponMGL_->GetIsAlive()==true)weaponMGL_->ChangeState(WeaponMGL::STATE::ATTACK);
+		if (weaponMGL_->GetIsAlive() == true)
+		{
+			weaponMGL_->ChangeState(WeaponMGL::STATE::ATTACK);
+		}
 		
-		if (weaponMGR_->GetIsAlive() == true)weaponMGR_->ChangeState(WeaponMGR::STATE::ATTACK);
+		if (weaponMGR_->GetIsAlive() == true)
+		{
+			weaponMGR_->ChangeState(WeaponMGR::STATE::ATTACK);
+		}
 		
-		isMGFire_ = true;
+		isMGSoundFire_ = true;
 		ChangeState(STATE::IDLE);
 		break;
 
@@ -689,7 +708,7 @@ void Boss::UpdateAttack(void)
 
 		if(weaponCannonL_->GetIsAlive()==true)weaponCannonL_->ChangeState(WeaponCannon::STATE::ATTACK);
 
-		if (weaponCannonR_->GetIsAlive() == true)weaponCannonR_->ChangeState(WeaponCannon::STATE::ATTACK);
+		if(weaponCannonR_->GetIsAlive() == true)weaponCannonR_->ChangeState(WeaponCannon::STATE::ATTACK);
 
 		ChangeState(STATE::IDLE);
 		break;
@@ -717,36 +736,6 @@ void Boss::UpdateAttack(void)
 	}
 }
 
-void Boss::UpdateJump(void)
-{
-	LookPlayer();
-	transformBody_.pos = MV1GetFramePosition(transform_.modelId, JOINT_FEET_BODY);
-
-	if (!isJump_)
-	{
-		wave_->SetIsAttack(true);
-		isLanging_ = true;
-		currentWaveScl = WAVE_SCL;
-		EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_WAVE, transform_.pos, currentWaveScl, LANDING_SCL, EFFECT_PLAEY_SPEED,this);
-		EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_LANDING, transform_.pos, { 0.0f,0.0f,0.0f }, LANDING_SCL, EFFECT_PLAEY_SPEED,this);
-		ChangeState(STATE::IDLE);
-	}
-	else if (isJump_)
-	{
-		if (transform_.pos.y >= JUMP_MAX_UP)
-		{
-			jumpPow_ = POW_JUMP_DOUN;
-		}
-
-		if (jumpPow_ >= POW_JUMP_DOUN)
-		{
-			VECTOR movePow = VScale(jumpDir_, speed_);
-			// 移動処理
-			transform_.pos = VAdd(transform_.pos, movePow);
-		}
-	}
-}
-
 void Boss::UpdateJumpBefore(void)
 {
 	LookPlayer();
@@ -758,12 +747,44 @@ void Boss::UpdateJumpBefore(void)
 	}
 }
 
+void Boss::UpdateJump(void)
+{
+	LookPlayer();
+	transformBody_.pos = MV1GetFramePosition(transform_.modelId, JOINT_FEET_BODY);
+
+	//ジャンプ中の処理
+	if (!isJump_)
+	{
+		//着地したら、衝撃波攻撃を発動させ波のエフェクトを再生する
+		wave_->SetIsAttack(true);
+		isLanging_ = true;
+		currentWaveScl = WAVE_SCL;
+		EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_WAVE, transform_.pos, currentWaveScl, LANDING_SCL, EFFECT_PLAEY_SPEED,this);
+		EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_LANDING, transform_.pos, { 0.0f,0.0f,0.0f }, LANDING_SCL, EFFECT_PLAEY_SPEED,this);
+		ChangeState(STATE::IDLE);
+	}
+	else if (isJump_)
+	{
+		//ジャンプの高さが最大値に達したら、ジャンプの力を下げる
+		if (transform_.pos.y >= JUMP_MAX_POS_Y)
+		{
+			jumpPow_ = POW_JUMP_DOUN;
+		}
+		//ジャンプ上昇処理
+		if (jumpPow_ >= POW_JUMP_DOUN)
+		{
+			VECTOR movePow = VScale(jumpDir_, speed_);
+			transform_.pos = VAdd(transform_.pos, movePow);
+		}
+	}
+}
+
 void Boss::UpdateRoadAttack(void)
 {
 	SoundManager::GetInstance().Set3DPosition(SoundManager::SOUND::SE_BOSS_ROAD, transform_.pos);
 	
 	transformBody_.pos = MV1GetFramePosition(transform_.modelId, JOINT_CAR_BODY);
-	
+	//車体の向きをプレイヤーに向ける
 	if (!roadIsAttack_)
 	{
 		LookPlayer();
@@ -771,7 +792,7 @@ void Boss::UpdateRoadAttack(void)
 		roadLockTime_++;
 		
 		transform_.quaRot = transformFeetCar_.quaRot;
-
+		//攻撃の再開処理
 		if (roadLockTime_ >= MAX_ROAD_LOCK_TIME)
 		{
 			roadLockTime_ = 0;
@@ -779,7 +800,7 @@ void Boss::UpdateRoadAttack(void)
 			CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::ROAD_ATTACK, true);
 		}
 	}
-
+	//攻撃中の移動と場外に出るのを回避する処理
 	if (roadIsAttack_)
 	{
 		isRoadFire_ = true;
@@ -815,6 +836,7 @@ void Boss::UpdateRoadAttack(void)
 		}
 	}
 
+	//攻撃回数が最大値に達したら、突進攻撃を終了し、通常状態に戻す
 	if (roadCount_ >= MAX_ROAD_COUNT)
 	{
 		transform_.modelId = transformFeet_.modelId;
@@ -828,11 +850,11 @@ void Boss::UpdateRoadAttack(void)
 void Boss::UpdateStateLaserAttack(void)
 {
 	transformBody_.pos = MV1GetFramePosition(transform_.modelId, JOINT_FEET_BODY);
-
+	//レーザー攻撃中の回転処理
 	if (weaponRG_->GetIsAttack() == true)
 	{
 		laserAttackRot_ += laserRotSpeed_;
-
+		//レーザー攻撃の回転が最大値に達したら、レーザー攻撃を終了し、通常状態に戻す
 		if (laserAttackRot_ >= LASER_MAX_ROT)
 		{
 			laserAttackRot_ = 0.0f;
@@ -855,8 +877,10 @@ void Boss::UpdateEnd(void)
 	weaponMPR_->SetHp(0);
 	weaponRG_->SetHp(0);
 
+	//死亡演出をするための処理
 	if (endCount_ >= END_MAX_COUNT)
 	{
+		//死亡演出のための胴体の移動処理
 		speed_ = MOVE_SPEED;
 		VECTOR movePow = VScale(roadDir_, speed_);
 		transformBody_.pos = VAdd(transformBody_.pos, movePow);
@@ -884,7 +908,7 @@ void Boss::DrawPre(void)
 {
 	MV1DrawModel(transform_.modelId);
 	MV1DrawModel(transformBody_.modelId);
-
+	//ロードアッタクの時は車体のモデルを描画する
 	if (state_ == STATE::ROADATTACK)
 	{
 		MV1DrawModel(transformWheelBackFrontL_.modelId);
@@ -895,7 +919,7 @@ void Boss::DrawPre(void)
 		MV1DrawModel(transformWheelFrontR_.modelId);
 	}
 
-	WeaponDraw();
+	DrawWeapon();
 	wave_->Draw();
 	CharaBase::DrawShadowRound(200.0f);
 
@@ -915,6 +939,7 @@ void Boss::LookPlayer(void)
 		return;
 	}
 
+	//プレイヤーに向く処理
 	mainPos_ = playerPos_[mainIdx_];
 	VECTOR moveDir = VSub(mainPos_, transformBody_.pos);
 	moveDir.y = 0.0f;
@@ -932,22 +957,22 @@ void Boss::SelectTarget(void)
 {
 	if (isHostControl_)
 	{
+		//胴体が向くプレイヤーのランダム選択
 		int gameTime = TimeManager::GetInstance().GetGameTime();
 		if (static_cast<int>(gameTime) >= nextChangeMainTime_)
 		{
-
 			mainIdx_ = std::rand() % playerSize_;
 			nextChangeMainTime_ = static_cast<int>(gameTime) + INTERVAL_SEC;
 		}
+		//MP武器が攻撃するプレイヤーのランダム選択
 		if (static_cast<int>(gameTime) >= nextChangeMpTime_)
 		{
-
 			mpIdx_ = std::rand() % playerSize_;
 			nextChangeMpTime_ = static_cast<int>(gameTime) + INTERVAL_SEC_MP;
 		}
+		//Cannon武器が攻撃するプレイヤーのランダム選択
 		if (static_cast<int>(gameTime) >= nextChangeCannonTime_)
 		{
-
 			cannonIdx_ = std::rand() % playerSize_;
 			nextChangeCannonTime_ = static_cast<int>(gameTime) + INTERVAL_SEC_CANNON;
 		}
@@ -955,13 +980,12 @@ void Boss::SelectTarget(void)
 }
 
 //ウェポンの呼び出し纏めよう＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝
-void Boss::WeaponSet(void)
+void Boss::SetWeapon(void)
 {
 	
 	weaponMGL_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MGL_L)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MGL_L)].transform, ColliderBase::TAG::WEAPON_MG_L, mainPos_);
 	weaponMGR_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MGL_R)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MGL_R)].transform, ColliderBase::TAG::WEAPON_MG_R, mainPos_);
-	int gameTime = TimeManager::GetInstance().GetGameTime();
-
+	
 	mpPos_ = playerPos_[mpIdx_];
 	weaponMPL_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MP_L)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MP_L)].transform, ColliderBase::TAG::WEAPON_MP_L, mpPos_);
 	weaponMPR_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MP_R)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MP_R)].transform, ColliderBase::TAG::WEAPON_MP_R, mainPos_);
@@ -972,7 +996,7 @@ void Boss::WeaponSet(void)
 	weaponCannonR_->SetBone(boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_CANNON_R)].id, boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_CANNON_R)].transform, ColliderBase::TAG::WEAPON_CANNON_R, CannonPos_);
 }
 
-void Boss::WeaponLoad(void)
+void Boss::LoadWeapon(void)
 {
 	weaponMGL_->Load();
 	weaponMGR_->Load();
@@ -983,7 +1007,7 @@ void Boss::WeaponLoad(void)
 	weaponCannonR_->Load();
 }
 
-void Boss::WeaponInit(void)
+void Boss::InitWeapon(void)
 {
 	weaponMGL_->Init();
 	weaponMGR_->Init();
@@ -994,7 +1018,7 @@ void Boss::WeaponInit(void)
 	weaponCannonR_->Init();
 }
 
-void Boss::WeaponUpdate(void)
+void Boss::UpdateWeapon(void)
 {
 	weaponMGL_->Update();
 	weaponMGR_->Update();
@@ -1005,7 +1029,7 @@ void Boss::WeaponUpdate(void)
 	weaponCannonR_->Update();
 }
 
-void Boss::WeaponDraw(void)
+void Boss::DrawWeapon(void)
 {
 	weaponMGL_->Draw();
 	weaponMGR_->Draw();
