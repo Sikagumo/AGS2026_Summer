@@ -122,26 +122,18 @@ void Application::Run(void)
 		
 		ImGuiWrapper::GetInstance().Update();
 
-		bool isChanging = SceneManager::GetInstance().IsSceneChanging();
-
 		sceneManager.Update();
 
 		inputTextManager.Update();
 		
 		KeyConfInputManager::GetInstance().Update();
 
-
 		sceneManager.Draw();
 		
 		ImGuiWrapper::GetInstance().Draw();
 
-		// 平均FPS描画
-		//fpsController_->Draw();
-
-		// ネットワーク管理更新(フレームの最後)
-		//netManager.UpdateEndOfFrame();
-
 		ScreenFlip();
+
 		// 理想FPS経過待ち
 		fpsController_->Wait();
 	}
@@ -175,17 +167,6 @@ void Application::DestroyInstance(void)
 	delete instance_;
 
 }
-
-bool Application::IsInitFail(void) const
-{
-	return isInitFail_;
-}
-
-bool Application::IsReleaseFail(void) const
-{
-	return isReleaseFail_;
-}
-
 void Application::GameEnd(void)
 {
 	isGameEnd_ = true;

@@ -70,7 +70,7 @@ void SceneTitle::Load(void)
 			, ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::BGM_TITLE_SEA));
 	SoundManager::GetInstance()
 		.Add(SoundManager::TYPE::BGM, SoundManager::SOUND::BGM_TITLE_THUNDER
-			, ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::BGM_TITLE_THUNDER));
+			, ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::BGM_TITLE_SELECT));
 
 	SoundManager::GetInstance().Add(SoundManager::TYPE::SE, SoundManager::SOUND::SE_UI_SELECT
 		, ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::SE_UI_SELECT));

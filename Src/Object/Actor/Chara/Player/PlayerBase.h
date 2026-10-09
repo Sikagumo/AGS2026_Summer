@@ -26,15 +26,14 @@ public:
 	{
 		NONE = -1
 
-		, BOMB		// ”š”j
-		, BOMB_FINISH
+		, BOMB		  // ”š”j
+		, BOMB_FINISH // ”š”jÅI’e
 
 		, BIG // ‹‘å
-		, BIG_FINISH // ‹‘å
+		, BIG_FINISH // ‹‘åÅI’e
 
 		, RAPID_FIRE // ˜AË
 		, CLUSTER	 // ŠgU
-
 
 		, RECOVERY	// ‰ñ•œ
 		, POISON	// “Å
@@ -43,10 +42,10 @@ public:
 
 	enum class SKIN_TYPE
 	{
-		HUMAN,
-		DOG,
-		MONKEY,
-		BIRD,
+		HUMAN,  // lŠÔ
+		DOG,    // Œ¢
+		MONKEY, // ƒTƒ‹
+		BIRD,   // ƒLƒW
 
 		MAX
 	};
@@ -54,7 +53,7 @@ public:
 	enum class PLAYER_STATE
 	{
 		NONE = -1,
-		IDLE,
+		IDLE,  
 		MOVE,
 		ATTACK,
 	};
@@ -99,7 +98,8 @@ public:
 	const VECTOR& GetPos(void)const { return transform_.pos; };
 	VECTOR GetBodyPos(void)const { return bodyPos_; };
 
-	virtual void SetSoundData(VECTOR _pos, float _radius, bool _isLanging,bool _isMGFire, bool _isRoad);
+
+	void SetSoundData(VECTOR _pos, float _radius, bool _isLanding, bool _isMGFire, bool _isRoad);
 
 	/// @brief ’e‚ğæ“¾
 	const std::vector<std::unique_ptr<PBulletBase>>&

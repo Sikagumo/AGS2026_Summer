@@ -11,7 +11,7 @@ public:
 	enum class TYPE
 	{
 		NONE,
-		BGM,
+		BGM, // 
 		SE
 	};
 
@@ -21,11 +21,11 @@ public:
 		NONE = -1,
 
 		// BGM
-		BGM_TITLE_SEA,
-		BGM_TITLE_THUNDER,
-		BGM_GAME,
-		BGM_RESULT,
-		BGM_LOBBY,
+		BGM_TITLE_SEA,     // 波音
+		BGM_TITLE_THUNDER, // 雷音
+		BGM_LOBBY,  // キャラ選択ロビーBGM
+		BGM_GAME,   // 戦闘BGM
+		BGM_RESULT, // リザルト画面BGM
 
 		// SE
 		SE_SELECT,

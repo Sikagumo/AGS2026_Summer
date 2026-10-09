@@ -12,10 +12,10 @@
 #include "../../../Application.h"
 
 
-
 CharaBase::CharaBase(void)
 	: ActorBase::ActorBase()
-	, isJump_(false), jumpPow_(0.0f)
+	, isJump_(false)
+	, jumpPow_(0.0f)
 	, moveSpeed_(0.0f)
 	, prevPos_(UtilityMath::VECTOR_ZERO)
 	, moveDir_(UtilityMath::VECTOR_ZERO)
@@ -123,9 +123,6 @@ void CharaBase::Collision(void)
 
 	// ƒWƒƒƒ“ƒv—Ê‚ð‰ÁŽZ
 	transform_.pos.y += jumpPow_;
-
-	
-
 }
 
 void CharaBase::CollisionGravity(void)

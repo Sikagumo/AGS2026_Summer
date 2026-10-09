@@ -9,15 +9,6 @@ class CharaBase : public ActorBase
 {
 public:
 
-	// 衝突判定種別
-	enum class COLLIDER_TYPE
-	{
-		LINE,
-		CAPSULE,
-		VIEW_RANGE,
-		MAX,
-	};
-
 	/// @brief コンストラクタ
 	CharaBase(void);
 
@@ -27,6 +18,7 @@ public:
 	void Update(void)override final;
 
 	virtual void DrawDebug(void);
+
 
 protected:
 

@@ -56,10 +56,10 @@ public:
 	void DestroyInstance(void);
 
 	// ‰Šú‰»¬Œ÷^¸”s‚Ì”»’è
-	bool IsInitFail(void) const;
+	bool IsInitFail(void) const { return isInitFail_; };
 
 	// ‰ğ•ú¬Œ÷^¸”s‚Ì”»’è
-	bool IsReleaseFail(void) const;
+	bool IsReleaseFail(void) const { return isReleaseFail_; };
 
 	// d—Í‚Ìæ“¾
 	float GetGravityPow(void) const { return GRAVITY * GRAVITY_SCALE; }

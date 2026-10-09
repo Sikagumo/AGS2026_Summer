@@ -17,7 +17,7 @@ AnimationController::AnimationController(int _modelId)
 	, isLoop_(false)
 	, isStop_(false), timeStop_(0.0f)
 	, playSpeed_(0.0f)
-	, preAnimLocalPos_(UtilityMath::VECTOR_ZERO)
+	, preAnimationLocalPos_(UtilityMath::VECTOR_ZERO)
 {
 }
 
@@ -177,13 +177,13 @@ void AnimationController::Play(int _type, bool _isLoop, float _playSpeed, float 
 		if (stateFromAnim.isInPlace)
 		{
 			// 遷移元が固定位置アニメの場合、固定値をそのまま使用
-			preAnimLocalPos_ = stateFromAnim.inPlaceLocalPos;
+			preAnimationLocalPos_ = stateFromAnim.inPlaceLocalPos;
 		}
 		else
 		{
 			// 遷移元が非固定の場合、現在のルートフレームの実際のローカル位置を取得
 			MATRIX curFrameMat = MV1GetFrameLocalMatrix(modelId_, FRAME_ROOT_NUM);
-			preAnimLocalPos_ = MGetTranslateElem(curFrameMat);
+			preAnimationLocalPos_ = MGetTranslateElem(curFrameMat);
 		}
 	}
 
@@ -272,7 +272,7 @@ void AnimationController::Update(void)
 
 
 	// ブレンド時間が割り当てているときは、現在時間と最大時間の割合を、それ以外はタイマーを終了
-	term = ((blendTime_ > 0.0f) ? (curBlendTime_ / blendTime_) : 1.0f);
+	blendTimeTerm_ = ((blendTime_ > 0.0f) ? (curBlendTime_ / blendTime_) : 1.0f);
 
 	if (prePlayType_ != -1)
 	{
@@ -282,11 +282,11 @@ void AnimationController::Update(void)
 
 
 		// 旧・新規アニメーションのブレンド率を割り当て
-		MV1SetAttachAnimBlendRate(modelId_, preAnim.attachNo, (1.0f - term));
-		MV1SetAttachAnimBlendRate(modelId_, curAnim.attachNo, term);
+		MV1SetAttachAnimBlendRate(modelId_, preAnim.attachNo, (1.0f - blendTimeTerm_));
+		MV1SetAttachAnimBlendRate(modelId_, curAnim.attachNo, blendTimeTerm_);
 
 		// ブレンドアニメーション終了時
-		if (term >= 1.0f)
+		if (blendTimeTerm_ >= 1.0f)
 		{
 			// 前アニメーションをデタッチ
 			MV1DetachAnim(modelId_, preAnim.attachNo);
@@ -304,7 +304,7 @@ void AnimationController::Update(void)
 	if (preAnim.isInPlace || curAnim.isInPlace)
 	{
 		// 遷移前/遷移後アニメーションが固定の場合、アニメーション位置固定処理
-		AnimationInPlace(preAnim, curAnim, term);
+		AnimationInPlace(preAnim, curAnim, blendTimeTerm_);
 	}
 }
 void AnimationController::AnimationInPlace(Animation& _prePlayAnim, Animation& _curPlayAnim, float _rate)
@@ -316,7 +316,7 @@ void AnimationController::AnimationInPlace(Animation& _prePlayAnim, Animation& _
 	float rate = std::clamp(_rate, 0.0f, 1.0f);
 
 	// 遷移の位置
-	VECTOR preBase = preAnimLocalPos_;
+	VECTOR preBase = preAnimationLocalPos_;
 	VECTOR curBase = UtilityMath::VECTOR_ZERO;
 	
 	if (_curPlayAnim.isInPlace)
@@ -327,7 +327,7 @@ void AnimationController::AnimationInPlace(Animation& _prePlayAnim, Animation& _
 	}
 	else
 	{
-		curBase = GetRawAnimRootPos(_curPlayAnim, _prePlayAnim);
+		curBase = GetRawAnimationRootPos(_curPlayAnim, _prePlayAnim);
 		
 		// ブレンド率に戻す
 		if (_curPlayAnim.attachNo != -1)
@@ -356,7 +356,7 @@ void AnimationController::AnimationInPlace(Animation& _prePlayAnim, Animation& _
 	// 対象フレームにセットし直し、アニメーションの移動値を無効化
 	MV1SetFrameUserLocalMatrix(modelId_, FRAME_ROOT_NUM, mix);
 }
-VECTOR AnimationController::GetRawAnimRootPos(Animation& _target, Animation& _other)
+VECTOR AnimationController::GetRawAnimationRootPos(Animation& _target, Animation& _other)
 {
 	if (_target.attachNo != -1)
 	{
@@ -393,10 +393,10 @@ void AnimationController::DrawDebug(void)
 {
 #ifdef _DEBUG
 	if (playType_ == -1) { return; }
-	auto& anim = animations_.at(playType_);
+	auto& animation = animations_.at(playType_);
 
 	// アニメーションの描画
-	DrawFormatString(0,64,0xFF0000,"animTime:%.2f, term : %.2f",anim.step, term);
+	DrawFormatString(0,64,0xFF0000,"animTime:%.2f, term : %.2f",animation.step, blendTimeTerm_);
 #endif // _DEBUG
 }
 
@@ -405,17 +405,17 @@ void AnimationController::Release(void)
 	if (animations_.empty()) { return; }
 
 	// ロードしたアニメーションを解放
-	for (auto& [type, anim] : animations_)
+	for (auto& [type, animation] : animations_)
 	{
 		// アニメーションをリセット
-		MV1DetachAnim(modelId_, anim.attachNo);
+		MV1DetachAnim(modelId_, animation.attachNo);
 
 		// パス読み込みでの外部アニメーション時
-		if (anim.type == ANIMATION_TYPE::EXTERNAL &&
-			anim.isLoadPath)
+		if (animation.type == ANIMATION_TYPE::EXTERNAL &&
+			animation.isLoadPath)
 		{
 			// アニメーション解放
-			MV1DeleteModel(anim.modelId);
+			MV1DeleteModel(animation.modelId);
 		}
 	}
 
@@ -428,27 +428,10 @@ bool AnimationController::IsEnd(void) const
 	// アニメーションが再生されていない・ループアニメーション時、false
 	if (playType_ == -1 || isLoop_) { return false; }
 
-	auto& anim = animations_.at(playType_);
+	auto& animation = animations_.at(playType_);
 
 	// 再生時間が最大再生時間を超えたら、true
-	return (anim.step >= anim.totalTime);
-
-	/*
-	// アニメーションが終了しているか
-	if (playAnim_.step >= playAnim_.totalTime)
-	{
-		// アニメーションが終了している
-		return true;
-	}
-
-	if (isLoop_)
-	{
-		// ループ時は終了していない判定
-		return false;
-	}
-
-	return false;
-	*/
+	return (animation.step >= animation.totalTime);
 }
 
 bool AnimationController::IsEndPoint(float _pointStart, float _pointEnd)
@@ -475,59 +458,60 @@ float AnimationController::GetPlayPointRate(void)
 
 	if (playType_ == -1) { return 0.0f; }
 
-	Animation& anim = animations_.at(playType_);
+	Animation& animation = animations_.at(playType_);
 
-	return (anim.step / anim.totalTime);
+	return (animation.step / animation.totalTime);
 }
 
 void AnimationController::Stop(float _stopTime)
 {
+	// 停止処理
 	isStop_ = true;
 	timeStop_ = _stopTime;
 }
 
-void AnimationController::SetAnimStep(float _step)
+void AnimationController::SetAnimationStep(float _step)
 {
 	if (playType_ == -1) { return; }
 
-	auto& anim = animations_.at(playType_);
+	auto& animation = animations_.at(playType_);
 
 	// 再生位置の制限
-	float step = std::clamp(_step, 0.0f, anim.totalTime);
+	float step = std::clamp(_step, 0.0f, animation.totalTime);
 
 	// 再生位置割り当て
-	anim.step = _step;
+	animation.step = _step;
 }
 
-void AnimationController::SetAnimStepRate(float _rate)
+void AnimationController::SetAnimationStepRate(float _rate)
 {
 	if (playType_ == -1) { return; }
 
-	auto& anim = animations_.at(playType_);
+	auto& animation = animations_.at(playType_);
 
 	float step = std::clamp(_rate, 0.0f, 1.0f);
 
 	// 再生位置割り当て
-	float rate = (1.0f / anim.totalTime);
-	anim.step = (rate * step);
+	float rate = (1.0f / animation.totalTime);
+	animation.step = (rate * step);
 }
 
 void AnimationController::SetModelId(int _modelId)
 {
 	modelId_ = _modelId;
-	for (auto& anim : animations_)
+	for (auto& animation : animations_)
 	{
-		anim.second.modelId = _modelId;
+		animation.second.modelId = _modelId;
 	}
 }
 
 float AnimationController::GetPlayTime(void)
 {
-	auto& anim = animations_.at(playType_);
+	auto& animation = animations_.at(playType_);
 	float time = -1;
 	if (playType_ != -1)
 	{
-		time = anim.step;
+		time = animation.step;
 	}
 
 #ifdef _DEBUG
@@ -543,11 +527,11 @@ float AnimationController::GetPlayTime(void)
 
 float AnimationController::GetPlayTimeTotal(void)
 {
-	auto& anim = animations_.at(playType_);
+	auto& animation = animations_.at(playType_);
 	float time = -1;
 	if (playType_ != -1)
 	{
-		time = anim.totalTime;
+		time = animation.totalTime;
 	}
 
 #ifdef _DEBUG

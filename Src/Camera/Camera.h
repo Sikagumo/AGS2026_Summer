@@ -28,77 +28,71 @@ public:
 	static constexpr float LIMIT_X_UP = 40.0f * (DX_PI_F / 180.0f);
 	static constexpr float LIMIT_X_DOWN = 35.0f * (DX_PI_F / 180.0f);
 	
-	// カメラモード
+	/// @brief カメラモード
 	enum class MODE
 	{
-		NONE,
-		FIXED_POINT,
-		FREE,
-		PLAYER_FOLLOW,
-		BOSS_FOLLOW,
+		NONE = -1,     // 無効状態
+		FIXED_POINT,   // 定点カメラ
+		FREE,          // フリー移動カメラ
+		PLAYER_FOLLOW, // プレイヤー追従
+		BOSS_FOLLOW,   // ボス追従
 	};
 
-	// 衝突判定種別
-	enum class COLLIDER_TYPE
-	{
-		SPHERE,
-		MAX,
-	};
-
+	/// @brief ロックオン対象
 	enum class LOCKON_TARGET
 	{
 		NONE = -1,
-		BOSS_BODY,
-		BOSS_WEAPON_MGL_L,
-		BOSS_WEAPON_MGL_R,
-		BOSS_WEAPON_CANNON_L,
-		BOSS_WEAPON_CANNON_R,
-		BOSS_WEAPON_MP_L,
-		BOSS_WEAPON_MP_R,
-		BOSS_WEAPON_RG,
+
+		BOSS_BODY,          // ボス胴体
+		BOSS_MACHINE_GUN_L, // マシンガン左
+		BOSS_MACHINE_GUN_R, // マシンガン右
+		BOSS_CANNON_L,      // 大砲左
+		BOSS_CANNON_R,      // 大砲右
+		BOSS_MISSILE_POD_L, // ボスミサイルポッド左
+		BOSS_MISSILE_POD_R, // ボスミサイルポッド右
+		BOSS_RAIL_GUN,      // ボスレールガン
+
 		MAX,
 	};
 
 
-	// コンストラクタ
 	Camera(void);
-
-	// デストラクタ
 	~Camera(void)override = default;
 
-	/// @brief リソースロード
 	void Load(void) override {}
 
-	// 更新
 	void Update(void)override;
 
-	// 描画前のカメラ設定
+	/// @brief 描画前のカメラ設定
 	void SetBeforeDraw(void);
 
-	// デバッグ用描画
+	/// @brief デバッグ用描画
 	void DrawDebug(void);
 
-	// 座標の取得
+	/// @brief 座標の取得
 	const VECTOR& GetPos(void) const { return transform_.pos; };
 
-	// 角度の取得
+	/// @brief 角度の取得
 	const VECTOR& GetAngles(void) const { return angles_;  };
-		// X回転を抜いたY軸のみのカメラ角度
+
+	/// @brief X回転を抜いたY軸のみのカメラ角度
 	const Quaternion& GetQuaRotY(void) const { return rotY_; };
 	
-	// 注視点の取得
+	/// @brief 注視点の取得
 	const VECTOR& GetTargetPos(void) const { return targetPos_;  };
 
-	// カメラの前方方向
+	/// @brief カメラの前方方向取得
 	VECTOR GetForward(void) const;
 
-	// カメラモードの変更
+	/// @brief カメラモードの変更
+	/// @param _mode 遷移後のモード
 	void ChangeMode(MODE _mode);
 
-	// 追従対象の設定
+	/// @brief 追従対象の設定
+	/// @param _follow 追従対象
 	void SetFollow(const Transform* _follow) { followTransform_ = _follow; };
 
-	//クオータニオン角度の取得
+	/// @brief クォータニオン角度の割り当て
 	void SetQuaternionRot(Quaternion _rot) { transform_.quaRot = _rot; }
 
 	/// @brief 追従対象割り当て
@@ -112,6 +106,9 @@ public:
 
 	/// @brief 追従対象選択処理
 	void LockOnChoice(void);
+
+	/// @brief 
+	/// @param  
 	void FollowLockOnPosition(void);
 
 	// ロックオンするか否かの設定
@@ -223,7 +220,6 @@ private:
 	void ProcessMove(void);
 
 	// カメラ回転
-	void RotationKeyboard(bool _isLimit);
 	void RotationMouse(bool _isLimit);
 	void RotationGamePad(bool _isLimit);
 
@@ -232,6 +228,9 @@ private:
 	void SetBeforeDrawFree(void);
 	void SetBeforeDrawFollowPlayer(void);
 	void SetBeforeDrawFollowBoss(void);
+
+	/// @brief ロックオンを解除するか否か
+	bool IsUnlockTarget(void);
 
 	// 衝突判定
 	void Collision(void);

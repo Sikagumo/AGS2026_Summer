@@ -104,7 +104,7 @@ namespace
 	constexpr float ANIMATINO_SPEED_JUMP = 50.0f;
 
 	// 回避
-	constexpr float ANIMATION_SPEED_DODGE = 50.0f;
+	constexpr float ANIMATION_SPEED_DODGE = 55.0f;
 
 	// 撃破
 	constexpr float ANIMATION_SPEED_DEFEAT = 30.0f;
@@ -255,11 +255,9 @@ void Player::InitAnimation(void)
 	animation_->AddExternal(static_cast<int>(ANIMATION_TYPE::THROW_LEFT)
 		, ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::ANIM_THROW_LEFT), throwSpeed);
 
+	// 右投擲
 	animation_->AddExternal(static_cast<int>(ANIMATION_TYPE::THROW_RIGHT)
 		, ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::ANIM_THROW_RIGHT), throwSpeed);
-
-	animation_->AddExternal(static_cast<int>(ANIMATION_TYPE::THROW_RUN)
-		, ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::ANIM_THROW_RUN), 20.0f);
 
 	// ジャンプ
 	constexpr VECTOR LOCAL_POS_JUMP = { 0.0f, 50.0f, 0.0f };
@@ -621,11 +619,6 @@ VECTOR Player::CalcAddPosition(void)
 	return ret;
 }
 
-void Player::SetSoundData(VECTOR _pos, float _radius, bool _isLanging,bool _isMGFire, bool _isRoad)
-{
-	PlayerBase::SetSoundData(_pos, _radius, _isLanging, _isMGFire, _isRoad);
-}
-
 bool Player::GetIsRespawn(void) const
 {
 	// 撃破アニメーション終了の瞬間、有効
@@ -633,11 +626,6 @@ bool Player::GetIsRespawn(void) const
 			&& animation_->GetPlayType() == static_cast<int>(ANIMATION_TYPE::DEFEAT)
 			&& animation_->IsEnd());
 }
-
-void Player::ReleasePost(void)
-{
-}
-
 
 void Player::ProcessMove(void)
 {
@@ -728,7 +716,10 @@ void Player::DrawShotOrbit(void)
 	if (shotType_ == SHOT_TYPE::NONE) { return; }
 
 	constexpr int SPHERE_DIV = 12;
-	constexpr int ORBIT_MAX = 60;
+	constexpr int ORBIT_START = 60;
+
+	// 軌道の最小値
+	constexpr float ORBIT_MIN = 0.1f;
 	constexpr float ORBIT_RADIUS_DOWN = 0.75f;
 	constexpr float ORBIT_RADIUS = 0.125f;
 
@@ -769,7 +760,7 @@ void Player::DrawShotOrbit(void)
 	shotDir = UtilityMath::VNormalize(CalcShotDir());
 
 	// 経過時間
-	float radius = (ORBIT_RADIUS * ORBIT_MAX);
+	float radius = (ORBIT_RADIUS * ORBIT_START);
 
 	const VECTOR SHOT_LOCAL_POS = VGet(0.0f, 25.0f, 0.0f);
 	VECTOR viewPos = VAdd(transform_.pos, SHOT_LOCAL_POS);
@@ -779,7 +770,7 @@ void Player::DrawShotOrbit(void)
 	shotPow.z = (shotDir.z * powXZ * ORBIT_STEP_SCALE);
 	shotPow.y = (shotDir.y * powY * ORBIT_STEP_SCALE);
 
-	for (int i = 1; i < ORBIT_MAX; ++i)
+	for (int i = 1; i < ORBIT_START; ++i)
 	{
 		// このステップの移動量[発射速度 - 重力加算値]
 		VECTOR pos = shotPow;
@@ -804,8 +795,8 @@ void Player::DrawShotOrbit(void)
 
 			// 補正値 = (指定位置までの距離 / 視点と終点の長さ)
 			constexpr float GROUND_POS_Y = 0.0f;
-			float term = (GROUND_POS_Y - viewPosLate.y / (viewPos.y - viewPosLate.y));
-			VECTOR groundPos = UtilityMath::Lerp(viewPosLate, viewPos, term);
+			float blendTimeTerm_ = (GROUND_POS_Y - viewPosLate.y / (viewPos.y - viewPosLate.y));
+			VECTOR groundPos = UtilityMath::Lerp(viewPosLate, viewPos, blendTimeTerm_);
 			
 			DrawShotOrbitPoint(groundPos);
 			break;
@@ -814,7 +805,9 @@ void Player::DrawShotOrbit(void)
 		
 		DrawSphere3D(viewPos, radius, SPHERE_DIV, color, color, true);
 
-		radius -= ORBIT_RADIUS_DOWN;
+		// 軌道の球の減少
+		radius = (((radius - ORBIT_RADIUS_DOWN) > ORBIT_MIN)
+						? (radius - ORBIT_RADIUS_DOWN) : ORBIT_MIN);
 	}
 }
 void Player::DrawShotOrbitPoint(const VECTOR& _shotPos)

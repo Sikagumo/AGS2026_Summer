@@ -50,6 +50,7 @@ public:
 
 	/// @brief 同じモデル内のアニメーションを準備し、再生座標固定
 	/// @param _type アニメーション種類
+	/// @param _localPos 固定するアニメーションローカル位置
 	/// @param _speed アニメーション速度 
 	void AddInternal(int _type, const VECTOR& _localPos, float _speed = ANIM_SPEED_DEFAULT);
 
@@ -62,18 +63,18 @@ public:
 
 	/// @brief 別の読み込み済みアニメーションモデルから準備し、再生座標固定
 	/// @param _type アニメーション種類
-	/// @param _speed アニメーション速度 
 	/// @param _handle アニメーションのハンドル
-	/// @param _placeLocalPos 固定するアニメーションローカル位置
+	/// @param _localPos 固定するアニメーションローカル位置
+	/// @param _speed アニメーション速度 
 	void AddExternal(int _type, int _handle
 					, const VECTOR& _localPos
 					, float _speed = ANIM_SPEED_DEFAULT);
 
 	/// @brief 別の読み込み済みアニメーションモデルから準備し、再生座標固定
 	/// @param _type アニメーション種類
-	/// @param _speed アニメーション速度 
-	/// @param _handle アニメーションのハンドル
-	/// @param _placeLocalPos 固定するアニメーションローカル位置
+	/// @param _handle アニメーションのハンドル 
+	/// @param _localPos 固定するアニメーションローカル位置
+	/// @param _speed アニメーション速度
 	void AddExternal(int _type, int _handle
 					, const VECTOR& _localPos
 					, const VECTOR& _localPosEnd, float _speed = ANIM_SPEED_DEFAULT);
@@ -118,14 +119,14 @@ public:
 
 	/// @brief 再生位置変更処理
 	/// @param _step 再生する位置
-	void SetAnimStep(float _step = 0.0f);
+	void SetAnimationStep(float _step = 0.0f);
 
 	/// @brief 停止しているか否か
 	bool IsStop(void)const { return isStop_; };
 
 	/// @brief 再生位置変更
-	/// @param rate 再生位置の割合(0.0f～1.0f)
-	void SetAnimStepRate(float rate);
+	/// @param _rate 再生位置の割合(0.0f～1.0f)
+	void SetAnimationStepRate(float _rate);
 
 	void SetModelId(int _modelId);
 
@@ -153,6 +154,7 @@ private:
 	// ブレンド時間
 	float blendTime_;
 
+	// 再生速度
 	float playSpeed_;
 
 	// ブレンドのカウンタタイマー
@@ -167,33 +169,33 @@ private:
 	// 停止時間
 	float timeStop_;
 	
-	float term;
+	float blendTimeTerm_;
 	
 	// ブレンドアニメーションの前アニメーションのローカル位置
-	VECTOR preAnimLocalPos_;
+	VECTOR preAnimationLocalPos_;
 	
 	/// @brief 他アニメーションとのブレンドの影響を受けない単体の素のルート位置を取得
 	/// @param _target 位置を取得したいアニメーション
 	/// @param _other ブレンド対象の相方アニメーション(一時的にブレンド率0%にする)
-	VECTOR GetRawAnimRootPos(Animation& _target, Animation& _other);
+	VECTOR GetRawAnimationRootPos(Animation& _target, Animation& _other);
 
 	/// @brief 固定位置アニメーションの、現在の再生進行度に応じた目標位置を取得
-	/// @param _anim 対象の固定位置のアニメーション
+	/// @param _animation 対象の固定位置のアニメーション
 	/// @return 開始位置から線形補間した位置終了した位置
-	VECTOR GetInPlaceProgressPos(const Animation& _anim) const;
+	VECTOR GetInPlaceProgressPos(const Animation& _animation) const;
 	
 
 	/// @brief アニメーション追加処理
 	/// @param _type アニメーションの種類
-	/// @param _animIndex 格納するアニメーションリスト
-	void Add(int _type, Animation& _animIndex);
+	/// @param _animationIndex 格納するアニメーションリスト
+	void Add(int _type, Animation& _animationIndex);
 
 	/// @brief アニメーションが格納されているか判定
 	/// @param _type アニメーションの種類
 	bool IsFindAnimation(int _type);
 
 	/// @brief 固定アニメーション処理
-	/// @param _prePlayAnim 再生中のアニメーション
-	/// @param _curPlayAnim 再生中のアニメーション
-	void AnimationInPlace(Animation& _prePlayAnim, Animation& _curPlayAnim, float _blendTime);
+	/// @param _prePlayAnimation 再生中のアニメーション
+	/// @param _curPlayAnimation 再生中のアニメーション
+	void AnimationInPlace(Animation& _prePlayAnimation, Animation& _curPlayAnimation, float _blendTime);
 };

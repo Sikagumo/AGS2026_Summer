@@ -22,6 +22,14 @@ SoundManager& SoundManager::GetInstance(void)
 	return *instance_;
 }
 
+void SoundManager::DestroyInstance(void)
+{
+	// 全音声を削除してからインスタンスを破棄
+	Release();
+	delete instance_;
+	instance_ = nullptr;
+}
+
 void SoundManager::Initialize(void)
 {
 	// 初期音量の設定
@@ -106,7 +114,6 @@ void SoundManager::Update3D(const VECTOR _listenPos)
 			AdjustVolume(pair.first, volume);
 		}
 	}
-
 }
 
 void SoundManager::Stop(const SOUND _sound)
@@ -174,14 +181,6 @@ bool SoundManager::IsPlaying(SOUND sound)
 
 	// DxLib仕様：1なら再生中、0なら停止中
 	return CheckSoundMem(it->second.data) == 1;
-}
-
-void SoundManager::DestroyInstance(void)
-{
-	// 全音声を削除してからインスタンスを破棄
-	Release();
-	delete instance_;
-	instance_ = nullptr;
 }
 
 void SoundManager::SetMasterVolumeBGM(int volume)

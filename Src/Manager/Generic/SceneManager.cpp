@@ -312,7 +312,7 @@ void SceneManager::Draw(void)
     {
         if (scene)
         {
-            if (scene->GetDebugMode() == true)
+            if (scene->GetIsDebugMode() == true)
             {
                 GuiController::GetInstance().DrawUI();
             }

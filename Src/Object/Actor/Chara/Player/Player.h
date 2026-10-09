@@ -6,36 +6,34 @@
 
 class Player : public PlayerBase
 {
-private:
+public:
 
 	// 吹っ飛ばし量
 	static constexpr float KNOCK_POW_Y = 3.75f;
 
 
-public:
-
 	enum class ANIMATION_TYPE
 	{
 		NONE = -1,
-		IDLE,
-		WALK,
-		THROW_LEFT,
-		THROW_RIGHT,
-		THROW_RUN,
-		JUMP,
-		DODGE,
-		DEFEAT,
+
+		IDLE,        // 待機
+		WALK,        // 歩行
+		THROW_LEFT,  // 左投擲
+		THROW_RIGHT, // 右投擲
+		JUMP,        // ジャンプ
+		DODGE,       // 回避
+		DEFEAT,      // 撃破
 		MAX,
 	};
 
 	enum class ACTION_TYPE
 	{
 		NONE = -1,
-		JUMP,
-		DODGE,
-		DEFEAT,
-		ATTACK_SPECIAL,
-		ATTACK,
+		JUMP,           // ジャンプ
+		DODGE,          // 回避
+		DEFEAT,         // 撃破
+		ATTACK_SPECIAL, // 特殊攻撃
+		ATTACK,         // 通常攻撃
 	};
 
 	/// @brief コンストラクタ
@@ -53,17 +51,16 @@ public:
 
 	void DrawDebug(void)override;
 
-	void ReleasePost(void)override;
-
 	/// @brief 吹っ飛ばし処理
 	/// @param _knockDirXZ 横吹っ飛ばし方向
 	/// @param _knockPowXZ 横吹っ飛ばし力
 	/// @param _isStan スタンさせるか否か 
 	/// @param _knockPowY 縦吹っ飛ばし力
 	void SetKnock(const VECTOR& _knockDirXZ, float _knockPowXZ
-					, bool _isStan, float _knockPowY = KNOCK_POW_Y);
+		, bool _isStan, float _knockPowY = KNOCK_POW_Y);
 	
-	void SetSoundData(VECTOR _pos, float _radius, bool _isLanging, bool _isMGFire, bool _isRoad)override;
+	/// @brief リスポーンしたか否か
+	bool GetIsRespawn(void)const;
 
 	// 自分が操作するキャラクターかどうかを設定
 	void SetHostControl(bool _isLocal);
@@ -71,12 +68,13 @@ public:
 	//自分が操作するキャラクターかどうかを取得する
 	bool GetHostControl(void) const { return isHostControl_; }
 
-	// ネットワークから受け取った情報を強制的にセットする（ラジコン用）
-	void SetNetworkAction(const VECTOR& _pos, const Quaternion& _rot, int _animId, bool _isAttack, int _currentHp);
-
-	/// @brief リスポーンしたか否か
-	bool GetIsRespawn(void)const;
-
+	/// @brief ネットワークから受け取った情報を強制的にセットする(ラジコン用)
+	/// @param _pos 現在座標
+	/// @param _rot 現在回転量
+	/// @param _animationId 現在アニメーションID
+	/// @param _isAttack 攻撃中かの判定
+	/// @param _currentHp 現在HP
+	void SetNetworkAction(const VECTOR& _pos, const Quaternion& _rot, int _animationId, bool _isAttack, int _currentHp);
 
 	// キャラクターの通信キーを設定
 	void SetNetKey(int _key);
@@ -188,8 +186,8 @@ private:
 	/// @brief アニメーション再生
 	/// @param _type アニメーションの種類
 	/// @param _isLoop ループ再生するか否か
-	/// @param _animSpeed 再生速度指定(任意)
-	void PlayAnimation(ANIMATION_TYPE _type, bool _isLoop = true, bool _isAnimBlend = true, float _animSpeed = -1.0f);
+	/// @param _animationSpeed 再生速度指定(任意)
+	void PlayAnimation(ANIMATION_TYPE _type, bool _isLoop = true, bool _isAnimationBlend = true, float _animSpeed = -1.0f);
 
 	void CreateBullet(void);
 	void ShotBullet(void);
