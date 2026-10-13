@@ -155,6 +155,8 @@ private:
 	int selectedJobIndex_;       // 選択中のジョブインデックス
 	int selectedSkinIndex_;      // 選択中のスキンインデックス
 	int inputIntervalCounter_;   // 入力インターバルカウンター
+	Vector2F prevMousePos_;		 // 前回のマウス座標
+	bool isMouseMode_;			 // マウス操作モードフラグ
 
 	// シングルUIのハンドル配列
 	std::array<int, static_cast<int>(UI_SINGLE::MAX)> uiHandles_; 

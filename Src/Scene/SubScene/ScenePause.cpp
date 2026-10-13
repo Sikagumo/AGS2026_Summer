@@ -18,6 +18,8 @@ ScenePause::ScenePause(void)
 	, isYes_(false)
 	, inputIntervalCounter_(0)
 	, isPhaseChanged_(false)
+	, prevMousePos_(0.0f, 0.0f)
+	, isMouseMode_(true)
 	, selectTextHandles_()
 	, noSelectTextHandles_()
 	, backGroundHandle_(-1)
@@ -58,6 +60,11 @@ void ScenePause::Initialize(void)
 {
 	SceneBase::Initialize();
 	inputIntervalCounter_ = 0;
+
+	SetMouseDispFlag(true);
+
+	auto mousePos = KeyConfInputManager::GetInstance().GetMousePosition();
+	prevMousePos_ = Vector2F(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y));
 
 	auto& collisionController = CollisionController::GetInstance();
 
@@ -113,6 +120,45 @@ void ScenePause::Initialize(void)
 
 void ScenePause::Update(void)
 {
+	auto& keyConfInputManager = KeyConfInputManager::GetInstance();
+
+	// 現在のマウス座標を取得
+	const Vector2 MOUSE_POSITION = keyConfInputManager.GetMousePosition();
+	const Vector2F MOUSE_POSITION_F(static_cast<float>(MOUSE_POSITION.x), static_cast<float>(MOUSE_POSITION.y));
+
+	// マウスが動いた、またはクリックされたらマウスモードへ
+	if (std::abs(MOUSE_POSITION_F.x - prevMousePos_.x) > 2.0f ||
+		std::abs(MOUSE_POSITION_F.y - prevMousePos_.y) > 2.0f ||
+		(GetMouseInput() & (MOUSE_INPUT_LEFT | MOUSE_INPUT_RIGHT)) != 0)
+	{
+		isMouseMode_ = true;
+		SetMouseDispFlag(true);
+		prevMousePos_ = MOUSE_POSITION_F;
+	}
+
+	// コントローラーやキーボードのUI操作入力があったらコントローラーモードへ
+	if (keyConfInputManager.isPressed("UP") || keyConfInputManager.isPressed("DOWN") ||
+		keyConfInputManager.isPressed("LEFT") || keyConfInputManager.isPressed("RIGHT") ||
+		keyConfInputManager.isTrigerDown("OK") || keyConfInputManager.isTrigerDown("CANCEL") ||
+		keyConfInputManager.isTrigerDown("PAUSE"))
+	{
+		isMouseMode_ = false;
+		SetMouseDispFlag(false);
+	}
+
+	// モードに応じてカーソルコライダーの位置を更新
+	if (cursorCollider_ != nullptr)
+	{
+		if (isMouseMode_)
+		{
+			cursorCollider_->SetCenterPos(MOUSE_POSITION_F);
+		}
+		else
+		{
+			cursorCollider_->SetCenterPos(Vector2F(-1000.0f, -1000.0f));
+		}
+	}
+
 	switch (currentPhase_)
 	{
 	case ScenePause::PHASE::APPEAR:
@@ -190,16 +236,22 @@ void ScenePause::ProcessNormal(void)
 	cursorCollider_->SetCenterPos(MOUSE_POSITION_F);
 
 	// マウスによるホバー処理
-	bool isHoverGame = collisionController.IsTagCollidingWithTag2D(TAG::PAUSE_MOUSE_CURSOR, TAG::PAUSE_GAME_BUTTON);
-	bool isHoverTitle = collisionController.IsTagCollidingWithTag2D(TAG::PAUSE_MOUSE_CURSOR, TAG::PAUSE_TITLE_BUTTON);
+	bool isHoverGame = false;
+	bool isHoverTitle = false;
 
-	if (isHoverGame)
+	if (isMouseMode_)
 	{
-		selectedIndex_ = static_cast<int>(MENU_ITEM::RETURN_GAME);
-	}
-	else if (isHoverTitle)
-	{
-		selectedIndex_ = static_cast<int>(MENU_ITEM::RETURN_TITLE);
+		isHoverGame = collisionController.IsTagCollidingWithTag2D(TAG::PAUSE_MOUSE_CURSOR, TAG::PAUSE_GAME_BUTTON);
+		isHoverTitle = collisionController.IsTagCollidingWithTag2D(TAG::PAUSE_MOUSE_CURSOR, TAG::PAUSE_TITLE_BUTTON);
+
+		if (isHoverGame)
+		{
+			selectedIndex_ = static_cast<int>(MENU_ITEM::RETURN_GAME);
+		}
+		else if (isHoverTitle)
+		{
+			selectedIndex_ = static_cast<int>(MENU_ITEM::RETURN_TITLE);
+		}
 	}
 
 	// インターバルのカウントダウン
@@ -297,17 +349,22 @@ void ScenePause::ProcessYesNo(void)
 		return;
 	}
 
-	// マウスによるホバー処理
-	bool isHoverYes = collisionController.IsTagCollidingWithTag2D(TAG::PAUSE_MOUSE_CURSOR, TAG::PAUSE_YESNO_BUTTON);
-	bool isHoverNo = collisionController.IsTagCollidingWithTag2D(TAG::PAUSE_MOUSE_CURSOR, TAG::SELECT_SINGLE_BIG);
+	bool isHoverYes = false;
+	bool isHoverNo = false;
 
-	if (isHoverYes)
+	if (isMouseMode_)
 	{
-		isYes_ = true;
-	}
-	else if (isHoverNo)
-	{
-		isYes_ = false;
+		isHoverYes = collisionController.IsTagCollidingWithTag2D(TAG::PAUSE_MOUSE_CURSOR, TAG::PAUSE_YESNO_BUTTON);
+		isHoverNo = collisionController.IsTagCollidingWithTag2D(TAG::PAUSE_MOUSE_CURSOR, TAG::SELECT_SINGLE_BIG);
+
+		if (isHoverYes)
+		{
+			isYes_ = true;
+		}
+		else if (isHoverNo)
+		{
+			isYes_ = false;
+		}
 	}
 
 	// インターバルのカウントダウン

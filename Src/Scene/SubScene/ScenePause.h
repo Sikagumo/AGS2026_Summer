@@ -7,6 +7,7 @@
 
 #include "../SceneBase.h"
 #include "../../Application.h"
+#include "../../Common/Vector2.h"
 
 class Collider2DCircle;
 class Collider2DBox;
@@ -93,6 +94,8 @@ private:
 	// 入力関連
 	int inputIntervalCounter_; // スティックの入力間隔カウンター
 	bool isPhaseChanged_;      // フェーズ変更直後の入力無効化フラグ
+	Vector2F prevMousePos_;    // 前回のマウス座標
+	bool isMouseMode_;         // マウス操作モードフラグ
 
 	// 画像ハンドル関連
 	std::array<int, static_cast<size_t>(PAUSE_TEXT_UI::MAX)> selectTextHandles_;     // 選択中文字画像配列
