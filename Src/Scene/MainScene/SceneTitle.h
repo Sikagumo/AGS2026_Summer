@@ -73,6 +73,7 @@ private:
 	int selectedIdx_;            // 選択中のメニューインデックス
 	int inputIntervalCounter_;   // 入力間隔調整用カウンター
 	Vector2F prevMousePos_;      // 前回のマウス座標
+	bool isMouseMode_;			 // 現在マウスで操作しているかどうかのフラグ
 	bool isSelectMenu_;          // メニュー選択中かどうか
 
 	// GUIコンポーネント関連

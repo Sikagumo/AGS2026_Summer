@@ -22,6 +22,8 @@ SceneLobby::SceneLobby(bool _isMulti)
 	, selectedSkinIndex_(0)
 	, cursorCollider_(nullptr)
 	, inputIntervalCounter_(0)
+	, prevMousePos_(0.0f, 0.0f)
+	, isMouseMode_(true)
 	, multiState_(LOBBY_STATE::SELECT_MODE)
 	, buttonSelectIndex_(0)
 	, passcode_{ 0, 0, 0, 0 }
@@ -375,6 +377,39 @@ void SceneLobby::Update(void)
 	const Vector2 MOUSE_POSITION = KeyConfInputManager::GetInstance().GetMousePosition();
 	const Vector2F MOUSE_POSITION_F(static_cast<float>(MOUSE_POSITION.x), static_cast<float>(MOUSE_POSITION.y));
 
+	// マウスが動いた、またはクリックされたらマウスモードへ
+	if (MOUSE_POSITION_F.x != prevMousePos_.x || MOUSE_POSITION_F.y != prevMousePos_.y ||
+		(GetMouseInput() & (MOUSE_INPUT_LEFT | MOUSE_INPUT_RIGHT)) != 0)
+	{
+		isMouseMode_ = true;
+		SetMouseDispFlag(true);
+	}
+
+	// コントローラーやキーボードのUI操作入力があったらコントローラーモードへ
+	if (KeyConfInputManager::GetInstance().isPressed("UP") || 
+		KeyConfInputManager::GetInstance().isPressed("DOWN") ||
+		KeyConfInputManager::GetInstance().isPressed("LEFT") || 
+		KeyConfInputManager::GetInstance().isPressed("RIGHT") ||
+		KeyConfInputManager::GetInstance().isTrigerDown("OK") || 
+		KeyConfInputManager::GetInstance().isTrigerDown("CANCEL") ||
+		KeyConfInputManager::GetInstance().isTrigerDown("PAUSE"))
+	{
+		isMouseMode_ = false;
+		SetMouseDispFlag(false);
+	}
+
+	prevMousePos_ = MOUSE_POSITION_F;
+
+	// モードに応じてカーソルコライダーの位置を更新
+	if (cursorCollider_ != nullptr)
+	{
+		if (isMouseMode_)
+		{
+			// マウスモード：実際のマウス位置に追従
+			cursorCollider_->SetCenterPos(MOUSE_POSITION_F);
+		}
+	}
+
 	if (cursorCollider_ != nullptr)
 	{
 		cursorCollider_->SetCenterPos(MOUSE_POSITION_F);
@@ -555,48 +590,51 @@ void SceneLobby::UpdateSingle(void)
 		bool isHoverSkin = false;
 		bool isHoverReady = false;
 
-		if (cursorCollider_ != nullptr)
+		if (isMouseMode_)
 		{
-			if (mainUiCollisions_.at(0) != nullptr)
+			if (cursorCollider_ != nullptr)
 			{
-				isHoverWeapon = collisionController.CheckCollision2D(
-					cursorCollider_.get(),
-					mainUiCollisions_.at(0).get()
-				);
+				if (mainUiCollisions_.at(0) != nullptr)
+				{
+					isHoverWeapon = collisionController.CheckCollision2D(
+						cursorCollider_.get(),
+						mainUiCollisions_.at(0).get()
+					);
+				}
+
+				if (mainUiCollisions_.at(1) != nullptr)
+				{
+					isHoverSkin = collisionController.CheckCollision2D(
+						cursorCollider_.get(),
+						mainUiCollisions_.at(1).get()
+					);
+				}
+
+				if (readyButtonCollision_ != nullptr)
+				{
+					isHoverReady = collisionController.CheckCollision2D(
+						cursorCollider_.get(),
+						readyButtonCollision_.get()
+					);
+				}
 			}
 
-			if (mainUiCollisions_.at(1) != nullptr)
+			// マウスホバー位置による選択インデックスの更新
+			if (isHoverWeapon)
 			{
-				isHoverSkin = collisionController.CheckCollision2D(
-					cursorCollider_.get(),
-					mainUiCollisions_.at(1).get()
-				);
+				// 武器
+				mainSelectIndex_ = 0;
 			}
-
-			if (readyButtonCollision_ != nullptr)
+			else if (isHoverSkin)
 			{
-				isHoverReady = collisionController.CheckCollision2D(
-					cursorCollider_.get(),
-					readyButtonCollision_.get()
-				);
+				// 見た目
+				mainSelectIndex_ = 1;
 			}
-		}
-
-		// マウスホバー位置による選択インデックスの更新
-		if (isHoverWeapon)
-		{
-			// 武器
-			mainSelectIndex_ = 0;
-		}
-		else if (isHoverSkin)
-		{
-			// 見た目
-			mainSelectIndex_ = 1;
-		}
-		else if (isHoverReady)
-		{
-			// 準備完了
-			mainSelectIndex_ = 2;
+			else if (isHoverReady)
+			{
+				// 準備完了
+				mainSelectIndex_ = 2;
+			}
 		}
 
 		// スティック/キーボード入力でのUI選択切り替え
@@ -708,29 +746,32 @@ void SceneLobby::UpdateSingle(void)
 			}
 		}
 
-		// 画面中央武器ミニウィンドウ内のコライダー判定
-		for (int jobIndex = 0; jobIndex < JOB_MAXIMUM; ++jobIndex)
+		if (isMouseMode_)
 		{
-			auto& weaponCollider = weaponUiCollisions_.at(static_cast<size_t>(jobIndex));
-
-			// ヌルチェック
-			if (cursorCollider_ != nullptr && weaponCollider != nullptr)
+			// 画面中央武器ミニウィンドウ内のコライダー判定
+			for (int jobIndex = 0; jobIndex < JOB_MAXIMUM; ++jobIndex)
 			{
-				bool isHoverItem = collisionController.CheckCollision2D(
-					cursorCollider_.get(),
-					weaponCollider.get()
-				);
+				auto& weaponCollider = weaponUiCollisions_.at(static_cast<size_t>(jobIndex));
 
-				if (isHoverItem)
+				// ヌルチェック
+				if (cursorCollider_ != nullptr && weaponCollider != nullptr)
 				{
-					selectedJobIndex_ = jobIndex;
+					bool isHoverItem = collisionController.CheckCollision2D(
+						cursorCollider_.get(),
+						weaponCollider.get()
+					);
 
-					if (keyConfInputManager.isTrigerDown("OK"))
+					if (isHoverItem)
 					{
-						selectState_ = SELECT_STATE::MAIN;
-						SoundManager::GetInstance().Play(SoundManager::SOUND::SE_LOBBY_SELECT);
-						SetJobToSKin();
-						return;
+						selectedJobIndex_ = jobIndex;
+
+						if (keyConfInputManager.isTrigerDown("OK") || (GetMouseInput() & MOUSE_INPUT_LEFT) != 0) // クリック対応
+						{
+							selectState_ = SELECT_STATE::MAIN;
+							SoundManager::GetInstance().Play(SoundManager::SOUND::SE_LOBBY_SELECT);
+							SetJobToSKin();
+							return;
+						}
 					}
 				}
 			}
@@ -773,29 +814,32 @@ void SceneLobby::UpdateSingle(void)
 			}
 		}
 
-		// 画面中央スキンミニウィンドウ内のコライダー判定
-		for (int skinIndex = 0; skinIndex < SKIN_MAXIMUM; ++skinIndex)
+		if (isMouseMode_)
 		{
-			auto& skinCollider = skinUiCollisions_.at(static_cast<size_t>(skinIndex));
-
-			// ヌルチェック
-			if (cursorCollider_ != nullptr && skinCollider != nullptr)
+			// 画面中央スキンミニウィンドウ内のコライダー判定
+			for (int skinIndex = 0; skinIndex < SKIN_MAXIMUM; ++skinIndex)
 			{
-				bool isHoverItem = collisionController.CheckCollision2D(
-					cursorCollider_.get(),
-					skinCollider.get()
-				);
+				auto& skinCollider = skinUiCollisions_.at(static_cast<size_t>(skinIndex));
 
-				if (isHoverItem)
+				// ヌルチェック
+				if (cursorCollider_ != nullptr && skinCollider != nullptr)
 				{
-					selectedSkinIndex_ = skinIndex;
+					bool isHoverItem = collisionController.CheckCollision2D(
+						cursorCollider_.get(),
+						skinCollider.get()
+					);
 
-					if (keyConfInputManager.isTrigerDown("OK"))
+					if (isHoverItem)
 					{
-						selectState_ = SELECT_STATE::MAIN;
-						SoundManager::GetInstance().Play(SoundManager::SOUND::SE_LOBBY_SELECT);
-						SetJobToSKin();
-						return;
+						selectedSkinIndex_ = skinIndex;
+
+						if (keyConfInputManager.isTrigerDown("OK") || (GetMouseInput() & MOUSE_INPUT_LEFT) != 0) // クリック対応
+						{
+							selectState_ = SELECT_STATE::MAIN;
+							SoundManager::GetInstance().Play(SoundManager::SOUND::SE_LOBBY_SELECT);
+							SetJobToSKin();
+							return;
+						}
 					}
 				}
 			}

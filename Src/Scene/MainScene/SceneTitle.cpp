@@ -36,7 +36,8 @@ SceneTitle::SceneTitle(void)
 	, time_(0.0f)
 	, selectedIdx_(0)
 	, inputIntervalCounter_(0)
-	, prevMousePos_(UtilityMath::VECTOR2F_ZERO)
+	, prevMousePos_(0.0f, 0.0f)
+	, isMouseMode_(true)
 	, peachGui_(nullptr)
 	, waveGui_(nullptr)
 	, oniSimaGui_(nullptr)
@@ -135,6 +136,9 @@ void SceneTitle::Initialize(void)
 	}
 
 	SetMouseDispFlag(true);
+
+	auto mousePos = KeyConfInputManager::GetInstance().GetMousePosition();
+	prevMousePos_ = Vector2F(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y));
 
 	// マウスカーソル用のコライダー生成（半径1の円）
 	cursorCollider_ = std::make_unique<Collider2DCircle>
@@ -259,10 +263,41 @@ void SceneTitle::Update(void)
 
 	auto& keyConfInputManager = KeyConfInputManager::GetInstance();
 
-	// マウス座標の更新
+	// 現在のマウス座標を取得
 	const Vector2 MOUSE_POS = keyConfInputManager.GetMousePosition();
 	const Vector2F MOUSE_POS_F(static_cast<float>(MOUSE_POS.x), static_cast<float>(MOUSE_POS.y));
-	cursorCollider_->SetCenterPos(MOUSE_POS_F);
+
+	// マウスが動いた、またはクリックされたらマウスモードへ
+	if (MOUSE_POS_F.x != prevMousePos_.x || MOUSE_POS_F.y != prevMousePos_.y ||
+		(GetMouseInput() & (MOUSE_INPUT_LEFT | MOUSE_INPUT_RIGHT)) != 0)
+	{
+		isMouseMode_ = true;
+		SetMouseDispFlag(true); // マウスカーソルを表示
+	}
+
+	// コントローラーやキーボードのUI操作入力があったらコントローラーモードへ
+	if (keyConfInputManager.isPressed("UP") || keyConfInputManager.isPressed("DOWN") ||
+		keyConfInputManager.isPressed("LEFT") || keyConfInputManager.isPressed("RIGHT") ||
+		keyConfInputManager.isTrigerDown("OK") || keyConfInputManager.isTrigerDown("CANCEL"))
+	{
+		isMouseMode_ = false;
+		SetMouseDispFlag(false); // マウスカーソルを非表示
+	}
+
+	// マウス座標を次フレームの移動判定用に保存
+	prevMousePos_ = MOUSE_POS_F;
+
+	// モードに応じてカーソルコライダーの位置を更新
+	if (isMouseMode_)
+	{
+		// マウスモード：実際のマウス位置に追従
+		cursorCollider_->SetCenterPos(MOUSE_POS_F);
+	}
+	else
+	{
+		// コントローラーモード：画面外の適当な位置に退避させ、ボタンとの当たり判定を無効化
+		cursorCollider_->SetCenterPos(Vector2F(-1000.0f, -1000.0f));
+	}
 
 #ifdef _DEBUG
 	if (KeyConfInputManager::GetInstance().isTrigerDown("APPLY_DEBUG"))
@@ -333,8 +368,10 @@ void SceneTitle::Update(void)
 		// 決定処理
 		for (int i = 0; i < MENU_BUTTON_NUM; ++i)
 		{
+			// IS_TARGET の判定は、マウスホバー または パッドの選択カーソル
 			const bool IS_TARGET = CollisionController::GetInstance().IsTagCollidingWithTag2D(Collider2DBase::TAG_2D::MOUSE_CURSOR, buttonTags[i]) || (selectedIdx_ == i);
 
+			// OKボタン、または左クリックで決定
 			if (IS_TARGET && keyConfInputManager.isTrigerDown("OK"))
 			{
 				isSelectMenu_ = false;
