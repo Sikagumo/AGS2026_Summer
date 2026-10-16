@@ -77,6 +77,7 @@ void EnemyRobo::InitCollider(void)
 void EnemyRobo::InitAnimation(void)
 {
 	CharaBase::InitAnimation();
+	//アニメーションの追加
 	for (int i = 0; i < static_cast<int>(ANIM_TYPE::MAX); i++)
 	{
 		animation_->AddInternal(i, ANIM_OFFSET, ANIM_SPEED);
@@ -97,6 +98,7 @@ void EnemyRobo::InitPost(void)
 
 void EnemyRobo::UpdateProcess(void)
 {
+	//死亡時に状態をENDに変更する
 	if (hp_ <= 0)
 	{
 		if (state_ != STATE::END)
@@ -106,6 +108,7 @@ void EnemyRobo::UpdateProcess(void)
 	}
 	else if (hp_ > 0)
 	{
+		//攻撃判定にプレイヤーが入ったら攻撃状態に変更する
 		bool isAttack = CollisionController::GetInstance().IsActorCollidingWithTag(this, ColliderBase::TAG::PLAYER);
 		if (isAttack == true)
 		{
@@ -177,6 +180,7 @@ void EnemyRobo::ChangeStateAttack(void)
 
 	CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::ENEMY_ATTACK, true);
 
+	//経過時間による攻撃アニメーションの切り替え
 	float time = TimeManager::GetInstance().GetGameTime();
 	if ((static_cast<int>(time) % ATTACK_ANIM_DIVISOR) == 0)
 	{
@@ -250,6 +254,7 @@ void EnemyRobo::UpdateEnd(void)
 
 void EnemyRobo::LockPlayer(void)
 {
+	//プレイヤーの座標を取得して、敵の向きをプレイヤーの方向に向ける
 	VECTOR moveDir = VSub(playerPos_, transform_.pos);
 	moveDir.y = 0.0f;
 	moveDir = VNorm(moveDir);

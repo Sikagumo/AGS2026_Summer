@@ -6,7 +6,8 @@
 #include "../../../../../Collision/CollisionController.h"
 #include "BBulletCannon.h"
 
-BBulletCannon::BBulletCannon()
+BBulletCannon::BBulletCannon(void)
+	: aliveTime_(0)
 {
 }
 
@@ -25,7 +26,7 @@ void BBulletCannon::ReleasePost(void)
 
 void BBulletCannon::InitTransform(void)
 {
-	transform_.scl = { 0.2f,0.2f,0.2f };
+	transform_.scl = BULLET_SCALE;
 	transform_.quaRot = Quaternion::Identity();
 	transform_.quaRotLocal = Quaternion::AngleAxis(UtilityMath::Deg2RadF(INIT_ROT), UtilityMath::AXIS_Y);
 	transform_.Update();
@@ -34,9 +35,8 @@ void BBulletCannon::InitTransform(void)
 void BBulletCannon::InitCollider(void)
 {
 	ColliderSphere* colSphere = new ColliderSphere(
-		ColliderBase::TAG::CANNON_BULLET, &transform_, { 0.0f,0.0f,0.0f }, radius_);
+		ColliderBase::TAG::CANNON_BULLET, &transform_, COLLIDER_OFFSET, radius_);
 	ownColliders_[static_cast<int>(ColliderBase::TAG::MG_BULLET)].push_back(colSphere);
-
 
 	CollisionController::GetInstance().RegisterActor(this);
 }
@@ -53,13 +53,18 @@ void BBulletCannon::InitPost(void)
 {
 }
 
+void BBulletCannon::CreateBullets(VECTOR _pos, VECTOR _dir, float _radius)
+{
+	transform_.pos = _pos;
+	dir_ = _dir;
+	radius_ = _radius;
+}
+
 void BBulletCannon::UpdateProcess(void)
 {
-	if (CollisionController::GetInstance().IsActorCollidingWithTag(this, ColliderBase::TAG::PLAYER))
-	{
-		isAlive_ = false;
-	}
-	if (CollisionController::GetInstance().IsActorCollidingWithTag(this, ColliderBase::TAG::STAGE))
+	// プレイヤーまたはステージに衝突したら非生存状態へ
+	if (CollisionController::GetInstance().IsActorCollidingWithTag(this, ColliderBase::TAG::PLAYER) ||
+		CollisionController::GetInstance().IsActorCollidingWithTag(this, ColliderBase::TAG::STAGE))
 	{
 		isAlive_ = false;
 	}
@@ -67,22 +72,19 @@ void BBulletCannon::UpdateProcess(void)
 	if (isAlive_)
 	{
 		aliveTime_++;
-		// 弾を移動させる
-		// 移動量の計算(方向×スピード)
-		float targetAngle = atan2(dir_.x, dir_.z);
+
+		// 武器の回転を反映
 		transform_.quaRot = weaponTrans_.quaRot;
 
-
-
+		// 移動量の計算（方向 × スピード）
 		VECTOR movePow = VScale(dir_, speed_);
-		// 移動処理
 		transform_.pos = VAdd(transform_.pos, movePow);
 
+		// 寿命チェック
 		if (aliveTime_ > MAX_ALIVE_TIME)
 		{
 			aliveTime_ = 0;
 			isAlive_ = false;
-
 		}
 	}
 	else

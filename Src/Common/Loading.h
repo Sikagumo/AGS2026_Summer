@@ -17,13 +17,13 @@ public:
 	/// @brief インスタンスを破棄する
 	static void DestroyInstance(void);
 
-	/// @brief 初期化する
+	/// @brief 初期化処理
 	void Initialize(void);
 
-	/// @brief 更新する
+	/// @brief 更新処理
 	void Update(void);
 
-	/// @brief 描画する
+	/// @brief 描画処理
 	void Draw(void);
 
 	/// @brief 非同期ロードを開始する
@@ -58,7 +58,7 @@ private:
 	bool isLoading_; // ロード中フラグ
 	float progress_; // 進捗率
 
-	// 画像関連
+	// ローディング画像のハンドル
 	int imageHandle_;
 
 	/// @brief コンストラクタ

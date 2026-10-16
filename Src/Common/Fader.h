@@ -51,11 +51,11 @@ public:
 
 private:
 
-    // 状態関連
-    STATE state_;   // 状態
-    float alpha_;   // 透明度
-    bool isPreEnd_; // 1フレーム判定用
-    bool isEnd_;    // フェード処理の終了判定
+    // 状態管理関連
+    STATE state_;   // 現状のフェード状態
+    float alpha_;   // 現在の透明度
+    bool isPreEnd_; // 1フレーム判定用フラグ
+    bool isEnd_;    // フェード処理の終了判定フラグ
 
     // フェードに使用する画像ハンドル
     int fadeImageHandle_;

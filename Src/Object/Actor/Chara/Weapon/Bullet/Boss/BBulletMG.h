@@ -1,63 +1,77 @@
 #pragma once
 #include "BBulletBase.h"
-class BBulletMG :
-    public BBulletBase
+
+/// @brief ボス用マシンガン弾クラス
+class BBulletMG : public BBulletBase
 {
 public:
-	BBulletMG();
-	~BBulletMG(void)override;
 
-	// リソースロード
+	BBulletMG(void);
+
+	~BBulletMG(void) override;
+
+	/// @brief リソースの読み込み
 	void Load(void) override;
 
-	void ReleasePost(void)override;
+	/// @brief 解放後の後処理
+	void ReleasePost(void) override;
 
+	/// @brief 攻撃状態を設定する
+	/// @param _isAttack true: 攻撃中 / false: 非攻撃中
+	void SetIsAttack(bool _isAttack) override { isAttack_ = _isAttack; }
 
-
-	void SetIsAttack(bool _isAttack)override { isAttack_ = _isAttack; }
-
+	/// @brief 座標を設定する
+	/// @param _pos 設定座標
 	void SetPos(VECTOR _pos) {};
 
-	void CreateBullets(VECTOR _pos, VECTOR _dir, float _radius)override { transform_.pos = _pos; dir_ = _dir; radius_ = _radius; }
+	/// @brief 弾の生成と初期パラメータ設定
+	/// @param _pos 発射座標
+	/// @param _dir 発射方向
+	/// @param _radius 当たり判定半径
+	void CreateBullets(VECTOR _pos, VECTOR _dir, float _radius) override { transform_.pos = _pos; dir_ = _dir; radius_ = _radius; }
 
-	void SetPlayerPos(VECTOR _pos) {}
-	void SetUpMaxPos_(float _pos)override {}
+	/// @brief プレイヤー座標の設定（マシンガン弾では未使用）
+	/// @param _pos プレイヤー座標
+	void SetPlayerPos(VECTOR _pos) override {}
 
-	void SetTransform(Transform trans)override { weaponTrans_ = trans; }
+	/// @brief 上限高度の設定（マシンガン弾では未使用）
+	/// @param _pos 上限高度
+	void SetUpMaxPos(float _pos) override {}
+
+	/// @brief 発射元トランスフォームの設定
+	/// @param _trans 発射元のトランスフォーム
+	void SetTransform(const Transform& _trans) override { weaponTrans_ = _trans; }
 
 protected:
-	// 大きさ、回転、座標の初期化
+
+	/// @brief トランスフォームの初期化
 	void InitTransform(void) override;
 
-	// 衝突判定の初期化
+	/// @brief コライダーの初期化
 	void InitCollider(void) override;
 
-	// アニメーションの初期化
+	/// @brief アニメーションの初期化
 	void InitAnimation(void) override;
 
-	// 初期化後の個別処理
+	/// @brief 初期化後の個別処理
 	void InitPost(void) override;
 
+	/// @brief フレーム毎の更新処理
 	void UpdateProcess(void) override;
+
+	/// @brief 更新処理後の個別処理
 	void UpdateProcessPost(void) override;
 
-
-
-	// 前描画
+	/// @brief 描画処理
 	void DrawPre(void) override;
-
-
-
-
 
 private:
 
-	
+	static constexpr float INIT_SPEED = 40.0f;								// 弾の初期移動速度
+	static constexpr float MAX_ALIVE_TIME = 300.0f;							// 生存可能フレーム数（寿命）
+	static constexpr float MIN_ALTITUDE = -30.0f;							// 弾が消滅する限界高度（Y座標）
+	static constexpr VECTOR BULLET_SCALE = { 0.05f, 0.05f, 0.05f };			// 弾モデルの基本スケール
+	static constexpr VECTOR COLLIDER_OFFSET = { 0.0f, 0.0f, 0.0f };			// 球コライダーのローカルオフセット座標
 
-	static constexpr float INIT_SPEED = 40.0f;
-	static constexpr float MAX_ALIVE_TIME = 300.0f;
-
-	int aliveTime_ = 0;
-
+	int aliveTime_;															// 生存フレームカウンタ
 };
-

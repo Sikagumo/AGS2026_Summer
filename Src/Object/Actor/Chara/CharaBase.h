@@ -1,5 +1,6 @@
 #pragma once
 #include <array>
+#include <DxLib.h>
 #include "../ActorBase.h"
 #include "../../Common/AnimationController.h"
 #include "../../../Utility/UtilityMath.h"
@@ -19,11 +20,13 @@ public:
 
 	virtual void DrawDebug(void);
 
+	// @brief 移動前の座標を取得
+	VECTOR GetPrevPos(void) const { return prevPos_; } 
 
 protected:
 
 	// 最大落下速度
-	static constexpr float MAX_FALL_SPEED = -300.0f;
+	static constexpr float MAX_FALL_SPEED = -250.0f;
 
 	// 衝突時の押し戻し試行回数
 	static constexpr int CNT_TRY_COLLISION = 20;
@@ -33,8 +36,10 @@ protected:
 
 	//影の描画する高さ式（前が高さ)(後ろが補正値)
 	static constexpr float SHADOW_POS_Y = -7.0f + -0.5;
+
 	//影の濃さの最大値
 	static constexpr int MAX_SHADOW_COL = 255;
+
 	//影を完全に消す高さ
 	static constexpr float SHADOW_FADE_HEIGHT = 3000.0f;
 

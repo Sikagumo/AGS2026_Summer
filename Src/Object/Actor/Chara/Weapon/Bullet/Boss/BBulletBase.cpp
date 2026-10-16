@@ -1,6 +1,11 @@
 #include "BBulletBase.h"
 
 BBulletBase::BBulletBase(void)
+	: isAttack_(false)
+	, isAlive_(false)
+	, speed_(0.0f)
+	, radius_(0.0f)
+	, dir_({ 0.0f, 0.0f, 0.0f })
 {
 }
 

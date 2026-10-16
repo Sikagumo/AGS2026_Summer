@@ -708,18 +708,14 @@ void SceneGame::UpdateGameEnd(void)
 	}
 
 	stage_->Update();
+
+	rainyTime_ = TimeManager::GetInstance().GetGameTime();
+	rainyParams_.timeValue = rainyTime_;
 }
 
 void SceneGame::DrawGame(void)
 {
 	stage_->Draw();
-
-	// 雨シェーダ
-	ShaderController::GetInstance().Draw2D(
-		ResourceManager::SRC::PS_RAINY,
-		0, 0, 1.0f,
-		rainyParams_
-	);
 
 	ShaderController::GetInstance().ExecuteDrawCommands();
 
@@ -745,6 +741,13 @@ void SceneGame::DrawGame(void)
 	auto& effect = EffectManager::GetInstance();
 	effect.Draw();
 
+	// 雨シェーダ
+	ShaderController::GetInstance().Draw2D(
+		ResourceManager::SRC::PS_RAINY,
+		0, 0, 1.0f,
+		rainyParams_
+	);
+
 	DrawHpBerBoss();
 
 	gameTimer_->Draw();
@@ -764,17 +767,17 @@ void SceneGame::DrawGameEnd(void)
 {
 	stage_->Draw();
 
-	ShaderController::GetInstance().Draw2D(
-		ResourceManager::SRC::PS_RAINY,
-		0, 0, 1.0f,
-		rainyParams_
-	);
-
 	ShaderController::GetInstance().ExecuteDrawCommands();
 
 	boss_->Draw();
 	auto& effect = EffectManager::GetInstance();
 	effect.Draw();
+
+	ShaderController::GetInstance().Draw2D(
+		ResourceManager::SRC::PS_RAINY,
+		0, 0, 1.0f,
+		rainyParams_
+	);
 
 	const int IMAGE_TITLE_Y = Application::SCREEN_SIZE_Y / 3;
 	if (slowCount_ >= SLOW_COUNT_MAX * 30)

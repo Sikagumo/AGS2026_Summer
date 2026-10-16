@@ -137,6 +137,7 @@ void Application::Run(void)
 		// —‘zFPSŒo‰ß‘Ò‚¿
 		fpsController_->Wait();
 	}
+
 	netManager.DestroyInstance();
 }
 
