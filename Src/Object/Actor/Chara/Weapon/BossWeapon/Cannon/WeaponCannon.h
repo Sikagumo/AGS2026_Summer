@@ -19,37 +19,6 @@ public:
 	/// @brief 解放後の後処理
 	void ReleasePost(void) override;
 
-	/// @brief 接続ボーン情報およびターゲット情報の受け取り
-	/// @param _id 接続ボーンの番号
-	/// @param _trans 接続ボーンを持つ対象のトランスフォーム
-	/// @param _tag 当たり判定登録用タグ
-	/// @param _playerPos ターゲット（プレイヤー）の座標
-	void SetBone(int _id, const Transform& _trans, ColliderBase::TAG _tag, const VECTOR& _playerPos) override;
-
-	/// @brief 武装の現在ワールド座標を取得する
-	/// @return ワールド座標
-	const VECTOR GetPos(void) const override;
-
-	/// @brief ダメージ処理
-	/// @param _damage 受け取った実数ダメージ
-	void SetDamage(int _damage) override { hp_ -= _damage; }
-
-	/// @brief 生存状態の取得
-	/// @return true: 生存 / false: 死亡
-	bool GetIsAlive(void) override { return isAlive_; }
-
-	/// @brief 現在HPの取得
-	/// @return 現在HP
-	int GetHp(void) override { return hp_; }
-
-	/// @brief HPの設定
-	/// @param _hp 設定するHP値
-	void SetHp(int _hp) override { hp_ = _hp; }
-
-	/// @brief ステートの変更処理
-	/// @param _state 遷移先のステート
-	void ChangeState(STATE _state) override;
-
 protected:
 
 	/// @brief トランスフォームの初期化
@@ -79,10 +48,6 @@ protected:
 	/// @brief 衝突予約処理
 	void CollisionReserve(void) override {}
 
-	/// @brief ステート変更（数値インデックス）
-	/// @param _state 遷移先のステート値
-	void ChangeState(int _state) override;
-
 	/// @brief アイドル状態変更時の処理
 	void ChangeStateIdle(void) override;
 
@@ -103,9 +68,6 @@ protected:
 
 	/// @brief アイドル状態の更新処理
 	void UpdateIdle(void) override;
-
-	/// @brief 終了状態の更新処理
-	void UpdateEnd(void) override;
 
 private:
 

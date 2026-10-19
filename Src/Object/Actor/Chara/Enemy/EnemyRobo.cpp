@@ -46,6 +46,8 @@ void EnemyRobo::InitTransform(void)
 	transform_.quaRotLocal = Quaternion::AngleAxis(UtilityMath::Deg2RadF(INIT_ROT_Y), UtilityMath::AXIS_Y);
 
 	transform_.Update();
+
+	isJump_ = true;
 }
 
 void EnemyRobo::InitCollider(void)
@@ -118,6 +120,8 @@ void EnemyRobo::UpdateProcess(void)
 				ChangeState(STATE::ATTACK);
 			}
 		}
+		
+
 	}
 
 	Damage();
@@ -204,7 +208,7 @@ void EnemyRobo::ChangeStateEnd(void)
 	stateUpdate_ = std::bind(&EnemyRobo::UpdateEnd, this);
 	count_ = 0;
 
-	EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_MISSILE, transform_.pos, END_EFFECT_ROT, END_EFFECT_SCALE, END_EFFECT_SPEED, this);
+	EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_MISSILE, transform_.pos, END_EFFECT_ROT, END_EFFECT_SCALE, EFFECT_SPEED, this);
 
 	CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::ENEMYROBO, false);
 	CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::ENEMY_ATTACK, false);
@@ -212,7 +216,26 @@ void EnemyRobo::ChangeStateEnd(void)
 
 void EnemyRobo::UpdateIdle(void)
 {
-	ChangeState(STATE::MOVE);
+	bool isJunp = CollisionController::GetInstance().IsActorCollidingWithTag(this, ColliderBase::TAG::STAGE);
+	if (isJump_ == true)
+	{
+		if (isJunp == true)
+		{
+			isJump_ = false;
+			transform_.pos.y = 0;
+			EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_LANDING, transform_.pos, { 0.0f,0.0f,0.0f }, LANDING_SCL, EFFECT_SPEED, this);
+			ChangeState(STATE::MOVE);
+		}
+	}
+	else
+	{
+		if (isJunp == true)
+		{
+			
+			ChangeState(STATE::MOVE);
+		}
+	}
+	
 }
 
 void EnemyRobo::UpdateAttack(void)

@@ -48,6 +48,43 @@ void WeaponBase::ReleasePost(void)
 {
 }
 
+void WeaponBase::SetBone(int _id, const Transform& _trans, ColliderBase::TAG _tag, const VECTOR& _playerPos)
+{
+	bone_.id = _id;
+	bone_.transform = _trans;
+	bone_.playerPos = _playerPos;
+	tag_ = _tag;
+}
+
+const VECTOR WeaponBase::GetPos(void) const
+{
+	// ローカル座標を回転させてワールド座標へ変換
+	VECTOR localRotPos = transform_.quaRot.PosAxis(localPos_);
+
+	// 位置を加算して最終的なワールド座標にする
+	return VAdd(transform_.pos, localRotPos);
+}
+
+void WeaponBase::SetDamage(int _damage)
+{
+	hp_ -= _damage;
+}
+
+bool WeaponBase::GetIsAlive(void)
+{
+	return isAlive_;
+}
+
+int WeaponBase::GetHp(void)
+{
+	return hp_;
+}
+
+void WeaponBase::SetHp(int _hp)
+{
+	hp_ = _hp;
+}
+
 void WeaponBase::DrawPre(void)
 {
 }
@@ -93,6 +130,8 @@ void WeaponBase::CollisionGravity(void)
 
 void WeaponBase::ChangeState(STATE _state)
 {
+	state_ = _state;
+	ChangeState(static_cast<int>(state_));
 }
 
 void WeaponBase::ChangeStateAttackWindup(void)
@@ -101,6 +140,14 @@ void WeaponBase::ChangeStateAttackWindup(void)
 
 void WeaponBase::ChangeState(int _state)
 {
+	stateBase_ = _state;
+
+	// ステート遷移の関数マップから該当する初期化関数を探して実行
+	auto it = stateChanges_.find(stateBase_);
+	if (it != stateChanges_.end())
+	{
+		it->second();
+	}
 }
 
 void WeaponBase::ChangeStateIdle(void)
@@ -125,6 +172,14 @@ void WeaponBase::UpdateIdle(void)
 
 void WeaponBase::UpdateEnd(void)
 {
+	speed_ = MOVE_SPEED;
+	VECTOR movePow = VScale(moveDir_, speed_);
+
+	// ジャンプ（空中）状態なら吹っ飛び移動を適用する
+	if (isJump_)
+	{
+		transform_.pos = VAdd(transform_.pos, movePow);
+	}
 }
 
 void WeaponBase::UpdateAttackWindup(void)

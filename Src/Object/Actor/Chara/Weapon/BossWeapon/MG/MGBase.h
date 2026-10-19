@@ -13,37 +13,6 @@ public:
 	MGBase(void);
 	~MGBase(void) override = default;
 
-	/// @brief 接続ボーン情報およびターゲット情報の受け取り
-	/// @param _id 接続ボーンの番号
-	/// @param _trans 接続ボーンを持つ対象のトランスフォーム
-	/// @param _tag 当たり判定登録用タグ
-	/// @param _playerPos ターゲット（プレイヤー）の座標
-	void SetBone(int _id, const Transform& _trans, ColliderBase::TAG _tag, const VECTOR& _playerPos) override;
-
-	/// @brief マシンガンのワールド座標を取得する
-	/// @return マシンガンのワールド座標
-	const VECTOR GetPos(void) const override;
-
-	/// @brief ダメージを受けてHPを減らす
-	/// @param _damage 受けたダメージ量
-	void SetDamage(int _damage) override { hp_ -= _damage; }
-
-	/// @brief 生存状態を取得する
-	/// @return true: 生きている / false: 死亡
-	bool GetIsAlive(void) override { return isAlive_; }
-
-	/// @brief 現在のHPを取得する
-	/// @return 現在のHP
-	int GetHp(void) override { return hp_; }
-
-	/// @brief HPを設定する
-	/// @param _hp 設定するHP量
-	void SetHp(int _hp) override { hp_ = _hp; }
-
-	/// @brief 状態（ステート）を変更する
-	/// @param _state 遷移先のステート
-	void ChangeState(STATE _state) override;
-
 	/// @brief 現在攻撃中かどうかを取得する
 	/// @return true: 攻撃中 / false: 非攻撃中
 	bool IsAttack(void) { return isAttack_; }
@@ -86,12 +55,8 @@ protected:
 	int muzzleCount_;									// 現在使用中の銃口インデックス
 	std::vector<std::shared_ptr<BBulletBase>> bullets_;	// 弾オブジェクトの管理プール
 	int look_;											// 左右の向き補正用係数（-1または1）
-	bool isAttack_;										// 攻撃実行中フラグ
-
-	// ステート管理用
-	std::function<void(void)> stateUpdate_;				// 現在ステートの更新関数ポインタ/// @brief 内部ステート遷移処理（int値版）
-	/// @param _state 遷移先のステート値
-	void ChangeState(int _state) override;
+	bool isAttack_;										// 攻撃実行中フラグタ
+	
 
 	/// @brief 待機ステート開始処理
 	void ChangeStateIdle(void) override;
@@ -114,15 +79,10 @@ protected:
 	/// @brief 攻撃ステートの毎フレーム更新
 	void UpdateAttack(void) override;
 
-	/// @brief 死亡・破壊ステートの毎フレーム更新
-	void UpdateEnd(void) override;
-
 	/// @brief 攻撃エフェクトの位置・回転の追従と再生制御
 	void UpdateAttackEffect(void);
 
 	/// @brief 攻撃サウンドの3D音響設定
 	void UpdateAttackSound(void);
 
-	// 左右で個別設定するパラメータ
-	VECTOR localPos_ = { 0.0f, 0.0f, 0.0f };			// ボーン基準のローカルオフセット位置
 };

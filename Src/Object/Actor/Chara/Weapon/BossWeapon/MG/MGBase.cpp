@@ -12,21 +12,8 @@ MGBase::MGBase(void)
     , muzzleCount_(0)
     , isAttack_(false)
     , look_(1)
+    , effectPos_{0,0,0}
 {
-}
-
-void MGBase::SetBone(int _id, const Transform& _trans, ColliderBase::TAG _tag, const VECTOR& _playerPos)
-{
-    bone_.id = _id;
-    bone_.transform = _trans;
-    bone_.playerPos = _playerPos;
-    tag_ = _tag;
-}
-
-const VECTOR MGBase::GetPos(void) const
-{
-    VECTOR localRotPos = transform_.quaRot.PosAxis(localPos_);
-    return VAdd(transform_.pos, localRotPos);
 }
 
 void MGBase::UpdateCommon(void)
@@ -82,27 +69,6 @@ void MGBase::LookPlayer(void)
     MATRIX rotationMatrix = Quaternion::ToMatrix(bulletRot);
     VECTOR bulletDir = VTransformSR(forward, rotationMatrix);
     bulletDir_ = VNorm(bulletDir);
-}
-
-void MGBase::ChangeState(STATE _state)
-{
-    state_ = _state;
-    int state = static_cast<int>(state_);
-
-    // 内部用のChangeStateを実行
-    ChangeState(state);
-}
-
-void MGBase::ChangeState(int _state)
-{
-    stateBase_ = _state;
-
-    // イテレータで安全・高速に検索して実行
-    auto it = stateChanges_.find(stateBase_);
-    if (it != stateChanges_.end())
-    {
-        it->second();
-    }
 }
 
 void MGBase::ChangeStateIdle(void)
@@ -176,18 +142,6 @@ void MGBase::UpdateAttack(void)
         isAttack_ = false;
         SoundManager::GetInstance().Stop(SoundManager::SOUND::SE_BOSS_MG_FIRE);
         ChangeState(STATE::IDLE);
-    }
-}
-
-void MGBase::UpdateEnd(void)
-{
-    speed_ = MOVE_SPEED;
-    VECTOR movePow = VScale(moveDir_, speed_);
-
-    // 移動処理
-    if (isJump_)
-    {
-        transform_.pos = VAdd(transform_.pos, movePow);
     }
 }
 

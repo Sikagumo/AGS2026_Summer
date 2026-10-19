@@ -16,27 +16,14 @@ WeaponMP::WeaponMP(void)
 	, attackCount_(0)
 	, outCount_(0)
 {
+	for (int i = 0; i < MUZZLE_MAX_COUNT; ++i)
+	{
+		muzzlePos_[i] = { 0,0,0 };
+	}
 }
 
 void WeaponMP::ReleasePost(void)
 {
-}
-
-void WeaponMP::SetBone(int _id, const Transform& _trans, ColliderBase::TAG _tag, const VECTOR& _playerPos)
-{
-	bone_.id = _id;
-	bone_.transform = _trans;
-	bone_.playerPos = _playerPos;
-	tag_ = _tag;
-}
-
-const VECTOR WeaponMP::GetPos(void) const
-{
-	// ローカル座標を回転させてワールド座標へ変換
-	VECTOR localRotPos = transform_.quaRot.PosAxis(localPos_);
-
-	// 位置を加算して最終的なワールド座標にする
-	return VAdd(transform_.pos, localRotPos);
 }
 
 void WeaponMP::Load(void)
@@ -126,25 +113,6 @@ void WeaponMP::LookPlayer(void)
 	transform_.quaRot = bone_.transform.quaRot;
 }
 
-void WeaponMP::ChangeState(STATE _state)
-{
-	state_ = _state;
-	int state = static_cast<int>(state_);
-
-	// 各状態遷移の初期処理
-	ChangeState(state);
-}
-
-void WeaponMP::ChangeState(int _state)
-{
-	stateBase_ = _state;
-	auto it = stateChanges_.find(stateBase_);
-	if (it != stateChanges_.end())
-	{
-		it->second();
-	}
-}
-
 void WeaponMP::ChangeStateIdle(void)
 {
 	stateUpdate_ = std::bind(&WeaponMP::UpdateIdle, this);
@@ -192,18 +160,6 @@ void WeaponMP::UpdateIdle(void)
 {
 	LookPlayer();
 	transform_.pos = MV1GetFramePosition(bone_.transform.modelId, bone_.id);
-}
-
-void WeaponMP::UpdateEnd(void)
-{
-	speed_ = MOVE_SPEED;
-	VECTOR movePow = VScale(moveDir_, speed_);
-
-	// 移動処理
-	if (isJump_)
-	{
-		transform_.pos = VAdd(transform_.pos, movePow);
-	}
 }
 
 void WeaponMP::CreateBullets(void)

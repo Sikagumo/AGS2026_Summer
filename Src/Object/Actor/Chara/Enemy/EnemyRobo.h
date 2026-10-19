@@ -96,8 +96,6 @@ protected:
 	/// @brief 死亡/終了状態への遷移処理
 	void ChangeStateEnd(void);
 
-	
-
 	/// @brief 待機状態の更新処理
 	void UpdateIdle(void);
 
@@ -118,7 +116,7 @@ private:
 
 	// 当たり判定（コライダー）関連
 	static constexpr VECTOR COL_LINE_START_POS = { 0.0f, 60.0f, 0.0f };   // ライン判定の始点位置
-	static constexpr VECTOR COL_LINE_END_POS = { 0.0f, -1.0f, 0.0f };     // ライン判定の終点位置
+	static constexpr VECTOR COL_LINE_END_POS = { 0.0f, -10.0f, 0.0f };     // ライン判定の終点位置
 	static constexpr VECTOR COL_CAPSULE_START_POS = { 0.0f, 90.0f, 0.0f };// カプセル判定の始点位置
 	static constexpr VECTOR COL_CAPSULE_END_POS = { 0.0f, 40.0f, 0.0f };  // カプセル判定の終点位置
 	static constexpr float COL_CAPSULE_END_RADIUS = 30.0f;               // カプセル判定の半径
@@ -142,7 +140,8 @@ private:
 	static constexpr float COUNT_MAX = 10.0f;                             // 死亡演出タイマーの上限値
 	static constexpr VECTOR END_EFFECT_ROT = { 0.0f, 0.0f, 0.0f };       // 死亡時爆発エフェクトの回転角度
 	static constexpr VECTOR END_EFFECT_SCALE = { 50.0f, 50.0f, 50.0f };  // 死亡時爆発エフェクトのスケール
-	static constexpr float END_EFFECT_SPEED = 1.0f;                       // 死亡時爆発エフェクトの再生速度
+	static constexpr float EFFECT_SPEED = 1.0f;                       // 死亡時爆発エフェクトの再生速度
+	static constexpr VECTOR LANDING_SCL = { 66.0f,30.0f,66.0f };	// 着地エフェクトの大きさ
 
 	int hp_;             // 現在のHP
 	VECTOR playerPos_;   // ターゲットプレイヤーの現在座標
