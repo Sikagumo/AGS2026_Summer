@@ -15,7 +15,7 @@ namespace
 Fader::Fader(void)
     : state_(STATE::NONE)
     , alpha_(ALPHA_MIN)
-    , isPreEnd_(true)
+    , isPreviousEnd_(true)
     , isEnd_(true)
     , fadeImageHandle_(-1)
 {
@@ -44,13 +44,9 @@ void Fader::SetFade(STATE _state)
     state_ = _state;
     if (state_ != STATE::NONE)
     {
-        isPreEnd_ = false;
+        isPreviousEnd_ = false;
         isEnd_ = false;
     }
-}
-
-void Fader::Init(void)
-{
 }
 
 void Fader::LoadFadeImage(void)
@@ -84,12 +80,12 @@ void Fader::Update(void)
         {
             // フェード終了
             alpha_ = ALPHA_MAX;
-            if (isPreEnd_)
+            if (isPreviousEnd_)
             {
                 // 1フレーム後に終了とする
                 isEnd_ = true;
             }
-            isPreEnd_ = true;
+            isPreviousEnd_ = true;
         }
 
         break;
@@ -101,12 +97,12 @@ void Fader::Update(void)
         {
             // フェード終了
             alpha_ = ALPHA_MIN;
-            if (isPreEnd_)
+            if (isPreviousEnd_)
             {
                 // 1フレーム後に終了とする
                 isEnd_ = true;
             }
-            isPreEnd_ = true;
+            isPreviousEnd_ = true;
         }
         break;
     }

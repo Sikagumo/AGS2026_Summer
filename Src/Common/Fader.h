@@ -38,7 +38,7 @@ public:
     void SetFade(STATE _state);
 
     /// @brief 初期化
-    void Init(void);
+    void Initialize(void) {};
 
     /// @brief 更新
     void Update(void);
@@ -52,10 +52,10 @@ public:
 private:
 
     // 状態管理関連
-    STATE state_;   // 現状のフェード状態
-    float alpha_;   // 現在の透明度
-    bool isPreEnd_; // 1フレーム判定用フラグ
-    bool isEnd_;    // フェード処理の終了判定フラグ
+    STATE state_;           // 現状のフェード状態
+    float alpha_;           // 現在の透明度
+    bool isPreviousEnd_;    // 1フレーム判定用フラグ
+    bool isEnd_;            // フェード処理の終了判定フラグ
 
     // フェードに使用する画像ハンドル
     int fadeImageHandle_;

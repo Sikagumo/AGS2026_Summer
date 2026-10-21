@@ -110,12 +110,13 @@ void Loading::Draw(void)
 	float gameTime = TimeManager::GetInstance().GetGameTime(); // ゲームの経過時間
 	float currentAngle = gameTime * ROTATION_SPEED;            // 現在の角度
 
-	VECTOR centerPos = VGet(Application::SCREEN_HALF_X, Application::SCREEN_HALF_Y, 0.0f); 
-	VECTOR drawPos = UtilityMath::GetCirclePos(centerPos, CIRCLE_RADIUS, currentAngle);    
+	VECTOR centerPosition = VGet(Application::SCREEN_HALF_X, Application::SCREEN_HALF_Y, 0.0f);
+	VECTOR drawPosition = UtilityMath::GetCirclePos(centerPosition, CIRCLE_RADIUS, currentAngle);
 
 	float rotationAngle = currentAngle + (DX_PI_F / 2.0f); 
 
-	DrawRotaGraph(static_cast<int>(drawPos.x), static_cast<int>(drawPos.y), 0.2f, rotationAngle, imageHandle_, true);
+	DrawRotaGraph(static_cast<int>(drawPosition.x), static_cast<int>(drawPosition.y),
+		0.2f, rotationAngle, imageHandle_, true);
 }
 
 void Loading::EndAsyncLoad(void)

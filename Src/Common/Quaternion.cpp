@@ -2,98 +2,119 @@
 #include "Quaternion.h"
 
 #include<math.h>
-#include<DxLib.h>
 
 #include"../Utility/UtilityMath.h"
 
+namespace
+{
+	// 数値計算用定数関連
+	constexpr double VALUE_ZERO_D = 0.0;		// 浮動小数点数（double型）のゼロ
+	constexpr double VALUE_ONE_D = 1.0;			// 浮動小数点数（double型）の1.0
+	constexpr double VALUE_HALF_D = 0.5;        // 浮動小数点数（double型）の0.5（半分）
+	constexpr double VALUE_TWO_D = 2.0;			// 浮動小数点数（double型）の2.0
+	constexpr float  VALUE_ZERO_F = 0.0f;       // 浮動小数点数（float型）のゼロ
+	constexpr float  VALUE_ONE_F = 1.0f;		// 浮動小数点数（float型）の1.0
+	constexpr float  VALUE_HALF_F = 0.5f;		// 浮動小数点数（float型）の0.5（半分）
+	constexpr float  VALUE_TWO_F = 2.0f;		// 浮動小数点数（float型）の2.0
+	constexpr float  VALUE_QUARTER_F = 0.25f;	// 浮動小数点数（float型）の0.25（4分の1）
+
+	// 角度および比較用定数
+	constexpr double ANGLE_LIMIT_DEGREE = 179.9196;   // 180度近傍の判定を行うための限界角度（度数法）
+	constexpr float  LENGTH_EPSILON = 0.000001f;      // ベクトルの長さなどの極小値（誤差・ゼロ除算防止用）
+	constexpr float  DENOMINATOR_EPSILON = 0.0001f;   // 分母の極小値（ゼロ除算防止用）
+	constexpr double DEGREE_CONVERT_FACTOR = 180.0;   // ラジアンから度数法（デグリー）へ変換するための係数
+}
+
 Quaternion::Quaternion(void)
+	: w_(VALUE_ONE_D)
+	, x_(VALUE_ZERO_D)
+	, y_(VALUE_ZERO_D)
+	, z_(VALUE_ZERO_D)
 {
-	w = 1;
-	x = y = z = 0;
 }
 
-Quaternion::Quaternion(const VECTOR& rad)
+Quaternion::Quaternion(const VECTOR& _radian)
 {
-	Quaternion q = Euler(rad.x, rad.y, rad.z);
-	w = q.w;
-	x = q.x;
-	y = q.y;
-	z = q.z;
+	Quaternion quaternion = CreateEuler(_radian.x, _radian.y, _radian.z);
+	w_ = quaternion.w_;
+	x_ = quaternion.x_;
+	y_ = quaternion.y_;
+	z_ = quaternion.z_;
 }
 
-Quaternion::Quaternion(double ww, double wx, double wy, double wz)
+Quaternion::Quaternion(double _scalarW, double _vectorX, double _vectorY, double _vectorZ)
 {
-	w = ww;
-	x = wx;
-	y = wy;
-	z = wz;
+	w_ = _scalarW;
+	x_  = _vectorX;
+	y_  = _vectorY;
+	z_  = _vectorZ;
 }
 
-Quaternion Quaternion::Euler(const VECTOR& rad)
+Quaternion Quaternion::CreateEuler(const VECTOR& _radian)
 {
-	return Euler(rad.x, rad.y, rad.z);
+	return CreateEuler(_radian.x, _radian.y, _radian.z);
 }
 
-Quaternion Quaternion::Euler(double radX, double radY, double radZ)
+Quaternion Quaternion::CreateEuler(double _radianX, double _radianY, double _radianZ)
 {
-	Quaternion ret = Quaternion();
+	Quaternion result = Quaternion();
 
 	// 角度を0〜2π範囲に正規化
-	radX = UtilityMath::RadIn2PI(radX);
-	radY = UtilityMath::RadIn2PI(radY);
-	radZ = UtilityMath::RadIn2PI(radZ);
+	_radianX = UtilityMath::RadIn2PI(_radianX);
+	_radianY = UtilityMath::RadIn2PI(_radianY);
+	_radianZ = UtilityMath::RadIn2PI(_radianZ);
 
 	// オイラー角からクォータニオンへの変換式
-	double cosZ = cos(radZ / 2.0f);
-	double sinZ = sin(radZ / 2.0f);
-	double cosX = cos(radX / 2.0f);
-	double sinX = sin(radX / 2.0f);
-	double cosY = cos(radY / 2.0f);
-	double sinY = sin(radY / 2.0f);
+	double cosineZ = cos(_radianZ / VALUE_TWO_D);
+	double sineZ = sin(_radianZ / VALUE_TWO_D);
+	double cosineX = cos(_radianX / VALUE_TWO_D);
+	double sineX = sin(_radianX / VALUE_TWO_D);
+	double cosineY = cos(_radianY / VALUE_TWO_D);
+	double sineY = sin(_radianY / VALUE_TWO_D);
 
 	// ZYXの順で適用するクォータニオン計算
-	ret.w = cosX * cosY * cosZ + sinX * sinY * sinZ;
-	ret.x = sinX * cosY * cosZ + cosX * sinY * sinZ;
-	ret.y = cosX * sinY * cosZ - sinX * cosY * sinZ;
-	ret.z = cosX * cosY * sinZ - sinX * sinY * cosZ;
+	result.w_ = cosineX * cosineY * cosineZ + sineX * sineY * sineZ;
+	result.x_ = sineX * cosineY * cosineZ + cosineX * sineY * sineZ;
+	result.y_ = cosineX * sineY * cosineZ - sineX * cosineY * sineZ;
+	result.z_ = cosineX * cosineY * sineZ - sineX * sineY * cosineZ;
 
-	return ret;
+	return result;
 }
 
-Quaternion Quaternion::Mult(const Quaternion& q1, const Quaternion& q2)
+Quaternion Quaternion::Multiply(const Quaternion& _quaternion1, const Quaternion& _quaternion2)
 {
-	Quaternion ret = Quaternion();
-	double d1, d2, d3, d4;
+	Quaternion result = Quaternion();
+	double value1, value2, value3, value4;
 
 	// wの計算 
-	d1 = q1.w * q2.w;
-	d2 = -q1.x * q2.x;
-	d3 = -q1.y * q2.y;
-	d4 = -q1.z * q2.z;
-	ret.w = d1 + d2 + d3 + d4;
+	value1 = _quaternion1.w_ * _quaternion2.w_;
+	value2 = -_quaternion1.x_ * _quaternion2.x_;
+	value3 = -_quaternion1.y_ * _quaternion2.y_;
+	value4 = -_quaternion1.z_ * _quaternion2.z_;
+	result.w_ = value1 + value2 + value3 + value4;
 
 	// xの計算 
-	d1 = q1.w * q2.x;
-	d2 = q2.w * q1.x;
-	d3 = q1.y * q2.z;
-	d4 = -q1.z * q2.y;
-	ret.x = d1 + d2 + d3 + d4;
+	value1 = _quaternion1.w_ * _quaternion2.x_;
+	value2 = _quaternion2.w_ * _quaternion1.x_;
+	value3 = _quaternion1.y_ * _quaternion2.z_;
+	value4 = -_quaternion1.z_ * _quaternion2.y_;
+	result.x_ = value1 + value2 + value3 + value4;
 
 	// yの計算
-	d1 = q1.w * q2.y;
-	d2 = q2.w * q1.y;
-	d3 = q1.z * q2.x;
-	d4 = -q1.x * q2.z;
-	ret.y = d1 + d2 + d3 + d4;
+	value1 = _quaternion1.w_ * _quaternion2.y_;
+	value2 = _quaternion2.w_ * _quaternion1.y_;
+	value3 = _quaternion1.z_ * _quaternion2.x_;
+	value4 = -_quaternion1.x_ * _quaternion2.z_;
+	result.y_ = value1 + value2 + value3 + value4;
 
 	// zの計算
-	d1 = q1.w * q2.z;
-	d2 = q2.w * q1.z;
-	d3 = q1.x * q2.y;
-	d4 = -q1.y * q2.x;
-	ret.z = d1 + d2 + d3 + d4;
+	value1 = _quaternion1.w_ * _quaternion2.z_;
+	value2 = _quaternion2.w_ * _quaternion1.z_;
+	value3 = _quaternion1.x_ * _quaternion2.y_;
+	value4 = -_quaternion1.y_ * _quaternion2.x_;
+	result.z_ = value1 + value2 + value3 + value4;
 
-	return ret;
+	return result;
 }
 
 Quaternion Quaternion::Mult(const Quaternion& q) const
