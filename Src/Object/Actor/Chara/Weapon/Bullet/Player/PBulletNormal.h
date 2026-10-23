@@ -5,10 +5,6 @@ class PBulletNormal : public PBulletBase
 {
 public:
 
-	static constexpr float SHOT_SPEED_BIG_XZ = 5.0f;
-	static constexpr float SHOT_SPEED_BIG_Y = 5.0f;
-
-
 	/// @brief コンストラクタ
 	/// @param _scale モデルスケール
 	/// @param _radius 弾の半径
@@ -25,8 +21,7 @@ public:
 
 	void Load(void)override;
 
-	void PreActiveProcess(void)override;
-
+	/// @brief 着弾時の処理
 	void BlastAction(void)override;
 
 

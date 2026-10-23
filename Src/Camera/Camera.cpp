@@ -30,15 +30,15 @@ namespace
 	// 追従対象の最大Y軸座標
 	constexpr float TARGET_POS_MAX_Y = 275.0f;
 
-	// マウス感度倍率
-	constexpr float ROT_SENS = (1.0 - 0.0f);
-
 	// マウス移動量が反映される最小値
-
 	constexpr float MOUSE_MOVE_THRESHOLD = 0.0f;
+
 	// 追従有効範囲
 	constexpr float POS_SPACE_MIN = 300.0f;
 	constexpr float POS_SPACE_MAX = 1750.0f;
+
+	// Y軸の押し出し最小地点
+	constexpr float RESOLVE_FOLLOW_POS_MIN_Y = -5.0f;
 
 	// カメラの回転量
 	const float ROT_POW_KEY = UtilityMath::Deg2RadF(5.0f);
@@ -75,7 +75,6 @@ void Camera::InitCollider(void)
 	colliderSphere->SetTriger(false);
 
 	CollisionController::GetInstance().RegisterActor(this);
-		
 }
 
 void Camera::InitPost(void)
@@ -90,6 +89,7 @@ void Camera::Update(void)
 	// 更新前情報
 	prePos_ = transform_.pos;
 
+	// 各状態別処理
 	update_();
 }
 
@@ -206,6 +206,7 @@ void Camera::SetLockOnTargets(LOCKON_TARGET _target, const VECTOR& _targetPos, i
 		}
 	}
 
+	// 
 	if (_targetHp <= 0) { return; }
 
 	// 対象をリストに追加
@@ -222,6 +223,7 @@ void Camera::LockOnChoice(void)
 	float vecSize = POS_SPACE_MAX;
 	LOCKON_TARGET lockTarget = LOCKON_TARGET::NONE;
 
+	// ターゲット未割当時、処理終了
 	if (targetsParam_.empty()) { return; }
 
 	if (!isLockOn_)
@@ -423,21 +425,11 @@ void Camera::SyncAngleYFromRotY(void)
 	// rotY_が示す前方ベクトルをXZ平面上で求める
 	VECTOR forward = rotY_.PosAxis(UtilityMath::DIR_FORWARD);
 
-	// atan2でY軸角度を逆算してangles_.yに書き戻す
+	// atan2でY軸角度を逆算し、angles_.yに書き戻す
 	angles_.y = atan2f(forward.x, forward.z);
 
 	SyncFollow();
 }
-
-void Camera::ProcessRot(bool _isLimit)
-{
-	// マウス回転
-	RotationMouse(_isLimit);
-
-	// 方向回転によるXYZの移動(ゲームパッド)
-	RotationGamePad(_isLimit);
-}
-
 
 void Camera::SetBeforeDrawFixedPoint(void)
 {
@@ -511,10 +503,10 @@ void Camera::SetBeforeDrawFollowPlayer(void)
 	SyncFollow();
 
 	// 地面下に移動制限を掛ける
-	constexpr float FOLLOW_POS_MIN_Y = -5.0f;
-	if (transform_.pos.y < FOLLOW_POS_MIN_Y)
+	constexpr float RESOLVE_FOLLOW_POS_MIN_Y = -5.0f;
+	if (transform_.pos.y < RESOLVE_FOLLOW_POS_MIN_Y)
 	{
-		transform_.pos.y = FOLLOW_POS_MIN_Y;
+		transform_.pos.y = RESOLVE_FOLLOW_POS_MIN_Y;
 	}
 }
 
@@ -539,23 +531,19 @@ void Camera::SetBeforeDrawFollowBoss(void)
 	localPos = transform_.quaRot.PosAxis(scaledLocalPos);
 	VECTOR newCamPos = VAdd(pos, localPos);
 
-	// イージング中は EasingChangeTarget() で補間、完了後はそのまま代入
 	if (easingTerm_ < 1.0f)
 	{
+		// イージング中は座標を補間
 		transform_.pos = EasingChangeTarget(easingFromPos_, newCamPos, easingTerm_);
 		targetPos_ = EasingChangeTarget(easingFromTarget_, newTarget, easingTerm_);
 	}
 	else
 	{
+		// 補間完了時、そのまま代入
 		transform_.pos = newCamPos;
 		targetPos_ = newTarget;
 	}
 
-}
-
-bool Camera::IsUnlockTarget(void)
-{
-	return false;
 }
 
 void Camera::ProcessMove(void)
@@ -577,6 +565,15 @@ void Camera::ProcessMove(void)
 	}
 }
 
+void Camera::ProcessRot(bool _isLimit)
+{
+	// マウス回転
+	RotationMouse(_isLimit);
+
+	// 方向回転によるXYZの移動(ゲームパッド)
+	RotationGamePad(_isLimit);
+}
+
 void Camera::RotationMouse(bool _isLimit)
 {
 	// マウス移動量
@@ -586,10 +583,12 @@ void Camera::RotationMouse(bool _isLimit)
 	mouseMove.x = ((std::abs(mouseMove.x) > MOUSE_MOVE_THRESHOLD) ? mouseMove.x : 0.0f);
 	mouseMove.y = ((std::abs(mouseMove.y) > MOUSE_MOVE_THRESHOLD) ? mouseMove.y : 0.0f);
 
-	auto sensitivity = KeyConfInputManager::GetInstance().GetMouseSensitivity();
+	// マウス感度を適用
+	auto& sensitivity = KeyConfInputManager::GetInstance().GetMouseSensitivity();
 	mouseMove.x *= sensitivity.x;
 	mouseMove.y *= sensitivity.y;
 
+	// 操作反転を適用
 	if (sensitivity.invertX)
 	{
 		mouseMove.x = -mouseMove.x;
@@ -599,11 +598,9 @@ void Camera::RotationMouse(bool _isLimit)
 		mouseMove.y = -mouseMove.y;
 	}
 
-	// 全体の感度倍率を掛ける
-	mouseMove *= ROT_SENS;
-
 	if (!UtilityMath::EqualsVZero(mouseMove))
 	{
+		// カメラ回転を
 		angles_.x += (mouseMove.y * ROT_POW_MOUSE);
 		angles_.y += (mouseMove.x * ROT_POW_MOUSE);
 
@@ -662,39 +659,36 @@ void Camera::Collision(void)
 
 void Camera::ResolveCollision(void)
 {
-	if (mode_ != MODE::PLAYER_FOLLOW)
-	{
-		return;
-	}
+	// プレイヤー追従中のみ押し出しを有効にする
+	if (mode_ != MODE::PLAYER_FOLLOW) { return; }
 
 	// 衝突判定
 	Collision();
 
 	// 地面下に移動制限を掛ける
-	constexpr float FOLLOW_POS_MIN_Y = -5.0f;
-	if (transform_.pos.y < FOLLOW_POS_MIN_Y)
+	if (transform_.pos.y < RESOLVE_FOLLOW_POS_MIN_Y)
 	{
-		transform_.pos.y = FOLLOW_POS_MIN_Y;
+		transform_.pos.y = RESOLVE_FOLLOW_POS_MIN_Y;
 	}
 }
 
-VECTOR Camera::EasingChangeTarget(const VECTOR& _fromVec, const VECTOR& _toVec, float _term)
+VECTOR Camera::EasingChangeTarget(const VECTOR& _fromVec, const VECTOR& _toVec, float term)
 {
 	 /* QuadInOut イージング
 	   t < 0.5 : 加速フェーズ (2t^2)
 	   t >= 0.5: 減速フェーズ (1 - (-2t+2)^2 / 2)
 	*/
-	_term = std::clamp(_term, 0.0f, 1.0f);
+	term = std::clamp(term, 0.0f, 1.0f);
 
 	// 開始イージング
-	const float QUAD_IN = (2.0f * _term * _term);
+	const float QUAD_IN = (2.0f * term * term);
 
 	// 終了イージング
-	const float QUAD_OUT = (1.0f - (-2.0f * _term + 2.0f) * (-2.0f * _term + 2.0f) / 2.0f);
+	const float QUAD_OUT = (1.0f - (-2.0f * term + 2.0f) * (-2.0f * term + 2.0f) / 2.0f);
 
 	// イージング位置が中間を超えたらイージング方法を切り替える
 	const float MIDDLE = 0.5f;
-	const float easedT = ((_term < MIDDLE) ? QUAD_IN : QUAD_OUT);
+	const float easedT = ((term < MIDDLE) ? QUAD_IN : QUAD_OUT);
 
 	return VGet(_fromVec.x + (_toVec.x - _fromVec.x) * easedT,
 				_fromVec.y + (_toVec.y - _fromVec.y) * easedT,

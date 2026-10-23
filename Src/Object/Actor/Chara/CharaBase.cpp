@@ -11,12 +11,19 @@
 #include "../../../Camera/Camera.h"
 #include "../../../Application.h"
 
+namespace
+{
+	// 回転の遅延間隔
+	constexpr float ROT_DELAY_TERM = 0.2f;
+
+	// 影の頂点数
+	constexpr int SHADOW_VERTEX_NUM = 4;
+};
 
 CharaBase::CharaBase(void)
 	: ActorBase::ActorBase()
 	, isJump_(false)
 	, jumpPow_(0.0f)
-	, moveSpeed_(0.0f)
 	, prevPos_(UtilityMath::VECTOR_ZERO)
 	, moveDir_(UtilityMath::VECTOR_ZERO)
 	, movePow_(UtilityMath::VECTOR_ZERO)
@@ -63,9 +70,6 @@ void CharaBase::Update(void)
 	// 重力処理
 	CalcGravityPow();
 
-	// 衝突判定前準備
-	CollisionReserve();
-
 	// 衝突判定
 	Collision();
 
@@ -105,18 +109,13 @@ void CharaBase::CalcGravityPow(void)
 					: jumpPow_);
 }
 
-
-
 void CharaBase::Collision(void)
 {
 	// 移動処理
 	transform_.pos = VAdd(transform_.pos, movePow_);
 
-	CollisionCapsule();
-
-	// 任意の値を加算
+	// 任意の位置の加算
 	transform_.pos = VAdd(transform_.pos, CalcAddPosition());
-
 
 	// 衝突(重力)
 	CollisionGravity();
@@ -137,25 +136,17 @@ void CharaBase::CollisionGravity(void)
 	}
 }
 
-
-void CharaBase::CollisionCapsule(void)
+void CharaBase::DrawShadowRound(float _shadowScl)
 {
-	
-}
-void CharaBase::DrawShadowRound(float shadowScl)
-{
-	
-	
-	const float SHADOW_SIZE =shadowScl;   // 影の基本サイズ（半径）
+	// 影の基本サイズ（半径）
+	const float SHADOW_SIZE = _shadowScl;
 
-	
 	float shadowY = SHADOW_POS_Y;
 
 	float distance = transform_.pos.y - shadowY;
 	if (distance < 0) distance = 0;
 	if (distance > SHADOW_FADE_HEIGHT) distance = SHADOW_FADE_HEIGHT;
 	int alpha = (int)((1.0f - (distance / SHADOW_FADE_HEIGHT)) * MAX_SHADOW_COL);
-
 
 	// キャラクターの現在位置
 	imageShadowVertex_[LEFT_BACK].pos	  = VGet(transform_.pos.x - SHADOW_SIZE, shadowY, transform_.pos.z - SHADOW_SIZE);
@@ -185,7 +176,7 @@ void CharaBase::DrawShadowRound(float shadowScl)
 	index[3] = RIGHT_FORWARD; index[4] = RIGHT_BACK;   index[5] = LEFT_FORWARD;
 
 	// 描画
-	DrawPolygonIndexed3D(imageShadowVertex_.data(), 4, index, TRIANGLE_CNT, shadowHandle_, TRUE);
+	DrawPolygonIndexed3D(imageShadowVertex_.data(), SHADOW_VERTEX_NUM, index, TRIANGLE_CNT, shadowHandle_, TRUE);
 
 	// グラフィック設定の復元
 	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
@@ -195,26 +186,19 @@ void CharaBase::DrawShadowRound(float shadowScl)
 
 void CharaBase::DrawPre(void)
 {
-
-	
-
 #ifdef _DEBUG
 		// モデル向き描画
-		transform_.DrawModelDir();
-
-		
+		transform_.DrawModelDir();		
 #endif
 }
 
 void CharaBase::DelayRotate(void)
 {
-	constexpr float ROT_TERM = 0.2f;
-
 	// 移動方向から回転に変換する
 	if (UtilityMath::EqualsVZero(moveDir_)) { return; }
 
 	// 回転の補間
 	transform_.quaRot = Quaternion::Slerp(transform_.quaRot
 							, Quaternion::LookRotation(moveDir_)
-							, ROT_TERM);
+							, ROT_DELAY_TERM);
 }

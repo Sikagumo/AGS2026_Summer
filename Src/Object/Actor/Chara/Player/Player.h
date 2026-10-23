@@ -11,11 +11,9 @@ public:
 	// 吹っ飛ばし量
 	static constexpr float KNOCK_POW_Y = 3.75f;
 
-
 	enum class ANIMATION_TYPE
 	{
-		NONE = -1,
-
+		NONE = -1,   // 未割当値
 		IDLE,        // 待機
 		WALK,        // 歩行
 		THROW_LEFT,  // 左投擲
@@ -28,7 +26,7 @@ public:
 
 	enum class ACTION_TYPE
 	{
-		NONE = -1,
+		NONE = -1,      // 未割当値
 		JUMP,           // ジャンプ
 		DODGE,          // 回避
 		DEFEAT,         // 撃破
@@ -60,7 +58,7 @@ public:
 		, bool _isStan, float _knockPowY = KNOCK_POW_Y);
 	
 	/// @brief リスポーンしたか否か
-	bool GetIsRespawn(void)const;
+	bool IsRespawn(void)const;
 
 	// 自分が操作するキャラクターかどうかを設定
 	void SetHostControl(bool _isLocal);
@@ -101,27 +99,11 @@ protected:
 
 private:
 
-	static constexpr std::array<SHOT_TYPE, static_cast<int>(JOB_TYPE::MAX)>
-		SHOT_TYPE_NORMAL
-		= { SHOT_TYPE::BOMB, SHOT_TYPE::BIG, SHOT_TYPE::RAPID_FIRE, SHOT_TYPE::POISON };
-
-	static constexpr std::array<SHOT_TYPE, static_cast<int>(JOB_TYPE::MAX)>
-		SHOT_TYPE_SPECIAL
-			= { SHOT_TYPE::NONE, SHOT_TYPE::NONE, SHOT_TYPE::CLUSTER, SHOT_TYPE::RECOVERY };
-
-	// 連射パラメータ
-	static constexpr float SCALE_RAPID = 0.85f;
-	static constexpr float RADIUS_RAPID = 10.0f;
-	static constexpr int POWER_RAPID = 18;
-	static constexpr float SHOT_SPEED_XZ_RAPID = 17.5f;
-	static constexpr float SHOT_SPEED_Y_RAPID = 2.5f;
-	static constexpr float ALIVE_TIME_RAPID = 2.5f;
-
-
 	// 攻撃回数
 	int attackNumMax_;
 	int curAttackCount_;
 
+	// 発射している弾の識別番号
 	int shotIndex_;
 
 	ANIMATION_TYPE animationType_;
@@ -129,6 +111,9 @@ private:
 	// 投げる位置
 	VECTOR throwPos_;
 	VECTOR throwDir_;
+
+	// 移動速度
+	float moveSpeed_;
 
 	// 吹っ飛ばし量
 	Vector2F knockPowXZ_;
@@ -144,8 +129,10 @@ private:
 	// 撃破時間
 	float curTimeDefeat_;
 
+	// 行動コントローラ
 	std::unique_ptr<PActionController> actionController_;
 
+	// 発射間隔
 	float shotTerm_;
 
 	// 自分が操作するかどうか
@@ -162,9 +149,10 @@ private:
 	// 着弾地点
 	std::array<VERTEX3D, 4> shotPointVertex_;
 
+	/// @brief 行動初期化処理
+	void InitActions(void);
 
-
-	// 操作
+	/// @brief 移動処理
 	void ProcessMove(void);
 
 	/// @brief ジャンプ処理
@@ -179,9 +167,10 @@ private:
 	void ProcessKnockback(void);
 	void ProcessAttack(void);
 
-	void SetRespawn(void);
+	void ProcessRecovery(void);
 
-	void InitActions(void);
+	/// @brief 復活処理
+	void SetRespawn(void);
 
 	/// @brief アニメーション再生
 	/// @param _type アニメーションの種類
@@ -189,6 +178,7 @@ private:
 	/// @param _animationSpeed 再生速度指定(任意)
 	void PlayAnimation(ANIMATION_TYPE _type, bool _isLoop = true, bool _isAnimationBlend = true, float _animSpeed = -1.0f);
 
+	/// @brief 弾丸の処理
 	void CreateBullet(void);
 	void ShotBullet(void);
 	void UpdateBullets(void);
@@ -196,7 +186,7 @@ private:
 	/* 拡散弾処理 */
 	void CreateCluster(void);
 	void ShotCluster(void);
-	std::unique_ptr<PBulletNormal> _CreateClusterBullet(const VECTOR& _throwDir);
+	std::unique_ptr<PBulletNormal> CreateClusterBullet(const VECTOR& _throwDir);
 
 	void DelayRotate(void)override;
 
@@ -206,7 +196,7 @@ private:
 	/// @brief 弾の着弾地点
 	void DrawShotOrbitPoint(const VECTOR& _shotPos);
 
-	VECTOR CalcShotDir(void);
+	VECTOR CalcShotDirection(void);
 
 	void ProcShotNormal(void);
 	void ProcShotSpecial(void);

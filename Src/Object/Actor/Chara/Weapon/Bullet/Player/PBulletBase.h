@@ -130,8 +130,6 @@ protected:
 
 	virtual void BlastAction(void) = 0;
 
-	void ReleasePost(void)override;
-
 	virtual void ChangeBulletStateProc(void) = 0;
 
 

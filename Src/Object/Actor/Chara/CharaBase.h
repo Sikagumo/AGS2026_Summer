@@ -43,10 +43,14 @@ protected:
 	//影を完全に消す高さ
 	static constexpr float SHADOW_FADE_HEIGHT = 3000.0f;
 
+	// 頂点番号の定数
+	static constexpr int LEFT_BACK = 0;
+	static constexpr int LEFT_FORWARD = 1;
+	static constexpr int RIGHT_BACK = 2;
+	static constexpr int RIGHT_FORWARD = 3;
+
 
 	std::unique_ptr<AnimationController> animation_;
-
-	float moveSpeed_;
 
 	VECTOR moveDir_;
 
@@ -62,12 +66,6 @@ protected:
 	bool isJump_;
 
 	int shadowHandle_;
-	
-	// 頂点番号の定数
-	static constexpr int LEFT_BACK	   = 0;
-	static constexpr int LEFT_FORWARD  = 1;
-	static constexpr int RIGHT_BACK	   = 2;
-	static constexpr int RIGHT_FORWARD = 3;
 
 	// 頂点配列
 	std::array<VERTEX3D, 4> imageShadowVertex_;
@@ -92,9 +90,8 @@ protected:
 	// 衝突判定
 	void Collision(void);
 	void CollisionGravity(void);
-	void CollisionCapsule(void);
-	virtual void CollisionReserve(void) {};
 
-	void DrawShadowRound(float shadowScl);
-
+	/// @brief 影描画処理
+	/// @param _shadowScl 影のサイズ
+	void DrawShadowRound(float _shadowScl);
 };

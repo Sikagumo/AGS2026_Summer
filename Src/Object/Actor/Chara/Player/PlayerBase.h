@@ -29,7 +29,7 @@ public:
 		, BOMB		  // ФЪФj
 		, BOMB_FINISH // ФЪФjН≈ПIТe
 
-		, BIG // ЛРСе
+		, BIG        // ЛРСе
 		, BIG_FINISH // ЛРСеН≈ПIТe
 
 		, RAPID_FIRE // ШAОЋ

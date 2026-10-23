@@ -8,30 +8,34 @@ class AnimationController
 {
 public:
 
+	/// @brief アニメーションの取得元の種類
 	enum class ANIMATION_TYPE
 	{
-		NONE,
-		INTERNAL, // 内部アニメーション
-		EXTERNAL, // 外部アニメーション
+		NONE = -1, // 未割当
+		INTERNAL,  // 内部アニメーション
+		EXTERNAL,  // 外部アニメーション
 	};
 
 	// アニメーションデータ
 	struct Animation
 	{
-		ANIMATION_TYPE type = ANIMATION_TYPE::NONE;
+		ANIMATION_TYPE type = ANIMATION_TYPE::NONE; // アニメーション取得元の種類
 		int modelId		= -1; // アニメーションモデル
-		int attachNo	= -1;
-		int animIndex	= 0;	 // モデル内アニメーション番号
+		int attachNo	= -1; // 識別番号
+		int animationIndex	= 0; // モデル内アニメーション番号
 		float speed		= 0.0f;	 // 再生速度
 		float totalTime = 0.0f;	 // 最大再生時間
 		float step		= 0.0f;	 // 現在再生時間
 		bool isLoadPath = false; // パスで読み込んでいるか否か
-		bool isInPlace = false; // アニメーションの位置を固定するか否か
-		VECTOR inPlaceLocalPos = UtilityMath::VECTOR_ZERO; // 固定するアニメーションローカル位置
-		VECTOR inPlaceLocalPosEnd = UtilityMath::VECTOR_ZERO; // 固定するアニメーションローカル位置
+		bool isInPlace  = false; // アニメーションの位置を固定するか否か
+		VECTOR inPlaceLocalPos    = UtilityMath::VECTOR_ZERO; // 固定位置の開始ローカル位置
+		VECTOR inPlaceLocalPosEnd = UtilityMath::VECTOR_ZERO; // 固定位置の終了ローカル位置
 	};
 
+	// 既定のアニメーション再生速度
 	static constexpr float ANIM_SPEED_DEFAULT = 30.0f;
+
+	// 既定のアニメーションブレンド時間
 	static constexpr float BLEND_TIME_DEFAULT = 0.175f;
 
 
@@ -73,10 +77,11 @@ public:
 	/// @brief 別の読み込み済みアニメーションモデルから準備し、再生座標固定
 	/// @param _type アニメーション種類
 	/// @param _handle アニメーションのハンドル 
-	/// @param _localPos 固定するアニメーションローカル位置
+	/// @param _localPosStart 固定位置の開始ローカル位置
+	/// @param _localPosEnd 固定位置の開始ローカル位置
 	/// @param _speed アニメーション速度
 	void AddExternal(int _type, int _handle
-					, const VECTOR& _localPos
+					, const VECTOR& _localPosStart
 					, const VECTOR& _localPosEnd, float _speed = ANIM_SPEED_DEFAULT);
 
 
@@ -98,6 +103,7 @@ public:
 
 
 	/// @brief アニメーションが終了しているか否か
+	[[nodiscard("判定として利用してください")]]
 	bool IsEnd(void) const;
 
 	/// @brief 一定の位置に到達したかの判定
@@ -110,6 +116,7 @@ public:
 	float GetPlayPointRate(void);
 
 	/// @brief 再生中のアニメーション番号取得
+	[[nodiscard("値を利用してください")]]
 	int GetPlayType(void)const { return playType_; };
 
 
@@ -122,6 +129,7 @@ public:
 	void SetAnimationStep(float _step = 0.0f);
 
 	/// @brief 停止しているか否か
+	[[nodiscard("判定として利用してください")]]	
 	bool IsStop(void)const { return isStop_; };
 
 	/// @brief 再生位置変更
@@ -169,11 +177,13 @@ private:
 	// 停止時間
 	float timeStop_;
 	
-	float blendTimeTerm_;
+	// アニメーションブレンドの進行率(0.0～1.0)
+	float blendRate_;
 	
 	// ブレンドアニメーションの前アニメーションのローカル位置
 	VECTOR preAnimationLocalPos_;
 	
+
 	/// @brief 他アニメーションとのブレンドの影響を受けない単体の素のルート位置を取得
 	/// @param _target 位置を取得したいアニメーション
 	/// @param _other ブレンド対象の相方アニメーション(一時的にブレンド率0%にする)
@@ -187,12 +197,12 @@ private:
 
 	/// @brief アニメーション追加処理
 	/// @param _type アニメーションの種類
-	/// @param _animationIndex 格納するアニメーションリスト
-	void Add(int _type, Animation& _animationIndex);
+	/// @param _animation 格納するアニメーション
+	void Add(int _type, Animation& _animation);
 
 	/// @brief アニメーションが格納されているか判定
 	/// @param _type アニメーションの種類
-	bool IsFindAnimation(int _type);
+	bool IsFindAnimation(int _animationType);
 
 	/// @brief 固定アニメーション処理
 	/// @param _prePlayAnimation 再生中のアニメーション

@@ -68,7 +68,6 @@ protected:
 	// 描画処理
 	void DrawPre(void) override;
 
-	void CollisionReserve(void) override {};
 
 	//ステート更新
 	STATE state_;											//現在の状態

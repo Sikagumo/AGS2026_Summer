@@ -154,11 +154,6 @@ void PBulletBase::Draw(void)
 #endif
 }
 
-void PBulletBase::ReleasePost(void)
-{
-	
-}
-
 void PBulletBase::ChangeBulletState(BULLET_STATE _state)
 {
 	bulletState_ = _state;
@@ -188,7 +183,6 @@ void PBulletBase::Shot(const VECTOR& _shotDir)
 {
 	VECTOR shotDir = ((UtilityMath::EqualsVZero(_shotDir))
 							? throwDir_ : _shotDir);
-
 
 	if (!IS_GRAVITY)
 	{

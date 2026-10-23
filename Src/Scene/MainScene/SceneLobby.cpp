@@ -481,6 +481,21 @@ void SceneLobby::Draw(void)
 			Application::SCREEN_HALF_X + 350, Application::SCREEN_SIZE_Y - 100
 		};
 
+		const float WEAPON_IMAGE_SCALE = 0.5f;
+		const Vector2 WEAPON_IMAGE_POSITION
+		{
+			Application::SCREEN_HALF_X, Application::SCREEN_SIZE_Y - 250
+		};
+
+		// ëIëíÜÇÃïêäÌâÊëúÇï`âÊ
+		const int WEAPON_HANDLE = GetWeaponUIHandle(static_cast<PlayerBase::JOB_TYPE>(selectedJobIndex_), true);
+
+		if (WEAPON_HANDLE != -1)
+		{
+			DrawRotaGraph(WEAPON_IMAGE_POSITION.x, WEAPON_IMAGE_POSITION.y,
+				static_cast<double>(WEAPON_IMAGE_SCALE), 0.0, WEAPON_HANDLE, true);
+		}
+
 		// É{É^Éìîwåiï`âÊ
 		DrawRotaGraph3(static_cast<float>(START_BUTTON_POSITION.x),
 			static_cast<float>(START_BUTTON_POSITION.y), static_cast<float>(uiBackWidth_ / 2),

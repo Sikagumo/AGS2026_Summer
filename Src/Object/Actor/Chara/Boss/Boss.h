@@ -248,10 +248,6 @@ protected:
 	/// @brief リソース解放後の個別処理を行う
 	void ReleasePost(void) override;
 
-	// 衝突判定
-	/// @brief 衝突判定の予約処理を行う
-	void CollisionReserve(void) override {};
-
 	// 武器関連
 	/// @brief 武器のセット処理をまとめて呼び出す
 	void SetWeapon(void);
