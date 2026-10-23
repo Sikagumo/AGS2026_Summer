@@ -117,33 +117,36 @@ Quaternion Quaternion::Multiply(const Quaternion& _quaternion1, const Quaternion
 	return result;
 }
 
-Quaternion Quaternion::Mult(const Quaternion& q) const
+Quaternion Quaternion::Multiply(const Quaternion& quaternion) const
 {
-	return Mult(Quaternion(w, x, y, z), q);
+	return Multiply(Quaternion(w_, x_, y_, z_), quaternion);
 }
 
-Quaternion Quaternion::AngleAxis(double rad, VECTOR axis)
+Quaternion Quaternion::CreateAngleAxis(double rad, VECTOR axis)
 {
-	Quaternion ret = Quaternion();
+	Quaternion result = Quaternion();
 
-	double norm;
-	double c, s;
+	double squaredNorm;
+	double cosineValue, sineValue;
 
-	// 単位クォータニオンで初期化（Unityの仕様に合わせる）
-	ret.w = 1.0;
-	ret.x = ret.y = ret.z = 0.0;
-
+	// 単位クォータニオンで初期化
+	result.w_ = VALUE_ONE_D;
+	result.x_ = result.y_ = result.z_ = VALUE_ZERO_D;
+	
 	// 軸ベクトルの正規化
-	norm = (double)axis.x * (double)axis.x + (double)axis.y * (double)axis.y + (double)axis.z * (double)axis.z;
-	if (norm <= 0.0f)
+	squaredNorm = (double)axis.x * (double)axis.x +
+		(double)axis.y * (double)axis.y +
+		(double)axis.z * (double)axis.z;
+
+	if (squaredNorm <= VALUE_ZERO_D)
 	{
-		return ret; // 軸が無効な場合は単位クォータニオンを返す
+		return result;
 	}
 
-	norm = 1.0 / sqrt(norm);
-	axis.x = (float)(axis.x * norm);
-	axis.y = (float)(axis.y * norm);
-	axis.z = (float)(axis.z * norm);
+	squaredNorm = VALUE_ONE_D / sqrt(squaredNorm);
+	axis.x = static_cast<float>(axis.x * squaredNorm);
+	axis.y = static_cast<float>(axis.y * squaredNorm);
+	axis.z = static_cast<float>(axis.z * squaredNorm);
 
 	// 角度の半分のcos, sinを計算
 	c = cos(0.5f * rad);
