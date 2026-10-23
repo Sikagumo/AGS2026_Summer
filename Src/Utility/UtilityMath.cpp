@@ -1,29 +1,27 @@
 #include "UtilityMath.h"
-
-#include<DxLib.h>
-#include<string>
-#include<fstream>
-#include<sstream>
-#include<vector>
-#include<math.h>
+#include <DxLib.h>
+#include <string>
+#include <fstream>
+#include <sstream>
+#include <vector>
+#include <math.h>
 #include <cstdlib>
 
 
-
 // 小数値を四捨五入して整数に変換する
-int UtilityMath::Round(float v)
+int UtilityMath::Round(float _vec)
 {
-	return static_cast<int>(roundf(v));
+	return static_cast<int>(roundf(_vec));
 }
 
 // 文字列を指定された区切り文字で分割する
-std::vector<std::string> UtilityMath::Split(std::string& line, char delimiter)
+std::vector<std::string> UtilityMath::Split(std::string& _line, char _delimiter)
 {
-	std::istringstream stream(line);
+	std::istringstream stream(_line);
 	std::string field;
 	std::vector<std::string> result;
 
-	while (getline(stream, field, delimiter))
+	while (getline(stream, field, _delimiter))
 	{
 		result.push_back(field);
 	}
@@ -32,227 +30,182 @@ std::vector<std::string> UtilityMath::Split(std::string& line, char delimiter)
 }
 
 // ラジアンを度に変換する（double）
-double UtilityMath::Rad2DegD(double rad)
+double UtilityMath::Rad2DegD(double _rad)
 {
-	return rad * (180.0 / DX_PI);
+	return _rad * (180.0 / DX_PI);
 }
 
 // ラジアンを度に変換する（float）
-float UtilityMath::Rad2DegF(float rad)
+float UtilityMath::Rad2DegF(float _rad)
 {
-	return rad * (180.0f / DX_PI_F);
+	return _rad * (180.0f / DX_PI_F);
 }
 
 // ラジアンを度に変換して整数にする
-int UtilityMath::Rad2DegI(int rad)
+int UtilityMath::Rad2DegI(int _rad)
 {
-	return rad * Round(180.0f / DX_PI_F);
+	return _rad * Round(180.0f / DX_PI_F);
 }
 
 // 度をラジアンに変換する（double）
-double UtilityMath::Deg2RadD(double deg)
+double UtilityMath::Deg2RadD(double _deg)
 {
-	return deg * (DX_PI / 180.0);
+	return _deg * (DX_PI / 180.0);
 }
 
 // 度をラジアンに変換する（float）
-float UtilityMath::Deg2RadF(float deg)
+float UtilityMath::Deg2RadF(float _deg)
 {
-	return deg * (DX_PI_F / 180.0f);
+	return _deg * (DX_PI_F / 180.0f);
 }
 
 // 度をラジアンに変換して整数にする
-int UtilityMath::Deg2RadI(int deg)
+int UtilityMath::Deg2RadI(int _deg)
 {
-	return deg * Round(DX_PI_F / 180.0f);
+	return _deg * Round(DX_PI_F / 180.0f);
 }
 
 // 角度を0～360度の範囲に正規化する
-double UtilityMath::DegIn360(double deg)
+double UtilityMath::DegIn360(double _deg)
 {
-	deg = fmod(deg, 360.0);
-	if (deg < 0.0f)
+	_deg = fmod(_deg, 360.0);
+	if (_deg < 0.0f)
 	{
-		deg += 360.0;
+		_deg += 360.0;
 	}
 
-	return deg;
+	return _deg;
 }
 
 // ラジアンを0～2πの範囲に正規化する
-double UtilityMath::RadIn2PI(double rad)
+double UtilityMath::RadIn2PI(double _rad)
 {
-	rad = fmod(rad, DX_TWO_PI);
-	if (rad < 0.0)
+	_rad = fmod(_rad, DX_TWO_PI);
+	if (_rad < 0.0)
 	{
-		rad += DX_TWO_PI;
+		_rad += DX_TWO_PI;
 	}
 
-	return rad;
+	return _rad;
 }
 
 // ラジアン単位でどちら回りが近いかを判定する（-1=反時計回り、1=時計回り）
-int UtilityMath::DirNearAroundRad(float from, float to)
+int UtilityMath::DirNearAroundRad(float _from, float _to)
 {
 	float ret = 1.0f;
 
-	float diff = to - from;
+	float diff = (_to - _from);
 
 	if (diff >= 0.0f)
 	{
-
-		//比較元よりも時計回りに位置する
-		if (diff > DX_PI_F)
-		{
-
-			//でも、180度以上離れているので、反時計回りの方が近い
-			ret = -1.0f;
-		}
-		else
-		{
-			//時計回り
-			ret = 1.0f;
-		}
-
+		// 比較元よりも時計回りに位置する
+		ret = ((diff > DX_PI_F) ? -1.0f : 1.0f);
 	}
 	else
 	{
-
-		//比較元よりも反時計回りに位置する
-
-		if (diff < -DX_PI_F)
-		{
-			//でも、180度以上離れているので、時計回りの方が近い
-			ret = 1.0f;
-		}
-		else
-		{
-			//反時計回り
-			ret = -1.0f;
-		}
+		// 比較元よりも反時計回りに位置する
+		ret = ((diff < -DX_PI_F) ? 1.0f : -1.0f);
 	}
 
 	return static_cast<int>(ret);
 }
 
 // 度単位でどちら回りが近いかを判定する（-1=反時計回り、1=時計回り）
-int UtilityMath::DirNearAroundDeg(float from, float to)
+int UtilityMath::DirNearAroundDeg(float _from, float _to)
 {
 	float ret = 1.0f;
 
-	float diff = to - from;
+	float diff = (_to - _from);
 
 	if (diff >= 0.0f)
 	{
-
-
 		//比較元よりも時計回りに位置する
-		if (diff > 180.0f)
-		{
-
-			//でも、180度以上離れているので、反時計回りの方が近い
-			ret = -1.0f;
-		}
-		else
-		{
-			//時計回り
-			ret = 1.0f;
-		}
+		ret = ((diff > 180.0f) ? -1.0f : 1.0f);
 	}
 	else
 	{
 		//比較元よりも反時計回りに位置する
-		if (diff < -180.0f)
-		{
-			//でも、180度以上離れているので。時計回りの方が近い
-			ret = 1.0f;
-		}
-		else
-		{
-			//時計回り
-			ret = -1.0f;
-		}
+		ret = ((diff < -180.0f) ? 1.0f : -1.0f);
 	}
 
 	return static_cast<int>(ret);
 }
 
 // 整数値を線形補間する
-int UtilityMath::Lerp(int start, int end, float t)
+int UtilityMath::Lerp(int _start, int _end, float _term)
 {
 	//線形補間
-	if (t >= 1.0f)
+	if (_term >= 1.0f)
 	{
-		return end;
+		return _end;
 	}
 
-	return (start + Round(t * static_cast<float>(end - start)));;
+	return (_start + Round(_term * static_cast<float>(_end - _start)));;
 }
 
 // 浮動小数点値を線形補間する
-float UtilityMath::Lerp(float start, float end, float t)
+float UtilityMath::Lerp(float _start, float _end, float _term)
 {
 	//線形補間
-	if (t >= 1.0f)
+	if (_term >= 1.0f)
 	{
-		return end;
+		return _end;
 	}
 
-	return (start + (t * (end - start)));
+	return (_start + (_term * (_end - _start)));
 }
 
 // 倍精度浮動小数点値を線形補間する
-double UtilityMath::Lerp(double start, double end, double t)
+double UtilityMath::Lerp(double _start, double _end, double _term)
 {
 	//線形補間
-	if (t >= 1.0)
+	if (_term >= 1.0)
 	{
-		return end;
+		return _end;
 	}
 
-	return (start + (t * (end - start)));;
+	return (_start + (_term * (_end - _start)));;
 }
 
 // 2Dベクトルを線形補間する
-Vector2 UtilityMath::Lerp(const Vector2& start, const Vector2& end, float t)
+Vector2 UtilityMath::Lerp(const Vector2& _start, const Vector2& _end, float _term)
 {
 	//線形補間
-	if (t >= 1.0f)
+	if (_term >= 1.0f)
 	{
-		return end;
+		return _end;
 	}
 
-	
-	return Vector2(start.x + Round(t * static_cast<float>((end.x - start.x)))
-				 , start.y + Round(t * static_cast<float>((end.y - start.y))));
+	return Vector2(_start.x + Round(_term * static_cast<float>((_end.x - _start.x)))
+				 , _start.y + Round(_term * static_cast<float>((_end.y - _start.y))));
 }
 
 // 3Dベクトルを線形補間する
-VECTOR UtilityMath::Lerp(const VECTOR& start, const VECTOR& end, float t)
+VECTOR UtilityMath::Lerp(const VECTOR& _start, const VECTOR& _end, float _term)
 {
 	//線形補間
-	if (t >= 1.0f)
+	if (_term >= 1.0f)
 	{
-		return end;
+		return _end;
 	}
 
-	return VGet(start.x + t * (end.x - start.x)
-		, start.y + t * (end.y - start.y)
-		, start.z + t * (end.z - start.z));
+	return VGet(_start.x + _term * (_end.x - _start.x)
+		, _start.y + _term * (_end.y - _start.y)
+		, _start.z + _term * (_end.z - _start.z));
 }
 
 // 度単位で角度を線形補間し、360度を考慮する
-double UtilityMath::LerpDeg(double start, double end, double t)
+double UtilityMath::LerpDeg(double _start, double _end, double _term)
 {
 	double ret;
 
-	double diff = end - start;
+	double diff = _end - _start;
 
 	if (diff < -180.0)
 	{
-		end += 360.0;
+		_end += 360.0;
 
-		ret = Lerp(start, end, t);
+		ret = Lerp(_start, _end, _term);
 
 		if (ret >= 360.0)
 		{
@@ -261,9 +214,9 @@ double UtilityMath::LerpDeg(double start, double end, double t)
 	}
 	else if (diff > 180.0)
 	{
-		end -= 360.0;
+		_end -= 360.0;
 
-		ret = Lerp(start, end, t);
+		ret = Lerp(_start, _end, _term);
 
 		if (ret < 0.0)
 		{
@@ -272,112 +225,112 @@ double UtilityMath::LerpDeg(double start, double end, double t)
 	}
 	else
 	{
-		ret = Lerp(start, end, t);
+		ret = Lerp(_start, _end, _term);
 	}
 
 	return ret;
 }
 
 // 色（COLOR_F）を線形補間する
-COLOR_F UtilityMath::Lerp(const COLOR_F& start, const COLOR_F& end, float t)
+COLOR_F UtilityMath::Lerp(const COLOR_F& _start, const COLOR_F& _end, float _term)
 {
 	//線形補間
-	if (t >= 1.0f)
+	if (_term >= 1.0f)
 	{
-		return end;
+		return _end;
 	}
-	return COLOR_F(start.r + t * (end.r - start.r)
-		, start.g + t * (end.g - start.g)
-		, start.b + t * (end.b - start.b)
-		, start.a + t * (end.a - start.a));
+	return COLOR_F(_start.r + _term * (_end.r - _start.r)
+		, _start.g + _term * (_end.g - _start.g)
+		, _start.b + _term * (_end.b - _start.b)
+		, _start.a + _term * (_end.a - _start.a));
 }
 
 // 2Dベクトルの3点間でベジエ補間する
-Vector2 UtilityMath::Bezier(const Vector2& p1, const Vector2& p2, const Vector2& p3, float t)
+Vector2 UtilityMath::Bezier(const Vector2& _point1, const Vector2& _point2, const Vector2& _point3, float _term)
 {
-	Vector2 a = Lerp(p1, p2, t);
-	Vector2 b = Lerp(p2, p3, t);
+	Vector2 a = Lerp(_point1, _point2, _term);
+	Vector2 b = Lerp(_point2, _point3, _term);
 
-	return Lerp(a, b, t);
+	return Lerp(a, b, _term);
 }
 
 // 3Dベクトルの3点間でベジエ補間する
-VECTOR UtilityMath::Bezier(const VECTOR& p1, const VECTOR& p2, const VECTOR& p3, float t)
+VECTOR UtilityMath::Bezier(const VECTOR& _point1, const VECTOR& _point2, const VECTOR& _point3, float _term)
 {
-	VECTOR a = Lerp(p1, p2, t);
-	VECTOR b = Lerp(p2, p3, t);
+	VECTOR a = Lerp(_point1, _point2, _term);
+	VECTOR b = Lerp(_point2, _point3, _term);
 
-	return Lerp(a, b, t);
+	return Lerp(a, b, _term);
 }
 
 // XZ平面上で中心点を軸に回転後の座標を求める
-VECTOR UtilityMath::RotXZPos(const VECTOR& centerPos, const VECTOR& radiusPos, float rad)
+VECTOR UtilityMath::RotXZPos(const VECTOR& _centerPos, const VECTOR& _radiusPos, float _rad)
 {
-	float x = ((radiusPos.x - centerPos.x) * cosf(rad)) - ((radiusPos.z - centerPos.z) * sinf(rad));
-	float z = ((radiusPos.x - centerPos.x) * cosf(rad)) + ((radiusPos.z - centerPos.z) * cosf(rad));
+	float x = ((_radiusPos.x - _centerPos.x) * cosf(_rad)) - ((_radiusPos.z - _centerPos.z) * sinf(_rad));
+	float z = ((_radiusPos.x - _centerPos.x) * cosf(_rad)) + ((_radiusPos.z - _centerPos.z) * cosf(_rad));
 
-	return VGet(centerPos.x + x, radiusPos.y, centerPos.z + z);
+	return VGet(_centerPos.x + x, _radiusPos.y, _centerPos.z + z);
 }
 
 // 2Dベクトルの長さを求める
-double UtilityMath::Magnitude(const Vector2& v)
+double UtilityMath::Magnitude(const Vector2& _vec)
 {
-	return sqrt((v.x * v.x) + (v.y * v.y));
+	return sqrt((_vec.x * _vec.x) + (_vec.y * _vec.y));
 }
 
 // 3Dベクトルの長さを求める
-double UtilityMath::Magnitude(const VECTOR& v)
+double UtilityMath::Magnitude(const VECTOR& _vec)
 {
-	return sqrt((v.x * v.x) + (v.y * v.y) + (v.z * v.z));
+	return sqrt((_vec.x * _vec.x) + (_vec.y * _vec.y) + (_vec.z * _vec.z));
 }
 
 // 3Dベクトルの長さをfloatで求める
-float UtilityMath::MagnitudeF(const VECTOR& v)
+float UtilityMath::MagnitudeF(const VECTOR& _vec)
 {
-	return sqrtf((v.x * v.x) + (v.y * v.y) + (v.z * v.z));
+	return sqrtf((_vec.x * _vec.x) + (_vec.y * _vec.y) + (_vec.z * _vec.z));
 }
 
 // 2Dベクトルの長さの2乗を求める
-int UtilityMath::SqrMagnitude(const Vector2& v)
+int UtilityMath::SqrMagnitude(const Vector2& _vec)
 {
-	return v.x * v.x + v.y * v.y;
+	return ((_vec.x * _vec.x) + (_vec.y * _vec.y));
 }
 
 // 3Dベクトルの長さの2乗をfloatで求める
-float UtilityMath::SqrMagnitudeF(const VECTOR& v)
+float UtilityMath::SqrMagnitudeF(const VECTOR& _vec)
 {
-	return v.x * v.x + v.y * v.y + v.z * v.z;
+	return ((_vec.x * _vec.x) + (_vec.y * _vec.y) + (_vec.z * _vec.z));
 }
 
 // 3Dベクトルの長さの2乗を求める
-double UtilityMath::SqrMagnitude(const VECTOR& v)
+double UtilityMath::SqrMagnitude(const VECTOR& _vec)
 {
-	return v.x * v.x + v.y * v.y + v.z * v.z;
+	return ((_vec.x * _vec.x) + (_vec.y * _vec.y) + (_vec.z * _vec.z));
 }
 
 // 2つの3Dベクトル間の距離の2乗を求める
 
-double UtilityMath::SqrMagnitude(const VECTOR& v1, const VECTOR& v2)
+double UtilityMath::SqrMagnitude(const VECTOR& _vec1, const VECTOR& _vec2)
 {
-	return pow(v2.x - v1.x, 2) + pow(v2.y - v1.y, 2) + pow(v2.z - v1.z, 2);
+	return pow(_vec2.x - _vec1.x, 2) + pow(_vec2.y - _vec1.y, 2) + pow(_vec2.z - _vec1.z, 2);
 }
 
 // 2つの2Dベクトル間の距離を求める
-double UtilityMath::Distance(const Vector2& v1, const Vector2& v2)
+double UtilityMath::Distance(const Vector2& _vec1, const Vector2& _vec2)
 {
-	return sqrt(pow(v2.x - v1.x, 2) + pow(v2.y - v1.y, 2));
+	return sqrt(pow(_vec2.x - _vec1.x, 2) + pow(_vec2.y - _vec1.y, 2));
 }
 
 // 2つの3Dベクトル間の距離を求める
-double UtilityMath::Distance(const VECTOR& v1, const VECTOR& v2)
+double UtilityMath::Distance(const VECTOR& _vec1, const VECTOR& _vec2)
 {
-	return sqrt(pow(v2.x - v1.x, 2) + pow(v2.y - v1.y, 2) + pow(v2.z - v1.z, 2));
+	return sqrt(pow(_vec2.x - _vec1.x, 2) + pow(_vec2.y - _vec1.y, 2) + pow(_vec2.z - _vec1.z, 2));
 }
 
 // 2つの3Dベクトルが等しいかどうかを判定する
 bool UtilityMath::Equals(const VECTOR& _vec1, const VECTOR& _vec2)
 {
-	if (_vec1.x == _vec2.x && _vec1.y == _vec2.y && _vec1.z == _vec2.z)
+	if ((_vec1.x == _vec2.x) && (_vec1.y == _vec2.y) && (_vec1.z == _vec2.z))
 	{
 		return true;
 	}
@@ -417,15 +370,15 @@ bool UtilityMath::EqualsVZero(const Vector2F& _vec)
 }
 
 // 2Dベクトルを正規化して3Dベクトルで返す
-VECTOR UtilityMath::Normalize(const Vector2& v)
+VECTOR UtilityMath::Normalize(const Vector2& _vec)
 {
 	VECTOR ret = VGet(
-		static_cast<float>(v.x),
-		static_cast<float>(v.y),
-		0.0f
+		static_cast<float>(_vec.x)
+		, static_cast<float>(_vec.y)
+		, 0.0f
 	);
 
-	float len = static_cast<float>(Magnitude(v));
+	float len = static_cast<float>(Magnitude(_vec));
 
 	ret.x /= len;
 	ret.y /= len;
@@ -447,7 +400,7 @@ Vector2 UtilityMath::VNormalize(const Vector2& _vec)
 	// ゼロ除算対策で元のゼロベクトルを返す
 	if (UtilityMath::EqualsVZero(_vec)) { return _vec; }
 
-	float mag = sqrtf((_vec.x * _vec.x) + (_vec.y * _vec.y));
+	float mag = sqrtf(static_cast<float>((_vec.x * _vec.x) + (_vec.y * _vec.y)));
 
 	return Vector2(static_cast<int>(_vec.x / mag), static_cast<int>(_vec.y / mag));
 }
@@ -462,17 +415,17 @@ Vector2F UtilityMath::VNormalize(const Vector2F& _vec)
 }
 
 // 2つの3Dベクトルのなす角（度）を求める
-double UtilityMath::AngleDeg(const VECTOR& from, const VECTOR& to)
+double UtilityMath::AngleDeg(const VECTOR& _from, const VECTOR& _to)
 {
-	auto fLen = SqrMagnitude(from);
-	auto tLen = SqrMagnitude(to);
-	auto denominator = sqrt(fLen * tLen);
-	if (denominator < kEpsilonNormalSqrt)
+	auto fLen = SqrMagnitude(_from);
+	auto tLen = SqrMagnitude(_to);
+	auto denomina_tor = sqrt(fLen * tLen);
+	if (denomina_tor < kEpsilonNormalSqrt)
 	{
 		return 0.0f;
 	}
 
-	auto dot = VDot(from, to) / denominator;
+	auto dot = VDot(_from, _to) / denomina_tor;
 
 	if (dot < -1.0f)
 	{
@@ -488,77 +441,62 @@ double UtilityMath::AngleDeg(const VECTOR& from, const VECTOR& to)
 }
 
 // 指定方向に線と終点に球体を描画する
-void UtilityMath::DrawLineDir(const VECTOR& pos, const VECTOR& dir, int color, float len)
+void UtilityMath::DrawLineDir(const VECTOR& _pos, const VECTOR& _dir, int color, float len)
 {
-	auto nDir = UtilityMath::VNormalize(dir);
-	auto sPos = VAdd(pos, VScale(nDir, -len));
-	auto ePos = VAdd(pos, VScale(nDir, len));
+	auto nDir = UtilityMath::VNormalize(_dir);
+	auto sPos = VAdd(_pos, VScale(nDir, -len));
+	auto ePos = VAdd(_pos, VScale(nDir, len));
 
 	DrawLine3D(sPos, ePos, color);
 	DrawSphere3D(ePos, 5.0f, 5, color, color, true);
 }
 
 // 回転行列を基にXYZ軸方向の線を描画する
-void UtilityMath::DrawLineXYZ(const VECTOR& pos, const MATRIX& rot, float len)
+void UtilityMath::DrawLineXYZ(const VECTOR& _pos, const MATRIX& rot, float len)
 {
 	VECTOR dir;
 
 	// X
 	dir = VTransform(UtilityMath::DIR_R, rot);
-	DrawLineDir(pos, dir, 0xff0000, len);
+	DrawLineDir(_pos, dir, 0xff0000, len);
 
 	// Y
 	dir = VTransform(UtilityMath::DIR_UP, rot);
-	DrawLineDir(pos, dir, 0x00ff00, len);
+	DrawLineDir(_pos, dir, 0x00ff00, len);
 
 	// Z
 	dir = VTransform(UtilityMath::DIR_FORWARD, rot);
-	DrawLineDir(pos, dir, 0x0000ff, len);
+	DrawLineDir(_pos, dir, 0x0000ff, len);
 }
 
 // クォータニオンを基にXYZ軸方向の線を描画する
-void UtilityMath::DrawLineXYZ(const VECTOR& pos, const Quaternion& rot, float len)
+void UtilityMath::DrawLineXYZ(const VECTOR& _pos, const Quaternion& rot, float len)
 {
 	VECTOR dir;
 
 	// X
 	dir = rot.GetRight();
-	DrawLineDir(pos, dir, 0xff0000, len);
+	DrawLineDir(_pos, dir, 0xff0000, len);
 
 	// Y
 	dir = rot.GetUp();
-	DrawLineDir(pos, dir, 0x00ff00, len);
+	DrawLineDir(_pos, dir, 0x00ff00, len);
 
 	// Z
 	dir = rot.GetForward();
-	DrawLineDir(pos, dir, 0x0000ff, len);
+	DrawLineDir(_pos, dir, 0x0000ff, len);
 
 	// W
 	dir = VAdd(VNormalize(rot.GetRight()), VNormalize(rot.GetUp()));
 	dir = VAdd(dir, VNormalize(rot.GetForward()));
 	dir = VNormalize(dir);
-	DrawLineDir(pos, dir, 0xffffff, len);
+	DrawLineDir(_pos, dir, 0xffffff, len);
 }
 
-//bool UtilityMath::IsTimeOver(float& totalTime, const float& waitTime)
-//{
-//	//デルタタイム
-//	auto delta = SceneManager::GetInstance().GetDeltaTime();
-//	totalTime += delta;
-//
-//	//待機時間を超過しているか判断
-//	if (totalTime >= waitTime)
-//	{
-//		return true;
-//	}
-//
-//	return false;
-//}
-
-VECTOR UtilityMath::GetCirclePos(const VECTOR& center, float radius, float angle)
+VECTOR UtilityMath::GetCirclePos(const VECTOR& _center, float _radius, float angle)
 {
-	return VGet(center.x + std::cosf(angle) * radius,
-		center.y + std::sinf(angle) * radius, center.z);
+	return VGet(_center.x + std::cosf(angle) * _radius,
+		_center.y + std::sinf(angle) * _radius, _center.z);
 }
 
 float UtilityMath::RandRangeF(float min, float max)
@@ -570,7 +508,7 @@ VECTOR UtilityMath::GetNearestPointOnSegment(const VECTOR& _startPos,
 	const VECTOR& _endPos, const VECTOR& _targetPos)
 {
 	VECTOR segmentVec = VSub(_endPos, _startPos);
-	VECTOR toTargetVec = VSub(_targetPos, _startPos);
+	VECTOR _toTargetVec = VSub(_targetPos, _startPos);
 
 	float lenSquare = static_cast<float>(SqrMagnitude(segmentVec));
 
@@ -579,7 +517,7 @@ VECTOR UtilityMath::GetNearestPointOnSegment(const VECTOR& _startPos,
 		return _startPos;
 	}
 
-	float segmentRatio = VDot(toTargetVec, segmentVec) / lenSquare;
+	float segmentRatio = VDot(_toTargetVec, segmentVec) / lenSquare;
 
 	if (segmentRatio < 0.0f) { segmentRatio = 0.0f; }
 	if (segmentRatio > 1.0f) { segmentRatio = 1.0f; }

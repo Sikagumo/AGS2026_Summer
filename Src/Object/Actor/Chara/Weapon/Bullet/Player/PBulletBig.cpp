@@ -58,11 +58,11 @@ void PBulletBig::UpdatePost(void)
 		/* íeä€ägëÂèàóù */
 		scaleUpTime_ += timeManager_.GetDeltaTime();
 
-		float term = (scaleUpTime_ / RADIUS_DURATION);
-		term = std::clamp(term, 0.0f, 1.0f);
+		float blendRate_ = (scaleUpTime_ / RADIUS_DURATION);
+		blendRate_ = std::clamp(blendRate_, 0.0f, 1.0f);
 
-		radiusBullet_ += ((radiusMax_ - radiusBullet_) * (term * term));
-		transform_.SetScale((scaleMax_ * (term * term)));
+		radiusBullet_ += ((radiusMax_ - radiusBullet_) * (blendRate_ * blendRate_));
+		transform_.SetScale((scaleMax_ * (blendRate_ * blendRate_)));
 	}
 }
 

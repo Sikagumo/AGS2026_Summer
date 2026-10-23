@@ -1,7 +1,6 @@
 
 #include "Boss.h"
 #include "../../../../Manager/Generic/ResourceManager.h"
-#include "../../../../Manager/Generic/InputManager.h"
 #include "../../../../Manager/Generic/SceneManager.h"
 #include "../../../../Manager/Decoration/SoundManager.h"
 #include "../../../../Manager/System/TimeManager.h"

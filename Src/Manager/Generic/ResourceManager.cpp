@@ -274,7 +274,7 @@ void ResourceManager::Initialize(void)
 
 	/* BGM */
 	_SetResource(LOAD_TYPE::SOUND, SRC::BGM_TITLE_SEA, PATH_BGM + "Sea.mp3");
-	_SetResource(LOAD_TYPE::SOUND, SRC::BGM_TITLE_THUNDER, PATH_BGM + "Thunderstorm.mp3");
+	_SetResource(LOAD_TYPE::SOUND, SRC::BGM_TITLE_SELECT, PATH_BGM + "Thunderstorm.mp3");
 	_SetResource(LOAD_TYPE::SOUND, SRC::BGM_GAME, PATH_BGM + "GameBGM.mp3");
 	_SetResource(LOAD_TYPE::SOUND, SRC::BGM_RESULT, PATH_BGM + "Result.mp3");
 	_SetResource(LOAD_TYPE::SOUND, SRC::BGM_LOBBY, PATH_BGM + "BGM_LOBBY.mp3");

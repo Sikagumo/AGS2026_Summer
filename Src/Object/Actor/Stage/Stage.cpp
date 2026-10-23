@@ -232,8 +232,6 @@ void Stage::Update(void)
 
 	for (auto& frontTree : treesFront_)
 	{
-		if (!frontTree->GetIsActive()) { continue; }
-
 		frontTree->Update();
 	}
 

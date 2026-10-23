@@ -7,20 +7,21 @@ public:
 
 	Tree(void);
 
-	~Tree(void) = default;
+	~Tree(void)override = default;
 
 	void Load(void)override;
-	void Update(void)override;
+	void Update(void)override {};
 
 	bool GetIsActive(void)const { return isActive_; };
 	void SetIsActive(bool _isActive) { isActive_ = _isActive; };
 
+
 protected:
 
-	void InitTransform(void)override;
+	void InitTransform(void)override {};
 	void InitCollider(void)override;
 	void InitAnimation(void)override {};
-	void InitPost(void)override;
+	void InitPost(void)override {};
 
 private:
 

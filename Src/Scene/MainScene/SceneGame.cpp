@@ -22,6 +22,13 @@
 #include "../../Manager/Generic/KeyConfInputManager.h"
 #include "../SubScene/ScenePause.h"
 
+namespace
+{
+	// 雨の強さ
+	constexpr float RAIN_POW = 1.0f;
+	constexpr float RAIN_POW_BACK = 1.0f;
+};
+
 SceneGame::SceneGame(std::vector<PlayerSelectType> _playerSelectType)
 	: players_()
 	, boss_(std::make_unique<Boss>())
@@ -100,7 +107,7 @@ void SceneGame::Load(void)
 		, ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::BGM_GAME));
 
 	SoundManager::GetInstance().Add(SoundManager::TYPE::BGM, SoundManager::SOUND::BGM_TITLE_THUNDER
-		, ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::BGM_TITLE_THUNDER));
+		, ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::BGM_TITLE_SELECT));
 
 	SoundManager::GetInstance().Add(SoundManager::TYPE::SE, SoundManager::SOUND::SE_HIT_BLAST
 		, ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::SE_HIT_BLAST));
@@ -173,10 +180,7 @@ void SceneGame::Initialize(void)
 	SoundManager::GetInstance().Play(SoundManager::SOUND::BGM_GAME);
 	SoundManager::GetInstance().Play(SoundManager::SOUND::BGM_TITLE_THUNDER);
 
-	// 雨シェーダ導入
-	constexpr float RAIN_POW = 1.0f;
-	constexpr float RAIN_POW_BACK = 1.0f;
-
+	// 雨シェーダ
 	rainyParams_.rainIntensity = RAIN_POW;
 	rainyParams_.rainIntensityBack = RAIN_POW_BACK;
 	rainyParams_.rainColor = GetColorF(0.75f, 0.82f, 0.9f, 1.0f);
@@ -260,14 +264,12 @@ void SceneGame::DamageProcess(void)
 		SoundManager::GetInstance().Play(SoundManager::SOUND::SE_HIT_BLAST);
 	}
 
-	// プレイヤー被ダメージ処理
 	for (auto& player : players_)
 	{
-		if (!player->GetHostControl())
-		{
-			continue;
-		}
+		// マルチプレイ中の操作していないプレイヤーはスキップ
+		if (!player->GetHostControl()) { continue; }
 
+		// プレイヤー被ダメージ処理
 		player->SetDamage(damageController_->GetPlayerDamage()
 			, damageController_->GetInvincible());
 	}
@@ -279,13 +281,12 @@ void SceneGame::UpdateGameTime(void)
 	{
 		gameTimer_->Update();
 
-		// プレイヤー撃破時、制限時間の減少
 		for (auto& player : players_)
 		{
-			if (!player->GetIsRespawn())
-			{
-				continue;
-			}
+			// 生存中はスキップ
+			if (!player->IsRespawn()) { continue; }
+
+			// プレイヤー撃破時、制限時間の減少
 			gameTimer_->SetTime(gameTimer_->GetTime() - GAME_TIME_DEFEAT_DEC);
 		}
 
@@ -302,6 +303,7 @@ void SceneGame::UpdateGameTime(void)
 		ChangeState(GAME_STATE::GAME_END);
 	}
 
+	// 雨シェーダ更新
 	rainyTime_ = TimeManager::GetInstance().GetGameTime();
 	rainyParams_.timeValue = rainyTime_;
 }
