@@ -1,4 +1,5 @@
 #pragma once
+
 #include "BBulletBase.h"
 
 /// @brief ボス用衝撃波（ウェーブ）弾クラス
@@ -10,6 +11,7 @@ public:
 	/// @param _transform ボスのトランスフォーム参照
 	BBulletWave(const Transform& _transform);
 
+	/// @brief デストラクタ
 	~BBulletWave(void) override;
 
 	/// @brief リソースロード

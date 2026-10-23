@@ -205,19 +205,13 @@ void SceneGame::Update(void)
 		SceneManager::GetInstance().PushScene(std::make_shared<ScenePause>());
 	}
 
-	if (NetManager::GetInstance().GetMode() != NET_MODE::NONE
-		&& NetManager::GetInstance().GetIsConnectionLost())
-	{
-		NetManager::GetInstance().Stop();
-		SceneManager::GetInstance().ChangeScene(std::make_shared<SceneTitle>());
-		return;
-	}
-
 	stateUpdate_();
 }
 
 void SceneGame::DamageProcess(void)
 {
+	int playerCount = 0;
+
 	for (auto& enemyRobo : enemyRobots_)
 	{
 		enemyRobo->SetPlayerPos(players_.at(0)->GetBodyPos());
@@ -227,6 +221,8 @@ void SceneGame::DamageProcess(void)
 	for (auto& player : players_)
 	{
 		keyPosList.emplace_back(player->GetNetKey(), player->GetBodyPos());
+		boss_->SetPlayerPos(player->GetBodyPos(), playerCount);
+		playerCount++;
 	}
 
 	std::sort(keyPosList.begin(), keyPosList.end(), [](const auto& _a, const auto& _b)
@@ -236,25 +232,8 @@ void SceneGame::DamageProcess(void)
 
 	const int PLAYER_COUNT = static_cast<int>(keyPosList.size());
 
-	if (PLAYER_COUNT >= 1)
-	{
-		boss_->SetPlayer1Pos(keyPosList[0].second);
-	}
+	
 
-	if (PLAYER_COUNT >= 2)
-	{
-		boss_->SetPlayer2Pos(keyPosList[1].second);
-	}
-
-	if (PLAYER_COUNT >= 3)
-	{
-		boss_->SetPlayer3Pos(keyPosList[2].second);
-	}
-
-	if (PLAYER_COUNT >= 4)
-	{
-		boss_->SetPlayer4Pos(keyPosList[3].second);
-	}
 
 	if (NetManager::GetInstance().GetMode() != NET_MODE::CLIENT)
 	{

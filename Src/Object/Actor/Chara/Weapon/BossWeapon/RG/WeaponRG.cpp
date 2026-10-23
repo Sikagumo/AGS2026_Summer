@@ -1,3 +1,5 @@
+#include "WeaponRG.h"
+
 #include <DxLib.h>
 #include "../../../../../../Manager/Generic/ResourceManager.h"
 #include "../../../../../../Utility/UtilityMath.h"
@@ -7,7 +9,6 @@
 #include "../../../../../Collider/ColliderLine.h"
 #include "../../../../../Collision/CollisionController.h"
 #include "../../Bullet/Boss/BBulletLaser.h"
-#include "WeaponRG.h"
 
 WeaponRG::WeaponRG(void)
 	: WeaponBase()
@@ -20,23 +21,6 @@ WeaponRG::WeaponRG(void)
 
 void WeaponRG::ReleasePost(void)
 {
-}
-
-void WeaponRG::SetBone(int _id, const Transform& _trans, ColliderBase::TAG _tag, const VECTOR& _playerPos)
-{
-	bone_.id = _id;
-	bone_.transform = _trans;
-	bone_.playerPos = _playerPos;
-	tag_ = _tag;
-}
-
-const VECTOR WeaponRG::GetPos(void) const
-{
-	// ローカル座標を回転させてワールド座標へ変換
-	VECTOR localRotPos = transform_.quaRot.PosAxis(localPos_);
-
-	// 位置を加算して最終的なワールド座標にする
-	return VAdd(transform_.pos, localRotPos);
 }
 
 void WeaponRG::Load(void)
@@ -122,25 +106,6 @@ void WeaponRG::DrawPre(void)
 void WeaponRG::LookPlayer(void)
 {
 	transform_.quaRot = bone_.transform.quaRot;
-}
-
-void WeaponRG::ChangeState(STATE _state)
-{
-	state_ = _state;
-	int state = static_cast<int>(state_);
-
-	// 各状態遷移の初期処理
-	ChangeState(state);
-}
-
-void WeaponRG::ChangeState(int _state)
-{
-	stateBase_ = _state;
-	auto it = stateChanges_.find(stateBase_);
-	if (it != stateChanges_.end())
-	{
-		it->second();
-	}
 }
 
 void WeaponRG::ChangeStateIdle(void)
@@ -233,16 +198,4 @@ void WeaponRG::UpdateIdle(void)
 {
 	LookPlayer();
 	transform_.pos = MV1GetFramePosition(bone_.transform.modelId, bone_.id);
-}
-
-void WeaponRG::UpdateEnd(void)
-{
-	speed_ = MOVE_SPEED;
-	VECTOR movePow = VScale(moveDir_, speed_);
-
-	// 移動処理
-	if (isJump_)
-	{
-		transform_.pos = VAdd(transform_.pos, movePow);
-	}
 }

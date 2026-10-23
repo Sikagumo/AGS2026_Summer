@@ -1,16 +1,21 @@
 #pragma once
-#include "../../WeaponBase.h"
+
 #include <algorithm>
 #include <vector>
 
+#include "../../WeaponBase.h"
+
 class BBulletBase;
 
-
+/// @brief ボス用ミサイルポッド武装クラス
 class WeaponMP : public WeaponBase
 {
 public:
 
+	/// @brief コンストラクタ
 	WeaponMP(void);
+
+	/// @brief デストラクタ
 	~WeaponMP(void) override = default;
 
 	/// @brief 武器モデル・SE等のリソース読み込み処理
@@ -18,37 +23,6 @@ public:
 
 	/// @brief 解放後の後処理
 	void ReleasePost(void) override;
-
-	/// @brief ボーン情報およびターゲット情報の受け取り
-	/// @param _id 接続ボーンの番号
-	/// @param _trans 接続ボーンを持つ対象のトランスフォーム
-	/// @param _tag 当たり判定登録用タグ
-	/// @param _playerPos ターゲット（プレイヤー）の座標
-	void SetBone(int _id, const Transform& _trans, ColliderBase::TAG _tag, const VECTOR& _playerPos) override;
-
-	/// @brief 現在のワールド座標を取得する
-	/// @return 現在のワールド座標
-	const VECTOR GetPos(void) const override;
-
-	/// @brief ダメージを受けてHPを減らす
-	/// @param _damage 受けたダメージ量
-	void SetDamage(int _damage) override { hp_ -= _damage; }
-
-	/// @brief 生存状態を取得する
-	/// @return true: 生きている / false: 死亡
-	bool GetIsAlive(void) override { return isAlive_; }
-
-	/// @brief 現在のHPを取得する
-	/// @return 現在のHP
-	int GetHp(void) override { return hp_; }
-
-	/// @brief HPを設定する
-	/// @param _hp 設定するHP量
-	void SetHp(int _hp) override { hp_ = _hp; }
-
-	/// @brief 状態（ステート）を変更する
-	/// @param _state 遷移先のステート
-	void ChangeState(STATE _state) override;
 
 	/// @brief 右側か左側かを指定するフラグを設定する
 	/// @param _isLR true: L（左） / false: R（右）
@@ -90,11 +64,6 @@ protected:
 	/// @return 弾のスマートポインタ
 	std::shared_ptr<BBulletBase> GetValidBullet(void);
 
-	// ステート管理用
-	std::function<void(void)> stateUpdate_;		// 現在ステートの更新関数ポインタ
-	/// @param _state 遷移先のステート値
-	void ChangeState(int _state) override;
-
 	/// @brief 待機ステート開始処理
 	void ChangeStateIdle(void) override;
 
@@ -109,9 +78,6 @@ protected:
 
 	/// @brief 攻撃ステートの毎フレーム更新
 	void UpdateAttack(void) override;
-
-	/// @brief 死亡・破壊ステートの毎フレーム更新
-	void UpdateEnd(void) override;
 
 private:
 

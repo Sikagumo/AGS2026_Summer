@@ -1,3 +1,4 @@
+#include "WeaponCannon.h"
 #include <DxLib.h>
 #include "../../../../../../Manager/Generic/ResourceManager.h"
 #include "../../../../../../Utility/UtilityMath.h"
@@ -6,9 +7,9 @@
 #include "../../../../../Collider/ColliderLine.h"
 #include "../../../../../Collision/CollisionController.h"
 #include "../../Bullet/Boss/BBulletCannon.h"
-#include "WeaponCannon.h"
 
-WeaponCannon::WeaponCannon()
+
+WeaponCannon::WeaponCannon(void)
 	: isAttack_(false)
 	, bulletDir_(VGet(0.0f, 0.0f, 0.0f))
 	, look_(0)
@@ -18,23 +19,6 @@ WeaponCannon::WeaponCannon()
 
 void WeaponCannon::ReleasePost(void)
 {
-}
-
-void WeaponCannon::SetBone(int _id, const Transform& _trans, ColliderBase::TAG _tag, const VECTOR& _playerPos)
-{
-	bone_.id = _id;
-	bone_.transform = _trans;
-	bone_.playerPos = _playerPos;
-	tag_ = _tag;
-}
-
-const VECTOR WeaponCannon::GetPos(void) const
-{
-	// ローカル座標を回転させてワールド座標へ変換
-	VECTOR localRotPos = transform_.quaRot.PosAxis(localPos_);
-
-	// 位置を加算して最終的なワールド座標にする
-	return VAdd(transform_.pos, localRotPos);
 }
 
 void WeaponCannon::Load(void)
@@ -152,24 +136,6 @@ void WeaponCannon::LookPlayer(void)
 	bulletDir_ = VNorm(bulletDir);
 }
 
-void WeaponCannon::ChangeState(STATE _state)
-{
-	state_ = _state;
-	int state = static_cast<int>(state_);
-	ChangeState(state);
-}
-
-void WeaponCannon::ChangeState(int _state)
-{
-	stateBase_ = _state;
-	auto it = stateChanges_.find(stateBase_);
-
-	if (it != stateChanges_.end())
-	{
-		it->second();
-	}
-}
-
 void WeaponCannon::ChangeStateIdle(void)
 {
 	stateUpdate_ = std::bind(&WeaponCannon::UpdateIdle, this);
@@ -201,18 +167,6 @@ void WeaponCannon::ChangeStateEnd(void)
 
 void WeaponCannon::UpdateAttackWindup(void)
 {
-}
-
-void WeaponCannon::UpdateEnd(void)
-{
-	speed_ = MOVE_SPEED;
-	VECTOR movePow = VScale(moveDir_, speed_);
-
-	// 移動処理
-	if (isJump_)
-	{
-		transform_.pos = VAdd(transform_.pos, movePow);
-	}
 }
 
 void WeaponCannon::UpdateAttack(void)

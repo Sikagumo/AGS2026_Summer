@@ -1,16 +1,21 @@
 #pragma once
+
 #include <memory>
 #include <vector>
+
 #include "MGBase.h"
 
 class BBulletBase;
 
-
+/// @brief ボス用左マシンガン武装クラス
 class WeaponMGL : public MGBase
 {
 public:
 
+	/// @brief コンストラクタ
 	WeaponMGL(void);
+
+	/// @brief デストラクタ
 	~WeaponMGL(void) override = default;
 
 	/// @brief 武器モデル・SE等のリソース読み込み処理

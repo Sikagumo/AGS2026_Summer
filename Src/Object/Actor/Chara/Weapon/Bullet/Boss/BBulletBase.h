@@ -1,4 +1,5 @@
 #pragma once
+
 #include "../../../../ActorBase.h"
 
 /// @brief エネミー・ボス弾の基底クラス

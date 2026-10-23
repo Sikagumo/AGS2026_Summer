@@ -1,8 +1,10 @@
 #pragma once
+
 #include <memory>
 #include <array>
 #include <map>
 #include <functional>
+
 #include "../../ActorBase.h"
 #include "../../../Collider/ColliderBase.h"
 
@@ -24,11 +26,14 @@ public:
 	/// @brief ボーン情報の受け取り構造体
 	struct Bone {
 		int id = 0;						// ボーンID
-		Transform transform = {};			// ボーンを持つ対象のトランスフォーム
+		Transform transform = {};		// ボーンを持つ対象のトランスフォーム
 		VECTOR playerPos = { 0,0,0 };	// プレイヤーの位置座標
 	};
 
+	/// @brief コンストラクタ
 	WeaponBase(void);
+
+	/// @brief デストラクタ
 	virtual ~WeaponBase(void) override = default;
 
 	/// @brief 毎フレームの更新処理
@@ -42,27 +47,27 @@ public:
 	/// @param _trans ボーンを持つ対象のトランスフォーム
 	/// @param _tag 当たり判定用のタグ
 	/// @param _playerPos ターゲット（プレイヤー）の座標
-	virtual void SetBone(int _id, const Transform& _trans, ColliderBase::TAG _tag, const VECTOR& _playerPos) = 0;
+	virtual void SetBone(int _id, const Transform& _trans, ColliderBase::TAG _tag, const VECTOR& _playerPos);
 
 	/// @brief 照準・ロックオン用の座標を取得する
 	/// @return ワールド座標
-	virtual const VECTOR GetPos(void) const = 0;
+	virtual const VECTOR GetPos(void) const;
 
 	/// @brief ウェポンのダメージ受け取り用
 	/// @param _damage 実数ダメージ
-	virtual void SetDamage(int _damage) = 0;
+	virtual void SetDamage(int _damage);
 
 	/// @brief ウェポンの生存状態を取得する
 	/// @return true: 生きている / false: 死亡
-	virtual bool GetIsAlive(void) = 0;
+	virtual bool GetIsAlive(void);
 
 	/// @brief ウェポンの現在HPを取得する
 	/// @return 現在HP
-	virtual int GetHp(void) = 0;
+	virtual int GetHp(void);
 
 	/// @brief ウェポンのHPを設定する
 	/// @param _hp 設定するHP値
-	virtual void SetHp(int _hp) = 0;
+	virtual void SetHp(int _hp);
 
 	/// @brief 状態（ステート）を変更する
 	/// @param _state 遷移先のステート

@@ -1,10 +1,13 @@
-﻿#pragma once
+#pragma once
+
 #include <DxLib.h>
 #include <memory>
 #include <array>
 #include <functional>
+
 #include "../CharaBase.h"
-#include "../../../Common/Transform.h";
+
+#include "../../../Common/Transform.h"
 #include "../../../../Net/NetStructures.h"
 
 class WeaponMGL;
@@ -12,7 +15,9 @@ class WeaponMGR;
 class WeaponCannon;
 class WeaponMP;
 class WeaponRG;
+class WeaponBase;
 class BBulletWave;
+
 /// @brief ボスキャラクター本体クラス
 class Boss : public CharaBase
 {
@@ -25,7 +30,7 @@ public:
 		ATTACK,			// 通常攻撃状態
 		JUMP,			// ジャンプ滞空状態
 		JUMPBEFORE,		// ジャンプ溜め（予備動作）状態
-		ROADATTACK,		// 돌진（突進）攻撃状態
+		ROADATTACK,		// 突進攻撃状態
 		LASER,			// 照射レーザー攻撃状態
 		END,			// 撃破・死亡状態
 	};
@@ -65,6 +70,18 @@ public:
 		MAX,			// アニメーション種類の総数
 	};
 
+	/// @brief タイヤの登録
+	enum class WHEEL_TYPE
+	{
+		FRONT_L,		//左前
+		FRONT_R,		//右前
+		BACK_FRONT_L,	//左後ろ前
+		BACK_FRONT_R,	//右後ろ前
+		BACK_L,			//左後ろ
+		BACK_R,			//右後ろ
+		MAX,			//タイヤの総数
+	};
+
 	/// @brief 接続ボーンの個別トランスフォーム情報構造体
 	struct Bone 
 	{
@@ -95,7 +112,7 @@ public:
 
 	/// @brief 着地音を鳴らすかどうかを取得する
 	/// @return 着地音を鳴らすかどうかのフラグ
-	const bool& GetLandingFlag(void) const { return isLanging_; }
+	const bool& GetLandingFlag(void) const { return isLanding_; }
 
 	/// @brief MGの発射音を鳴らすかどうかを取得する
 	/// @return MGの発射音を鳴らすかどうかのフラグ
@@ -104,7 +121,6 @@ public:
 	/// @brief 走行音を鳴らすかどうかを取得する
 	/// @return 走行音を鳴らすかどうかのフラグ
 	const bool& GetRoadFlag(void) const { return isRoadFire_; }
-
 
 	// 各武器のダメージ受け取り用関数
 
@@ -118,7 +134,6 @@ public:
 	/// @param _damage 受けたダメージ量
 	void SetWeaponMGRDamage(int _damage);
 
-
 	// ミサイルポッド
 
 	/// @brief 左ミサイルポッドのダメージを設定する
@@ -128,7 +143,6 @@ public:
 	/// @brief 右ミサイルポッドのダメージを設定する
 	/// @param _damage 受けたダメージ量
 	void SetWeaponMPRDamage(int _damage);
-
 
 	// キャノン
 
@@ -140,13 +154,11 @@ public:
 	/// @param _damage 受けたダメージ量
 	void SetWeaponCannonRDamage(int _damage);
 
-
 	// レールガン
 
 	/// @brief レールガンのダメージを設定する
 	/// @param _damage 受けたダメージ量
 	void SetWeaponRGDamage(int _damage);
-
 
 	// ボス本体へのダメージ受け取り用
 
@@ -156,35 +168,23 @@ public:
 
 	/// @brief ボスの現在HPを取得する
 	/// @return ボスの現在HP
-	int GetHP(void) const { return hp_; }
+	int GetHP(void) const { return static_cast<int>(hp_); }
 
 	/// @brief ボス本体のトランスフォームを取得する
 	/// @return ボス本体のトランスフォーム
 	Transform& GetBodyTransform(void) { return transformBody_; }
 
-
 	// プレイヤー座標
 
-	/// @brief プレイヤー1の座標を設定する
-	/// @param _playerPos プレイヤー1の座標
-	void SetPlayer1Pos(VECTOR _playerPos) { playerPos_[0] = _playerPos; }
+	/// @brief プレイヤーの座標を設定する
+	/// @param _playerPos プレイヤーの座標
+	/// @param _playerNo プレイヤーの番号
+	void SetPlayerPos(VECTOR _playerPos ,int _playerNo) { playerPos_[_playerNo] = _playerPos; }
 
-	/// @brief プレイヤー2の座標を設定する
-	/// @param _playerPos プレイヤー2の座標
-	void SetPlayer2Pos(VECTOR _playerPos) { playerPos_[1] = _playerPos; }
-
-	/// @brief プレイヤー3の座標を設定する
-	/// @param _playerPos プレイヤー3の座標
-	void SetPlayer3Pos(VECTOR _playerPos) { playerPos_[2] = _playerPos; }
-
-	/// @brief プレイヤー4の座標を設定する
-	/// @param _playerPos プレイヤー4の座標
-	void SetPlayer4Pos(VECTOR _playerPos) { playerPos_[3] = _playerPos; }
 
 	/// @brief プレイヤーの人数を設定する
 	/// @param _size プレイヤーの人数
 	void SetPlayerSize(int _size) { playerSize_ = _size; }
-
 
 	// ホスト制御
 
@@ -196,7 +196,6 @@ public:
 	/// @return ホスト制御かどうかのフラグ
 	bool GetHostControl(void) const { return isHostControl_; }
 
-
 	// ネットワーク
 
 	/// @brief 現在のボスのネットワークアクション情報を取得する
@@ -206,7 +205,6 @@ public:
 	/// @brief ネットワークからのアクション情報をボスに適用する
 	/// @param _action 受信したネットワーク用ボスアクションデータ
 	void SetNetworkAction(const NET_BOSS_ACTION& _action);
-
 
 	// メインターゲット
 
@@ -284,7 +282,7 @@ private:
 	static constexpr float INIT_ROT = 180.0f;				// ボスの初期回転角度
 
 	// 攻撃
-	static constexpr float FIRST_ATTACK_INTERVAL = 580;		// 初回攻撃までの待機時間
+	static constexpr int FIRST_ATTACK_INTERVAL = 580;		// 初回攻撃までの待機時間
 	static constexpr float MAX_ATTACK_INTERVAL = 600;		// 攻撃間隔の最大値
 	static constexpr float DOUN_ATTACK_INTERVAL = 50;		// 攻撃後の待機時間
 	static constexpr int INTERVAL_SEC = 20;					// 攻撃対象変更の間隔
@@ -299,10 +297,12 @@ private:
 	static constexpr float SOUND_RADIUS = 2000.0f;			// 音が聞こえる範囲
 
 	// エフェクト
-	static constexpr float EFFECT_PLAEY_DAMEGE = 5.0f;			// プレイヤーへのエフェクトダメージ
+
+	static constexpr float EFFECT_PLAY_DAMAGE = 5.0f;			// プレイヤーへのエフェクトダメージ
 	static constexpr VECTOR EFFECT_SCL = { 10,10,10 };			// 通常エフェクトの大きさ
 	static constexpr VECTOR EFFECT_SCL_LASER = { 35,35,35 };	// レーザーエフェクトの大きさ
-	static constexpr float EFFECT_PLAEY_SPEED = 1.0f;			// エフェクトの再生速度
+
+	static constexpr float EFFECT_PLAY_SPEED = 1.0f;			// エフェクトの再生速度
 	static constexpr VECTOR EFFECT_ROT = { 90.0f,0.0f,0.0f };	// エフェクトの回転
 	static constexpr int EFFECT_NO_ZERO = 0;					// エフェクト番号0
 	static constexpr int EFFECT_NO_ONE = 1;						// エフェクト番号1
@@ -313,7 +313,7 @@ private:
 	static constexpr float ANIM_SPEED = 20.0f;				// アニメーション再生速度
 
 	// HP
-	static constexpr int MAX_HP = 2000;						// ボスの最大HP
+	static constexpr float MAX_HP = 2000;						// ボスの最大HP
 	static constexpr float MAX_HP_HALF = MAX_HP / 2.0f;		// ボスHPの半分
 	static constexpr float WEAPON_HP_CANNON = 0.5f;			// キャノンのHP倍率
 	static constexpr float WEAPON_HP_MP = 0.7f;				// MPのHP倍率
@@ -323,8 +323,10 @@ private:
 	static constexpr float POW_JUMP_INIT = 3000.0f;					// ジャンプ初速
 	static constexpr float JUMP_MAX_POS_Y = POW_JUMP_INIT + 500.0f;	// ジャンプ上昇の最大位置
 	static constexpr float MOVE_SPEED_INIT = 20.0f;					// ジャンプ時の初期移動速度
-	static constexpr float POW_JUMP_DOUN = -50.0f;					// 落下時の初期加速度
-	static constexpr float MAX_DOUN_SPEED = -500.0f;					// 落下時の最大速度
+
+	static constexpr float POW_JUMP_DOWN = -50.0f;					// 落下時の初期加速度
+
+	static constexpr float MAX_DOWN_SPEED = -500.0f;					// 落下時の最大速度
 	static constexpr VECTOR WAVE_SCL = { 1.0f,50.0f,1.0f };			// ジャンプ波エフェクトの大きさ
 	static constexpr VECTOR WAVE_SCL_UP = { 4.0f,0.0f,4.0f };		// 上昇波エフェクトの大きさ
 	static constexpr VECTOR LANDING_SCL = { 100.0f,50.0f,100.0f };	// 着地エフェクトの大きさ
@@ -356,17 +358,29 @@ private:
 	static constexpr int JOINT_CAR_WHEEL_BACK_FRONT_R = 16;					// 後方前側右のボーン番号
 	static constexpr int JOINT_CAR_WHEEL_BACK_L = 10;						// 後輪左のボーン番号
 	static constexpr int JOINT_CAR_WHEEL_BACK_R = 14;						// 後輪右のボーン番号
-	static constexpr int JOINT_WAEAPON_MG_L = JOINT_CAR_BODY;				// 左MGのボーン番号
-	static constexpr int JOINT_WAEAPON_MG_R = 10;							// 右MGのボーン番号
-	static constexpr int JOINT_WAEAPON_CANNON_L = 6;						// 左キャノンのボーン番号
-	static constexpr int JOINT_WAEAPON_CANNON_R = JOINT_FEET_BODY;			// 右キャノンのボーン番号
-	static constexpr int JOINT_WAEAPON_MP_L = JOINT_CAR_WHEEL_BACK_FRONT_L;	// 左MPのボーン番号
-	static constexpr int JOINT_WAEAPON_MP_R = JOINT_CAR_WHEEL_BACK_R;		// 右MPのボーン番号
-	static constexpr int JOINT_WAEAPON_RG = JOINT_CAR_WHEEL_BACK_FRONT_R;	// RGのボーン番号
+
+	static constexpr int JOINT_WEAPON_MG_L = JOINT_CAR_BODY;				// 左MGのボーン番号
+	static constexpr int JOINT_WEAPON_MG_R = 10;							// 右MGのボーン番号
+	static constexpr int JOINT_WEAPON_CANNON_L = 6;						// 左キャノンのボーン番号
+	static constexpr int JOINT_WEAPON_CANNON_R = JOINT_FEET_BODY;			// 右キャノンのボーン番号
+	static constexpr int JOINT_WEAPON_MP_L = JOINT_CAR_WHEEL_BACK_FRONT_L;	// 左MPのボーン番号
+	static constexpr int JOINT_WEAPON_MP_R = JOINT_CAR_WHEEL_BACK_R;		// 右MPのボーン番号
+	static constexpr int JOINT_WEAPON_RG = JOINT_CAR_WHEEL_BACK_FRONT_R;	// RGのボーン番号
+
+	// 各車輪に対応するモデルボーン番号の定数配列
+	static constexpr int WHEEL_JOINTS[static_cast<size_t>(WHEEL_TYPE::MAX)] =
+	{
+		JOINT_CAR_WHEEL_FRONT_L,		// 前輪左のボーン番号
+		JOINT_CAR_WHEEL_FRONT_R,		// 前輪右のボーン番号
+		JOINT_CAR_WHEEL_BACK_FRONT_L,	// 後方前側左輪のボーン番号
+		JOINT_CAR_WHEEL_BACK_FRONT_R,	// 後方前側右輪のボーン番号
+		JOINT_CAR_WHEEL_BACK_L,			// 後輪左のボーン番号
+		JOINT_CAR_WHEEL_BACK_R			// 後輪右のボーン番号
+	};
 
 	// 復帰
-	static constexpr int DOWU_POS = -50;						// 落下時の復帰判定位置
-	static constexpr VECTOR POP_POS = { 0, 2000,0 };			// 復帰時の位置
+
+	static constexpr int DOWN_POS = -30;						// 落下時の復帰判定位置
 
 	// 死亡時
 	static constexpr int END_MAX_COUNT = 4;					// 死亡演出の最大カウント
@@ -378,15 +392,11 @@ private:
 	Transform transformFeet_;					// 足部分のトランスフォーム
 	Transform transformBody_;					// 体部分のトランスフォーム
 	Transform transformFeetCar_;				// 車体のトランスフォーム
-	Transform transformWheelBackL_;				// 後輪左のトランスフォーム
-	Transform transformWheelBackFrontL_;		// 後方前側左輪のトランスフォーム
-	Transform transformWheelFrontL_;			// 前輪左のトランスフォーム
-	Transform transformWheelBackR_;				// 後輪右のトランスフォーム
-	Transform transformWheelBackFrontR_;		// 後方前側右輪のトランスフォーム
-	Transform transformWheelFrontR_;			// 前輪右のトランスフォーム
+	// 6個の Transform を配列にまとめる
+	std::array<Transform, static_cast<size_t>(WHEEL_TYPE::MAX)> transformWheels_;
 
 	// ステータス
-	int hp_;								// HP
+	float hp_;								// HP
 	std::array<Bone, 7> boneId_;			// 各ボーン
 	BONE_NAME boneName_;					// ボーンの名前
 	VECTOR wallStopPos_;					// 壁に接触した位置
@@ -398,7 +408,8 @@ private:
 	int roadLockTime_;						// 体当たりのロックオン時間
 	bool roadIsAttack_;						// 体当たり攻撃中かのフラグ
 	float soundRadius_;						// 音の聞こえる範囲
-	bool isLanging_;						// 着地音を鳴らすかのフラグ
+
+	bool isLanding_;						// 着地音を鳴らすかのフラグ
 	bool isMGSoundFire_;					// MG発射音を鳴らすかのフラグ
 	bool isRoadFire_;						// 走行音を鳴らすかのフラグ
 
@@ -406,21 +417,21 @@ private:
 	int jumpCount_;							// ジャンプ回数
 	int attackCount_;						// 攻撃回数
 	int attackInterval_;					// 攻撃間隔
-	VECTOR currentWaveScl;					// 現在の波エフェクトサイズ
+	VECTOR currentWaveScl_;					// 現在の波エフェクトサイズ
 	float laserAttackRot_;					// レーザー攻撃の回転角度
 	float laserShotHp_;						// レーザー発射時のHP
 	float laserRotSpeed_;					// レーザーの回転速度
 	ATTACK_TYPE lastAttackType_;			// 前回の攻撃種類
 	ATTACK_TYPE attackSelect_;				// 現在選択中の攻撃種類
 
-	//攻撃対象情報
+	// 攻撃対象情報
 	VECTOR mainPos_;						// メインターゲットの位置
 	int mainIdx_;							// メインターゲットの番号
 	int nextChangeMainTime_;				// メインターゲット変更までの時間
 	VECTOR mpPos_;							// MPターゲットの位置
 	int mpIdx_;								// MPターゲットの番号
 	int nextChangeMpTime_;					// MPターゲット変更までの時間
-	VECTOR CannonPos_;						// キャノンターゲットの位置
+	VECTOR cannonPos_;						// キャノンターゲットの位置
 	int cannonIdx_;							// キャノンターゲットの番号
 	int nextChangeCannonTime_;				// キャノンターゲット変更までの時間
 	VECTOR playerPos_[4];					// 各プレイヤーの位置
@@ -435,6 +446,7 @@ private:
 	std::unique_ptr<WeaponMP> weaponMPR_;			// 右MPの武器ポインター
 	std::unique_ptr<WeaponRG> weaponRG_;			// RGの武器ポインター
 	std::unique_ptr<BBulletWave> wave_;				// 波攻撃のポインター
+	std::array<WeaponBase*, static_cast<size_t>(BONE_NAME::MAX)> weapons_;// 全武器の一括管理用配列
 
 	// ホストかどうか	
 	bool isHostControl_;							// ホストが操作を担当するかのフラグ
@@ -446,10 +458,12 @@ private:
 	VECTOR cameraPos_;								// 死亡演出時のカメラ位置
 
 	// ボーン初期化
-	void BoneParam(void);							// ボーン情報を初期化
+	/// @brief ボーン情報を初期化する
+	void BoneParam(void);
 
-	//ボーンアプデ
-	void UpdateBossTransform(void);					// ボーンのトランスフォームを更新
+	// ボーンアプデ
+	/// @brief ボーンのトランスフォームを更新する
+	void UpdateBossTransform(void);
 
 	// 状態
 	STATE state_;									// 現在の状態
@@ -465,8 +479,8 @@ private:
 	void ChangeState(STATE _state);
 
 	/// @brief ボスの状態を変更する
-	/// @param state 変更する状態番号
-	void ChangeState(int state);
+	/// @param _state 変更する状態番号
+	void ChangeState(int _state);
 
 	/// @brief 待機状態へ遷移する
 	void ChangeStateIdle(void);
