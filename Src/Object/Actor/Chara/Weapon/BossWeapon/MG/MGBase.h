@@ -1,16 +1,20 @@
 #pragma once
-#include "../../WeaponBase.h"
+
 #include <algorithm>
 #include <vector>
 
+#include "../../WeaponBase.h"
+
 class BBulletBase;
 
-
+/// @brief マシンガンクラス
 class MGBase : public WeaponBase
 {
 public:
 
+	/// @brief コンストラクタ
 	MGBase(void);
+	/// @brief デストラクタ
 	~MGBase(void) override = default;
 
 	/// @brief 現在攻撃中かどうかを取得する

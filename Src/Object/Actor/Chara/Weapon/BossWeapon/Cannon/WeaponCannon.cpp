@@ -1,3 +1,4 @@
+#include "WeaponCannon.h"
 #include <DxLib.h>
 #include "../../../../../../Manager/Generic/ResourceManager.h"
 #include "../../../../../../Utility/UtilityMath.h"
@@ -6,9 +7,9 @@
 #include "../../../../../Collider/ColliderLine.h"
 #include "../../../../../Collision/CollisionController.h"
 #include "../../Bullet/Boss/BBulletCannon.h"
-#include "WeaponCannon.h"
 
-WeaponCannon::WeaponCannon()
+
+WeaponCannon::WeaponCannon(void)
 	: isAttack_(false)
 	, bulletDir_(VGet(0.0f, 0.0f, 0.0f))
 	, look_(0)

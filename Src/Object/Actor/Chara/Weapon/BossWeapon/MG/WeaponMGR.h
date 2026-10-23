@@ -1,6 +1,8 @@
 #pragma once
+
 #include <memory>
 #include <vector>
+
 #include "MGBase.h"
 
 class BBulletBase;
@@ -10,7 +12,10 @@ class WeaponMGR : public MGBase
 {
 public:
 
+	/// @brief コンストラクタ
 	WeaponMGR(void);
+	
+	/// @brief デストラクタ
 	~WeaponMGR(void) override = default;
 
 	/// @brief 武器モデル・SE等のリソース読み込み処理

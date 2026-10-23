@@ -1,10 +1,11 @@
+#include "BBulletMG.h"
+
 #include <DxLib.h>
 #include "../../../../../../Utility/UtilityMath.h"
 #include "../../../../../../Manager/Generic/ResourceManager.h"
 #include "../../../../../Collider/ColliderBase.h"
 #include "../../../../../Collider/ColliderSphere.h"
 #include "../../../../../Collision/CollisionController.h"
-#include "BBulletMG.h"
 
 BBulletMG::BBulletMG(void)
 	: aliveTime_(0)

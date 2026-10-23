@@ -154,9 +154,10 @@ void MGBase::UpdateAttackEffect(void)
     effectPos_ = VAdd(transform_.pos, localRotPos);
     EffectManager::GetInstance().UpdatePos(EffectManager::EFFECT::EFFECT_MG, this, effectPos_);
 
-    Quaternion effectquaRot = Quaternion::Mult(transform_.quaRot, Quaternion::AngleAxis(UtilityMath::Deg2RadF(EFFECT_ROT_X_OFFSET), UtilityMath::AXIS_X));
 
-    VECTOR effectRot = effectquaRot.ToEuler();
+    Quaternion effectQuaRot = Quaternion::Mult(transform_.quaRot, Quaternion::AngleAxis(UtilityMath::Deg2RadF(EFFECT_ROT_X_OFFSET), UtilityMath::AXIS_X));
+
+    VECTOR effectRot = effectQuaRot.ToEuler();
     effectRot.x = UtilityMath::Rad2DegF(effectRot.x);
     effectRot.y = UtilityMath::Rad2DegF(effectRot.y);
     effectRot.z = UtilityMath::Rad2DegF(effectRot.z);
@@ -189,9 +190,10 @@ void MGBase::CreateBullets(void)
     VECTOR localRotPos = transform_.quaRot.PosAxis(muzzlePos_[muzzleCount_]);
 
     // 位置を加算して最終的なワールド座標にする
-    VECTOR bulletpos = VAdd(transform_.pos, localRotPos);
 
-    bullet->CreateBullets(bulletpos, bulletDir_, BULLET_HIT_SIZE);
+    VECTOR bulletPos = VAdd(transform_.pos, localRotPos);
+
+    bullet->CreateBullets(bulletPos, bulletDir_, BULLET_HIT_SIZE);
     bullet->Init();
     bullet->SetTransform(transform_);
 }

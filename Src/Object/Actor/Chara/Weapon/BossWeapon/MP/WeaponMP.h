@@ -1,16 +1,21 @@
 #pragma once
-#include "../../WeaponBase.h"
+
 #include <algorithm>
 #include <vector>
 
+#include "../../WeaponBase.h"
+
 class BBulletBase;
 
-
+/// @brief ボス用ミサイルポッド武装クラス
 class WeaponMP : public WeaponBase
 {
 public:
 
+	/// @brief コンストラクタ
 	WeaponMP(void);
+
+	/// @brief デストラクタ
 	~WeaponMP(void) override = default;
 
 	/// @brief 武器モデル・SE等のリソース読み込み処理

@@ -1,12 +1,13 @@
 #pragma once
+
 #include <DxLib.h>
 #include <memory>
 #include <array>
 #include <functional>
+
 #include "../CharaBase.h"
 
-class EnemyRobo :
-	public CharaBase
+class EnemyRobo :public CharaBase
 {
 public:
 
@@ -34,7 +35,8 @@ public:
 	EnemyRobo(VECTOR _pos);
 
 	/// @brief デストラクタ
-	~EnemyRobo() override;
+
+	~EnemyRobo(void) override;
 
 	/// @brief リソースロード処理
 	void Load(void) override;
@@ -49,40 +51,44 @@ public:
 
 protected:
 
-	// 大きさ、回転、座標の初期化
+	/// @brief 大きさ、回転、座標の初期化
 	void InitTransform(void) override;
 
-	// 衝突判定の初期化
+	/// @brief 衝突判定の初期化
 	void InitCollider(void) override;
 
-	// アニメーションの初期化
+	/// @brief アニメーションの初期化
 	void InitAnimation(void) override;
 
-	// 初期化後の個別処理
+	/// @brief 初期化後の個別処理
 	void InitPost(void) override;
 
-	// 更新処理
+	/// @brief 更新処理
 	void UpdateProcess(void) override;
+
+	/// @brief 更新後の後処理
 	void UpdateProcessPost(void) override;
 
-	// 描画処理
+	/// @brief 描画処理
 	void DrawPre(void) override;
 
+	/// @brief 衝突予約処理
 	void CollisionReserve(void) override {};
 
-	//ステート更新
-	STATE state_;											//現在の状態
-	int stateBase_;											//状態の基準値（数値管理用）
-	std::map<int, std::function<void(void)>> stateChanges_;	//状態遷移時の初期処理マップ
-	std::function<void(void)> stateUpdate_;					//現在の状態の更新処理関数
+	// ステート更新
+	STATE state_;											// 現在の状態
+	int stateBase_;											// 状態の基準値（数値管理用）
+	std::map<int, std::function<void(void)>> stateChanges_;	// 状態遷移時の初期処理マップ
+	std::function<void(void)> stateUpdate_;					// 現在の状態の更新処理関数
 
 	/// @brief 状態を変更する
 	/// @param _state 変更後の状態
 	void ChangeState(STATE _state);
 
 	/// @brief 状態を変更する（数値指定）
-	/// @param state 状態番号
-	void ChangeState(int state);
+	/// @param _state 状態番号
+
+	void ChangeState(int _state);
 
 	/// @brief 待機状態への遷移処理
 	void ChangeStateIdle(void);
@@ -147,7 +153,8 @@ private:
 	VECTOR playerPos_;   // ターゲットプレイヤーの現在座標
 	VECTOR moveDir_;     // 移動方向ベクトル
 	int count_;          // 死亡演出等の汎用カウントタイマー
-	bool poizun_;        // 毒状態（持続ダメージ）フラグ
+
+	bool isPoison_;        // 毒状態（持続ダメージ）フラグ
 
 	/// @brief ターゲット（プレイヤー）の方を向く処理
 	void LockPlayer(void);

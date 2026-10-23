@@ -19,6 +19,7 @@ void BBulletBase::Update(void)
 	UpdateProcess();
 
 	transform_.Update();
+
 	UpdateProcessPost();
 }
 

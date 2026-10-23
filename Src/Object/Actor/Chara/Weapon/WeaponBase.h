@@ -1,8 +1,10 @@
 #pragma once
+
 #include <memory>
 #include <array>
 #include <map>
 #include <functional>
+
 #include "../../ActorBase.h"
 #include "../../../Collider/ColliderBase.h"
 
@@ -24,11 +26,14 @@ public:
 	/// @brief ボーン情報の受け取り構造体
 	struct Bone {
 		int id = 0;						// ボーンID
-		Transform transform = {};			// ボーンを持つ対象のトランスフォーム
+		Transform transform = {};		// ボーンを持つ対象のトランスフォーム
 		VECTOR playerPos = { 0,0,0 };	// プレイヤーの位置座標
 	};
 
+	/// @brief コンストラクタ
 	WeaponBase(void);
+
+	/// @brief デストラクタ
 	virtual ~WeaponBase(void) override = default;
 
 	/// @brief 毎フレームの更新処理

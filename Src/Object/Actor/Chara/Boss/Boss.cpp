@@ -37,7 +37,7 @@ Boss::Boss(void)
 	, roadLockTime_(-1)
 	, roadIsAttack_(false)
 	, soundRadius_(SOUND_RADIUS)
-	, isLanging_(false)
+	, isLanding_(false)
 	, isMGSoundFire_(false)
 	, isRoadFire_(false)
 	, jumpCount_(0)
@@ -152,7 +152,7 @@ void Boss::SetBossDamage(int _damage)
 	hp_ -= _damage;
 
 	// ダメージが一定以上ならエフェクトを再生
-	if (_damage > EFFECT_PLAEY_DAMEGE)
+	if (_damage > EFFECT_PLAY_DAMAGE)
 	{
 		PlayEffect();
 	}
@@ -161,13 +161,13 @@ void Boss::SetBossDamage(int _damage)
 void Boss::BoneParam(void)
 {
 	// 武器のジョイントの座標を取得して、ボーンIDに登録
-	boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MGL_L)]={JOINT_WAEAPON_MG_L, transformBody_ };
-	boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MGL_R)]={ JOINT_WAEAPON_MG_R, transformBody_ };
-	boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_CANNON_L)]={JOINT_WAEAPON_CANNON_L, transformBody_ };
-	boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_CANNON_R)]={ JOINT_WAEAPON_CANNON_R, transformBody_ };
-	boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MP_L)]={JOINT_WAEAPON_MP_L, transformBody_ };
-	boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MP_R)]={ JOINT_WAEAPON_MP_R, transformBody_ };
-	boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_RG)]={JOINT_WAEAPON_RG, transformBody_ };
+	boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MGL_L)]={JOINT_WEAPON_MG_L, transformBody_ };
+	boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MGL_R)]={ JOINT_WEAPON_MG_R, transformBody_ };
+	boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_CANNON_L)]={JOINT_WEAPON_CANNON_L, transformBody_ };
+	boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_CANNON_R)]={ JOINT_WEAPON_CANNON_R, transformBody_ };
+	boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MP_L)]={JOINT_WEAPON_MP_L, transformBody_ };
+	boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_MP_R)]={ JOINT_WEAPON_MP_R, transformBody_ };
+	boneId_[static_cast<int>(BONE_NAME::WEAPON_JOINT_RG)]={JOINT_WEAPON_RG, transformBody_ };
 }
 
 void Boss::Load(void)
@@ -200,9 +200,9 @@ void Boss::Load(void)
 void Boss::PlayEffect(void)
 {
 	// 各エフェクトの再生
-	EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_BOSS_HIT, { 0,0,0 }, EFFECT_ROT, EFFECT_SCL, EFFECT_PLAEY_SPEED, this, EFFECT_NO_ONE);
-	EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_BOSS_HIT, { 0,0,0 }, { 0,0,0 }, EFFECT_SCL, EFFECT_PLAEY_SPEED, this, EFFECT_NO_TWO);
-	EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_BOSS_HIT, { 0,0,0 }, { 0,0,0 }, EFFECT_SCL, EFFECT_PLAEY_SPEED, this, EFFECT_NO_THREE);
+	EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_BOSS_HIT, { 0,0,0 }, EFFECT_ROT, EFFECT_SCL, EFFECT_PLAY_SPEED, this, EFFECT_NO_ONE);
+	EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_BOSS_HIT, { 0,0,0 }, { 0,0,0 }, EFFECT_SCL, EFFECT_PLAY_SPEED, this, EFFECT_NO_TWO);
+	EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_BOSS_HIT, { 0,0,0 }, { 0,0,0 }, EFFECT_SCL, EFFECT_PLAY_SPEED, this, EFFECT_NO_THREE);
 }
 
 void Boss::UpdateEffect(void)
@@ -210,9 +210,9 @@ void Boss::UpdateEffect(void)
 	// 各エフェクトの座標を更新
 	VECTOR hitEffectPos1= MV1GetFramePosition(transform_.modelId, JOINT_FEET_BODY);
 	EffectManager::GetInstance().UpdatePos(EffectManager::EFFECT::EFFECT_BOSS_HIT, this, hitEffectPos1, EFFECT_NO_ONE);
-	VECTOR hitEffectPos2 = MV1GetFramePosition(transformBody_.modelId, JOINT_WAEAPON_MP_L);
+	VECTOR hitEffectPos2 = MV1GetFramePosition(transformBody_.modelId, JOINT_WEAPON_MP_L);
 	EffectManager::GetInstance().UpdatePos(EffectManager::EFFECT::EFFECT_BOSS_HIT, this, hitEffectPos2, EFFECT_NO_TWO);
-	VECTOR hitEffectPos3 = MV1GetFramePosition(transformBody_.modelId, JOINT_WAEAPON_MP_R);
+	VECTOR hitEffectPos3 = MV1GetFramePosition(transformBody_.modelId, JOINT_WEAPON_MP_R);
 	EffectManager::GetInstance().UpdatePos(EffectManager::EFFECT::EFFECT_BOSS_HIT, this, hitEffectPos3, EFFECT_NO_THREE);
 
 	// 各エフェクトの回転を更新
@@ -359,7 +359,7 @@ void Boss::InitPost(void)
 	weaponMPR_->SetHp(static_cast<int>(hp_ * WEAPON_HP_MP));
 	weaponRG_->SetHp(static_cast<int>(hp_));
 
-	//ステートチェンジ関数の登録
+	// ステートチェンジ関数の登録
 	stateChanges_.emplace(static_cast<int>(STATE::IDLE),std::bind(&Boss::ChangeStateIdle, this));
 	stateChanges_.emplace(static_cast<int>(STATE::ATTACK), std::bind(&Boss::ChangeStateAttack, this));
 	stateChanges_.emplace(static_cast<int>(STATE::JUMP), std::bind(&Boss::ChangeStateJump, this));
@@ -368,7 +368,7 @@ void Boss::InitPost(void)
 	stateChanges_.emplace(static_cast<int>(STATE::LASER), std::bind(&Boss::ChangeStateLaserAttack, this));
 	stateChanges_.emplace(static_cast<int>(STATE::END), std::bind(&Boss::ChangeStateEnd, this));
 
-	//ステートの初期設定
+	// ステートの初期設定
 	ChangeState(STATE::IDLE);
 }
 
@@ -388,7 +388,7 @@ void Boss::ChangeState(int _state)
 	stateChanges_[stateBase_]();
 }
 
-//各ステイトのチェンジ関数＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝－
+// 各ステイトのチェンジ関数＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝－
 void Boss::ChangeStateIdle(void)
 {
 	stateUpdate_ = std::bind(&Boss::UpdateIdle, this);
@@ -405,7 +405,7 @@ void Boss::ChangeStateAttack(void)
 	stateUpdate_ = std::bind(&Boss::UpdateAttack, this);
 	attackCount_ = 0;
 
-	//レーザー攻撃用HPの値と最大HPの値が同じ場合は、初回のレーザー攻撃の間隔を設定する
+	// レーザー攻撃用HPの値と最大HPの値が同じ場合は、初回のレーザー攻撃の間隔を設定する
 	if (laserShotHp_ == (MAX_HP + (MAX_HP_HALF * playerSize_)))
 	{
 		attackCount_ = FIRST_ATTACK_INTERVAL;
@@ -466,7 +466,7 @@ void Boss::ChangeStateLaserAttack(void)
 	weaponRG_->ChangeState(WeaponRG::STATE::PREPARATION);
 	animation_->Play(static_cast<int>(ANIM_TYPE::JUMPBEFORE), false);
 
-	//初レーザー攻撃の回転速度を初期化
+	// 初レーザー攻撃の回転速度を初期化
 	if (laserShotHp_ != (MAX_HP + (MAX_HP_HALF * playerSize_)))
 	{
 		laserRotSpeed_ = FIRST_LASER_ROT_SPEED;
@@ -479,7 +479,7 @@ void Boss::ChangeStateEnd(void)
 
 	// 再生処理
 	animation_->Play(static_cast<int>(ANIM_TYPE::JUMPBEFORE), false);
-	EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_PLAYER_BLAST, transformBody_.pos, { 0,0,0 }, EFFECT_SCL_LASER, EFFECT_PLAEY_SPEED, this);
+	EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_PLAYER_BLAST, transformBody_.pos, { 0,0,0 }, EFFECT_SCL_LASER, EFFECT_PLAY_SPEED, this);
 	SoundManager::GetInstance().Play(SoundManager::SOUND::SE_HIT_BLAST);
 
 	for (auto* weapon : weapons_)
@@ -487,7 +487,7 @@ void Boss::ChangeStateEnd(void)
 		weapon->SetHp(0);
 	}
 }
-//===========================================================================================================================================================================================================================================================
+// ===========================================================================================================================================================================================================================================================
 
 void Boss::UpdateBossTransform(void)
 {
@@ -498,7 +498,7 @@ void Boss::UpdateBossTransform(void)
 
 	transformFeetCar_.Update();
 
-	//攻撃時タイヤの座標を各ジョイントに合わせる
+	// 攻撃時タイヤの座標を各ジョイントに合わせる
 	if (state_ == STATE::ROADATTACK)
 	{
 		UpdateWheel();
@@ -523,16 +523,15 @@ void Boss::UpdateProcess(void)
 
 	SelectTarget();
 
-	//ステー外に出たり地面貫通した際にステージ内に戻す
-	if (transform_.pos.y < DOWU_POS)
+	// ステー外に出たり地面貫通した際にステージ内に戻す
+	if (transform_.pos.y < DOWN_POS)
 	{
 		transform_.pos.y = 0;
 	}
 	
-	//死亡時ステートをENDに変更
+	// 死亡時ステートをENDに変更
 	if (hp_ <= 0)
 	{
-		
 		if (state_ != STATE::END)
 		{
 			if (isHostControl_)
@@ -546,7 +545,7 @@ void Boss::UpdateProcess(void)
 	{
 		stateUpdate_();
 
-		//MG武器の攻撃中かどうかを判定し、攻撃中であればMGの発射音を再生するフラグを立てる
+		// MG武器の攻撃中かどうかを判定し、攻撃中であればMGの発射音を再生するフラグを立てる
 		if (weaponMGL_->IsAttack() == true || weaponMGR_->IsAttack() == true)
 		{
 			if (SoundManager::GetInstance().IsPlaying(SoundManager::SOUND::SE_BOSS_MG_FIRE) == false)
@@ -556,7 +555,7 @@ void Boss::UpdateProcess(void)
 		}
 	}
 
-	isLanging_ = false;
+	isLanding_ = false;
 	isMGSoundFire_ = false;
 	isRoadFire_ = false;
 
@@ -576,7 +575,7 @@ void Boss::UpdateProcess(void)
 	wave_->SetPos(transform_.pos);
 	wave_->Update();
 
-	//カメラのロックオン追従対象に登録
+	// カメラのロックオン追従対象に登録
 	camera->SetLockOnTargets(Camera::LOCKON_TARGET::BOSS_BODY, transformBody_.pos, static_cast<int>(hp_));
 	camera->SetLockOnTargets(Camera::LOCKON_TARGET::BOSS_WEAPON_MGL_L, weaponMGL_->GetPos(), weaponMGL_->GetHp());
 	camera->SetLockOnTargets(Camera::LOCKON_TARGET::BOSS_WEAPON_MGL_R, weaponMGR_->GetPos(), weaponMGR_->GetHp());
@@ -592,17 +591,17 @@ void Boss::UpdateProcessPost(void)
 	UpdateEffect();
 }
 
-//各ステイトのアップデート関数＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝－
+// 各ステイトのアップデート関数＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝－
 void Boss::UpdateIdle(void)
 {
 	transformBody_.pos = MV1GetFramePosition(transform_.modelId, JOINT_FEET_BODY);
 	LookPlayer();
 	attackCount_++;
-	//現在HPがレーザー攻撃HP以下で、攻撃間隔が経過している場合はレーザー攻撃ステートに変更する
+	// 現在HPがレーザー攻撃HP以下で、攻撃間隔が経過している場合はレーザー攻撃ステートに変更する
 	if (hp_ <= laserShotHp_ && attackCount_ >= attackInterval_)
 	{
 		ChangeState(STATE::LASER);
-		//レーザー攻撃HPの値を変更する
+		// レーザー攻撃HPの値を変更する
 		if (laserShotHp_== (MAX_HP + (MAX_HP_HALF * playerSize_)))
 		{
 			laserShotHp_ = (MAX_HP + (MAX_HP_HALF * playerSize_)) / HALF;
@@ -618,7 +617,7 @@ void Boss::UpdateIdle(void)
 			laserShotHp_ = -MAX_HP_HALF;
 		}
 	}
-	//攻撃間隔が経過している場合は攻撃ステートに変更する
+	// 攻撃間隔が経過している場合は攻撃ステートに変更する
 	else if (attackCount_ >= attackInterval_)
 	{
 		ChangeState(STATE::ATTACK);
@@ -630,22 +629,18 @@ void Boss::UpdateAttack(void)
 	LookPlayer();
 	transformBody_.pos = MV1GetFramePosition(transform_.modelId, JOINT_FEET_BODY);
 
-	//攻撃タイプをランダムで選択する
-	if (static_cast<int>(ATTACK_TYPE::MAX) > 1)
+	// 攻撃タイプをランダムで選択する
+// 前回と同じ攻撃タイプが選択されないようにするためのループ
+	do
 	{
-		//前回と同じ攻撃タイプが選択されないようにするためのループ
-		do
-		{
-			int randomAttack = static_cast<int>(UtilityMath::RandRangeF(0.0f, static_cast<float>(ATTACK_TYPE::MAX)));
-			 attackSelect_ = static_cast<ATTACK_TYPE>(randomAttack);
-		} 
-		
-		while (attackSelect_ == lastAttackType_); 
-	}
+		int randomAttack = static_cast<int>(UtilityMath::RandRangeF(0.0f, static_cast<float>(ATTACK_TYPE::MAX)));
+		attackSelect_ = static_cast<ATTACK_TYPE>(randomAttack);
+	} 
+	while (attackSelect_ == lastAttackType_);
 
 	lastAttackType_ = attackSelect_;
 
-	//攻撃タイプに応じてそれぞれのステートを変更する
+	// 攻撃タイプに応じてそれぞれのステートを変更する
 	switch (attackSelect_)
 	{
 	case ATTACK_TYPE::JUMP:
@@ -653,12 +648,10 @@ void Boss::UpdateAttack(void)
 		break;
 
 	case ATTACK_TYPE::MG:
-
 		if (weaponMGL_->GetIsAlive() == true)
 		{
 			weaponMGL_->ChangeState(WeaponMGL::STATE::ATTACKWINDUP);
 		}
-		
 		if (weaponMGR_->GetIsAlive() == true)
 		{
 			weaponMGR_->ChangeState(WeaponMGR::STATE::ATTACKWINDUP);
@@ -673,12 +666,10 @@ void Boss::UpdateAttack(void)
 		break;
 
 	case ATTACK_TYPE::CANNON:
-
 		if (weaponCannonL_->GetIsAlive() == true)
 		{
 			weaponCannonL_->ChangeState(WeaponCannon::STATE::ATTACK);
 		}
-
 		if (weaponCannonR_->GetIsAlive() == true)
 		{
 			weaponCannonR_->ChangeState(WeaponCannon::STATE::ATTACK);
@@ -688,13 +679,11 @@ void Boss::UpdateAttack(void)
 		break;
 
 	case ATTACK_TYPE::MISSILE:
-
 		if (weaponMPL_->GetIsAlive() == true)
 		{
 			weaponMPL_->ChangeState(WeaponMP::STATE::ATTACK);
 			weaponMPL_->IsLR(true);
 		}
-
 		if (weaponMPR_->GetIsAlive() == true)
 		{
 			weaponMPR_->ChangeState(WeaponMP::STATE::ATTACK);
@@ -726,27 +715,27 @@ void Boss::UpdateJump(void)
 	LookPlayer();
 	transformBody_.pos = MV1GetFramePosition(transform_.modelId, JOINT_FEET_BODY);
 
-	//ジャンプ中の処理
+	// ジャンプ中の処理
 	if (!isJump_)
 	{
-		//着地したら、衝撃波攻撃を発動させ波のエフェクトを再生する
+		// 着地したら、衝撃波攻撃を発動させ波のエフェクトを再生する
 		wave_->SetIsAttack(true);
-		isLanging_ = true;
+		isLanding_ = true;
 		currentWaveScl_ = WAVE_SCL;
 		transform_.pos.y = 0;
-		EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_WAVE, transform_.pos, currentWaveScl_, LANDING_SCL, EFFECT_PLAEY_SPEED,this);
-		EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_LANDING, transform_.pos, { 0.0f,0.0f,0.0f }, LANDING_SCL, EFFECT_PLAEY_SPEED,this);
+		EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_WAVE, transform_.pos, currentWaveScl_, LANDING_SCL, EFFECT_PLAY_SPEED,this);
+		EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_LANDING, transform_.pos, { 0.0f,0.0f,0.0f }, LANDING_SCL, EFFECT_PLAY_SPEED,this);
 		ChangeState(STATE::IDLE);
 	}
 	else if (isJump_)
 	{
-		//ジャンプの高さが最大値に達したら、ジャンプの力を下げる
+		// ジャンプの高さが最大値に達したら、ジャンプの力を下げる
 		if (transform_.pos.y >= JUMP_MAX_POS_Y)
 		{
-			jumpPow_ = POW_JUMP_DOUN;
+			jumpPow_ = POW_JUMP_DOWN;
 		}
-		//ジャンプ上昇処理
-		if (jumpPow_ >= POW_JUMP_DOUN)
+		// ジャンプ上昇処理
+		if (jumpPow_ >= POW_JUMP_DOWN)
 		{
 			VECTOR movePow = VScale(jumpDir_, speed_);
 			transform_.pos = VAdd(transform_.pos, movePow);
@@ -759,7 +748,7 @@ void Boss::UpdateRoadAttack(void)
 	SoundManager::GetInstance().Set3DPosition(SoundManager::SOUND::SE_BOSS_ROAD, transform_.pos);
 	
 	transformBody_.pos = MV1GetFramePosition(transform_.modelId, JOINT_CAR_BODY);
-	//車体の向きをプレイヤーに向ける
+	// 車体の向きをプレイヤーに向ける
 	if (!roadIsAttack_)
 	{
 		LookPlayer();
@@ -767,7 +756,7 @@ void Boss::UpdateRoadAttack(void)
 		roadLockTime_++;
 		
 		transform_.quaRot = transformFeetCar_.quaRot;
-		//攻撃の再開処理
+		// 攻撃の再開処理
 		if (roadLockTime_ >= MAX_ROAD_LOCK_TIME)
 		{
 			roadLockTime_ = 0;
@@ -775,7 +764,7 @@ void Boss::UpdateRoadAttack(void)
 			CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::ROAD_ATTACK, true);
 		}
 	}
-	//攻撃中の移動と場外に出るのを回避する処理
+	// 攻撃中の移動と場外に出るのを回避する処理
 	if (roadIsAttack_)
 	{
 		isRoadFire_ = true;
@@ -811,7 +800,7 @@ void Boss::UpdateRoadAttack(void)
 		}
 	}
 
-	//攻撃回数が最大値に達したら、突進攻撃を終了し、通常状態に戻す
+	// 攻撃回数が最大値に達したら、突進攻撃を終了し、通常状態に戻す
 	if (roadCount_ >= MAX_ROAD_COUNT)
 	{
 		transform_.modelId = transformFeet_.modelId;
@@ -825,11 +814,11 @@ void Boss::UpdateRoadAttack(void)
 void Boss::UpdateStateLaserAttack(void)
 {
 	transformBody_.pos = MV1GetFramePosition(transform_.modelId, JOINT_FEET_BODY);
-	//レーザー攻撃中の回転処理
+	// レーザー攻撃中の回転処理
 	if (weaponRG_->GetIsAttack() == true)
 	{
 		laserAttackRot_ += laserRotSpeed_;
-		//レーザー攻撃の回転が最大値に達したら、レーザー攻撃を終了し、通常状態に戻す
+		// レーザー攻撃の回転が最大値に達したら、レーザー攻撃を終了し、通常状態に戻す
 		if (laserAttackRot_ >= LASER_MAX_ROT)
 		{
 			laserAttackRot_ = 0.0f;
@@ -845,10 +834,10 @@ void Boss::UpdateStateLaserAttack(void)
 void Boss::UpdateEnd(void)
 {
 
-	//死亡演出をするための処理
+	// 死亡演出をするための処理
 	if (endCount_ >= END_MAX_COUNT)
 	{
-		//死亡演出のための胴体の移動処理
+		// 死亡演出のための胴体の移動処理
 		speed_ = MOVE_SPEED;
 		VECTOR movePow = VScale(roadDir_, speed_);
 		transformBody_.pos = VAdd(transformBody_.pos, movePow);
@@ -891,7 +880,7 @@ void Boss::DrawPre(void)
 #endif
 }
 
-//機能関数
+// 機能関数
 void Boss::LookPlayer(void)
 {
 	// 突進「中」は、すでに決まった `roadDir_` に向かって進むので、振り向かない
@@ -900,7 +889,7 @@ void Boss::LookPlayer(void)
 		return;
 	}
 
-	//プレイヤーに向く処理
+	// プレイヤーに向く処理
 	mainPos_ = playerPos_[mainIdx_];
 	VECTOR moveDir = VSub(mainPos_, transformBody_.pos);
 	moveDir.y = 0.0f;
@@ -924,20 +913,20 @@ void Boss::SelectTarget(void)
 
 	if (isHostControl_)
 	{
-		//胴体が向くプレイヤーのランダム選択
+		// 胴体が向くプレイヤーのランダム選択
 		float gameTime = TimeManager::GetInstance().GetGameTime();
 		if (static_cast<int>(gameTime) >= nextChangeMainTime_)
 		{
 			mainIdx_ = std::rand() % playerSize_;
 			nextChangeMainTime_ = static_cast<int>(gameTime) + INTERVAL_SEC;
 		}
-		//MP武器が攻撃するプレイヤーのランダム選択
+		// MP武器が攻撃するプレイヤーのランダム選択
 		if (static_cast<int>(gameTime) >= nextChangeMpTime_)
 		{
 			mpIdx_ = std::rand() % playerSize_;
 			nextChangeMpTime_ = static_cast<int>(gameTime) + INTERVAL_SEC_MP;
 		}
-		//Cannon武器が攻撃するプレイヤーのランダム選択
+		// Cannon武器が攻撃するプレイヤーのランダム選択
 		if (static_cast<int>(gameTime) >= nextChangeCannonTime_)
 		{
 			cannonIdx_ = std::rand() % playerSize_;
@@ -1038,13 +1027,13 @@ void Boss::SetNetworkAction(const NET_BOSS_ACTION& _action)
 
 	hp_ = static_cast<float>(_action.bossHp);
 
-	const int difference = PREV_HP - static_cast<int>(hp_);
+	int difference = PREV_HP - static_cast<int>(hp_);
 
 	transform_.pos = _action.pos;
 
 	transformBody_.quaRot = _action.rot;
 
-	if (difference > EFFECT_PLAEY_DAMEGE)
+	if (difference > EFFECT_PLAY_DAMAGE)
 	{
 		PlayEffect();
 	}
@@ -1125,8 +1114,8 @@ void Boss::SetNetworkAction(const NET_BOSS_ACTION& _action)
 			if (static_cast<STATE>(_action.animId) == STATE::IDLE)
 			{
 				currentWaveScl_ = WAVE_SCL;
-				EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_WAVE, transform_.pos, currentWaveScl_, LANDING_SCL, EFFECT_PLAEY_SPEED, this);
-				EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_LANDING, transform_.pos, { 0.0f, 0.0f, 0.0f }, LANDING_SCL, EFFECT_PLAEY_SPEED, this);
+				EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_WAVE, transform_.pos, currentWaveScl_, LANDING_SCL, EFFECT_PLAY_SPEED, this);
+				EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_LANDING, transform_.pos, { 0.0f, 0.0f, 0.0f }, LANDING_SCL, EFFECT_PLAY_SPEED, this);
 
 				// クライアント側でも衝撃波の当たり判定を有効にする
 				wave_->SetIsAttack(true);

@@ -1,8 +1,9 @@
+#include "BBulletWave.h"
+
 #include <DxLib.h>
 #include "../../../../../Collider/ColliderSphere.h"
 #include "../../../../../Collider/ColliderBase.h"
 #include "../../../../../Collision/CollisionController.h"
-#include "BBulletWave.h"
 
 BBulletWave::BBulletWave(const Transform& _transform)
 	: BBulletBase()

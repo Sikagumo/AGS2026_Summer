@@ -1,9 +1,11 @@
+C++
+#include "WeaponBase.h"
+
 #include <DxLib.h>
 #include "../../../../Application.h"
 #include "../../../../Utility/UtilityMath.h"
 #include "../../../../Manager/System/TimeManager.h"
 #include "../../../Collision/CollisionController.h"
-#include "WeaponBase.h"
 
 WeaponBase::WeaponBase(void)
 	: hp_(500)

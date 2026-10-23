@@ -1,9 +1,11 @@
+#include "EffectManager.h"
+
+#include <algorithm>
 #include "EffekseerForDXLib.h"
+
 #include "../../Application.h"
 #include "../Generic/ResourceManager.h"
 #include "../../Utility/UtilityMath.h"
-#include "EffectManager.h"
-#include <algorithm>
 
 // 静的メンバ変数の実体定義
 EffectManager* EffectManager::instance_ = nullptr;
@@ -37,8 +39,9 @@ void EffectManager::Initialize(void)
     effect_.clear();
     playingList_.clear();
 
-	//エフェクトデータのロードと登録
+    // エフェクトデータのロードと登録
     EFFECT_DATA wave = EFFECT_DATA();
+
     wave.Data = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::EFFECT_WAVE);
     effect_[EFFECT::EFFECT_WAVE] = wave;
 
@@ -96,9 +99,7 @@ void EffectManager::Play(const EFFECT _effect, const VECTOR _pos, const VECTOR _
     if (playHandle != -1)
     {
         SetPosPlayingEffekseer3DEffect(playHandle, it->second.pos.x, it->second.pos.y, it->second.pos.z);
-
         SetRotationPlayingEffekseer3DEffect(playHandle, UtilityMath::Deg2RadD(it->second.rot.x), UtilityMath::Deg2RadD(it->second.rot.y), UtilityMath::Deg2RadD(it->second.rot.z));
-
         SetScalePlayingEffekseer3DEffect(playHandle, it->second.scl.x, it->second.scl.y, it->second.scl.z);
         SetSpeedPlayingEffekseer3DEffect(playHandle, it->second.speed);
 
@@ -116,18 +117,16 @@ bool EffectManager::IsPlaying(EFFECT _effect, const void* _owner, int _tag)
     // 再生中のエフェクトリストから対象のエフェクトを検索する
     for (const auto& active : playingList_)
     {
-        // 所有者と識別タグが一致するエフェクトかを判定する
-        if (active.owner == _owner && active.tag == _tag)
+        // 所有者、タグ、エフェクトIDが一致しないなら次へ（ハズレは飛ばす）
+        if (active.owner != _owner || active.tag != _tag || active.effectId != _effect)
         {
-            // エフェクトIDが一致するかを判定する
-            if (active.effectId == _effect)
-            {
-                // エフェクトが現在も再生中（戻り値が0）であるかを判定する
-                if (IsEffekseer3DEffectPlaying(active.playHandle) == 0)
-                {
-                    return true;
-                }
-            }
+            continue;
+        }
+
+        // エフェクトが現在も再生中か判定
+        if (IsEffekseer3DEffectPlaying(active.playHandle) == 0)
+        {
+            return true;
         }
     }
     return false;

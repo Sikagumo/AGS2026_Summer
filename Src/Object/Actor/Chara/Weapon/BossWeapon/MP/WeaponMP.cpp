@@ -1,3 +1,5 @@
+#include "WeaponMP.h"
+
 #include <DxLib.h>
 #include "../../../../../../Manager/Generic/ResourceManager.h"
 #include "../../../../../../Utility/UtilityMath.h"
@@ -5,9 +7,7 @@
 #include "../../../../../Collider/ColliderSphere.h"
 #include "../../../../../Collider/ColliderLine.h"
 #include "../../../../../Collision/CollisionController.h"
-
 #include "../../Bullet/Boss/BBulletMissile.h"
-#include "WeaponMP.h"
 
 WeaponMP::WeaponMP(void)
 	: isLR_(false)
@@ -167,9 +167,10 @@ void WeaponMP::CreateBullets(void)
 	std::shared_ptr<BBulletBase> bullet = GetValidBullet();
 
 	VECTOR localRotPos = transform_.quaRot.PosAxis(muzzlePos_[muzzleCount_]);
-	VECTOR bulletpos = VAdd(transform_.pos, localRotPos);
 
-	bullet->CreateBullets(bulletpos, bulletDir_, ATTACK_RADIUS);
+	VECTOR bulletPos = VAdd(transform_.pos, localRotPos);
+
+	bullet->CreateBullets(bulletPos, bulletDir_, ATTACK_RADIUS);
 	bullet->Init();
 	bullet->SetTransform(transform_);
 	bullet->SetPlayerPos(bone_.playerPos);

@@ -1,16 +1,20 @@
 #pragma once
+
 #include <memory>
+
 #include "../../WeaponBase.h"
 
 class BBulletLaser;
 
-
+/// @brief ボス用レールガン武装クラス
 class WeaponRG : public WeaponBase
 {
 public:
 
+	/// @brief 繧ｳ繝ｳ繧ｹ繝医Λ繧ｯ繧ｿ
 	WeaponRG(void);
 
+	/// @brief 繝・せ繝医Λ繧ｯ繧ｿ
 	~WeaponRG(void) override = default;
 
 	/// @brief 武器モデル等のリソース読み込み処理

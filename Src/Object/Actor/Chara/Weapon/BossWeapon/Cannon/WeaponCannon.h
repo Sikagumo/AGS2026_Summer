@@ -1,16 +1,21 @@
 #pragma once
-#include "../../WeaponBase.h"
+
 #include <algorithm>
 #include <memory>
 #include <vector>
 
+#include "../../WeaponBase.h"
+
 class BBulletBase;
 
 
+/// @brief キャノンクラス
 class WeaponCannon : public WeaponBase
 {
 public:
-	WeaponCannon();
+	/// @brief コンストラクタ
+	WeaponCannon(void);
+	/// @brief デストラクタ
 	~WeaponCannon(void) override = default;
 
 	/// @brief 描画用リソースのロード処理

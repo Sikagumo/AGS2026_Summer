@@ -1,3 +1,4 @@
+#include "EnemyRobo.h"
 #include "../../../../Manager/Generic/ResourceManager.h"
 #include "../../../../Manager/Generic/InputManager.h"
 #include "../../../../Manager/Generic/SceneManager.h"
@@ -14,10 +15,10 @@
 #include "../../../Collider/ColliderLine.h"
 #include "../../../Collider/ColliderSphere.h"
 #include "../../../Collision/CollisionController.h"
-#include "EnemyRobo.h"
+
 
 EnemyRobo::EnemyRobo(VECTOR _pos)
-	: poizun_(false)
+	: isPoison_(false)
 	, hp_(MAX_HP)
 	, playerPos_({ 0.0f, 0.0f, 0.0f })
 	, moveDir_({ 0.0f, 0.0f, 0.0f })
@@ -29,7 +30,7 @@ EnemyRobo::EnemyRobo(VECTOR _pos)
 	transform_.pos = _pos;
 }
 
-EnemyRobo::~EnemyRobo()
+EnemyRobo::~EnemyRobo(void)
 {
 }
 
@@ -80,7 +81,7 @@ void EnemyRobo::InitCollider(void)
 void EnemyRobo::InitAnimation(void)
 {
 	CharaBase::InitAnimation();
-	//アニメーションの追加
+	// アニメーションの追加
 	for (int i = 0; i < static_cast<int>(ANIM_TYPE::MAX); i++)
 	{
 		animation_->AddInternal(i, ANIM_OFFSET, ANIM_SPEED);
@@ -101,7 +102,7 @@ void EnemyRobo::InitPost(void)
 
 void EnemyRobo::UpdateProcess(void)
 {
-	//死亡時に状態をENDに変更する
+	// 死亡時に状態をENDに変更する
 	if (hp_ <= 0)
 	{
 		if (state_ != STATE::END)
@@ -111,7 +112,7 @@ void EnemyRobo::UpdateProcess(void)
 	}
 	else if (hp_ > 0)
 	{
-		//攻撃判定にプレイヤーが入ったら攻撃状態に変更する
+		// 攻撃判定にプレイヤーが入ったら攻撃状態に変更する
 		bool isAttack = CollisionController::GetInstance().IsActorCollidingWithTag(this, ColliderBase::TAG::PLAYER);
 		if (isAttack == true)
 		{
@@ -120,8 +121,6 @@ void EnemyRobo::UpdateProcess(void)
 				ChangeState(STATE::ATTACK);
 			}
 		}
-		
-
 	}
 
 	Damage();
@@ -165,9 +164,10 @@ void EnemyRobo::ChangeState(STATE _state)
 	EnemyRobo::ChangeState(state);
 }
 
-void EnemyRobo::ChangeState(int state)
+
+void EnemyRobo::ChangeState(int _state)
 {
-	stateBase_ = state;
+	stateBase_ = _state;
 	// 各状態遷移の初期処理
 	stateChanges_[stateBase_]();
 }
@@ -185,7 +185,7 @@ void EnemyRobo::ChangeStateAttack(void)
 
 	CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::ENEMY_ATTACK, true);
 
-	//経過時間による攻撃アニメーションの切り替え
+	// 経過時間による攻撃アニメーションの切り替え
 	float time = TimeManager::GetInstance().GetGameTime();
 	if ((static_cast<int>(time) % ATTACK_ANIM_DIVISOR) == 0)
 	{
@@ -216,10 +216,11 @@ void EnemyRobo::ChangeStateEnd(void)
 
 void EnemyRobo::UpdateIdle(void)
 {
-	bool isJunp = CollisionController::GetInstance().IsActorCollidingWithTag(this, ColliderBase::TAG::STAGE);
+	
+	bool isJump = CollisionController::GetInstance().IsActorCollidingWithTag(this, ColliderBase::TAG::STAGE);
 	if (isJump_ == true)
 	{
-		if (isJunp == true)
+		if (isJump == true)
 		{
 			isJump_ = false;
 			transform_.pos.y = 0;
@@ -229,7 +230,7 @@ void EnemyRobo::UpdateIdle(void)
 	}
 	else
 	{
-		if (isJunp == true)
+		if (isJump == true)
 		{
 			
 			ChangeState(STATE::MOVE);
@@ -278,7 +279,7 @@ void EnemyRobo::UpdateEnd(void)
 
 void EnemyRobo::LockPlayer(void)
 {
-	//プレイヤーの座標を取得して、敵の向きをプレイヤーの方向に向ける
+	// プレイヤーの座標を取得して、敵の向きをプレイヤーの方向に向ける
 	VECTOR moveDir = VSub(playerPos_, transform_.pos);
 	moveDir.y = 0.0f;
 	moveDir = VNorm(moveDir);
@@ -298,10 +299,10 @@ void EnemyRobo::Damage(void)
 
 	if (CollisionController::GetInstance().IsActorCollidingWithTag(this, ColliderBase::TAG::PLAYER_RECOVERY))
 	{
-		poizun_ = true; 
+		isPoison_ = true; 
 	}
 
-	if (poizun_)
+	if (isPoison_)
 	{
 		hp_ -= POISON_DAMAGE;
 	}

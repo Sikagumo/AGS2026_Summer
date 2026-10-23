@@ -1,4 +1,8 @@
+#include "WeaponMGR.h"
+
 #include <DxLib.h>
+#include <algorithm>
+
 #include "../../../../../../Manager/Generic/ResourceManager.h"
 #include "../../../../../../Manager/Decoration/SoundManager.h"
 #include "../../../../../../Utility/UtilityMath.h"
@@ -7,7 +11,6 @@
 #include "../../../../../Collider/ColliderLine.h"
 #include "../../../../../Collision/CollisionController.h"
 #include "../../Bullet/Boss/BBulletMG.h"
-#include "WeaponMGR.h"
 
 WeaponMGR::WeaponMGR(void)
 	: MGBase()

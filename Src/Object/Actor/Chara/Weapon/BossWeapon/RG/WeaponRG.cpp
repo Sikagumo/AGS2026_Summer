@@ -1,3 +1,5 @@
+#include "WeaponRG.h"
+
 #include <DxLib.h>
 #include "../../../../../../Manager/Generic/ResourceManager.h"
 #include "../../../../../../Utility/UtilityMath.h"
@@ -7,7 +9,6 @@
 #include "../../../../../Collider/ColliderLine.h"
 #include "../../../../../Collision/CollisionController.h"
 #include "../../Bullet/Boss/BBulletLaser.h"
-#include "WeaponRG.h"
 
 WeaponRG::WeaponRG(void)
 	: WeaponBase()

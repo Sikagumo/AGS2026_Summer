@@ -1,13 +1,27 @@
 #pragma once
+
 #include <DxLib.h>
 #include <unordered_map>
 #include <vector>
 #include <mutex>
+
 #include "../../Utility/UtilityMath.h"
 
 class EffectManager
 {
 public:
+	// （中略）
+
+	/// @brief インスタンスを明示的に生成
+	static void CreateInstance(void);
+
+	/// @brief インスタンス取得
+	/// @return EffectControllerインスタンスの参照
+	static EffectManager& GetInstance(void);
+
+	/// @brief 初期化処理
+	void Initialize(void);
+
 	/// @brief 個別エフェクトの識別子
 	enum class EFFECT
 	{
@@ -26,6 +40,7 @@ public:
 		EFFECT_PLAYER_POISON,
 
 	};
+
 	/// @brief エフェクトのリソースデータ構造体
 	/// @brief エフェクト発生時のパラメータ設定構造体
 	struct EFFECT_DATA
@@ -48,7 +63,6 @@ public:
 
 
 	/// @brief インスタンスを明示的に生成
-	/// @param void 
 	static void CreateInstance(void);
 
 	/// @brief インスタンス取得
@@ -56,7 +70,6 @@ public:
 	static EffectManager& GetInstance(void);
 
 	/// @brief 初期化処理
-	/// @param void 
 	void Initialize(void);
 
 	/// @brief 3Dエフェクトの再生

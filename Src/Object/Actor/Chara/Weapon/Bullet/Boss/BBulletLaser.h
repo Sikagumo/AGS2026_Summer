@@ -1,4 +1,5 @@
 #pragma once
+
 #include "BBulletBase.h"
 
 /// @brief ボス用レーザー弾クラス
@@ -6,8 +7,10 @@ class BBulletLaser : public BBulletBase
 {
 public:
 
+	/// @brief コンストラクタ
 	BBulletLaser(void);
 
+	/// @brief デストラクタ
 	~BBulletLaser(void) override;
 
 	/// @brief リソースの読み込み
