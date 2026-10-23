@@ -20,7 +20,6 @@
 #include "../Weapon/BossWeapon/MG/WeaponMGR.h"
 #include "../Weapon/BossWeapon/MP/WeaponMP.h"
 #include "../Weapon/BossWeapon/RG/WeaponRG.h"
-#include "../Weapon/WeaponBase.h"
 #include "../Weapon/BossWeapon/Cannon/WeaponCannon.h"
 #include "../Weapon/Bullet/Boss/BBulletWave.h"
 
@@ -576,13 +575,13 @@ void Boss::UpdateProcess(void)
 
 	// ƒJƒƒ‰‚ÌƒƒbƒNƒIƒ“’Ç]‘ÎÛ‚É“o˜^
 	camera->SetLockOnTargets(Camera::LOCKON_TARGET::BOSS_BODY, transformBody_.pos, static_cast<int>(hp_));
-	camera->SetLockOnTargets(Camera::LOCKON_TARGET::BOSS_WEAPON_MGL_L, weaponMGL_->GetPos(), weaponMGL_->GetHp());
-	camera->SetLockOnTargets(Camera::LOCKON_TARGET::BOSS_WEAPON_MGL_R, weaponMGR_->GetPos(), weaponMGR_->GetHp());
-	camera->SetLockOnTargets(Camera::LOCKON_TARGET::BOSS_WEAPON_CANNON_L, weaponCannonL_->GetPos(), weaponCannonL_->GetHp());
-	camera->SetLockOnTargets(Camera::LOCKON_TARGET::BOSS_WEAPON_CANNON_R, weaponCannonR_->GetPos(), weaponCannonR_->GetHp());
-	camera->SetLockOnTargets(Camera::LOCKON_TARGET::BOSS_WEAPON_MP_L, weaponMPL_->GetPos(), weaponMPL_->GetHp());
-	camera->SetLockOnTargets(Camera::LOCKON_TARGET::BOSS_WEAPON_MP_R, weaponMPR_->GetPos(), weaponMPR_->GetHp());
-	camera->SetLockOnTargets(Camera::LOCKON_TARGET::BOSS_WEAPON_RG, weaponRG_->GetPos(), weaponRG_->GetHp());
+	camera->SetLockOnTargets(Camera::LOCKON_TARGET::BOSS_MACHINE_GUN_L, weaponMGL_->GetPos(), weaponMGL_->GetHp());
+	camera->SetLockOnTargets(Camera::LOCKON_TARGET::BOSS_MACHINE_GUN_R, weaponMGR_->GetPos(), weaponMGR_->GetHp());
+	camera->SetLockOnTargets(Camera::LOCKON_TARGET::BOSS_CANNON_L, weaponCannonL_->GetPos(), weaponCannonL_->GetHp());
+	camera->SetLockOnTargets(Camera::LOCKON_TARGET::BOSS_CANNON_R, weaponCannonR_->GetPos(), weaponCannonR_->GetHp());
+	camera->SetLockOnTargets(Camera::LOCKON_TARGET::BOSS_MISSILE_POD_L, weaponMPL_->GetPos(), weaponMPL_->GetHp());
+	camera->SetLockOnTargets(Camera::LOCKON_TARGET::BOSS_MISSILE_POD_R, weaponMPR_->GetPos(), weaponMPR_->GetHp());
+	camera->SetLockOnTargets(Camera::LOCKON_TARGET::BOSS_RAIL_GUN, weaponRG_->GetPos(), weaponRG_->GetHp());
 }
 
 void Boss::UpdateProcessPost(void)

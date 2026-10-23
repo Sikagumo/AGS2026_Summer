@@ -72,9 +72,6 @@ protected:
 	/// @brief 描画処理
 	void DrawPre(void) override;
 
-	/// @brief 衝突予約処理
-	void CollisionReserve(void) override {};
-
 	// ステート更新
 	STATE state_;											// 現在の状態
 	int stateBase_;											// 状態の基準値（数値管理用）
