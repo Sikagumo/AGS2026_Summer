@@ -10,18 +10,7 @@
 class EffectManager
 {
 public:
-	// （中略）
-
-	/// @brief インスタンスを明示的に生成
-	static void CreateInstance(void);
-
-	/// @brief インスタンス取得
-	/// @return EffectControllerインスタンスの参照
-	static EffectManager& GetInstance(void);
-
-	/// @brief 初期化処理
-	void Initialize(void);
-
+	
 	/// @brief 個別エフェクトの識別子
 	enum class EFFECT
 	{

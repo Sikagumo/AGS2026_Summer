@@ -1,4 +1,3 @@
-C++
 #include "WeaponBase.h"
 
 #include <DxLib.h>
