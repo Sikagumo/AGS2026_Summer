@@ -50,23 +50,23 @@ void MGBase::LookPlayer(void)
 
     // クオータニオンを作成してボスの回転と合成
     targetAngleRad = UtilityMath::Deg2RadF(targetAngleDeg);
-    Quaternion quaRot = Quaternion::AngleAxis(-targetAngleRad, UtilityMath::AXIS_X);
+    Quaternion quaRot = Quaternion::CreateAngleAxis(-targetAngleRad, UtilityMath::AXIS_X);
 
-    quaRot = Quaternion::Mult(quaRot, Quaternion::AngleAxis((targetAngleRad * look_), UtilityMath::AXIS_Y));
+    quaRot = Quaternion::Multiply(quaRot, Quaternion::CreateAngleAxis((targetAngleRad * look_), UtilityMath::AXIS_Y));
 
-    transform_.quaRot = Quaternion::Mult(bone_.transform.quaRot, quaRot);
+    transform_.quaRot = Quaternion::Multiply(bone_.transform.quaRot, quaRot);
 
     Quaternion bulletRot = transform_.quaRot;
 
     // 発射向きのランダム化（マジックナンバーを定数化）
     float randDirX = UtilityMath::RandRangeF(RAND_DIR_MIN, RAND_DIR_MAX);
-    bulletRot = Quaternion::Mult(bulletRot, Quaternion::AngleAxis(UtilityMath::Deg2RadF(randDirX), UtilityMath::AXIS_X));
+    bulletRot = Quaternion::Multiply(bulletRot, Quaternion::CreateAngleAxis(UtilityMath::Deg2RadF(randDirX), UtilityMath::AXIS_X));
     float randDirY = UtilityMath::RandRangeF(RAND_DIR_MIN, RAND_DIR_MAX);
-    bulletRot = Quaternion::Mult(bulletRot, Quaternion::AngleAxis(UtilityMath::Deg2RadF(randDirY), UtilityMath::AXIS_Y));
+    bulletRot = Quaternion::Multiply(bulletRot, Quaternion::CreateAngleAxis(UtilityMath::Deg2RadF(randDirY), UtilityMath::AXIS_Y));
 
     // 発射方向の計算
     VECTOR forward = VGet(0.0f, 0.0f, 1.0f);
-    MATRIX rotationMatrix = Quaternion::ToMatrix(bulletRot);
+    MATRIX rotationMatrix = Quaternion::ConvertToMatrix(bulletRot);
     VECTOR bulletDir = VTransformSR(forward, rotationMatrix);
     bulletDir_ = VNorm(bulletDir);
 }
@@ -148,16 +148,16 @@ void MGBase::UpdateAttack(void)
 void MGBase::UpdateAttackEffect(void)
 {
     // ローカル座標を回転させてワールド座標へ変換
-    VECTOR localRotPos = transform_.quaRot.PosAxis(muzzlePos_[1]);
+    VECTOR localRotPos = transform_.quaRot.RotatePosition(muzzlePos_[1]);
 
     // 位置を加算して最終的なワールド座標にする
     effectPos_ = VAdd(transform_.pos, localRotPos);
     EffectManager::GetInstance().UpdatePos(EffectManager::EFFECT::EFFECT_MG, this, effectPos_);
 
 
-    Quaternion effectQuaRot = Quaternion::Mult(transform_.quaRot, Quaternion::AngleAxis(UtilityMath::Deg2RadF(EFFECT_ROT_X_OFFSET), UtilityMath::AXIS_X));
+    Quaternion effectQuaRot = Quaternion::Multiply(transform_.quaRot, Quaternion::CreateAngleAxis(UtilityMath::Deg2RadF(EFFECT_ROT_X_OFFSET), UtilityMath::AXIS_X));
 
-    VECTOR effectRot = effectQuaRot.ToEuler();
+    VECTOR effectRot = effectQuaRot.ConvertToEuler();
     effectRot.x = UtilityMath::Rad2DegF(effectRot.x);
     effectRot.y = UtilityMath::Rad2DegF(effectRot.y);
     effectRot.z = UtilityMath::Rad2DegF(effectRot.z);
@@ -187,7 +187,7 @@ void MGBase::CreateBullets(void)
     std::shared_ptr<BBulletBase> bullet = GetValidBullet();
 
     // ローカル座標を回転させてワールド座標へ変換
-    VECTOR localRotPos = transform_.quaRot.PosAxis(muzzlePos_[muzzleCount_]);
+    VECTOR localRotPos = transform_.quaRot.RotatePosition(muzzlePos_[muzzleCount_]);
 
     // 位置を加算して最終的なワールド座標にする
 

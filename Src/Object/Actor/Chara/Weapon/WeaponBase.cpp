@@ -60,7 +60,7 @@ void WeaponBase::SetBone(int _id, const Transform& _trans, ColliderBase::TAG _ta
 const VECTOR WeaponBase::GetPos(void) const
 {
 	// ローカル座標を回転させてワールド座標へ変換
-	VECTOR localRotPos = transform_.quaRot.PosAxis(localPos_);
+	VECTOR localRotPos = transform_.quaRot.RotatePosition(localPos_);
 
 	// 位置を加算して最終的なワールド座標にする
 	return VAdd(transform_.pos, localRotPos);

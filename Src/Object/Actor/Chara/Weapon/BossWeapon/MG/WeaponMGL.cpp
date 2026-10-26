@@ -31,7 +31,7 @@ void WeaponMGL::InitTransform(void)
 {
 	transform_.scl = WEAPON_SIZE;
 	transform_.quaRot = bone_.transform.quaRot;
-	transform_.quaRotLocal = Quaternion::AngleAxis(UtilityMath::Deg2RadF(WEAPON_ROT), UtilityMath::AXIS_Y);
+	transform_.quaRotLocal = Quaternion::CreateAngleAxis(UtilityMath::Deg2RadF(WEAPON_ROT), UtilityMath::AXIS_Y);
 
 	transform_.pos = MV1GetFramePosition(bone_.transform.modelId, bone_.id);
 	transform_.Update();

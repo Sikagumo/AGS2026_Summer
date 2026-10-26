@@ -62,26 +62,26 @@ void Stage::InitTransform(void)
 	// スカイドーム初期化
 	constexpr float SKYDOME_SCALE = 150.0f;
 	skyDome_.InitTransform(SKYDOME_SCALE,
-		Quaternion::Identity(), Quaternion::Identity());
+		Quaternion::GetIdentity(), Quaternion::GetIdentity());
 
 	// 描画用ステージ
 	constexpr float SCALE = 0.425f;
 	constexpr VECTOR LOCAL_POS = { 0.0f, 10.0f, 0.0f };
 	VECTOR localPos = LOCAL_POS;
 	viewTrans_.InitTransform(SCALE,
-		Quaternion::Identity(), Quaternion::Identity(),
+		Quaternion::GetIdentity(), Quaternion::GetIdentity(),
 		localPos);
 
 	// 当たり判定用ステージ
 	constexpr float COLLISION_POS_Y = -117.5f;
 	localPos.y += COLLISION_POS_Y;
 	transform_.InitTransform(SCALE,
-		Quaternion::Identity(), Quaternion::Identity(),
+		Quaternion::GetIdentity(), Quaternion::GetIdentity(),
 		localPos);
 
 	// 木の位置
 	treePosModel_.InitTransform(SCALE,
-		Quaternion::Identity(), Quaternion::Identity(),
+		Quaternion::GetIdentity(), Quaternion::GetIdentity(),
 		localPos);
 
 	
@@ -95,7 +95,7 @@ void Stage::InitTransform(void)
 		pos.y = TREE_POS_Y;
 
 		treesFront_.at(i)->GetTransform().InitTransform(TREE_SCALE
-			, Quaternion::Identity(), Quaternion::AngleAxis(UtilityMath::Deg2RadF(rot), UtilityMath::AXIS_Y)
+			, Quaternion::GetIdentity(), Quaternion::CreateAngleAxis(UtilityMath::Deg2RadF(rot), UtilityMath::AXIS_Y)
 			, pos);
 	}
 	
@@ -109,7 +109,7 @@ void Stage::InitTransform(void)
 		pos.y = TREE_POS_Y;
 
 		treesBack_.at(i).InitTransform(TREE_SCALE
-			, Quaternion::Identity(), Quaternion::AngleAxis(UtilityMath::Deg2RadF(rot), UtilityMath::AXIS_Y)
+			, Quaternion::GetIdentity(), Quaternion::CreateAngleAxis(UtilityMath::Deg2RadF(rot), UtilityMath::AXIS_Y)
 			, pos);
 	}
 }
@@ -173,7 +173,7 @@ void Stage::InitPost(void)
 		pos.y = TREE_POS_Y;
 
 		treesFront_.at(i)->GetTransform().InitTransform(TREE_SCALE
-			, Quaternion::Identity(), Quaternion::AngleAxis(UtilityMath::Deg2RadF(rot), UtilityMath::AXIS_Y)
+			, Quaternion::GetIdentity(), Quaternion::CreateAngleAxis(UtilityMath::Deg2RadF(rot), UtilityMath::AXIS_Y)
 			, pos);
 	}
 }

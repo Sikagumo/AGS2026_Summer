@@ -28,8 +28,8 @@ void BBulletCannon::ReleasePost(void)
 void BBulletCannon::InitTransform(void)
 {
 	transform_.scl = BULLET_SCALE;
-	transform_.quaRot = Quaternion::Identity();
-	transform_.quaRotLocal = Quaternion::AngleAxis(UtilityMath::Deg2RadF(INIT_ROT), UtilityMath::AXIS_Y);
+	transform_.quaRot = Quaternion::GetIdentity();
+	transform_.quaRotLocal = Quaternion::CreateAngleAxis(UtilityMath::Deg2RadF(INIT_ROT), UtilityMath::AXIS_Y);
 	transform_.Update();
 }
 

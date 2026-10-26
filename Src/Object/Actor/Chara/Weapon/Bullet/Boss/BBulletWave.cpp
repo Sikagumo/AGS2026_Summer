@@ -32,8 +32,8 @@ void BBulletWave::SetPos(VECTOR _pos)
 void BBulletWave::InitTransform(void)
 {
 	transform_.scl = bossTransform_.scl;
-	transform_.quaRot = Quaternion::Identity();
-	transform_.quaRotLocal = Quaternion::Identity();
+	transform_.quaRot = Quaternion::GetIdentity();
+	transform_.quaRotLocal = Quaternion::GetIdentity();
 	transform_.pos = bossTransform_.pos;
 	transform_.Update();
 }

@@ -51,7 +51,7 @@ Camera::Camera(void)
 	, followTransform_(nullptr)
 	, mode_(MODE::NONE)
 	, angles_(UtilityMath::VECTOR_ZERO)
-	, rotY_(Quaternion::Identity())
+	, rotY_(Quaternion::GetIdentity())
 	, targetPos_(UtilityMath::VECTOR_ZERO)
 	, prePos_(UtilityMath::VECTOR_ZERO)
 	, isLockOn_(false)
@@ -357,7 +357,7 @@ void Camera::SetDefault(void)
 
 	// カメラ角
 	angles_ = DERFAULT_ANGLES;
-	transform_.quaRot = Quaternion::Identity();
+	transform_.quaRot = Quaternion::GetIdentity();
 
 	// 注視点
 	targetPos_ = UtilityMath::VECTOR_ZERO;
@@ -369,7 +369,7 @@ void Camera::SyncFollow(void)
 	VECTOR pos = followTransform_->pos;
 
 	// Y軸
-	rotY_ = Quaternion::AngleAxis(angles_.y, UtilityMath::AXIS_Y);
+	rotY_ = Quaternion::CreateAngleAxis(angles_.y, UtilityMath::AXIS_Y);
 
 	if (isLockOn_) 
 	{
@@ -382,15 +382,15 @@ void Camera::SyncFollow(void)
 		// XZ平面に投影（Y成分を無視）してY軸回転角を求める
 		float yAngle = atan2(toTarget.x, toTarget.z);
 
-		rotY_ = Quaternion::AngleAxis(yAngle, UtilityMath::AXIS_Y);
+		rotY_ = Quaternion::CreateAngleAxis(yAngle, UtilityMath::AXIS_Y);
 	}
 	
 	// Y軸 + X軸
-	transform_.quaRot = rotY_.Mult(Quaternion::AngleAxis(angles_.x, UtilityMath::AXIS_X));
+	transform_.quaRot = rotY_.Multiply(Quaternion::CreateAngleAxis(angles_.x, UtilityMath::AXIS_X));
 
 	
 	// 注視点
-	VECTOR localPos = transform_.quaRot.PosAxis(FOLLOW_TARGET_LOCAL_POS);
+	VECTOR localPos = transform_.quaRot.RotatePosition(FOLLOW_TARGET_LOCAL_POS);
 	VECTOR newTarget = VAdd(pos, localPos);
 
 
@@ -404,7 +404,7 @@ void Camera::SyncFollow(void)
 	// カメラ位置
 	const VECTOR LOCAL_POS = ((isLockOn_) ? FOLLOW_LOCAL_POS_LOCKON : FOLLOW_LOCAL_POS);
 	VECTOR scaledLocalPos = VScale(LOCAL_POS, followDistScale_);
-	localPos = transform_.quaRot.PosAxis(scaledLocalPos);
+	localPos = transform_.quaRot.RotatePosition(scaledLocalPos);
 	VECTOR newCamPos = VAdd(pos, localPos);
 
     // イージング中は EasingChangeTarget() で補間、完了後はそのまま代入
@@ -423,7 +423,7 @@ void Camera::SyncFollow(void)
 void Camera::SyncAngleYFromRotY(void)
 {
 	// rotY_が示す前方ベクトルをXZ平面上で求める
-	VECTOR forward = rotY_.PosAxis(UtilityMath::DIR_FORWARD);
+	VECTOR forward = rotY_.RotatePosition(UtilityMath::DIR_FORWARD);
 
 	// atan2でY軸角度を逆算し、angles_.yに書き戻す
 	angles_.y = atan2f(forward.x, forward.z);
@@ -446,13 +446,13 @@ void Camera::SetBeforeDrawFree(void)
 	ProcessMove();
 
 	// Y軸
-	rotY_ = Quaternion::AngleAxis(angles_.y, UtilityMath::AXIS_Y);
+	rotY_ = Quaternion::CreateAngleAxis(angles_.y, UtilityMath::AXIS_Y);
 
 	// Y軸 + X軸
-	transform_.quaRot = rotY_.Mult(Quaternion::AngleAxis(angles_.x, UtilityMath::AXIS_X));
+	transform_.quaRot = rotY_.Multiply(Quaternion::CreateAngleAxis(angles_.x, UtilityMath::AXIS_X));
 
 	// 注視点更新
-	targetPos_ = VAdd(transform_.pos, transform_.quaRot.PosAxis(FOLLOW_TARGET_LOCAL_POS));
+	targetPos_ = VAdd(transform_.pos, transform_.quaRot.RotatePosition(FOLLOW_TARGET_LOCAL_POS));
 }
 
 void Camera::SetBeforeDrawFollowPlayer(void)
@@ -519,16 +519,16 @@ void Camera::SetBeforeDrawFollowBoss(void)
 	VECTOR pos = followTransform_->pos;
 	angles_ = DERFAULT_ANGLES;
 	// Y軸
-	rotY_ = Quaternion::AngleAxis(angles_.y, UtilityMath::AXIS_Y);
+	rotY_ = Quaternion::CreateAngleAxis(angles_.y, UtilityMath::AXIS_Y);
 
 	// 注視点
-	VECTOR localPos = transform_.quaRot.PosAxis(FOLLOW_TARGET_LOCAL_POS);
+	VECTOR localPos = transform_.quaRot.RotatePosition(FOLLOW_TARGET_LOCAL_POS);
 	VECTOR newTarget = VAdd(pos, localPos);
 
 	// カメラ位置
 	const VECTOR LOCAL_POS = (BOSS_CAMERA_POS);
 	VECTOR scaledLocalPos = VScale(LOCAL_POS, followDistScale_);
-	localPos = transform_.quaRot.PosAxis(scaledLocalPos);
+	localPos = transform_.quaRot.RotatePosition(scaledLocalPos);
 	VECTOR newCamPos = VAdd(pos, localPos);
 
 	if (easingTerm_ < 1.0f)
@@ -554,7 +554,7 @@ void Camera::ProcessMove(void)
 	if (!UtilityMath::EqualsVZero(moveDir))
 	{
 		// 現在の向きからの進行方向を取得
-		VECTOR direction = UtilityMath::VNormalize((transform_.quaRot.PosAxis(moveDir)));
+		VECTOR direction = UtilityMath::VNormalize((transform_.quaRot.RotatePosition(moveDir)));
 
 		// 移動させたい方向に移動量をかける(=移動量)
 		VECTOR movePow = VScale(direction, CAMERA_MOVE_SPEED);

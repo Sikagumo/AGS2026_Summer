@@ -25,7 +25,7 @@ void ColliderBase::Draw(void) const
 VECTOR ColliderBase::TransformLocalToWorld(const VECTOR& _localPos) const
 {
 	// ローカル座標を回転させてワールド座標へ変換
-	VECTOR localRotPos = followTarget_->quaRot.PosAxis(_localPos);
+	VECTOR localRotPos = followTarget_->quaRot.RotatePosition(_localPos);
 
 	// 位置を加算して最終的なワールド座標にする
 	return VAdd(followTarget_->pos, localRotPos);

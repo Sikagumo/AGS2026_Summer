@@ -29,10 +29,10 @@ void WeaponCannon::Load(void)
 void WeaponCannon::InitTransform(void)
 {
 	transform_.scl = WEAPON_SIZE;
-	transform_.quaRot = Quaternion::Identity();
+	transform_.quaRot = Quaternion::GetIdentity();
 	transform_.quaRotLocal =
-		Quaternion::Mult(transform_.quaRotLocal,
-			Quaternion::AngleAxis(UtilityMath::Deg2RadF(WEAPON_ROT), UtilityMath::AXIS_Y));
+		Quaternion::Multiply(transform_.quaRotLocal,
+			Quaternion::CreateAngleAxis(UtilityMath::Deg2RadF(WEAPON_ROT), UtilityMath::AXIS_Y));
 	transform_.pos = MV1GetFramePosition(bone_.transform.modelId, bone_.id);
 	transform_.Update();
 }
@@ -111,7 +111,7 @@ void WeaponCannon::LookPlayer(void)
 
 	// Y軸計算
 	float targetAngleYRad = atan2(moveDir.x, moveDir.z);
-	Quaternion rotY = Quaternion::AngleAxis(targetAngleYRad, UtilityMath::AXIS_Y);
+	Quaternion rotY = Quaternion::CreateAngleAxis(targetAngleYRad, UtilityMath::AXIS_Y);
 
 	// X軸計算と制限
 	float horizontalDistance = sqrtf(moveDir.z * moveDir.z + moveDir.x * moveDir.x);
@@ -121,17 +121,17 @@ void WeaponCannon::LookPlayer(void)
 	targetAngleXDeg = std::clamp(targetAngleXDeg, LIMIT_MIN_ANGLE, LIMIT_MAX_ANGLE);
 
 	float clampedAngleXRad = UtilityMath::Deg2RadF(targetAngleXDeg);
-	Quaternion rotX = Quaternion::AngleAxis(-clampedAngleXRad, UtilityMath::AXIS_X);
+	Quaternion rotX = Quaternion::CreateAngleAxis(-clampedAngleXRad, UtilityMath::AXIS_X);
 
 	// 合成
-	Quaternion localRot = Quaternion::Mult(rotY, rotX);
+	Quaternion localRot = Quaternion::Multiply(rotY, rotX);
 	transform_.quaRot = localRot;
 
 	Quaternion bulletRot = transform_.quaRot;
 
 	// 発射方向の計算
 	VECTOR forward = VGet(0.0f, 0.0f, 1.0f);
-	MATRIX rotationMatrix = Quaternion::ToMatrix(bulletRot);
+	MATRIX rotationMatrix = Quaternion::ConvertToMatrix(bulletRot);
 	VECTOR bulletDir = VTransformSR(forward, rotationMatrix);
 	bulletDir_ = VNorm(bulletDir);
 }
@@ -192,7 +192,7 @@ void WeaponCannon::CreateBullets(void)
 	std::shared_ptr<BBulletBase> bullet = GetValidBullet();
 
 	// ローカル座標を回転させてワールド座標へ変換
-	VECTOR localRotPos = transform_.quaRot.PosAxis(CAPSULE_START_POS);
+	VECTOR localRotPos = transform_.quaRot.RotatePosition(CAPSULE_START_POS);
 
 	// 位置を加算して最終的なワールド座標にする
 	VECTOR bulletPos = VAdd(transform_.pos, localRotPos);

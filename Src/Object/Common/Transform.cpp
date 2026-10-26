@@ -14,8 +14,8 @@ Transform::Transform(void)
 	matScl(MGetIdent()),
 	matRot(MGetIdent()),
 	matPos(MGetIdent()),
-	quaRot(Quaternion().Identity()),
-	quaRotLocal(Quaternion().Identity())
+	quaRot(Quaternion().GetIdentity()),
+	quaRotLocal(Quaternion().GetIdentity())
 
 {
 }
@@ -27,8 +27,8 @@ void Transform::Update(void)
 	matScl = MGetScale(scl);
 
 	// 回転
-	rot = quaRot.ToEuler();
-	matRot = quaRot.ToMatrix();
+	rot = quaRot.ConvertToEuler();
+	matRot = quaRot.ConvertToMatrix();
 
 	// 位置
 	matPos = MGetTranslate(VAdd(pos, localPos));
@@ -36,8 +36,8 @@ void Transform::Update(void)
 	// 行列の合成
 	MATRIX mat = MGetIdent();
 	mat = MMult(mat, matScl);
-	Quaternion q = quaRot.Mult(quaRotLocal);
-	mat = MMult(mat, q.ToMatrix());
+	Quaternion q = quaRot.Multiply(quaRotLocal);
+	mat = MMult(mat, q.ConvertToMatrix());
 	mat = MMult(mat, matPos);
 
 	// 行列をモデルに判定
@@ -120,7 +120,7 @@ void Transform::InitTransform(float _scl, const Quaternion& _rot, const Quaterni
 void Transform::InitTransform(void)
 {
 	InitTransform(UtilityMath::VECTOR_ONE,
-				  Quaternion::Identity(), Quaternion::Identity(),
+				  Quaternion::GetIdentity(), Quaternion::GetIdentity(),
 				  UtilityMath::VECTOR_ZERO);
 }
 
@@ -141,12 +141,12 @@ void Transform::Translate(const VECTOR& _dir, float _movePow)
 
 void Transform::Rotate(const Quaternion& rot)
 {
-	quaRot = Quaternion::Mult(quaRot, rot);
+	quaRot = Quaternion::Multiply(quaRot, rot);
 	Update();
 }
 void Transform::Rotate(const VECTOR& _axis, float _pow)
 {
-	Quaternion qua = Quaternion::AngleAxis(_pow, _axis);
+	Quaternion qua = Quaternion::CreateAngleAxis(_pow, _axis);
 	Rotate(qua);
 }
 
@@ -193,5 +193,5 @@ VECTOR Transform::GetDown(void) const
 
 VECTOR Transform::GetDir(const VECTOR& dir) const
 {
-	return quaRot.PosAxis(dir);
+	return quaRot.RotatePosition(dir);
 }

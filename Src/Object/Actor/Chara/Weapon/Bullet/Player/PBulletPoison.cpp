@@ -32,7 +32,7 @@ void PBulletPoison::Load(void)
 void PBulletPoison::InitTransform(void)
 {
 	transform_.InitTransform(SCALE_POISON
-		, transform_.quaRot, Quaternion::Identity());
+		, transform_.quaRot, Quaternion::GetIdentity());
 }
 
 void PBulletPoison::UpdatePost(void)
@@ -104,7 +104,7 @@ void PBulletPoison::BlastAction(void)
 		.SetCollisionActive(this, ColliderBase::TAG::PLAYER_BLAST, true);
 
 	EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_PLAYER_POISON,
-		transform_.pos, Quaternion::Identity().ToEuler(),
+		transform_.pos, Quaternion::GetIdentity().ConvertToEuler(),
 		{ 35.0f , 35.0f, 35.0f }, 1.0f, this);
 
 	SoundManager::GetInstance().Play(SoundManager::SOUND::SE_PBULLET_POISON);

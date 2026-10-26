@@ -30,10 +30,10 @@ void WeaponMGR::ReleasePost(void)
 void WeaponMGR::InitTransform(void)
 {
 	transform_.scl = WEAPON_SIZE;
-	transform_.quaRot = Quaternion::Mult(transform_.quaRot,
-		Quaternion::AngleAxis(UtilityMath::Deg2RadF(WEAPON_ROT), UtilityMath::AXIS_Y));
-	transform_.quaRotLocal = Quaternion::Mult(transform_.quaRotLocal,
-		Quaternion::AngleAxis(UtilityMath::Deg2RadF(WEAPON_ROT), UtilityMath::AXIS_Y));
+	transform_.quaRot = Quaternion::Multiply(transform_.quaRot,
+		Quaternion::CreateAngleAxis(UtilityMath::Deg2RadF(WEAPON_ROT), UtilityMath::AXIS_Y));
+	transform_.quaRotLocal = Quaternion::Multiply(transform_.quaRotLocal,
+		Quaternion::CreateAngleAxis(UtilityMath::Deg2RadF(WEAPON_ROT), UtilityMath::AXIS_Y));
 
 	transform_.pos = MV1GetFramePosition(bone_.transform.modelId, bone_.id);
 	transform_.Update();

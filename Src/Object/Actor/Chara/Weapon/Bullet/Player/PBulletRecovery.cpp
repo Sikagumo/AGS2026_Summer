@@ -30,7 +30,7 @@ void PBulletRecovery::Load(void)
 void PBulletRecovery::InitTransform(void)
 {
 	transform_.InitTransform(SCALE_RECOVERY
-		, transform_.quaRot, Quaternion::Identity());
+		, transform_.quaRot, Quaternion::GetIdentity());
 }
 
 void PBulletRecovery::InitPost(void)
@@ -118,6 +118,6 @@ void PBulletRecovery::BlastAction(void)
 
 
 	EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_PLAYER_RECOVERY,
-		transform_.pos, Quaternion::Identity().ToEuler(),
+		transform_.pos, Quaternion::GetIdentity().ConvertToEuler(),
 		{ 35.0f , 35.0f, 35.0f }, 1.0f, this);
 }

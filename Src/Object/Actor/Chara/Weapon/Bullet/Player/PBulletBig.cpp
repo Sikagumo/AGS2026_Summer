@@ -36,7 +36,7 @@ void PBulletBig::Load(void)
 
 void PBulletBig::InitTransform(void)
 {
-	transform_.InitTransform(SCALE_BIG, transform_.quaRot, Quaternion::Identity());
+	transform_.InitTransform(SCALE_BIG, transform_.quaRot, Quaternion::GetIdentity());
 }
 
 void PBulletBig::UpdatePost(void)

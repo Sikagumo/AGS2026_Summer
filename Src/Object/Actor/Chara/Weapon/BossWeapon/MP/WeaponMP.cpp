@@ -34,8 +34,8 @@ void WeaponMP::Load(void)
 void WeaponMP::InitTransform(void)
 {
 	transform_.scl = WEAPON_SIZE;
-	transform_.quaRot = Quaternion::Identity();
-	transform_.quaRotLocal = Quaternion::Identity();
+	transform_.quaRot = Quaternion::GetIdentity();
+	transform_.quaRotLocal = Quaternion::GetIdentity();
 
 	transform_.pos = MV1GetFramePosition(bone_.transform.modelId, bone_.id);
 	transform_.Update();
@@ -166,7 +166,7 @@ void WeaponMP::CreateBullets(void)
 {
 	std::shared_ptr<BBulletBase> bullet = GetValidBullet();
 
-	VECTOR localRotPos = transform_.quaRot.PosAxis(muzzlePos_[muzzleCount_]);
+	VECTOR localRotPos = transform_.quaRot.RotatePosition(muzzlePos_[muzzleCount_]);
 
 	VECTOR bulletPos = VAdd(transform_.pos, localRotPos);
 

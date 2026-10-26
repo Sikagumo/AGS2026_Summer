@@ -42,8 +42,8 @@ void EnemyRobo::Load(void)
 void EnemyRobo::InitTransform(void)
 {
 	transform_.scl = INIT_SCALE;
-	transform_.quaRot = Quaternion::Identity();
-	transform_.quaRotLocal = Quaternion::AngleAxis(UtilityMath::Deg2RadF(INIT_ROT_Y), UtilityMath::AXIS_Y);
+	transform_.quaRot = Quaternion::GetIdentity();
+	transform_.quaRotLocal = Quaternion::CreateAngleAxis(UtilityMath::Deg2RadF(INIT_ROT_Y), UtilityMath::AXIS_Y);
 
 	transform_.Update();
 
@@ -244,8 +244,8 @@ void EnemyRobo::UpdateAttack(void)
 	VECTOR worldOffset = VSub(handPos, transform_.pos);
 
 	// ワールド回転を打ち消してローカル空間に戻す
-	Quaternion invRot = transform_.quaRot.Inverse();
-	VECTOR handLocalPos = invRot.PosAxis(worldOffset);
+	Quaternion invRot = transform_.quaRot.CalculateInverse();
+	VECTOR handLocalPos = invRot.RotatePosition(worldOffset);
 
 	CollisionController::GetInstance().SetActorSphereLocalPos(this, ColliderBase::TAG::ENEMY_ATTACK, handLocalPos);
 
@@ -284,7 +284,7 @@ void EnemyRobo::LockPlayer(void)
 	moveDir = VNorm(moveDir);
 	moveDir_ = moveDir;
 	float targetAngle = atan2(moveDir.x, moveDir.z);
-	transform_.quaRot = Quaternion::AngleAxis(targetAngle, UtilityMath::AXIS_Y);
+	transform_.quaRot = Quaternion::CreateAngleAxis(targetAngle, UtilityMath::AXIS_Y);
 }
 
 void EnemyRobo::Damage(void)

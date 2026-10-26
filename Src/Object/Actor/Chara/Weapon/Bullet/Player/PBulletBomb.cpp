@@ -25,7 +25,7 @@ void PBulletBomb::Load(void)
 void PBulletBomb::InitTransform(void)
 {
 	transform_.InitTransform(SCALE_BOMB
-		, transform_.quaRot, Quaternion::Identity());
+		, transform_.quaRot, Quaternion::GetIdentity());
 }
 
 
@@ -91,6 +91,6 @@ void PBulletBomb::BlastAction(void)
 
 
 	EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_PLAYER_BLAST,
-		transform_.pos, Quaternion::Identity().ToEuler(),
+		transform_.pos, Quaternion::GetIdentity().ConvertToEuler(),
 		{ 35.0f , 35.0f, 35.0f }, 1.0f, this);
 }

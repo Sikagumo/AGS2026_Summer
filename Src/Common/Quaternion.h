@@ -190,8 +190,8 @@ public:
 	// @param endQuaternion 終了
 	// @param ratio 補間率
 	// @return 補間結果
-	static Quaternion CalculateSlerpUnclamped(Quaternion startQuaternion, 
-		Quaternion endQuaternion, float ratio);
+	static Quaternion CalculateSlerpUnclamped(Quaternion _startQuaternion, 
+		Quaternion _endQuaternion, float _ratio);
 
 	// @brief 単位クォータニオン
 	// @return 回転なし
@@ -212,27 +212,27 @@ public:
 	// @brief 角度と軸に分解
 	// @param angle 出力角度
 	// @param axis 出力軸
-	void ConvertToAngleAxis(float* angle, VECTOR* axis);
+	void ConvertToAngleAxis(float* _angle, VECTOR* _axis);
 
 	// @brief スカラー乗算（破壊）
 	// @param rightValue 値
 	// @return 結果
-	Quaternion operator*(float& rightValue);
+	Quaternion operator*(float& _rightValue);
 
 	// @brief スカラー乗算（非破壊）
 	// @param rightValue 値
 	// @return 結果
-	const Quaternion operator*(const float& rightValue);
+	const Quaternion operator*(const float& _rightValue);
 
 	// @brief 加算（破壊）
 	// @param rightValue 相手
 	// @return 結果
-	Quaternion operator+(Quaternion& rightValue);
+	Quaternion operator+(Quaternion& _rightValue);
 
 	// @brief 加算（非破壊）
 	// @param rightValue 相手
 	// @return 結果
-	const Quaternion operator+(const Quaternion& rightValue);
+	const Quaternion operator+(const Quaternion& _rightValue);
 
 private:
 

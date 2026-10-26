@@ -19,7 +19,7 @@ void SkyDome::Load(void)
 void SkyDome::InitTransform(void)
 {
 	transform_.InitTransform(SCALE,
-							 Quaternion::Identity(), Quaternion::AngleAxis(180.0f, UtilityMath::AXIS_Y),
+							 Quaternion::GetIdentity(), Quaternion::CreateAngleAxis(180.0f, UtilityMath::AXIS_Y),
 							 UtilityMath::VECTOR_ZERO);
 }
 void SkyDome::InitCollider(void)

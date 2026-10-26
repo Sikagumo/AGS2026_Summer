@@ -325,8 +325,8 @@ void Player::InitAnimation(void)
 void Player::InitTransform(void)
 {
 	transform_.InitTransform(MODEL_SCALE
-		, Quaternion::Identity()
-		, Quaternion::AngleAxis(UtilityMath::Deg2RadF(LOCAL_ROT_Y), UtilityMath::AXIS_Y)
+		, Quaternion::GetIdentity()
+		, Quaternion::CreateAngleAxis(UtilityMath::Deg2RadF(LOCAL_ROT_Y), UtilityMath::AXIS_Y)
 		, START_POS, VGet(0.0f, LOCAL_POS_Y, 0.0f));
 
 	transform_.Update();
@@ -719,7 +719,7 @@ void Player::ProcessMove(void)
 		movePow_ = UtilityMath::VECTOR_ZERO;
 
 		// ˆÚ“®•ûŒü‚ğæ“¾
-		moveDir_ = Quaternion::PosAxis(cameraRot, direction);
+		moveDir_ = Quaternion::RotatePosition(cameraRot, direction);
 		moveDir_.y = 0.0f;
 
 		// ‰Á‘¬“x‚ÉŠ„‚è“–‚Ä
@@ -1196,7 +1196,7 @@ void Player::UpdateBullets(void)
 
 void Player::DelayRotate(void)
 {
-	Quaternion goalRot = Quaternion::Identity();
+	Quaternion goalRot = Quaternion::GetIdentity();
 
 	// ƒƒbƒNƒIƒ“—LŒøAƒJƒƒ‰•ûŒü‚É‰ñ“]
 	isCameraRotActive_ = SceneManager::GetInstance().GetCamera()->GetIsLockOn();
@@ -1205,20 +1205,20 @@ void Player::DelayRotate(void)
 	{
 		// ƒJƒƒ‰‚ÌY²‰ñ“]‚ğ‰ñ“]‚É•ÏŠ·‚·‚é
 		goalRot = SceneManager::GetInstance().GetCamera()->GetQuaRotY();
-		goalRot.x = 0.0f;
-		moveDir_ = Quaternion::PosAxis(goalRot, UtilityMath::DIR_FORWARD);
+		goalRot.x_ = 0.0f;
+		moveDir_ = Quaternion::RotatePosition(goalRot, UtilityMath::DIR_FORWARD);
 	}
 	else if (!UtilityMath::EqualsVZero(moveDir_))
 	{
 		// ˆÚ“®•ûŒü‚©‚ç‰ñ“]‚É•ÏŠ·‚·‚é
-		goalRot = Quaternion::LookRotation(moveDir_);
+		goalRot = Quaternion::CreateLookRotation(moveDir_);
 	}
 
 
 	constexpr float ROT_DELAY_TERM = 0.2f;
 
 	// ‰ñ“]‚Ì•âŠÔ
-	transform_.quaRot = Quaternion::Slerp(transform_.quaRot, goalRot, ROT_DELAY_TERM);
+	transform_.quaRot = Quaternion::CalculateSlerp(transform_.quaRot, goalRot, ROT_DELAY_TERM);
 }
 
 
@@ -1346,10 +1346,10 @@ void Player::CreateCluster(void)
 	{
 		// —Ö‚ÌŠgUŠp“x
 		const float CONE_ANGLE = (CONE_ANGLE_MAX / static_cast<float>(RING_NUM - 1) * static_cast<float>(ring));
-		const Quaternion CONE_ROT = Quaternion::AngleAxis(UtilityMath::Deg2RadF(CONE_ANGLE), rightAxis);
+		const Quaternion CONE_ROT = Quaternion::CreateAngleAxis(UtilityMath::Deg2RadF(CONE_ANGLE), rightAxis);
 
 		// ‘O•ûŒü‚ğŒX‚¯‚é
-		const VECTOR TILED_DIR = Quaternion::PosAxis(CONE_ROT, FORWARD_DIR);
+		const VECTOR TILED_DIR = Quaternion::RotatePosition(CONE_ROT, FORWARD_DIR);
 
 
 		// Šp“x‚ğ•ÏX‚µ‚Ä‚¢‚­’l
@@ -1359,10 +1359,10 @@ void Player::CreateCluster(void)
 		{
 			// Šp“x
 			float azimuth = AZIMUTH_STEP * static_cast<float>(circle);
-			const Quaternion azimuthRot = Quaternion::AngleAxis(UtilityMath::Deg2RadF(azimuth), FORWARD_DIR);
+			const Quaternion azimuthRot = Quaternion::CreateAngleAxis(UtilityMath::Deg2RadF(azimuth), FORWARD_DIR);
 
 			// •úËó‚É”­Ë‚·‚é‚æ‚¤‚É•ûŒü‚ğ’²®
-			VECTOR shotDir = UtilityMath::VNormalize(Quaternion::PosAxis(azimuthRot, TILED_DIR));
+			VECTOR shotDir = UtilityMath::VNormalize(Quaternion::RotatePosition(azimuthRot, TILED_DIR));
 
 
 			// ŠeŠgU’e‚ğ¶¬

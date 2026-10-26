@@ -31,13 +31,13 @@ void WeaponRG::Load(void)
 void WeaponRG::InitTransform(void)
 {
 	transform_.scl = WEAPON_SIZE;
-	transform_.quaRot = Quaternion::Identity();
+	transform_.quaRot = Quaternion::GetIdentity();
 	transform_.quaRotLocal =
-		Quaternion::Mult(transform_.quaRotLocal,
-			Quaternion::AngleAxis(UtilityMath::Deg2RadF(WEAPON_ROT), UtilityMath::AXIS_Y));
+		Quaternion::Multiply(transform_.quaRotLocal,
+			Quaternion::CreateAngleAxis(UtilityMath::Deg2RadF(WEAPON_ROT), UtilityMath::AXIS_Y));
 	transform_.quaRotLocal =
-		Quaternion::Mult(transform_.quaRotLocal,
-			Quaternion::AngleAxis(UtilityMath::Deg2RadF(PITCH_ANGLE_90), UtilityMath::AXIS_X));
+		Quaternion::Multiply(transform_.quaRotLocal,
+			Quaternion::CreateAngleAxis(UtilityMath::Deg2RadF(PITCH_ANGLE_90), UtilityMath::AXIS_X));
 
 	transform_.pos = MV1GetFramePosition(bone_.transform.modelId, bone_.id);
 	transform_.Update();
@@ -166,23 +166,23 @@ void WeaponRG::UpdatePreparation(void)
 		}
 	}
 
-	transform_.quaRot = Quaternion::Mult(bone_.transform.quaRot, Quaternion::AngleAxis(UtilityMath::Deg2RadF(localUpRot_), UtilityMath::AXIS_X));
+	transform_.quaRot = Quaternion::Multiply(bone_.transform.quaRot, Quaternion::CreateAngleAxis(UtilityMath::Deg2RadF(localUpRot_), UtilityMath::AXIS_X));
 }
 
 void WeaponRG::UpdateAttack(void)
 {
 	transform_.pos = MV1GetFramePosition(bone_.transform.modelId, bone_.id);
-	transform_.quaRot = Quaternion::Mult(bone_.transform.quaRot, Quaternion::AngleAxis(UtilityMath::Deg2RadF(localUpRot_), UtilityMath::AXIS_X));
+	transform_.quaRot = Quaternion::Multiply(bone_.transform.quaRot, Quaternion::CreateAngleAxis(UtilityMath::Deg2RadF(localUpRot_), UtilityMath::AXIS_X));
 
 	// ローカル座標を回転させてワールド座標へ変換
-	VECTOR localRotPos = transform_.quaRot.PosAxis(LASER_EMIT_OFFSET);
+	VECTOR localRotPos = transform_.quaRot.RotatePosition(LASER_EMIT_OFFSET);
 
 	// 位置を加算して最終的なワールド座標にする
 	VECTOR localPos = VAdd(transform_.pos, localRotPos);
 
 	EffectManager::GetInstance().UpdatePos(EffectManager::EFFECT::EFFECT_LASER, this, localPos);
-	Quaternion effectQuaRot = Quaternion::Mult(transform_.quaRot, Quaternion::AngleAxis(UtilityMath::Deg2RadF(PITCH_ANGLE_90), UtilityMath::AXIS_X));
-	VECTOR effectRot = effectQuaRot.ToEuler();
+	Quaternion effectQuaRot = Quaternion::Multiply(transform_.quaRot, Quaternion::CreateAngleAxis(UtilityMath::Deg2RadF(PITCH_ANGLE_90), UtilityMath::AXIS_X));
+	VECTOR effectRot = effectQuaRot.ConvertToEuler();
 	effectRot.x = UtilityMath::Rad2DegF(effectRot.x);
 	effectRot.y = UtilityMath::Rad2DegF(effectRot.y);
 	effectRot.z = UtilityMath::Rad2DegF(effectRot.z);

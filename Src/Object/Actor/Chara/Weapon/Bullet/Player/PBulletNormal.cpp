@@ -23,7 +23,7 @@ void PBulletNormal::Load(void)
 
 void PBulletNormal::InitTransform(void)
 {
-	transform_.InitTransform(SCALE, transform_.quaRot, Quaternion::Identity());
+	transform_.InitTransform(SCALE, transform_.quaRot, Quaternion::GetIdentity());
 }
 
 void PBulletNormal::UpdatePost(void)

@@ -214,19 +214,19 @@ void Boss::UpdateEffect(void)
 	EffectManager::GetInstance().UpdatePos(EffectManager::EFFECT::EFFECT_BOSS_HIT, this, hitEffectPos3, EFFECT_NO_THREE);
 
 	// 各エフェクトの回転を更新
-	VECTOR hitEffectRot1 = Quaternion::Mult(transformBody_.quaRot, Quaternion::AngleAxis(UtilityMath::Deg2RadF(90.0f), UtilityMath::AXIS_X)).ToEuler();
+	VECTOR hitEffectRot1 = Quaternion::Multiply(transformBody_.quaRot, Quaternion::CreateAngleAxis(UtilityMath::Deg2RadF(90.0f), UtilityMath::AXIS_X)).ConvertToEuler();
 	hitEffectRot1.x = UtilityMath::Rad2DegF(hitEffectRot1.x);
 	hitEffectRot1.y = UtilityMath::Rad2DegF(hitEffectRot1.y);
 	hitEffectRot1.z = UtilityMath::Rad2DegF(hitEffectRot1.z);
 	EffectManager::GetInstance().UpdateRot(EffectManager::EFFECT::EFFECT_BOSS_HIT, this, hitEffectRot1, EFFECT_NO_ONE);
 
-	VECTOR hitEffectRot2 = Quaternion::Mult(transformBody_.quaRot, Quaternion::AngleAxis(UtilityMath::Deg2RadF(180.0f), UtilityMath::AXIS_Y)).ToEuler();
+	VECTOR hitEffectRot2 = Quaternion::Multiply(transformBody_.quaRot, Quaternion::CreateAngleAxis(UtilityMath::Deg2RadF(180.0f), UtilityMath::AXIS_Y)).ConvertToEuler();
 	hitEffectRot2.x = UtilityMath::Rad2DegF(hitEffectRot2.x);
 	hitEffectRot2.y = UtilityMath::Rad2DegF(hitEffectRot2.y);
 	hitEffectRot2.z = UtilityMath::Rad2DegF(hitEffectRot2.z);
 	EffectManager::GetInstance().UpdateRot(EffectManager::EFFECT::EFFECT_BOSS_HIT, this, hitEffectRot2, EFFECT_NO_TWO);
 
-	VECTOR hitEffectRot3 = Quaternion::Mult(transformBody_.quaRot, Quaternion::AngleAxis(UtilityMath::Deg2RadF(0.0f), UtilityMath::AXIS_X)).ToEuler();
+	VECTOR hitEffectRot3 = Quaternion::Multiply(transformBody_.quaRot, Quaternion::CreateAngleAxis(UtilityMath::Deg2RadF(0.0f), UtilityMath::AXIS_X)).ConvertToEuler();
 	hitEffectRot3.x = UtilityMath::Rad2DegF(hitEffectRot3.x);
 	hitEffectRot3.y = UtilityMath::Rad2DegF(hitEffectRot3.y);
 	hitEffectRot3.z = UtilityMath::Rad2DegF(hitEffectRot3.z);
@@ -244,9 +244,9 @@ void Boss::UpdateWheel(void)
 
 		// 左右で回転方向を変える
 		float rotDirection = (i % 2 == 0) ? WHEEL_ROT : -WHEEL_ROT;
-		transformWheels_[i].quaRotLocal = Quaternion::Mult(
+		transformWheels_[i].quaRotLocal = Quaternion::Multiply(
 			transformWheels_[i].quaRotLocal,
-			Quaternion::AngleAxis(UtilityMath::Deg2RadF(rotDirection), UtilityMath::AXIS_X)
+			Quaternion::CreateAngleAxis(UtilityMath::Deg2RadF(rotDirection), UtilityMath::AXIS_X)
 		);
 	}
 }
@@ -262,8 +262,8 @@ void Boss::InitTransform(void)
 	// ベース
 	transform_.modelId = transformFeet_.modelId;
 	transform_.scl = BOSS_SIZE;
-	transform_.quaRot = Quaternion::Identity();
-	transform_.quaRotLocal = Quaternion::Mult(transform_.quaRotLocal, Quaternion::AngleAxis(UtilityMath::Deg2RadF(INIT_ROT), UtilityMath::AXIS_Y));
+	transform_.quaRot = Quaternion::GetIdentity();
+	transform_.quaRotLocal = Quaternion::Multiply(transform_.quaRotLocal, Quaternion::CreateAngleAxis(UtilityMath::Deg2RadF(INIT_ROT), UtilityMath::AXIS_Y));
 	transform_.pos = BOSS_INIT_POS;
 	transform_.Update();
 
@@ -273,8 +273,8 @@ void Boss::InitTransform(void)
 
 	// 車体
 	transformFeetCar_.scl = BOSS_CAR_SIZE;
-	transformFeetCar_.quaRot = Quaternion::Identity();
-	transformFeetCar_.quaRotLocal = Quaternion::Mult(transformFeetCar_.quaRotLocal, Quaternion::AngleAxis(UtilityMath::Deg2RadF(INIT_ROT), UtilityMath::AXIS_Y));
+	transformFeetCar_.quaRot = Quaternion::GetIdentity();
+	transformFeetCar_.quaRotLocal = Quaternion::Multiply(transformFeetCar_.quaRotLocal, Quaternion::CreateAngleAxis(UtilityMath::Deg2RadF(INIT_ROT), UtilityMath::AXIS_Y));
 	transformFeetCar_.pos = transform_.pos;
 	transformFeetCar_.Update();
 
@@ -282,21 +282,21 @@ void Boss::InitTransform(void)
 	for (size_t i = 0; i < transformWheels_.size(); ++i)
 	{
 		transformWheels_[i].scl = BOSS_CAR_SIZE;
-		transformWheels_[i].quaRot = Quaternion::Identity();
+		transformWheels_[i].quaRot = Quaternion::GetIdentity();
 
 		// 左側輪（偶数番）と右側輪（奇数番）で初期回転を切り替える
 		float initRotY = (i % 2 == 0) ? INIT_ROT : 0.0f;
-		transformWheels_[i].quaRotLocal = Quaternion::Mult(
+		transformWheels_[i].quaRotLocal = Quaternion::Multiply(
 			transformWheels_[i].quaRotLocal,
-			Quaternion::AngleAxis(UtilityMath::Deg2RadF(initRotY), UtilityMath::AXIS_Y)
+			Quaternion::CreateAngleAxis(UtilityMath::Deg2RadF(initRotY), UtilityMath::AXIS_Y)
 		);
 		transformWheels_[i].Update();
 	}
 
 	// 胴体
 	transformBody_.scl = BOSS_SIZE;
-	transformBody_.quaRot = Quaternion::Identity();
-	transformBody_.quaRotLocal = Quaternion::Mult(transformBody_.quaRotLocal, Quaternion::AngleAxis(UtilityMath::Deg2RadF(INIT_ROT), UtilityMath::AXIS_Y));
+	transformBody_.quaRot = Quaternion::GetIdentity();
+	transformBody_.quaRotLocal = Quaternion::Multiply(transformBody_.quaRotLocal, Quaternion::CreateAngleAxis(UtilityMath::Deg2RadF(INIT_ROT), UtilityMath::AXIS_Y));
 	transformBody_.pos = MV1GetFramePosition(transform_.modelId, JOINT_FEET_BODY);
 	transformBody_.Update();
 
@@ -825,7 +825,7 @@ void Boss::UpdateStateLaserAttack(void)
 			ChangeState(STATE::IDLE);
 		}
 
-		transformBody_.quaRot = Quaternion::Mult(transformBody_.quaRot, Quaternion::AngleAxis(UtilityMath::Deg2RadF(laserRotSpeed_), UtilityMath::AXIS_Y));
+		transformBody_.quaRot = Quaternion::Multiply(transformBody_.quaRot, Quaternion::CreateAngleAxis(UtilityMath::Deg2RadF(laserRotSpeed_), UtilityMath::AXIS_Y));
 	}
 }
 
@@ -893,8 +893,8 @@ void Boss::LookPlayer(void)
 	moveDir.y = 0.0f;
 	moveDir = VNorm(moveDir);
 	float targetAngle = atan2(moveDir.x, moveDir.z);
-	transformBody_.quaRot = Quaternion::AngleAxis(targetAngle, UtilityMath::AXIS_Y);
-	transformFeetCar_.quaRot = Quaternion::AngleAxis(targetAngle, UtilityMath::AXIS_Y);
+	transformBody_.quaRot = Quaternion::CreateAngleAxis(targetAngle, UtilityMath::AXIS_Y);
+	transformFeetCar_.quaRot = Quaternion::CreateAngleAxis(targetAngle, UtilityMath::AXIS_Y);
 
 	// 突進していない（準備中）なら、突進方向を常にプレイヤーに向ける
 	jumpDir_ = moveDir;

@@ -52,9 +52,9 @@ void BBulletMissile::ReleasePost(void)
 void BBulletMissile::InitTransform(void)
 {
 	transform_.scl = MISSILE_SCALE;
-	transform_.quaRot = Quaternion::Identity();
-	transform_.quaRotLocal = Quaternion::AngleAxis(UtilityMath::Deg2RadF(INIT_ROT), UtilityMath::AXIS_Y);
-	transform_.quaRotLocal = Quaternion::Mult(transform_.quaRotLocal, Quaternion::AngleAxis(UtilityMath::Deg2RadF(-90.0f), UtilityMath::AXIS_X));
+	transform_.quaRot = Quaternion::GetIdentity();
+	transform_.quaRotLocal = Quaternion::CreateAngleAxis(UtilityMath::Deg2RadF(INIT_ROT), UtilityMath::AXIS_Y);
+	transform_.quaRotLocal = Quaternion::Multiply(transform_.quaRotLocal, Quaternion::CreateAngleAxis(UtilityMath::Deg2RadF(-90.0f), UtilityMath::AXIS_X));
 	transform_.Update();
 }
 
@@ -137,7 +137,7 @@ void BBulletMissile::MoveUp(void)
 		// プレイヤーの頭上へワープ
 		transform_.pos = playerPos_;
 		transform_.pos.y = SPAWN_HEIGHT_Y;
-		transform_.quaRotLocal = Quaternion::Mult(transform_.quaRotLocal, Quaternion::AngleAxis(UtilityMath::Deg2RadF(180.0f), UtilityMath::AXIS_X));
+		transform_.quaRotLocal = Quaternion::Multiply(transform_.quaRotLocal, Quaternion::CreateAngleAxis(UtilityMath::Deg2RadF(180.0f), UtilityMath::AXIS_X));
 	}
 }
 

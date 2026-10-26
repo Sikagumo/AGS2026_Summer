@@ -198,7 +198,7 @@ void CharaBase::DelayRotate(void)
 	if (UtilityMath::EqualsVZero(moveDir_)) { return; }
 
 	// ‰ñ“]‚Ì•âŠÔ
-	transform_.quaRot = Quaternion::Slerp(transform_.quaRot
-							, Quaternion::LookRotation(moveDir_)
+	transform_.quaRot = Quaternion::CalculateSlerp(transform_.quaRot
+							, Quaternion::CreateLookRotation(moveDir_)
 							, ROT_DELAY_TERM);
 }
