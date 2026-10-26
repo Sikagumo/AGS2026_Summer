@@ -5,10 +5,11 @@
 
 
 PBulletNormal::PBulletNormal(float _scale, float _radius, int _power
-		, float _shotSpeedXZ, float _shotSpeedY, float _aliveTime
+    , float _shotSpeedXZ, float _shotSpeedY, float _aliveTime
 	, int _shotType, bool _isActiveGravity)
 	: PBulletBase::PBulletBase(_shotType, _isActiveGravity)
-	, ALIVE_TIME(_aliveTime), SCALE(_scale)
+	, ALIVE_TIME(_aliveTime)
+	, SCALE(_scale)
 {
 	shotSpeedXZ_ = _shotSpeedXZ;
 	shotSpeedY_ = _shotSpeedY;
@@ -17,10 +18,6 @@ PBulletNormal::PBulletNormal(float _scale, float _radius, int _power
 }
 
 void PBulletNormal::Load(void)
-{
-}
-
-void PBulletNormal::PreActiveProcess(void)
 {
 }
 
@@ -33,6 +30,7 @@ void PBulletNormal::UpdatePost(void)
 {
 	if (bulletState_ == BULLET_STATE::BLAST)
 	{
+		// 着弾時、即無効化
 		bulletState_ = BULLET_STATE::INACTIVE;
 		activePowerBullet_ = 0;
 	}
@@ -44,12 +42,14 @@ void PBulletNormal::ChangeBulletStateProc(void)
 
 void PBulletNormal::SetParam(void)
 {
+	// パラメータ割り当て
 	aliveTime_ = ALIVE_TIME;
 	throwPow_.y = ((throwPow_.y < 0.0f) ? 0.0f : throwPow_.y);
 }
 
 void PBulletNormal::BlastAction(void)
 {
+	// 着弾有効化
 	bulletState_ = BULLET_STATE::BLAST;
 	isVisible_ = false;
 	activePowerBullet_ = power_;

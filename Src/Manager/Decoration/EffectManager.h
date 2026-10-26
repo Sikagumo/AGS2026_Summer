@@ -1,13 +1,16 @@
 #pragma once
+
 #include <DxLib.h>
 #include <unordered_map>
 #include <vector>
 #include <mutex>
+
 #include "../../Utility/UtilityMath.h"
 
 class EffectManager
 {
 public:
+	
 	/// @brief 個別エフェクトの識別子
 	enum class EFFECT
 	{
@@ -26,26 +29,29 @@ public:
 		EFFECT_PLAYER_POISON,
 
 	};
+
 	/// @brief エフェクトのリソースデータ構造体
+	/// @brief エフェクト発生時のパラメータ設定構造体
 	struct EFFECT_DATA
 	{
-		int Data = 0;
-		VECTOR pos = UtilityMath::VECTOR_ZERO;
-		VECTOR rot = UtilityMath::VECTOR_ZERO;
-		VECTOR scl = UtilityMath::VECTOR_ONE;
-		float speed = 0.0f;
+		int Data = 0;                             // エフェクトのリソースID・種類識別データ
+		VECTOR pos = UtilityMath::VECTOR_ZERO;    // エフェクトの発生位置（3D座標）
+		VECTOR rot = UtilityMath::VECTOR_ZERO;    // エフェクトの回転角（オイラー角）
+		VECTOR scl = UtilityMath::VECTOR_ONE;     // エフェクトの拡大率（スケール）
+		float speed = 0.0f;                       // エフェクトの再生速度
 	};
+
+	/// @brief 現在再生中のエフェクト管理用構造体
 	struct PLAYING_EFFECT
 	{
-		EFFECT effectId;
-		int playHandle;
-		const void* owner; 
-		int tag;           
+		EFFECT effectId;                          // 再生中のエフェクト識別ID（列挙型）
+		int playHandle;                           // Effekseer等の再生ハンドルID
+		const void* owner;                        // エフェクトの所有者アクター（追従対象等のポインタ）
+		int tag;                                  // 分類・識別用のタグ用ID
 	};
 
 
 	/// @brief インスタンスを明示的に生成
-	/// @param void 
 	static void CreateInstance(void);
 
 	/// @brief インスタンス取得
@@ -53,7 +59,6 @@ public:
 	static EffectManager& GetInstance(void);
 
 	/// @brief 初期化処理
-	/// @param void 
 	void Initialize(void);
 
 	/// @brief 3Dエフェクトの再生
@@ -69,7 +74,7 @@ public:
 	/// @brief エフェクトが再生中か確認
 	/// @param _effect 対象のエフェクトID
 	/// @return 再生中ならtrue
-	bool IsPlaying(EFFECT _effect, void* _owner, int _tag = 1);
+	bool IsPlaying(EFFECT _effect, const void* _owner, int _tag = 1);
 
 	/// @brief インスタンスの破棄
 	/// @param void 
@@ -94,7 +99,7 @@ public:
 	void UpdateScl(const EFFECT _effect, const void* _owner, const VECTOR _scl, int _tag = 1);
 
 	/// @brief 指定したエフェクトIDの再生をすべて強制停止する
-	void Stop(EFFECT _effect, void* _owner, int _tag = 1);
+	void Stop(EFFECT _effect, const void* _owner, int _tag = 1);
 
 	/// @brief 全エフェクトの時間更新処理
 	void Update(void);
@@ -105,13 +110,13 @@ public:
 private:
 
 
-	static EffectManager* instance_; // シングルトンインスタンス
+	static EffectManager* instance_;					// シングルトンインスタンス
+	std::unordered_map<EFFECT, EFFECT_DATA> effect_;	// サウンドハンドルの管理マップ
+	std::vector<PLAYING_EFFECT> playingList_;			// 再生中のエフェクトリスト
 
-	std::unordered_map<EFFECT, EFFECT_DATA> effect_; // サウンドハンドルの管理マップ
-	std::vector<PLAYING_EFFECT> playingList_;
-
-
+	/// @brief コンストラクタ
 	EffectManager(void) = default;
+	/// @brief デストラクタ
 	~EffectManager(void) = default;
 
 	// コピーコンストラクタ対策

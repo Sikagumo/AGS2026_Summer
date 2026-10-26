@@ -67,6 +67,10 @@ public:
 	/// @return 前フレームからの移動量
 	Vector2F GetMouseVelocityAndFixCenter(void);
 
+	/// @brief マウスの移動量を取得
+	/// @return 前フレームからの移動量
+	Vector2F GetMouseVelocity(void);
+
 	/// @brief マウスの感度設定を変更する
 	/// @param _sensitivity 設定する感度データ
 	void SetMouseSensitivity(const MouseSensitivity& _sensitivity);

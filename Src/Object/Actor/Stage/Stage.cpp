@@ -1,11 +1,13 @@
 #include "Stage.h"
-#include "../../Actor/ActorBase.h"
+#include "./Tree.h"
 #include "../../../Manager/Generic/ResourceManager.h"
 #include "../../../Object/Collision/CollisionController.h"
 #include "../../../Utility/UtilityMath.h"
 #include "../../Collider/ColliderModel.h"
-#include "../../Collider/ColliderCapsule.h"
 #include "../../../Shader/ShaderController.h"
+#include <algorithm>
+#include <memory>
+#include <DxLib.h>
 
 // –Ø‚Ìƒpƒ‰ƒ[ƒ^
 constexpr float TREE_SCALE = 1.25f;
@@ -230,8 +232,6 @@ void Stage::Update(void)
 
 	for (auto& frontTree : treesFront_)
 	{
-		if (!frontTree->GetIsActive()) { continue; }
-
 		frontTree->Update();
 	}
 

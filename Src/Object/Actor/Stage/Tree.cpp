@@ -3,11 +3,17 @@
 #include "../../../Object/Collision/CollisionController.h"
 #include "../../Collider/ColliderCapsule.h"
 
+namespace
+{
+	// 木の位置
+	constexpr float COLLISION_OFFSET_Y = 250.0f;
 
-constexpr float TREE_RADIUS = 27.5f;
+	// 木モデルの当たり判定の半径
+	constexpr float COLLISION_RADIUS = 27.5f;
+};
 
 Tree::Tree(void)
-	: ActorBase::ActorBase(), isActive_(true)
+	: ActorBase::ActorBase()
 {
 }
 
@@ -17,18 +23,13 @@ void Tree::Load(void)
 		LoadModelDuplicate(ResourceManager::SRC::MODEL_TREE);
 }
 
-void Tree::InitTransform(void)
-{
-}
-
 void Tree::InitCollider(void)
 {
 	// 木のコライダ割り当て
 	VECTOR posEnd = UtilityMath::VECTOR_ZERO;
-	posEnd.y = 250.0f;
-	constexpr float TREE_RADIUS = 27.5f;
+	posEnd.y = COLLISION_OFFSET_Y;
 
-	ColliderCapsule* treeCol = new ColliderCapsule(ColliderBase::TAG::TREE, &transform_, UtilityMath::VECTOR_ZERO, posEnd, TREE_RADIUS);
+	ColliderCapsule* treeCol = new ColliderCapsule(ColliderBase::TAG::TREE, &transform_, UtilityMath::VECTOR_ZERO, posEnd, COLLISION_RADIUS);
 	ownColliders_[static_cast<int>(ColliderBase::TAG::TREE)].push_back(treeCol);
 
 	treeCol->SetTriger(false);
@@ -38,23 +39,4 @@ void Tree::InitCollider(void)
 
 	CollisionController::GetInstance()
 		.SetCollisionActive(this, ColliderBase::TAG::TREE, true);
-}
-
-void Tree::InitPost(void)
-{
-}
-
-
-void Tree::Update(void)
-{
-	/*
-	// レーザー衝突時、無効化
-	if (CollisionController::GetInstance()
-		.IsActorCollidingWithTag(this, ColliderBase::TAG::LASER))
-	{
-		CollisionController::GetInstance()
-			.SetCollisionActive(this, ColliderBase::TAG::TREE, false);
-
-		isActive_ = false;
-	}*/
 }

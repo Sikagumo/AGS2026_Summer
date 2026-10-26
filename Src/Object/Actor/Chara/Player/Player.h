@@ -6,36 +6,32 @@
 
 class Player : public PlayerBase
 {
-private:
+public:
 
 	// 吹っ飛ばし量
 	static constexpr float KNOCK_POW_Y = 3.75f;
 
-
-public:
-
-	enum class ANIM_TYPE
+	enum class ANIMATION_TYPE
 	{
-		NONE = -1,
-		IDLE,
-		RUN,
-		THROW_LEFT,
-		THROW_RIGHT,
-		THROW_RUN,
-		JUMP,
-		DODGE,
-		DEFEAT,
+		NONE = -1,   // 未割当値
+		IDLE,        // 待機
+		WALK,        // 歩行
+		THROW_LEFT,  // 左投擲
+		THROW_RIGHT, // 右投擲
+		JUMP,        // ジャンプ
+		DODGE,       // 回避
+		DEFEAT,      // 撃破
 		MAX,
 	};
 
 	enum class ACTION_TYPE
 	{
-		NONE = -1,
-		JUMP,
-		DODGE,
-		DEFEAT,
-		ATTACK_SPECIAL,
-		ATTACK,
+		NONE = -1,      // 未割当値
+		JUMP,           // ジャンプ
+		DODGE,          // 回避
+		DEFEAT,         // 撃破
+		ATTACK_SPECIAL, // 特殊攻撃
+		ATTACK,         // 通常攻撃
 	};
 
 	/// @brief コンストラクタ
@@ -53,17 +49,16 @@ public:
 
 	void DrawDebug(void)override;
 
-	void ReleasePost(void)override;
-
 	/// @brief 吹っ飛ばし処理
 	/// @param _knockDirXZ 横吹っ飛ばし方向
 	/// @param _knockPowXZ 横吹っ飛ばし力
 	/// @param _isStan スタンさせるか否か 
 	/// @param _knockPowY 縦吹っ飛ばし力
 	void SetKnock(const VECTOR& _knockDirXZ, float _knockPowXZ
-					, bool _isStan, float _knockPowY = KNOCK_POW_Y);
+		, bool _isStan, float _knockPowY = KNOCK_POW_Y);
 	
-	void SetSoundData(VECTOR _pos, float _radius, bool _isLanging, bool _isMGFire, bool _isRoad)override;
+	/// @brief リスポーンしたか否か
+	bool IsRespawn(void)const;
 
 	// 自分が操作するキャラクターかどうかを設定
 	void SetHostControl(bool _isLocal);
@@ -71,12 +66,13 @@ public:
 	//自分が操作するキャラクターかどうかを取得する
 	bool GetHostControl(void) const { return isHostControl_; }
 
-	// ネットワークから受け取った情報を強制的にセットする（ラジコン用）
-	void SetNetworkAction(const VECTOR& _pos, const Quaternion& _rot, int _animId, bool _isAttack, int _currentHp);
-
-	/// @brief リスポーンしたか否か
-	bool GetIsRespawn(void)const;
-
+	/// @brief ネットワークから受け取った情報を強制的にセットする(ラジコン用)
+	/// @param _pos 現在座標
+	/// @param _rot 現在回転量
+	/// @param _animationId 現在アニメーションID
+	/// @param _isAttack 攻撃中かの判定
+	/// @param _currentHp 現在HP
+	void SetNetworkAction(const VECTOR& _pos, const Quaternion& _rot, int _animationId, bool _isAttack, int _currentHp);
 
 	// キャラクターの通信キーを設定
 	void SetNetKey(int _key);
@@ -103,34 +99,21 @@ protected:
 
 private:
 
-	static constexpr std::array<SHOT_TYPE, static_cast<int>(JOB_TYPE::MAX)>
-		SHOT_TYPE_NORMAL
-		= { SHOT_TYPE::BOMB, SHOT_TYPE::BIG, SHOT_TYPE::RAPID_FIRE, SHOT_TYPE::POISON };
-
-	static constexpr std::array<SHOT_TYPE, static_cast<int>(JOB_TYPE::MAX)>
-		SHOT_TYPE_SPECIAL
-			= { SHOT_TYPE::NONE, SHOT_TYPE::NONE, SHOT_TYPE::CLUSTER, SHOT_TYPE::RECOVERY };
-
-	// 連射パラメータ
-	static constexpr float SCALE_RAPID = 0.85f;
-	static constexpr float RADIUS_RAPID = 10.0f;
-	static constexpr int POWER_RAPID = 18;
-	static constexpr float SHOT_SPEED_XZ_RAPID = 17.5f;
-	static constexpr float SHOT_SPEED_Y_RAPID = 2.5f;
-	static constexpr float ALIVE_TIME_RAPID = 2.5f;
-
-
 	// 攻撃回数
 	int attackNumMax_;
-	int curAttackNum_;
+	int curAttackCount_;
 
+	// 発射している弾の識別番号
 	int shotIndex_;
 
-	ANIM_TYPE animType_;
+	ANIMATION_TYPE animationType_;
 
 	// 投げる位置
 	VECTOR throwPos_;
 	VECTOR throwDir_;
+
+	// 移動速度
+	float moveSpeed_;
 
 	// 吹っ飛ばし量
 	Vector2F knockPowXZ_;
@@ -146,14 +129,16 @@ private:
 	// 撃破時間
 	float curTimeDefeat_;
 
+	// 行動コントローラ
 	std::unique_ptr<PActionController> actionController_;
 
+	// 発射間隔
 	float shotTerm_;
 
 	// 自分が操作するかどうか
 	bool isHostControl_;
 
-	// 誰のキャラクターかを識別key
+	// 誰のキャラクターかの識別キー
 	int netKey_;
 
 	// 攻撃したかどうか
@@ -164,9 +149,10 @@ private:
 	// 着弾地点
 	std::array<VERTEX3D, 4> shotPointVertex_;
 
+	/// @brief 行動初期化処理
+	void InitActions(void);
 
-
-	// 操作
+	/// @brief 移動処理
 	void ProcessMove(void);
 
 	/// @brief ジャンプ処理
@@ -177,22 +163,22 @@ private:
 	void ProcessDodge(void);
 	void Dodge(void);
 
-	/// @brief 回避処理
 	void ProcessDefeat(void);
-
-	void ProcessKnock(void);
-
+	void ProcessKnockback(void);
 	void ProcessAttack(void);
 
-	void SetRespawn(void);
+	void ProcessRecovery(void);
 
+	/// @brief 復活処理
+	void SetRespawn(void);
 
 	/// @brief アニメーション再生
 	/// @param _type アニメーションの種類
 	/// @param _isLoop ループ再生するか否か
-	/// @param _animSpeed 再生速度指定(任意)
-	void PlayAnimation(ANIM_TYPE _type, bool _isLoop = true, bool _isAnimBlend = true, float _animSpeed = -1.0f);
+	/// @param _animationSpeed 再生速度指定(任意)
+	void PlayAnimation(ANIMATION_TYPE _type, bool _isLoop = true, bool _isAnimationBlend = true, float _animSpeed = -1.0f);
 
+	/// @brief 弾丸の処理
 	void CreateBullet(void);
 	void ShotBullet(void);
 	void UpdateBullets(void);
@@ -200,7 +186,7 @@ private:
 	/* 拡散弾処理 */
 	void CreateCluster(void);
 	void ShotCluster(void);
-	std::unique_ptr<PBulletNormal> _CreateClusterBullet(const VECTOR& _throwDir);
+	std::unique_ptr<PBulletNormal> CreateClusterBullet(const VECTOR& _throwDir);
 
 	void DelayRotate(void)override;
 
@@ -210,7 +196,7 @@ private:
 	/// @brief 弾の着弾地点
 	void DrawShotOrbitPoint(const VECTOR& _shotPos);
 
-	VECTOR CalcShotDir(void);
+	VECTOR CalcShotDirection(void);
 
 	void ProcShotNormal(void);
 	void ProcShotSpecial(void);

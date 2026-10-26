@@ -89,7 +89,7 @@ public:
 
 		/* 外部アニメーション */
 		ANIM_IDLE,
-		ANIM_RUN,
+		ANIM_WALK,
 		ANIM_THROW_RUN,
 		ANIM_THROW_LEFT,
 		ANIM_THROW_RIGHT,
@@ -119,7 +119,7 @@ public:
 
 		/* BGM */
 		BGM_TITLE_SEA,
-		BGM_TITLE_THUNDER,
+		BGM_TITLE_SELECT,
 		BGM_GAME,
 		BGM_RESULT,
 		BGM_LOBBY,

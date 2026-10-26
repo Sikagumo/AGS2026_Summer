@@ -6,12 +6,16 @@
 
 DamageController::DamageController()
 	: bossDamage_(0)
-	, weaponMGLDamage_(0), weaponMGRDamage_(0)
-	, weaponMPLDamage_(0), weaponMPRDamage_(0)
+	, weaponMGLDamage_(0)
+	, weaponMGRDamage_(0)
+	, weaponMPLDamage_(0)
+	, weaponMPRDamage_(0)
 	, weaponRGDamage_(0)
-	, weaponCannonLDamage_(0) , weaponCannonRDamage_(0)
+	, weaponCannonLDamage_(0) 
+	, weaponCannonRDamage_(0)
 	, playerHpMax_{}
-	, playerAttackBullet_(0), playerAttackBlast_(0)
+	, playerAttackBullet_(0)
+	, playerAttackBlast_(0)
 	, damageData_(0)
 	, isInvincible_(false)
 {

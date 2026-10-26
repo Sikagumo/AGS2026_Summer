@@ -22,6 +22,13 @@
 #include "../../Manager/Generic/KeyConfInputManager.h"
 #include "../SubScene/ScenePause.h"
 
+namespace
+{
+	// 雨の強さ
+	constexpr float RAIN_POW = 1.0f;
+	constexpr float RAIN_POW_BACK = 1.0f;
+};
+
 SceneGame::SceneGame(std::vector<PlayerSelectType> _playerSelectType)
 	: players_()
 	, boss_(std::make_unique<Boss>())
@@ -100,7 +107,7 @@ void SceneGame::Load(void)
 		, ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::BGM_GAME));
 
 	SoundManager::GetInstance().Add(SoundManager::TYPE::BGM, SoundManager::SOUND::BGM_TITLE_THUNDER
-		, ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::BGM_TITLE_THUNDER));
+		, ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::BGM_TITLE_SELECT));
 
 	SoundManager::GetInstance().Add(SoundManager::TYPE::SE, SoundManager::SOUND::SE_HIT_BLAST
 		, ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::SE_HIT_BLAST));
@@ -173,10 +180,7 @@ void SceneGame::Initialize(void)
 	SoundManager::GetInstance().Play(SoundManager::SOUND::BGM_GAME);
 	SoundManager::GetInstance().Play(SoundManager::SOUND::BGM_TITLE_THUNDER);
 
-	// 雨シェーダ導入
-	constexpr float RAIN_POW = 1.0f;
-	constexpr float RAIN_POW_BACK = 1.0f;
-
+	// 雨シェーダ
 	rainyParams_.rainIntensity = RAIN_POW;
 	rainyParams_.rainIntensityBack = RAIN_POW_BACK;
 	rainyParams_.rainColor = GetColorF(0.75f, 0.82f, 0.9f, 1.0f);
@@ -205,19 +209,13 @@ void SceneGame::Update(void)
 		SceneManager::GetInstance().PushScene(std::make_shared<ScenePause>());
 	}
 
-	if (NetManager::GetInstance().GetMode() != NET_MODE::NONE
-		&& NetManager::GetInstance().GetIsConnectionLost())
-	{
-		NetManager::GetInstance().Stop();
-		SceneManager::GetInstance().ChangeScene(std::make_shared<SceneTitle>());
-		return;
-	}
-
 	stateUpdate_();
 }
 
 void SceneGame::DamageProcess(void)
 {
+	int playerCount = 0;
+
 	for (auto& enemyRobo : enemyRobots_)
 	{
 		enemyRobo->SetPlayerPos(players_.at(0)->GetBodyPos());
@@ -227,6 +225,8 @@ void SceneGame::DamageProcess(void)
 	for (auto& player : players_)
 	{
 		keyPosList.emplace_back(player->GetNetKey(), player->GetBodyPos());
+		boss_->SetPlayerPos(player->GetBodyPos(), playerCount);
+		playerCount++;
 	}
 
 	std::sort(keyPosList.begin(), keyPosList.end(), [](const auto& _a, const auto& _b)
@@ -236,25 +236,8 @@ void SceneGame::DamageProcess(void)
 
 	const int PLAYER_COUNT = static_cast<int>(keyPosList.size());
 
-	if (PLAYER_COUNT >= 1)
-	{
-		boss_->SetPlayer1Pos(keyPosList[0].second);
-	}
+	
 
-	if (PLAYER_COUNT >= 2)
-	{
-		boss_->SetPlayer2Pos(keyPosList[1].second);
-	}
-
-	if (PLAYER_COUNT >= 3)
-	{
-		boss_->SetPlayer3Pos(keyPosList[2].second);
-	}
-
-	if (PLAYER_COUNT >= 4)
-	{
-		boss_->SetPlayer4Pos(keyPosList[3].second);
-	}
 
 	if (NetManager::GetInstance().GetMode() != NET_MODE::CLIENT)
 	{
@@ -281,14 +264,12 @@ void SceneGame::DamageProcess(void)
 		SoundManager::GetInstance().Play(SoundManager::SOUND::SE_HIT_BLAST);
 	}
 
-	// プレイヤー被ダメージ処理
 	for (auto& player : players_)
 	{
-		if (!player->GetHostControl())
-		{
-			continue;
-		}
+		// マルチプレイ中の操作していないプレイヤーはスキップ
+		if (!player->GetHostControl()) { continue; }
 
+		// プレイヤー被ダメージ処理
 		player->SetDamage(damageController_->GetPlayerDamage()
 			, damageController_->GetInvincible());
 	}
@@ -300,13 +281,12 @@ void SceneGame::UpdateGameTime(void)
 	{
 		gameTimer_->Update();
 
-		// プレイヤー撃破時、制限時間の減少
 		for (auto& player : players_)
 		{
-			if (!player->GetIsRespawn())
-			{
-				continue;
-			}
+			// 生存中はスキップ
+			if (!player->IsRespawn()) { continue; }
+
+			// プレイヤー撃破時、制限時間の減少
 			gameTimer_->SetTime(gameTimer_->GetTime() - GAME_TIME_DEFEAT_DEC);
 		}
 
@@ -323,6 +303,7 @@ void SceneGame::UpdateGameTime(void)
 		ChangeState(GAME_STATE::GAME_END);
 	}
 
+	// 雨シェーダ更新
 	rainyTime_ = TimeManager::GetInstance().GetGameTime();
 	rainyParams_.timeValue = rainyTime_;
 }
@@ -708,18 +689,14 @@ void SceneGame::UpdateGameEnd(void)
 	}
 
 	stage_->Update();
+
+	rainyTime_ = TimeManager::GetInstance().GetGameTime();
+	rainyParams_.timeValue = rainyTime_;
 }
 
 void SceneGame::DrawGame(void)
 {
 	stage_->Draw();
-
-	// 雨シェーダ
-	ShaderController::GetInstance().Draw2D(
-		ResourceManager::SRC::PS_RAINY,
-		0, 0, 1.0f,
-		rainyParams_
-	);
 
 	ShaderController::GetInstance().ExecuteDrawCommands();
 
@@ -745,6 +722,13 @@ void SceneGame::DrawGame(void)
 	auto& effect = EffectManager::GetInstance();
 	effect.Draw();
 
+	// 雨シェーダ
+	ShaderController::GetInstance().Draw2D(
+		ResourceManager::SRC::PS_RAINY,
+		0, 0, 1.0f,
+		rainyParams_
+	);
+
 	DrawHpBerBoss();
 
 	gameTimer_->Draw();
@@ -764,17 +748,17 @@ void SceneGame::DrawGameEnd(void)
 {
 	stage_->Draw();
 
-	ShaderController::GetInstance().Draw2D(
-		ResourceManager::SRC::PS_RAINY,
-		0, 0, 1.0f,
-		rainyParams_
-	);
-
 	ShaderController::GetInstance().ExecuteDrawCommands();
 
 	boss_->Draw();
 	auto& effect = EffectManager::GetInstance();
 	effect.Draw();
+
+	ShaderController::GetInstance().Draw2D(
+		ResourceManager::SRC::PS_RAINY,
+		0, 0, 1.0f,
+		rainyParams_
+	);
 
 	const int IMAGE_TITLE_Y = Application::SCREEN_SIZE_Y / 3;
 	if (slowCount_ >= SLOW_COUNT_MAX * 30)

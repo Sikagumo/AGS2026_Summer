@@ -1,9 +1,12 @@
 #pragma once
+#include <memory>
 #include <string>
 #include <vector>
 #include "../../Actor/ActorBase.h"
-#include "./Tree.h"
 #include "../../../Shader/ShaderParameters.h"
+#include "./Tree.h"
+
+class Tree;
 
 class Stage : public ActorBase
 {

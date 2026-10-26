@@ -1,19 +1,26 @@
 #include "../../../../Manager/Decoration/SoundManager.h"
 #include "PlayerBase.h"
 
-constexpr int HP_MAX_PLAYER = 250;
+namespace
+{
+	// ÉvÉåÉCÉÑÅ[ç≈ëÂHP
+	constexpr int HP_MAX_PLAYER = 250;
+};
 
 PlayerBase::PlayerBase(int _playerNo, JOB_TYPE _jobType, const VECTOR& _startPos, SKIN_TYPE _playerType)
 	: CharaBase::CharaBase()
 	, playerNo_(_playerNo)
 	, jobType_(_jobType)
 	, skinType_(_playerType)
-	, hp_(HP_MAX_PLAYER), HP_MAX(HP_MAX_PLAYER)
+	, hp_(HP_MAX_PLAYER)
+	, HP_MAX(HP_MAX_PLAYER)
 	, START_POS(_startPos)
 	, bodyPos_(UtilityMath::VECTOR_ZERO)
-	, timeInv_(0.0f), timeInvDodge_(0.0f)
+	, timeInv_(0.0f)
+	, timeInvDodge_(0.0f)
 	, shotType_(SHOT_TYPE::NONE)
-	, bullets_{}, clusterBullets_{}
+	, bullets_{}
+	, clusterBullets_{}
 {
 	transform_.pos = START_POS;
 }
@@ -41,24 +48,23 @@ void PlayerBase::SetDamage(int _damage, bool _isInvincible
 	hp_ -= _damage;
 }
 
-void PlayerBase::SetSoundData(VECTOR _pos, float _radius,bool _isLanging, bool _isMGFire,bool _isRoad)
+void PlayerBase::SetSoundData(VECTOR _pos, float _radius, bool _isLanding, bool _isMGFire, bool _isRoad)
 {
-	SoundManager& sound = SoundManager::GetInstance();
-	if (_isLanging)
+	if (_isLanding)
 	{
-		sound.Play3D(SoundManager::SOUND::SE_BOSS_LANDING
+		SoundManager::GetInstance().Play3D(SoundManager::SOUND::SE_BOSS_LANDING
 					 , _pos, transform_.pos, _radius);
 	}
 
 	if (_isMGFire)
 	{
-		sound.Play3D(SoundManager::SOUND::SE_BOSS_MG_FIRE
+		SoundManager::GetInstance().Play3D(SoundManager::SOUND::SE_BOSS_MG_FIRE
 					 , _pos, transform_.pos, _radius);
 	}
 
 	if (_isRoad)
 	{
-		sound.Play3D(SoundManager::SOUND::SE_BOSS_ROAD
+		SoundManager::GetInstance().Play3D(SoundManager::SOUND::SE_BOSS_ROAD
 					 , _pos, transform_.pos, _radius);
 	}
 

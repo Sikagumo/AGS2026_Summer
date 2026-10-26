@@ -38,15 +38,6 @@ void ActorBase::Draw(void)
 
 	// Œã•`‰æ
 	DrawLate();
-
-	//if (sceneMng_.GetIsDebugMode())
-	//{
-	//	// Š—L‚µ‚Ä‚¢‚éƒRƒ‰ƒCƒ_‚Ì•`‰æ
-	//	for (const auto& [type, collider] : ownColliders_)
-	//	{
-	//		collider->Draw();
-	//	}
-	//}
 }
 
 void ActorBase::Release(void)

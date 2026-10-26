@@ -50,7 +50,6 @@
     <ClCompile Include="Src\Object\Collision\CollisionCapsule.cpp" />
     <ClCompile Include="Src\Object\Collision\CollisionSphere.cpp" />
     <ClCompile Include="Src\Manager\Generic\KeyConfInputManager.cpp" />
-    <ClCompile Include="Src\Scene\MainScene\SceneGameBoss.cpp" />
     <ClCompile Include="Src\Scene\MainScene\SceneResult.cpp" />
     <ClCompile Include="Src\Object\Collider2D\Collider2DBox.cpp" />
     <ClCompile Include="Src\Object\Collider2D\Collider2DCircle.cpp" />
@@ -151,7 +150,6 @@
     <ClInclude Include="Src\Object\Collision\CollisionCapsule.h" />
     <ClInclude Include="Src\Object\Collision\CollisionSphere.h" />
     <ClInclude Include="Src\Manager\Generic\KeyConfInputManager.h" />
-    <ClInclude Include="Src\Scene\MainScene\SceneGameBoss.h" />
     <ClInclude Include="Src\Scene\MainScene\SceneResult.h" />
     <ClInclude Include="Src\Object\Collider2D\Collider2DBox.h" />
     <ClInclude Include="Src\Object\Collider2D\Collider2DCircle.h" />
