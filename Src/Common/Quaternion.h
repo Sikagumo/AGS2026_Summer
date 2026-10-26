@@ -53,29 +53,29 @@ public:
 	// @brief 現在の回転と合成
 	// @param quaternion 合成対象
 	// @return 合成結果
-	Quaternion Multiply(const Quaternion& quaternion) const;
+	Quaternion Multiply(const Quaternion& _quaternion) const;
 
 	// @brief 軸回転クォータニオン生成
 	// @param radian 回転角
 	// @param axis 回転軸
 	// @return 回転クォータニオン
-	static Quaternion CreateAngleAxis(double radian, VECTOR axis);
+	static Quaternion CreateAngleAxis(double _radian, VECTOR _axis);
 
 	// @brief ベクトルを回転（静的）
 	// @param quaternion 回転
 	// @param axis 対象ベクトル
 	// @return 回転後ベクトル
-	static VECTOR RotatePosition(const Quaternion& quaternion, VECTOR axis);
+	static VECTOR RotatePosition(const Quaternion& _quaternion, VECTOR _axis);
 
 	// @brief ベクトルを回転（メンバ）
 	// @param position 対象ベクトル
 	// @return 回転後ベクトル
-	VECTOR RotatePosition(VECTOR position) const;
+	VECTOR RotatePosition(VECTOR _position) const;
 
 	// @brief オイラー角変換（静的）
 	// @param quaternion 対象クォータニオン
 	// @return オイラー角
-	static VECTOR ConvertToEuler(const Quaternion& quaternion);
+	static VECTOR ConvertToEuler(const Quaternion& _quaternion);
 
 	// @brief オイラー角変換（メンバ）
 	// @return オイラー角
@@ -84,7 +84,7 @@ public:
 	// @brief 行列変換（静的）
 	// @param quaternion 対象クォータニオン
 	// @return 回転行列
-	static MATRIX ConvertToMatrix(const Quaternion& quaternion);
+	static MATRIX ConvertToMatrix(const Quaternion& _quaternion);
 
 	// @brief 行列変換（メンバ）
 	// @return 回転行列
@@ -93,18 +93,18 @@ public:
 	// @brief 方向から回転生成
 	// @param direction 前方向
 	// @return 回転クォータニオン
-	static Quaternion CreateLookRotation(VECTOR direction);
+	static Quaternion CreateLookRotation(VECTOR _direction);
 
 	// @brief 方向＋上方向から回転生成
 	// @param direction 前方向
 	// @param upDirection 上方向
 	// @return 回転クォータニオン
-	static Quaternion CreateLookRotation(VECTOR direction, VECTOR upDirection);
+	static Quaternion CreateLookRotation(VECTOR _direction, VECTOR _upDirection);
 
 	// @brief 行列から回転抽出
 	// @param matrix 行列
 	// @return 回転クォータニオン
-	static Quaternion GetRotation(MATRIX matrix);
+	static Quaternion GetRotation(MATRIX _matrix);
 
 	// @brief 前方向取得
 	// @return 前方向ベクトル
@@ -134,17 +134,17 @@ public:
 	// @param quaternion1 クォータニオン1
 	// @param quaternion2 クォータニオン2
 	// @return 内積値
-	static double CalculateDot(const Quaternion& quaternion1, const Quaternion& quaternion2);
+	static double CalculateDot(const Quaternion& _quaternion1, const Quaternion& _quaternion2);
 
 	// @brief 内積計算（メンバ）
 	// @param target 比較対象
 	// @return 内積値
-	double CalculateDot(const Quaternion& target) const;
+	double CalculateDot(const Quaternion& _target) const;
 
 	// @brief 正規化（静的）
 	// @param quaternion 対象
 	// @return 正規化結果
-	static Quaternion Normalize(const Quaternion& quaternion);
+	static Quaternion Normalize(const Quaternion& _quaternion);
 
 	// @brief 正規化（非破壊）
 	// @return 正規化結果
@@ -157,32 +157,33 @@ public:
 	// @return 逆回転
 	Quaternion CalculateInverse(void) const;
 
-	// @brief 球面線形補間
-	// @param fromQuaternion 開始
-	// @param toQuaternion 終了
-	// @param ratio 補間率
-	// @return 補間結果
-	static Quaternion Slerp(Quaternion fromQuaternion, Quaternion toQuaternion, double ratio);
+	/// @brief 球面線形補間
+	/// @param fromQuaternion 開始
+	/// @param toQuaternion 終了
+	/// @param ratio 補間率
+	/// @return 補間結果
+	static Quaternion CalculateSlerp(Quaternion _fromQuaternion, 
+		Quaternion _toQuaternion, double _ratio);
 
-	// @brief 方向差から回転生成
-	// @param fromDirection 開始方向
-	// @param toDirection 目標方向
-	// @return 回転クォータニオン
-	static Quaternion FromToRotation(VECTOR fromDirection, VECTOR toDirection);
+	/// @brief 方向差から回転生成
+	/// @param fromDirection 開始方向
+	/// @param toDirection 目標方向
+	/// @return 回転クォータニオン
+	static Quaternion CreateFromToRotation(VECTOR _fromDirection, VECTOR _toDirection);
 
 	// @brief 最大角制限付き補間
 	// @param fromQuaternion 現在
 	// @param toQuaternion 目標
 	// @param maxDegreesDelta 最大角度
 	// @return 補間結果
-	static Quaternion RotateTowards(const Quaternion& fromQuaternion,
-		const Quaternion& toQuaternion, float maxDegreesDelta);
+	static Quaternion RotateTowards(const Quaternion& _fromQuaternion,
+		const Quaternion& _toQuaternion, float _maxDegreesDelta);
 
 	// @brief 角度差取得
 	// @param quaternion1 クォータニオン1
 	// @param quaternion2 クォータニオン2
 	// @return 角度差
-	static double CalculateAngle(const Quaternion& quaternion1, const Quaternion& quaternion2);
+	static double CalculateAngle(const Quaternion& _quaternion1, const Quaternion& _quaternion2);
 
 	// @brief 制限なし補間
 	// @param startQuaternion 開始
@@ -241,6 +242,6 @@ private:
 	// @brief 指定方向を回転
 	// @param direction 入力方向
 	// @return 回転後
-	VECTOR GetDirection(VECTOR direction) const;
+	VECTOR GetDirection(VECTOR _direction) const;
 
 };
