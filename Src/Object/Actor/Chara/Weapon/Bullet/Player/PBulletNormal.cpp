@@ -17,6 +17,12 @@ PBulletNormal::PBulletNormal(float _scale, float _radius, int _power
 	radiusBullet_ = _radius;
 }
 
+PBulletNormal::~PBulletNormal(void)
+{
+	// ƒƒ‚ƒŠ‰ğ•ú
+	Release();
+}
+
 void PBulletNormal::InitTransform(void)
 {
 	transform_.InitTransform(SCALE, transform_.quaRot, Quaternion::Identity());

@@ -5,27 +5,31 @@ class Tree : public ActorBase
 {
 public:
 
+	/// @brief コンストラクタ
 	Tree(void);
 
-	~Tree(void)override = default;
+	/// @brief デストラクタ
+	~Tree(void)override;
 
+	/// @brief リソース読み込み処理
 	void Load(void)override;
 
+	/// @brief 更新処理
 	void Update(void)override {};
 
 
 protected:
 
-	/// @brief 大きさ、回転、座標を初期化する
+	/// @brief 大きさ、回転、座標の初期化
 	void InitTransform(void) override {};
 
-	/// @brief 衝突判定を初期化する
+	/// @brief 衝突判定の初期化
 	void InitCollider(void) override;
 
-	/// @brief アニメーションを初期化する
+	/// @brief アニメーションの初期化
 	void InitAnimation(void) override {};
 
-	/// @brief 初期化後の個別処理を行う
+	/// @brief 初期化後の個別処理
 	void InitPost(void) override {};
 
 

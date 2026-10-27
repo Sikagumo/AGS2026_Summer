@@ -8,8 +8,15 @@ Tree::Tree(void)
 {
 }
 
+Tree::~Tree(void)
+{
+	// ‰ğ•úˆ—
+	Release();
+}
+
 void Tree::Load(void)
 {
+	// ƒŠƒ\[ƒX“Ç‚İ‚İ
 	transform_.modelId = ResourceManager::GetInstance().
 		LoadModelDuplicate(ResourceManager::SRC::MODEL_TREE);
 }

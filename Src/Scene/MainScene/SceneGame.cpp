@@ -324,6 +324,10 @@ void SceneGame::Release(void)
 
 	boss_->Release();
 
+	// カメラのメモリ解放
+	auto& camera = SceneManager::GetInstance().GetCamera();
+	camera->Release();
+
 	NetManager::GetInstance().Stop();
 }
 
@@ -697,6 +701,13 @@ void SceneGame::UpdateGameEnd(void)
 
 void SceneGame::DrawGame(void)
 {
+	// 雨シェーダ
+	ShaderController::GetInstance().Draw2D(
+		ResourceManager::SRC::PS_RAINY,
+		0, 0, 1.0f,
+		rainyParams_
+	);
+
 	stage_->Draw();
 
 	ShaderController::GetInstance().ExecuteDrawCommands();
@@ -723,12 +734,7 @@ void SceneGame::DrawGame(void)
 	auto& effect = EffectManager::GetInstance();
 	effect.Draw();
 
-	// 雨シェーダ
-	ShaderController::GetInstance().Draw2D(
-		ResourceManager::SRC::PS_RAINY,
-		0, 0, 1.0f,
-		rainyParams_
-	);
+	
 
 	DrawHpBerBoss();
 

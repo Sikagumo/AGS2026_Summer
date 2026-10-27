@@ -9,6 +9,12 @@ PBulletBomb::PBulletBomb(int _shotType)
 {
 }
 
+PBulletBomb::~PBulletBomb(void)
+{
+	// ƒƒ‚ƒŠ‰ğ•ú
+	Release();
+}
+
 void PBulletBomb::InitTransform(void)
 {
 	transform_.InitTransform(SCALE_BOMB
@@ -41,14 +47,18 @@ void PBulletBomb::UpdatePost(void)
 
 void PBulletBomb::SetParam(void)
 {
+	// ‘¬“xŠ„‚è“–‚Ä
 	shotSpeedXZ_ = SHOT_SPEED_BOMB_XZ;
 	shotSpeedY_ = SHOT_SPEED_BOMB_Y;
 
+	// ¶‘¶ŠÔŠ„‚è“–‚Ä
 	aliveTime_ = TIME_ALIVE_BOMB;
 
+	// “–‚½‚è”»’è‚Ì”¼Œa‰Šú‰»
 	radiusBullet_ = RADIUS_BULLET;
 	radiusBlast_ = 0.0f;
 
+	// UŒ‚—ÍŠ„‚è“–‚Ä
 	power_ = POWER_BOMB;
 }
 

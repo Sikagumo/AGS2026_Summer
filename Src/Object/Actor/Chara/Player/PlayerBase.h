@@ -74,8 +74,8 @@ public:
 	/// @param _playerType プレイヤーの見た目の種類
 	PlayerBase(int _playerNo, JOB_TYPE _jobType, const VECTOR& _startPos, SKIN_TYPE _playerType);
 
-	virtual ~PlayerBase(void)override = default;
-
+	/// @brief デストラクタ
+	virtual ~PlayerBase(void)override;
 
 	/// @brief プレイヤー番号取得
 	int GetPlayerNo(void)const { return playerNo_; };

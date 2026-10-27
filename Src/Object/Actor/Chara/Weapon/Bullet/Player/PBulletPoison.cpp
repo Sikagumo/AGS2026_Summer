@@ -13,9 +13,15 @@ PBulletPoison::PBulletPoison(int _shotType)
 {
 }
 
+PBulletPoison::~PBulletPoison(void)
+{
+	// ƒƒ‚ƒŠ‰ğ•ú
+	Release();
+}
+
 void PBulletPoison::Load(void)
 {
-	// SE“Ç‚İ‚İ
+	// Œø‰Ê‰¹“Ç‚İ‚İ
 	SoundManager::GetInstance().Add(SoundManager::TYPE::SE, SoundManager::SOUND::SE_PBULLET_POISON
 		, ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::SE_PBULLET_POISON));
 }
@@ -53,14 +59,18 @@ void PBulletPoison::UpdatePost(void)
 
 void PBulletPoison::SetParam(void)
 {
+	// ”­Ë‘¬“xŠ„‚è“–‚Ä
 	shotSpeedXZ_ = SHOT_SPEED_POISON_XZ;
 	shotSpeedY_ = SHOT_SPEED_POISON_Y;
 
+	// ¶‘¶ŠÔŠ„‚è“–‚Ä
 	aliveTime_ = TIME_ALIVE_POISON;
 
+	// “–‚½‚è”»’è‚Ì”¼ŒaŠ„‚è“–‚Ä
 	radiusBullet_ = RADIUS_BULLET;
 	radiusBlast_ = 0.0f;
 
+	// UŒ‚—ÍŠ„‚è“–‚Ä
 	power_ = POWER_POISON;
 }
 

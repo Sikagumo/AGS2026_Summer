@@ -52,6 +52,12 @@ PBulletBase::PBulletBase(int _shotType, bool _isGravity)
 {
 }
 
+PBulletBase::~PBulletBase(void)
+{
+	// ƒƒ‚ƒŠ‰ğ•ú
+	Release();
+}
+
 void PBulletBase::InitCollider(void)
 {
 	// Ä‰Šú‰»Aˆ—‚ğI—¹
@@ -134,6 +140,7 @@ void PBulletBase::UpdateShot(void)
 
 	if (IS_GRAVITY)
 	{
+		// d—Í‰ÁZˆ—
 		curGravityPow_ += (Application::GetInstance().GetGravityPow() * delta);
 		pos.y -= curGravityPow_;
 	}
@@ -142,6 +149,7 @@ void PBulletBase::UpdateShot(void)
 
 	if (aliveTime_ > 0.0f)
 	{
+		// ¶‘¶ŠÔŒ¸­
 		aliveTime_ -= delta;
 	}
 	else

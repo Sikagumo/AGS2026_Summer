@@ -21,10 +21,14 @@ public:
 	/// @brief コンストラクタ
 	/// @param _isRapidFire 連射か否か
 	PActionController(std::unique_ptr<AnimationController>& _anim, bool _isRapidFire);
+
+	/// @brief デストラクタ
 	~PActionController(void) = default;
 
+	/// @brief 更新処理
 	void Update(void);
 
+	/// @brief デバッグのみの描画
 	void DrawDebug(void);
 
 	/// @brief 行動割り当て処理
@@ -61,6 +65,7 @@ public:
 
 private:
 
+	/// @brief 行動パラメータ
 	struct ActionParam
 	{
 		// 有効時間
@@ -85,6 +90,8 @@ private:
 		std::function<void(void)> actionProcess;
 		
 	};
+
+	/// @brief 各行動配列
 	std::map<const int, const ActionParam> actions_;
 
 	// アニメーション
@@ -115,7 +122,6 @@ private:
 	void Update_Action(void);
 
 	/// @brief 終了中状態の更新
-	/// @param  
 	void Update_End(void);
 };
 

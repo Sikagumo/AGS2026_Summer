@@ -13,7 +13,8 @@ public:
 	/// @param _shotType 弾の種類
 	PBulletBig(int _shotType);
 
-	~PBulletBig(void)override = default;
+	/// @brief デストラクタ
+	~PBulletBig(void)override;
 
 	/// @brief 生成した瞬間の処理
 	void PreActiveProcess(void)override { isScaleUp_ = true; };
@@ -70,6 +71,6 @@ private:
 	bool isScaleUp_;
 
 	// 拡大割合
-	float scaleUpTime_;
+	float scaleUpTerm_;
 };
 

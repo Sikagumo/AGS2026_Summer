@@ -18,6 +18,12 @@ PlayerBase::PlayerBase(int _playerNo, JOB_TYPE _jobType, const VECTOR& _startPos
 	transform_.pos = START_POS;
 }
 
+PlayerBase::~PlayerBase(void)
+{
+	// ƒƒ‚ƒŠŠJ•ú
+	Release();
+}
+
 void PlayerBase::SetDamage(int _damage, bool _isInvincible
 						  , float _timeInvincible, bool _isIgnoreInvincible)
 {

@@ -7,9 +7,15 @@ PBulletBig::PBulletBig(int _shotType)
 	: PBulletBase::PBulletBase(_shotType)
 	, radiusMax_(0.0f)
 	, scaleMax_(0.0f)
-	, scaleUpTime_(0.0f)
+	, scaleUpTerm_(0.0f)
 	, isScaleUp_(false)
 {
+}
+
+PBulletBig::~PBulletBig(void)
+{
+	// ƒƒ‚ƒŠ‰ğ•ú
+	Release();
 }
 
 void PBulletBig::InitTransform(void)
@@ -34,8 +40,8 @@ void PBulletBig::UpdatePost(void)
 	if (!isScaleUp_ || radiusBullet_ >= radiusMax_) { return; }
 
 	// ’eŠÛŠg‘åˆ—
-	scaleUpTime_ += timeManager_.GetDeltaTime();
-	float blendRate_ = (scaleUpTime_ / RADIUS_DURATION);
+	scaleUpTerm_ += timeManager_.GetDeltaTime();
+	float blendRate_ = (scaleUpTerm_ / RADIUS_DURATION);
 	blendRate_ = std::clamp(blendRate_, 0.0f, 1.0f);
 
 	// ƒpƒ‰ƒ[ƒ^‚É”½‰f
@@ -45,15 +51,19 @@ void PBulletBig::UpdatePost(void)
 
 void PBulletBig::SetParam(void)
 {
+	// “–‚½‚è”»’è‚Ì”¼ŒaŠ„‚è“–‚Ä
 	radiusBullet_ = RADIUS_BIG;
 	radiusMax_ = RADIUS_BIG + (RADIUS_INCREMENT * shotCnt_);
 
+	// ”­Ë‘¬“xŠ„‚è“–‚Ä
 	shotSpeedXZ_ = SHOT_SPEED_BIG_XZ;
 	shotSpeedY_ = SHOT_SPEED_BIG_Y;
 
+	// ¶‘¶ŠÔŠ„‚è“–‚Ä
 	aliveTime_ = TIME_ALIVE_BIG;
 
-	scaleUpTime_ = 0.0f;
+	// Šg‘å—¦‰Šú‰»
+	scaleUpTerm_ = 0.0f;
 
 	// Šg‘å–³Œø‰»
 	isScaleUp_ = false;

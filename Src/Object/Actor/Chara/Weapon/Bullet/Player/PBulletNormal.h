@@ -17,7 +17,8 @@ public:
 				, float _shotSpeedXZ, float _shotSpeedY, float _aliveTime
 				, int _shotType, bool _isActiveGravity = true);
 
-	~PBulletNormal(void)override = default;
+	/// @brief デストラクタ
+	~PBulletNormal(void)override;
 
 
 protected:

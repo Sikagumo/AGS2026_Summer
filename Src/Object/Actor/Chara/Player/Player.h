@@ -50,8 +50,11 @@ public:
 	/// @param _skinType 見た目の種類
 	/// @param _startPos 開始位置
 	Player(int _playerNo, JOB_TYPE _jobType, SKIN_TYPE _skinType, const VECTOR& _startPos);
-	~Player(void)override = default;
 
+	/// @brief デストラクタ
+	~Player(void)override;
+
+	/// @brief リソース読み込み処理
 	void Load(void)override;
 
 	/// @brief 吹っ飛ばし処理
@@ -108,6 +111,9 @@ protected:
 	void DrawPre(void)override;
 	void DrawLate(void)override;
 
+	/// @brief 各オブジェクトのメモリ解放
+	void ReleasePost(void)override;
+
 	/// @brief 位置に加算処理
 	VECTOR CalcAddPosition(void) override;
 
@@ -156,12 +162,12 @@ private:
 	// アニメーション速度
 	static constexpr float ANIMATION_SPEED_IDLE   = 30.0f; // 待機
 	static constexpr float ANIMATION_SPEED_WALK   = 55.0f; // 移動
-	static constexpr float ANIMATINO_SPEED_JUMP   = 50.0f; // ジャンプ
+	static constexpr float ANIMATION_SPEED_JUMP   = 50.0f; // ジャンプ
 	static constexpr float ANIMATION_SPEED_DODGE  = 55.0f; // 回避
 	static constexpr float ANIMATION_SPEED_DEFEAT = 30.0f; // 撃破
 	static constexpr float ANIMATION_SPEED_THROW_BIG   = 20.0f; // 巨大弾発射
 	static constexpr float ANIMATION_SPEED_THROW_RAPID = 75.0f; // 連射弾発射
-	static constexpr float ANIMATINO_SPEED_THROW_BOMB  = 35.0f; // 爆発弾発射
+	static constexpr float ANIMATION_SPEED_THROW_BOMB  = 35.0f; // 爆発弾発射
 
 	// 行動有効の時間
 	static constexpr float JUMP_TOTAL_ACTIVE         = 0.2f;  // ジャンプ
@@ -177,7 +183,7 @@ private:
 	static constexpr float JUMP_TIMING_ACTION         = 0.1f;  // ジャンプ
 	static constexpr float DODGE_TIMING_ACTION        = 0.1f;  // 回避
 	static constexpr float DEFEAT_TIMING_ACTION       = 0.01f; // 撃墜
-	static constexpr float SHOT_BOMB_TIMIMG_ACTION    = 0.75f; // 爆発弾発射
+	static constexpr float SHOT_BOMB_TIMING_ACTION    = 0.75f; // 爆発弾発射
 	static constexpr float SHOT_CANNON_TIMING_ACTION  = 1.25f;  // 巨大弾発射
 	static constexpr float SHOT_RAPID_TIMING_ACTIVE   = 0.375f; // 連射弾発射
 	static constexpr float SHOT_CLUSTER_TIMING_ACTIVE = 0.4f;   // 拡散弾発射
@@ -206,9 +212,9 @@ private:
 	static constexpr float SHOT_CANNON_TIMING_STOP = 1.15f;  // 巨大弾
 
 	// 巨大弾 行動パラメータ
-	static constexpr float SHOT_CANNON_TOTAL_ACTIVE_INCREAMENT = 0.2f;  // 行動有効の間隔上昇値
-	static constexpr float SHOT_CANNON_TOTAL_END_INCREAMENT    = 0.55f; // 行動終了の間隔上昇値
-	static constexpr float SHOT_CANNON_TOTAL_INPUT             = 0.2f;  // 連続入力が有効になる時間
+	static constexpr float SHOT_CANNON_TOTAL_ACTIVE_INCREMENT = 0.2f;  // 行動有効の間隔上昇値
+	static constexpr float SHOT_CANNON_TOTAL_END_INCREMENT    = 0.55f; // 行動終了の間隔上昇値
+	static constexpr float SHOT_CANNON_TOTAL_INPUT            = 0.2f;  // 連続入力が有効になる時間
 
 	// Y軸制限位置
 	static constexpr float LIMIT_POS_Y = -1500.0f;
@@ -223,10 +229,13 @@ private:
 	// 発射している弾の識別番号
 	int shotIndex_;
 
+	// 再生中のアニメーションの種類
 	ANIMATION_TYPE animationType_;
 
-	// 投げる位置
+	// 発射Z位置
 	VECTOR throwPos_;
+
+	// 発射方向
 	VECTOR throwDir_;
 
 	// 移動速度
@@ -235,6 +244,7 @@ private:
 	// 吹っ飛ばし量
 	Vector2F knockPowXZ_;
 
+	// 回避の横移動量
 	Vector2F dodgePowXZ_;
 
 	// カメラに応じた回転をするか否か
@@ -313,11 +323,16 @@ private:
 
 	/// @brief 拡散弾生成
 	void CreateCluster(void);
+
+	/// @brief 拡散弾生成処理
+	/// @param _throwDir 発射方向
+	/// @return 拡散弾オブジェクト
 	std::unique_ptr<PBulletNormal> CreateClusterBullet(const VECTOR& _throwDir);
 
 	/// @brief 拡散弾発射
 	void ShotCluster(void);
 
+	/// @brief 移動方向に応じた遅延回転
 	void DelayRotate(void)override;
 
 	/// @brief 弾の軌道を描画
@@ -337,6 +352,10 @@ private:
 
 	/// @brief 攻撃の行動中か否か
 	bool IsActionAttack(void)const;
+
+	/// @brief 攻撃回数をリセットするか否か
+	/// @param _type 再生するアニメーションの種類
+	bool IsResetAttackCount(ANIMATION_TYPE _type)const;
 
 	/// @brief 自分の最新状態をパケット用に変換して NetManager に送る
 	void SendMyActionToNetManager(void);

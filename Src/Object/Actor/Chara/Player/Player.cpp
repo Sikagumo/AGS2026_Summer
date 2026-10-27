@@ -26,6 +26,9 @@
 
 namespace
 {
+	// 巨大弾発射数
+	constexpr int CANNON_BULLET_MAX = 3;
+
 	// 衝突判定用線分位置
 	constexpr VECTOR COL_LINE_START_LOCAL_POS = { 0.0f, 50.0f, 0.0f };
 	constexpr VECTOR COL_LINE_END_LOCAL_POS = { 0.0f, 0.0f, 0.0f };
@@ -133,8 +136,7 @@ Player::Player(int _playerNo, JOB_TYPE _jobType, SKIN_TYPE _skinType, const VECT
 {
 	if (_jobType == JOB_TYPE::CANNON)
 	{
-		constexpr int BULLET_MAX = 3;
-		attackNumMax_ = BULLET_MAX;
+		attackNumMax_ = CANNON_BULLET_MAX;
 	}
 
 	shotType_ = JOB_SHOT_TYPE[static_cast<int>(jobType_)];
@@ -160,6 +162,11 @@ Player::Player(int _playerNo, JOB_TYPE _jobType, SKIN_TYPE _skinType, const VECT
 	shotPointVertex_[RIGHT_FORWARD].u = 1.0f; shotPointVertex_[RIGHT_FORWARD].v = 0.0f;
 }
 
+Player::~Player(void)
+{
+	// メモリ解放
+	Release();
+}
 
 void Player::Load(void)
 {
@@ -198,7 +205,7 @@ void Player::InitAnimation(void)
 	}
 	else
 	{
-		throwSpeed = ANIMATINO_SPEED_THROW_BOMB;
+		throwSpeed = ANIMATION_SPEED_THROW_BOMB;
 	}
 
 	// 左投擲
@@ -213,7 +220,7 @@ void Player::InitAnimation(void)
 	constexpr VECTOR LOCAL_POS_JUMP = { 0.0f, 50.0f, 0.0f };
 	animation_->AddExternal(static_cast<int>(ANIMATION_TYPE::JUMP)
 		, ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::ANIM_JUMP)
-		, LOCAL_POS_JUMP, ANIMATINO_SPEED_JUMP);
+		, LOCAL_POS_JUMP, ANIMATION_SPEED_JUMP);
 
 	// 回避
 	constexpr VECTOR LOCAL_POS_DODGE = { 0.0f, 25.0f, 0.0f };
@@ -313,9 +320,9 @@ void Player::InitActions(void)
 
 		// 通常弾 (2弾目)
 		actionNum++;
-		timeTotalActive += SHOT_CANNON_TOTAL_ACTIVE_INCREAMENT;
+		timeTotalActive += SHOT_CANNON_TOTAL_ACTIVE_INCREMENT;
 		timeInput += SHOT_CANNON_TOTAL_INPUT;
-		timeTotalEnd += SHOT_CANNON_TOTAL_END_INCREAMENT;
+		timeTotalEnd += SHOT_CANNON_TOTAL_END_INCREMENT;
 		timeTotalStop = SHOT_CANNON_TOTAL_STOP;
 		timeTimingStop = SHOT_CANNON_TIMING_STOP;
 
@@ -325,7 +332,7 @@ void Player::InitActions(void)
 
 		// 通常弾 (3弾目)
 		actionNum++;
-		timeTotalActive += (SHOT_CANNON_TOTAL_ACTIVE_INCREAMENT * 2);
+		timeTotalActive += (SHOT_CANNON_TOTAL_ACTIVE_INCREMENT * 2);
 
 		actionController_->SetAction(actionNum, timeTotalActive, timeTimingAction, timeTotalEnd
 			, std::bind(&Player::ShotBullet, this)
@@ -359,7 +366,7 @@ void Player::InitActions(void)
 	{
 		// 通常弾
 		actionNum = static_cast<int>(ACTION_TYPE::ATTACK);
-		actionController_->SetAction(actionNum, SHOT_BOMB_TOTAL_ACTIVE, SHOT_BOMB_TIMIMG_ACTION, SHOT_BOMB_TOTAL_END
+		actionController_->SetAction(actionNum, SHOT_BOMB_TOTAL_ACTIVE, SHOT_BOMB_TIMING_ACTION, SHOT_BOMB_TOTAL_END
 			, std::bind(&Player::ShotBullet, this));
 	}
 }
@@ -477,6 +484,23 @@ void Player::DrawLate(void)
 		}
 	}
 #endif
+}
+
+void Player::ReleasePost(void)
+{
+	for (auto& bullet : bullets_)
+	{
+		// 弾解放
+		if (bullet == nullptr) { continue; }
+		bullet->Release();
+	}
+
+	for (auto& cluster : clusterBullets_)
+	{
+		// 拡散弾解放
+		if (cluster == nullptr) { continue; }
+		cluster->Release();
+	}
 }
 
 void Player::SetKnock(const VECTOR& _knockDirXZ, float _knockPowXZ, bool _isStan, float _knockPowY)
@@ -1119,21 +1143,22 @@ void Player::DelayRotate(void)
 
 void Player::CreateBullet(void)
 {
-	std::unique_ptr<PBulletBase> bullet;
+	std::unique_ptr<PBulletBase> bulletObj;
 
 	shotIndex_ = 0;
 
 	// 弾の再利用処理
-	for (auto& bullet : bullets_)
+	for (auto& pooledBullet : bullets_)
 	{
 		// 拡散弾では再利用生成を行わない
 		if (shotType_ == SHOT_TYPE::CLUSTER) { break; }
 
-		if (!bullet->IsAlive()
-			&& static_cast<int>(shotType_) == bullet->GetShotType())
+		if (!pooledBullet->IsAlive()
+			&& static_cast<int>(shotType_) == pooledBullet->GetShotType())
 		{
-			bullet->Init();
-			bullet->Create(transform_.pos, throwDir_, curAttackCount_);
+			// 無効中の弾を再利用
+			pooledBullet->Init();
+			pooledBullet->Create(transform_.pos, throwDir_, curAttackCount_);
 			return;
 		}
 
@@ -1147,27 +1172,27 @@ void Player::CreateBullet(void)
 	{
 		// 巨大弾
 		case SHOT_TYPE::BIG:
-			bullet = std::make_unique<PBulletBig>(type);
+			bulletObj = std::make_unique<PBulletBig>(type);
 			break;
 
 		// 爆発弾
 		case SHOT_TYPE::BOMB:
-			bullet = std::make_unique<PBulletBomb>(type);
+			bulletObj = std::make_unique<PBulletBomb>(type);
 			break;
 
 		// 回復弾
 		case SHOT_TYPE::RECOVERY:
-			bullet = std::make_unique<PBulletRecovery>(type);
+			bulletObj = std::make_unique<PBulletRecovery>(type);
 			break;
 
 		// 毒弾
 		case SHOT_TYPE::POISON:
-			bullet = std::make_unique<PBulletPoison>(type);
+			bulletObj = std::make_unique<PBulletPoison>(type);
 			break;
 
 		// 連射
 		case SHOT_TYPE::RAPID_FIRE:
-			bullet = std::make_unique<PBulletNormal>
+			bulletObj = std::make_unique<PBulletNormal>
 						(RAPID_SCALE, RAPID_RADIUS, RAPID_POWER
 						, RAPID_SHOT_SPEED_XZ, RAPID_SHOT_SPEED_Y, RAPID_ALIVE_TIME
 						, type, false);
@@ -1185,10 +1210,10 @@ void Player::CreateBullet(void)
 	}
 
 	// 弾再生成処理
-	bullet->Load();
-	bullet->Init();
-	bullet->Create(throwPos_, throwDir_, curAttackCount_);
-	bullets_.emplace_back(std::move(bullet));
+	bulletObj->Load();
+	bulletObj->Init();
+	bulletObj->Create(throwPos_, throwDir_, curAttackCount_);
+	bullets_.emplace_back(std::move(bulletObj));
 }
 
 void Player::CreateCluster(void)
@@ -1342,24 +1367,42 @@ void Player::ShotCluster(void)
 
 void Player::PlayAnimation(ANIMATION_TYPE _type, bool _isLoop, bool _isAnimBlend, float _animSpeed)
 {
-	// コンボ時のみ
-	if (_type != ANIMATION_TYPE::THROW_LEFT
-		&& _type != ANIMATION_TYPE::THROW_RIGHT
-		&& (attackNumMax_ != 0))
+	if (IsResetAttackCount(_type))
 	{
-		if (animationType_ == ANIMATION_TYPE::THROW_LEFT
-			|| animationType_ == ANIMATION_TYPE::THROW_RIGHT)
-		{
-			curAttackCount_ = 0;
-		}
+		// 攻撃回数のリセット
+		curAttackCount_ = 0;
 	}
 
 	// ブレンド無効時、ブレンド時間を減少
 	float blendTime = ((!_isAnimBlend) ? 0.001f : AnimationController::BLEND_TIME_DEFAULT);
 
+	// アニメーション登録
 	animationType_ = _type;
-	
 	animation_->Play(static_cast<int>(animationType_), _isLoop, _animSpeed, blendTime);
+}
+
+bool Player::IsResetAttackCount(ANIMATION_TYPE _type) const
+{
+	if (jobType_ != JOB_TYPE::CANNON)
+	{
+		// 巨大弾以外のジョブの場合、false
+		return false;
+	}
+
+	if (_type == ANIMATION_TYPE::THROW_LEFT
+		|| _type == ANIMATION_TYPE::THROW_RIGHT)
+	{
+		// 再生するアニメーションが投擲アニメーションの場合、false
+		return false;
+	}
+	if (animationType_ != ANIMATION_TYPE::THROW_LEFT
+		&& animationType_ != ANIMATION_TYPE::THROW_RIGHT)
+	{
+		// 再生中のアニメーションが投擲アニメーション以外の場合、false
+		return false;
+	}
+
+	return true;
 }
 
 void Player::SetNetworkAction(const VECTOR& _pos, const Quaternion& _rot, int _animId, bool _isAttack, int _currentHp)

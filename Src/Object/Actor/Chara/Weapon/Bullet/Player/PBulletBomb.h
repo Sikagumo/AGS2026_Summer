@@ -9,9 +9,12 @@ public:
 	static constexpr float SHOT_SPEED_BOMB_XZ = 10.0f;
 	static constexpr float SHOT_SPEED_BOMB_Y = 7.5f;
 
+	/// @brief コンストラクタ
+	/// @param _shotType 弾の種類
 	PBulletBomb(int _shotType);
 
-	~PBulletBomb(void)override = default;
+	/// @brief デストラクタ
+	~PBulletBomb(void)override;
 
 
 protected:

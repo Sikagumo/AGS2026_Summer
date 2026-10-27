@@ -12,19 +12,16 @@ class Stage : public ActorBase
 {
 public:
 
-	// 衝突判定種別
-	enum class COLLIDER_TYPE
-	{
-		MODEL = 0,
-		MAX,
-	};
-
+	/// @brief コンストラクタ
 	Stage(void);
 
-	~Stage(void)override = default;
+	/// @brief デストラクタ
+	~Stage(void)override;
 
+	/// @brief リソース読み込み処理
 	void Load(void)override;
 
+	/// @brief 更新処理
 	void Update(void)override;
 
 	// 描画処理
@@ -45,6 +42,9 @@ protected:
 
 	/// @brief 初期化後の個別処理
 	void InitPost(void) override;
+
+	/// @brief 各オブジェクト用解放処理
+	void ReleasePost(void)override;
 
 
 private:
@@ -70,8 +70,10 @@ private:
 		"Collision_Wall",
 	};
 
-	// 木の配置するフレーム名
+	// 木オブジェクトの配置するフレーム名(当たり判定あり)
 	const std::string POS_FRAME_NAME_FRONT = "tree_In";
+
+	// 木オブジェクトの配置するフレーム名(描画のみ)
 	const std::string POS_FRAME_NAME_BACK  = "tree_Out";
 
 	// スカイドーム
@@ -80,12 +82,18 @@ private:
 	// 描画用モデル
 	Transform viewTrans_;
 
-	// 描画用モデルのテクスチャ
+	// ステージモデルのテクスチャハンドル
 	int viewStageTexHandle_;
+
+	// ステージモデルのテクスチャシェーダのパラメータ
 	TextureScaleShaderParams texScaleParams_;
 
 	// 木のモデル
 	Transform treePosModel_;
-	std::vector<std::shared_ptr<Tree>> treesFront_;
+
+	// 木オブジェクト(当たり判定あり)
+	std::vector<std::unique_ptr<Tree>> treesFront_;
+
+	// 木オブジェクト(描画のみ)
 	std::vector<Transform> treesBack_;
 };

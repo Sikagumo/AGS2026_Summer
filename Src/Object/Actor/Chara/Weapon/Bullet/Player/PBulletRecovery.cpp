@@ -13,6 +13,12 @@ PBulletRecovery::PBulletRecovery(int _shotType)
 {
 }
 
+PBulletRecovery::~PBulletRecovery(void)
+{
+	// メモリ解放
+	Release();
+}
+
 void PBulletRecovery::InitTransform(void)
 {
 	transform_.InitTransform(SCALE_RECOVERY
@@ -27,6 +33,7 @@ void PBulletRecovery::InitCollider(void)
 	auto& support = ownColliders_[static_cast<int>(COLLISION_TYPE::SUPPORT)];
 	if (!support.empty()) { return; }
 
+	// 当たり判定の登録
 	support.emplace_back(new ColliderSphere(ColliderBase::TAG::PLAYER_RECOVERY, &transform_
 		, UtilityMath::VECTOR_ZERO, 0.0f));
 
@@ -35,11 +42,14 @@ void PBulletRecovery::InitCollider(void)
 
 void PBulletRecovery::SetParam(void)
 {
+	// 発射速度割り当て
 	shotSpeedXZ_ = SHOT_SPEED_RECOVERY_XZ;
 	shotSpeedY_ = SHOT_SPEED_RECOVERY_Y;
 
+	// 生存時間割り当て
 	aliveTime_ = TIME_ALIVE_RECOVERY;
 
+	// 当たり判定の半径割り当て
 	radiusBullet_ = RADIUS_BULLET;
 	radiusBlast_ = 0.0f;
 
@@ -85,6 +95,7 @@ void PBulletRecovery::BlastAction(void)
 	SetColliderRadius(COLLISION_TYPE::SUPPORT, radiusBlast_);
 	SetColliderActive(ColliderBase::TAG::PLAYER_RECOVERY, true);
 
+	// 回復エフェクト再生
 	EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_PLAYER_RECOVERY
 		, transform_.pos, Quaternion::Identity().ToEuler()
 		, { RECOVERY_EFFECT_SCALE, RECOVERY_EFFECT_SCALE, RECOVERY_EFFECT_SCALE }

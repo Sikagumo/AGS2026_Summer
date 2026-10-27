@@ -14,6 +14,11 @@ Stage::Stage(void)
 {
 }
 
+Stage::~Stage(void)
+{
+	Release();
+}
+
 void Stage::Load(void)
 {
 	// スカイドーム
@@ -23,6 +28,7 @@ void Stage::Load(void)
 	transform_.modelId = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::MODEL_STAGE_COLLISION);
 	viewTrans_.modelId = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::MODEL_STAGE);
 
+	// 木の位置記憶用モデル
 	treePosModel_.modelId = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::MODEL_TREE_POSITION);
 
 	// 木(当たり判定あり)
@@ -30,10 +36,10 @@ void Stage::Load(void)
 	int maxFront = MV1GetFrameChildNum(treePosModel_.modelId, frameFront);
 	for (int i = 0; i < maxFront; i++)
 	{
-		std::shared_ptr<Tree> tree = std::make_shared<Tree>();
+		std::unique_ptr<Tree> tree = std::make_unique<Tree>();
 		tree->Load();
 
-		treesFront_.emplace_back(tree);
+		treesFront_.emplace_back(std::move(tree));
 	}
 
 	// 木(当たり判定無し)
@@ -225,4 +231,20 @@ void Stage::DrawTree(void)
 	}
 
 	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+}
+
+void Stage::ReleasePost(void)
+{
+	for (auto& tree : treesFront_)
+	{
+		// 木オブジェクト解放
+		tree->Release();
+	}
+
+	// 木オブジェクト配列をクリア
+	treesFront_.clear();
+	treesBack_.clear();
+
+	// ステージ当たり判定の後始末
+	MV1TerminateCollInfo(transform_.modelId);
 }

@@ -31,6 +31,12 @@ Camera::Camera(void)
 {
 }
 
+Camera::~Camera(void)
+{
+	// メモリ解放
+	Release();
+}
+
 void Camera::InitCollider(void)
 {
 	// 主に地面との衝突で使用する球体コライダ
@@ -322,7 +328,7 @@ void Camera::SetDefault(void)
 	transform_.pos = DEFAULT_POS;
 
 	// カメラ角
-	angles_ = DERFAULT_ANGLES;
+	angles_ = DEFAULT_ANGLES;
 	transform_.quaRot = Quaternion::Identity();
 
 	// 注視点
@@ -497,7 +503,7 @@ void Camera::SetBeforeDrawFollowBoss(void)
 
 	// 同期先の位置
 	VECTOR pos = followTransform_->pos;
-	angles_ = DERFAULT_ANGLES;
+	angles_ = DEFAULT_ANGLES;
 	// Y軸
 	rotY_ = Quaternion::AngleAxis(angles_.y, UtilityMath::AXIS_Y);
 

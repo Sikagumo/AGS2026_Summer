@@ -42,6 +42,8 @@ public:
 	/// @param _modelId アニメーション対象
 	AnimationController(int _modelId);
 
+	/// @brief デストラクタ
+	/// @param  
 	~AnimationController(void);
 
 	/// @brief 同じモデル内のアニメーションを準備
@@ -113,7 +115,6 @@ public:
 	/// @brief 再生中のアニメーション番号取得
 	int GetPlayType(void)const { return playType_; };
 
-
 	/// @brief アニメーション停止処理
 	/// @param _stopTime 停止時間
 	void Stop(float _stopTime);
@@ -128,14 +129,6 @@ public:
 	/// @brief 再生位置変更
 	/// @param _rate 再生位置の割合(0.0f～1.0f)
 	void SetAnimationStepRate(float _rate);
-
-	void SetModelId(int _modelId);
-
-	/// @brief 再生中のアニメーションの現在時間を取得
-	float GetPlayTime(void);
-
-	/// @brief 再生中のアニメーションの総再生時間を取得
-	float GetPlayTimeTotal(void);
 
 
 private:
@@ -179,7 +172,7 @@ private:
 	/// @brief 他アニメーションとのブレンドの影響を受けない単体の素のルート位置を取得
 	/// @param _target 位置を取得したいアニメーション
 	/// @param _other ブレンド対象の相方アニメーション(一時的にブレンド率0%にする)
-	VECTOR GetRawAnimationRootPos(Animation& _target, Animation& _other);
+	VECTOR GetRawAnimationRootPos(Animation& _target, Animation& _other)const;
 
 	/// @brief 固定位置アニメーションの、現在の再生進行度に応じた目標位置を取得
 	/// @param _animation 対象の固定位置のアニメーション
@@ -190,10 +183,6 @@ private:
 	/// @param _type アニメーションの種類
 	/// @param _animation 格納するアニメーション
 	void Add(int _type, Animation& _animation);
-
-	/// @brief アニメーションが格納されているか判定
-	/// @param _type アニメーションの種類
-	bool IsFindAnimation(int _animationType);
 
 	/// @brief 固定アニメーション処理
 	/// @param _prePlayAnimation 再生中のアニメーション

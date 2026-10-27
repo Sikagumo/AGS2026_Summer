@@ -22,12 +22,16 @@ public:
 	/// @param _isGravity 重力をつけるか否(default:true)
 	PBulletBase(int _shotType, bool _isGravity = true);
 
-	virtual ~PBulletBase(void)override = default;
+	/// @brief デストラクタ
+	virtual ~PBulletBase(void)override;
 
+	/// @brief リソース読み込み処理
 	virtual void Load(void)override {};
 
+	/// @brief 更新処理
 	void Update(void)override final;
 
+	/// @brief 描画処理
 	void Draw(void)override;
 
 	/// @brief 生成処理

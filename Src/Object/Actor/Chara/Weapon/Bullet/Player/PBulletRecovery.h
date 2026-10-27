@@ -12,10 +12,12 @@ public:
 	// 回復割合(0.0～1.0)
 	static constexpr float RECOVERY_RATE = 0.175f;
 
-
+	/// @brief コンストラクタ
+	/// @param _shotType 弾の種類
 	PBulletRecovery(int _shotType);
 
-	~PBulletRecovery(void)override = default;
+	/// @brief デストラクタ
+	~PBulletRecovery(void)override;
 
 
 protected:

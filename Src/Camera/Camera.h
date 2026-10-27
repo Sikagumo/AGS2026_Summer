@@ -38,15 +38,20 @@ public:
 		MAX,                // 要素数
 	};
 
+	/// @brief コンストラクタ
 	Camera(void);
-	~Camera(void)override = default;
+
+	/// @brief デストラクタ
+	~Camera(void)override;
 
 	// 所有する資源(コライダ等)の二重管理を避けるためコピー・ムーブ禁止
 	Camera(const Camera&) = delete;
 	Camera& operator=(const Camera&) = delete;
 
+	/// @brief リソース読み込み処理
 	void Load(void) override {}
 
+	/// @brief 更新処理
 	void Update(void) override;
 
 	/// @brief 描画前のカメラ設定
@@ -166,7 +171,7 @@ private:
 	static constexpr float CAMERA_MOVE_SPEED = 50.0f;
 
 	// カメラの初期角度
-	static constexpr VECTOR DERFAULT_ANGLES = { 0.0f, 0.0f, 0.0f };
+	static constexpr VECTOR DEFAULT_ANGLES = { 0.0f, 0.0f, 0.0f };
 
 	// ロックオン切替イージング終了時間
 	static constexpr float LOCKON_DURATION = 0.2f;
@@ -281,7 +286,7 @@ private:
 	/// @brief ロックオンを解除するか否か
 	bool IsUnLockTarget(void)const;
 
-	/// @brief QuardInOut補間で位置を取得
+	/// @brief QuadInOut補間で位置を取得
 	/// @param _fromVec 始点
 	/// @param _toVec 終点
 	/// @param term 補間間隔
