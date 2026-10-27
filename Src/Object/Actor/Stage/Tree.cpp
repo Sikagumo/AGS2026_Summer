@@ -3,15 +3,6 @@
 #include "../../../Object/Collision/CollisionController.h"
 #include "../../Collider/ColliderCapsule.h"
 
-namespace
-{
-	// –Ø‚ÌˆÊ’u
-	constexpr float COLLISION_OFFSET_Y = 250.0f;
-
-	// –Øƒ‚ƒfƒ‹‚Ì“–‚½‚è”»’è‚Ì”¼Œa
-	constexpr float COLLISION_RADIUS = 27.5f;
-};
-
 Tree::Tree(void)
 	: ActorBase::ActorBase()
 {
@@ -28,15 +19,12 @@ void Tree::InitCollider(void)
 	// –Ø‚ÌƒRƒ‰ƒCƒ_Š„‚è“–‚Ä
 	VECTOR posEnd = UtilityMath::VECTOR_ZERO;
 	posEnd.y = COLLISION_OFFSET_Y;
-
 	ColliderCapsule* treeCol = new ColliderCapsule(ColliderBase::TAG::TREE, &transform_, UtilityMath::VECTOR_ZERO, posEnd, COLLISION_RADIUS);
 	ownColliders_[static_cast<int>(ColliderBase::TAG::TREE)].push_back(treeCol);
 
-	treeCol->SetTriger(false);
-
 	// “–‚½‚è”»’è“o˜^
+	treeCol->SetTriger(false);
 	CollisionController::GetInstance().RegisterActor(this);
-
 	CollisionController::GetInstance()
 		.SetCollisionActive(this, ColliderBase::TAG::TREE, true);
 }

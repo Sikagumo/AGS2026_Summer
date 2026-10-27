@@ -4,21 +4,8 @@
 #include "../../../../../Collision/CollisionController.h"
 #include "../../../../../../Manager/Decoration/EffectManager.h"
 
-namespace
-{
-	constexpr float RADIUS_BULLET = 9.0f;
-	constexpr float RADIUS_BLAST = 65.0f;
-	constexpr float SCALE_BOMB = 1.0f;
-	constexpr float TIME_ALIVE_BOMB = 10.0f;
-	constexpr int POWER_BOMB = 65;
-}
-
 PBulletBomb::PBulletBomb(int _shotType)
 	: PBulletBase::PBulletBase(_shotType)
-{
-}
-
-void PBulletBomb::Load(void)
 {
 }
 
@@ -28,33 +15,28 @@ void PBulletBomb::InitTransform(void)
 		, transform_.quaRot, Quaternion::Identity());
 }
 
-
 void PBulletBomb::UpdatePost(void)
 {
 	if (bulletState_ == BULLET_STATE::BLAST)
 	{
-		if (isActiveDestroy_) 
+		if (isActiveDestroy_)
 		{
+			// 爆発を１フレーム有効後、消滅
+
 			// 当たり判定無効化
 			CollisionController::GetInstance()
 				.SetCollisionActive(this, ColliderBase::TAG::PLAYER_BLAST, false);
+
 			bulletState_ = BULLET_STATE::INACTIVE;
 			activePowerBullet_ = 0;
 			activePowerBlast_ = 0;
+
 			return;
 		}
 
 		// 弾を消滅させる
 		isActiveDestroy_ = true;
 	}
-}
-
-void PBulletBomb::PreActiveProcess(void)
-{
-}
-
-void PBulletBomb::ChangeBulletStateProc(void)
-{
 }
 
 void PBulletBomb::SetParam(void)
@@ -72,25 +54,16 @@ void PBulletBomb::SetParam(void)
 
 void PBulletBomb::BlastAction(void)
 {
-	bulletState_ = BULLET_STATE::BLAST;
-	isVisible_ = false;
-	activePowerBlast_ = POWER_BOMB;
-
-	// 当たり判定無効化
-	CollisionController::GetInstance()
-		.SetCollisionActive(this, ColliderBase::TAG::PLAYER_BULLET, false);
+	// 着弾状態へ移行
+	BeginBlast();
+	activePowerBlast_ = power_;
 
 	// 爆発有効化
-	radiusBlast_ = RADIUS_BLAST;
+	ActivateBlastCollider(RADIUS_BLAST);
 
-	ownColliders_[static_cast<int>(COLLISION_TYPE::BLAST)]
-		.at(0)->SetRadius(radiusBlast_);
-
-	CollisionController::GetInstance()
-		.SetCollisionActive(this, ColliderBase::TAG::PLAYER_BLAST, true);
-
-
-	EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_PLAYER_BLAST,
-		transform_.pos, Quaternion::Identity().ToEuler(),
-		{ 35.0f , 35.0f, 35.0f }, 1.0f, this);
+	// エフェクト有効化
+	EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_PLAYER_BLAST
+		, transform_.pos, Quaternion::Identity().ToEuler()
+		, { BLAST_EFFECT_SCALE , BLAST_EFFECT_SCALE, BLAST_EFFECT_SCALE }
+		, BLAST_EFFECT_SPEED, this);
 }

@@ -7,24 +7,15 @@
 #include "../../../../../../Manager/Generic/ResourceManager.h"
 #include "../../../../../../Manager/Decoration/SoundManager.h"
 
-namespace
-{
-	constexpr float RADIUS_BULLET = 5.0f;
-	constexpr float RADIUS_POISON = 100.0f;
-	constexpr float SCALE_POISON = 1.0f;
-	constexpr float TIME_ALIVE_POISON = 7.5f;
-	constexpr int POWER_POISON = 1;
-	constexpr float ACTIVE_TIME = 2.5f;
-}
-
 PBulletPoison::PBulletPoison(int _shotType)
 	: PBulletBase::PBulletBase(_shotType)
-	, activeTime_(0.0f)
+	, activeTimePoison_(0.0f)
 {
 }
 
 void PBulletPoison::Load(void)
 {
+	// SE読み込み
 	SoundManager::GetInstance().Add(SoundManager::TYPE::SE, SoundManager::SOUND::SE_PBULLET_POISON
 		, ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::SE_PBULLET_POISON));
 }
@@ -48,24 +39,16 @@ void PBulletPoison::UpdatePost(void)
 			return;
 		}
 
-		if (activeTime_ > 0.0f)
+		if (activeTimePoison_ > 0.0f)
 		{
-			activeTime_ -= TimeManager::GetInstance().GetDeltaTime();
+			activeTimePoison_ -= TimeManager::GetInstance().GetDeltaTime();
 		}
 		else
 		{
-			// 弾を消滅させる
+			// 毒の継続時間が終了したら消滅させる
 			isActiveDestroy_ = true;
 		}
 	}
-}
-
-void PBulletPoison::PreActiveProcess(void)
-{
-}
-
-void PBulletPoison::ChangeBulletStateProc(void)
-{
 }
 
 void PBulletPoison::SetParam(void)
@@ -78,34 +61,27 @@ void PBulletPoison::SetParam(void)
 	radiusBullet_ = RADIUS_BULLET;
 	radiusBlast_ = 0.0f;
 
-
 	power_ = POWER_POISON;
 }
 
 void PBulletPoison::BlastAction(void)
 {
-	bulletState_ = BULLET_STATE::BLAST;
-	isVisible_ = false;
-
+	// 着弾状態へ移行(弾の当たり判定は無効化)
+	BeginBlast();
+	
+	// 攻撃有効化
 	activePowerBlast_ = power_;
-	activeTime_ = ACTIVE_TIME;
+	activeTimePoison_ = ACTIVE_TIME;
 
-	// 当たり判定無効化
-	CollisionController::GetInstance()
-		.SetCollisionActive(this, ColliderBase::TAG::PLAYER_BULLET, false);
+	// 毒範囲有効化
+	ActivateBlastCollider(RADIUS_POISON);
 
-	// 爆発有効化
-	radiusBlast_ = RADIUS_POISON;
+	// エフェクト再生
+	EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_PLAYER_POISON
+		, transform_.pos, Quaternion::Identity().ToEuler()
+		, { POISON_EFFECT_SCALE, POISON_EFFECT_SCALE, POISON_EFFECT_SCALE }
+		, POISON_EFFECT_SPEED, this);
 
-	ownColliders_[static_cast<int>(COLLISION_TYPE::BLAST)]
-		.at(0)->SetRadius(radiusBlast_);
-
-	CollisionController::GetInstance()
-		.SetCollisionActive(this, ColliderBase::TAG::PLAYER_BLAST, true);
-
-	EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_PLAYER_POISON,
-		transform_.pos, Quaternion::Identity().ToEuler(),
-		{ 35.0f , 35.0f, 35.0f }, 1.0f, this);
-
+	// SE再生
 	SoundManager::GetInstance().Play(SoundManager::SOUND::SE_PBULLET_POISON);
 }

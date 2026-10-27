@@ -3,6 +3,7 @@
 #include <DxLib.h>
 #include <functional>
 #include "../../../../../../Common/Quaternion.h"
+#include "../../../../../Collider/ColliderBase.h"
 #include "../../../../../../Utility/UtilityMath.h"
 
 class PBulletBase : public ActorBase
@@ -23,12 +24,11 @@ public:
 
 	virtual ~PBulletBase(void)override = default;
 
-	virtual void Load(void)override = 0;
+	virtual void Load(void)override {};
 
 	void Update(void)override final;
 
 	void Draw(void)override;
-
 
 	/// @brief ¶¬ˆ—
 	/// @param _pos ”­ËˆÊ’u
@@ -40,6 +40,14 @@ public:
 	/// @param _shotDir ”­Ë•ûŒü(–¢Š„“–A“Š‚°‚é•ûŒü‚ğ—˜—p)
 	void Shot(const VECTOR& _shotDir = UtilityMath::VECTOR_ZERO);
 
+	/// @brief ’e‚ÌˆÊ’u’Ç]ˆ—
+	/// @param _pos ’Ç]ˆÊ’u
+	/// @param _offsetDir ’e‚Ì•ûŒü
+	void SetFollow(const VECTOR& _pos, const VECTOR& _offsetDir);
+
+	/// @brief ¶¬‚µ‚½uŠÔ‚Ìˆ—
+	virtual void PreActiveProcess(void) {};
+
 	/// @brief ’e‚ª¶‘¶’†‚©”Û‚©
 	bool IsAlive(void)const;
 
@@ -47,51 +55,60 @@ public:
 	bool GetIsVisible(void)const { return isVisible_; };
 
 	/// @brief ’e‚Ì“–‚½‚è”»’è”¼Œaæ“¾
-	float GetRadiusBullet(void)const { return radiusBullet_; }
+	float GetRadiusBullet(void)const { return radiusBullet_; };
 
 	/// @brief ’…’e‚Ì”š”­‚Ì“–‚½‚è”»’è”¼Œaæ“¾ 
-	float GetRadiusBlast(void)const { return radiusBlast_; }
-
-
-	void SetFollow(const VECTOR& _pos, const VECTOR& _offsetDir);
-
-	virtual void PreActiveProcess(void){};
+	float GetRadiusBlast(void)const { return radiusBlast_; };
 
 	/// @brief ’e©‘Ì‚ÌUŒ‚—Í
-	int GetPowerBullet(void)const { return activePowerBullet_; }
+	int GetPowerBullet(void)const { return activePowerBullet_; };
 
 	/// @brief ’…’e‚Ì”š”­‚ÌUŒ‚—Í
-	int GetPowerBlast(void)const { return activePowerBlast_; }
+	int GetPowerBlast(void)const { return activePowerBlast_; };
 
 	/// @brief ’e‚Ìí—Ş‚ğæ“¾
-	int GetShotType(void)const { return shotType_; }
+	int GetShotType(void)const { return shotType_; };
 
+	/// @brief ’eó‘Ô‚ğæ“¾
+	BULLET_STATE GetBulletState(void)const { return bulletState_; };
+
+	/// @brief “Š‚°‚é•ûŒü æ“¾
 	const VECTOR& GetThrowDir(void)const { return throwDir_; };
-	const VECTOR& GetThrowPow(void)const { return throwPow_; };
 
+	/// @brief ¶‘¶ŠÔ æ“¾
 	float GetAliveTime(void)const { return aliveTime_; };
 	
 
 protected:
 
+	/// @brief ’e‚Ì“–‚½‚è”»’è‚Ìí—Ş
 	enum class COLLISION_TYPE
 	{
 		BULLET = 0, // ’e
-		BLAST,		// ”š”­
-		SUPPORT,	// ‰ñ•œ
+		BLAST,		// ”š”­”ÍˆÍ
+		SUPPORT,	// ‰ñ•œ”ÍˆÍ
 	};
 
-	BULLET_STATE bulletState_;
+	// ’e‚Ì‹…‚Ì•ªŠ„”
+	static constexpr int SPHERE_DIV = 16;
 
-	const bool IS_GRAVITY;
-
+	// ’e‚Ìí—Ş
 	int shotType_;
 
+	// ’e‚Éd—Í‚ğ‚½‚¹‚é‚©”Û‚©
+	const bool IS_GRAVITY;
+
+	// ’e‚Ìó‘Ô
+	BULLET_STATE bulletState_;
+
+	// ’e‚Ì“–‚½‚è”»’è‚Ì”¼Œa
 	float radiusBullet_;
 	float radiusBlast_;
 
+	// d—Í—Ê
 	float curGravityPow_;
 
+	// ”­Ë‘¬“x
 	float shotSpeedXZ_;
 	float shotSpeedY_;
 
@@ -99,12 +116,16 @@ protected:
 	VECTOR throwPow_;
 	VECTOR throwDir_;
 
+	// ¶‘¶ŠÔ
 	float aliveTime_;
 
+	// ”­Ë”
 	int shotCnt_;
 
+	// ’e‚ğ•\¦‚·‚é‚©”Û‚©
 	bool isVisible_;
 
+	// ’e‚ÌUŒ‚—Í
 	int power_;
 	int activePowerBullet_;
 	int activePowerBlast_;
@@ -112,29 +133,53 @@ protected:
 	// Á–Å‚³‚¹‚é‚©”Û‚©
 	bool isActiveDestroy_;
 
-
-	std::function<void(void)> updateProc_;
-
-
+	/// @brief ‘å‚«‚³A‰ñ“]AÀ•W‚Ì‰Šú‰»
 	void InitTransform(void)override = 0;
 
-	void InitCollider(void)override final;
+	/// @brief Õ“Ë”»’è‚Ì‰Šú‰»
+	void InitCollider(void)override;
 
+	/// @brief ƒAƒjƒ[ƒVƒ‡ƒ“‚Ì‰Šú‰»
 	void InitAnimation(void)final {};
 
-	void InitPost(void)override;
+	/// @brief ‰Šú‰»Œã‚ÌŒÂ•Êˆ—
+	void InitPost(void)override final;
 
+	/// @brief ’e‚Ìƒpƒ‰ƒ[ƒ^Š„‚è“–‚Äˆ—
 	virtual void SetParam(void) = 0;
 
+	/// @brief Še’e‚ÌXVˆ—
 	virtual void UpdatePost(void) = 0;
 
+	/// @brief ”š”j‚Ìˆ—
 	virtual void BlastAction(void) = 0;
 
-	virtual void ChangeBulletStateProc(void) = 0;
+	/// @brief w’èƒ^ƒO‚Ì“–‚½‚è”»’è‚Ì—LŒø/–³Œø‚ğØ‚è‘Ö‚¦
+	/// @param _tag ƒ^ƒO
+	/// @param _isActive —LŒø‚É‚·‚é‚©”Û‚©
+	void SetColliderActive(ColliderBase::TAG _tag, bool _isActive);
+
+	/// @brief w’èí—Ş‚Ì“–‚½‚è”»’è(æ“ª)‚Ì”¼Œa‚ğİ’è
+	/// @param _type w’è‚Ì“–‚½‚è”»’è
+	/// @param _radius ”¼Œa
+	void SetColliderRadius(COLLISION_TYPE _type, float _radius);
+
+	/// @brief ’…’eó‘Ô‚ÖˆÚs‚·‚é
+	void BeginBlast(void);
+
+	/// @brief ”š”­‚Ì“–‚½‚è”»’è‚ğw’è”¼Œa‚Å—LŒø‰»‚·‚é
+	void ActivateBlastCollider(float _radius);
 
 
 private:
 
-	void ChangeBulletState(BULLET_STATE _state);
+	/// @brief ”­Ë’†‚ÌˆÚ“®E¶‘¶ŠÔ‚ÌXVˆ—
+	void UpdateShot(void);
+
+	/// @brief ’…’e‘ÎÛ‚ÉÕ“Ë‚µ‚Ä‚¢‚é‚©”Û‚©
+	bool IsHitTarget(void);
+
+	/// @brief ƒXƒe[ƒWÕ“ËE‰ºŒü‚«”­Ë‚É‚æ‚é’…’e”»’è
+	bool IsHitTerrain(void);
 };
 

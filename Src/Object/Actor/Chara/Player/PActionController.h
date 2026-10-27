@@ -10,11 +10,12 @@ class PActionController
 {
 public:
 
+	/// @brief 行動状態
 	enum class PACTION_STATE
 	{
-		NONE = -1,
-		ACTION,
-		END,
+		NONE = -1, // 無効状態
+		ACTION,    // 行動中
+		END,       // 終了状態
 	};
 
 	/// @brief コンストラクタ
@@ -25,7 +26,6 @@ public:
 	void Update(void);
 
 	void DrawDebug(void);
-
 
 	/// @brief 行動割り当て処理
 	/// @param _actionNum 登録番号
@@ -55,6 +55,7 @@ public:
 	/// @brief 行動が終わっているか否か
 	bool IsEndActionActive(void)const { return (curTimeActionActive_ <= 0.0f); };
 
+	/// @brief 現在の行動状態取得
 	PACTION_STATE GetActionState(void)const { return actionState_; };
 
 
@@ -80,34 +81,41 @@ private:
 		// 停止までの時間
 		float timeStopActive = 0.0f;
 
+		// 各行動
 		std::function<void(void)> actionProcess;
 		
 	};
 	std::map<const int, const ActionParam> actions_;
 
+	// アニメーション
 	std::unique_ptr<AnimationController>& animation_;
 
+	// 現在の行動状態
 	PACTION_STATE actionState_;
-
 
 	// 現在実行中の行動名
 	int curActionNum_;
 
+	// 行動中の時間
 	float curTimeAction_;
 
 	// 行動するまでの時間
 	float curTimeActionActive_;
 
+	// 入力有効までの時間
 	float curTimeInput_;
 
 	// 停止するまでの時間
 	float curTimeStopActive_;
 
-	// 連射か否か
+	// 連射行動か否か
 	bool isRapidFire_ = false;
 
-
+	/// @brief 行動中状態の更新
 	void Update_Action(void);
+
+	/// @brief 終了中状態の更新
+	/// @param  
 	void Update_End(void);
 };
 

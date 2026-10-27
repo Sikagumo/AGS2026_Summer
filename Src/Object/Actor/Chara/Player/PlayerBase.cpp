@@ -1,19 +1,12 @@
 #include "../../../../Manager/Decoration/SoundManager.h"
 #include "PlayerBase.h"
 
-namespace
-{
-	// プレイヤー最大HP
-	constexpr int HP_MAX_PLAYER = 250;
-};
-
 PlayerBase::PlayerBase(int _playerNo, JOB_TYPE _jobType, const VECTOR& _startPos, SKIN_TYPE _playerType)
 	: CharaBase::CharaBase()
 	, playerNo_(_playerNo)
 	, jobType_(_jobType)
 	, skinType_(_playerType)
-	, hp_(HP_MAX_PLAYER)
-	, HP_MAX(HP_MAX_PLAYER)
+	, hp_(HP_MAX)
 	, START_POS(_startPos)
 	, bodyPos_(UtilityMath::VECTOR_ZERO)
 	, timeInv_(0.0f)
@@ -44,6 +37,7 @@ void PlayerBase::SetDamage(int _damage, bool _isInvincible
 		timeInv_ = _timeInvincible;
 	}
 
+	// HPに反映
 	SoundManager::GetInstance().Play(SoundManager::SOUND::SE_DAMAGE_PLAYER);
 	hp_ -= _damage;
 }
@@ -52,22 +46,24 @@ void PlayerBase::SetSoundData(VECTOR _pos, float _radius, bool _isLanding, bool 
 {
 	if (_isLanding)
 	{
+		// 着地SE再生
 		SoundManager::GetInstance().Play3D(SoundManager::SOUND::SE_BOSS_LANDING
 					 , _pos, transform_.pos, _radius);
 	}
 
 	if (_isMGFire)
 	{
+		// マシンガンSE再生
 		SoundManager::GetInstance().Play3D(SoundManager::SOUND::SE_BOSS_MG_FIRE
 					 , _pos, transform_.pos, _radius);
 	}
 
 	if (_isRoad)
 	{
+		// 突進SE再生
 		SoundManager::GetInstance().Play3D(SoundManager::SOUND::SE_BOSS_ROAD
 					 , _pos, transform_.pos, _radius);
 	}
-
 }
 
 void PlayerBase::UpdateSound(void)

@@ -3,34 +3,12 @@
 #include "../../../../../../Manager/System/TimeManager.h"
 #include "../../../../../Collision/CollisionController.h"
 
-namespace
-{
-	constexpr float RADIUS_BIG = 9.0f;
-	constexpr float RADIUS_INCREMENT = 27.5f;
-	constexpr float RADIUS_BIG_BLAST = RADIUS_BIG + (RADIUS_INCREMENT * 4);
-	constexpr float SCALE_BIG = 1.5f;
-	constexpr float SCALE_BIG_INCREMENT = 2.5f;
-	constexpr float TIME_ALIVE_BIG = 5.0f;
-
-	// UŒ‚—Í
-	constexpr int POWER_START = 50;
-	constexpr int POWER_INCREMENT = 75;
-
-	// Šg‘åŠ®—¹‚Ü‚Å‚ÌŽžŠÔ
-	constexpr float RADIUS_DURATION = 1.0f;
-}
-
-
 PBulletBig::PBulletBig(int _shotType)
 	: PBulletBase::PBulletBase(_shotType)
 	, radiusMax_(0.0f)
 	, scaleMax_(0.0f)
 	, scaleUpTime_(0.0f)
 	, isScaleUp_(false)
-{
-}
-
-void PBulletBig::Load(void)
 {
 }
 
@@ -52,26 +30,17 @@ void PBulletBig::UpdatePost(void)
 		return;
 	}
 
+	// ’e‚ªŠg‘å‚ªI—¹Žž‚Íˆ—I—¹
+	if (!isScaleUp_ || radiusBullet_ >= radiusMax_) { return; }
 
-	if (isScaleUp_ && radiusBullet_ < radiusMax_)
-	{
-		/* ’eŠÛŠg‘åˆ— */
-		scaleUpTime_ += timeManager_.GetDeltaTime();
+	// ’eŠÛŠg‘åˆ—
+	scaleUpTime_ += timeManager_.GetDeltaTime();
+	float blendRate_ = (scaleUpTime_ / RADIUS_DURATION);
+	blendRate_ = std::clamp(blendRate_, 0.0f, 1.0f);
 
-		float blendRate_ = (scaleUpTime_ / RADIUS_DURATION);
-		blendRate_ = std::clamp(blendRate_, 0.0f, 1.0f);
-
-		radiusBullet_ += ((radiusMax_ - radiusBullet_) * (blendRate_ * blendRate_));
-		transform_.SetScale((scaleMax_ * (blendRate_ * blendRate_)));
-	}
-}
-
-void PBulletBig::ChangeBulletStateProc(void)
-{
-	if (bulletState_ == BULLET_STATE::SHOT)
-	{
-		transform_.SetScale(RADIUS_BIG);
-	}
+	// ƒpƒ‰ƒ[ƒ^‚É”½‰f
+	radiusBullet_ += ((radiusMax_ - radiusBullet_) * (blendRate_ * blendRate_));
+	transform_.SetScale((scaleMax_ * (blendRate_ * blendRate_)));
 }
 
 void PBulletBig::SetParam(void)
@@ -86,14 +55,17 @@ void PBulletBig::SetParam(void)
 
 	scaleUpTime_ = 0.0f;
 
+	// Šg‘å–³Œø‰»
 	isScaleUp_ = false;
 
+	// UŒ‚—ÍŠ„‚è“–‚Ä
 	power_ = POWER_START + (POWER_INCREMENT * shotCnt_);
 	scaleMax_ = SCALE_BIG + (SCALE_BIG_INCREMENT * shotCnt_);
 }
 
 void PBulletBig::BlastAction(void)
 {
+	// ƒpƒ‰ƒ[ƒ^–³Œø‰»
 	bulletState_ = BULLET_STATE::BLAST;
 	isVisible_ = false;
 	activePowerBullet_ = power_;

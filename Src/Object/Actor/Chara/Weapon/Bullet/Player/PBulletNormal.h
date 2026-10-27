@@ -19,26 +19,28 @@ public:
 
 	~PBulletNormal(void)override = default;
 
-	void Load(void)override;
-
-	/// @brief 着弾時の処理
-	void BlastAction(void)override;
-
 
 protected:
 
+	/// @brief 大きさ、回転、座標の初期化
 	void InitTransform(void)override;
 
+	/// @brief 各弾の更新処理
 	void UpdatePost(void)override;
 
-	void ChangeBulletStateProc(void)override;
-
+	/// @brief 各弾の更新処理
 	void SetParam(void)override;
+
+	/// @brief 爆破時の処理
+	void BlastAction(void)override;
 
 
 private:
 
+	// 生存時間
 	const float ALIVE_TIME;
+
+	// スケール
 	const float SCALE;
 };
 

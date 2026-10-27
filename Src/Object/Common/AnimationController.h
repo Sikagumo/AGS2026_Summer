@@ -16,7 +16,7 @@ public:
 		EXTERNAL,  // 外部アニメーション
 	};
 
-	// アニメーションデータ
+	/// @brief アニメーションデータ
 	struct Animation
 	{
 		ANIMATION_TYPE type = ANIMATION_TYPE::NONE; // アニメーション取得元の種類
@@ -38,14 +38,11 @@ public:
 	// 既定のアニメーションブレンド時間
 	static constexpr float BLEND_TIME_DEFAULT = 0.175f;
 
-
 	/// @brief コンストラクタ
 	/// @param _modelId アニメーション対象
 	AnimationController(int _modelId);
 
-	/// @brief デストラクタ
 	~AnimationController(void);
-
 
 	/// @brief 同じモデル内のアニメーションを準備
 	/// @param _type アニメーション種類
@@ -101,9 +98,7 @@ public:
 	/// @brief メモリ解放処理
 	void Release(void);
 
-
 	/// @brief アニメーションが終了しているか否か
-	[[nodiscard("判定として利用してください")]]
 	bool IsEnd(void) const;
 
 	/// @brief 一定の位置に到達したかの判定
@@ -116,7 +111,6 @@ public:
 	float GetPlayPointRate(void);
 
 	/// @brief 再生中のアニメーション番号取得
-	[[nodiscard("値を利用してください")]]
 	int GetPlayType(void)const { return playType_; };
 
 
@@ -129,7 +123,6 @@ public:
 	void SetAnimationStep(float _step = 0.0f);
 
 	/// @brief 停止しているか否か
-	[[nodiscard("判定として利用してください")]]	
 	bool IsStop(void)const { return isStop_; };
 
 	/// @brief 再生位置変更
@@ -183,7 +176,6 @@ private:
 	// ブレンドアニメーションの前アニメーションのローカル位置
 	VECTOR preAnimationLocalPos_;
 	
-
 	/// @brief 他アニメーションとのブレンドの影響を受けない単体の素のルート位置を取得
 	/// @param _target 位置を取得したいアニメーション
 	/// @param _other ブレンド対象の相方アニメーション(一時的にブレンド率0%にする)
@@ -193,7 +185,6 @@ private:
 	/// @param _animation 対象の固定位置のアニメーション
 	/// @return 開始位置から線形補間した位置終了した位置
 	VECTOR GetInPlaceProgressPos(const Animation& _animation) const;
-	
 
 	/// @brief アニメーション追加処理
 	/// @param _type アニメーションの種類
@@ -208,4 +199,7 @@ private:
 	/// @param _prePlayAnimation 再生中のアニメーション
 	/// @param _curPlayAnimation 再生中のアニメーション
 	void AnimationInPlace(Animation& _prePlayAnimation, Animation& _curPlayAnimation, float _blendTime);
+
+	/// @brief 遷移前/遷移後アニメーションが固定か否か
+	bool IsPreInPlace(const Animation* _preAnimation, const Animation* _curAnimation)const;
 };

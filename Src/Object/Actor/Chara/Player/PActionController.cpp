@@ -6,7 +6,9 @@
 PActionController::PActionController(std::unique_ptr<AnimationController>& _anim, bool _isRapidFire)
 	: animation_(_anim)
 	, actionState_(PACTION_STATE::NONE)
-	, curTimeAction_(0.0f), curTimeInput_(0.0f), curTimeActionActive_(0.0f)
+	, curTimeAction_(0.0f)
+	, curTimeInput_(0.0f)
+	, curTimeActionActive_(0.0f)
 	, curTimeStopActive_(0.0f)
 	, curActionNum_(-1)
 	, isRapidFire_(_isRapidFire)
@@ -29,6 +31,7 @@ void PActionController::SetAction(int _actionNum, float _timeActive, float _time
 		return;
 	}
 
+	// 行動パラメータ登録
 	ActionParam param = ActionParam();
 	param.timeActive = _timeActive;
 	param.timeEnd = _timeEnd;
@@ -37,7 +40,6 @@ void PActionController::SetAction(int _actionNum, float _timeActive, float _time
 	param.timeStopActive = _timeStopActive;
 	param.timeActionActive = _timeActiveFunc;
 	param.actionProcess = _actionProc;
-	
 	actions_.emplace(_actionNum, param);
 }
 
@@ -56,7 +58,7 @@ void PActionController::Active(int _actionNum)
 	}
 #endif
 
-
+	// 行動有効化
 	actionState_ = PACTION_STATE::ACTION;
 
 	// 行動の情報を割り当て
@@ -82,6 +84,7 @@ void PActionController::Update(void)
 
 	if (!animation_->IsStop())
 	{
+		// アニメーション再生中に行動時間減少
 		curTimeAction_ -= TimeManager::GetInstance().GetDeltaTime();
 	}
 
@@ -95,22 +98,24 @@ void PActionController::Update(void)
 	}
 
 }
+
 void PActionController::Update_Action(void)
 {
 	if (curTimeStopActive_ > 0.0f)
 	{
 		curTimeStopActive_ -= TimeManager::GetInstance().GetDeltaTime();
 
-		// 一度だけ行動を実行
+		// 一度だけ停止
 		if (curTimeStopActive_ <= 0.0f)
 		{
 			animation_->Stop(actions_[curActionNum_].timeStop);
 		}
 	}
 
+	// アニメーション停止時、処理終了
 	if (animation_->IsStop()) { return; }
 	
-
+	// 入力可能時間を0になるまで減少
 	curTimeInput_ = ((curTimeInput_ > 0) ? curTimeInput_ - TimeManager::GetInstance().GetDeltaTime() : 0.0f);
 
 	if (curTimeActionActive_ > 0.0f)
@@ -125,17 +130,19 @@ void PActionController::Update_Action(void)
 		}
 	}
 
-	
 	if (curTimeAction_ < 0.0f)
 	{
+		// 終了状態に遷移
 		actionState_ = PACTION_STATE::END;
 		curTimeAction_ = actions_[curActionNum_].timeEnd;
 	}
 }
+
 void PActionController::Update_End(void)
 {
 	if (curTimeAction_ < 0.0f)
 	{
+		// 無効状態に遷移
 		actionState_ = PACTION_STATE::NONE;
 		curActionNum_ = -1;
 	}

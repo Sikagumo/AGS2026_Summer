@@ -10,20 +10,30 @@ public:
 	~Tree(void)override = default;
 
 	void Load(void)override;
-	void Update(void)override {};
 
-	bool GetIsActive(void)const { return isActive_; };
-	void SetIsActive(bool _isActive) { isActive_ = _isActive; };
+	void Update(void)override {};
 
 
 protected:
 
-	void InitTransform(void)override {};
-	void InitCollider(void)override;
-	void InitAnimation(void)override {};
-	void InitPost(void)override {};
+	/// @brief 大きさ、回転、座標を初期化する
+	void InitTransform(void) override {};
+
+	/// @brief 衝突判定を初期化する
+	void InitCollider(void) override;
+
+	/// @brief アニメーションを初期化する
+	void InitAnimation(void) override {};
+
+	/// @brief 初期化後の個別処理を行う
+	void InitPost(void) override {};
+
 
 private:
 
-	bool isActive_;
+	// 木の位置
+	static constexpr float COLLISION_OFFSET_Y = 250.0f;
+
+	// 木モデルの当たり判定の半径
+	static constexpr float COLLISION_RADIUS = 27.5f;
 };

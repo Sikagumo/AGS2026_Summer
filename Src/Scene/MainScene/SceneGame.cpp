@@ -176,7 +176,7 @@ void SceneGame::Initialize(void)
 	// タイマー有効化
 	gameTimer_->SetIsTimeActive(true);
 
-	damageController_->SetPlayerMaxHp(players_.at(0)->GetMaxHp());
+	damageController_->SetPlayerMaxHp(Player::HP_MAX);
 	SoundManager::GetInstance().Play(SoundManager::SOUND::BGM_GAME);
 	SoundManager::GetInstance().Play(SoundManager::SOUND::BGM_TITLE_THUNDER);
 
@@ -356,7 +356,8 @@ void SceneGame::DrawHpBerPlayer(void)
 			playerHpImageBack_, true
 		);
 
-		const float HP_RATIO = (static_cast<float>(players_.at(i)->GetCurHp()) / static_cast<float>(players_.at(i)->GetMaxHp()));
+		// プレイヤーのHP割合
+		const float HP_RATIO = (static_cast<float>(players_.at(i)->GetCurHp()) / static_cast<float>(Player::HP_MAX));
 		const float RATIO = std::clamp(HP_RATIO, 0.0f, 1.0f);
 
 

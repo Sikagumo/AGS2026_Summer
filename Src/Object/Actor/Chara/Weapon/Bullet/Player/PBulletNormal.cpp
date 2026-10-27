@@ -17,10 +17,6 @@ PBulletNormal::PBulletNormal(float _scale, float _radius, int _power
 	radiusBullet_ = _radius;
 }
 
-void PBulletNormal::Load(void)
-{
-}
-
 void PBulletNormal::InitTransform(void)
 {
 	transform_.InitTransform(SCALE, transform_.quaRot, Quaternion::Identity());
@@ -35,29 +31,18 @@ void PBulletNormal::UpdatePost(void)
 		activePowerBullet_ = 0;
 	}
 }
-
-void PBulletNormal::ChangeBulletStateProc(void)
-{
-}
-
 void PBulletNormal::SetParam(void)
 {
 	// ÉpÉâÉÅÅ[É^äÑÇËìñÇƒ
 	aliveTime_ = ALIVE_TIME;
-	throwPow_.y = ((throwPow_.y < 0.0f) ? 0.0f : throwPow_.y);
 }
 
 void PBulletNormal::BlastAction(void)
 {
-	// íÖíeóLå¯âª
-	bulletState_ = BULLET_STATE::BLAST;
-	isVisible_ = false;
+	// íÖíeèÛë‘Ç÷à⁄çs(íeÇÃìñÇΩÇËîªíËÇÕñ≥å¯âª)
+	BeginBlast();
 	activePowerBullet_ = power_;
 
 	// íeÇè¡ñ≈Ç≥ÇπÇÈ
 	isActiveDestroy_ = true;
-
-	// ìñÇΩÇËîªíËñ≥å¯âª
-	CollisionController::GetInstance()
-		.SetCollisionActive(this, ColliderBase::TAG::PLAYER_BULLET, false);
 }
