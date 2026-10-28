@@ -7,7 +7,7 @@ public:
 
 	// 弾の発射速度
 	static constexpr float SHOT_SPEED_POISON_XZ = 10.0f;
-	static constexpr float SHOT_SPEED_POISON_Y = 8.5f;
+	static constexpr float SHOT_SPEED_POISON_Y = 6.75f;
 
 	/// @brief コンストラクタ
 	/// @param _shotType 弾の種類

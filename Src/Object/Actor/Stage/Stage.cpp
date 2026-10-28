@@ -22,14 +22,14 @@ Stage::~Stage(void)
 void Stage::Load(void)
 {
 	// スカイドーム
-	skyDome_.modelId = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::MODEL_SKYDOME);
+	skyDome_.modelId = ResourceManager::GetInstance().LoadModelDuplicate(ResourceManager::SRC::MODEL_SKYDOME);
 
 	// ステージモデル
-	transform_.modelId = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::MODEL_STAGE_COLLISION);
-	viewTrans_.modelId = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::MODEL_STAGE);
+	transform_.modelId = ResourceManager::GetInstance().LoadModelDuplicate(ResourceManager::SRC::MODEL_STAGE_COLLISION);
+	viewTrans_.modelId = ResourceManager::GetInstance().LoadModelDuplicate(ResourceManager::SRC::MODEL_STAGE);
 
 	// 木の位置記憶用モデル
-	treePosModel_.modelId = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::MODEL_TREE_POSITION);
+	treePosModel_.modelId = ResourceManager::GetInstance().LoadModelDuplicate(ResourceManager::SRC::MODEL_TREE_POSITION);
 
 	// 木(当たり判定あり)
 	int frameFront = MV1SearchFrame(treePosModel_.modelId, POS_FRAME_NAME_FRONT.c_str());
@@ -178,6 +178,48 @@ void Stage::Update(void)
 	// スカイドーム
 	constexpr float SKYDOME_ROT_SPEED = 0.0005f;
 	skyDome_.Rotate(UtilityMath::AXIS_Y, SKYDOME_ROT_SPEED);
+
+	// カメラの現在位置を取得
+	VECTOR cameraPos = GetCameraPosition();
+
+	// 木をカメラから「遠い順（降順）」にソート
+	std::sort(treesFront_.begin(), treesFront_.end(),
+		[&cameraPos](const std::unique_ptr<Tree>& a, const std::unique_ptr<Tree>& b) {
+
+			VECTOR posA = a->GetTransform().pos;
+			VECTOR posB = b->GetTransform().pos;
+
+			// 距離の2乗で比較
+			float distSqA = (posA.x - cameraPos.x) * (posA.x - cameraPos.x) +
+				(posA.y - cameraPos.y) * (posA.y - cameraPos.y) +
+				(posA.z - cameraPos.z) * (posA.z - cameraPos.z);
+
+			float distSqB = (posB.x - cameraPos.x) * (posB.x - cameraPos.x) +
+				(posB.y - cameraPos.y) * (posB.y - cameraPos.y) +
+				(posB.z - cameraPos.z) * (posB.z - cameraPos.z);
+
+			// 遠いもの(距離が大きいもの)を先頭にする
+			return distSqA > distSqB;
+		});
+
+	// 木をカメラから「遠い順（降順）」にソート
+	std::sort(treesBack_.begin(), treesBack_.end(),
+		[&cameraPos](const Transform& a, const Transform& b) {
+			VECTOR posA = a.pos;
+			VECTOR posB = b.pos;
+
+			// 距離の2乗で比較
+			float distSqA = (posA.x - cameraPos.x) * (posA.x - cameraPos.x) +
+				(posA.y - cameraPos.y) * (posA.y - cameraPos.y) +
+				(posA.z - cameraPos.z) * (posA.z - cameraPos.z);
+
+			float distSqB = (posB.x - cameraPos.x) * (posB.x - cameraPos.x) +
+				(posB.y - cameraPos.y) * (posB.y - cameraPos.y) +
+				(posB.z - cameraPos.z) * (posB.z - cameraPos.z);
+
+			// 遠いもの(距離が大きいもの)を先頭にする
+			return distSqA > distSqB;
+		});
 }
 
 void Stage::Draw(void)

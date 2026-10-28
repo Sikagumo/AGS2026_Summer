@@ -11,13 +11,6 @@ public:
 	// 吹っ飛ばし量
 	static constexpr float KNOCK_POW_Y = 3.75f;
 
-	// 連射弾発射速度
-	static constexpr float RAPID_SHOT_SPEED_XZ = 17.5f;
-	static constexpr float RAPID_SHOT_SPEED_Y = 2.5f;
-
-	// 拡散弾発射速度
-	static constexpr float CLUSTER_SHOT_SPEED = 20.0f;
-
 	/// @brief アニメーションの種類
 	enum class ANIMATION_TYPE
 	{
@@ -111,9 +104,6 @@ protected:
 	void DrawPre(void)override;
 	void DrawLate(void)override;
 
-	/// @brief 各オブジェクトのメモリ解放
-	void ReleasePost(void)override;
-
 	/// @brief 位置に加算処理
 	VECTOR CalcAddPosition(void) override;
 
@@ -125,18 +115,6 @@ private:
 	static constexpr float LOCAL_POS_Y  = 5.25f;  // ローカル縦位置
 	static constexpr float LOCAL_ROT_Y  = 180.0f; // ローカルY軸回転
 	static constexpr float SHADOW_SCALE = 30.0f;  // 影の半径
-
-	// 連射パラメータ
-	static constexpr float RAPID_SCALE      = 0.85f; // スケール
-	static constexpr float RAPID_RADIUS     = 10.0f; // 当たり判定半径
-	static constexpr int   RAPID_POWER      = 30;    // 攻撃力
-	static constexpr float RAPID_ALIVE_TIME = 2.5f;  // 生存時間
-
-	// 拡散弾パラメータ
-	static constexpr float CLUSTER_SCALE      = 0.25f; // スケール
-	static constexpr float CLUSTER_RADIUS     = 5.0f;  // 当たり判定半径
-	static constexpr int   CLUSTER_POWER      = 30;    // 攻撃力
-	static constexpr float CLUSTER_ALIVE_TIME = 0.25f; // 生存時間
 
 	// ジャンプ力
 	static constexpr float JUMP_POW = 5.0f;
@@ -219,24 +197,8 @@ private:
 	// Y軸制限位置
 	static constexpr float LIMIT_POS_Y = -1500.0f;
 
-	// 着弾地点画像
-	int imageBulletHitPoint_;
-
-	// 攻撃回数
-	int attackNumMax_;
-	int curAttackCount_;
-
-	// 発射している弾の識別番号
-	int shotIndex_;
-
 	// 再生中のアニメーションの種類
 	ANIMATION_TYPE animationType_;
-
-	// 発射Z位置
-	VECTOR throwPos_;
-
-	// 発射方向
-	VECTOR throwDir_;
 
 	// 移動速度
 	float moveSpeed_;
@@ -312,38 +274,9 @@ private:
 	/// @param _animationSpeed 再生速度指定(任意)
 	void PlayAnimation(ANIMATION_TYPE _type, bool _isLoop = true, bool _isAnimationBlend = true, float _animSpeed = -1.0f);
 
-	/// @brief 弾丸生成
-	void CreateBullet(void);
-
-	/// @brief 弾丸発射
-	void ShotBullet(void);
-
-	/// @brief 弾丸更新
-	void UpdateBullets(void);
-
-	/// @brief 拡散弾生成
-	void CreateCluster(void);
-
-	/// @brief 拡散弾生成処理
-	/// @param _throwDir 発射方向
-	/// @return 拡散弾オブジェクト
-	std::unique_ptr<PBulletNormal> CreateClusterBullet(const VECTOR& _throwDir);
-
-	/// @brief 拡散弾発射
-	void ShotCluster(void);
-
 	/// @brief 移動方向に応じた遅延回転
 	void DelayRotate(void)override;
 
-	/// @brief 弾の軌道を描画
-	void DrawShotOrbit(void);
-
-	/// @brief 弾の着弾地点
-	void DrawShotOrbitPoint(const VECTOR& _shotPos);
-
-	/// @brief 発射方向取得
-	VECTOR CalcShotDirection(void);
-	
 	/// @brief 通常弾更新
 	void ProcShotNormal(void);
 

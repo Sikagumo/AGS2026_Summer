@@ -134,6 +134,7 @@ void SceneGame::Initialize(void)
 	SetMouseDispFlag(false);
 
 	auto& camera = SceneManager::GetInstance().GetCamera();
+	camera->Init();
 	camera->ChangeMode(Camera::MODE::PLAYER_FOLLOW);
 	camera->SetFollow(&players_.at(0)->GetTransform());
 
@@ -324,9 +325,10 @@ void SceneGame::Release(void)
 
 	boss_->Release();
 
-	// ƒJƒƒ‰‚Ìƒƒ‚ƒŠ‰ð•ú
+	// ƒJƒƒ‰‚Ì‰Šú‰»
 	auto& camera = SceneManager::GetInstance().GetCamera();
-	camera->Release();
+	camera->SetFollow(nullptr);
+	camera->ChangeMode(Camera::MODE::NONE);
 
 	NetManager::GetInstance().Stop();
 }
@@ -624,14 +626,14 @@ void SceneGame::UpdateGame(void)
 	for (auto& player : players_)
 	{
 		// ’e
-		for (auto& bullet : player->GetBullets())
+		for (auto& bullet : player->GetWeaponController()->GetBullets())
 		{
 			attackPower = std::max(attackPower, bullet->GetPowerBullet());
 			attackBlast = std::max(attackBlast, bullet->GetPowerBlast());
 		}
 
 		// ŠgŽU’e
-		for (auto& bullet : player->GetBulletsCluster())
+		for (auto& bullet : player->GetWeaponController()->GetBulletsCluster())
 		{
 			if (bullet == nullptr)
 			{

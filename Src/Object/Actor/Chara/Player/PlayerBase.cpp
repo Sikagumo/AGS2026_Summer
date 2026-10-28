@@ -11,9 +11,7 @@ PlayerBase::PlayerBase(int _playerNo, JOB_TYPE _jobType, const VECTOR& _startPos
 	, bodyPos_(UtilityMath::VECTOR_ZERO)
 	, timeInv_(0.0f)
 	, timeInvDodge_(0.0f)
-	, shotType_(SHOT_TYPE::NONE)
-	, bullets_{}
-	, clusterBullets_{}
+	, weaponController_(nullptr)
 {
 	transform_.pos = START_POS;
 }
@@ -75,4 +73,9 @@ void PlayerBase::SetSoundData(VECTOR _pos, float _radius, bool _isLanding, bool 
 void PlayerBase::UpdateSound(void)
 {
 	SoundManager::GetInstance().Update3D(transform_.pos);
+}
+
+void PlayerBase::ReleasePost(void)
+{
+	weaponController_->Release();
 }

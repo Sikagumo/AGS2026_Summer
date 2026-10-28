@@ -353,6 +353,7 @@ void SceneManager::Release(void)
     scenes_.clear();
 
     // カメラを解放する
+    camera_->Release();
     camera_.reset();
 
     // 各マネージャーを破棄する

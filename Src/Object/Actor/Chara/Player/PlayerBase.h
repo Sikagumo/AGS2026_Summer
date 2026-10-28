@@ -4,9 +4,11 @@
 #include <vector>
 #include <array>
 #include <map>
+#include "./PlayerWeaponController.h"
 #include "../Weapon/Bullet/Player/PBulletBase.h"
 #include "../Weapon/Bullet/Player/PBulletNormal.h"
-class PBulletNormal;
+
+class PlayerWeaponController;
 
 class PlayerBase : public CharaBase
 {
@@ -15,30 +17,12 @@ public:
 	/// @brief ジョブ状態
 	enum class JOB_TYPE
 	{
-		NONE = -1,  // 無効
+		NONE = -1, // 無効状態
 
 		BOMB,       // 爆破
 		CANNON,     // 巨大
 		RAPID_FIRE, // 連射
 		SUPPORT,    // 回復
-
-		MAX         // 要素数
-	};
-
-	/// @brief 発射状態
-	enum class SHOT_TYPE
-	{
-		NONE = -1,
-
-		BOMB,      // 爆破
-
-		BIG,       // 巨大
-
-		RAPID_FIRE, // 連射
-		CLUSTER,    // 拡散
-
-		RECOVERY, // 回復
-		POISON,   // 毒
 
 		MAX // 要素数
 	};
@@ -54,17 +38,31 @@ public:
 		MAX // 要素数
 	};
 
+	// 左手のフレーム番号
+	static inline const std::map<SKIN_TYPE, int>
+		FRAME_NUM_FINGER_LEFT
+		= {
+			{ SKIN_TYPE::HUMAN, 23},
+			{ SKIN_TYPE::DOG, 15},
+			{ SKIN_TYPE::MONKEY, 23},
+			{ SKIN_TYPE::BIRD, 19}
+	};
+
+	// 右手のフレーム番号
+	static inline const std::map<SKIN_TYPE, int>
+		FRAME_NUM_FINGER_RIGHT
+		= {
+			{ SKIN_TYPE::HUMAN, 39},
+			{ SKIN_TYPE::DOG, 23},
+			{ SKIN_TYPE::MONKEY, 47},
+			{ SKIN_TYPE::BIRD, 31}
+	};
+
 	// 最大HP
 	static constexpr int HP_MAX = 250;
 
 	// デフォルト無敵時間
 	static constexpr float TIME_INVINCIBLE = 1.0f;
-
-	// 拡散弾の分割数
-	static constexpr int CLUSTER_SPLIT = 16;
-
-	// 拡散弾の一度に生成される数
-	static constexpr int CLUSTER_NUM_MAX = ((2 * CLUSTER_SPLIT) + 1);
 
 
 	/// @brief コンストラクタ
@@ -85,9 +83,6 @@ public:
 
 	/// @brief ジョブ状態取得
 	JOB_TYPE GetJobType(void)const { return jobType_; };
-
-	/// @brief 発射状態取得
-	SHOT_TYPE GetShotType(void)const { return shotType_; };
 
 	/// @brief プレイヤーにダメージ処理
 	/// @param _damage ダメージ量
@@ -111,70 +106,42 @@ public:
 	/// @param _isRoad ボス突進音を有効にするか否か
 	void SetSoundData(VECTOR _pos, float _radius, bool _isLanding, bool _isMGFire, bool _isRoad);
 
-	/// @brief 弾を取得
-	const std::vector<std::unique_ptr<PBulletBase>>&
-		GetBullets(void)const { return bullets_; };
-
-	/// @brief 拡散弾を取得
-	std::array<std::unique_ptr<PBulletNormal>, (CLUSTER_NUM_MAX)>&
-		GetBulletsCluster(void) { return clusterBullets_; };
+	/// @brief 武器コントローラを取得
+	const std::unique_ptr<PlayerWeaponController>& GetWeaponController(void)const { return weaponController_; }
 
 
 protected:
 
-	// 左手のフレーム番号
-	const std::map<SKIN_TYPE, int>
-		FRAME_NUM_FINGER_LEFT
-	= {
-		{ SKIN_TYPE::HUMAN, 23},
-		{ SKIN_TYPE::DOG, 15},
-		{ SKIN_TYPE::MONKEY, 23},
-		{ SKIN_TYPE::BIRD, 19}
-	};
-
-	// 右手のフレーム番号
-	const std::map<SKIN_TYPE, int>
-		FRAME_NUM_FINGER_RIGHT
-		= {
-			{ SKIN_TYPE::HUMAN, 39},
-			{ SKIN_TYPE::DOG, 23},
-			{ SKIN_TYPE::MONKEY, 47},
-			{ SKIN_TYPE::BIRD, 31}
-	};
-
-
 	// プレイヤー番号
 	const int playerNo_;
-
-	// HP
-	int hp_;
 
 	// 初期位置
 	const VECTOR START_POS;
 
+	// HP
+	int hp_;
+
+	// 武器コントローラ
+	std::unique_ptr<PlayerWeaponController> weaponController_;
+
 	// 無敵時間
 	float timeInv_;
+
+	// 回避無敵時間
 	float timeInvDodge_;
 
+	// 胴体の位置
 	VECTOR bodyPos_;
-
-	// 通常弾
-	std::vector<std::unique_ptr<PBulletBase>>
-		bullets_;
-
-	// 拡散弾
-	std::array<std::unique_ptr<PBulletNormal>, (CLUSTER_NUM_MAX)>
-		clusterBullets_;
 
 	// ジョブ状態
 	JOB_TYPE jobType_;
-
-	// 発射状態
-	SHOT_TYPE shotType_;
 
 	// 見た目状態
 	SKIN_TYPE skinType_;
 
 	/// @brief 3D音声更新
 	void UpdateSound(void);
+
+	/// @brief 各オブジェクトのメモリ解放
+	void ReleasePost(void)override;
 };

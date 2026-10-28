@@ -6,8 +6,8 @@ class PBulletBig : public PBulletBase
 public:
 
 	// 弾の発射速度
-	static constexpr float SHOT_SPEED_BIG_XZ = 5.0f;
-	static constexpr float SHOT_SPEED_BIG_Y = 5.0f;
+	static constexpr float SHOT_SPEED_BIG_XZ = 6.5f;
+	static constexpr float SHOT_SPEED_BIG_Y = 6.5f;
 
 	/// @brief コンストラクタ
 	/// @param _shotType 弾の種類
