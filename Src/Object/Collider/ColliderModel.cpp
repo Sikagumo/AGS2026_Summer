@@ -1,70 +1,73 @@
 #include "ColliderModel.h"
 
+namespace
+{
+	// 無効なモデルID
+	constexpr int INVALID_MODEL_ID = -1; 
+
+	// ループの初期インデックス
+	constexpr int INITIAL_LOOP_INDEX = 0; 
+}
+
 ColliderModel::ColliderModel(TAG _collisionTag, const Transform* _followTarget)
-    : ColliderBase(SHAPE::MODEL, _collisionTag, _followTarget)
+	: ColliderBase(SHAPE::MODEL, _collisionTag, _followTarget)
 {
 }
 
 int ColliderModel::GetModelHandle(void) const
 {
-    if (followTarget_ != nullptr && followTarget_->modelId != -1)
-    {
-        return followTarget_->modelId;
-    }
+	// 早期リターン
+	if (followTarget_ == nullptr || followTarget_->modelId == INVALID_MODEL_ID)
+	{
+		return INVALID_MODEL_ID;
+	}
 
-    return -1;
+	return followTarget_->modelId;
 }
 
-void ColliderModel::AddExcludeFrameIds(const std::string& exclusionName)
+void ColliderModel::AddExcludeFrameIds(const std::string& _exclusionName)
 {
-    // モデル未設定なら処理しない
-    if (!followTarget_ || followTarget_->modelId == -1) { return; }
+	// モデル未設定なら早期リターン
+	if (followTarget_ == nullptr || followTarget_->modelId == INVALID_MODEL_ID)
+	{
+		return;
+	}
 
-    // モデルのフレーム総数を取得
-    int num = MV1GetFrameNum(followTarget_->modelId);
+	// モデルのフレーム総数を取得
+	int frameNum = MV1GetFrameNum(followTarget_->modelId);
 
-    for (int i = 0; i < num; i++)
-    {
-        // フレーム名を取得
-        const char* frameName = MV1GetFrameName(followTarget_->modelId, i);
-        std::string frameNameStr = frameName;
+	for (int i = INITIAL_LOOP_INDEX; i < frameNum; i++)
+	{
+		// フレーム名を取得
+		const char* frameName = MV1GetFrameName(followTarget_->modelId, i);
+		std::string frameNameStr = frameName;
 
-        // 指定文字列を含むフレームか判定
-        if (frameNameStr.find(exclusionName) != std::string::npos)
-        {
-            // 該当フレームを除外リストに登録
-            excludedFrameIndices_.insert(i);
-        }
-    }
+		// 指定文字列を含むフレームか判定
+		if (frameNameStr.find(_exclusionName) != std::string::npos)
+		{
+			// 該当フレームを除外リストに登録
+			excludedFrameIndices_.insert(i);
+		}
+	}
 }
 
-void ColliderModel::ClearExcludedFrames(void)
+void ColliderModel::DrawDebug(int _debugColor) const
 {
-    // 除外リストを全削除
-    excludedFrameIndices_.clear();
-}
+	int modelHandle = GetModelHandle();
 
-bool ColliderModel::IsExcludedFrame(int frameIdx) const
-{
-    // セットに存在するかで判定
-    return excludedFrameIndices_.count(frameIdx) > 0;
-}
+	// モデルが無効なら早期リターン
+	if (modelHandle == INVALID_MODEL_ID)
+	{
+		return;
+	}
 
-void ColliderModel::DrawDebug(int debugColor) const
-{
-    int modelHandle = GetModelHandle();
-    if (modelHandle == -1)
-    {
-        return;
-    }
+	constexpr int ALPHA_BLEND_PARAM = 1; // 半透明のブレンドパラメータ
+	constexpr int NO_BLEND_PARAM = 0;    // ブレンドなしのパラメータ
 
-    const int ALPHA_BLEND_PARAM = 1; // 半透明のブレンドパラメータ
-    const int NO_BLEND_PARAM = 0;    // ブレンドなしのパラメータ
+	// 半透明にして描画する
+	SetDrawBlendMode(DX_BLENDMODE_ALPHA, ALPHA_BLEND_PARAM);
 
-    // 半透明にして描画する
-    SetDrawBlendMode(DX_BLENDMODE_ALPHA, ALPHA_BLEND_PARAM);
+	MV1DrawModel(modelHandle);
 
-    MV1DrawModel(modelHandle);
-
-    SetDrawBlendMode(DX_BLENDMODE_NOBLEND, NO_BLEND_PARAM);
+	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, NO_BLEND_PARAM);
 }

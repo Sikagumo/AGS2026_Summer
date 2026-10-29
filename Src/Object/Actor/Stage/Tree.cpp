@@ -24,7 +24,7 @@ void Tree::InitCollider(void)
 	ownColliders_[static_cast<int>(ColliderBase::TAG::TREE)].push_back(treeCol);
 
 	// “–‚½‚è”»’è“o˜^
-	treeCol->SetTriger(false);
+	treeCol->SetTrigger(false);
 	CollisionController::GetInstance().RegisterActor(this);
 	CollisionController::GetInstance()
 		.SetCollisionActive(this, ColliderBase::TAG::TREE, true);

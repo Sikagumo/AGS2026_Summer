@@ -24,10 +24,37 @@
 
 namespace
 {
-	// 雨の強さ
-	constexpr float RAIN_POW = 1.0f;
-	constexpr float RAIN_POW_BACK = 1.0f;
-};
+	// 描画・UI関連の定数
+	constexpr float RAIN_POW = 1.0f;               // 雨の強さの基本係数
+	constexpr float RAIN_POW_BACK = 1.0f;          // 背景における雨の強さの係数
+	constexpr int INFO_IMAGE_X_OFFSET = 770 / 6;   // 情報画像のX方向オフセット
+	constexpr int INFO_IMAGE_Y_OFFSET = 587 / 6;   // 情報画像のY方向オフセット
+	constexpr int UI_GAME_X_OFFSET = 300;          // ゲームUIのX方向オフセット
+	constexpr int UI_GAME_Y_POS = 35;              // ゲームUIのY方向位置
+	constexpr int INVALID_HANDLE = -1;             // 無効なリソースハンドルを示す値
+	constexpr float HP_RATIO_MIN = 0.0f;           // HP比率の最小値（0%）
+	constexpr float HP_RATIO_MAX = 1.0f;           // HP比率の最大値（100%）
+
+	// HPバー描画用の定数
+	constexpr float PLAYER_HP_BAR_SCALE = 0.275f;				 // プレイヤー用HPバーの表示スケール
+	constexpr Vector2 PLAYER_HP_BAR_MIDDLE_POS = { 200, 500 };	 // プレイヤー用HPバーの中央基準座標
+	constexpr int PLAYER_HP_BAR_OFFSET_Y = 100;					 // 複数プレイヤー表示時の縦方向の間隔
+
+	constexpr float BOSS_HP_BAR_SCALE = 0.5f;					 // ボス用HPバーの表示スケール
+	constexpr Vector2F BOSS_HP_BAR_OFFSET = { 0.0f, -100.0f };	 // ボス頭上等のバー表示オフセット
+	constexpr float BOSS_HP_DISPLAY_RATIO_MIN = 0.3f;			 // ボスHPバーの表示比率最小閾値
+	constexpr float BOSS_HP_DISPLAY_RATIO_MAX = 0.9f;			 // ボスHPバーの表示比率最大閾値
+	constexpr int BOSS_HP_BAR_OFFSET_X = -10;					 // ボス用HPバーのX方向微調整オフセット
+
+	constexpr float HP_BAR_DIST_MIN = 50.0f;       // HPバーのスケール計算における最小距離
+	constexpr float HP_BAR_MIN_SCALE = 0.375f;     // HPバーの最小スケール制限
+	constexpr float HP_BAR_MAX_SCALE = 1.5f;       // HPバーの最大スケール制限
+
+	constexpr float CONNECTION_TIMEOUT_SEC = 5.0f; // ネットワーク接続のタイムアウト時間（秒）
+	constexpr double RESULT_IMAGE_SCALE = 0.25;    // リザルト画面での画像表示スケール
+	constexpr double UI_GAME_IMAGE_SCALE = 0.5;    // ゲーム中UI画像の表示スケール
+	constexpr double RESULT_TITLE_SCALE = 2.0f;    // リザルトタイトルの表示スケール
+}
 
 SceneGame::SceneGame(std::vector<PlayerSelectType> _playerSelectType)
 	: players_()
@@ -36,14 +63,13 @@ SceneGame::SceneGame(std::vector<PlayerSelectType> _playerSelectType)
 	, stage_(std::make_unique<Stage>())
 	, damageController_(std::make_unique<DamageController>())
 	, gameTimer_(nullptr)
-	, targetHpImage_(-1)
-	, targetHpBerImage_(-1)
-	, infoImage_(-1)
-	, gameTexts_()
+	, targetHpImage_(INVALID_HANDLE)
+	, targetHpBerImage_(INVALID_HANDLE)
+	, infoImage_(INVALID_HANDLE)
+	, gameTexts_(INVALID_HANDLE)
 	, uiGame_()
-	, playerHpImage_(-1)
-	, playerHpImageBack_(-1)
-	, tempTime_(0.0f)
+	, playerHpImage_(INVALID_HANDLE)
+	, playerHpImageBack_(INVALID_HANDLE)
 	, slowCount_(0)
 	, imageResult_()
 	, isGameOver_(false)
@@ -55,16 +81,18 @@ SceneGame::SceneGame(std::vector<PlayerSelectType> _playerSelectType)
 	, stateUpdate_(nullptr)
 	, stateDraw_(nullptr)
 {
-	for (size_t i = 0; i < _playerSelectType.size(); i++)
+	// プレイヤー選択情報をもとにプレイヤーインスタンスを生成
+	for (size_t i = 0; i < _playerSelectType.size(); ++i)
 	{
-		const auto JOB = _playerSelectType.at(i).job;
-		const auto SKIN = _playerSelectType.at(i).skin;
-		std::unique_ptr<Player> player = std::make_unique<Player>(static_cast<int>(i), JOB, SKIN, PLAYER_INIT_POS[i]);
+		const auto job = _playerSelectType.at(i).job;
+		const auto skin = _playerSelectType.at(i).skin;
+		std::unique_ptr<Player> player = std::make_unique<Player>(static_cast<int>(i), job, skin, PLAYER_INIT_POS[i]);
 
 		players_.emplace_back(std::move(player));
 	}
 
-	for (int i = 0; i < ENEMYS_POP; i++)
+	// 指定数分の敵ロボを生成
+	for (int i = 0; i < ENEMYS_POP; ++i)
 	{
 		std::unique_ptr<EnemyRobo> enemy = std::make_unique<EnemyRobo>(ENEMY_POS[i]);
 
@@ -78,6 +106,7 @@ void SceneGame::Load(void)
 {
 	SceneBase::Load();
 
+	// HPバーやUI画像のロード
 	playerHpImageBack_ = ResourceManager::GetInstance().LoadHandleIdsOnce(ResourceManager::SRC::IMGS_HP_PLAYER, 0);
 	playerHpImage_ = ResourceManager::GetInstance().LoadHandleIdsOnce(ResourceManager::SRC::IMGS_HP_PLAYER, 1);
 
@@ -103,6 +132,7 @@ void SceneGame::Load(void)
 
 	gameTimer_ = std::make_unique<GameTimer>(GAME_TIME);
 
+	// 各種サウンドの追加
 	SoundManager::GetInstance().Add(SoundManager::TYPE::BGM, SoundManager::SOUND::BGM_GAME
 		, ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::BGM_GAME));
 
@@ -112,7 +142,6 @@ void SceneGame::Load(void)
 	SoundManager::GetInstance().Add(SoundManager::TYPE::SE, SoundManager::SOUND::SE_HIT_BLAST
 		, ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::SE_HIT_BLAST));
 
-	// 時間カウントリセット
 	TimeManager::GetInstance().Reset();
 }
 
@@ -128,9 +157,7 @@ void SceneGame::Initialize(void)
 		return;
 	}
 
-	NetManager::GetInstance().SetConnectionTimeout(5.0f);
-
-	// マウスを表示しない設定にする
+	NetManager::GetInstance().SetConnectionTimeout(CONNECTION_TIMEOUT_SEC);
 	SetMouseDispFlag(false);
 
 	auto& camera = SceneManager::GetInstance().GetCamera();
@@ -138,25 +165,24 @@ void SceneGame::Initialize(void)
 	camera->ChangeMode(Camera::MODE::PLAYER_FOLLOW);
 	camera->SetFollow(&players_.at(0)->GetTransform());
 
-	const NET_JOIN_USER SELF_USER = NetManager::GetInstance().GetSelfUser();
-	const auto REMOTE_USERS = NetManager::GetInstance().GetNetUsers();
-	const bool IS_BOSS_LOCAL_CONTROL = (NetManager::GetInstance().GetMode() != NET_MODE::CLIENT);
-	boss_->SetHostControl(IS_BOSS_LOCAL_CONTROL);
+	const NET_JOIN_USER selfUser = NetManager::GetInstance().GetSelfUser();
+	const auto remoteUsers = NetManager::GetInstance().GetNetUsers();
+	const bool isBossLocalControl = (NetManager::GetInstance().GetMode() != NET_MODE::CLIENT);
 
-	// 自分の設定
+	boss_->SetHostControl(isBossLocalControl);
+
+	// ホストである自分の設定
 	players_.at(0)->SetHostControl(true);
-	players_.at(0)->SetNetKey(SELF_USER.key);
+	players_.at(0)->SetNetKey(selfUser.key);
 
-	// 他人の設定
+	// クライアントなど他人の設定
 	int idx = 1;
-	for (const auto& pair : REMOTE_USERS)
+	for (const auto& pair : remoteUsers)
 	{
 		if (idx >= static_cast<int>(players_.size()))
 		{
 			break;
 		}
-
-		// ラジコンにする
 		players_.at(idx)->SetHostControl(false);
 		players_.at(idx)->SetNetKey(pair.second.key);
 		idx++;
@@ -174,14 +200,13 @@ void SceneGame::Initialize(void)
 	boss_->Init();
 	stage_->Init();
 
-	// タイマー有効化
 	gameTimer_->SetIsTimeActive(true);
-
 	damageController_->SetPlayerMaxHp(Player::HP_MAX);
+
 	SoundManager::GetInstance().Play(SoundManager::SOUND::BGM_GAME);
 	SoundManager::GetInstance().Play(SoundManager::SOUND::BGM_TITLE_THUNDER);
 
-	// 雨シェーダ
+	// 雨シェーダーのパラメータ初期化
 	rainyParams_.rainIntensity = RAIN_POW;
 	rainyParams_.rainIntensityBack = RAIN_POW_BACK;
 	rainyParams_.rainColor = GetColorF(0.75f, 0.82f, 0.9f, 1.0f);
@@ -192,7 +217,7 @@ void SceneGame::Initialize(void)
 
 	for (size_t i = 0; i < imageResult_.size(); ++i)
 	{
-		imageResult_[i] = -1;
+		imageResult_[i] = INVALID_HANDLE;
 	}
 
 	ResourceManager::GetInstance().LoadHandleIds(ResourceManager::SRC::IMGS_RESULT, imageResult_.data());
@@ -210,7 +235,10 @@ void SceneGame::Update(void)
 		SceneManager::GetInstance().PushScene(std::make_shared<ScenePause>());
 	}
 
-	stateUpdate_();
+	if (stateUpdate_ != nullptr)
+	{
+		stateUpdate_();
+	}
 }
 
 void SceneGame::DamageProcess(void)
@@ -235,14 +263,9 @@ void SceneGame::DamageProcess(void)
 			return _a.first < _b.first;
 		});
 
-	const int PLAYER_COUNT = static_cast<int>(keyPosList.size());
-
-	
-
-
 	if (NetManager::GetInstance().GetMode() != NET_MODE::CLIENT)
 	{
-		// ボスへのダメージ適用をホストのみに限定する
+		// ボスや各部位へのダメージ適用をホストのみに限定する
 		boss_->SetBossDamage(damageController_->GetBossDamage());
 		boss_->SetWeaponCannonLDamage(damageController_->GetWeaponCannonLDamage());
 		boss_->SetWeaponCannonRDamage(damageController_->GetWeaponCannonRDamage());
@@ -253,26 +276,26 @@ void SceneGame::DamageProcess(void)
 		boss_->SetWeaponRGDamage(damageController_->GetWeaponRGDamage());
 	}
 
-	if (damageController_->GetBossDamage() > 0
-		|| damageController_->GetWeaponCannonLDamage() > 0
-		|| damageController_->GetWeaponCannonRDamage() > 0
-		|| damageController_->GetWeaponMGLDamage() > 0
-		|| damageController_->GetWeaponMGRDamage() > 0
-		|| damageController_->GetWeaponMPLDamage() > 0
-		|| damageController_->GetWeaponMPRDamage() > 0
-		|| damageController_->GetWeaponRGDamage() > 0)
+	if (damageController_->GetBossDamage() > 0 ||
+		damageController_->GetWeaponCannonLDamage() > 0 ||
+		damageController_->GetWeaponCannonRDamage() > 0 ||
+		damageController_->GetWeaponMGLDamage() > 0 ||
+		damageController_->GetWeaponMGRDamage() > 0 ||
+		damageController_->GetWeaponMPLDamage() > 0 ||
+		damageController_->GetWeaponMPRDamage() > 0 ||
+		damageController_->GetWeaponRGDamage() > 0)
 	{
 		SoundManager::GetInstance().Play(SoundManager::SOUND::SE_HIT_BLAST);
 	}
 
 	for (auto& player : players_)
 	{
-		// マルチプレイ中の操作していないプレイヤーはスキップ
-		if (!player->GetHostControl()) { continue; }
+		if (!player->GetHostControl())
+		{
+			continue;
+		}
 
-		// プレイヤー被ダメージ処理
-		player->SetDamage(damageController_->GetPlayerDamage()
-			, damageController_->GetInvincible());
+		player->SetDamage(damageController_->GetPlayerDamage(), damageController_->GetInvincible());
 	}
 }
 
@@ -284,10 +307,10 @@ void SceneGame::UpdateGameTime(void)
 
 		for (auto& player : players_)
 		{
-			// 生存中はスキップ
-			if (!player->IsRespawn()) { continue; }
-
-			// プレイヤー撃破時、制限時間の減少
+			if (!player->IsRespawn())
+			{
+				continue;
+			}
 			gameTimer_->SetTime(gameTimer_->GetTime() - GAME_TIME_DEFEAT_DEC);
 		}
 
@@ -298,20 +321,21 @@ void SceneGame::UpdateGameTime(void)
 		gameTimer_->SetTime(NetManager::GetInstance().GetGameTime());
 	}
 
-	// 制限時間が0の時、ゲーム終了
 	if (gameTimer_->GetTime() <= 0.0f)
 	{
 		ChangeState(GAME_STATE::GAME_END);
 	}
 
-	// 雨シェーダ更新
 	rainyTime_ = TimeManager::GetInstance().GetGameTime();
 	rainyParams_.timeValue = rainyTime_;
 }
 
 void SceneGame::Draw(void)
 {
-	stateDraw_();
+	if (stateDraw_ != nullptr)
+	{
+		stateDraw_();
+	}
 }
 
 void SceneGame::Release(void)
@@ -325,7 +349,6 @@ void SceneGame::Release(void)
 
 	boss_->Release();
 
-	// カメラの初期化
 	auto& camera = SceneManager::GetInstance().GetCamera();
 	camera->SetFollow(nullptr);
 	camera->ChangeMode(Camera::MODE::NONE);
@@ -335,192 +358,125 @@ void SceneGame::Release(void)
 
 void SceneGame::DrawHpBerPlayer(void)
 {
-	constexpr float BER_SCALE = 0.275f;
-
 	Vector2 backSize = Vector2();
 	GetGraphSize(playerHpImageBack_, &backSize.x, &backSize.y);
-	backSize *= BER_SCALE;
+	backSize *= PLAYER_HP_BAR_SCALE;
 
 	Vector2 imageSize = Vector2();
 	GetGraphSize(playerHpImage_, &imageSize.x, &imageSize.y);
 
-	// 中央位置
-	constexpr Vector2 BER_POS_MIDDLE = { 200, 500 };
-	Vector2 berPos = BER_POS_MIDDLE;
+	Vector2 berPos = PLAYER_HP_BAR_MIDDLE_POS;
 
-	// 表示幅のリマップ範囲
-	constexpr float DISPLAY_RATIO_MIN = 0.0f;
-	constexpr float DISPLAY_RATIO_MAX = 1.0f;
-
-	const int PLAYER_NUM = static_cast<int>(players_.size());
-	for (int i = 0; i < PLAYER_NUM; i++)
+	const int playerNum = static_cast<int>(players_.size());
+	for (int i = 0; i < playerNum; ++i)
 	{
-		// バー背景描画
 		DrawRotaGraph(
 			berPos.x, berPos.y,
-			BER_SCALE, 0.0f,
+			PLAYER_HP_BAR_SCALE, 0.0f,
 			playerHpImageBack_, true
 		);
 
-		// プレイヤーのHP割合
-		const float HP_RATIO = (static_cast<float>(players_.at(i)->GetCurHp()) / static_cast<float>(Player::HP_MAX));
-		const float RATIO = std::clamp(HP_RATIO, 0.0f, 1.0f);
+		const float hpRatio = (static_cast<float>(players_.at(i)->GetCurHp()) / static_cast<float>(Player::HP_MAX));
+		const float ratio = std::clamp(hpRatio, HP_RATIO_MIN, HP_RATIO_MAX);
 
+		const float displayRatio = std::lerp(HP_RATIO_MIN, HP_RATIO_MAX, ratio);
 
-		// 減少範囲にリマップ
-		const float DISPLAY_RATIO = std::lerp(DISPLAY_RATIO_MIN, DISPLAY_RATIO_MAX, RATIO);
+		const Vector2 posUpperLeft = {
+			static_cast<int>(berPos.x - (backSize.x / 2)),
+			static_cast<int>(berPos.y - (backSize.y / 2))
+		};
 
-		// 左上座標
-		const Vector2 POS_UPPER_LEFT
-			= { static_cast<int>(berPos.x - (backSize.x / 2)),
-				static_cast<int>(berPos.y - (backSize.y / 2)) };
+		const Vector2 posLowerRight = {
+			static_cast<int>(posUpperLeft.x + (backSize.x * displayRatio)),
+			static_cast<int>(posUpperLeft.y + backSize.y)
+		};
 
-		// 右下座標
-		const Vector2 POS_LOWER_RIGHT
-			= { (POS_UPPER_LEFT.x + static_cast<int>(backSize.x * DISPLAY_RATIO)),
-				(POS_UPPER_LEFT.y + backSize.y) };
+		const int imageWidth = static_cast<int>(imageSize.x * displayRatio);
 
-		// 切り取り幅
-		const int IMAGE_WIDTH = static_cast<int>(imageSize.x * DISPLAY_RATIO);
-
-		if (IMAGE_WIDTH > 0)
+		if (imageWidth > 0)
 		{
-			const Vector2 HP_UV_POS = { 0, 0 }; 
-
 			DrawRectExtendGraph(
-				POS_UPPER_LEFT.x, POS_UPPER_LEFT.y,
-				POS_LOWER_RIGHT.x, POS_LOWER_RIGHT.y,
-				HP_UV_POS.x, HP_UV_POS.y,
-				IMAGE_WIDTH, imageSize.y,
+				posUpperLeft.x, posUpperLeft.y,
+				posLowerRight.x, posLowerRight.y,
+				0, 0,
+				imageWidth, imageSize.y,
 				playerHpImage_,
 				true
 			);
 		}
 
-		constexpr int BER_OFFSET_Y = 100;
-		berPos.y += (backSize.y + BER_OFFSET_Y);
-
-#ifdef _DEBUG
-		DrawFormatString(10, Application::SCREEN_SIZE_Y - (16 * (PLAYER_NUM - (i + 1))), 0xff0000, "プレイヤーHP：%d"
-			, players_.at(i)->GetCurHp());
-#endif
+		berPos.y += (backSize.y + PLAYER_HP_BAR_OFFSET_Y);
 	}
 }
 
 void SceneGame::DrawHpBerBoss(void)
 {
-	const std::unique_ptr<Camera>& CAMERA = SceneManager::GetInstance().GetCamera();
-	constexpr float BER_SCALE = 0.5f;
-	constexpr Vector2F BER_OFFSET = { 0.0f, -100.0f };
+	const std::unique_ptr<Camera>& camera = SceneManager::GetInstance().GetCamera();
 
-	// 表示幅としてのRATIOのリマップ範囲（数値で調整可能）
-	constexpr float DISPLAY_RATIO_MIN = 0.3f;
-	constexpr float DISPLAY_RATIO_MAX = 0.9f;
-
-	Vector2 backSize = Vector2();
-	GetGraphSize(targetHpBerImage_, &backSize.x, &backSize.y);
-
-	if (CAMERA->GetIsLockOn() && !CAMERA->IsEasingState())
+	if (camera->GetIsLockOn() && !camera->IsEasingState())
 	{
-		VECTOR viewPos = ConvWorldPosToScreenPos(CAMERA->GetTargetPos());
-		viewPos.x += BER_OFFSET.x;
-		viewPos.y += BER_OFFSET.y;
+		VECTOR viewPos = ConvWorldPosToScreenPos(camera->GetTargetPos());
+		viewPos.x += BOSS_HP_BAR_OFFSET.x;
+		viewPos.y += BOSS_HP_BAR_OFFSET.y;
 
-		// 背景
 		DrawRotaGraph(
 			static_cast<int>(viewPos.x), static_cast<int>(viewPos.y),
-			BER_SCALE, 0.0f,
+			BOSS_HP_BAR_SCALE, 0.0f,
 			targetHpBerImage_, true
 		);
 
 		Vector2 imageSize = Vector2();
 		GetGraphSize(targetHpImage_, &imageSize.x, &imageSize.y);
 
-		// スクリーン上でのゲージ画像全体のサイズ（BER_SIZE倍）
-		const Vector2F BER_SIZE = { (imageSize.x * BER_SCALE), (imageSize.y * BER_SCALE) };
+		const Vector2F berSize = { (imageSize.x * BOSS_HP_BAR_SCALE), (imageSize.y * BOSS_HP_BAR_SCALE) };
 
-		// 追従先のHPが残っている場合に割合を計算
-		const float HP_RATIO = (CAMERA->GetLockOnMaxHp() > 0)
-			? static_cast<float>(CAMERA->GetLockOnHp()) / static_cast<float>(CAMERA->GetLockOnMaxHp())
+		const float hpRatio = (camera->GetLockOnMaxHp() > 0)
+			? static_cast<float>(camera->GetLockOnHp()) / static_cast<float>(camera->GetLockOnMaxHp())
 			: 0.0f;
 
-		const float RATIO = std::clamp(HP_RATIO, 0.0f, 1.0f);
+		const float ratio = std::clamp(hpRatio, HP_RATIO_MIN, HP_RATIO_MAX);
 
-		// HP割合を範囲にリマップ
-		const float DISPLAY_RATIO = std::lerp(DISPLAY_RATIO_MIN, DISPLAY_RATIO_MAX, RATIO);
+		const Vector2 posUpperLeft = {
+			static_cast<int>(viewPos.x - (berSize.x / 2)),
+			static_cast<int>(viewPos.y - (berSize.y / 2))
+		};
 
-		// スクリーン上でのゲージ画像全体のサイズ
-		const float SCALED_W = (imageSize.x * BER_SIZE.x);
-		const float SCALED_H = (imageSize.y * BER_SIZE.y);
+		const Vector2 posLowerRight = {
+			static_cast<int>(posUpperLeft.x + (berSize.x * ratio) + BOSS_HP_BAR_OFFSET_X),
+			static_cast<int>(posUpperLeft.y + berSize.y)
+		};
 
-		// 左上座標
-		const Vector2 POS_UPPER_LEFT
-			= { static_cast<int>(viewPos.x - (BER_SIZE.x / 2)),
-				static_cast<int>(viewPos.y - (BER_SIZE.y / 2)) };
+		const int imageWidth = static_cast<int>(imageSize.x * ratio);
 
-		// 右下座標
-		constexpr int OFFSET_X = -10;
-		const Vector2 POS_LOWER_RIGHT
-			= { (POS_UPPER_LEFT.x + static_cast<int>(BER_SIZE.x * RATIO) + OFFSET_X),
-				(POS_UPPER_LEFT.y + static_cast<int>(BER_SIZE.y)) };
-
-		// 切り取り幅 (HP割合分)
-		const int IMAGE_WIDTH = static_cast<int>(imageSize.x * RATIO);
-
-		if (IMAGE_WIDTH > 0)
+		if (imageWidth > 0)
 		{
 			DrawRectExtendGraph(
-				POS_UPPER_LEFT.x, POS_UPPER_LEFT.y,
-				POS_LOWER_RIGHT.x, POS_LOWER_RIGHT.y,
+				posUpperLeft.x, posUpperLeft.y,
+				posLowerRight.x, posLowerRight.y,
 				0, 0,
-				IMAGE_WIDTH, imageSize.y,
+				imageWidth, imageSize.y,
 				targetHpImage_,
 				true
 			);
 		}
-
-#ifdef _DEBUG
-		DrawFormatString(10, 60, GetColor(255, 255, 255),
-			"Boss HP: %d / %d  Ratio: %.2f",
-			CAMERA->GetLockOnHp(), CAMERA->GetLockOnMaxHp(), RATIO);
-#endif
 	}
 }
 
 float SceneGame::CalcHpBarScale(const VECTOR& _targetPos)
 {
-	// 距離の最小値
-	constexpr float DIST_MIN = 50.0f;
-
-	// スケールの最小/最大
-	constexpr float HP_BAR_MIN_SCALE = 0.375f;
-	constexpr float HP_BAR_MAX_SCALE = 1.5f;
-
-	const VECTOR CAMERA_POS = SceneManager::GetInstance().GetCamera()->GetPos();
-	VECTOR distVec = VSub(_targetPos, CAMERA_POS);
+	const VECTOR cameraPos = SceneManager::GetInstance().GetCamera()->GetPos();
+	VECTOR distVec = VSub(_targetPos, cameraPos);
 	distVec.y = 0.0f;
-	const float DIST = VSize(distVec);
+	const float dist = VSize(distVec);
 
-	// ベクトルの距離が最小値より小さい場合は最小値にする
-	const float SAFE_DIST = ((DIST < DIST_MIN) ? DIST_MIN : DIST);
+	const float safeDist = ((dist < HP_BAR_DIST_MIN) ? HP_BAR_DIST_MIN : dist);
+	const float scale = (HP_BAR_DIST_MIN / safeDist);
 
-	// 遠ければ遠いほどスケールを狭める
-	const float SCALE = (DIST_MIN / SAFE_DIST);
-
-	return std::clamp(SCALE, HP_BAR_MIN_SCALE, HP_BAR_MAX_SCALE);
+	return std::clamp(scale, HP_BAR_MIN_SCALE, HP_BAR_MAX_SCALE);
 }
 
 void SceneGame::DrawDebug(void)
 {
-	SceneManager::GetInstance().GetCamera()->DrawDebug();
-	damageController_->DebugDraw();
-
-	const bool IS_HIT = CollisionController::GetInstance().IsTagCollidingWithTag(ColliderBase::TAG::CAMERA, ColliderBase::TAG::WALL);
-
-	if (IS_HIT)
-	{
-		DrawString(0, 600, "当たってる", 0x000000);
-	}
 }
 
 void SceneGame::UpdateGui(void)
@@ -530,18 +486,16 @@ void SceneGame::UpdateGui(void)
 void SceneGame::ChangeState(GAME_STATE _state)
 {
 	state_ = _state;
-
-	const int STATE = static_cast<int>(state_);
-
-	// 各状態遷移の初期処理
-	ChangeState(STATE);
+	ChangeState(static_cast<int>(state_));
 }
 
 void SceneGame::ChangeState(int _state)
 {
 	stateBase_ = _state;
-	// 各状態遷移の初期処理
-	stateChanges_[stateBase_]();
+	if (stateChanges_.find(stateBase_) != stateChanges_.end())
+	{
+		stateChanges_[stateBase_]();
+	}
 }
 
 void SceneGame::ChangeGame(void)
@@ -566,9 +520,6 @@ void SceneGame::ChangeGameEnd(void)
 
 void SceneGame::UpdateGame(void)
 {
-	auto& sound = SoundManager::GetInstance();
-	auto& camera = SceneManager::GetInstance().GetCamera();
-
 	if (Loading::GetInstance()->IsLoading())
 	{
 		return;
@@ -599,13 +550,11 @@ void SceneGame::UpdateGame(void)
 			continue;
 		}
 
-		const int KEY = player->GetNetKey();
-
-		if (remoteHisMap.find(KEY) != remoteHisMap.end())
+		const int key = player->GetNetKey();
+		if (remoteHisMap.find(key) != remoteHisMap.end())
 		{
-			const NET_ACTION LATEST_ACTION = remoteHisMap[KEY].actions[0];
-
-			player->SetNetworkAction(LATEST_ACTION.pos, LATEST_ACTION.rot, LATEST_ACTION.animId, LATEST_ACTION.isAttack, LATEST_ACTION.currentHp);
+			const NET_ACTION latestAction = remoteHisMap[key].actions[0];
+			player->SetNetworkAction(latestAction.pos, latestAction.rot, latestAction.animId, latestAction.isAttack, latestAction.currentHp);
 		}
 	}
 
@@ -620,19 +569,16 @@ void SceneGame::UpdateGame(void)
 		player->SetSoundData(boss_->GetBossPos(), boss_->GetSoundRadius(), boss_->GetLandingFlag(), boss_->GetMGFireFlag(), boss_->GetRoadFlag());
 	}
 
-	// プレイヤーの攻撃
 	int attackPower = 0;
 	int attackBlast = 0;
 	for (auto& player : players_)
 	{
-		// 弾
 		for (auto& bullet : player->GetWeaponController()->GetBullets())
 		{
 			attackPower = std::max(attackPower, bullet->GetPowerBullet());
 			attackBlast = std::max(attackBlast, bullet->GetPowerBlast());
 		}
 
-		// 拡散弾
 		for (auto& bullet : player->GetWeaponController()->GetBulletsCluster())
 		{
 			if (bullet == nullptr)
@@ -646,10 +592,8 @@ void SceneGame::UpdateGame(void)
 	damageController_->SetPlayerAttack(attackPower, attackBlast);
 
 	UpdateGameTime();
-
 	EffectManager::GetInstance().Update();
 
-	// ボスHPが０の時、ゲームクリア
 	if (boss_->GetHP() <= 0 || gameTimer_->GetTime() <= 0.0f)
 	{
 		ChangeState(GAME_STATE::GAME_END);
@@ -703,7 +647,6 @@ void SceneGame::UpdateGameEnd(void)
 
 void SceneGame::DrawGame(void)
 {
-	// 雨シェーダ
 	ShaderController::GetInstance().Draw2D(
 		ResourceManager::SRC::PS_RAINY,
 		0, 0, 1.0f,
@@ -711,7 +654,6 @@ void SceneGame::DrawGame(void)
 	);
 
 	stage_->Draw();
-
 	ShaderController::GetInstance().ExecuteDrawCommands();
 
 	for (auto& player : players_)
@@ -730,38 +672,24 @@ void SceneGame::DrawGame(void)
 		enemyRobo->Draw();
 	}
 
-	// 木
 	stage_->DrawTree();
-
-	auto& effect = EffectManager::GetInstance();
-	effect.Draw();
-
-	
-
+	EffectManager::GetInstance().Draw();
 	DrawHpBerBoss();
-
 	gameTimer_->Draw();
 
-	DrawRotaGraph((Application::SCREEN_SIZE_X - (770 / 6)), (587 / 6), 0.25, 0.0, infoImage_, true);
-	DrawRotaGraph((Application::SCREEN_HALF_X - 300), 35, 0.5, 0.0, uiGame_.at(0), true);
+	DrawRotaGraph(Application::SCREEN_SIZE_X - INFO_IMAGE_X_OFFSET, INFO_IMAGE_Y_OFFSET, RESULT_IMAGE_SCALE, 0.0, infoImage_, true);
+	DrawRotaGraph(Application::SCREEN_HALF_X - UI_GAME_X_OFFSET, UI_GAME_Y_POS, UI_GAME_IMAGE_SCALE, 0.0, uiGame_.at(0), true);
 
 	DrawHpBerPlayer();
-
-#ifdef _DEBUG
-	DrawDebug();
-	SceneManager::GetInstance().GetCamera()->DrawDebug();
-#endif // _DEBUG
 }
 
 void SceneGame::DrawGameEnd(void)
 {
 	stage_->Draw();
-
 	ShaderController::GetInstance().ExecuteDrawCommands();
 
 	boss_->Draw();
-	auto& effect = EffectManager::GetInstance();
-	effect.Draw();
+	EffectManager::GetInstance().Draw();
 
 	ShaderController::GetInstance().Draw2D(
 		ResourceManager::SRC::PS_RAINY,
@@ -769,16 +697,16 @@ void SceneGame::DrawGameEnd(void)
 		rainyParams_
 	);
 
-	const int IMAGE_TITLE_Y = Application::SCREEN_SIZE_Y / 3;
+	const int imageTitleY = Application::SCREEN_SIZE_Y / 3;
 	if (slowCount_ >= SLOW_COUNT_MAX * 30)
 	{
 		if (boss_->GetHP() > 0)
 		{
-			DrawRotaGraph(Application::SCREEN_HALF_X, IMAGE_TITLE_Y, 2.0f, UtilityMath::DEG2RAD, imageResult_[3], true);
+			DrawRotaGraph(Application::SCREEN_HALF_X, imageTitleY, RESULT_TITLE_SCALE, UtilityMath::DEG2RAD, imageResult_[3], true);
 		}
 		else
 		{
-			DrawRotaGraph(Application::SCREEN_HALF_X, IMAGE_TITLE_Y, 2.0f, UtilityMath::DEG2RAD, imageResult_[1], true);
+			DrawRotaGraph(Application::SCREEN_HALF_X, imageTitleY, RESULT_TITLE_SCALE, UtilityMath::DEG2RAD, imageResult_[1], true);
 		}
 	}
 }

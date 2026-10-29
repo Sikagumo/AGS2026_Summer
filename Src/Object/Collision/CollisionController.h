@@ -31,7 +31,6 @@ struct CollisionInfo
 class CollisionController
 {
 public:
-
 	/// @brief インスタンスを明示的に生成
 	static void CreateInstance(void);
 
@@ -64,8 +63,7 @@ public:
 	/// @param _colliderB コライダーB
 	/// @param _outInfo 衝突情報を格納する構造体
 	/// @return 衝突していればtrue
-	bool CheckCollision(const ColliderBase* _colliderA,
-		const ColliderBase* _colliderB, CollisionInfo& _outInfo);
+	bool CheckCollision(const ColliderBase* _colliderA, const ColliderBase* _colliderB, CollisionInfo& _outInfo);
 
 	/// @brief 指定したアクターが特定のタグを持つ相手と衝突しているか調べる
 	/// @param _actor 調査対象のアクター
@@ -95,15 +93,13 @@ public:
 	/// @param _targetActor 変更したいアクター
 	/// @param _targetTag 変更したいコライダーのタグ
 	/// @param _radius 新しく設定する半径の値
-	void SetActorColliderRadius(ActorBase* _targetActor, ColliderBase::TAG _targetTag,
-		float _radius);
+	void SetActorColliderRadius(ActorBase* _targetActor, ColliderBase::TAG _targetTag, float _radius);
 
 	/// @brief 指定したタグの球コライダーのローカル座標を変更する
 	/// @param _targetActor 変更したいアクター
 	/// @param _targetTag 変更したいコライダータグ
 	/// @param _localPosition 新しい座標
-	void SetActorSphereLocalPos(ActorBase* _targetActor, ColliderBase::TAG _targetTag,
-		const VECTOR& _localPosition);
+	void SetActorSphereLocalPos(ActorBase* _targetActor, ColliderBase::TAG _targetTag, const VECTOR& _localPosition);
 
 	/// @brief 指定したタグのカプセルコライダーの始点・終点・半径を一括で変更する
 	/// @param _targetActor 変更したいアクター
@@ -111,8 +107,7 @@ public:
 	/// @param _localStartPos 新しい始点
 	/// @param _localEndPos 新しい終点
 	/// @param _radius 新しい半径
-	void SetActorCapsuleShape(ActorBase* _targetActor, ColliderBase::TAG _targetTag,
-		const VECTOR& _localStartPos, const VECTOR& _localEndPos, float _radius);
+	void SetActorCapsuleShape(ActorBase* _targetActor, ColliderBase::TAG _targetTag, const VECTOR& _localStartPos, const VECTOR& _localEndPos, float _radius);
 
 	/// @brief 衝突したアクター同士の押し戻し処理を行う
 	/// @param _actorA 動かす対象のアクターA
@@ -135,28 +130,24 @@ public:
 	/// @param _tagA 対象の2DタグA
 	/// @param _tagB 対象の2DタグB
 	/// @param _isEnable 衝突を有効にするか
-	void SetCollisionGroup2D(Collider2DBase::TAG_2D _tagA,
-		Collider2DBase::TAG_2D _tagB, bool _isEnable);
+	void SetCollisionGroup2D(Collider2DBase::TAG_2D _tagA, Collider2DBase::TAG_2D _tagB, bool _isEnable);
 
 	/// @brief コライダー同士の詳細な衝突チェック
 	/// @param _colA 1つ目の2Dコライダー
 	/// @param _colB 2つ目の2Dコライダー
 	/// @return 衝突しているか
-	bool CheckCollision2D(const Collider2DBase* _colA,
-		const Collider2DBase* _colB) const;
+	bool CheckCollision2D(const Collider2DBase* _colA, const Collider2DBase* _colB) const;
 
 	/// @brief 特定の2Dタグ同士が現在衝突しているか調べる
 	/// @param _targetTagA 調査対象の2DタグA
 	/// @param _targetTagB 調査対象の2DタグB
 	/// @return 衝突していればtrue
-	bool IsTagCollidingWithTag2D(Collider2DBase::TAG_2D _targetTagA,
-		Collider2DBase::TAG_2D _targetTagB) const;
+	bool IsTagCollidingWithTag2D(Collider2DBase::TAG_2D _targetTagA, Collider2DBase::TAG_2D _targetTagB) const;
 
 	/// @brief 2Dコライダーのデバッグ描画
 	void DrawDebug2D(void);
 
 private:
-
 	// 定数関連
 	static constexpr float DEFAULT_CULL_DIST = 5000.0f; // カリングを行う距離のデフォルト値
 	static const size_t MATRIX_SIZE_2D = 32;            // 2D衝突マトリクスの配列サイズ

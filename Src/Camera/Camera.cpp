@@ -39,7 +39,7 @@ void Camera::InitCollider(void)
 		COL_CAPSULE_SPHERE);
 	ownColliders_[static_cast<int>(ColliderBase::TAG::CAMERA)].push_back(colliderSphere);
 
-	colliderSphere->SetTriger(false);
+	colliderSphere->SetTrigger(false);
 
 	CollisionController::GetInstance().RegisterActor(this);
 }
@@ -87,7 +87,7 @@ void Camera::DrawDebug(void)
 
 	VECTOR target = VSub(lockOnParam_.pos, VGet(followTransform_->pos.x, lockOnParam_.pos.y, followTransform_->pos.z));
 	float tan = atan2f(target.x, target.z);
-	VECTOR rotY = rotY_.ToEuler();
+	VECTOR rotY = rotY_.ConvertToEuler();
 
 	DrawFormatString(0, 32, 0xffffff, "Camera(pos(%.1f, %.1f, %.1f), \nangle(%.1f‹, %.1f‹, %.1f‹)),rotY(%.1f‹, %.1f‹, %.1f‹))"
 		, transform_.pos.x, transform_.pos.y, transform_.pos.z

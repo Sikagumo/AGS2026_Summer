@@ -1,7 +1,6 @@
 #pragma once
 
 #include <DxLib.h>
-
 #include "ColliderBase.h"
 
 class Transform;
@@ -16,26 +15,26 @@ public:
 	/// @param _followTarget 追従対象のTransform
 	/// @param _localStartPos ローカル空間での開始位置
 	/// @param _localEndPos ローカル空間での終了位置
-	ColliderLine(TAG  _collisionTag, const Transform* _followTarget, const VECTOR& _localStartPos, const VECTOR& _localEndPos);
+	ColliderLine(TAG _collisionTag, const Transform* _followTarget, const VECTOR& _localStartPos, const VECTOR& _localEndPos);
 
 	/// @brief デストラクタ
 	~ColliderLine(void) override = default;
 
 	/// @brief ローカル開始位置の設定
 	/// @param _position ローカル空間での開始位置
-	void SetLocalStartPos(const VECTOR& _position);
+	void SetLocalStartPos(const VECTOR& _position) { localStartPos_ = _position; }
 
 	/// @brief ローカル終了位置の設定
 	/// @param _position ローカル空間での終了位置
-	void SetLocalEndPos(const VECTOR& _position);
+	void SetLocalEndPos(const VECTOR& _position) { localEndPos_ = _position; }
 
 	/// @brief ローカル開始位置の取得
 	/// @return ローカル空間での開始位置
-	const VECTOR& GetLocalStartPos(void) const;
+	const VECTOR& GetLocalStartPos(void) const { return localStartPos_; }
 
 	/// @brief ローカル終了位置の取得
 	/// @return ローカル空間での終了位置
-	const VECTOR& GetLocalEndPos(void) const;
+	const VECTOR& GetLocalEndPos(void) const { return localEndPos_; }
 
 	/// @brief ワールド開始位置の取得
 	/// @return ワールド空間での開始位置

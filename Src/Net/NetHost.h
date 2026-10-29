@@ -5,6 +5,7 @@
 class NetHost : public NetBase
 {
 public:
+
 	// ベースクラスのコンストラクタを使用
 	using NetBase::NetBase;
 
@@ -21,5 +22,4 @@ private:
 
 	// ユーザー情報送信のしきい値時間
 	static constexpr float SEND_INTERVAL_LIMIT = 0.1f;
-
 };

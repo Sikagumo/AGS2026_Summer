@@ -44,7 +44,7 @@ void WeaponCannon::InitCollider(void)
 
 	ColliderCapsule* capsuleCollider = new ColliderCapsule(
 		tag_, &transform_, CAPSULE_START_POS, CAPSULE_END_POS, CAPSULE_RADIUS);
-	capsuleCollider->SetTriger(false);
+	capsuleCollider->SetTrigger(false);
 	ownColliders_[static_cast<int>(tag_)].push_back(capsuleCollider);
 
 	CollisionController::GetInstance().RegisterActor(this);

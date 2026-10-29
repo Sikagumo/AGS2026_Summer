@@ -54,16 +54,16 @@ void EnemyRobo::InitCollider(void)
 {
 	ColliderLine* colLine = new ColliderLine(ColliderBase::TAG::ENEMYROBO, &transform_, COL_LINE_START_POS, COL_LINE_END_POS);
 	ownColliders_[static_cast<int>(ColliderBase::TAG::ENEMYROBO)].push_back(colLine);
-	colLine->SetTriger(false);
+	colLine->SetTrigger(false);
 
 	ColliderCapsule* colCapsule = new ColliderCapsule(
 		ColliderBase::TAG::ENEMYROBO, &transform_, COL_CAPSULE_START_POS, COL_CAPSULE_END_POS, COL_CAPSULE_END_RADIUS);
 	ownColliders_[static_cast<int>(ColliderBase::TAG::ENEMYROBO)].push_back(colCapsule);
-	colCapsule->SetTriger(false);
+	colCapsule->SetTrigger(false);
 
 	ColliderSphere* colSphere = new ColliderSphere(ColliderBase::TAG::ENEMYROBO, &transform_, COL_SPHERE_POS, COL_SPHERE_RADIUS);
 	ownColliders_[static_cast<int>(ColliderBase::TAG::ENEMYROBO)].push_back(colSphere);
-	colSphere->SetTriger(true);
+	colSphere->SetTrigger(true);
 
 	// 手のボーン座標から攻撃コライダー位置を算出
 	VECTOR handPos = MV1GetFramePosition(transform_.modelId, BONE_HAND_INDEX);
@@ -71,7 +71,7 @@ void EnemyRobo::InitCollider(void)
 
 	ColliderSphere* colAttackSphere = new ColliderSphere(ColliderBase::TAG::ENEMY_ATTACK, &transform_, handLocalPos, COL_ATTACK_SPHERE_RADIUS);
 	ownColliders_[static_cast<int>(ColliderBase::TAG::ENEMY_ATTACK)].push_back(colAttackSphere);
-	colAttackSphere->SetTriger(false);
+	colAttackSphere->SetTrigger(false);
 
 	CollisionController::GetInstance().RegisterActor(this);
 	CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::ENEMY_ATTACK, false);

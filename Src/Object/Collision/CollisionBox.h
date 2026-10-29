@@ -12,4 +12,3 @@ public:
 	/// @return Õ“Ë‚µ‚Ä‚¢‚é‚©
 	static bool CheckBoxVsBox(const Collider2DBase* _boxA, const Collider2DBase* _boxB);
 };
-

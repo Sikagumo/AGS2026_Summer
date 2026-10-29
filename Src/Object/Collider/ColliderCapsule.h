@@ -1,7 +1,6 @@
 #pragma once
 
 #include <DxLib.h>
-
 #include "ColliderBase.h"
 
 class Transform;
@@ -11,60 +10,63 @@ class ColliderCapsule : public ColliderBase
 {
 public:
 
-    /// @brief コンストラクタ
-    /// @param collisionTag 衝突種別
-    /// @param followTarget 追従対象のTransform
-    /// @param localStartPos ローカル空間での開始位置
-    /// @param localEndPos ローカル空間での終了位置
-    /// @param radius カプセルの半径
-    ColliderCapsule(TAG _collisionTag, const Transform* _followTarget, const VECTOR& _localStartPos, const VECTOR& _localEndPos, float _radius);
+	/// @brief コンストラクタ
+	/// @param _collisionTag 衝突種別
+	/// @param _followTarget 追従対象のTransform
+	/// @param _localStartPos ローカル空間での開始位置
+	/// @param _localEndPos ローカル空間での終了位置
+	/// @param _radius カプセルの半径
+	ColliderCapsule(TAG _collisionTag, const Transform* _followTarget, const VECTOR& _localStartPos, 
+		const VECTOR& _localEndPos, float _radius);
 
-    /// @brief デストラクタ
-    ~ColliderCapsule(void) override = default;
+	/// @brief デストラクタ
+	~ColliderCapsule(void) override = default;
 
-    /// @brief ローカル開始位置の設定
-    /// @param pos ローカル空間での開始位置
-    void SetLocalStartPos(const VECTOR& _position);
+	/// @brief ローカル開始位置の設定
+	/// @param _position ローカル空間での開始位置
+	void SetLocalStartPos(const VECTOR& _position) { localStartPos_ = _position; }
 
-    /// @brief ローカル終了位置の設定
-    /// @param pos ローカル空間での終了位置
-    void SetLocalEndPos(const VECTOR& _position);
+	/// @brief ローカル終了位置の設定
+	/// @param _position ローカル空間での終了位置
+	void SetLocalEndPos(const VECTOR& _position) { localEndPos_ = _position; }
 
-    /// @brief 半径の設定
-    /// @param radius カプセルの半径
-    void SetRadius(float _radius) override;
+	/// @brief 半径の設定
+	/// @param _radius カプセルの半径
+	void SetRadius(float _radius) { radius_ = _radius; }
 
-    /// @brief ローカル開始位置の取得
-    /// @return ローカル空間での開始位置
-    const VECTOR& GetLocalStartPos(void) const;
+	/// @brief ローカル開始位置の取得
+	/// @return ローカル空間での開始位置
+	const VECTOR& GetLocalStartPos(void) const { return localStartPos_; }
 
-    /// @brief ローカル終了位置の取得
-    /// @return ローカル空間での終了位置
-    const VECTOR& GetLocalEndPos(void) const;
+	/// @brief ローカル終了位置の取得
+	/// @return ローカル空間での終了位置
+	const VECTOR& GetLocalEndPos(void) const { return localEndPos_; }
 
-    /// @brief ワールド開始位置の取得
-    /// @return ワールド空間での開始位置
-    VECTOR GetWorldStartPos(void) const;
+	/// @brief ワールド開始位置の取得
+	/// @return ワールド空間での開始位置
+	VECTOR GetWorldStartPos(void) const;
 
-    /// @brief ワールド終了位置の取得
-    /// @return ワールド空間での開始位置
-    VECTOR GetWorldEndPos(void) const;
+	/// @brief ワールド終了位置の取得
+	/// @return ワールド空間での終了位置
+	VECTOR GetWorldEndPos(void) const;
 
-    /// @brief 半径の取得
-   /// @return カプセルの半径
-    float GetRadius(void) const;
+	/// @brief 半径の取得
+	/// @return カプセルの半径
+	float GetRadius(void) const { return radius_; }
 
 protected:
-    /// @brief デバッグ描画
-    /// @param debugColor 描画色
-    void DrawDebug(int _debugColor) const override;
+
+	/// @brief デバッグ描画
+	/// @param _debugColor 描画色
+	void DrawDebug(int _debugColor) const override;
 
 private:
-    // デバッグ表示の球体・カプセルポリゴン分割数
-    static constexpr int DEBUG_SEGMENT_COUNT = 8;
 
-    // コライダーの形状パラメータ関連
-    VECTOR localStartPos_; // カプセルの開始座標
-    VECTOR localEndPos_;   // カプセルの終了座標
-    float radius_;         // カプセルの半径
+	// デバッグ表示の球体・カプセルポリゴン分割数
+	static constexpr int DEBUG_SEGMENT_COUNT = 8;
+
+	// コライダーの形状パラメータ関連
+	VECTOR localStartPos_; // カプセルの開始座標
+	VECTOR localEndPos_;   // カプセルの終了座標
+	float radius_;         // カプセルの半径
 };

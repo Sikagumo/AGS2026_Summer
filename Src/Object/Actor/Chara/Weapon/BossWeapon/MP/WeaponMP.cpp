@@ -49,7 +49,7 @@ void WeaponMP::InitCollider(void)
 	ColliderSphere* colSphere = new ColliderSphere(
 		tag_, &transform_, SPHERE_START_POS, SPHERE_RADIUS);
 	ownColliders_[static_cast<int>(tag_)].push_back(colSphere);
-	colSphere->SetTriger(false);
+	colSphere->SetTrigger(false);
 
 	CollisionController::GetInstance().RegisterActor(this);
 }

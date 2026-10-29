@@ -4,38 +4,44 @@
 #include "../Collision/CollisionController.h"
 #include "../../Utility/UtilityMath.h"
 
-bool CollisionLine::CheckLineVsModel(const ColliderBase* _lineCol,
-	const ColliderBase* _modelCol, CollisionInfo& _outInfo)
+namespace
+{
+	// マジックナンバー排除用の定数
+	constexpr int INVALID_HANDLE = -1; // 無効なモデルハンドルを示す値
+	constexpr int HIT_FLAG_TRUE = 1;   // 衝突判定関数が真（ヒットした）を返す値
+}
+
+bool CollisionLine::CheckLineVsModel(const ColliderBase* _lineCol, const ColliderBase* _modelCol, CollisionInfo& _outInfo)
 {
 	if (!_lineCol || !_modelCol)
 	{
 		return false;
 	}
 
-	const auto* LINE = static_cast<const ColliderLine*>(_lineCol);    
-	const auto* MODEL = static_cast<const ColliderModel*>(_modelCol); 
+	const auto* line = static_cast<const ColliderLine*>(_lineCol);
+	const auto* model = static_cast<const ColliderModel*>(_modelCol);
 
-	if (!LINE || !MODEL)
+	if (!line || !model)
 	{
 		return false;
 	}
 
-	const int MODEL_HANDLE = MODEL->GetModelHandle(); 
-	if (MODEL_HANDLE == -1)
+	const int modelHandle = model->GetModelHandle();
+	if (modelHandle == INVALID_HANDLE)
 	{
 		return false;
 	}
 
-	const VECTOR START_POS = LINE->GetWorldStartPos(); 
-	const VECTOR END_POS = LINE->GetWorldEndPos();     
+	const VECTOR startPos = line->GetWorldStartPos();
+	const VECTOR endPos = line->GetWorldEndPos();
 
 	// 線分とモデルの衝突判定
-	const MV1_COLL_RESULT_POLY HIT_RESULT = MV1CollCheck_Line(MODEL_HANDLE, -1, START_POS, END_POS);
+	const MV1_COLL_RESULT_POLY hitResult = MV1CollCheck_Line(modelHandle, INVALID_HANDLE, startPos, endPos);
 
-	if (HIT_RESULT.HitFlag == 1)
+	if (hitResult.HitFlag == HIT_FLAG_TRUE)
 	{
 		// 判定から除外するフレームに当たった場合は無視する
-		if (MODEL->IsExcludedFrame(HIT_RESULT.FrameIndex))
+		if (model->IsExcludedFrame(hitResult.FrameIndex))
 		{
 			return false;
 		}
@@ -44,9 +50,9 @@ bool CollisionLine::CheckLineVsModel(const ColliderBase* _lineCol,
 		_outInfo.hitCollider = _modelCol;
 		_outInfo.isActive = true;
 
-		_outInfo.hitPosition = HIT_RESULT.HitPosition;
-		_outInfo.hitNormal = HIT_RESULT.Normal;
-		_outInfo.penetration = UtilityMath::MagnitudeF(VSub(END_POS, HIT_RESULT.HitPosition));
+		_outInfo.hitPosition = hitResult.HitPosition;
+		_outInfo.hitNormal = hitResult.Normal;
+		_outInfo.penetration = UtilityMath::MagnitudeF(VSub(endPos, hitResult.HitPosition));
 
 		return true;
 	}

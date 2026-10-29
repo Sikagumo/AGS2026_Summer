@@ -308,12 +308,12 @@ void Boss::InitCollider(void)
 	// 地面との当たり判定用のラインコライダーを作成
 	ColliderLine* colLine = new ColliderLine(ColliderBase::TAG::BOSS, &transform_, COL_LINE_START_POS, COL_LINE_END_POS);
 	ownColliders_[static_cast<int>(ColliderBase::TAG::BOSS)].push_back(colLine);
-	colLine->SetTriger(false);
+	colLine->SetTrigger(false);
 
 	// その他との当たり判定用のカプセルコライダーを作成
 	ColliderCapsule* colCapsule = new ColliderCapsule(ColliderBase::TAG::BOSS, &transform_, COL_CAPSULE_START_POS, COL_CAPSULE_END_POS, COL_CAPSULE_BODY_RADIUS);
 	ownColliders_[static_cast<int>(ColliderBase::TAG::BOSS)].push_back(colCapsule);
-	colCapsule->SetTriger(false);
+	colCapsule->SetTrigger(false);
 
 	// 攻撃用の球コライダーを作成
 	ColliderSphere* colSphere = new ColliderSphere(ColliderBase::TAG::ROAD_ATTACK, &transform_, { 0.0f,0.0f,0.0f }, COL_CAPSULE_ROAD_ATTACK_RADIUS);

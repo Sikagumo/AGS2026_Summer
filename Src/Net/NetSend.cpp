@@ -1,10 +1,18 @@
 #include "NetSend.h"
-
 #include <cstring>
 #include <DxLib.h>
 
 #include "../Manager/System/NetManager.h"
 #include "../Common/CRC.h" 
+
+namespace
+{
+	// 初期値用の定数
+	constexpr std::uint32_t INITIAL_CRC_VALUE = 0;   // CRCの初期値
+	constexpr int ARRAY_INITIAL_INDEX = 0;           // 配列の初期インデックス
+	constexpr int CLIENT_START_INDEX = 1;            // クライアント格納の開始インデックス
+	constexpr int INITIAL_HISTORY_COUNT = 0;         // アクション履歴数の初期値
+}
 
 NetSend::NetSend(int _sendSocketId)
 	: sendSocketId_(_sendSocketId)
@@ -16,40 +24,35 @@ void NetSend::Send(NET_DATA_TYPE _type)
 	switch (_type)
 	{
 	case NET_DATA_TYPE::USER:
-	{
 		SendUser();
 		break;
-	}
+
 	case NET_DATA_TYPE::USERS:
-	{
 		SendUsers();
 		break;
-	}
+
 	case NET_DATA_TYPE::ACTION_HIST_ALL:
-	{
 		SendActionHistoryAll();
 		break;
-	}
+
 	case NET_DATA_TYPE::ACTION_HIST_RELAY:
-	{
 		SendAllClientActions();
 		break;
-	}
-	case NET_DATA_TYPE::BOSS_ACTION: 
-	{
+
+	case NET_DATA_TYPE::BOSS_ACTION:
 		SendBossAction();
 		break;
-	}
+
 	case NET_DATA_TYPE::GO_GAME_SCENE:
-	{
 		SendGoGameScene();
 		break;
-	}
+
 	case NET_DATA_TYPE::LEAVE_ROOM:
-	{
 		SendLeaveRoom();
 		break;
-	}
+
+	default:
+		break;
 	}
 }
 
@@ -68,15 +71,15 @@ NET_BASIC_DATA NetSend::MakeBasicData(NET_DATA_TYPE _type, std::uint32_t _crc)
 void NetSend::SendUser(void)
 {
 	// クライアント用自分の情報をホストへ送る
-	NET_JOIN_USER selfUser = NetManager::GetInstance().GetSelfUser(); 
+	NET_JOIN_USER selfUser = NetManager::GetInstance().GetSelfUser();
 	uint32_t crc = CRC::Calculate(&selfUser, sizeof(NET_JOIN_USER), CRC::CRC_32());
-	NET_BASIC_DATA basicData = MakeBasicData(NET_DATA_TYPE::USER, 0);
+	NET_BASIC_DATA basicData = MakeBasicData(NET_DATA_TYPE::USER, INITIAL_CRC_VALUE);
 
 	char buffer[MAX_SEND_BYTES];
 	memcpy(buffer, &basicData, sizeof(NET_BASIC_DATA));
 	memcpy(buffer + sizeof(NET_BASIC_DATA), &selfUser, sizeof(NET_JOIN_USER));
 
-	int sendSize = sizeof(NET_BASIC_DATA) + sizeof(NET_JOIN_USER); 
+	int sendSize = sizeof(NET_BASIC_DATA) + sizeof(NET_JOIN_USER);
 
 	// ホストへ向けて発信
 	SendUDP_Host(buffer, sendSize);
@@ -85,7 +88,7 @@ void NetSend::SendUser(void)
 void NetSend::SendUsers(void)
 {
 	// 全員のリストを各クライアントへ送る
-	NET_JOIN_USERS usersData; 
+	NET_JOIN_USERS usersData;
 
 	// 配列を一旦初期化
 	for (int i = 0; i < MAX_PLAYERS; ++i)
@@ -95,11 +98,11 @@ void NetSend::SendUsers(void)
 
 	// 自分の情報を配列にセット
 	NET_JOIN_USER selfUser = NetManager::GetInstance().GetSelfUser();
-	usersData.users[0] = selfUser;
+	usersData.users[ARRAY_INITIAL_INDEX] = selfUser;
 
 	// 接続してきているクライアント達を配列にセット
 	auto usersMap = NetManager::GetInstance().GetNetUsers();
-	int index = 1;
+	int index = CLIENT_START_INDEX;
 	for (const auto& pair : usersMap)
 	{
 		if (index >= MAX_PLAYERS)
@@ -111,13 +114,13 @@ void NetSend::SendUsers(void)
 	}
 
 	uint32_t crc = CRC::Calculate(&usersData, sizeof(NET_JOIN_USERS), CRC::CRC_32());
-	NET_BASIC_DATA basicData = MakeBasicData(NET_DATA_TYPE::USERS, 0);
+	NET_BASIC_DATA basicData = MakeBasicData(NET_DATA_TYPE::USERS, INITIAL_CRC_VALUE);
 
 	char buffer[MAX_SEND_BYTES];
 	memcpy(buffer, &basicData, sizeof(NET_BASIC_DATA));
 	memcpy(buffer + sizeof(NET_BASIC_DATA), &usersData, sizeof(NET_JOIN_USERS));
 
-	int sendSize = sizeof(NET_BASIC_DATA) + sizeof(NET_JOIN_USERS); 
+	int sendSize = sizeof(NET_BASIC_DATA) + sizeof(NET_JOIN_USERS);
 
 	// 接続済みクライアント全員へ向けて発射
 	SendUDP_Client(buffer, sendSize);
@@ -125,14 +128,13 @@ void NetSend::SendUsers(void)
 
 void NetSend::SendActionHistoryAll(void)
 {
-	NET_ACTION_HIS myActionHistory = NetManager::GetInstance().GetSelfActionHistory(); 
-
+	NET_ACTION_HIS myActionHistory = NetManager::GetInstance().GetSelfActionHistory();
 	myActionHistory.key = NetManager::GetInstance().GetMyKey();
 
 	uint32_t crc = CRC::Calculate(&myActionHistory, sizeof(NET_ACTION_HIS), CRC::CRC_32());
-	NET_BASIC_DATA basicData = MakeBasicData(NET_DATA_TYPE::ACTION_HIST_ALL, 0);
-	char buffer[MAX_SEND_BYTES];
+	NET_BASIC_DATA basicData = MakeBasicData(NET_DATA_TYPE::ACTION_HIST_ALL, INITIAL_CRC_VALUE);
 
+	char buffer[MAX_SEND_BYTES];
 	memcpy(buffer, &basicData, sizeof(NET_BASIC_DATA));
 	memcpy(buffer + sizeof(NET_BASIC_DATA), &myActionHistory, sizeof(NET_ACTION_HIS));
 
@@ -157,9 +159,9 @@ void NetSend::SendBossAction(void)
 	}
 
 	// ボスの最新状態を取得する
-	NET_BOSS_ACTION bossAction = NetManager::GetInstance().GetBossAction(); 
+	NET_BOSS_ACTION bossAction = NetManager::GetInstance().GetBossAction();
 	uint32_t crc = CRC::Calculate(&bossAction, sizeof(NET_BOSS_ACTION), CRC::CRC_32());
-	NET_BASIC_DATA basicData = MakeBasicData(NET_DATA_TYPE::BOSS_ACTION, 0);
+	NET_BASIC_DATA basicData = MakeBasicData(NET_DATA_TYPE::BOSS_ACTION, INITIAL_CRC_VALUE);
 
 	char buffer[MAX_SEND_BYTES];
 	memcpy(buffer, &basicData, sizeof(NET_BASIC_DATA));
@@ -176,19 +178,19 @@ void NetSend::SendAction(void)
 
 void NetSend::SendUDP_Host(const void* _bufferPointer, int _dataSize)
 {
-	IPDATA hostIp = NetManager::GetInstance().GetHostIp(); 
+	IPDATA hostIp = NetManager::GetInstance().GetHostIp();
 	NetWorkSendUDP(sendSocketId_, hostIp, HOST_PORT, _bufferPointer, _dataSize);
 }
 
 void NetSend::SendUDP_Client(const void* _bufferPointer, int _dataSize)
 {
 	// ホストは接続済みの全クライアントへ送信する
-	int myKey = NetManager::GetInstance().GetMyKey(); 
-	auto usersMap = NetManager::GetInstance().GetNetUsers(); 
+	int myKey = NetManager::GetInstance().GetMyKey();
+	auto usersMap = NetManager::GetInstance().GetNetUsers();
 
 	for (const auto& userPair : usersMap)
 	{
-		const NET_JOIN_USER& remoteUser = userPair.second; 
+		const NET_JOIN_USER& remoteUser = userPair.second;
 		if (remoteUser.mode == NET_MODE::NONE || remoteUser.key == myKey)
 		{
 			continue;
@@ -207,7 +209,7 @@ void NetSend::SendGoGameScene(void)
 	}
 
 	// ペイロードなし、ヘッダーのみ送信
-	NET_BASIC_DATA basicData = MakeBasicData(NET_DATA_TYPE::GO_GAME_SCENE, 0);
+	NET_BASIC_DATA basicData = MakeBasicData(NET_DATA_TYPE::GO_GAME_SCENE, INITIAL_CRC_VALUE);
 
 	char buffer[sizeof(NET_BASIC_DATA)];
 	memcpy(buffer, &basicData, sizeof(NET_BASIC_DATA));
@@ -224,15 +226,14 @@ void NetSend::SendAllClientActions(void)
 	}
 
 	// ホストが収集している全クライアントのアクション履歴を取得
-	auto remoteHistoryMap = NetManager::GetInstance().GetRemoteActionHistory(); 
-
+	auto remoteHistoryMap = NetManager::GetInstance().GetRemoteActionHistory();
 	if (remoteHistoryMap.empty())
 	{
 		return;
 	}
 
-	NET_ACTION_HIS_ALL allHistory; 
-	allHistory.count = 0;
+	NET_ACTION_HIS_ALL allHistory;
+	allHistory.count = INITIAL_HISTORY_COUNT;
 
 	for (const auto& pair : remoteHistoryMap)
 	{
@@ -245,14 +246,13 @@ void NetSend::SendAllClientActions(void)
 	}
 
 	uint32_t crc = CRC::Calculate(&allHistory, sizeof(NET_ACTION_HIS_ALL), CRC::CRC_32());
-
 	NET_BASIC_DATA basicData = MakeBasicData(NET_DATA_TYPE::ACTION_HIST_RELAY, crc);
 
 	char buffer[MAX_SEND_BYTES];
 	memcpy(buffer, &basicData, sizeof(NET_BASIC_DATA));
 	memcpy(buffer + sizeof(NET_BASIC_DATA), &allHistory, sizeof(NET_ACTION_HIS_ALL));
 
-	int sendSize = sizeof(NET_BASIC_DATA) + sizeof(NET_ACTION_HIS_ALL); 
+	int sendSize = sizeof(NET_BASIC_DATA) + sizeof(NET_ACTION_HIS_ALL);
 
 	SendUDP_Client(buffer, sendSize);
 }
@@ -260,7 +260,7 @@ void NetSend::SendAllClientActions(void)
 void NetSend::SendLeaveRoom(void)
 {
 	// ヘッダーのみ
-	NET_BASIC_DATA basicData = MakeBasicData(NET_DATA_TYPE::LEAVE_ROOM, 0);
+	NET_BASIC_DATA basicData = MakeBasicData(NET_DATA_TYPE::LEAVE_ROOM, INITIAL_CRC_VALUE);
 	char buffer[sizeof(NET_BASIC_DATA)];
 	memcpy(buffer, &basicData, sizeof(NET_BASIC_DATA));
 

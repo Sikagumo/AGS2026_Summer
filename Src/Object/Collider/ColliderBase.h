@@ -1,9 +1,7 @@
 #pragma once
 
 #include <DxLib.h>
-
 #include "../Common/Transform.h"
-
 
 /// @brief コライダーの基底クラス
 class ColliderBase
@@ -13,11 +11,11 @@ public:
 	// 形状
 	enum class SHAPE
 	{
-		NONE,        //　無効
-		LINE,        //  線分
-		SPHERE,      //  球
-		CAPSULE,     //  カプセル
-		MODEL,       //  モデル
+		NONE,        // 無効
+		LINE,        // 線分
+		SPHERE,      // 球
+		CAPSULE,     // カプセル
+		MODEL,       // モデル
 	};
 
 	// 衝突種別
@@ -30,25 +28,25 @@ public:
 		PLAYER_BLAST,	// プレイヤー爆発
 		PLAYER_RECOVERY,// プレイヤー回復
 		ENEMY,          // 敵
-		ENEMYROBO,		//ロボ敵
-		ENEMY_ATTACK,	//敵の攻撃
+		ENEMYROBO,		// ロボ敵
+		ENEMY_ATTACK,	// 敵の攻撃
 		BOSS,			// ボス
-		WEAPON_MG_L,	//マシンガン（左
-		WEAPON_MG_R,	//マシンガン（右
-		WEAPON_CANNON_L,//キャノン（左
-		WEAPON_CANNON_R,//キャノン（右
-		WEAPON_MP_L,	//ミサイルポッド（左
-		WEAPON_MP_R,	//ミサイルポッド（右
-		WEAPON_RG,		//レールガン
+		WEAPON_MG_L,	// マシンガン（左）
+		WEAPON_MG_R,	// マシンガン（右）
+		WEAPON_CANNON_L,// キャノン（左）
+		WEAPON_CANNON_R,// キャノン（右）
+		WEAPON_MP_L,	// ミサイルポッド（左）
+		WEAPON_MP_R,	// ミサイルポッド（右）
+		WEAPON_RG,		// レールガン
 		CAMERA,         // カメラ
 		WALL,           // 壁
-		HIT_WAVE,		//衝撃波
-		MG_BULLET,		//マシンガンの弾
-		ROAD_ATTACK,	//体当たり
-		MISSILE_ATTACK,	//ミサイル攻撃
-		MISSILE_PUSH,	//ミサイル吹き飛ばして
-		LASER,			//レーザー攻撃
-		CANNON_BULLET,	//キャノン弾
+		HIT_WAVE,		// 衝撃波
+		MG_BULLET,		// マシンガンの弾
+		ROAD_ATTACK,	// 体当たり
+		MISSILE_ATTACK,	// ミサイル攻撃
+		MISSILE_PUSH,	// ミサイル吹き飛ばして
+		LASER,			// レーザー攻撃
+		CANNON_BULLET,	// キャノン弾
 	};
 
 	/// @brief コンストラクタ
@@ -60,44 +58,51 @@ public:
 	/// @brief デストラクタ
 	virtual ~ColliderBase(void) = default;
 
+	/// @brief コピーコンストラクタを禁止する
+	ColliderBase(const ColliderBase&) = delete;
+
+	/// @brief コピー代入演算子を禁止する
+	ColliderBase& operator=(const ColliderBase&) = delete;
+
 	/// @brief デバッグ描画を行う
 	void Draw(void) const;
 
 	/// @brief 追従先を取得する
 	/// @return Transformポインタ
-	const Transform* GetFollowTarget(void) const;
+	const Transform* GetFollowTarget(void) const { return followTarget_; }
 
 	/// @brief 追従先を設定する
-	/// @param followTarget 新しいTransform
-	void SetFollowTarget(Transform* _followTarget);
+	/// @param _followTarget 新しいTransform
+	void SetFollowTarget(const Transform* _followTarget) { followTarget_ = _followTarget; }
 
 	/// @brief コライダー形状を取得する
 	/// @return 形状種別
-	SHAPE GetShapeType(void) const;
+	SHAPE GetShapeType(void) const { return shapeType_; }
 
 	/// @brief 衝突タグを取得する
 	/// @return タグ種別
-	TAG GetCollisionTag(void) const;
+	TAG GetCollisionTag(void) const { return collisionTag_; }
 
 	/// @brief 有効状態を取得する
 	/// @return true: 有効 / false: 無効
-	bool IsActive(void) const;
+	bool IsActive(void) const { return isActive_; }
 
 	/// @brief 有効状態を設定する
-	/// @param isActive trueで有効化
-	void SetActive(bool isActive);
+	/// @param _isActive trueで有効化
+	void SetActive(bool _isActive) { isActive_ = _isActive; }
 
 	/// @brief 押し出し判定するかどうか
 	/// @return trueなら押し出す
 	bool IsTrigger(void) const { return isTrigger_; }
 
 	/// @brief 押し出し判定の設定
-	/// @param isTrigger trueなら押し出す、falseなら押し出さない
-	void SetTriger(bool _isTrigger);
+	/// @param _isTrigger trueなら押し出す、falseなら押し出さない
+	void SetTrigger(bool _isTrigger) { isTrigger_ = _isTrigger; }
 
-	/// @brief 半径を設定する
+	/// @brief 半径を設定する（派生クラスで必要に応じてオーバーライド）
 	/// @param _radius 新しい半径の値
 	virtual void SetRadius(float _radius) {}
+
 protected:
 
 	// デバック表示の色
@@ -120,12 +125,11 @@ protected:
 	bool isTrigger_;
 
 	/// @brief ローカル座標をワールド座標に変換する
-	/// @param localPos ローカル座標
+	/// @param _localPos ローカル座標
 	/// @return ワールド座標
 	VECTOR TransformLocalToWorld(const VECTOR& _localPos) const;
 
 	/// @brief デバッグ描画
-	/// @param color 描画色
+	/// @param _color 描画色
 	virtual void DrawDebug(int _color) const = 0;
 };
-

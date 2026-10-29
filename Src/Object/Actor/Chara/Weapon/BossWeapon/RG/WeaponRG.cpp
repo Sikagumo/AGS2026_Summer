@@ -51,7 +51,7 @@ void WeaponRG::InitCollider(void)
 	ColliderCapsule* colCapsule = new ColliderCapsule(
 		tag_, &transform_, CAPSULE_START_POS, CAPSULE_END_POS, CAPSULE_RADIUS);
 	ownColliders_[static_cast<int>(tag_)].push_back(colCapsule);
-	colCapsule->SetTriger(false);
+	colCapsule->SetTrigger(false);
 
 	CollisionController::GetInstance().RegisterActor(this);
 }

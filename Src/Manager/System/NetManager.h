@@ -50,7 +50,7 @@ public:
 
 	/// @brief ホストのIPアドレスを設定する
 	/// @param _ip 設定するIPアドレス
-	void SetHostIp(IPDATA _ip);
+	void SetHostIp(IPDATA _ip) { hostIp_ = _ip; }
 
 	/// @brief ホストのIPアドレスを取得する
 	/// @return ホストのIPアドレス
@@ -58,19 +58,31 @@ public:
 
 	/// @brief 自分の情報を取得する
 	/// @return 自分のネットワーク情報
-	NET_JOIN_USER GetSelfUser(void) const;
+	NET_JOIN_USER GetSelfUser(void) const
+	{
+		std::lock_guard<std::mutex> lock(poolMutex_);
+		return netPool_.selfUser;
+	}
 
 	/// @brief 他のユーザー情報を取得する
 	/// @return キーとネットワーク情報のマップ
-	std::map<int, NET_JOIN_USER> GetNetUsers(void) const;
+	std::map<int, NET_JOIN_USER> GetNetUsers(void) const
+	{
+		std::lock_guard<std::mutex> lock(poolMutex_);
+		return netPool_.remoteUsers;
+	}
 
 	/// @brief 自分の情報を設定する
 	/// @param _info 設定するネットワーク情報
-	void SetSelfInfo(const NET_JOIN_USER& _info);
+	void SetSelfInfo(const NET_JOIN_USER& _info)
+	{
+		std::lock_guard<std::mutex> lock(poolMutex_);
+		netPool_.selfUser = _info;
+	}
 
 	/// @brief ルームワードのIDを設定する
 	/// @param _id ルームワードのID
-	void SetRoomWordId(int _id);
+	void SetRoomWordId(int _id) { roomWordId_ = _id; }
 
 	/// @brief 自分の最新アクションを履歴に追加する
 	/// @param _action 追加するアクション
@@ -78,22 +90,30 @@ public:
 
 	/// @brief 自分の過去数フレーム分のアクション履歴を取得する
 	/// @return 自分のアクション履歴
-	NET_ACTION_HIS GetSelfActionHistory(void) const;
+	NET_ACTION_HIS GetSelfActionHistory(void) const
+	{
+		std::lock_guard<std::mutex> lock(poolMutex_);
+		return selfActionHistory_;
+	}
 
 	/// @brief 他人のアクション履歴を取得する
 	/// @return キーとアクション履歴のマップ
-	std::map<int, NET_ACTION_HIS> GetRemoteActionHistory(void) const;
+	std::map<int, NET_ACTION_HIS> GetRemoteActionHistory(void) const
+	{
+		std::lock_guard<std::mutex> lock(poolMutex_);
+		return remoteActionHistory_;
+	}
 
 	/// @brief ゲーム開始の合図を受け取ったか取得する
 	/// @return 受け取っていればtrue
 	bool GetHasReceivedGoGame(void) const { return hasReceivedGoGame_; }
 
 	/// @brief ゲーム開始の合図をリセットする
-	void ResetGoGame(void);
+	void ResetGoGame(void) { hasReceivedGoGame_ = false; }
 
 	/// @brief ボスのアクションを設定する
 	/// @param _action 設定するボスのアクション
-	void SetBossAction(const NET_BOSS_ACTION& _action);
+	void SetBossAction(const NET_BOSS_ACTION& _action) { netPool_.bossAction = _action; }
 
 	/// @brief ボスのアクションを取得する
 	/// @return ボスのアクション
@@ -101,7 +121,7 @@ public:
 
 	/// @brief ゲーム時間を設定する
 	/// @param _time 設定するゲーム時間
-	void SetGameTime(float _time);
+	void SetGameTime(float _time) { gameTime_ = _time; }
 
 	/// @brief ゲーム時間を取得する
 	/// @return ゲーム時間
@@ -113,7 +133,7 @@ public:
 
 	/// @brief 接続タイムアウト時間を設定する
 	/// @param _timeout タイムアウト時間（秒）
-	void SetConnectionTimeout(float _timeout);
+	void SetConnectionTimeout(float _timeout) { connectionTimeout_ = _timeout; }
 
 private:
 
@@ -166,6 +186,18 @@ private:
 
 	/// @brief デストラクタ
 	~NetManager(void);
+
+	/// @brief コピーコンストラクタを禁止する
+	NetManager(const NetManager&) = delete;
+
+	/// @brief コピー代入演算子を禁止する
+	NetManager& operator=(const NetManager&) = delete;
+
+	/// @brief ムーブコンストラクタを禁止する
+	NetManager(NetManager&&) = delete;
+
+	/// @brief ムーブ代入演算子を禁止する
+	NetManager& operator=(NetManager&&) = delete;
 
 	/// @brief 受信したUDPパケットの解析とデータ種別ごとの振り分け処理
 	void UdpReceiveData(void);

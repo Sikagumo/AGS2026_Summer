@@ -35,7 +35,19 @@ public:
 	SceneGame(std::vector<PlayerSelectType> _playerSelectType);
 
 	/// @brief デストラクタ
-	~SceneGame(void) = default;
+	~SceneGame(void) override = default;
+
+	/// @brief コピーコンストラクタの禁止
+	SceneGame(const SceneGame&) = delete;
+
+	/// @brief コピー代入演算子の禁止
+	SceneGame& operator=(const SceneGame&) = delete;
+
+	/// @brief ムーブコンストラクタの禁止
+	SceneGame(SceneGame&&) = delete;
+
+	/// @brief ムーブ代入演算子の禁止
+	SceneGame& operator=(SceneGame&&) = delete;
 
 	/// @brief リソースの読み込み開始
 	void Load(void) override;
@@ -64,7 +76,7 @@ private:
 	static constexpr float GAME_TIME_DEFEAT_DEC = 75.0f;// 撃破時の制限時間減少量
 
 	// 敵の初期配置座標リスト
-	const std::vector<VECTOR> ENEMY_POS = 
+	const std::vector<VECTOR> ENEMY_POS =
 	{
 		{ -1254.0f, 1642.0f,  -890.0f },
 		{   340.0f, 1715.0f,  1280.0f },
@@ -137,8 +149,7 @@ private:
 	};
 	std::array<int, static_cast<int>(UI_GAME::MAX)> uiGame_; // ゲーム用UIハンドル配列
 
-    // 制御・パラメータ関連
-	float tempTime_;                                     // 一時的な時間保持用
+	// 制御・パラメータ関連
 	int slowCount_;                                      // スロー演出用カウンター
 	std::array<int, 4> imageResult_;                     // リザルト用画像ハンドル配列
 	bool isGameOver_;                                    // ゲームオーバーかどうか

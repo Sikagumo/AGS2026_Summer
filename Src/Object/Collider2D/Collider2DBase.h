@@ -51,13 +51,19 @@ public:
 	/// @brief デストラクタ
 	virtual ~Collider2DBase(void) = default;
 
+	/// @brief コピーコンストラクタを禁止する
+	Collider2DBase(const Collider2DBase&) = delete;
+
+	/// @brief コピー代入演算子を禁止する
+	Collider2DBase& operator=(const Collider2DBase&) = delete;
+
 	/// @brief 2D形状タイプの取得
 	/// @return 2D形状タイプ
-	SHAPE_2D GetShapeType(void) const;
+	SHAPE_2D GetShapeType(void) const { return shapeType_; }
 
 	/// @brief 2Dタグの取得 
 	/// @return 衝突2Dタグ
-	TAG_2D GetCollisionTag(void) const;
+	TAG_2D GetCollisionTag(void) const { return collisionTag_; }
 
 	/// @brief デバッグ描画
 	/// @param _color 描画色

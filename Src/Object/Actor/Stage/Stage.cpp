@@ -119,7 +119,7 @@ void Stage::InitCollider(void)
 	ColliderModel* colModel = new ColliderModel(ColliderBase::TAG::STAGE, &transform_);
 	ownColliders_[static_cast<int>(ColliderBase::TAG::STAGE)].push_back(colModel);
 
-	colModel->SetTriger(true);
+	colModel->SetTrigger(true);
 
 	for (const auto& excludeName : EXCLUDE_STAGE_NAMES)
 	{
@@ -131,7 +131,7 @@ void Stage::InitCollider(void)
 
 	// •Ç‚ÌƒRƒ‰ƒCƒ_Š„‚è“–‚Ä
 	ownColliders_[static_cast<int>(ColliderBase::TAG::WALL)].push_back(wallCollider);
-	wallCollider->SetTriger(false);
+	wallCollider->SetTrigger(false);
 
 	for (const auto& excludeName : EXCLUDE_WALL_NAMES)
 	{

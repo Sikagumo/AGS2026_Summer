@@ -16,31 +16,31 @@ public:
 	Collider2DBox(const Vector2F& _centerPos, float _width, float _height, TAG_2D _collisionTag);
 
 	/// @brief デストラクタ
-	virtual ~Collider2DBox(void) override = default;
+	~Collider2DBox(void) override = default;
 
 	/// @brief 中心座標の取得
 	/// @return 中央座標
-	Vector2F GetCenterPos(void) const;
+	Vector2F GetCenterPos(void) const { return centerPos_; }
 
 	/// @brief 横幅の変更
 	/// @param _width 新しい横幅
-	void SetWidth(float _width);
+	void SetWidth(float _width) { width_ = _width; }
 
 	/// @brief 縦幅の変更
 	/// @param _height 新しい縦幅
-	void SetHeight(float _height);
+	void SetHeight(float _height) { height_ = _height; }
 
 	/// @brief ワールド空間上の中央座標を取得
 	/// @return ワールド中央座標
-	Vector2F GetWorldCenterPos(void) const;
+	Vector2F GetWorldCenterPos(void) const { return centerPos_; }
 
 	/// @brief 横幅の取得
 	/// @return 矩形の横幅
-	float GetWidth(void) const;
+	float GetWidth(void) const { return width_; }
 
 	/// @brief 縦幅の取得
 	/// @return 矩形の縦幅
-	float GetHeight(void) const;
+	float GetHeight(void) const { return height_; }
 
 	/// @brief 矩形の左上座標を取得
 	/// @return 左上座標
@@ -52,7 +52,7 @@ public:
 
 	/// @brief デバッグ描画
 	/// @param _color 描画色
-	virtual void DrawDebug(int _color) const override;
+	void DrawDebug(int _color) const override;
 
 private:
 
@@ -61,5 +61,5 @@ private:
 	float height_;           // 矩形の縦幅
 
 	// 中央座標
-	Vector2F centerPos_;    
+	Vector2F centerPos_;
 };

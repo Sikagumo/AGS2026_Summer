@@ -44,12 +44,12 @@ void WeaponMGR::InitCollider(void)
 	ColliderLine* colLine = new ColliderLine(ColliderBase::TAG::STAGE, &transform_, LINE_START_POS, LINE_END_POS);
 	// èCê≥É|ÉCÉìÉg: SHAPE::LINE Ç≈ÇÕÇ»Ç≠ TAG::STAGE Ç…èCê≥
 	ownColliders_[static_cast<int>(ColliderBase::TAG::STAGE)].push_back(colLine);
-	colLine->SetTriger(false);
+	colLine->SetTrigger(false);
 
 	ColliderCapsule* colCapsule = new ColliderCapsule(
 		tag_, &transform_, CAPSULE_START_POS, CAPSULE_END_POS, CAPSULE_RADIUS);
 	ownColliders_[static_cast<int>(tag_)].push_back(colCapsule);
-	colCapsule->SetTriger(false);
+	colCapsule->SetTrigger(false);
 
 	CollisionController::GetInstance().RegisterActor(this);
 }

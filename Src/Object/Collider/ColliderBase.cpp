@@ -24,44 +24,14 @@ void ColliderBase::Draw(void) const
 
 VECTOR ColliderBase::TransformLocalToWorld(const VECTOR& _localPos) const
 {
+	if (followTarget_ == nullptr)
+	{
+		return _localPos;
+	}
+
 	// ローカル座標を回転させてワールド座標へ変換
 	VECTOR localRotPos = followTarget_->quaRot.RotatePosition(_localPos);
 
 	// 位置を加算して最終的なワールド座標にする
 	return VAdd(followTarget_->pos, localRotPos);
-}
-
-const Transform* ColliderBase::GetFollowTarget(void) const
-{
-	return followTarget_;
-}
-
-void ColliderBase::SetFollowTarget(Transform* followTarget)
-{
-	followTarget_ = followTarget;
-}
-
-ColliderBase::SHAPE ColliderBase::GetShapeType(void) const
-{
-	return shapeType_;
-}
-
-ColliderBase::TAG ColliderBase::GetCollisionTag(void) const
-{
-	return collisionTag_;
-}
-
-bool ColliderBase::IsActive(void) const
-{
-	return isActive_;
-}
-
-void ColliderBase::SetActive(bool _isActive)
-{
-	isActive_ = _isActive;
-}
-
-void ColliderBase::SetTriger(bool _isTrigger)
-{
-	isTrigger_ = _isTrigger;
 }

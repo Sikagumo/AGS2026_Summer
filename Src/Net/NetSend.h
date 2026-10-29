@@ -5,7 +5,6 @@
 class NetSend
 {
 public:
-
 	/// @brief コンストラクタ
 	/// @param _sendSocketId 送信用ソケットのID
 	NetSend(int _sendSocketId);
@@ -18,7 +17,6 @@ public:
 	void Send(NET_DATA_TYPE _type);
 
 private:
-
 	// 送信用ソケットID
 	int sendSocketId_;
 

@@ -17,7 +17,7 @@ public:
 	static TimeManager& GetInstance(void);
 
 	/// @brief インスタンスを破棄する
-	static void  DestroyInstance(void);
+	static void DestroyInstance(void);
 
 	/// @brief 各種数値を初期状態にリセットする
 	void Reset(void);
@@ -30,23 +30,23 @@ public:
 
 	/// @brief 現在のゲーム内総時間を取得する
 	/// @return 総時間（秒）
-	float GetGameTime(void) const;
+	float GetGameTime(void) const { return gameTime_; }
 
 	/// @brief 現在のゲーム内(時)を取得する
 	/// @return 時間
-	int GetGameHour(void) const;
+	int GetGameHour(void) const { return static_cast<int>(gameTime_) / SECONDS_PER_HOUR; }
 
 	/// @brief 現在のゲーム内(分)を取得する
 	/// @return 分
-	int GetGameMinute(void) const;
+	int GetGameMinute(void) const { return (static_cast<int>(gameTime_) / SECONDS_PER_MINUTE) % MINUTES_PER_HOUR; }
 
 	/// @brief 現在のゲーム内(秒)を取得する
 	/// @return 秒
-	int GetGameSecond(void) const;
+	int GetGameSecond(void) const { return static_cast<int>(gameTime_) % SECONDS_PER_MINUTE; }
 
 	/// @brief ゲーム内時間を直接設定する
 	/// @param _time 設定する時間
-	void SetGameTime(float _time);
+	void SetGameTime(float _time) { gameTime_ = _time; }
 
 	/// @brief 指定したIDでタイマーを開始する
 	/// @param _timerId タイマー識別用文字列
@@ -89,30 +89,35 @@ private:
 	static constexpr int SECONDS_PER_HOUR = 3600; // 1時間あたりの秒数
 
 	// シングルトン用インスタンス
-	static TimeManager* instance_; 
+	static TimeManager* instance_;
 
 	// 時間管理関連
 	std::chrono::steady_clock::time_point previousTime_; // 前フレームのシステム時刻
 	float gameTime_;                                     // ゲーム開始時からの累積時間
-	float gameSpeed_;                                    // 時間の進行速度（1.0が等倍）
+	float gameSpeed_;                                    // 時間の進行速度
 	float deltaTime_;                                    // 前フレームからの経過時間
 
 	// ポーズフラグ
-	bool isPaused_; 
+	bool isPaused_;
 
 	// 実行中のタイマーリスト
-	std::unordered_map < std::string, Timer> timers_; 
+	std::unordered_map<std::string, Timer> timers_;
 
 	/// @brief コンストラクタ
-	TimeManager(void) = default;
+	TimeManager(void);
 
 	/// @brief デストラクタ
 	~TimeManager(void) = default;
 
-	/// @brief インスタンスのコピー禁止
+	/// @brief コピーコンストラクタを禁止する
 	TimeManager(const TimeManager&) = delete;
 
-	/// @brief 代入演算子の禁止
+	/// @brief コピー代入演算子を禁止する
 	TimeManager& operator=(const TimeManager&) = delete;
 
+	/// @brief ムーブコンストラクタを禁止する
+	TimeManager(TimeManager&&) = delete;
+
+	/// @brief ムーブ代入演算子を禁止する
+	TimeManager& operator=(TimeManager&&) = delete;
 };
