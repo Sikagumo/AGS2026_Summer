@@ -34,7 +34,7 @@ public:
 	/// @brief エフェクト発生時のパラメータ設定構造体
 	struct EFFECT_DATA
 	{
-		int Data = 0;                             // エフェクトのリソースID・種類識別データ
+		int data = 0;                             // エフェクトのリソースID・種類識別データ
 		VECTOR pos = UtilityMath::VECTOR_ZERO;    // エフェクトの発生位置（3D座標）
 		VECTOR rot = UtilityMath::VECTOR_ZERO;    // エフェクトの回転角（オイラー角）
 		VECTOR scl = UtilityMath::VECTOR_ONE;     // エフェクトの拡大率（スケール）
@@ -101,11 +101,17 @@ public:
 	/// @brief 指定したエフェクトIDの再生をすべて強制停止する
 	void Stop(EFFECT _effect, const void* _owner, int _tag = 1);
 
+	/// @brief 全てのエフェクトの停止
+	void StopAll(void);
+
 	/// @brief 全エフェクトの時間更新処理
 	void Update(void);
 
 	/// @brief 全エフェクトの画面描画処理
 	void Draw(void);
+
+	/// @brief 全リソースの解放
+	void Release(void);
 
 private:
 

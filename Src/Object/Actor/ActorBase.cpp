@@ -12,7 +12,6 @@ ActorBase::ActorBase(void)
 
 ActorBase::~ActorBase(void)
 {
-	// ƒƒ‚ƒŠ‰ğ•ú
 	Release();
 }
 

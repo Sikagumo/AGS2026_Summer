@@ -198,7 +198,7 @@ void WeaponCannon::CreateBullets(void)
 	VECTOR bulletPos = VAdd(transform_.pos, localRotPos);
 
 	bullet->CreateBullets(bulletPos, bulletDir_, BULLET_HIT_SIZE);
-	bullet->Init();
+	bullet->ReSetBullets();
 	bullet->SetTransform(transform_);
 }
 
@@ -211,5 +211,6 @@ std::shared_ptr<BBulletBase> WeaponCannon::GetValidBullet(void)
 	std::shared_ptr<BBulletBase> bullet = std::make_shared<BBulletCannon>();
 	bullets_.emplace_back(bullet);
 	bullet->Load();
+	bullet->Init();
 	return bullet;
 }

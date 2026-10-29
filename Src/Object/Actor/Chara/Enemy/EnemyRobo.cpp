@@ -52,15 +52,16 @@ void EnemyRobo::InitTransform(void)
 
 void EnemyRobo::InitCollider(void)
 {
+	//地面に設置しているかの当たり判定
 	ColliderLine* colLine = new ColliderLine(ColliderBase::TAG::ENEMYROBO, &transform_, COL_LINE_START_POS, COL_LINE_END_POS);
 	ownColliders_[static_cast<int>(ColliderBase::TAG::ENEMYROBO)].push_back(colLine);
-	colLine->SetTrigger(false);
-
+	colLine->SetTriger(false);
+	//本体の当たり判定
 	ColliderCapsule* colCapsule = new ColliderCapsule(
 		ColliderBase::TAG::ENEMYROBO, &transform_, COL_CAPSULE_START_POS, COL_CAPSULE_END_POS, COL_CAPSULE_END_RADIUS);
 	ownColliders_[static_cast<int>(ColliderBase::TAG::ENEMYROBO)].push_back(colCapsule);
-	colCapsule->SetTrigger(false);
-
+	colCapsule->SetTriger(false);
+	//プレイヤーが攻撃可能位置にいるかの検知判定
 	ColliderSphere* colSphere = new ColliderSphere(ColliderBase::TAG::ENEMYROBO, &transform_, COL_SPHERE_POS, COL_SPHERE_RADIUS);
 	ownColliders_[static_cast<int>(ColliderBase::TAG::ENEMYROBO)].push_back(colSphere);
 	colSphere->SetTrigger(true);
@@ -69,12 +70,13 @@ void EnemyRobo::InitCollider(void)
 	VECTOR handPos = MV1GetFramePosition(transform_.modelId, BONE_HAND_INDEX);
 	VECTOR handLocalPos = VSub(handPos, transform_.pos);
 
+	//攻撃用当たり判定
 	ColliderSphere* colAttackSphere = new ColliderSphere(ColliderBase::TAG::ENEMY_ATTACK, &transform_, handLocalPos, COL_ATTACK_SPHERE_RADIUS);
 	ownColliders_[static_cast<int>(ColliderBase::TAG::ENEMY_ATTACK)].push_back(colAttackSphere);
-	colAttackSphere->SetTrigger(false);
-
-	CollisionController::GetInstance().RegisterActor(this);
-	CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::ENEMY_ATTACK, false);
+	colAttackSphere->SetTriger(false);
+	auto& colCon = CollisionController::GetInstance();
+	colCon.RegisterActor(this);
+	colCon.SetCollisionActive(this, ColliderBase::TAG::ENEMY_ATTACK, false);
 }
 
 void EnemyRobo::InitAnimation(void)
@@ -136,6 +138,7 @@ void EnemyRobo::DrawPre(void)
 	MV1DrawModel(transform_.modelId);
 
 #ifdef _DEBUG
+	//当たり判定の描画
 	for (auto& [id, colliderVector] : ownColliders_)
 	{
 		for (auto* collider : colliderVector)
@@ -173,8 +176,8 @@ void EnemyRobo::ChangeState(int _state)
 
 void EnemyRobo::ChangeStateIdle(void)
 {
-	stateUpdate_ = std::bind(&EnemyRobo::UpdateIdle, this);
 
+	stateUpdate_ = std::bind(&EnemyRobo::UpdateIdle, this);
 	CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::ENEMY_ATTACK, false);
 }
 
@@ -208,17 +211,20 @@ void EnemyRobo::ChangeStateEnd(void)
 	count_ = 0;
 
 	EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_MISSILE, transform_.pos, END_EFFECT_ROT, END_EFFECT_SCALE, EFFECT_SPEED, this);
-
-	CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::ENEMYROBO, false);
-	CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::ENEMY_ATTACK, false);
+	auto& colCon = CollisionController::GetInstance();
+	colCon.SetCollisionActive(this, ColliderBase::TAG::ENEMYROBO, false);
+	colCon.SetCollisionActive(this, ColliderBase::TAG::ENEMY_ATTACK, false);
 }
 
 void EnemyRobo::UpdateIdle(void)
 {
-	
+	//空中にいるかを判定
 	bool isJump = CollisionController::GetInstance().IsActorCollidingWithTag(this, ColliderBase::TAG::STAGE);
+	
+	//地面にいるなら移動を始める処理
 	if (isJump_ == true)
 	{
+		//空中から着地した際の処理
 		if (isJump == true)
 		{
 			isJump_ = false;
@@ -229,9 +235,9 @@ void EnemyRobo::UpdateIdle(void)
 	}
 	else
 	{
+		//空中以外空遷移した際の処理
 		if (isJump == true)
 		{
-			
 			ChangeState(STATE::MOVE);
 		}
 	}
@@ -240,6 +246,7 @@ void EnemyRobo::UpdateIdle(void)
 
 void EnemyRobo::UpdateAttack(void)
 {
+
 	VECTOR handPos = MV1GetFramePosition(transform_.modelId, BONE_HAND_INDEX);
 	VECTOR worldOffset = VSub(handPos, transform_.pos);
 
@@ -247,8 +254,10 @@ void EnemyRobo::UpdateAttack(void)
 	Quaternion invRot = transform_.quaRot.CalculateInverse();
 	VECTOR handLocalPos = invRot.RotatePosition(worldOffset);
 
+	//当たり判定の座標更新
 	CollisionController::GetInstance().SetActorSphereLocalPos(this, ColliderBase::TAG::ENEMY_ATTACK, handLocalPos);
-
+	
+	//攻撃アニメーションが終わったら待機にする
 	if (animation_->IsEnd() == true)
 	{
 		ChangeState(STATE::IDLE);
@@ -266,6 +275,7 @@ void EnemyRobo::UpdateStateMove(void)
 
 void EnemyRobo::UpdateEnd(void)
 {
+	//死亡演出を止める処理
 	if (count_ >= COUNT_MAX)
 	{
 		EffectManager::GetInstance().Stop(EffectManager::EFFECT::EFFECT_MISSILE, this);
@@ -289,14 +299,17 @@ void EnemyRobo::LockPlayer(void)
 
 void EnemyRobo::Damage(void)
 {
-	if (CollisionController::GetInstance().IsActorCollidingWithTag(this, ColliderBase::TAG::PLAYER_BLAST) ||
-		CollisionController::GetInstance().IsActorCollidingWithTag(this, ColliderBase::TAG::PLAYER_BULLET) ||
-		CollisionController::GetInstance().IsActorCollidingWithTag(this, ColliderBase::TAG::LASER))
+	auto& colCon = CollisionController::GetInstance();
+	//プレイヤーの弾とボスのレーザに当ると大ダメージ
+	if (colCon.IsActorCollidingWithTag(this, ColliderBase::TAG::PLAYER_BLAST) ||
+		colCon.IsActorCollidingWithTag(this, ColliderBase::TAG::PLAYER_BULLET) ||
+		colCon.IsActorCollidingWithTag(this, ColliderBase::TAG::LASER))
 	{
 		hp_ -= NORMAL_DAMAGE;
 	}
 
-	if (CollisionController::GetInstance().IsActorCollidingWithTag(this, ColliderBase::TAG::PLAYER_RECOVERY))
+	//プレイヤーの回復弾に当ると継続ダメージ
+	if (colCon.IsActorCollidingWithTag(this, ColliderBase::TAG::PLAYER_RECOVERY))
 	{
 		isPoison_ = true; 
 	}

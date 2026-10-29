@@ -49,6 +49,12 @@ void BBulletMissile::ReleasePost(void)
 {
 }
 
+void BBulletMissile::ReSetBullets()
+{
+	InitTransform();
+	InitPost();
+}
+
 void BBulletMissile::InitTransform(void)
 {
 	transform_.scl = MISSILE_SCALE;
@@ -69,8 +75,7 @@ void BBulletMissile::InitCollider(void)
 	ownColliders_[static_cast<int>(ColliderBase::TAG::MISSILE_PUSH)].push_back(colPushSphere);
 
 	CollisionController::GetInstance().RegisterActor(this);
-	CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::MISSILE_ATTACK, false);
-	CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::MISSILE_PUSH, false);
+	
 }
 
 void BBulletMissile::InitAnimation(void)
@@ -82,6 +87,8 @@ void BBulletMissile::InitPost(void)
 	isUp_ = true;
 	isAlive_ = true;
 	attackCount_ = 0;
+	CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::MISSILE_ATTACK, false);
+	CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::MISSILE_PUSH, false);
 }
 
 void BBulletMissile::UpdateProcess(void)
@@ -173,7 +180,6 @@ void BBulletMissile::Attack(void)
 		// 当たり判定の無効化とアクター登録解除（アクター自体の解除は1回のみ行う）
 		CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::MISSILE_ATTACK, false);
 		CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::MISSILE_PUSH, false);
-		CollisionController::GetInstance().UnregisterActor(this);
 	}
 }
 

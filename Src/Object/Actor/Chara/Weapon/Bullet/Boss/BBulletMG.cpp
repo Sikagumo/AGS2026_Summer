@@ -23,6 +23,13 @@ void BBulletMG::Load(void)
 
 void BBulletMG::ReleasePost(void)
 {
+	
+}
+
+void BBulletMG::ReSetBullets()
+{
+	InitTransform();
+	InitPost();
 }
 
 void BBulletMG::InitTransform(void)
@@ -90,7 +97,6 @@ void BBulletMG::UpdateProcess(void)
 	else
 	{
 		CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::MG_BULLET, false);
-		CollisionController::GetInstance().UnregisterActor(this);
 	}
 }
 
@@ -104,4 +110,5 @@ void BBulletMG::DrawPre(void)
 	{
 		MV1DrawModel(transform_.modelId);
 	}
+
 }

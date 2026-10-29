@@ -66,6 +66,8 @@ void SceneResult::Draw(void)
 {
 	const int IMAGE_RESULT_Y = (Application::SCREEN_SIZE_Y / 3) + 30; // 結果タイトルのY座標
 	const int IMAGE_RESULT_X = (Application::SCREEN_HALF_X / 2) + 50; // 結果タイトルのX座標
+	const int TXT_POS_X = Application::SCREEN_HALF_X + (Application::SCREEN_HALF_X / 2);
+	const int TXT_POS_Y = Application::SCREEN_SIZE_Y - 20;
 
 	DrawRotaGraph(Application::SCREEN_HALF_X, Application::SCREEN_HALF_Y, 1.0f, UtilityMath::DEG2RAD, img_, true);
 
@@ -78,7 +80,7 @@ void SceneResult::Draw(void)
 		DrawRotaGraph(IMAGE_RESULT_X, IMAGE_RESULT_Y, 1.0f, UtilityMath::DEG2RAD, imageResult_[0], true);
 	}
 
-	DrawString(Application::SCREEN_HALF_X + (Application::SCREEN_HALF_X / 2), Application::SCREEN_SIZE_Y - 20, "クリックしてタイトルへ", 0xffffff, true);
+	DrawString(TXT_POS_X, TXT_POS_Y, "クリックしてタイトルへ", 0xffffff, true);
 }
 
 void SceneResult::Release(void)

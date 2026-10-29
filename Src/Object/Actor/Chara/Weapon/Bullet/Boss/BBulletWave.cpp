@@ -22,11 +22,18 @@ void BBulletWave::Load(void)
 
 void BBulletWave::ReleasePost(void)
 {
+	
 }
 
 void BBulletWave::SetPos(VECTOR _pos)
 {
 	transform_.pos = _pos;
+}
+
+void BBulletWave::ReSetBullets()
+{
+	InitTransform();
+	InitPost();
 }
 
 void BBulletWave::InitTransform(void)
@@ -46,7 +53,7 @@ void BBulletWave::InitCollider(void)
 	ownColliders_[static_cast<int>(ColliderBase::TAG::HIT_WAVE)].push_back(colHitSphere);
 
 	CollisionController::GetInstance().RegisterActor(this);
-	CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::HIT_WAVE, false);
+	
 }
 
 void BBulletWave::InitAnimation(void)
@@ -55,6 +62,7 @@ void BBulletWave::InitAnimation(void)
 
 void BBulletWave::InitPost(void)
 {
+	CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::HIT_WAVE, false);
 }
 
 void BBulletWave::UpdateProcess(void)
