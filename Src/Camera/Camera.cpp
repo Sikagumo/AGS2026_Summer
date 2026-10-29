@@ -13,39 +13,6 @@
 #include "../Object/Collider/ColliderSphere.h"
 #include "../Application.h"
 
-namespace
-{
-	// カメラの初期座標
-	constexpr VECTOR DERFAULT_POS = { 0.0f, 200.0f, -500.0f };
-
-	// カメラの移動スピード
-	constexpr float CAMERA_MOVE_SPEED = 50.0f;
-
-	// カメラの初期角度
-	constexpr VECTOR DERFAULT_ANGLES = { 0.0f, 0.0f, 0.0f };
-
-	// ロックオン切替イージング終了時間
-	constexpr float LOCKON_DURATION = 0.2f;
-
-	// 追従対象の最大Y軸座標
-	constexpr float TARGET_POS_MAX_Y = 275.0f;
-
-	// マウス移動量が反映される最小値
-	constexpr float MOUSE_MOVE_THRESHOLD = 0.0f;
-
-	// 追従有効範囲
-	constexpr float POS_SPACE_MIN = 300.0f;
-	constexpr float POS_SPACE_MAX = 1750.0f;
-
-	// Y軸の押し出し最小地点
-	constexpr float RESOLVE_FOLLOW_POS_MIN_Y = -5.0f;
-
-	// カメラの回転量
-	const float ROT_POW_KEY = UtilityMath::Deg2RadF(5.0f);
-	const float ROT_POW_RAD = UtilityMath::Deg2RadF(2.5f);
-	const float ROT_POW_MOUSE = UtilityMath::Deg2RadF(0.05f);
-};
-
 Camera::Camera(void)
 	: ActorBase::ActorBase()
 	, followTransform_(nullptr)
@@ -90,7 +57,10 @@ void Camera::Update(void)
 	prePos_ = transform_.pos;
 
 	// 各状態別処理
-	update_();
+	if (update_)
+	{
+		update_();
+	}
 }
 
 void Camera::SetBeforeDraw(void)
@@ -124,10 +94,10 @@ void Camera::DrawDebug(void)
 		, UtilityMath::Rad2DegF(angles_.x), UtilityMath::Rad2DegF(angles_.y), UtilityMath::Rad2DegF(angles_.z)
 		, UtilityMath::Rad2DegF(rotY.x), UtilityMath::Rad2DegF(rotY.y), UtilityMath::Rad2DegF(rotY.z));
 
-	const std::array<std::string, static_cast<int>(LOCKON_TARGET::MAX) + 1> TARGET_NUM
+	const std::array<std::string, static_cast<int>(LOCKON_TARGET::MAX) + 1> TARGET_NAME
 		= { "なし", "ボス胴体", "左マシンガン", "右マシンガン", "左大砲", "右大砲", "左ミサイル", "左ミサイル", "レーザー" };
 	std::string targetText = "追従対象：";
-	targetText += TARGET_NUM.at(static_cast<int>(lockOnTarget_) + 1);
+	targetText += TARGET_NAME.at(static_cast<int>(lockOnTarget_) + 1);
 
 	DrawString(Application::SCREEN_SIZE_X - 200, 0, targetText.c_str(), 0xff0000);
 #endif
@@ -135,7 +105,7 @@ void Camera::DrawDebug(void)
 
 VECTOR Camera::GetForward(void) const
 {
-	return UtilityMath::VNormalize((VSub(targetPos_, transform_.pos)));
+	return UtilityMath::VNormalize(VSub(targetPos_, transform_.pos));
 }
 
 void Camera::ChangeMode(MODE _mode)
@@ -151,28 +121,27 @@ void Camera::ChangeMode(MODE _mode)
 	{
 		// 定点カメラ状態
 		case Camera::MODE::FIXED_POINT:
-			update_ = std::bind(&Camera::SetBeforeDrawFixedPoint, this);
+			update_ = [this]() { SetBeforeDrawFixedPoint(); };
 			break;
 
 		// フリーカメラ
 		case Camera::MODE::FREE:
-			update_ = std::bind(&Camera::SetBeforeDrawFree, this);
+			update_ = [this]() { SetBeforeDrawFree(); };
 			break;
 
 		// プレイヤー追従
 		case Camera::MODE::PLAYER_FOLLOW:
-			update_ = std::bind(&Camera::SetBeforeDrawFollowPlayer, this);
+			update_ = [this]() { SetBeforeDrawFollowPlayer(); };
 			break;
 
 		// ボス追従
 		case Camera::MODE::BOSS_FOLLOW:
-			update_ = std::bind(&Camera::SetBeforeDrawFollowBoss, this);
+			update_ = [this]() { SetBeforeDrawFollowBoss(); };
 			break;
 
 		default:
 			break;
 	}
-
 }
 
 void Camera::SetLockOnTargets(LOCKON_TARGET _target, const VECTOR& _targetPos, int _targetHp)
@@ -206,7 +175,7 @@ void Camera::SetLockOnTargets(LOCKON_TARGET _target, const VECTOR& _targetPos, i
 		}
 	}
 
-	// 
+	// ロックオン対象のHPが0の場合、処理終了
 	if (_targetHp <= 0) { return; }
 
 	// 対象をリストに追加
@@ -266,13 +235,10 @@ void Camera::LockOnChoice(void)
 
 		if (moveCount != 0)
 		{
-
-			int base = static_cast<int>(lockOnTarget_);
-
+			// ロックオン対象の切替
 			constexpr int TARGET_MAX = static_cast<int>(LOCKON_TARGET::MAX);
-
+			int base = static_cast<int>(lockOnTarget_);
 			int target = ((base + moveCount) % TARGET_MAX);
-
 			bool isChange = false;
 
 			for (int i = 0; i < TARGET_MAX; i++)
@@ -305,6 +271,7 @@ void Camera::LockOnChoice(void)
 	easingFromTarget_ = targetPos_;
 	easingTerm_ = 0.0f;
 
+	// ロックオン状態を有効化
 	isLockOn_ = true;
 	lockOnTarget_ = lockTarget;
 	lockOnParam_ = *targetsParam_.at(lockOnTarget_);
@@ -315,8 +282,7 @@ void Camera::FollowLockOnPosition(void)
 	if (targetsParam_.empty() || lockOnTarget_ == LOCKON_TARGET::NONE) { return; }
 
 	// 追従対象が一定以上、追従対象が無効時、ロックオン解除
-	if (!targetsParam_.contains(static_cast<LOCKON_TARGET>(lockOnTarget_))
-		|| targetsParam_.at(lockOnTarget_)->pos.y > TARGET_POS_MAX_Y)
+	if (IsUnLockTarget())
 	{
 		lockOnParam_ = TargetParam();
 		isLockOn_ = false;
@@ -353,10 +319,10 @@ void Camera::SetIsLockOn(bool _isLockOn)
 void Camera::SetDefault(void)
 {
 	// カメラの初期設定
-	transform_.pos = DERFAULT_POS;
+	transform_.pos = DEFAULT_POS;
 
 	// カメラ角
-	angles_ = DERFAULT_ANGLES;
+	angles_ = DEFAULT_ANGLES;
 	transform_.quaRot = Quaternion::GetIdentity();
 
 	// 注視点
@@ -466,6 +432,7 @@ void Camera::SetBeforeDrawFollowPlayer(void)
 		}
 		else
 		{
+			// ロックオン無効化
 			SetIsLockOn(false);
 		}
 	}
@@ -473,13 +440,13 @@ void Camera::SetBeforeDrawFollowPlayer(void)
 	// ロックオン時、常に追従位置を取得する
 	if (isLockOn_)
 	{
-		if (KeyConfInputManager::GetInstance().GetMouseWheelVolume() != 0
-			|| KeyConfInputManager::GetInstance().IsTriggerDown("TARGET_CHANGE_LEFT")
-			|| KeyConfInputManager::GetInstance().IsTriggerDown("TARGET_CHANGE_RIGHT"))
+		if (IsInputLockOnSelect())
 		{
+			// ロックオン対象切替
 			LockOnChoice();
 		}
 
+		// カメラをロックオン対象に追従
 		FollowLockOnPosition();
 	}
 
@@ -503,11 +470,24 @@ void Camera::SetBeforeDrawFollowPlayer(void)
 	SyncFollow();
 
 	// 地面下に移動制限を掛ける
-	constexpr float RESOLVE_FOLLOW_POS_MIN_Y = -5.0f;
 	if (transform_.pos.y < RESOLVE_FOLLOW_POS_MIN_Y)
 	{
 		transform_.pos.y = RESOLVE_FOLLOW_POS_MIN_Y;
 	}
+}
+
+bool Camera::IsInputLockOnSelect(void)const
+{
+	return (KeyConfInputManager::GetInstance().GetMouseWheelVolume() != 0
+		|| KeyConfInputManager::GetInstance().IsTriggerDown("TARGET_CHANGE_LEFT")
+		|| KeyConfInputManager::GetInstance().IsTriggerDown("TARGET_CHANGE_RIGHT"));
+}
+
+bool Camera::IsUnLockTarget(void) const
+{
+	// 追従対象が一定以上、追従対象が無効時、ロックオン解除
+	return (!targetsParam_.contains(static_cast<LOCKON_TARGET>(lockOnTarget_))
+			|| targetsParam_.at(lockOnTarget_)->pos.y > TARGET_POS_MAX_Y);
 }
 
 void Camera::SetBeforeDrawFollowBoss(void)
@@ -517,7 +497,7 @@ void Camera::SetBeforeDrawFollowBoss(void)
 
 	// 同期先の位置
 	VECTOR pos = followTransform_->pos;
-	angles_ = DERFAULT_ANGLES;
+	angles_ = DEFAULT_ANGLES;
 	// Y軸
 	rotY_ = Quaternion::CreateAngleAxis(angles_.y, UtilityMath::AXIS_Y);
 
@@ -543,7 +523,6 @@ void Camera::SetBeforeDrawFollowBoss(void)
 		transform_.pos = newCamPos;
 		targetPos_ = newTarget;
 	}
-
 }
 
 void Camera::ProcessMove(void)

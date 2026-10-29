@@ -134,6 +134,7 @@ void SceneGame::Initialize(void)
 	SetMouseDispFlag(false);
 
 	auto& camera = SceneManager::GetInstance().GetCamera();
+	camera->Init();
 	camera->ChangeMode(Camera::MODE::PLAYER_FOLLOW);
 	camera->SetFollow(&players_.at(0)->GetTransform());
 
@@ -176,7 +177,7 @@ void SceneGame::Initialize(void)
 	// タイマー有効化
 	gameTimer_->SetIsTimeActive(true);
 
-	damageController_->SetPlayerMaxHp(players_.at(0)->GetMaxHp());
+	damageController_->SetPlayerMaxHp(Player::HP_MAX);
 	SoundManager::GetInstance().Play(SoundManager::SOUND::BGM_GAME);
 	SoundManager::GetInstance().Play(SoundManager::SOUND::BGM_TITLE_THUNDER);
 
@@ -324,6 +325,11 @@ void SceneGame::Release(void)
 
 	boss_->Release();
 
+	// カメラの初期化
+	auto& camera = SceneManager::GetInstance().GetCamera();
+	camera->SetFollow(nullptr);
+	camera->ChangeMode(Camera::MODE::NONE);
+
 	NetManager::GetInstance().Stop();
 }
 
@@ -356,7 +362,8 @@ void SceneGame::DrawHpBerPlayer(void)
 			playerHpImageBack_, true
 		);
 
-		const float HP_RATIO = (static_cast<float>(players_.at(i)->GetCurHp()) / static_cast<float>(players_.at(i)->GetMaxHp()));
+		// プレイヤーのHP割合
+		const float HP_RATIO = (static_cast<float>(players_.at(i)->GetCurHp()) / static_cast<float>(Player::HP_MAX));
 		const float RATIO = std::clamp(HP_RATIO, 0.0f, 1.0f);
 
 
@@ -619,14 +626,14 @@ void SceneGame::UpdateGame(void)
 	for (auto& player : players_)
 	{
 		// 弾
-		for (auto& bullet : player->GetBullets())
+		for (auto& bullet : player->GetWeaponController()->GetBullets())
 		{
 			attackPower = std::max(attackPower, bullet->GetPowerBullet());
 			attackBlast = std::max(attackBlast, bullet->GetPowerBlast());
 		}
 
 		// 拡散弾
-		for (auto& bullet : player->GetBulletsCluster())
+		for (auto& bullet : player->GetWeaponController()->GetBulletsCluster())
 		{
 			if (bullet == nullptr)
 			{
@@ -696,6 +703,13 @@ void SceneGame::UpdateGameEnd(void)
 
 void SceneGame::DrawGame(void)
 {
+	// 雨シェーダ
+	ShaderController::GetInstance().Draw2D(
+		ResourceManager::SRC::PS_RAINY,
+		0, 0, 1.0f,
+		rainyParams_
+	);
+
 	stage_->Draw();
 
 	ShaderController::GetInstance().ExecuteDrawCommands();
@@ -722,12 +736,7 @@ void SceneGame::DrawGame(void)
 	auto& effect = EffectManager::GetInstance();
 	effect.Draw();
 
-	// 雨シェーダ
-	ShaderController::GetInstance().Draw2D(
-		ResourceManager::SRC::PS_RAINY,
-		0, 0, 1.0f,
-		rainyParams_
-	);
+	
 
 	DrawHpBerBoss();
 

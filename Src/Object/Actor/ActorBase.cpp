@@ -10,6 +10,12 @@ ActorBase::ActorBase(void)
 {
 }
 
+ActorBase::~ActorBase(void)
+{
+	// ƒƒ‚ƒŠ‰ğ•ú
+	Release();
+}
+
 void ActorBase::Init(void)
 {
 	// Transform‰Šú‰»

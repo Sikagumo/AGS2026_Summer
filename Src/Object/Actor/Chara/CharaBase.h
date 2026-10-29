@@ -10,6 +10,12 @@ class CharaBase : public ActorBase
 {
 public:
 
+	// 頂点番号の定数
+	static constexpr int LEFT_BACK     = 0;
+	static constexpr int LEFT_FORWARD  = 1;
+	static constexpr int RIGHT_BACK    = 2;
+	static constexpr int RIGHT_FORWARD = 3;
+
 	/// @brief コンストラクタ
 	CharaBase(void);
 
@@ -42,13 +48,6 @@ protected:
 
 	//影を完全に消す高さ
 	static constexpr float SHADOW_FADE_HEIGHT = 3000.0f;
-
-	// 頂点番号の定数
-	static constexpr int LEFT_BACK = 0;
-	static constexpr int LEFT_FORWARD = 1;
-	static constexpr int RIGHT_BACK = 2;
-	static constexpr int RIGHT_FORWARD = 3;
-
 
 	std::unique_ptr<AnimationController> animation_;
 

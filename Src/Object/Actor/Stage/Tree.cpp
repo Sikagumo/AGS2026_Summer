@@ -3,15 +3,6 @@
 #include "../../../Object/Collision/CollisionController.h"
 #include "../../Collider/ColliderCapsule.h"
 
-namespace
-{
-	// 木の位置
-	constexpr float COLLISION_OFFSET_Y = 250.0f;
-
-	// 木モデルの当たり判定の半径
-	constexpr float COLLISION_RADIUS = 27.5f;
-};
-
 Tree::Tree(void)
 	: ActorBase::ActorBase()
 {
@@ -19,6 +10,7 @@ Tree::Tree(void)
 
 void Tree::Load(void)
 {
+	// リソース読み込み
 	transform_.modelId = ResourceManager::GetInstance().
 		LoadModelDuplicate(ResourceManager::SRC::MODEL_TREE);
 }
@@ -28,15 +20,12 @@ void Tree::InitCollider(void)
 	// 木のコライダ割り当て
 	VECTOR posEnd = UtilityMath::VECTOR_ZERO;
 	posEnd.y = COLLISION_OFFSET_Y;
-
 	ColliderCapsule* treeCol = new ColliderCapsule(ColliderBase::TAG::TREE, &transform_, UtilityMath::VECTOR_ZERO, posEnd, COLLISION_RADIUS);
 	ownColliders_[static_cast<int>(ColliderBase::TAG::TREE)].push_back(treeCol);
 
-	treeCol->SetTriger(false);
-
 	// 当たり判定登録
+	treeCol->SetTriger(false);
 	CollisionController::GetInstance().RegisterActor(this);
-
 	CollisionController::GetInstance()
 		.SetCollisionActive(this, ColliderBase::TAG::TREE, true);
 }

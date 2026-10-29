@@ -17,7 +17,7 @@ public:
 	ActorBase(void);
 
 	// デストラクタ
-	virtual ~ActorBase(void) = default;
+	virtual ~ActorBase(void);
 
 	/// @brief リソースの読み込み
 	virtual void Load(void) = 0;

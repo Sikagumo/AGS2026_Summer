@@ -26,15 +26,16 @@
 
 namespace
 {
-	// モデルのパラメータ
-	constexpr float MODEL_SCALE = 0.625f;
-	constexpr float LOCAL_POS_Y = 5.25f;
-	constexpr float LOCAL_ROT_Y = 180.0f;
-	constexpr float SHADOW_SCALE = 30.0f;
+	// 衝突判定用線分位置
+	constexpr VECTOR COL_LINE_START_LOCAL_POS = { 0.0f, 50.0f, 0.0f };
+	constexpr VECTOR COL_LINE_END_LOCAL_POS = { 0.0f, 0.0f, 0.0f };
 
-	// プレイヤーの職業状態と弾状態の対応表
-	const std::array<Player::SHOT_TYPE, static_cast<int>(Player::JOB_TYPE::MAX)> JOB_SHOT_TYPE
-		{ Player::SHOT_TYPE::BOMB, Player::SHOT_TYPE::BIG, Player::SHOT_TYPE::RAPID_FIRE, Player::SHOT_TYPE::RECOVERY };
+	// 衝突判定用カプセル位置
+	constexpr VECTOR COL_CAPSULE_TOP_LOCAL_POS = { 0.0f, 50.0f, 0.0f };
+	constexpr VECTOR COL_CAPSULE_DOWN_LOCAL_POS = { 0.0f, 18.0f, 0.0f };
+
+	// 衝突判定用カプセル球体半径
+	constexpr float COL_CAPSULE_RADIUS = 10.0f;
 
 	// プレイヤースキンとモデルの対応表
 	const std::map<Player::SKIN_TYPE, ResourceManager::SRC>
@@ -43,179 +44,16 @@ namespace
 					, { Player::SKIN_TYPE::BIRD, ResourceManager::SRC::MODEL_PLAYER_BIRD}
 					, { Player::SKIN_TYPE::DOG, ResourceManager::SRC::MODEL_PLAYER_DOG} };
 
-	static constexpr std::array<Player::SHOT_TYPE, static_cast<int>(Player::JOB_TYPE::MAX)>
-		SHOT_TYPE_NORMAL
-		= { Player::SHOT_TYPE::BOMB, Player::SHOT_TYPE::BIG, Player::SHOT_TYPE::RAPID_FIRE, Player::SHOT_TYPE::POISON };
-
-	static constexpr std::array<Player::SHOT_TYPE, static_cast<int>(Player::JOB_TYPE::MAX)>
-		SHOT_TYPE_SPECIAL
-		= { Player::SHOT_TYPE::NONE, Player::SHOT_TYPE::NONE, Player::SHOT_TYPE::CLUSTER, Player::SHOT_TYPE::RECOVERY };
-
-	// 連射パラメータ
-	static constexpr float SCALE_RAPID = 0.85f;
-	static constexpr float RADIUS_RAPID = 10.0f;
-	static constexpr int POWER_RAPID = 18;
-	static constexpr float SHOT_SPEED_XZ_RAPID = 17.5f;
-	static constexpr float SHOT_SPEED_Y_RAPID = 2.5f;
-	static constexpr float ALIVE_TIME_RAPID = 2.5f;
-
-	// 横発射速度
-	constexpr std::array<float, static_cast<int>(Player::SHOT_TYPE::MAX)>
-		SHOT_POW_XZ
-		= { PBulletBomb::SHOT_SPEED_BOMB_XZ, PBulletBomb::SHOT_SPEED_BOMB_XZ
-			, PBulletBig::SHOT_SPEED_BIG_XZ, PBulletBig::SHOT_SPEED_BIG_XZ
-			, SHOT_SPEED_XZ_RAPID, SHOT_SPEED_XZ_RAPID
-			, PBulletRecovery::SHOT_SPEED_RECOVERY_XZ, PBulletPoison::SHOT_SPEED_POISON_XZ
-	};
-
-	// 縦発射速度
-	constexpr std::array<float, static_cast<int>(Player::SHOT_TYPE::MAX)>
-		SHOT_POW_Y
-		= { PBulletBomb::SHOT_SPEED_BOMB_Y, PBulletBomb::SHOT_SPEED_BOMB_Y
-			, PBulletBig::SHOT_SPEED_BIG_Y, PBulletBig::SHOT_SPEED_BIG_Y
-			, SHOT_SPEED_Y_RAPID, SHOT_SPEED_Y_RAPID
-			, PBulletRecovery::SHOT_SPEED_RECOVERY_Y, PBulletPoison::SHOT_SPEED_POISON_Y,
-	};
-	
-	// 衝突判定用線分位置
-	static constexpr VECTOR COL_LINE_START_LOCAL_POS = { 0.0f, 50.0f, 0.0f };
-	static constexpr VECTOR COL_LINE_END_LOCAL_POS = { 0.0f, 0.0f, 0.0f };
-
-	// 衝突判定用カプセル位置
-	static constexpr VECTOR COL_CAPSULE_TOP_LOCAL_POS = { 0.0f, 50.0f, 0.0f };
-	static constexpr VECTOR COL_CAPSULE_DOWN_LOCAL_POS = { 0.0f, 18.0f, 0.0f };
-
-	// 衝突判定用カプセル球体半径
-	static constexpr float COL_CAPSULE_RADIUS = 10.0f;
-
-	// ジャンプ力
-	static constexpr float JUMP_POW = 5.0f;
-
-	// 回避力
-	static constexpr float DODGE_POW = 10.0f;
-
-	// 回避時間
-	constexpr float TIME_DODGE = 0.5f;
-
-	// 回避クールタイム
-	constexpr float TIME_WAIT_DODGE = 1.5f;
-
-	// 移動速度
-	constexpr float MOVE_SPEED = 8.5f;
-
-	// 攻撃中の移動速度
-	constexpr float MOVE_SPEED_SHOT = (MOVE_SPEED * 0.3f);
-
-	// 連射の発射間隔
-	static constexpr float SHOT_RAPID_TERM = 0.025f;
-
-	// 拡散弾パラメータ
-	constexpr float CLUSTER_SCALE = 0.25f;
-	constexpr float CLUSTER_RADIUS = 5.0f;
-	constexpr int CLUSTER_POWER = 10;
-	constexpr float CLUSTER_SHOT_SPEED = 20.0f;
-	constexpr float CLUSTER_ALIVE_TIME = 0.25f;
-
-	// 軌道のサイズ
-	constexpr int ORBIT_START = 60;
-	constexpr float ORBIT_MIN = 0.1f;
-	constexpr float ORBIT_RADIUS_DOWN = 0.75f;
-	constexpr float ORBIT_RADIUS = 0.125f;
-
-	// 軌道の色
-	constexpr COLOR_U8 ORBIT_COLOR = { 150, 150, 150 };
-	
-	/* アニメーション速度 */
-
-	// 待機
-	constexpr float ANIMATION_SPEED_IDLE = 30.0f;
-
-	// 移動
-	constexpr float ANIMATION_SPEED_WALK = 55.0f;
-
-	// 巨大弾の投げ
-	constexpr float ANIMATION_SPEED_THROW_BIG = 20.0f;
-
-	// 連射弾の投げ
-	constexpr float ANIMATION_SPEED_THROW_RAPID = 75.0f;
-
-	// 爆発弾の投げ
-	constexpr float ANIMATINO_SPEED_THROW_BOMB = 35.0f;
-
-	// ジャンプの投げ
-	constexpr float ANIMATINO_SPEED_JUMP = 50.0f;
-
-	// 回避
-	constexpr float ANIMATION_SPEED_DODGE = 55.0f;
-
-	// 撃破
-	constexpr float ANIMATION_SPEED_DEFEAT = 30.0f;
-};
-
-namespace
-{
-	// 行動有効の時間
-	constexpr float JUMP_TOTAL_ACTIVE = 0.2f;
-	constexpr float DODGE_TOTAL_ACTIVE = 0.5;
-	constexpr float DEFEAT_TOTAL_ACTIVE = 1.0f;
-	constexpr float SHOT_BOMB_TOTAL_ACTIVE = 1.0f;
-	constexpr float SHOT_CANNON_TOTAL_ACTIVE = 2.5f;
-	constexpr float SHOT_RAPID_TOTAL_ACTIVE = 0.5f;
-	constexpr float SHOT_CLUSTER_TOTAL_ACTIVE = 0.5f;
-	constexpr float SHOT_SUPPORT_TOTAL_ACTIVE = 1.0f;
-
-	// 行動有効のタイミング
-	constexpr float JUMP_TIMING_ACTION = 0.1f;
-	constexpr float DODGE_TIMING_ACTION = 0.1f;
-	constexpr float DEFEAT_TIMING_ACTION = 0.01f;
-	constexpr float SHOT_BOMB_TIMIMG_ACTION = 0.75f;
-	constexpr float SHOT_CANNON_TIMING_ACTION = 1.25f;
-	constexpr float SHOT_RAPID_TIMING_ACTIVE = 0.375f;
-	constexpr float SHOT_CLUSTER_TIMING_ACTIVE = 0.4f;
-	constexpr float SHOT_SUPPORT_TIMING_ACTIVE = 0.75f;
-
-	// 行動終了後の時間
-	constexpr float JUMP_TOTAL_END = 0.25f;
-	constexpr float DODGE_TOTAL_END = 0.0f;
-	constexpr float DEFEAT_TOTAL_END = 5.0f;
-	constexpr float SHOT_CANNON_TOTAL_END = 0.25f;
-	constexpr float SHOT_BOMB_TOTAL_END = 0.25f;
-	constexpr float SHOT_RAPID_TOTAL_END = 0.25f;
-	constexpr float SHOT_CLUSTER_TOTAL_END = 0.0f;
-	constexpr float SHOT_SUPPORT_TOTAL_END = 0.25f;
-
-	// 行動の停止時間
-	constexpr float JUMP_TOTAL_STOP = 0.035f;
-	constexpr float DODGE_TOTAL_STOP = 0.025f;
-	constexpr float DEFEAT_TOTAL_STOP = 2.5f;
-	constexpr float SHOT_CANNON_TOTAL_STOP = 1.85f;
-
-	// 行動の停止タイミング
-	constexpr float JUMP_TIMING_STOP = 0.175f;
-	constexpr float DODGE_TIMING_STOP = 0.15f;
-	constexpr float DEFEAT_TIMING_STOP = 0.0f;
-	constexpr float SHOT_BOMB_TIMING_STOP = 0.25f;
-	constexpr float SHOT_CANNON_TIMING_STOP = 1.15f;
-
-	/* 爆破弾 行動パラメータ */
-
-
-	/* 巨大弾 行動パラメータ */
-	constexpr float SHOT_CANNON_TOTAL_ACTIVE_INCREAMENT = 0.3f; // 行動間隔上昇値
-	constexpr float SHOT_CANNON_TOTAL_END_INCREAMENT = 0.55f; // 行動間隔上昇値
-	constexpr float SHOT_CANNON_TOTAL_INPUT = 0.2f; // 行動間隔上昇値
+	// 回転の間隔
+	constexpr float ROT_DELAY_TERM = 0.2f;
 };
 
 Player::Player(int _playerNo, JOB_TYPE _jobType, SKIN_TYPE _skinType, const VECTOR& _startPos)
 	: PlayerBase::PlayerBase(_playerNo, _jobType, _startPos, _skinType)
 	, animationType_(ANIMATION_TYPE::IDLE)
-	, curAttackCount_(0)
-	, throwPos_(UtilityMath::VECTOR_ZERO)
-	, throwDir_(UtilityMath::VECTOR_ZERO)
-	, shotIndex_(-1)
+	, actionController_(nullptr)
 	, isCameraRotActive_(false)
 	, curTimeWaitDodge_(0.0f)
-	, attackNumMax_(0)
 	, knockPowXZ_(UtilityMath::VECTOR2F_ZERO)
 	, dodgePowXZ_(UtilityMath::VECTOR2F_ZERO)
 	, shotTerm_(0.0f)
@@ -226,18 +64,10 @@ Player::Player(int _playerNo, JOB_TYPE _jobType, SKIN_TYPE _skinType, const VECT
 	, isAttackSend_(false)
 	, shotPointVertex_{}
 {
-	if (_jobType == JOB_TYPE::CANNON)
-	{
-		constexpr int BULLET_MAX = 3;
-		attackNumMax_ = BULLET_MAX;
-	}
-
-	shotType_ = JOB_SHOT_TYPE[static_cast<int>(jobType_)];
-
 	moveSpeed_ = MOVE_SPEED;
 
-	std::fill(clusterBullets_.begin(), clusterBullets_.end(), nullptr);
-
+	// 武器クラス生成
+	weaponController_ = std::make_unique<PlayerWeaponController>(static_cast<int>(jobType_), transform_);
 
 	// 弾の衝突の範囲
 	const VECTOR INIT_NORM = UtilityMath::DIR_UP;
@@ -256,7 +86,6 @@ Player::Player(int _playerNo, JOB_TYPE _jobType, SKIN_TYPE _skinType, const VECT
 	shotPointVertex_[RIGHT_FORWARD].u = 1.0f; shotPointVertex_[RIGHT_FORWARD].v = 0.0f;
 }
 
-
 void Player::Load(void)
 {
 	transform_.modelId = ResourceManager::GetInstance()
@@ -265,6 +94,9 @@ void Player::Load(void)
 	// 回復SE
 	SoundManager::GetInstance().Add(SoundManager::TYPE::SE, SoundManager::SOUND::SE_RECOVERY_PLAYER
 		, ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::SE_PLAYER_RECOVERY));
+
+	// 武器コントローラのリソース読み込み
+	weaponController_->Load();
 }
 
 void Player::InitAnimation(void)
@@ -291,9 +123,10 @@ void Player::InitAnimation(void)
 	}
 	else
 	{
-		throwSpeed = ANIMATINO_SPEED_THROW_BOMB;
+		throwSpeed = ANIMATION_SPEED_THROW_BOMB;
 	}
 
+	// 左投擲
 	animation_->AddExternal(static_cast<int>(ANIMATION_TYPE::THROW_LEFT)
 		, ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::ANIM_THROW_LEFT), throwSpeed);
 
@@ -305,7 +138,7 @@ void Player::InitAnimation(void)
 	constexpr VECTOR LOCAL_POS_JUMP = { 0.0f, 50.0f, 0.0f };
 	animation_->AddExternal(static_cast<int>(ANIMATION_TYPE::JUMP)
 		, ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::ANIM_JUMP)
-		, LOCAL_POS_JUMP, ANIMATINO_SPEED_JUMP);
+		, LOCAL_POS_JUMP, ANIMATION_SPEED_JUMP);
 
 	// 回避
 	constexpr VECTOR LOCAL_POS_DODGE = { 0.0f, 25.0f, 0.0f };
@@ -353,13 +186,12 @@ void Player::InitCollider(void)
 void Player::InitPost(void)
 {
 	isJump_ = false;
-	curAttackCount_ = 0;
 
-	shotIndex_ = -1;
-
+	// 行動クラス生成
 	const bool IS_RAPID_FIRE = (jobType_ == JOB_TYPE::RAPID_FIRE);
 	actionController_ = std::make_unique<PActionController>(animation_, IS_RAPID_FIRE);
 
+	// 行動初期化
 	InitActions();
 }
 
@@ -391,10 +223,8 @@ void Player::InitActions(void)
 		// 特殊弾
 		actionNum = static_cast<int>(ACTION_TYPE::ATTACK_SPECIAL);
 		actionController_->SetAction(actionNum, SHOT_CANNON_TOTAL_ACTIVE, timeTimingAction, timeTotalEnd
-			, std::bind(&Player::ShotBullet, this)
+			, std::bind(&PlayerWeaponController::ShotBullet, weaponController_.get())
 			, timeTotalStop, timeTimingStop);
-
-
 
 		// 通常弾 (1弾目)
 		actionNum = static_cast<int>(ACTION_TYPE::ATTACK);
@@ -402,27 +232,27 @@ void Player::InitActions(void)
 		timeTimingAction = SHOT_CANNON_TIMING_ACTION;
 
 		actionController_->SetAction(actionNum, timeTotalActive, timeTimingAction, timeTotalEnd
-			, std::bind(&Player::ShotBullet, this)
+			, std::bind(&PlayerWeaponController::ShotBullet, weaponController_.get())
 			, timeTotalStop, timeTimingStop, timeInput);
 
 		// 通常弾 (2弾目)
 		actionNum++;
-		timeTotalActive += SHOT_CANNON_TOTAL_ACTIVE_INCREAMENT;
+		timeTotalActive += SHOT_CANNON_TOTAL_ACTIVE_INCREMENT;
 		timeInput += SHOT_CANNON_TOTAL_INPUT;
-		timeTotalEnd += SHOT_CANNON_TOTAL_END_INCREAMENT;
+		timeTotalEnd += SHOT_CANNON_TOTAL_END_INCREMENT;
 		timeTotalStop = SHOT_CANNON_TOTAL_STOP;
 		timeTimingStop = SHOT_CANNON_TIMING_STOP;
 
 		actionController_->SetAction(actionNum, timeTotalActive, timeTimingAction, timeTotalEnd
-			, std::bind(&Player::ShotBullet, this)
+			, std::bind(&PlayerWeaponController::ShotBullet, weaponController_.get())
 			, timeTotalStop, timeTimingStop, timeInput);
 
 		// 通常弾 (3弾目)
 		actionNum++;
-		timeTotalActive += (SHOT_CANNON_TOTAL_ACTIVE_INCREAMENT * 2);
+		timeTotalActive += (SHOT_CANNON_TOTAL_ACTIVE_INCREMENT * 2);
 
 		actionController_->SetAction(actionNum, timeTotalActive, timeTimingAction, timeTotalEnd
-			, std::bind(&Player::ShotBullet, this)
+			, std::bind(&PlayerWeaponController::ShotBullet, weaponController_.get())
 			, timeTotalStop, timeTimingStop);
 	}
 	else if (jobType_ == JOB_TYPE::RAPID_FIRE)
@@ -430,31 +260,31 @@ void Player::InitActions(void)
 		// 特殊弾(連射)
 		actionNum = static_cast<int>(ACTION_TYPE::ATTACK);
 		actionController_->SetAction(actionNum, SHOT_RAPID_TOTAL_ACTIVE, SHOT_RAPID_TIMING_ACTIVE, SHOT_RAPID_TOTAL_END
-			, std::bind(&Player::ShotCluster, this));
+			, std::bind(&PlayerWeaponController::ShotBullet, weaponController_.get()));
 
 		// 通常弾(拡散)
 		actionNum = static_cast<int>(ACTION_TYPE::ATTACK_SPECIAL);
 		actionController_->SetAction(actionNum, SHOT_CLUSTER_TOTAL_ACTIVE, SHOT_CLUSTER_TIMING_ACTIVE, SHOT_CLUSTER_TOTAL_END
-			, std::bind(&Player::ShotBullet, this));
+			, std::bind(&PlayerWeaponController::ShotCluster, weaponController_.get()));
 	}
 	else if (jobType_ == JOB_TYPE::SUPPORT)
 	{
 		// 特殊弾(回復)
 		actionNum = static_cast<int>(ACTION_TYPE::ATTACK_SPECIAL);
 		actionController_->SetAction(actionNum, SHOT_SUPPORT_TOTAL_ACTIVE, SHOT_SUPPORT_TIMING_ACTIVE, SHOT_SUPPORT_TOTAL_END
-			, std::bind(&Player::ShotBullet, this));
+			, std::bind(&PlayerWeaponController::ShotBullet, weaponController_.get()));
 
 		// 通常弾(毒)
 		actionNum = static_cast<int>(ACTION_TYPE::ATTACK);
 		actionController_->SetAction(actionNum, SHOT_SUPPORT_TOTAL_ACTIVE, SHOT_SUPPORT_TIMING_ACTIVE, SHOT_SUPPORT_TOTAL_END
-			, std::bind(&Player::ShotBullet, this));
+			, std::bind(&PlayerWeaponController::ShotBullet, weaponController_.get()));
 	}
 	else if (jobType_ == JOB_TYPE::BOMB)
 	{
 		// 通常弾
 		actionNum = static_cast<int>(ACTION_TYPE::ATTACK);
-		actionController_->SetAction(actionNum, SHOT_BOMB_TOTAL_ACTIVE, SHOT_BOMB_TIMIMG_ACTION, SHOT_BOMB_TOTAL_END
-			, std::bind(&Player::ShotBullet, this));
+		actionController_->SetAction(actionNum, SHOT_BOMB_TOTAL_ACTIVE, SHOT_BOMB_TIMING_ACTION, SHOT_BOMB_TOTAL_END
+			, std::bind(&PlayerWeaponController::ShotBullet, weaponController_.get()));
 	}
 }
 
@@ -470,6 +300,7 @@ void Player::UpdateProcess(void)
 
 	if (hp_ <= 0)
 	{
+		// 撃墜処理
 		ProcessDefeat();
 		return;
 	}
@@ -485,7 +316,7 @@ void Player::UpdateProcess(void)
 	}
 
 	// 弾更新処理
-	UpdateBullets();
+	weaponController_->Update(static_cast<int>(skinType_), animation_->IsStop());
 
 	// 吹っ飛ばし処理
 	ProcessKnockback();
@@ -502,21 +333,14 @@ void Player::UpdateProcess(void)
 	}
 }
 
-void Player::Draw(void)
+void Player::DrawPre(void)
 {
 	COLOR_F material = COLOR_F();
 
 	// 発射方向描画
-	DrawShotOrbit();
+	weaponController_->DrawShotOrbit();
 
-	if (jobType_ == JOB_TYPE::RAPID_FIRE && !clusterBullets_.empty())
-	{
-		for (auto& bullet : clusterBullets_)
-		{
-			if (bullet == nullptr) { continue; }
-			bullet->Draw();
-		}
-	}
+	weaponController_->Draw();
 
 	if (timeInv_ > 0.0f)
 	{
@@ -532,63 +356,13 @@ void Player::Draw(void)
 #ifdef _DEBUG
 	DrawFormatString(10, 140, 0xffffff, "Playerの座標：%f,%f,%f", transform_.pos.x, transform_.pos.y, transform_.pos.z);
 #endif
-
-	ActorBase::Draw();
-
-	CharaBase::DrawShadowRound(SHADOW_SCALE);
-}
-
-void Player::DrawDebug(void)
-{
-	CharaBase::DrawDebug();
-}
-
-void Player::SetKnock(const VECTOR& _knockDirXZ, float _knockPowXZ, bool _isStan, float _knockPowY)
-{
-	Vector2F knockVelo = UtilityMath::VECTOR2F_ZERO;
-
-	knockVelo.x = (_knockDirXZ.x * _knockPowXZ);
-	knockVelo.y = (_knockDirXZ.z * _knockPowXZ);
-
-	if (_isStan)
-	{
-		movePow_ = UtilityMath::VECTOR_ZERO;
-	}
-
-	// 吹っ飛ばし量に加算
-	knockPowXZ_ = knockVelo;
-
-	isJump_ = true;
-	jumpPow_ = _knockPowY;
-}
-
-void Player::SetRespawn(void)
-{
-	InitPost();
-	hp_ = HP_MAX;
-	transform_.pos = START_POS;
-
-
-
-	timeInv_ = TIME_INVINCIBLE;
-	PlayAnimation(ANIMATION_TYPE::IDLE, true, false);
-}
-
-void Player::UpdateProcessPost(void)
-{
-}
-
-void Player::DrawPre(void)
-{
-	for (auto& bullet : bullets_)
-	{
-		// 弾丸描画
-		bullet->Draw();
-	}
 }
 
 void Player::DrawLate(void)
 {
+	// 影描画
+	CharaBase::DrawShadowRound(SHADOW_SCALE);
+
 #ifdef _DEBUG
 
 	// 胴体位置
@@ -613,6 +387,34 @@ void Player::DrawLate(void)
 		}
 	}
 #endif
+}
+
+void Player::SetKnock(const VECTOR& _knockDirXZ, float _knockPowXZ, bool _isStan, float _knockPowY)
+{
+	Vector2F knockVelo = UtilityMath::VECTOR2F_ZERO;
+	knockVelo.x = (_knockDirXZ.x * _knockPowXZ);
+	knockVelo.y = (_knockDirXZ.z * _knockPowXZ);
+
+	if (_isStan)
+	{
+		movePow_ = UtilityMath::VECTOR_ZERO;
+	}
+
+	// 吹っ飛ばし量に加算
+	knockPowXZ_ = knockVelo;
+
+	isJump_ = true;
+	jumpPow_ = _knockPowY;
+}
+
+void Player::SetRespawn(void)
+{
+	InitPost();
+	hp_ = HP_MAX;
+	transform_.pos = START_POS;
+
+	timeInv_ = TIME_INVINCIBLE;
+	PlayAnimation(ANIMATION_TYPE::IDLE, true, false);
 }
 
 VECTOR Player::CalcAddPosition(void)
@@ -640,12 +442,14 @@ VECTOR Player::CalcAddPosition(void)
 	if (CollisionController::GetInstance()
 		.IsTagCollidingWithTag(ColliderBase::TAG::PLAYER, ColliderBase::TAG::WALL))
 	{
+		// 壁に衝突時の回避量加算
 		dodgeVec = VGet(-dodgePowXZ_.x, 0.0f, -dodgePowXZ_.y);
 		ret = VAdd(ret, dodgeVec);
 		dodgePowXZ_ = UtilityMath::VECTOR2F_ZERO;
 	}
 	else
 	{
+		// 回避量加算
 		dodgeVec = VGet(dodgePowXZ_.x, 0.0f, dodgePowXZ_.y);
 		ret = VAdd(ret, dodgeVec);
 	}
@@ -692,13 +496,9 @@ void Player::ProcessMove(void)
 		}
 	}
 
-	// ジャンプ行動有効時に行動前の時、処理終了
-	if (!actionController_->IsEndActionActive()
-		&& actionController_->GetCurActionNum() == static_cast<int>(ACTION_TYPE::ATTACK_SPECIAL)
-		||!actionController_->IsEndActionActive()
-		&& actionController_->GetCurActionNum() == static_cast<int>(ACTION_TYPE::ATTACK)
-		|| hp_ <= 0)
+	if (IsActionAttack()|| hp_ <= 0)
 	{
+		// ジャンプ行動有効時に行動前の時、処理終了
 		movePow_ = UtilityMath::VECTOR_ZERO;
 		return;
 	}
@@ -712,7 +512,7 @@ void Player::ProcessMove(void)
 	if (!UtilityMath::EqualsVZero(direction))
 	{
 		// 攻撃中は移動速度を低下
-		moveSpeed_ = ((shotIndex_ != -1)
+		moveSpeed_ = ((weaponController_->GetShotIndex() != -1)
 			? MOVE_SPEED_SHOT : MOVE_SPEED);
 
 		direction = UtilityMath::VNormalize(direction);
@@ -727,12 +527,14 @@ void Player::ProcessMove(void)
 	}
 	else
 	{
+		// 移動量無効化
 		movePow_ = UtilityMath::VECTOR_ZERO;
 	}
 
 	if (!isJump_
 		&& actionController_->GetActionState() == PActionController::PACTION_STATE::NONE)
 	{
+		// ジャンプ行動無効時、移動or待機アニメーション
 		if (!UtilityMath::EqualsVZero(direction))
 		{
 			PlayAnimation(ANIMATION_TYPE::WALK);
@@ -744,134 +546,13 @@ void Player::ProcessMove(void)
 	}
 }
 
-void Player::DrawShotOrbit(void)
+bool Player::IsActionAttack(void) const
 {
-	if (shotType_ == SHOT_TYPE::NONE) { return; }
-
-	// 軌道の半径
-	constexpr int ORBIT_SPHERE_DIV = 12;
-
-	// 軌道の変化量
-	static constexpr float ORBIT_DELTA = 0.167f;
-
-	// 軌道の間隔
-	static constexpr float ORBIT_STEP_SCALE = 10.0f;
-
-	unsigned int color = GetColor(ORBIT_COLOR.r, ORBIT_COLOR.g, ORBIT_COLOR.b);
-
-	float powXZ, powY = 0.0f;
-	powXZ = SHOT_POW_XZ[static_cast<int>(shotType_)];
-	powY = SHOT_POW_Y[static_cast<int>(shotType_)];
-
-	
-	VECTOR shotDir = UtilityMath::VECTOR_ZERO;
-	shotDir = UtilityMath::VNormalize(CalcShotDirection());
-
-	// 経過時間
-	float radius = (ORBIT_RADIUS * ORBIT_START);
-
-	const VECTOR SHOT_LOCAL_POS = VGet(0.0f, 25.0f, 0.0f);
-	VECTOR viewPos = VAdd(transform_.pos, SHOT_LOCAL_POS);
-
-	VECTOR shotPow = UtilityMath::VECTOR_ZERO;
-	shotPow.x = (shotDir.x * powXZ * ORBIT_STEP_SCALE);
-	shotPow.z = (shotDir.z * powXZ * ORBIT_STEP_SCALE);
-	shotPow.y = (shotDir.y * powY * ORBIT_STEP_SCALE);
-
-	for (int i = 1; i < ORBIT_START; ++i)
-	{
-		// このステップの移動量[発射速度 - 重力加算値]
-		VECTOR pos = shotPow;
-
-		if (shotType_ != SHOT_TYPE::RAPID_FIRE && shotType_ != SHOT_TYPE::CLUSTER)
-		{
-			pos.y -= (Application::GetInstance().GetGravityPow() * (ORBIT_DELTA * ORBIT_STEP_SCALE * i));
-		}
-
-
-		// 発射位置からの移動量を積算する
-		viewPos = VAdd(viewPos, pos);
-
-		if (viewPos.y < 0.0f)
-		{
-			// 着弾位置描画
-			VECTOR viewPosLate = VSub(viewPos, pos);
-			if (shotType_ != SHOT_TYPE::RAPID_FIRE && shotType_ != SHOT_TYPE::CLUSTER)
-			{
-				viewPosLate.y += (Application::GetInstance().GetGravityPow() * (ORBIT_DELTA * ORBIT_STEP_SCALE * i));
-			}
-
-			// 補正値 = (指定位置までの距離 / 視点と終点の長さ)
-			constexpr float GROUND_POS_Y = 0.0f;
-			float blendRate_ = (GROUND_POS_Y - viewPosLate.y / (viewPos.y - viewPosLate.y));
-			VECTOR groundPos = UtilityMath::Lerp(viewPosLate, viewPos, blendRate_);
-			
-			DrawShotOrbitPoint(groundPos);
-			break;
-		}
-
-		
-		DrawSphere3D(viewPos, radius, ORBIT_SPHERE_DIV, color, color, true);
-
-		// 軌道の球の減少
-		radius = (((radius - ORBIT_RADIUS_DOWN) > ORBIT_MIN)
-						? (radius - ORBIT_RADIUS_DOWN) : ORBIT_MIN);
-	}
-}
-void Player::DrawShotOrbitPoint(const VECTOR& _shotPos)
-{
-	// 衝突範囲
-	const float SHADOW_SIZE = 150.0f;
-
-	// 範囲の透明度
-	constexpr int POINT_ALPHA = static_cast<int>(255 * 1.0f);
-
-
-	// 範囲の位置
-	shotPointVertex_[LEFT_BACK].pos = VGet(_shotPos.x - SHADOW_SIZE
-											, _shotPos.y
-											, _shotPos.z - SHADOW_SIZE);
-
-	shotPointVertex_[LEFT_FORWARD].pos = VGet(_shotPos.x - SHADOW_SIZE
-												, _shotPos.y
-												, _shotPos.z + SHADOW_SIZE);
-
-	shotPointVertex_[RIGHT_BACK].pos = VGet(_shotPos.x + SHADOW_SIZE
-											, _shotPos.y
-											, _shotPos.z - SHADOW_SIZE);
-
-	shotPointVertex_[RIGHT_FORWARD].pos = VGet(_shotPos.x + SHADOW_SIZE
-												, _shotPos.y
-												, _shotPos.z + SHADOW_SIZE);
-
-	// アルファ値を各頂点に適用
-	for (auto& vertex : shotPointVertex_)
-	{
-		vertex.dif.a = POINT_ALPHA;
-	}
-
-	// 描画環境のセットアップ
-	SetUseLighting(FALSE);
-	SetUseZBuffer3D(TRUE);
-	SetWriteZBuffer3D(FALSE);
-	SetTextureAddressMode(DX_TEXADDRESS_CLAMP);
-	SetDrawBlendMode(DX_BLENDMODE_ALPHA, POINT_ALPHA);
-
-	// インデックス配列の定義
-	constexpr int POINT_CNT = 6;
-	constexpr int TRIANGLE_CNT = 2;
-	WORD index[POINT_CNT] = {};
-
-	index[0] = LEFT_BACK;	  index[1] = LEFT_FORWARD; index[2] = RIGHT_BACK;
-	index[3] = RIGHT_FORWARD; index[4] = RIGHT_BACK;   index[5] = LEFT_FORWARD;
-
-	// 描画
-	DrawPolygonIndexed3D(shotPointVertex_.data(), static_cast<int>(shotPointVertex_.size()), index, TRIANGLE_CNT, shadowHandle_, TRUE);
-
-	// グラフィック設定の復元
-	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
-	SetWriteZBuffer3D(TRUE);
-	SetUseLighting(TRUE);
+	// 攻撃行動中か否か
+	return (!actionController_->IsEndActionActive()
+		&& actionController_->GetCurActionNum() == static_cast<int>(ACTION_TYPE::ATTACK_SPECIAL)
+		|| !actionController_->IsEndActionActive()
+		&& actionController_->GetCurActionNum() == static_cast<int>(ACTION_TYPE::ATTACK));
 }
 
 void Player::ProcessJump(void)
@@ -889,8 +570,6 @@ void Player::ProcessJump(void)
 		}
 	}
 
-	// Y軸制限
-	const float LIMIT_POS_Y = -1500.0f;
 	if (transform_.pos.y < LIMIT_POS_Y)
 	{
 		transform_.pos.y = -(LIMIT_POS_Y);
@@ -914,13 +593,12 @@ void Player::ProcessDodge(void)
 		dodgePowXZ_ = UtilityMath::VECTOR2F_ZERO;
 	}
 
-
 	if (curTimeWaitDodge_ <= 0.0f
 		&& !UtilityMath::EqualsVZero(moveDir_))
 	{
 		if (!actionController_->IsEndActionActive()
 			&& actionController_->GetActionState() != PActionController::PACTION_STATE::NONE
-			|| shotIndex_ != -1)
+			|| weaponController_->GetShotIndex() != -1)
 		{
 			return;
 		}
@@ -1031,13 +709,7 @@ void Player::ProcessAttack(void)
 			if (keyConfInputManager.IsPressed("ATTACK_SPECIAL"))
 			{
 				// 弾が生存中は拡散弾を有効にしない
-				if (clusterBullets_.at(0) != nullptr)
-				{
-					if (clusterBullets_.at(0)->IsAlive())
-					{
-						return;
-					}
-				}
+				if (weaponController_->IsClusterAlive()) { return; }
 
 				ProcShotSpecial();
 				shotTerm_ = SHOT_RAPID_TERM;
@@ -1083,8 +755,8 @@ void Player::ProcessRecovery(void)
 void Player::ProcShotNormal(void)
 {	
 	// コンボをするか否か
-	const bool IS_COMBO = (attackNumMax_ != 0);
-
+	const bool IS_COMBO = (jobType_ == JOB_TYPE::CANNON);
+	
 	// コンボができて、入力可能か否か
 	const bool canCombo = (actionController_->IsActiveAction()
 		&& actionController_->IsActiveInput() && IS_COMBO);
@@ -1094,30 +766,22 @@ void Player::ProcShotNormal(void)
 
 	if (canCombo || canAttack)
 	{
-		// 行動回数が最大値を超えた場合、０に戻す
-		if (curAttackCount_ >= attackNumMax_
-			&& IS_COMBO)
-		{
-			curAttackCount_ = 0;
-		}
+		// 弾丸生成
+		weaponController_->CreateBullet(false);
 
-		
-		shotType_ = SHOT_TYPE_NORMAL[static_cast<int>(jobType_)];
+		// 発射の種類が無効時、処理終了
+		if (weaponController_->GetShotType() == PlayerWeaponController::SHOT_TYPE::NONE) { return; }
 
-		if (shotType_ == SHOT_TYPE::NONE) { return; }
-
-		CreateBullet();
-
-		// コンボ時、登録した攻撃コンボアクションを呼び出す
-		int actionNum = static_cast<int>(ACTION_TYPE::ATTACK) + ((IS_COMBO) ? curAttackCount_ : 0);
+		// 巨大弾の場合、登録した攻撃コンボアクションを呼び出す
+		int actionNum = static_cast<int>(ACTION_TYPE::ATTACK);
+		actionNum  += ((jobType_ == JOB_TYPE::CANNON) ? weaponController_->GetAttackCount() : 0);
 		actionController_->Active(actionNum);
 
+		// 攻撃有効をホスト側に送信
 		isAttackSend_ = true;
 
-		curAttackCount_++;
-
 		// 攻撃時に左右交互に弾を投げるアニメーション
-		ANIMATION_TYPE type = ((curAttackCount_ % 2 == 0) ? ANIMATION_TYPE::THROW_LEFT : ANIMATION_TYPE::THROW_RIGHT);
+		ANIMATION_TYPE type = ((weaponController_->GetAttackCount() % 2 == 0) ? ANIMATION_TYPE::THROW_LEFT : ANIMATION_TYPE::THROW_RIGHT);
 		PlayAnimation(type, false);
 	}
 }
@@ -1128,69 +792,22 @@ void Player::ProcShotSpecial(void)
 
 	if (canAttack)
 	{
-		shotType_ = SHOT_TYPE_SPECIAL[static_cast<int>(jobType_)];
+		// 弾丸生成処理
+		weaponController_->CreateBullet(true);
 
-		if (shotType_ == SHOT_TYPE::NONE) { return; }
-
-		CreateBullet();
+		// 発射の種類が無効時、処理終了
+		if (weaponController_->GetShotType() == PlayerWeaponController::SHOT_TYPE::NONE) { return; }
 
 		// 登録した攻撃アクションを呼び出す
 		int actionNum = static_cast<int>(ACTION_TYPE::ATTACK_SPECIAL);
 		actionController_->Active(actionNum);
 
+		// 攻撃有効をホスト側に送信
 		isAttackSend_ = true;
 
-		curAttackCount_++;
-
 		// 攻撃時に左右交互に弾を投げるアニメーション
-		ANIMATION_TYPE type = ((curAttackCount_ % 2 == 0) ? ANIMATION_TYPE::THROW_LEFT : ANIMATION_TYPE::THROW_RIGHT);
+		ANIMATION_TYPE type = ((weaponController_->GetAttackCount() % 2 == 0) ? ANIMATION_TYPE::THROW_LEFT : ANIMATION_TYPE::THROW_RIGHT);
 		PlayAnimation(type, false);
-	}
-}
-
-void Player::UpdateBullets(void)
-{
-	// 発射時の手のフレームに生成した弾を追従させる
-	const int FRAME_FINGER_LEFT = FRAME_NUM_FINGER_LEFT.at(skinType_);
-	const int FRAME_FINGER_RIGHT = FRAME_NUM_FINGER_RIGHT.at(skinType_);
-	const int FRAME_FINGER = ((curAttackCount_ % 2 == 0) ? FRAME_FINGER_LEFT : FRAME_FINGER_RIGHT);
-
-	const int FRAME_HAND_PALM = (FRAME_FINGER - 1);
-
-	VECTOR posFinger = UtilityMath::VECTOR_ZERO, posHandPalm = UtilityMath::VECTOR_ZERO;
-	posFinger = MV1GetFramePosition(transform_.modelId, FRAME_FINGER);
-	posHandPalm = MV1GetFramePosition(transform_.modelId, FRAME_HAND_PALM);
-
-	throwDir_ = UtilityMath::VNormalize(VSub(posFinger, posHandPalm));
-	throwPos_ = posFinger;
-
-	for (auto& bullet : bullets_)
-	{
-		bullet->Update();
-	}
-
-	if (jobType_ == JOB_TYPE::RAPID_FIRE)
-	{
-		for (auto& cluster : clusterBullets_)
-		{
-			if (cluster == nullptr) { continue; }
-
-			cluster->Update();
-		}
-	}
-
-	if (bullets_.empty()) { return; }
-	
-
-	if (shotIndex_ != -1)
-	{
-		if (animation_->IsStop())
-		{
-			bullets_.at(shotIndex_)->PreActiveProcess();
-		}
-
-		// 弾を手に追従
-		bullets_.at(shotIndex_)->SetFollow(throwPos_, throwDir_);
 	}
 }
 
@@ -1214,259 +831,48 @@ void Player::DelayRotate(void)
 		goalRot = Quaternion::CreateLookRotation(moveDir_);
 	}
 
-
-	constexpr float ROT_DELAY_TERM = 0.2f;
-
 	// 回転の補間
 	transform_.quaRot = Quaternion::CalculateSlerp(transform_.quaRot, goalRot, ROT_DELAY_TERM);
 }
 
-
-
-void Player::CreateBullet(void)
-{
-	std::unique_ptr<PBulletBase> bullet;
-
-	shotIndex_ = 0;
-
-	// 弾の再利用処理
-	for (auto& bullet : bullets_)
-	{
-		// 拡散弾では再利用生成を行わない
-		if (shotType_ == SHOT_TYPE::CLUSTER) { break; }
-
-		if (!bullet->IsAlive()
-			&& static_cast<int>(shotType_) == bullet->GetShotType())
-		{
-			bullet->Init();
-			bullet->Create(transform_.pos, throwDir_, curAttackCount_);
-			return;
-		}
-
-		shotIndex_++;
-	}
-
-	int type = static_cast<int>(shotType_);
-	switch (shotType_)
-	{
-		case SHOT_TYPE::BIG:
-			bullet = std::make_unique<PBulletBig>(type);
-			break;
-
-		case SHOT_TYPE::BOMB:
-			bullet = std::make_unique<PBulletBomb>(type);
-			break;
-
-		case SHOT_TYPE::BOMB_FINISH:
-			bullet = std::make_unique<PBulletBomb>(type);
-			break;
-
-		case SHOT_TYPE::RECOVERY:
-			bullet = std::make_unique<PBulletRecovery>(type);
-			break;
-
-		case SHOT_TYPE::POISON:
-			bullet = std::make_unique<PBulletPoison>(type);
-			break;
-
-		// 連射
-		case SHOT_TYPE::RAPID_FIRE:
-			bullet = std::make_unique<PBulletNormal>
-						(SCALE_RAPID, RADIUS_RAPID, POWER_RAPID
-						, SHOT_SPEED_XZ_RAPID, SHOT_SPEED_Y_RAPID, ALIVE_TIME_RAPID
-						, type, false);
-			break;
-
-		// 拡散弾
-		case SHOT_TYPE::CLUSTER:
-			CreateCluster();
-			return;
-			break;
-
-		default:
-			return;
-			break;
-
-	}
-
-	// 弾再生成処理
-	bullet->Load();
-	bullet->Init();
-	bullet->Create(throwPos_, throwDir_, curAttackCount_);
-	bullets_.emplace_back(std::move(bullet));
-}
-
-void Player::CreateCluster(void)
-{
-	// 拡散する角度の最大値
-	constexpr float CONE_ANGLE_MAX = (360.0f / CLUSTER_SPLIT);
-
-	// 正面の方向(ゼロベクトル時はZ+方向を正面にする)
-	const VECTOR FORWARD_DIR = ((UtilityMath::EqualsVZero(transform_.GetForward()) ? VGet(0.0f, 0.0f, 1.0f) : transform_.GetForward()));
-
-	int cnt = 0;
-
-	// 初回生成か否か
-	const bool IS_FIRST_CREATE = (clusterBullets_.at(0) == nullptr);
-
-	VECTOR createPos = throwPos_;
-	createPos.y += 10.0f;
-
-	// 前方向の基準軸
-	VECTOR rightAxis = UtilityMath::VNormalize(VCross(UtilityMath::AXIS_Y, FORWARD_DIR));
-	if (UtilityMath::EqualsVZero(rightAxis))
-	{
-		// 真上/真下に向いている場合の保険
-		rightAxis = UtilityMath::AXIS_X;
-	}
-
-	// 中心の弾を生成
-	if (IS_FIRST_CREATE)
-	{
-		std::unique_ptr<PBulletNormal> centerBullet = CreateClusterBullet(FORWARD_DIR);
-		centerBullet->Load();
-		centerBullet->Init();
-		centerBullet->Create(createPos, FORWARD_DIR);
-		clusterBullets_.at(cnt++) = std::move(centerBullet);
-	}
-	else
-	{
-		// 再利用
-		clusterBullets_.at(cnt)->Init();
-		clusterBullets_.at(cnt)->Create(createPos, FORWARD_DIR);
-		cnt++;
-	}
-
-
-
-	// 拡散する弾の輪の最大数
-	const int RING_NUM = (CLUSTER_NUM_MAX / CLUSTER_SPLIT);
-	
-	for (int ring = 1; ring < RING_NUM; ring++)
-	{
-		// 輪の拡散角度
-		const float CONE_ANGLE = (CONE_ANGLE_MAX / static_cast<float>(RING_NUM - 1) * static_cast<float>(ring));
-		const Quaternion CONE_ROT = Quaternion::CreateAngleAxis(UtilityMath::Deg2RadF(CONE_ANGLE), rightAxis);
-
-		// 前方向を傾ける
-		const VECTOR TILED_DIR = Quaternion::RotatePosition(CONE_ROT, FORWARD_DIR);
-
-
-		// 角度を変更していく値
-		const float AZIMUTH_STEP = (360.0f / static_cast<float>(CLUSTER_SPLIT));
-
-		for (int circle = 1; circle < CLUSTER_SPLIT; circle++)
-		{
-			// 角度
-			float azimuth = AZIMUTH_STEP * static_cast<float>(circle);
-			const Quaternion azimuthRot = Quaternion::CreateAngleAxis(UtilityMath::Deg2RadF(azimuth), FORWARD_DIR);
-
-			// 放射状に発射するように方向を調整
-			VECTOR shotDir = UtilityMath::VNormalize(Quaternion::RotatePosition(azimuthRot, TILED_DIR));
-
-
-			// 各拡散弾を生成
-			if (IS_FIRST_CREATE)
-			{
-				std::unique_ptr bullet = CreateClusterBullet(shotDir);
-
-				bullet->Load();
-				bullet->Init();
-				bullet->Create(createPos, shotDir);
-
-				clusterBullets_.at(cnt++) = std::move(bullet);
-			}
-			else
-			{
-				// 再利用
-				clusterBullets_.at(cnt)->Init();
-				clusterBullets_.at(cnt)->Create(createPos, shotDir);
-				cnt++;
-			}
-		}
-
-		// 生成数が一定を超えたら終了
-		if (cnt > (CLUSTER_NUM_MAX)) { break; }
-	}
-}
-
-std::unique_ptr<PBulletNormal> Player::CreateClusterBullet(const VECTOR& _throwDir)
-{
-	return std::make_unique<PBulletNormal>(CLUSTER_SCALE, CLUSTER_RADIUS, CLUSTER_POWER
-											, CLUSTER_SHOT_SPEED, 0.0f, CLUSTER_ALIVE_TIME
-		,static_cast<int>(SHOT_TYPE::CLUSTER) , false);
-}
-
-void Player::ShotBullet(void)
-{
-	bullets_[shotIndex_]->Shot(CalcShotDirection());
-	shotIndex_ = -1;
-}
-
-VECTOR Player::CalcShotDirection(void)
-{
-	VECTOR shotDir = transform_.GetForward();
-
-	if (shotType_ != SHOT_TYPE::RAPID_FIRE)
-	{
-		// 放物線状に投げる
-		shotDir = VAdd(shotDir, UtilityMath::DIR_UP);
-		shotDir = UtilityMath::VNormalize(shotDir);
-	}
-
-	else if (SceneManager::GetInstance().GetCamera()->GetIsLockOn())
-	{
-		// 直線に投げる
-		VECTOR throwDir = UtilityMath::VNormalize(
-			VSub(SceneManager::GetInstance().GetCamera()->GetLockOnPos(),
-				throwPos_));
-
-		shotDir = UtilityMath::VNormalize(VAdd(shotDir, throwDir));
-	}
-
-	return shotDir;
-}
-
-void Player::ShotCluster(void)
-{
-	// 発射処理の有効化
-	for (auto& bullet : clusterBullets_)
-	{
-		if (bullet == nullptr) { continue; }
-
-		bullet->Shot();
-	}
-	shotIndex_ = -1;
-}
-
 void Player::PlayAnimation(ANIMATION_TYPE _type, bool _isLoop, bool _isAnimBlend, float _animSpeed)
 {
-	// コンボ時のみ
-	if (_type != ANIMATION_TYPE::THROW_LEFT
-		&& _type != ANIMATION_TYPE::THROW_RIGHT
-		&& (attackNumMax_ != 0))
+	if (IsResetAttackCount(_type))
 	{
-		if (animationType_ == ANIMATION_TYPE::THROW_LEFT
-			|| animationType_ == ANIMATION_TYPE::THROW_RIGHT)
-		{
-			curAttackCount_ = 0;
-		}
+		// 攻撃回数のリセット
+		weaponController_->ResetAttackCount();
 	}
 
 	// ブレンド無効時、ブレンド時間を減少
 	float blendTime = ((!_isAnimBlend) ? 0.001f : AnimationController::BLEND_TIME_DEFAULT);
 
+	// アニメーション登録
 	animationType_ = _type;
-	
 	animation_->Play(static_cast<int>(animationType_), _isLoop, _animSpeed, blendTime);
 }
 
-
-/* マルチプレイ処理 */ 
-
-void Player::SetHostControl(bool _isLocal)
+bool Player::IsResetAttackCount(ANIMATION_TYPE _type) const
 {
-	isHostControl_ = _isLocal;
+	if (jobType_ != JOB_TYPE::CANNON)
+	{
+		// 巨大弾以外のジョブの場合、false
+		return false;
+	}
+
+	if (_type == ANIMATION_TYPE::THROW_LEFT
+		|| _type == ANIMATION_TYPE::THROW_RIGHT)
+	{
+		// 再生するアニメーションが投擲アニメーションの場合、false
+		return false;
+	}
+	if (animationType_ != ANIMATION_TYPE::THROW_LEFT
+		&& animationType_ != ANIMATION_TYPE::THROW_RIGHT)
+	{
+		// 再生中のアニメーションが投擲アニメーション以外の場合、false
+		return false;
+	}
+
+	return true;
 }
 
 void Player::SetNetworkAction(const VECTOR& _pos, const Quaternion& _rot, int _animId, bool _isAttack, int _currentHp)
@@ -1489,19 +895,12 @@ void Player::SetNetworkAction(const VECTOR& _pos, const Quaternion& _rot, int _a
 	hp_ = _currentHp;
 }
 
-void Player::SetNetKey(int _key)
-{
-	netKey_ = _key;
-}
-
-
 void Player::SendMyActionToNetManager(void)
 {
-	if (!isHostControl_)
-	{
-		return;
-	}
+	// 操作プレイヤー以外の時、処理終了
+	if (!isHostControl_) { return; }
 
+	// クライアント側のプレイヤー情報を送信
 	NET_ACTION myAction;
 	myAction.key = NetManager::GetInstance().GetMyKey();
 	myAction.frameNo = 0;
@@ -1511,9 +910,9 @@ void Player::SendMyActionToNetManager(void)
 	myAction.currentHp = hp_;
 	myAction.actionBits = 0;
 	myAction.isAttack = isAttackSend_;
-
 	NetManager::GetInstance().AddSelfAction(myAction);
 
+	// 攻撃状況を無効化
 	isAttackSend_ = false;
 }
 

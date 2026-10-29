@@ -10,27 +10,12 @@ class Transform;
 class Camera : public ActorBase
 {
 public:
-
-	// カメラのクリップ範囲
-	static constexpr float VIEW_NEAR = 10.0f;
-	static constexpr float VIEW_FAR = 20000.0f;
-
-	// 追従位置からカメラ位置までの相対座標
-	static constexpr VECTOR FOLLOW_LOCAL_POS = { 25.0f, 60.0f, -150.0f };
-	static constexpr VECTOR FOLLOW_LOCAL_POS_LOCKON = { 60.0f, 45.0f, -150.0f };
-
-	// 追従位置から注視点までの相対座標
-	static constexpr VECTOR FOLLOW_TARGET_LOCAL_POS = { 50.0f, 60.0f, 50.0f };
-
-
-	// カメラのX回転上限度角
-	static constexpr float LIMIT_X_UP = 40.0f * (DX_PI_F / 180.0f);
-	static constexpr float LIMIT_X_DOWN = 35.0f * (DX_PI_F / 180.0f);
 	
 	/// @brief カメラモード
 	enum class MODE
 	{
 		NONE = -1,     // 無効状態
+
 		FIXED_POINT,   // 定点カメラ
 		FREE,          // フリー移動カメラ
 		PLAYER_FOLLOW, // プレイヤー追従
@@ -40,7 +25,7 @@ public:
 	/// @brief ロックオン対象
 	enum class LOCKON_TARGET
 	{
-		NONE = -1,
+		NONE = -1,          // 未割当
 
 		BOSS_BODY,          // ボス胴体
 		BOSS_MACHINE_GUN_L, // マシンガン左
@@ -51,16 +36,24 @@ public:
 		BOSS_MISSILE_POD_R, // ボスミサイルポッド右
 		BOSS_RAIL_GUN,      // ボスレールガン
 
-		MAX,
+		MAX,                // 要素数
 	};
 
-
+	/// @brief コンストラクタ
 	Camera(void);
+
+	/// @brief デストラクタ
 	~Camera(void)override = default;
 
+	// 所有する資源(コライダ等)の二重管理を避けるためコピー・ムーブ禁止
+	Camera(const Camera&) = delete;
+	Camera& operator=(const Camera&) = delete;
+
+	/// @brief リソース読み込み処理
 	void Load(void) override {}
 
-	void Update(void)override;
+	/// @brief 更新処理
+	void Update(void) override;
 
 	/// @brief 描画前のカメラ設定
 	void SetBeforeDraw(void);
@@ -92,7 +85,7 @@ public:
 	void SetFollow(const Transform* _follow) { followTransform_ = _follow; }
 
 	/// @brief クォータニオン角度の割り当て
-	void SetQuaternionRot(Quaternion _rot) { transform_.quaRot = _rot; }
+	void SetQuaternionRot(const Quaternion& _rot) { transform_.quaRot = _rot; }
 
 	/// @brief 追従対象割り当て
 	/// @param _target 対象の種類
@@ -103,13 +96,17 @@ public:
 	/// @brief 現在の追従対象割り当て
 	LOCKON_TARGET GetLockOnTargetNum(void)const { return lockOnTarget_; }
 
-	// ロックオンするか否かの設定
+	/// @brief ロックオンするか否かの設定
 	void SetIsLockOn(bool _isLockOn);
 	bool GetIsLockOn(void)const { return isLockOn_; }
 
 	/// @brief ロックオン中の対象の位置を取得
 	const VECTOR& GetLockOnPos(void)const { return lockOnParam_.pos; }
+
+	/// @brief ロックオン対象のHP取得
 	int GetLockOnHp(void)const { return lockOnParam_.hp; }
+
+	/// @brief ロックオン対象の最大HP取得
 	int GetLockOnMaxHp(void)const { return lockOnParam_.maxHp; }
 
 	/// @brief イージング遷移中か否か
@@ -121,22 +118,23 @@ public:
 
 protected:
 
-	// 大きさ、回転、座標の初期化
+	/// @brief 大きさ、回転、座標の初期化
 	void InitTransform(void) override {}
 
-	// 衝突判定の初期化
+	/// @brief 衝突判定の初期化
 	void InitCollider(void) override;
 
-	// アニメーションの初期化
+	/// @brief アニメーションの初期化
 	void InitAnimation(void) override {}
 
-	// 初期化後の個別処理
+	/// @brief 初期化後の個別処理
 	void InitPost(void) override;
+
 
 private:
 
-	//ボスの追従時の座標
-	static constexpr VECTOR BOSS_CAMERA_POS = { 0, 10, -500 };
+	// ボスの追従時の座標
+	static constexpr VECTOR BOSS_CAMERA_POS = { 0.0f, 10.0f, -500.0f };
 
 	// 衝突時の押し戻し試行回数
 	static constexpr int CNT_TRY_COLLISION_CAMERA = 30;
@@ -155,6 +153,51 @@ private:
 
 	// 追従距離の補間速度
 	static constexpr float FOLLOW_DIST_LERP_SPEED = 5.0f;
+
+	// カメラのクリップ範囲
+	static constexpr float VIEW_NEAR = 10.0f;
+	static constexpr float VIEW_FAR = 20000.0f;
+
+	// 追従位置からカメラ位置までの相対座標
+	static constexpr VECTOR FOLLOW_LOCAL_POS = { 25.0f, 60.0f, -150.0f };
+	static constexpr VECTOR FOLLOW_LOCAL_POS_LOCKON = { 60.0f, 45.0f, -150.0f };
+
+	// 追従位置から注視点までの相対座標
+	static constexpr VECTOR FOLLOW_TARGET_LOCAL_POS = { 50.0f, 60.0f, 50.0f };
+
+	// カメラのX回転上限度角
+	static constexpr float LIMIT_X_UP = (40.0f * (DX_PI_F / 180.0f));
+	static constexpr float LIMIT_X_DOWN = (35.0f * (DX_PI_F / 180.0f));
+
+	// カメラの初期座標
+	static constexpr VECTOR DEFAULT_POS = { 0.0f, 200.0f, -500.0f };
+
+	// カメラの移動スピード
+	static constexpr float CAMERA_MOVE_SPEED = 50.0f;
+
+	// カメラの初期角度
+	static constexpr VECTOR DEFAULT_ANGLES = { 0.0f, 0.0f, 0.0f };
+
+	// ロックオン切替イージング終了時間
+	static constexpr float LOCKON_DURATION = 0.2f;
+
+	// 追従対象の最大Y軸座標
+	static constexpr float TARGET_POS_MAX_Y = 275.0f;
+
+	// マウス移動量が反映される最小値
+	static constexpr float MOUSE_MOVE_THRESHOLD = 0.0f;
+
+	// 追従有効範囲
+	static constexpr float POS_SPACE_MIN = 300.0f;
+	static constexpr float POS_SPACE_MAX = 1750.0f;
+
+	// Y軸の押し出し最小地点
+	static constexpr float RESOLVE_FOLLOW_POS_MIN_Y = -5.0f;
+
+	// カメラの回転量
+	const float ROT_POW_KEY = UtilityMath::Deg2RadF(5.0f);
+	const float ROT_POW_RAD = UtilityMath::Deg2RadF(2.5f);
+	const float ROT_POW_MOUSE = UtilityMath::Deg2RadF(0.05f);
 
 	/// @brief ロックオン対象のパラメータ
 	struct TargetParam
@@ -208,12 +251,11 @@ private:
 
 	// 壁衝突時の追従距離倍率
 	float followDistScale_;
-	
 
 	/// @brief カメラを初期位置に戻す
 	void SetDefault(void);
 
-	// @brief 追従対象との位置同期を取る
+	/// @brief 追従対象との位置同期を取る
 	void SyncFollow(void);
 
 	/// @brief アングルとY軸回転の同期処理
@@ -224,26 +266,32 @@ private:
 
 	/// @brief カメラ回転
 	/// @param _isLimitX X軸回転を制限するか否か
-	void ProcessRot(bool _isLimitX);
-	void RotationMouse(bool _isLimitX);
-	void RotationGamePad(bool _isLimitX);
+	void ProcessRot(bool _isLimitX);      // キーボード・マウス・ゲームパッドの入力で回転
+	void RotationMouse(bool _isLimitX);   // マウスの移動量で回転
+	void RotationGamePad(bool _isLimitX); // ゲームパッドの右スティックで回転
 
 	/// @brief モード別更新ステップ
-	void SetBeforeDrawFixedPoint(void);
-	void SetBeforeDrawFree(void);
-	void SetBeforeDrawFollowPlayer(void);
-	void SetBeforeDrawFollowBoss(void);
+	void SetBeforeDrawFixedPoint(void);   // 定点カメラ
+	void SetBeforeDrawFree(void);         // フリー移動
+	void SetBeforeDrawFollowPlayer(void); // プレイヤー追従
+	void SetBeforeDrawFollowBoss(void);   // ボス追従
 
 	/// @brief 衝突判定
 	void Collision(void);
 
-	/// @brief 追従対象選択処理
+	/// @brief ロックオン対象選択処理
 	void LockOnChoice(void);
 
 	/// @brief ロックオン中の対象の位置・HPを最新化する(無効時は解除)
 	void FollowLockOnPosition(void);
 
-	/// @brief QuardInOut補間で位置を取得
+	/// @brief ロックオン対象の切替の入力がされたか否か
+	bool IsInputLockOnSelect(void)const;
+
+	/// @brief ロックオンを解除するか否か
+	bool IsUnLockTarget(void)const;
+
+	/// @brief QuadInOut補間で位置を取得
 	/// @param _fromVec 始点
 	/// @param _toVec 終点
 	/// @param term 補間間隔

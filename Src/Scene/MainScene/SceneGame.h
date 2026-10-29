@@ -10,6 +10,7 @@
 #include "../SceneBase.h"
 #include "../../Object/Actor/Chara/Player/Player.h"
 #include "../../Object/Actor/Chara/Player/PlayerBase.h"
+#include "../../Object/Actor/Chara/Player/PlayerWeaponController.h"
 #include "../../Object/Actor/Chara/Boss/Boss.h"
 #include "../../Object/Actor/Chara/Enemy/EnemyRobo.h"
 #include "../../Object/Actor/Stage/Stage.h"

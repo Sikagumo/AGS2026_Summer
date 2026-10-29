@@ -7,23 +7,9 @@
 #include "../../../../../../Manager/System/TimeManager.h"
 #include "../../../../../../Manager/Decoration/EffectManager.h"
 
-namespace
-{
-	constexpr float RADIUS_BULLET = 10.0f;
-	constexpr float RADIUS_RECOVERY = 250.0f;
-	constexpr float SCALE_RECOVERY = 1.5f;
-	constexpr float TIME_ALIVE_RECOVERY = 15.0f;
-	constexpr float ACTIVE_TIME = 1.5f;
-
-}
-
 PBulletRecovery::PBulletRecovery(int _shotType)
 	: PBulletBase::PBulletBase(_shotType)
-	, activeTime_(0.0f)
-{
-}
-
-void PBulletRecovery::Load(void)
+	, activeTimeRecovery_(0.0f)
 {
 }
 
@@ -33,32 +19,37 @@ void PBulletRecovery::InitTransform(void)
 		, transform_.quaRot, Quaternion::GetIdentity());
 }
 
-void PBulletRecovery::InitPost(void)
+void PBulletRecovery::InitCollider(void)
 {
-	PBulletBase::InitPost();
+	PBulletBase::InitCollider();
 
+	// 回復範囲の判定は一度だけ生成する
+	auto& support = ownColliders_[static_cast<int>(COLLISION_TYPE::SUPPORT)];
+	if (!support.empty()) { return; }
 
-	ColliderSphere* recovery = new ColliderSphere(ColliderBase::TAG::PLAYER_RECOVERY, &transform_
-		, UtilityMath::VECTOR_ZERO, radiusBlast_);
-	ownColliders_[static_cast<int>(COLLISION_TYPE::SUPPORT)]
-		.emplace_back(recovery);
+	// 当たり判定の登録
+	support.emplace_back(new ColliderSphere(ColliderBase::TAG::PLAYER_RECOVERY, &transform_
+		, UtilityMath::VECTOR_ZERO, 0.0f));
 
-	CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::PLAYER_RECOVERY, false);
-
-	ownColliders_.at(static_cast<int>(COLLISION_TYPE::SUPPORT))
-		.at(0)->SetRadius(radiusBlast_);
+	SetColliderActive(ColliderBase::TAG::PLAYER_RECOVERY, false);
 }
+
 void PBulletRecovery::SetParam(void)
 {
+	// 発射速度割り当て
 	shotSpeedXZ_ = SHOT_SPEED_RECOVERY_XZ;
 	shotSpeedY_ = SHOT_SPEED_RECOVERY_Y;
 
+	// 生存時間割り当て
 	aliveTime_ = TIME_ALIVE_RECOVERY;
 
+	// 当たり判定の半径割り当て
 	radiusBullet_ = RADIUS_BULLET;
 	radiusBlast_ = 0.0f;
 
-	CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::PLAYER_RECOVERY, false);
+	// 回復範囲の無効化
+	SetColliderRadius(COLLISION_TYPE::SUPPORT, radiusBlast_);
+	SetColliderActive(ColliderBase::TAG::PLAYER_RECOVERY, false);
 }
 
 void PBulletRecovery::UpdatePost(void)
@@ -71,53 +62,36 @@ void PBulletRecovery::UpdatePost(void)
 			CollisionController::GetInstance()
 				.SetCollisionActive(this, ColliderBase::TAG::PLAYER_RECOVERY, false);
 
-
 			bulletState_ = BULLET_STATE::INACTIVE;
 			return;
 		}
 
-		if (activeTime_ > 0.0f)
+		if (activeTimeRecovery_ > 0.0f)
 		{
-			activeTime_ -= TimeManager::GetInstance().GetDeltaTime();
+			activeTimeRecovery_ -= TimeManager::GetInstance().GetDeltaTime();
 		}
 		else
 		{
-			// 弾を消滅させる
+			// 回復の継続時間が終了したら消滅させる
 			isActiveDestroy_ = true;
 		}
 	}
 }
 
-void PBulletRecovery::PreActiveProcess(void)
-{
-}
-
-void PBulletRecovery::ChangeBulletStateProc(void)
-{
-}
-
 void PBulletRecovery::BlastAction(void)
 {
-	bulletState_ = BULLET_STATE::BLAST;
-	isVisible_ = false;
-	activeTime_ = ACTIVE_TIME;
-
-	// 当たり判定無効化
-	CollisionController::GetInstance()
-		.SetCollisionActive(this, ColliderBase::TAG::PLAYER_BULLET, false);
-
+	// 着弾状態へ移行(弾の当たり判定は無効化)
+	BeginBlast();
+	activeTimeRecovery_ = ACTIVE_TIME;
 
 	// 回復当たり判定有効化
 	radiusBlast_ = RADIUS_RECOVERY;
+	SetColliderRadius(COLLISION_TYPE::SUPPORT, radiusBlast_);
+	SetColliderActive(ColliderBase::TAG::PLAYER_RECOVERY, true);
 
-	ownColliders_.at(static_cast<int>(COLLISION_TYPE::SUPPORT))
-		.at(0)->SetRadius(radiusBlast_);
-
-	CollisionController::GetInstance()
-		.SetCollisionActive(this, ColliderBase::TAG::PLAYER_RECOVERY, true);
-
-
-	EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_PLAYER_RECOVERY,
-		transform_.pos, Quaternion::GetIdentity().ConvertToEuler(),
-		{ 35.0f , 35.0f, 35.0f }, 1.0f, this);
+	// 回復エフェクト再生
+	EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_PLAYER_RECOVERY
+		, transform_.pos, Quaternion::GetIdentity().ConvertToEuler()
+		, { RECOVERY_EFFECT_SCALE, RECOVERY_EFFECT_SCALE, RECOVERY_EFFECT_SCALE }
+		, RECOVERY_EFFECT_SPEED, this);
 }

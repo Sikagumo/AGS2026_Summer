@@ -14,7 +14,7 @@ namespace
 	constexpr int FRAME_ROOT_NUM = 1;
 
 	/// @brief 登録済みアニメーションを検索する(operator[]と違い、要素を勝手に作らない)
-	/// @return 見つかったアニメーション。無ければnullptr
+	/// @return 見つかったアニメーション。無ければ、nullptr
 	Animation* FindAnimation(AnimationMap& _animations, int _type)
 	{
 		auto it = _animations.find(_type);
@@ -61,7 +61,6 @@ namespace
 	}
 };
 
-
 AnimationController::AnimationController(int _modelId)
 	: modelId_(_modelId)
 	, animations_{}
@@ -78,12 +77,10 @@ AnimationController::AnimationController(int _modelId)
 {
 }
 
-
 AnimationController::~AnimationController(void)
 {
 	Release();
 }
-
 
 void AnimationController::AddInternal(int _type, float _speed)
 {
@@ -94,6 +91,7 @@ void AnimationController::AddInternal(int _type, float _speed)
 	// アニメーション追加処理
 	Add(_type, animation);
 }
+
 void AnimationController::AddInternal(int _type, const VECTOR& _localPos, float _speed)
 {
     Animation animation = CreateAnimation(ANIMATION_TYPE::INTERNAL, _speed);
@@ -101,6 +99,7 @@ void AnimationController::AddInternal(int _type, const VECTOR& _localPos, float 
     ApplyInPlace(animation, _localPos, _localPos);   // if を外す
     Add(_type, animation);
 }
+
 void AnimationController::AddExternal(int _type, int _handle, float _speed)
 {
 	//* 外部のアニメーションの追加 */
@@ -110,6 +109,7 @@ void AnimationController::AddExternal(int _type, int _handle, float _speed)
 	// アニメーション追加処理
 	Add(_type, animation);
 }
+
 void AnimationController::AddExternal(int _type, int _handle
 									  , const VECTOR& _localPos, float _speed)
 {
@@ -125,6 +125,7 @@ void AnimationController::AddExternal(int _type, int _handle
 	// アニメーション追加処理
 	Add(_type, animation);
 }
+
 void AnimationController::AddExternal(int _type, int _handle
 									  , const VECTOR& _localPosStart, const VECTOR& _localPosEnd, float _speed)
 {
@@ -138,7 +139,6 @@ void AnimationController::AddExternal(int _type, int _handle
 	// アニメーション追加処理
 	Add(_type, animation);
 }
-
 
 void AnimationController::Play(int _type, bool _isLoop, float _playSpeed, float _blendTime)
 {
@@ -217,7 +217,6 @@ void AnimationController::Play(int _type, bool _isLoop, float _playSpeed, float 
 	MV1SetAttachAnimBlendRate(modelId_, playAnim->attachNo, startRate);
 }
 
-
 void AnimationController::Update(void)
 {
 	// 経過時間の取得
@@ -238,7 +237,7 @@ void AnimationController::Update(void)
 	Animation* curAnimation = FindAnimation(animations_, playType_);
 	if (curAnimation == nullptr) { return; }
 
-	// ブレンド中の前アニメーション(無ければnullptr)
+	// ブレンド中の前アニメーション(無ければ、nullptr)
 	Animation* preAnimation = FindAnimation(animations_, prePlayType_);
 
 
@@ -289,15 +288,22 @@ void AnimationController::Update(void)
 	// 対象フレームのローカル行列を初期値にリセットする
 	MV1ResetFrameUserLocalMatrix(modelId_, FRAME_ROOT_NUM);
 
-	// 遷移前/遷移後アニメーションが固定の場合、アニメーション位置固定処理
-	bool isPreInPlace = (preAnimation != nullptr && preAnimation->isInPlace);
-	if (isPreInPlace || curAnimation->isInPlace)
+	
+	if (IsPreInPlace(preAnimation, curAnimation))
 	{
-		Animation emptyAnim = Animation();
-		AnimationInPlace((preAnimation != nullptr ? *preAnimation : emptyAnim), *curAnimation, blendRate_);
+		// 遷移前・遷移後アニメーションが固定の場合、アニメーション位置固定処理
+		Animation emptyAnimation = Animation();
+		AnimationInPlace((preAnimation != nullptr ? *preAnimation : emptyAnimation), *curAnimation, blendRate_);
 	}
 }
-void AnimationController::AnimationInPlace(Animation& _prePlayAnim, Animation& _curPlayAnim, float _rate)
+
+bool AnimationController::IsPreInPlace(const Animation* _preAnimation, const Animation* _curAnimation) const
+{
+	return ((_preAnimation != nullptr && _preAnimation->isInPlace)
+		|| _curAnimation->isInPlace);
+}
+
+void AnimationController::AnimationInPlace(Animation& _prePlayAnimation, Animation& _curPlayAnimation, float _rate)
 {
 	// 対象フレームのローカル行列を初期値にリセットす
 	MV1ResetFrameUserLocalMatrix(modelId_, FRAME_ROOT_NUM);
@@ -309,24 +315,24 @@ void AnimationController::AnimationInPlace(Animation& _prePlayAnim, Animation& _
 	VECTOR preBase = preAnimationLocalPos_;
 	VECTOR curBase = UtilityMath::VECTOR_ZERO;
 	
-	if (_curPlayAnim.isInPlace)
+	if (_curPlayAnimation.isInPlace)
 	{
 		// 固定位置アニメーションの場合、自身の再生進行度(step/totalTime)に応じて
 		// inPlaceLocalPos → inPlaceLocalPosEnd へ徐々に移動した目標位置を使用
-		curBase = GetInPlaceProgressPos(_curPlayAnim);
+		curBase = GetInPlaceProgressPos(_curPlayAnimation);
 	}
 	else
 	{
-		curBase = GetRawAnimationRootPos(_curPlayAnim, _prePlayAnim);
+		curBase = GetRawAnimationRootPos(_curPlayAnimation, _prePlayAnimation);
 		
 		// ブレンド率に戻す
-		if (_curPlayAnim.attachNo != -1)
+		if (_curPlayAnimation.attachNo != -1)
 		{
-			MV1SetAttachAnimBlendRate(modelId_, _curPlayAnim.attachNo, blendRate);
+			MV1SetAttachAnimBlendRate(modelId_, _curPlayAnimation.attachNo, blendRate);
 		}
-		if (_prePlayAnim.attachNo != -1)
+		if (_prePlayAnimation.attachNo != -1)
 		{
-			MV1SetAttachAnimBlendRate(modelId_, _prePlayAnim.attachNo, (1.0f - blendRate));
+			MV1SetAttachAnimBlendRate(modelId_, _prePlayAnimation.attachNo, (1.0f - blendRate));
 		}
 	}
 		
@@ -346,7 +352,8 @@ void AnimationController::AnimationInPlace(Animation& _prePlayAnim, Animation& _
 	// 対象フレームにセットし直し、アニメーションの移動値を無効化
 	MV1SetFrameUserLocalMatrix(modelId_, FRAME_ROOT_NUM, mix);
 }
-VECTOR AnimationController::GetRawAnimationRootPos(Animation& _target, Animation& _other)
+
+VECTOR AnimationController::GetRawAnimationRootPos(Animation& _target, Animation& _other)const
 {
 	// 対象のみ100%、相方を0%にして素のルート位置を取得する
 	if (_target.attachNo != -1)
@@ -451,9 +458,10 @@ bool AnimationController::IsEndPoint(float _pointStart, float _pointEnd)
 	// 再生位置の割合
 	float curRate = GetPlayPointRate();
  
-	// 再生位置が指定の範囲内になったときtrue
+	// 再生位置が指定の範囲内になったとき、true
 	return (curRate >= start && curRate < end);
 }
+
 float AnimationController::GetPlayPointRate(void)
 {
 	/* アニメーション再生割合を取得 */
@@ -496,62 +504,8 @@ void AnimationController::SetAnimationStepRate(float _rate)
 	animation->step = (animation->totalTime * rate);
 }
 
-void AnimationController::SetModelId(int _modelId)
-{
-	modelId_ = _modelId;
-	for (auto& [type, animation] : animations_)
-	{
-		animation.modelId = _modelId;
-	}
-}
-
-float AnimationController::GetPlayTime(void)
-{
-	Animation* animation = FindAnimation(animations_, playType_);
-	if (animation == nullptr)
-	{
-#ifdef _DEBUG
-		OutputDebugString("\nアニメーションが割り当てられていないため、再生時間が取得出来ませんでした；；\n");
-		assert(false); // 例外スロー
-#endif
-		return -1.0f;
-	}
-
-	return animation->step;
-}
-
-float AnimationController::GetPlayTimeTotal(void)
-{
-	Animation* animation = FindAnimation(animations_, playType_);
-	if (animation == nullptr)
-	{
-#ifdef _DEBUG
-		OutputDebugString("\nアニメーションが割り当てられていないため、総再生時間が取得出来ませんでした；；\n");
-		assert(false); // 例外スロー
-#endif
-		return -1.0f;
-	}
-
-	return animation->totalTime;
-}
-
-
 void AnimationController::Add(int _type, Animation& _animation)
 {
 	// 同じ種類が登録済みの場合は追加されない
 	animations_.emplace(_type, _animation);
-}
-
-bool AnimationController::IsFindAnimation(int _animationType)
-{
-	if (animations_.contains(_animationType))
-	{
-		return true;
-	}
-
-#ifdef _DEBUG
-	OutputDebugString("\nアニメーションの情報がありません。\n");
-#endif
-
-	return false;
 }
