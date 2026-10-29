@@ -13,12 +13,6 @@ PBulletPoison::PBulletPoison(int _shotType)
 {
 }
 
-PBulletPoison::~PBulletPoison(void)
-{
-	// ƒƒ‚ƒŠ‰ğ•ú
-	Release();
-}
-
 void PBulletPoison::Load(void)
 {
 	// Œø‰Ê‰¹“Ç‚İ‚İ

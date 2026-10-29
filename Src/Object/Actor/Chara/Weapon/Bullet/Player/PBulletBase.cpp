@@ -52,12 +52,6 @@ PBulletBase::PBulletBase(int _shotType, bool _isGravity)
 {
 }
 
-PBulletBase::~PBulletBase(void)
-{
-	// ƒƒ‚ƒŠ‰ğ•ú
-	Release();
-}
-
 void PBulletBase::InitCollider(void)
 {
 	// Ä‰Šú‰»Aˆ—‚ğI—¹

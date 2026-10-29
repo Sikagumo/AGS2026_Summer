@@ -86,12 +86,6 @@ Player::Player(int _playerNo, JOB_TYPE _jobType, SKIN_TYPE _skinType, const VECT
 	shotPointVertex_[RIGHT_FORWARD].u = 1.0f; shotPointVertex_[RIGHT_FORWARD].v = 0.0f;
 }
 
-Player::~Player(void)
-{
-	// ƒƒ‚ƒŠ‰ğ•ú
-	Release();
-}
-
 void Player::Load(void)
 {
 	transform_.modelId = ResourceManager::GetInstance()

@@ -12,12 +12,6 @@ PBulletBig::PBulletBig(int _shotType)
 {
 }
 
-PBulletBig::~PBulletBig(void)
-{
-	// ƒƒ‚ƒŠ‰ğ•ú
-	Release();
-}
-
 void PBulletBig::InitTransform(void)
 {
 	transform_.InitTransform(SCALE_BIG, transform_.quaRot, Quaternion::Identity());

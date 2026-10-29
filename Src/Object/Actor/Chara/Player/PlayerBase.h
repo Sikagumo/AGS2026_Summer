@@ -73,7 +73,7 @@ public:
 	PlayerBase(int _playerNo, JOB_TYPE _jobType, const VECTOR& _startPos, SKIN_TYPE _playerType);
 
 	/// @brief デストラクタ
-	virtual ~PlayerBase(void)override;
+	virtual ~PlayerBase(void)override = default;
 
 	/// @brief プレイヤー番号取得
 	int GetPlayerNo(void)const { return playerNo_; };
@@ -141,7 +141,4 @@ protected:
 
 	/// @brief 3D音声更新
 	void UpdateSound(void);
-
-	/// @brief 各オブジェクトのメモリ解放
-	void ReleasePost(void)override;
 };

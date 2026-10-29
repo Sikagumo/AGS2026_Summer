@@ -23,7 +23,7 @@ public:
 	PBulletBase(int _shotType, bool _isGravity = true);
 
 	/// @brief デストラクタ
-	virtual ~PBulletBase(void)override;
+	virtual ~PBulletBase(void)override = default;
 
 	/// @brief リソース読み込み処理
 	virtual void Load(void)override {};

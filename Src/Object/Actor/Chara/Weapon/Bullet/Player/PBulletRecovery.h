@@ -17,7 +17,7 @@ public:
 	PBulletRecovery(int _shotType);
 
 	/// @brief デストラクタ
-	~PBulletRecovery(void)override;
+	~PBulletRecovery(void)override = default;
 
 
 protected:

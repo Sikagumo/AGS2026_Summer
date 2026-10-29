@@ -14,11 +14,6 @@ Stage::Stage(void)
 {
 }
 
-Stage::~Stage(void)
-{
-	Release();
-}
-
 void Stage::Load(void)
 {
 	// スカイドーム
@@ -277,12 +272,6 @@ void Stage::DrawTree(void)
 
 void Stage::ReleasePost(void)
 {
-	for (auto& tree : treesFront_)
-	{
-		// 木オブジェクト解放
-		tree->Release();
-	}
-
 	// 木オブジェクト配列をクリア
 	treesFront_.clear();
 	treesBack_.clear();

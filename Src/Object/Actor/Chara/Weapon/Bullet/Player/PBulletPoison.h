@@ -14,7 +14,7 @@ public:
 	PBulletPoison(int _shotType);
 
 	/// @brief デストラクタ
-	~PBulletPoison(void)override;
+	~PBulletPoison(void)override = default;
 
 	/// @brief リソース読み込み処理
 	void Load(void)override;

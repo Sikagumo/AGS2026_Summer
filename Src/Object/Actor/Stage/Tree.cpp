@@ -8,12 +8,6 @@ Tree::Tree(void)
 {
 }
 
-Tree::~Tree(void)
-{
-	// ‰ğ•úˆ—
-	Release();
-}
-
 void Tree::Load(void)
 {
 	// ƒŠƒ\[ƒX“Ç‚İ‚İ

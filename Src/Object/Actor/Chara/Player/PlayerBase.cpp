@@ -16,12 +16,6 @@ PlayerBase::PlayerBase(int _playerNo, JOB_TYPE _jobType, const VECTOR& _startPos
 	transform_.pos = START_POS;
 }
 
-PlayerBase::~PlayerBase(void)
-{
-	// ƒƒ‚ƒŠŠJ•ú
-	Release();
-}
-
 void PlayerBase::SetDamage(int _damage, bool _isInvincible
 						  , float _timeInvincible, bool _isIgnoreInvincible)
 {
@@ -73,9 +67,4 @@ void PlayerBase::SetSoundData(VECTOR _pos, float _radius, bool _isLanding, bool 
 void PlayerBase::UpdateSound(void)
 {
 	SoundManager::GetInstance().Update3D(transform_.pos);
-}
-
-void PlayerBase::ReleasePost(void)
-{
-	weaponController_->Release();
 }

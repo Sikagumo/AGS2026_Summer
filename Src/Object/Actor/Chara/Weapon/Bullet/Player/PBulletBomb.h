@@ -14,7 +14,7 @@ public:
 	PBulletBomb(int _shotType);
 
 	/// @brief デストラクタ
-	~PBulletBomb(void)override;
+	~PBulletBomb(void)override = default;
 
 
 protected:

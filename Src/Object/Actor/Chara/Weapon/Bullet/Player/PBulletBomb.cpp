@@ -9,12 +9,6 @@ PBulletBomb::PBulletBomb(int _shotType)
 {
 }
 
-PBulletBomb::~PBulletBomb(void)
-{
-	// ƒƒ‚ƒŠ‰ğ•ú
-	Release();
-}
-
 void PBulletBomb::InitTransform(void)
 {
 	transform_.InitTransform(SCALE_BOMB

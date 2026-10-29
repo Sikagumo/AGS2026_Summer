@@ -14,7 +14,7 @@ public:
 	PBulletBig(int _shotType);
 
 	/// @brief デストラクタ
-	~PBulletBig(void)override;
+	~PBulletBig(void)override = default;
 
 	/// @brief 生成した瞬間の処理
 	void PreActiveProcess(void)override { isScaleUp_ = true; };

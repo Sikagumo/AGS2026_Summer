@@ -13,12 +13,6 @@ PBulletRecovery::PBulletRecovery(int _shotType)
 {
 }
 
-PBulletRecovery::~PBulletRecovery(void)
-{
-	// ƒƒ‚ƒŠ‰ğ•ú
-	Release();
-}
-
 void PBulletRecovery::InitTransform(void)
 {
 	transform_.InitTransform(SCALE_RECOVERY

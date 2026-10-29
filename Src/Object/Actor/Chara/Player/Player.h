@@ -45,7 +45,7 @@ public:
 	Player(int _playerNo, JOB_TYPE _jobType, SKIN_TYPE _skinType, const VECTOR& _startPos);
 
 	/// @brief デストラクタ
-	~Player(void)override;
+	~Player(void)override = default;
 
 	/// @brief リソース読み込み処理
 	void Load(void)override;

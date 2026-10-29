@@ -15,6 +15,7 @@ public:
 	enum class MODE
 	{
 		NONE = -1,     // 無効状態
+
 		FIXED_POINT,   // 定点カメラ
 		FREE,          // フリー移動カメラ
 		PLAYER_FOLLOW, // プレイヤー追従
@@ -42,7 +43,7 @@ public:
 	Camera(void);
 
 	/// @brief デストラクタ
-	~Camera(void)override;
+	~Camera(void)override = default;
 
 	// 所有する資源(コライダ等)の二重管理を避けるためコピー・ムーブ禁止
 	Camera(const Camera&) = delete;
@@ -101,7 +102,11 @@ public:
 
 	/// @brief ロックオン中の対象の位置を取得
 	const VECTOR& GetLockOnPos(void)const { return lockOnParam_.pos; }
+
+	/// @brief ロックオン対象のHP取得
 	int GetLockOnHp(void)const { return lockOnParam_.hp; }
+
+	/// @brief ロックオン対象の最大HP取得
 	int GetLockOnMaxHp(void)const { return lockOnParam_.maxHp; }
 
 	/// @brief イージング遷移中か否か
@@ -261,15 +266,15 @@ private:
 
 	/// @brief カメラ回転
 	/// @param _isLimitX X軸回転を制限するか否か
-	void ProcessRot(bool _isLimitX);
-	void RotationMouse(bool _isLimitX);
-	void RotationGamePad(bool _isLimitX);
+	void ProcessRot(bool _isLimitX);      // キーボード・マウス・ゲームパッドの入力で回転
+	void RotationMouse(bool _isLimitX);   // マウスの移動量で回転
+	void RotationGamePad(bool _isLimitX); // ゲームパッドの右スティックで回転
 
 	/// @brief モード別更新ステップ
-	void SetBeforeDrawFixedPoint(void);
-	void SetBeforeDrawFree(void);
-	void SetBeforeDrawFollowPlayer(void);
-	void SetBeforeDrawFollowBoss(void);
+	void SetBeforeDrawFixedPoint(void);   // 定点カメラ
+	void SetBeforeDrawFree(void);         // フリー移動
+	void SetBeforeDrawFollowPlayer(void); // プレイヤー追従
+	void SetBeforeDrawFollowBoss(void);   // ボス追従
 
 	/// @brief 衝突判定
 	void Collision(void);

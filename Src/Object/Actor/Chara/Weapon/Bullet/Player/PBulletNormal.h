@@ -18,7 +18,7 @@ public:
 				, int _shotType, bool _isActiveGravity = true);
 
 	/// @brief デストラクタ
-	~PBulletNormal(void)override;
+	~PBulletNormal(void)override = default;
 
 
 protected:

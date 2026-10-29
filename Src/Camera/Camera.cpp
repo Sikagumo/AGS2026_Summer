@@ -31,12 +31,6 @@ Camera::Camera(void)
 {
 }
 
-Camera::~Camera(void)
-{
-	// メモリ解放
-	Release();
-}
-
 void Camera::InitCollider(void)
 {
 	// 主に地面との衝突で使用する球体コライダ

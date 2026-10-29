@@ -9,7 +9,7 @@ public:
 	Tree(void);
 
 	/// @brief デストラクタ
-	~Tree(void)override;
+	~Tree(void)override = default;
 
 	/// @brief リソース読み込み処理
 	void Load(void)override;

@@ -16,7 +16,7 @@ public:
 	Stage(void);
 
 	/// @brief デストラクタ
-	~Stage(void)override;
+	~Stage(void)override = default;
 
 	/// @brief リソース読み込み処理
 	void Load(void)override;
