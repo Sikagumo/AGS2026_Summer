@@ -1,7 +1,5 @@
 #include "ImGuiWrapper.h"
-
 #include <DxLib.h>
-
 #include "../Manager/Generic/KeyConfInputManager.h"
 #include "../../Lib/ImGUI/backends/imgui_impl_dx11.h"
 #include "../../Lib/ImGUI/backends/imgui_impl_win32.h"
@@ -9,8 +7,8 @@
 ImGuiWrapper* ImGuiWrapper::instance_ = nullptr;
 
 // imgui_impl_win32.cppからのメッセージハンドラのプロトタイプ宣言
-extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND _windowHandle, UINT _message, 
-	WPARAM _wParam, LPARAM _lParam);
+extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(
+	HWND _windowHandle, UINT _message, WPARAM _wParam, LPARAM _lParam);
 
 void ImGuiWrapper::CreateInstance(void)
 {
@@ -18,7 +16,7 @@ void ImGuiWrapper::CreateInstance(void)
 	{
 		instance_ = new ImGuiWrapper();
 	}
-	instance_->Init();
+	instance_->Initialize();
 }
 
 ImGuiWrapper& ImGuiWrapper::GetInstance(void)
@@ -26,7 +24,7 @@ ImGuiWrapper& ImGuiWrapper::GetInstance(void)
 	return *instance_;
 }
 
-void ImGuiWrapper::Init(void)
+void ImGuiWrapper::Initialize(void)
 {
 	// ウインドウへのメッセージをフックするウインドウプロージャを登録する
 	DxLib::SetHookWinProc(WndProc);
@@ -37,8 +35,8 @@ void ImGuiWrapper::Init(void)
 
 	ImGui_ImplWin32_Init(DxLib::GetMainWindowHandle());
 	ImGui_ImplDX11_Init(
-		(ID3D11Device*)DxLib::GetUseDirect3D11Device(),
-		(ID3D11DeviceContext*)DxLib::GetUseDirect3D11DeviceContext());
+		static_cast<ID3D11Device*>(const_cast<void*>(DxLib::GetUseDirect3D11Device())),
+		static_cast<ID3D11DeviceContext*>(const_cast<void*>(DxLib::GetUseDirect3D11DeviceContext())));
 }
 
 void ImGuiWrapper::Update(void)
@@ -66,7 +64,11 @@ void ImGuiWrapper::Destroy(void)
 	ImGui_ImplWin32_Shutdown();
 	ImGui::DestroyContext();
 
-	delete instance_;
+	if (instance_ != nullptr)
+	{
+		delete instance_;
+		instance_ = nullptr;
+	}
 }
 
 LRESULT ImGuiWrapper::WndProc(HWND _windowHandle, UINT _message, WPARAM _wParam, LPARAM _lParam)
@@ -80,51 +82,50 @@ LRESULT ImGuiWrapper::WndProc(HWND _windowHandle, UINT _message, WPARAM _wParam,
 		return true;
 	}
 
-	const UINT SYSTEM_COMMAND_MASK = 0xfff0; 
+	constexpr UINT SYSTEM_COMMAND_MASK = 0xfff0; // システムコマンド判定用マスク
+	constexpr LRESULT MESSAGE_HANDLED = 0;       // メッセージ処理完了時の戻り値
+	constexpr int QUIT_EXIT_CODE = 0;            // 終了コード
 
 	switch (_message)
 	{
 	case WM_SIZE:
-	{
 		if (_wParam == SIZE_MINIMIZED)
 		{
-			return 0;
+			return MESSAGE_HANDLED;
 		}
-		return 0;
-	}
+		return MESSAGE_HANDLED;
+
 	case WM_SYSCOMMAND:
-	{
-		if ((_wParam & SYSTEM_COMMAND_MASK) == SC_KEYMENU) 
+		if ((_wParam & SYSTEM_COMMAND_MASK) == SC_KEYMENU)
 		{
-			return 0;
+			return MESSAGE_HANDLED;
 		}
 		break;
-	}
-	case WM_DESTROY:
-	{
-		::PostQuitMessage(0);
-		return 0;
-	}
-	}
-	return ::DefWindowProcW(_windowHandle, _message, _wParam, _lParam);
-}
 
-ImGuiWrapper::~ImGuiWrapper(void)
-{
+	case WM_DESTROY:
+		::PostQuitMessage(QUIT_EXIT_CODE);
+		return MESSAGE_HANDLED;
+
+	default:
+		break;
+	}
+
+	return ::DefWindowProcW(_windowHandle, _message, _wParam, _lParam);
 }
 
 void ImGuiWrapper::UpdateInputMouse(void)
 {
 	// マウス情報をImGuiに渡す
-	ImGuiIO& imguiIO = ImGui::GetIO(); 
+	ImGuiIO& imguiIO = ImGui::GetIO();
 
 	// KeyConfInputManagerからマウス座標を取得
-	Vector2 mousePosition = KeyConfInputManager::GetInstance().GetMousePosition(); 
-	imguiIO.AddMousePosEvent(static_cast<float>(mousePosition.x), 
+	Vector2 mousePosition = KeyConfInputManager::GetInstance().GetMousePosition();
+	imguiIO.AddMousePosEvent(
+		static_cast<float>(mousePosition.x),
 		static_cast<float>(mousePosition.y));
 
 	// クリック状態はDxLibの関数から直接取得して判定
-	int mouseInput = GetMouseInput(); 
+	int mouseInput = GetMouseInput();
 	imguiIO.AddMouseButtonEvent(ImGuiMouseButton_Left, (mouseInput & MOUSE_INPUT_LEFT) != 0);
 	imguiIO.AddMouseButtonEvent(ImGuiMouseButton_Right, (mouseInput & MOUSE_INPUT_RIGHT) != 0);
 }
@@ -135,8 +136,4 @@ void ImGuiWrapper::UpdateNewFrame(void)
 	ImGui_ImplDX11_NewFrame();
 	ImGui_ImplWin32_NewFrame();
 	ImGui::NewFrame();
-}
-
-ImGuiWrapper::ImGuiWrapper(void)
-{
 }

@@ -1,4 +1,5 @@
 #pragma once
+
 #include <vector>
 #include <unordered_map>
 #include <DxLib.h>
@@ -22,13 +23,13 @@ public:
 	};
 
 	/// @brief 右スティックの感度設定
-	struct RStickSensitivity
+	struct RightStickSensitivity
 	{
 		float x = 1.0f;          // X軸感度
 		float y = 1.0f;          // Y軸感度
 		bool invertX = false;    // X軸反転
 		bool invertY = false;    // Y軸反転
-		float deadZone = 0.35f;  // デットゾーンのしきい値
+		float deadZone = 0.35f;  // デッドゾーンのしきい値
 	};
 
 	/// @brief インスタンの生成
@@ -47,29 +48,25 @@ public:
 	/// @brief 押し続けている間 true を返す
 	/// @param _name イベント名
 	/// @return 押されていれば true
-	bool isPressed(const std::string& _name) const;
+	bool IsPressed(const std::string& _name) const;
 
 	/// @brief 離した瞬間のみ true を返す
 	/// @param _name イベント名
 	/// @return 離した瞬間のみ true
-	bool isTrigerUp(const std::string& _name) const;
+	bool IsTriggerUp(const std::string& _name) const;
 
 	/// @brief 押した瞬間のみ true を返す
 	/// @param _name イベント名
 	/// @return 押した瞬間のみ true
-	bool isTrigerDown(const std::string& _name) const;
+	bool IsTriggerDown(const std::string& _name) const;
 
 	/// @brief マウスカーソルの座標を取得 
 	/// @return スクリーン座標のマウスカーソル位置
-	Vector2 GetMousePosition(void) const;
+	Vector2 GetMousePosition(void) const { return mousePosition_; }
 
 	/// @brief マウスの移動量を取得し、カーソルを画面中央に固定・非表示にする
 	/// @return 前フレームからの移動量
 	Vector2F GetMouseVelocityAndFixCenter(void);
-
-	/// @brief マウスの移動量を取得
-	/// @return 前フレームからの移動量
-	Vector2F GetMouseVelocity(void);
 
 	/// @brief マウスの感度設定を変更する
 	/// @param _sensitivity 設定する感度データ
@@ -77,7 +74,7 @@ public:
 
 	/// @brief 現在のマウス感度設定を取得する
 	/// @return 現在の感度設定
-	const MouseSensitivity& GetMouseSensitivity(void) const;
+	const MouseSensitivity& GetMouseSensitivity(void) const { return mouseSensitivity_; }
 
 	/// @brief 左スティックの入力方向を正規化したXZベクトルで返す
 	/// @return 正規化済みの方向ベクトル
@@ -85,7 +82,7 @@ public:
 
 	/// @brief 右スティックの入力量を返す
 	/// @return 右スティックの入力量
-	Vector2F GetRIghtStick(void) const;
+	Vector2F GetRightStick(void) const;
 
 	/// @brief 左スティックの生の入力値を返す
 	/// @return 左スティックの生の入力値
@@ -97,11 +94,11 @@ public:
 
 	/// @brief 右スティックの感度設定を変更する
 	/// @param _sensitivity 設定する感度データ
-	void SetRStickSensitivity(const RStickSensitivity& _sensitivity);
+	void SetRightStickSensitivity(const RightStickSensitivity& _sensitivity);
 
 	/// @brief 現在の右スティックの感度設定を取得する
 	/// @return 現在の感度設定
-	const RStickSensitivity& GetRStickSensitivity(void) const;
+	const RightStickSensitivity& GetRightStickSensitivity(void) const { return rightStickSensitivity_; }
 
 	/// @brief 現在の入力テーブルをファイルに保存する
 	void SaveInputTable(void);
@@ -116,12 +113,12 @@ public:
 	void LoadSensitivitySettings(void);
 
 	/// @brief 使用するパッドの番号を設定する
-	/// @param _padNo DxLib定数
-	void SetUsePadNo(int _padNo);
+	/// @param _padNumber DxLib定数
+	void SetUsePadNumber(int _padNumber);
 
 	/// @brief マウスホイールの回転量を取得する
 	/// @return 前フレームからの回転量 
-	int GetMouseWheel(void) const;
+	int GetMouseWheelVolume(void) const { return mouseWheelVolume_; }
 
 private:
 
@@ -130,7 +127,7 @@ private:
 	{
 		KEY_BOARD,      // キーボード
 		MOUSE,          // マウス
-		JOYPAD,         // ジョイパット
+		JOYPAD,         // ジョイパッド
 		XINPUT_ANALOG,  // XInputのアナログ入力
 	};
 
@@ -144,7 +141,7 @@ private:
 	/// @brief 保存データのヘッダ構造
 	struct KeyConfigHeader
 	{
-		char     signature[4] = { "" };  // ファイル識別ようのシグネチャ
+		char     signature[4] = { "" };  // ファイル識別用のシグネチャ
 		float    version = 1.0f;         // バージョン
 		uint32_t dataNum = 0;            // 入力イベントの数
 	};
@@ -197,16 +194,16 @@ private:
 	std::unordered_map<std::string, bool> previousInputState_;   // 前フレームの入力状態(トリガー判定に使用)
 
 	// スティック関連
-	StickInfo stickInfo_;                  // 現フレームのスティック入力値
-	RStickSensitivity rStickSensitivity_;  // 右スティックの感度設定
+	StickInfo stickInfo_;                         // 現フレームのスティック入力値
+	RightStickSensitivity rightStickSensitivity_; // 右スティックの感度設定
 
 	// マウス関連
 	Vector2 mousePosition_;               // マウスカーソルの座標
 	MouseSensitivity mouseSensitivity_;   // マウス感度
-	int mouseWheelVol_;                   // マウスホイールの回転量
+	int mouseWheelVolume_;                // マウスホイールの回転量
 
 	// 使用するパッドの番号
-	int usePadNo_;
+	int usePadNumber_;
 
 	// シングルトン用インスタンス
 	static KeyConfInputManager* instance_;
@@ -218,7 +215,7 @@ private:
 	~KeyConfInputManager(void) = default;
 
 	/// @brief 入力テーブルをデフォルト設定で初期化する
-	void InitInputTable(void);
+	void InitializeInputTable(void);
 
 	/// @brief スティックの入力値を正規化し、デッドゾーン処理を行う共通関数
 	/// @param _rawX 生のX入力値
@@ -239,8 +236,7 @@ private:
 	/// @param _inputInfo 判定する入力情報
 	/// @param _keyState キーボードの生データ
 	/// @return 押されていれば true
-	bool CheckKeyboardInput(const InputInfo& _inputInfo,
-		const std::array<char, 256>& _keyState) const;
+	bool CheckKeyboardInput(const InputInfo& _inputInfo, const std::array<char, 256>& _keyState) const;
 
 	/// @brief XInputのアナログ入力トリガーやスティックの判定を行う
 	/// @param _inputInfo 判定する入力情報
@@ -248,11 +244,15 @@ private:
 	/// @return 閾値を超えていれば true
 	bool CheckXInputAnalog(const InputInfo& _inputInfo, const XINPUT_STATE& _xInputState) const;
 
-	// コピー禁止 
+	/// @brief コピーコンストラクタを禁止する
 	KeyConfInputManager(const KeyConfInputManager&) = delete;
+
+	/// @brief コピー代入演算子を禁止する
 	KeyConfInputManager& operator=(const KeyConfInputManager&) = delete;
 
-	// ムーブ禁止
+	/// @brief ムーブコンストラクタを禁止する
 	KeyConfInputManager(KeyConfInputManager&&) = delete;
+
+	/// @brief ムーブ代入演算子を禁止する
 	KeyConfInputManager& operator=(KeyConfInputManager&&) = delete;
 };

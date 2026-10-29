@@ -204,7 +204,7 @@ void SceneGame::Initialize(void)
 
 void SceneGame::Update(void)
 {
-	if (KeyConfInputManager::GetInstance().isTrigerDown("PAUSE"))
+	if (KeyConfInputManager::GetInstance().IsTriggerDown("PAUSE"))
 	{
 		SceneManager::GetInstance().PushScene(std::make_shared<ScenePause>());
 	}

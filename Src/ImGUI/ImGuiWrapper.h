@@ -4,7 +4,6 @@
 /// @brief ImGuiのラッパークラス
 class ImGuiWrapper
 {
-
 public:
 
 	/// @brief インスタンスの生成
@@ -15,7 +14,7 @@ public:
 	static ImGuiWrapper& GetInstance(void);
 
 	/// @brief 初期化
-	void Init(void);
+	void Initialize(void);
 
 	/// @brief 更新
 	void Update(void);
@@ -28,8 +27,8 @@ public:
 
 private:
 
-	// シングルトン関連
-	static ImGuiWrapper* instance_; // 静的インスタンス
+	// 静的インスタンス
+	static ImGuiWrapper* instance_; 
 
 	/// @brief ウインドウプロシージャ
 	/// @param _windowHandle ウィンドウハンドル
@@ -41,15 +40,21 @@ private:
 		HWND _windowHandle, UINT _message, WPARAM _wParam, LPARAM _lParam);
 
 	/// @brief デフォルトコンストラクタをprivateにして、外部から生成できない様にする
-	ImGuiWrapper(void);
+	ImGuiWrapper(void) = default;
 
 	/// @brief デストラクタ
-	~ImGuiWrapper(void);
+	~ImGuiWrapper(void) = default;
 
-	// コピーと代入を禁止
+	/// @brief コピーコンストラクタを禁止する
 	ImGuiWrapper(const ImGuiWrapper&) = delete;
+
+	/// @brief コピー代入演算子を禁止する
 	ImGuiWrapper& operator=(const ImGuiWrapper&) = delete;
+
+	/// @brief ムーブコンストラクタを禁止する
 	ImGuiWrapper(ImGuiWrapper&&) = delete;
+
+	/// @brief ムーブ代入演算子を禁止する
 	ImGuiWrapper& operator=(ImGuiWrapper&&) = delete;
 
 	/// @brief マウス入力の更新
@@ -57,5 +62,4 @@ private:
 
 	/// @brief ImGuiの新しいフレームの更新
 	void UpdateNewFrame(void);
-
 };

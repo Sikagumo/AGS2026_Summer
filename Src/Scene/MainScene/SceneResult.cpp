@@ -56,7 +56,7 @@ void SceneResult::Update(void)
 {
 	auto& keyConfInputManager = KeyConfInputManager::GetInstance();
 
-	if (keyConfInputManager.isTrigerDown("OK"))
+	if (keyConfInputManager.IsTriggerDown("OK"))
 	{
 		SceneManager::GetInstance().ChangeScene(std::make_shared<SceneTitle>());
 	}

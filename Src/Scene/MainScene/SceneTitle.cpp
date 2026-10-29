@@ -276,9 +276,9 @@ void SceneTitle::Update(void)
 	}
 
 	// コントローラーやキーボードのUI操作入力があったらコントローラーモードへ
-	if (keyConfInputManager.isPressed("UP") || keyConfInputManager.isPressed("DOWN") ||
-		keyConfInputManager.isPressed("LEFT") || keyConfInputManager.isPressed("RIGHT") ||
-		keyConfInputManager.isTrigerDown("OK") || keyConfInputManager.isTrigerDown("CANCEL"))
+	if (keyConfInputManager.IsPressed("UP") || keyConfInputManager.IsPressed("DOWN") ||
+		keyConfInputManager.IsPressed("LEFT") || keyConfInputManager.IsPressed("RIGHT") ||
+		keyConfInputManager.IsTriggerDown("OK") || keyConfInputManager.IsTriggerDown("CANCEL"))
 	{
 		isMouseMode_ = false;
 		SetMouseDispFlag(false); // マウスカーソルを非表示
@@ -300,14 +300,14 @@ void SceneTitle::Update(void)
 	}
 
 #ifdef _DEBUG
-	if (KeyConfInputManager::GetInstance().isTrigerDown("APPLY_DEBUG"))
+	if (KeyConfInputManager::GetInstance().IsTriggerDown("APPLY_DEBUG"))
 	{
 		isDebugMode_ = true;
 	}
 
 	if (isDebugMode_ == true)
 	{
-		if (KeyConfInputManager::GetInstance().isTrigerDown("UNAPPLY_DEBUG"))
+		if (KeyConfInputManager::GetInstance().IsTriggerDown("UNAPPLY_DEBUG"))
 		{
 			isDebugMode_ = false;
 		}
@@ -330,7 +330,7 @@ void SceneTitle::Update(void)
 		if (inputIntervalCounter_ <= 0)
 		{
 			// 下入力
-			if (keyConfInputManager.isPressed("DOWN"))
+			if (keyConfInputManager.IsPressed("DOWN"))
 			{
 				selectedIdx_ = (selectedIdx_ + 1) % MENU_BUTTON_NUM;
 
@@ -339,7 +339,7 @@ void SceneTitle::Update(void)
 				inputIntervalCounter_ = STICK_INTERVAL;
 			}
 			// 上入力
-			else if (keyConfInputManager.isPressed("UP"))
+			else if (keyConfInputManager.IsPressed("UP"))
 			{
 				selectedIdx_ = (selectedIdx_ - 1 + MENU_BUTTON_NUM) % MENU_BUTTON_NUM;
 
@@ -350,7 +350,7 @@ void SceneTitle::Update(void)
 		}
 
 		// 上下の入力が全くない場合はインターバルをリセットする
-		if (!keyConfInputManager.isPressed("DOWN") && !keyConfInputManager.isPressed("UP"))
+		if (!keyConfInputManager.IsPressed("DOWN") && !keyConfInputManager.IsPressed("UP"))
 		{
 			inputIntervalCounter_ = 0;
 		}
@@ -372,7 +372,7 @@ void SceneTitle::Update(void)
 			const bool IS_TARGET = CollisionController::GetInstance().IsTagCollidingWithTag2D(Collider2DBase::TAG_2D::MOUSE_CURSOR, buttonTags[i]) || (selectedIdx_ == i);
 
 			// OKボタン、または左クリックで決定
-			if (IS_TARGET && keyConfInputManager.isTrigerDown("OK"))
+			if (IS_TARGET && keyConfInputManager.IsTriggerDown("OK"))
 			{
 				isSelectMenu_ = false;
 
@@ -586,7 +586,7 @@ void SceneTitle::ProcessMenuState(void)
 void SceneTitle::UpdateGui(void)
 {
 	// クリックされたら、対象のGUIをコントローラに渡す
-	if (KeyConfInputManager::GetInstance().isTrigerDown("OK"))
+	if (KeyConfInputManager::GetInstance().IsTriggerDown("OK"))
 	{
 		auto& colCtrl = CollisionController::GetInstance();
 		using TAG = Collider2DBase::TAG_2D;

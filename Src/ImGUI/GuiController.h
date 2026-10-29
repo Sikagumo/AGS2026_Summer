@@ -7,6 +7,7 @@
 class GuiController
 {
 public:
+
 	/// @brief インスタンスの生成
 	static void CreateInstance(void);
 
@@ -30,20 +31,26 @@ public:
 private:
 
 	// シングルトンインスタンス
-	static GuiController* instance_;           
+	static GuiController* instance_;
 
 	// 現在アクティブなGUIコンポーネント
-	std::shared_ptr<IGuiComponent> activeGui_; 
+	std::shared_ptr<IGuiComponent> activeGui_;
 
 	/// @brief コンストラクタ
-	GuiController(void) = default;
+	GuiController(void);
 
 	/// @brief デストラクタ
 	~GuiController(void) = default;
 
-	/// @brief コピー禁止
+	/// @brief コピーコンストラクタを禁止する
 	GuiController(const GuiController&) = delete;
 
-	/// @brief 代入禁止 
+	/// @brief コピー代入演算子を禁止する
 	GuiController& operator=(const GuiController&) = delete;
+
+	/// @brief ムーブコンストラクタを禁止する
+	GuiController(GuiController&&) = delete;
+
+	/// @brief ムーブ代入演算子を禁止する
+	GuiController& operator=(GuiController&&) = delete;
 };

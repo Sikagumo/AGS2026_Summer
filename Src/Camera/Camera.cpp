@@ -251,15 +251,15 @@ void Camera::LockOnChoice(void)
 		int moveCount = 0;
 
 		// マウスホイールの回転量
-		moveCount += KeyConfInputManager::GetInstance().GetMouseWheel();
+		moveCount += KeyConfInputManager::GetInstance().GetMouseWheelVolume();
 
 		// パッド・キーボードによる切り替え
-		if (KeyConfInputManager::GetInstance().isTrigerDown("TARGET_CHANGE_LEFT"))
+		if (KeyConfInputManager::GetInstance().IsTriggerDown("TARGET_CHANGE_LEFT"))
 		{
 			moveCount -= 1;
 		}
 
-		if (KeyConfInputManager::GetInstance().isTrigerDown("TARGET_CHANGE_RIGHT"))
+		if (KeyConfInputManager::GetInstance().IsTriggerDown("TARGET_CHANGE_RIGHT"))
 		{
 			moveCount += 1;
 		}
@@ -457,7 +457,7 @@ void Camera::SetBeforeDrawFree(void)
 
 void Camera::SetBeforeDrawFollowPlayer(void)
 {
-	if (KeyConfInputManager::GetInstance().isTrigerDown("LOCK_ON"))
+	if (KeyConfInputManager::GetInstance().IsTriggerDown("LOCK_ON"))
 	{
 		if (!isLockOn_)
 		{
@@ -473,9 +473,9 @@ void Camera::SetBeforeDrawFollowPlayer(void)
 	// ロックオン時、常に追従位置を取得する
 	if (isLockOn_)
 	{
-		if (KeyConfInputManager::GetInstance().GetMouseWheel() != 0
-			|| KeyConfInputManager::GetInstance().isTrigerDown("TARGET_CHANGE_LEFT")
-			|| KeyConfInputManager::GetInstance().isTrigerDown("TARGET_CHANGE_RIGHT"))
+		if (KeyConfInputManager::GetInstance().GetMouseWheelVolume() != 0
+			|| KeyConfInputManager::GetInstance().IsTriggerDown("TARGET_CHANGE_LEFT")
+			|| KeyConfInputManager::GetInstance().IsTriggerDown("TARGET_CHANGE_RIGHT"))
 		{
 			LockOnChoice();
 		}
@@ -613,7 +613,7 @@ void Camera::RotationMouse(bool _isLimit)
 
 void Camera::RotationGamePad(bool _isLimit)
 {
-	Vector2F rightStick = KeyConfInputManager::GetInstance().GetRIghtStick();
+	Vector2F rightStick = KeyConfInputManager::GetInstance().GetRightStick();
 
 	// 取得したX, Yの値をVECTOR型のX, Zに割り当てる
 	VECTOR dir = VGet(rightStick.x, 0.0f, rightStick.y);

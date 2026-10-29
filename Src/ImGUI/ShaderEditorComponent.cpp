@@ -1,17 +1,17 @@
 #include "ShaderEditorComponent.h"
 #include "../../Lib/ImGUI/imgui.h"
 
-ShaderEditorComponent::ShaderEditorComponent(const std::string& _name, 
-	NormalWaveShaderParams* _params)
+ShaderEditorComponent::ShaderEditorComponent(
+	const std::string& _name, NormalWaveShaderParams* _parameters)
 	: name_(_name)
-	, params_(_params)
+	, parameters_(_parameters)
 {
 }
 
 void ShaderEditorComponent::DrawUI(void)
 {
 	// パラメータが存在しない場合は安全のために処理を抜ける
-	if (params_ == nullptr)
+	if (parameters_ == nullptr)
 	{
 		return;
 	}
@@ -22,67 +22,66 @@ void ShaderEditorComponent::DrawUI(void)
 	// ライティング設定
 	if (ImGui::CollapsingHeader("Lighting", ImGuiTreeNodeFlags_DefaultOpen))
 	{
-		const float SLIDER_MIN_DIRECTION = -1.0f; // ライト方向スライダーの最小値
-		const float SLIDER_MAX_DIRECTION = 1.0f;  // ライト方向スライダーの最大値
-		const float SLIDER_MIN_RATE = 0.0f;       // 割合スライダーの最小値
-		const float SLIDER_MAX_RATE = 1.0f;       // 割合スライダーの最大値
+		constexpr float SLIDER_MIN_DIRECTION = -1.0f; // ライト方向スライダーの最小値
+		constexpr float SLIDER_MAX_DIRECTION = 1.0f;  // ライト方向スライダーの最大値
+		constexpr float SLIDER_MIN_RATE = 0.0f;       // 割合スライダーの最小値
+		constexpr float SLIDER_MAX_RATE = 1.0f;       // 割合スライダーの最大値
 
-		float lightDirection[3] = {               // ライトの方向ベクトル
-			params_->lightVectorX,
-			params_->lightVectorY,
-			params_->lightVectorZ
+		constexpr int VECTOR_ELEMENT_COUNT = 3; // ベクトルの要素数
+		constexpr int INDEX_X = 0;              // X成分のインデックス
+		constexpr int INDEX_Y = 1;              // Y成分のインデックス
+		constexpr int INDEX_Z = 2;              // Z成分のインデックス
+
+		float lightDirection[VECTOR_ELEMENT_COUNT] = { // ライトの方向ベクトル
+			parameters_->lightVectorX,
+			parameters_->lightVectorY,
+			parameters_->lightVectorZ
 		};
 
-		if (ImGui::SliderFloat3("Light Direction", lightDirection, SLIDER_MIN_DIRECTION, 
-			SLIDER_MAX_DIRECTION))
+		if (ImGui::SliderFloat3(
+			"Light Direction", lightDirection, SLIDER_MIN_DIRECTION, SLIDER_MAX_DIRECTION))
 		{
 			// 変更があれば構造体に直接セットする
-			params_->lightVectorX = lightDirection[0];
-			params_->lightVectorY = lightDirection[1];
-			params_->lightVectorZ = lightDirection[2];
+			parameters_->lightVectorX = lightDirection[INDEX_X];
+			parameters_->lightVectorY = lightDirection[INDEX_Y];
+			parameters_->lightVectorZ = lightDirection[INDEX_Z];
 		}
 
-		// 環境光
-		if (ImGui::SliderFloat("Ambient", &params_->ambientRate, SLIDER_MIN_RATE, SLIDER_MAX_RATE))
-		{
-			// 変更はそのまま反映される
-		}
+		// 環境光（ポインタ渡しにより直接値が更新される）
+		ImGui::SliderFloat(
+			"Ambient", &parameters_->ambientRate, SLIDER_MIN_RATE, SLIDER_MAX_RATE);
 	}
 
 	// 波エフェクト設定
 	if (ImGui::CollapsingHeader("Wave Effect", ImGuiTreeNodeFlags_DefaultOpen))
 	{
-		const float SLIDER_MIN_WAVE = 0.0f;  // 波パラメータスライダーの最小値
-		const float SLIDER_MAX_SPEED = 5.0f; // 波速度スライダーの最大値
-		const float SLIDER_MAX_FORCE = 0.1f; // 波強度スライダーの最大値
+		constexpr float SLIDER_MIN_WAVE = 0.0f;  // 波パラメータスライダーの最小値
+		constexpr float SLIDER_MAX_SPEED = 5.0f; // 波速度スライダーの最大値
+		constexpr float SLIDER_MAX_FORCE = 0.1f; // 波強度スライダーの最大値
 
 		// 波の速さ
-		if (ImGui::SliderFloat("Wave Speed", &params_->waveSpeedValue, SLIDER_MIN_WAVE, 
-			SLIDER_MAX_SPEED))
-		{
-		}
+		ImGui::SliderFloat(
+			"Wave Speed", &parameters_->waveSpeedValue, SLIDER_MIN_WAVE, SLIDER_MAX_SPEED);
 
 		// 波の強さ
-		if (ImGui::SliderFloat("Wave Force", &params_->waveForceValue, SLIDER_MIN_WAVE,
-			SLIDER_MAX_FORCE))
-		{
-		}
+		ImGui::SliderFloat(
+			"Wave Force", &parameters_->waveForceValue, SLIDER_MIN_WAVE, SLIDER_MAX_FORCE);
 
-		ImGui::Text("Current Time: %.3f", params_->timeValue);
+		ImGui::Text("Current Time: %.3f", parameters_->timeValue);
 	}
 
 	// フラグ設定
 	if (ImGui::CollapsingHeader("Flags"))
 	{
-		const float THRESHOLD_FLAG = 0.5f; // フラグ判定のしきい値
-		const float FLAG_ON = 1.0f;        // フラグONの値
-		const float FLAG_OFF = 0.0f;       // フラグOFFの値
+		constexpr float THRESHOLD_FLAG = 0.5f; // フラグ判定のしきい値
+		constexpr float FLAG_ON = 1.0f;        // フラグONの値
+		constexpr float FLAG_OFF = 0.0f;       // フラグOFFの値
 
 		// ノーマルマップのON/OFF
-		bool isUseNormalMap = (params_->useNormalMapFlag > THRESHOLD_FLAG);
+		bool isUseNormalMap = (parameters_->useNormalMapFlag > THRESHOLD_FLAG);
 		if (ImGui::Checkbox("Use NormalMap", &isUseNormalMap))
 		{
-			params_->useNormalMapFlag = isUseNormalMap ? FLAG_ON : FLAG_OFF;
+			parameters_->useNormalMapFlag = isUseNormalMap ? FLAG_ON : FLAG_OFF;
 		}
 	}
 

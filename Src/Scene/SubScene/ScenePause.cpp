@@ -137,10 +137,10 @@ void ScenePause::Update(void)
 	}
 
 	// コントローラーやキーボードのUI操作入力があったらコントローラーモードへ
-	if (keyConfInputManager.isPressed("UP") || keyConfInputManager.isPressed("DOWN") ||
-		keyConfInputManager.isPressed("LEFT") || keyConfInputManager.isPressed("RIGHT") ||
-		keyConfInputManager.isTrigerDown("OK") || keyConfInputManager.isTrigerDown("CANCEL") ||
-		keyConfInputManager.isTrigerDown("PAUSE"))
+	if (keyConfInputManager.IsPressed("UP") || keyConfInputManager.IsPressed("DOWN") ||
+		keyConfInputManager.IsPressed("LEFT") || keyConfInputManager.IsPressed("RIGHT") ||
+		keyConfInputManager.IsTriggerDown("OK") || keyConfInputManager.IsTriggerDown("CANCEL") ||
+		keyConfInputManager.IsTriggerDown("PAUSE"))
 	{
 		isMouseMode_ = false;
 		SetMouseDispFlag(false);
@@ -263,14 +263,14 @@ void ScenePause::ProcessNormal(void)
 	// キーボード・パッド・スティック操作
 	if (inputIntervalCounter_ <= 0)
 	{
-		if (inputManager.isPressed("UP"))
+		if (inputManager.IsPressed("UP"))
 		{
 			selectedIndex_ = (selectedIndex_ + static_cast<int>(MENU_ITEM::COUNT) - 1) %
 				static_cast<int>(MENU_ITEM::COUNT);
 
 			inputIntervalCounter_ = STICK_INTERVAL;
 		}
-		else if (inputManager.isPressed("DOWN"))
+		else if (inputManager.IsPressed("DOWN"))
 		{
 			selectedIndex_ = (selectedIndex_ + 1) % static_cast<int>(MENU_ITEM::COUNT);
 
@@ -279,12 +279,12 @@ void ScenePause::ProcessNormal(void)
 	}
 
 	// 上下の入力が全くない場合はインターバルをリセットする
-	if (inputManager.isPressed("UP") == false && inputManager.isPressed("DOWN") == false)
+	if (inputManager.IsPressed("UP") == false && inputManager.IsPressed("DOWN") == false)
 	{
 		inputIntervalCounter_ = 0;
 	}
 
-	if (inputManager.isTrigerDown("PAUSE") || inputManager.isTrigerDown("CANCEL"))
+	if (inputManager.IsTriggerDown("PAUSE") || inputManager.IsTriggerDown("CANCEL"))
 	{
 		currentPhase_ = PHASE::DISAPPEAR;
 		return;
@@ -299,7 +299,7 @@ void ScenePause::ProcessNormal(void)
 		}
 	}
 
-	if (inputManager.isTrigerDown("OK") || isMouseClicked)
+	if (inputManager.IsTriggerDown("OK") || isMouseClicked)
 	{
 		ProcessMenuState();
 	}
@@ -376,7 +376,7 @@ void ScenePause::ProcessYesNo(void)
 	// キーボード・パッド・スティック操作
 	if (inputIntervalCounter_ <= 0)
 	{
-		if (inputManager.isPressed("LEFT") || inputManager.isPressed("RIGHT"))
+		if (inputManager.IsPressed("LEFT") || inputManager.IsPressed("RIGHT"))
 		{
 			isYes_ = !isYes_;
 
@@ -385,12 +385,12 @@ void ScenePause::ProcessYesNo(void)
 	}
 
 	// 左右の入力が全くない場合はインターバルをリセットする
-	if (inputManager.isPressed("LEFT") == false && inputManager.isPressed("RIGHT") == false)
+	if (inputManager.IsPressed("LEFT") == false && inputManager.IsPressed("RIGHT") == false)
 	{
 		inputIntervalCounter_ = 0;
 	}
 
-	if (inputManager.isTrigerDown("CANCEL"))
+	if (inputManager.IsTriggerDown("CANCEL"))
 	{
 		currentPhase_ = PHASE::NORMAL;
 		return;
@@ -405,7 +405,7 @@ void ScenePause::ProcessYesNo(void)
 		}
 	}
 
-	if (inputManager.isTrigerDown("OK") || isMouseClicked)
+	if (inputManager.IsTriggerDown("OK") || isMouseClicked)
 	{
 		if (isYes_)
 		{

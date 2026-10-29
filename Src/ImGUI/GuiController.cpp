@@ -45,3 +45,8 @@ void GuiController::DrawUI(void)
 		activeGui_->DrawUI();
 	}
 }
+
+GuiController::GuiController(void)
+	: activeGui_(nullptr)
+{
+}

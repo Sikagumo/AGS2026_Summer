@@ -5,6 +5,21 @@
 #include "../../Utility/UtilityMath.h"
 #include "../../Application.h"
 
+namespace
+{
+	// 判定および計算用の定数
+	constexpr float MOUSE_VELOCITY_THRESHOLD = 1.0f; // マウス移動量の無視しきい値
+	constexpr int TRIGGER_THRESHOLD = 128;           // XInputトリガーのしきい値
+	constexpr int STICK_THRESHOLD = 16000;           // XInputスティックのしきい値
+
+	// ファイルおよびシグネチャ関連定数
+	constexpr size_t SIGNATURE_LENGTH = 4;
+	const char* const FILE_PATH_KEY_CONFIG = "DatData/keyConfig.dat";
+	const char* const FILE_PATH_SENSITIVITY = "DatData/sensitivity.dat";
+	const char* const SIGNATURE_KEY_CONFIG = "kcnf";
+	const char* const SIGNATURE_SENSITIVITY = "sens";
+}
+
 KeyConfInputManager* KeyConfInputManager::instance_ = nullptr;
 
 void KeyConfInputManager::CreateInstance(void)
@@ -26,8 +41,11 @@ KeyConfInputManager& KeyConfInputManager::GetInstance(void)
 
 void KeyConfInputManager::DestroyInstance(void)
 {
-	delete instance_;
-	instance_ = nullptr;
+	if (instance_ != nullptr)
+	{
+		delete instance_;
+		instance_ = nullptr;
+	}
 }
 
 KeyConfInputManager::KeyConfInputManager(void)
@@ -36,12 +54,12 @@ KeyConfInputManager::KeyConfInputManager(void)
 	, currentInputState_()
 	, previousInputState_()
 	, stickInfo_{}
-	, rStickSensitivity_{}
+	, rightStickSensitivity_{}
 	, mouseSensitivity_{}
-	, mouseWheelVol_(0)
-	, usePadNo_(DX_INPUT_PAD1)
+	, mouseWheelVolume_(0)
+	, usePadNumber_(DX_INPUT_PAD1)
 {
-	InitInputTable();
+	InitializeInputTable();
 	LoadInputTable();
 	LoadSensitivitySettings();
 
@@ -52,7 +70,7 @@ KeyConfInputManager::KeyConfInputManager(void)
 	}
 }
 
-void KeyConfInputManager::InitInputTable(void)
+void KeyConfInputManager::InitializeInputTable(void)
 {
 	inputTable_.clear();
 
@@ -194,15 +212,15 @@ void KeyConfInputManager::Update(void)
 	GetHitKeyStateAll(keyState.data());
 
 	int mouseState = GetMouseInput();
-	int padState = GetJoypadInputState(usePadNo_);
+	int padState = GetJoypadInputState(usePadNumber_);
 
 	GetMousePoint(&mousePosition_.x, &mousePosition_.y);
 
-	mouseWheelVol_ = GetMouseWheelRotVol();
+	mouseWheelVolume_ = GetMouseWheelRotVol();
 
 	// XInputの状態
 	XINPUT_STATE xInput{};
-	if (GetJoypadXInputState(usePadNo_, &xInput) == 0)
+	if (GetJoypadXInputState(usePadNumber_, &xInput) == 0)
 	{
 		stickInfo_.leftStickX = xInput.ThumbLX;
 		stickInfo_.leftStickY = xInput.ThumbLY;
@@ -220,17 +238,16 @@ void KeyConfInputManager::Update(void)
 	for (const auto& pair : inputTable_)
 	{
 		const auto& eventName = pair.first;
-		bool hit = false;
+		bool isHit = false;
 
 		if (eventName == "APPLY_DEBUG" || eventName == "UNAPPLY_DEBUG")
 		{
-			hit = true;
-
+			isHit = true;
 			for (const auto& inputInfo : pair.second)
 			{
-				if (CheckKeyboardInput(inputInfo, keyState) == false)
+				if (!CheckKeyboardInput(inputInfo, keyState))
 				{
-					hit = false;
+					isHit = false;
 					break;
 				}
 			}
@@ -242,83 +259,72 @@ void KeyConfInputManager::Update(void)
 				switch (inputInfo.type)
 				{
 				case INPUT_TYPE::KEY_BOARD:
-				{
 					if (CheckKeyboardInput(inputInfo, keyState))
 					{
-						hit = true;
+						isHit = true;
 					}
-				}
-				break;
+					break;
 
 				case INPUT_TYPE::MOUSE:
-				{
 					if ((mouseState & inputInfo.id) != 0)
 					{
-						hit = true;
+						isHit = true;
 					}
-				}
-				break;
+					break;
 
 				case INPUT_TYPE::JOYPAD:
-				{
 					if ((padState & inputInfo.id) != 0)
 					{
-						hit = true;
+						isHit = true;
 					}
-				}
-				break;
+					break;
 
 				case INPUT_TYPE::XINPUT_ANALOG:
-				{
 					if (CheckXInputAnalog(inputInfo, xInput))
 					{
-						hit = true;
+						isHit = true;
 					}
-				}
-				break;
+					break;
+
+				default:
+					break;
 				}
 			}
 		}
-		currentInputState_[eventName] = hit;
+		currentInputState_[eventName] = isHit;
 	}
 }
 
-bool KeyConfInputManager::isPressed(const std::string& _name) const
+bool KeyConfInputManager::IsPressed(const std::string& _name) const
 {
 	auto input = currentInputState_.find(_name);
-
 	return (input != currentInputState_.end()) && input->second;
 }
 
-bool KeyConfInputManager::isTrigerUp(const std::string& _name) const
+bool KeyConfInputManager::IsTriggerUp(const std::string& _name) const
 {
-	auto curInput = currentInputState_.find(_name);
-	auto preInput = previousInputState_.find(_name);
+	auto currentInput = currentInputState_.find(_name);
+	auto previousInput = previousInputState_.find(_name);
 
-	if (curInput == currentInputState_.end())
+	if (currentInput == currentInputState_.end())
 	{
 		return false;
 	}
 
-	return !(curInput->second) && preInput->second;
+	return !(currentInput->second) && previousInput->second;
 }
 
-bool KeyConfInputManager::isTrigerDown(const std::string& _name) const
+bool KeyConfInputManager::IsTriggerDown(const std::string& _name) const
 {
-	auto curInput = currentInputState_.find(_name);
-	auto preInput = previousInputState_.find(_name);
+	auto currentInput = currentInputState_.find(_name);
+	auto previousInput = previousInputState_.find(_name);
 
-	if (curInput == currentInputState_.cend())
+	if (currentInput == currentInputState_.cend())
 	{
 		return false;
 	}
 
-	return curInput->second && !(preInput->second);
-}
-
-Vector2 KeyConfInputManager::GetMousePosition(void) const
-{
-	return mousePosition_;
+	return currentInput->second && !(previousInput->second);
 }
 
 Vector2F KeyConfInputManager::GetMouseVelocityAndFixCenter(void)
@@ -333,18 +339,17 @@ Vector2F KeyConfInputManager::GetMouseVelocityAndFixCenter(void)
 	float diffX = static_cast<float>(currentX - centerX); // Xの移動量
 	float diffY = static_cast<float>(currentY - centerY); // Yの移動量
 
-	if (abs(diffX) <= 1.0f)
+	if (std::abs(diffX) <= MOUSE_VELOCITY_THRESHOLD)
 	{
 		diffX = 0.0f;
 	}
 
-	if (abs(diffY) <= 1.0f)
+	if (std::abs(diffY) <= MOUSE_VELOCITY_THRESHOLD)
 	{
 		diffY = 0.0f;
 	}
 
 	SetMousePoint(centerX, centerY);
-
 	SetMouseDispFlag(false);
 
 	return Vector2F(diffX, diffY);
@@ -353,11 +358,6 @@ Vector2F KeyConfInputManager::GetMouseVelocityAndFixCenter(void)
 void KeyConfInputManager::SetMouseSensitivity(const MouseSensitivity& _sensitivity)
 {
 	mouseSensitivity_ = _sensitivity;
-}
-
-const KeyConfInputManager::MouseSensitivity& KeyConfInputManager::GetMouseSensitivity(void) const
-{
-	return mouseSensitivity_;
 }
 
 void KeyConfInputManager::CalculateNormalizedStick(int _rawX, int _rawY, float _deadZone,
@@ -385,20 +385,20 @@ void KeyConfInputManager::ApplyRightStickSensitivity(int _rightStickX, int _righ
 {
 	float normalX = 0.0f;
 	float normalY = 0.0f;
-	CalculateNormalizedStick(_rightStickX, _rightStickY, rStickSensitivity_.deadZone,
+	CalculateNormalizedStick(_rightStickX, _rightStickY, rightStickSensitivity_.deadZone,
 		normalX, normalY);
 
-	normalX *= rStickSensitivity_.x;
-	normalY *= rStickSensitivity_.y;
+	normalX *= rightStickSensitivity_.x;
+	normalY *= rightStickSensitivity_.y;
 
 	normalX = std::fmax(-1.0f, std::fmin(1.0f, normalX));
 	normalY = std::fmax(-1.0f, std::fmin(1.0f, normalY));
 
-	if (rStickSensitivity_.invertX)
+	if (rightStickSensitivity_.invertX)
 	{
 		normalX = -normalX;
 	}
-	if (rStickSensitivity_.invertY)
+	if (rightStickSensitivity_.invertY)
 	{
 		normalY = -normalY;
 	}
@@ -410,148 +410,60 @@ void KeyConfInputManager::ApplyRightStickSensitivity(int _rightStickX, int _righ
 bool KeyConfInputManager::CheckKeyboardInput(const InputInfo& _inputInfo,
 	const std::array<char, 256>& _keyState) const
 {
-	if (_keyState[_inputInfo.id] != 0)
-	{
-		return true;
-	}
-	return false;
+	return (_keyState[_inputInfo.id] != 0);
 }
 
 bool KeyConfInputManager::CheckXInputAnalog(const InputInfo& _inputInfo,
 	const XINPUT_STATE& _xInputState) const
 {
-	const int TRIGGER_THRESHOLD = 128; // トリガーのしきい値
-	const int STICK_THRESHOLD = 16000; // スティックのしきい値
-
 	switch (static_cast<XINPUT_ANALOG_ID>(_inputInfo.id))
 	{
 	case XINPUT_ANALOG_ID::LEFT_TRIGGER:
-	{
-		if (_xInputState.LeftTrigger > TRIGGER_THRESHOLD)
-		{
-			return true;
-		}
-	}
-	break;
+		return (_xInputState.LeftTrigger > TRIGGER_THRESHOLD);
 
 	case XINPUT_ANALOG_ID::RIGHT_TRIGGER:
-	{
-		if (_xInputState.RightTrigger > TRIGGER_THRESHOLD)
-		{
-			return true;
-		}
-	}
-	break;
+		return (_xInputState.RightTrigger > TRIGGER_THRESHOLD);
 
 	case XINPUT_ANALOG_ID::LEFT_STICK_UP:
-	{
-		if (_xInputState.ThumbLY > STICK_THRESHOLD)
-		{
-			return true;
-		}
-	}
-	break;
+		return (_xInputState.ThumbLY > STICK_THRESHOLD);
 
 	case XINPUT_ANALOG_ID::LEFT_STICK_DOWN:
-	{
-		if (_xInputState.ThumbLY < -STICK_THRESHOLD)
-		{
-			return true;
-		}
-	}
-	break;
+		return (_xInputState.ThumbLY < -STICK_THRESHOLD);
 
 	case XINPUT_ANALOG_ID::LEFT_STICK_LEFT:
-	{
-		if (_xInputState.ThumbLX < -STICK_THRESHOLD)
-		{
-			return true;
-		}
-	}
-	break;
+		return (_xInputState.ThumbLX < -STICK_THRESHOLD);
 
 	case XINPUT_ANALOG_ID::LEFT_STICK_RIGHT:
-	{
-		if (_xInputState.ThumbLX > STICK_THRESHOLD)
-		{
-			return true;
-		}
-	}
-	break;
+		return (_xInputState.ThumbLX > STICK_THRESHOLD);
 
 	case XINPUT_ANALOG_ID::RIGHT_STICK_UP:
-	{
-		if (_xInputState.ThumbRY > STICK_THRESHOLD)
-		{
-			return true;
-		}
-	}
-	break;
+		return (_xInputState.ThumbRY > STICK_THRESHOLD);
 
 	case XINPUT_ANALOG_ID::RIGHT_STICK_DOWN:
-	{
-		if (_xInputState.ThumbRY < -STICK_THRESHOLD)
-		{
-			return true;
-		}
-	}
-	break;
+		return (_xInputState.ThumbRY < -STICK_THRESHOLD);
 
 	case XINPUT_ANALOG_ID::RIGHT_STICK_LEFT:
-	{
-		if (_xInputState.ThumbRX < -STICK_THRESHOLD)
-		{
-			return true;
-		}
-	}
-	break;
+		return (_xInputState.ThumbRX < -STICK_THRESHOLD);
 
 	case XINPUT_ANALOG_ID::RIGHT_STICK_RIGHT:
-	{
-		if (_xInputState.ThumbRX > STICK_THRESHOLD)
-		{
-			return true;
-		}
-	}
-	break;
+		return (_xInputState.ThumbRX > STICK_THRESHOLD);
 
 	case XINPUT_ANALOG_ID::LEFT_SHOULDER:
-	{
-		if (_xInputState.Buttons[XINPUT_BUTTON_LEFT_SHOULDER] != 0)
-		{
-			return true;
-		}
-	}
-	break;
+		return (_xInputState.Buttons[XINPUT_BUTTON_LEFT_SHOULDER] != 0);
 
 	case XINPUT_ANALOG_ID::RIGHT_SHOULDER:
-	{
-		if (_xInputState.Buttons[XINPUT_BUTTON_RIGHT_SHOULDER] != 0)
-		{
-			return true;
-		}
-	}
-	break;
+		return (_xInputState.Buttons[XINPUT_BUTTON_RIGHT_SHOULDER] != 0);
 
 	case XINPUT_ANALOG_ID::LEFT_STICK_PUSH:
-	{
-		if (_xInputState.Buttons[XINPUT_BUTTON_LEFT_THUMB] != 0)
-		{
-			return true;
-		}
-	}
-	break;
+		return (_xInputState.Buttons[XINPUT_BUTTON_LEFT_THUMB] != 0);
 
 	case XINPUT_ANALOG_ID::RIGHT_STICK_PUSH:
-	{
-		if (_xInputState.Buttons[XINPUT_BUTTON_RIGHT_THUMB] != 0)
-		{
-			return true;
-		}
-	}
-	break;
+		return (_xInputState.Buttons[XINPUT_BUTTON_RIGHT_THUMB] != 0);
 
+	default:
+		break;
 	}
+
 	return false;
 }
 
@@ -565,20 +477,20 @@ VECTOR KeyConfInputManager::GetLeftStickDirection(void) const
 
 	if (normalX == 0.0f && normalY == 0.0f)
 	{
-		return VGet(0.0f, 0.0f, 0.0f);
+		return UtilityMath::VECTOR_ZERO;
 	}
 
-	return VNorm(VGet(normalX, 0.0f, normalY));
+	return UtilityMath::VNormalize(VGet(normalX, 0.0f, normalY));
 }
 
-Vector2F KeyConfInputManager::GetRIghtStick(void) const
+Vector2F KeyConfInputManager::GetRightStick(void) const
 {
-	float x = 0.0f; // 処理後のX
-	float y = 0.0f; // 処理後のY
+	float processedX = 0.0f;
+	float processedY = 0.0f;
 
-	ApplyRightStickSensitivity(stickInfo_.rightStickX, stickInfo_.rightStickY, x, y);
+	ApplyRightStickSensitivity(stickInfo_.rightStickX, stickInfo_.rightStickY, processedX, processedY);
 
-	return Vector2F(x, y);
+	return Vector2F(processedX, processedY);
 }
 
 Vector2F KeyConfInputManager::GetLeftStickRaw(void) const
@@ -601,10 +513,9 @@ Vector2F KeyConfInputManager::GetRightStickRaw(void) const
 	float normalX = static_cast<float>(stickInfo_.rightStickX) / XINPUT_VAL_MAX;
 	float normalY = static_cast<float>(stickInfo_.rightStickY) / XINPUT_VAL_MAX;
 
-	// スティックの傾きの長さ
 	float length = sqrtf(normalX * normalX + normalY * normalY);
 
-	if (length < rStickSensitivity_.deadZone)
+	if (length < rightStickSensitivity_.deadZone)
 	{
 		return UtilityMath::VECTOR2F_ZERO;
 	}
@@ -612,20 +523,15 @@ Vector2F KeyConfInputManager::GetRightStickRaw(void) const
 	return Vector2F(normalX, normalY);
 }
 
-void KeyConfInputManager::SetRStickSensitivity(const RStickSensitivity& _sensitivity)
+void KeyConfInputManager::SetRightStickSensitivity(const RightStickSensitivity& _sensitivity)
 {
-	rStickSensitivity_ = _sensitivity;
-}
-
-const KeyConfInputManager::RStickSensitivity& KeyConfInputManager::GetRStickSensitivity(void) const
-{
-	return rStickSensitivity_;
+	rightStickSensitivity_ = _sensitivity;
 }
 
 void KeyConfInputManager::SaveInputTable(void)
 {
 	FILE* file = nullptr;
-	fopen_s(&file, "DatData/keyConfig.dat", "wb");
+	fopen_s(&file, FILE_PATH_KEY_CONFIG, "wb");
 
 	if (!file)
 	{
@@ -634,7 +540,7 @@ void KeyConfInputManager::SaveInputTable(void)
 
 	// ヘッダー情報
 	KeyConfigHeader header{};
-	memcpy(header.signature, "kcnf", 4);
+	memcpy(header.signature, SIGNATURE_KEY_CONFIG, SIGNATURE_LENGTH);
 	header.version = 1.0f;
 	header.dataNum = static_cast<uint32_t>(inputTable_.size());
 	fwrite(&header, sizeof(header), 1, file);
@@ -658,7 +564,7 @@ void KeyConfInputManager::SaveInputTable(void)
 void KeyConfInputManager::LoadInputTable(void)
 {
 	// ファイル読み込み
-	auto handle = FileRead_open("DatData/keyConfig.dat");
+	auto handle = FileRead_open(FILE_PATH_KEY_CONFIG);
 
 	if (handle == 0)
 	{
@@ -669,7 +575,7 @@ void KeyConfInputManager::LoadInputTable(void)
 	KeyConfigHeader header{};
 	FileRead_read(&header, sizeof(header), handle);
 
-	if (memcmp(header.signature, "kcnf", 4) != 0)
+	if (memcmp(header.signature, SIGNATURE_KEY_CONFIG, SIGNATURE_LENGTH) != 0)
 	{
 		FileRead_close(handle);
 		return;
@@ -679,7 +585,6 @@ void KeyConfInputManager::LoadInputTable(void)
 	{
 		// 名前の文字数
 		uint8_t nameSize = 0;
-
 		FileRead_read(&nameSize, sizeof(nameSize), handle);
 
 		// イベント名
@@ -700,7 +605,7 @@ void KeyConfInputManager::LoadInputTable(void)
 void KeyConfInputManager::SaveSensitivitySettings(void) const
 {
 	FILE* file = nullptr;
-	fopen_s(&file, "DatData/sensitivity.dat", "wb");
+	fopen_s(&file, FILE_PATH_SENSITIVITY, "wb");
 
 	if (!file)
 	{
@@ -709,11 +614,10 @@ void KeyConfInputManager::SaveSensitivitySettings(void) const
 
 	// 感度設定用のヘッダー
 	SensitivityHeader header{};
-
-	memcpy(header.signature, "sens", 4);
+	memcpy(header.signature, SIGNATURE_SENSITIVITY, SIGNATURE_LENGTH);
 	fwrite(&header, sizeof(header), 1, file);
 	fwrite(&mouseSensitivity_, sizeof(mouseSensitivity_), 1, file);
-	fwrite(&rStickSensitivity_, sizeof(rStickSensitivity_), 1, file);
+	fwrite(&rightStickSensitivity_, sizeof(rightStickSensitivity_), 1, file);
 
 	fclose(file);
 }
@@ -721,7 +625,7 @@ void KeyConfInputManager::SaveSensitivitySettings(void) const
 void KeyConfInputManager::LoadSensitivitySettings(void)
 {
 	// ファイル読み込み
-	auto handle = FileRead_open("DatData/sensitivity.dat");
+	auto handle = FileRead_open(FILE_PATH_SENSITIVITY);
 
 	if (handle == 0)
 	{
@@ -729,27 +633,21 @@ void KeyConfInputManager::LoadSensitivitySettings(void)
 	}
 
 	SensitivityHeader header{};
-
 	FileRead_read(&header, sizeof(header), handle);
 
-	if (memcmp(header.signature, "sens", 4) != 0)
+	if (memcmp(header.signature, SIGNATURE_SENSITIVITY, SIGNATURE_LENGTH) != 0)
 	{
 		FileRead_close(handle);
 		return;
 	}
 
 	FileRead_read(&mouseSensitivity_, sizeof(mouseSensitivity_), handle);
-	FileRead_read(&rStickSensitivity_, sizeof(rStickSensitivity_), handle);
+	FileRead_read(&rightStickSensitivity_, sizeof(rightStickSensitivity_), handle);
 
 	FileRead_close(handle);
 }
 
-void KeyConfInputManager::SetUsePadNo(int _padNo)
+void KeyConfInputManager::SetUsePadNumber(int _padNumber)
 {
-	usePadNo_ = _padNo;
-}
-
-int KeyConfInputManager::GetMouseWheel(void) const
-{
-	return mouseWheelVol_;
+	usePadNumber_ = _padNumber;
 }

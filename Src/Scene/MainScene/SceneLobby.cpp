@@ -386,13 +386,13 @@ void SceneLobby::Update(void)
 	}
 
 	// コントローラーやキーボードのUI操作入力があったらコントローラーモードへ
-	if (KeyConfInputManager::GetInstance().isPressed("UP") || 
-		KeyConfInputManager::GetInstance().isPressed("DOWN") ||
-		KeyConfInputManager::GetInstance().isPressed("LEFT") || 
-		KeyConfInputManager::GetInstance().isPressed("RIGHT") ||
-		KeyConfInputManager::GetInstance().isTrigerDown("OK") || 
-		KeyConfInputManager::GetInstance().isTrigerDown("CANCEL") ||
-		KeyConfInputManager::GetInstance().isTrigerDown("PAUSE"))
+	if (KeyConfInputManager::GetInstance().IsPressed("UP") || 
+		KeyConfInputManager::GetInstance().IsPressed("DOWN") ||
+		KeyConfInputManager::GetInstance().IsPressed("LEFT") || 
+		KeyConfInputManager::GetInstance().IsPressed("RIGHT") ||
+		KeyConfInputManager::GetInstance().IsTriggerDown("OK") || 
+		KeyConfInputManager::GetInstance().IsTriggerDown("CANCEL") ||
+		KeyConfInputManager::GetInstance().IsTriggerDown("PAUSE"))
 	{
 		isMouseMode_ = false;
 		SetMouseDispFlag(false);
@@ -579,7 +579,7 @@ void SceneLobby::UpdateSingle(void)
 	constexpr float THRESHOLD = 0.5f;
 	constexpr int STICK_INTERVAL = 15;
 
-	if (KeyConfInputManager::GetInstance().isTrigerDown("PAUSE"))
+	if (KeyConfInputManager::GetInstance().IsTriggerDown("PAUSE"))
 	{
 		SceneManager::GetInstance().PushScene(std::make_shared<ScenePause>());
 	}
@@ -590,8 +590,8 @@ void SceneLobby::UpdateSingle(void)
 		inputIntervalCounter_--;
 	}
 
-	if (!keyConfInputManager.isPressed("UP") && !keyConfInputManager.isPressed("DOWN") &&
-		!keyConfInputManager.isPressed("LEFT") && !keyConfInputManager.isPressed("RIGHT"))
+	if (!keyConfInputManager.IsPressed("UP") && !keyConfInputManager.IsPressed("DOWN") &&
+		!keyConfInputManager.IsPressed("LEFT") && !keyConfInputManager.IsPressed("RIGHT"))
 	{
 		inputIntervalCounter_ = 0;
 	}
@@ -656,7 +656,7 @@ void SceneLobby::UpdateSingle(void)
 		if (inputIntervalCounter_ == 0)
 		{
 			// 左右の入力武器と見た目を切り替える
-			if (keyConfInputManager.isPressed("RIGHT"))
+			if (keyConfInputManager.IsPressed("RIGHT"))
 			{
 				if (mainSelectIndex_ == 0)
 				{
@@ -669,7 +669,7 @@ void SceneLobby::UpdateSingle(void)
 					inputIntervalCounter_ = STICK_INTERVAL;
 				}
 			}
-			else if (keyConfInputManager.isPressed("LEFT"))
+			else if (keyConfInputManager.IsPressed("LEFT"))
 			{
 				if (mainSelectIndex_ == 1)
 				{
@@ -683,7 +683,7 @@ void SceneLobby::UpdateSingle(void)
 				}
 			}
 			// 下の入力準備完了へ移動する
-			else if (keyConfInputManager.isPressed("DOWN"))
+			else if (keyConfInputManager.IsPressed("DOWN"))
 			{
 				if (mainSelectIndex_ == 0 || mainSelectIndex_ == 1)
 				{
@@ -692,7 +692,7 @@ void SceneLobby::UpdateSingle(void)
 				}
 			}
 			// 上の入力準備完了 から 武器へ戻る
-			else if (keyConfInputManager.isPressed("UP"))
+			else if (keyConfInputManager.IsPressed("UP"))
 			{
 				if (mainSelectIndex_ == 2)
 				{
@@ -703,7 +703,7 @@ void SceneLobby::UpdateSingle(void)
 		}
 
 		// 決定入力時の処理
-		if (keyConfInputManager.isTrigerDown("OK"))
+		if (keyConfInputManager.IsTriggerDown("OK"))
 		{
 			if (mainSelectIndex_ == 0)
 			{
@@ -749,12 +749,12 @@ void SceneLobby::UpdateSingle(void)
 		// テーブルを使用した上下入力で武器選択移動
 		if (inputIntervalCounter_ == 0)
 		{
-			if (keyConfInputManager.isPressed("DOWN"))
+			if (keyConfInputManager.IsPressed("DOWN"))
 			{
 				selectedJobIndex_ = (selectedJobIndex_ + 1) % JOB_MAXIMUM;
 				inputIntervalCounter_ = STICK_INTERVAL;
 			}
-			else if (keyConfInputManager.isPressed("UP"))
+			else if (keyConfInputManager.IsPressed("UP"))
 			{
 				selectedJobIndex_ = (selectedJobIndex_ - 1 + JOB_MAXIMUM) % JOB_MAXIMUM;
 				inputIntervalCounter_ = STICK_INTERVAL;
@@ -780,7 +780,7 @@ void SceneLobby::UpdateSingle(void)
 					{
 						selectedJobIndex_ = jobIndex;
 
-						if (keyConfInputManager.isTrigerDown("OK") || (GetMouseInput() & MOUSE_INPUT_LEFT) != 0) // クリック対応
+						if (keyConfInputManager.IsTriggerDown("OK") || (GetMouseInput() & MOUSE_INPUT_LEFT) != 0) // クリック対応
 						{
 							selectState_ = SELECT_STATE::MAIN;
 							SoundManager::GetInstance().Play(SoundManager::SOUND::SE_LOBBY_SELECT);
@@ -793,7 +793,7 @@ void SceneLobby::UpdateSingle(void)
 		}
 
 		// パッド/キーボードでの「OK」決定
-		if (keyConfInputManager.isTrigerDown("OK"))
+		if (keyConfInputManager.IsTriggerDown("OK"))
 		{
 			selectState_ = SELECT_STATE::MAIN;
 			SoundManager::GetInstance().Play(SoundManager::SOUND::SE_LOBBY_SELECT);
@@ -802,7 +802,7 @@ void SceneLobby::UpdateSingle(void)
 		}
 
 		// キャンセル入力でウィンドウを閉じる
-		if (keyConfInputManager.isTrigerDown("CANCEL"))
+		if (keyConfInputManager.IsTriggerDown("CANCEL"))
 		{
 			selectState_ = SELECT_STATE::MAIN;
 			return;
@@ -817,12 +817,12 @@ void SceneLobby::UpdateSingle(void)
 		// テーブルを使用した上下入力でスキン選択移動
 		if (inputIntervalCounter_ == 0)
 		{
-			if (keyConfInputManager.isPressed("DOWN"))
+			if (keyConfInputManager.IsPressed("DOWN"))
 			{
 				selectedSkinIndex_ = (selectedSkinIndex_ + 1) % SKIN_MAXIMUM;
 				inputIntervalCounter_ = STICK_INTERVAL;
 			}
-			else if (keyConfInputManager.isPressed("UP"))
+			else if (keyConfInputManager.IsPressed("UP"))
 			{
 				selectedSkinIndex_ = (selectedSkinIndex_ - 1 + SKIN_MAXIMUM) % SKIN_MAXIMUM;
 				inputIntervalCounter_ = STICK_INTERVAL;
@@ -848,7 +848,7 @@ void SceneLobby::UpdateSingle(void)
 					{
 						selectedSkinIndex_ = skinIndex;
 
-						if (keyConfInputManager.isTrigerDown("OK") || (GetMouseInput() & MOUSE_INPUT_LEFT) != 0) // クリック対応
+						if (keyConfInputManager.IsTriggerDown("OK") || (GetMouseInput() & MOUSE_INPUT_LEFT) != 0) // クリック対応
 						{
 							selectState_ = SELECT_STATE::MAIN;
 							SoundManager::GetInstance().Play(SoundManager::SOUND::SE_LOBBY_SELECT);
@@ -861,7 +861,7 @@ void SceneLobby::UpdateSingle(void)
 		}
 
 		// パッド/キーボードでのOK決定
-		if (keyConfInputManager.isTrigerDown("OK"))
+		if (keyConfInputManager.IsTriggerDown("OK"))
 		{
 			selectState_ = SELECT_STATE::MAIN;
 			SoundManager::GetInstance().Play(SoundManager::SOUND::SE_LOBBY_SELECT);
@@ -870,7 +870,7 @@ void SceneLobby::UpdateSingle(void)
 		}
 
 		// キャンセル入力でウィンドウを閉じる
-		if (keyConfInputManager.isTrigerDown("CANCEL"))
+		if (keyConfInputManager.IsTriggerDown("CANCEL"))
 		{
 			selectState_ = SELECT_STATE::MAIN;
 			return;
@@ -986,8 +986,8 @@ void SceneLobby::UpdateSelectMode(void)
 	}
 
 	// 操作が何もない場合はインターバルをリセット
-	if (!keyConfInputManager.isPressed("UP") && !keyConfInputManager.isPressed("DOWN") &&
-		!keyConfInputManager.isPressed("LEFT") && !keyConfInputManager.isPressed("RIGHT"))
+	if (!keyConfInputManager.IsPressed("UP") && !keyConfInputManager.IsPressed("DOWN") &&
+		!keyConfInputManager.IsPressed("LEFT") && !keyConfInputManager.IsPressed("RIGHT"))
 	{
 		inputIntervalCounter_ = 0;
 	}
@@ -998,23 +998,23 @@ void SceneLobby::UpdateSelectMode(void)
 		if (inputIntervalCounter_ == 0)
 		{
 			// 左右入力で編集桁の移動
-			if (keyConfInputManager.isPressed("RIGHT"))
+			if (keyConfInputManager.IsPressed("RIGHT"))
 			{
 				selectOctet_ = (selectOctet_ + 1) % 4;
 				inputIntervalCounter_ = STICK_INTERVAL;
 			}
-			else if (keyConfInputManager.isPressed("LEFT"))
+			else if (keyConfInputManager.IsPressed("LEFT"))
 			{
 				selectOctet_ = (selectOctet_ - 1 + 4) % 4;
 				inputIntervalCounter_ = STICK_INTERVAL;
 			}
 			// 上下入力で数値の変更
-			else if (keyConfInputManager.isPressed("UP"))
+			else if (keyConfInputManager.IsPressed("UP"))
 			{
 				passcode_[selectOctet_] = (passcode_[selectOctet_] + 1) % 10;
 				inputIntervalCounter_ = STICK_INTERVAL;
 			}
-			else if (keyConfInputManager.isPressed("DOWN"))
+			else if (keyConfInputManager.IsPressed("DOWN"))
 			{
 				passcode_[selectOctet_] = (passcode_[selectOctet_] - 1 + 10) % 10;
 				inputIntervalCounter_ = STICK_INTERVAL;
@@ -1022,7 +1022,7 @@ void SceneLobby::UpdateSelectMode(void)
 		}
 
 		// OK または CANCEL で編集終了
-		if (keyConfInputManager.isTrigerDown("OK") || keyConfInputManager.isTrigerDown("CANCEL"))
+		if (keyConfInputManager.IsTriggerDown("OK") || keyConfInputManager.IsTriggerDown("CANCEL"))
 		{
 			isEditing_ = false;
 			SoundManager::GetInstance().Play(SoundManager::SOUND::SE_UI_SELECT);
@@ -1036,13 +1036,13 @@ void SceneLobby::UpdateSelectMode(void)
 	bool isInputted = false;
 	if (inputIntervalCounter_ == 0)
 	{
-		if (keyConfInputManager.isPressed("UP"))
+		if (keyConfInputManager.IsPressed("UP"))
 		{
 			buttonSelectIndex_ = (buttonSelectIndex_ - 1 + 3) % 3;
 			inputIntervalCounter_ = STICK_INTERVAL;
 			isInputted = true;
 		}
-		else if (keyConfInputManager.isPressed("DOWN"))
+		else if (keyConfInputManager.IsPressed("DOWN"))
 		{
 			buttonSelectIndex_ = (buttonSelectIndex_ + 1) % 3;
 			inputIntervalCounter_ = STICK_INTERVAL;
@@ -1072,7 +1072,7 @@ void SceneLobby::UpdateSelectMode(void)
 	}
 
 	// 決定入力時の処理
-	if (keyConfInputManager.isTrigerDown("OK"))
+	if (keyConfInputManager.IsTriggerDown("OK"))
 	{
 		if (buttonSelectIndex_ == static_cast<int>(MULTI_UI_TYPE::PASSCODE_BOX))
 		{
@@ -1121,7 +1121,7 @@ void SceneLobby::UpdateSelectMode(void)
 	}
 
 	// キャンセルボタンで前の画面に戻る
-	if (keyConfInputManager.isTrigerDown("CANCEL"))
+	if (keyConfInputManager.IsTriggerDown("CANCEL"))
 	{
 		multiState_ = LOBBY_STATE::SELECT_EQUIPMENT;
 		return;
@@ -1185,7 +1185,7 @@ void SceneLobby::UpdateInRoom(void)
 			inputIntervalCounter_--;
 		}
 
-		if (!keyConfInputManager.isPressed("LEFT") && !keyConfInputManager.isPressed("RIGHT"))
+		if (!keyConfInputManager.IsPressed("LEFT") && !keyConfInputManager.IsPressed("RIGHT"))
 		{
 			inputIntervalCounter_ = 0;
 		}
@@ -1193,7 +1193,7 @@ void SceneLobby::UpdateInRoom(void)
 		// 左右入力での選択切り替え
 		if (inputIntervalCounter_ == 0)
 		{
-			if (keyConfInputManager.isPressed("RIGHT") || keyConfInputManager.isPressed("LEFT"))
+			if (keyConfInputManager.IsPressed("RIGHT") || keyConfInputManager.IsPressed("LEFT"))
 			{
 				leaveSelectIndex_ = (leaveSelectIndex_ + 1) % 2;
 				inputIntervalCounter_ = STICK_INTERVAL;
@@ -1201,7 +1201,7 @@ void SceneLobby::UpdateInRoom(void)
 		}
 
 		// 決定入力
-		if (keyConfInputManager.isTrigerDown("OK"))
+		if (keyConfInputManager.IsTriggerDown("OK"))
 		{
 			SoundManager::GetInstance().Play(SoundManager::SOUND::SE_UI_SELECT);
 
@@ -1223,7 +1223,7 @@ void SceneLobby::UpdateInRoom(void)
 		}
 
 		// キャンセル入力でウィンドウを閉じる
-		if (keyConfInputManager.isTrigerDown("CANCEL"))
+		if (keyConfInputManager.IsTriggerDown("CANCEL"))
 		{
 			isLeaveWindow_ = false;
 			return;
@@ -1246,7 +1246,7 @@ void SceneLobby::UpdateInRoom(void)
 	}
 
 	// キャンセルボタンで確認ウィンドウを開く
-	if (keyConfInputManager.isTrigerDown("CANCEL"))
+	if (keyConfInputManager.IsTriggerDown("CANCEL"))
 	{
 		isLeaveWindow_ = true;
 		leaveSelectIndex_ = 1;
@@ -1269,7 +1269,7 @@ void SceneLobby::UpdateInRoom(void)
 	// ホストかつ全員準備完了時の出撃、または通常の準備完了切替をOKキーで行う
 	if (isAllReady && NetManager::GetInstance().IsHost() && !users.empty())
 	{
-		if (keyConfInputManager.isTrigerDown("OK"))
+		if (keyConfInputManager.IsTriggerDown("OK"))
 		{
 			self.gameState = GAME_STATE::GAME_PLAYING;
 			NetManager::GetInstance().SetSelfInfo(self);
@@ -1282,7 +1282,7 @@ void SceneLobby::UpdateInRoom(void)
 	}
 	else
 	{
-		if (keyConfInputManager.isTrigerDown("OK"))
+		if (keyConfInputManager.IsTriggerDown("OK"))
 		{
 			myReadyState_ = !myReadyState_;
 			self.gameState = myReadyState_ ? GAME_STATE::GOTO_GAME : GAME_STATE::CONNECTING;

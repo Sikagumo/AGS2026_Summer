@@ -674,19 +674,19 @@ void Player::ProcessMove(void)
 		// Š®‘S‚Éƒ[ƒ‚ÉƒŠƒZƒbƒg‚·‚é
 		direction = UtilityMath::VECTOR_ZERO;
 
-		if (keyConfInputManager.isPressed("UP"))
+		if (keyConfInputManager.IsPressed("UP"))
 		{
 			direction.z++;
 		}
-		if (keyConfInputManager.isPressed("DOWN"))
+		if (keyConfInputManager.IsPressed("DOWN"))
 		{
 			direction.z--;
 		}
-		if (keyConfInputManager.isPressed("LEFT"))
+		if (keyConfInputManager.IsPressed("LEFT"))
 		{
 			direction.x--;
 		}
-		if (keyConfInputManager.isPressed("RIGHT"))
+		if (keyConfInputManager.IsPressed("RIGHT"))
 		{
 			direction.x++;
 		}
@@ -879,7 +879,7 @@ void Player::ProcessJump(void)
 	if (!actionController_->IsActiveAction() &&
 		actionController_->GetActionState() == PActionController::PACTION_STATE::NONE)
 	{
-		bool isJumpTriggered = KeyConfInputManager::GetInstance().isTrigerDown("JUMP");
+		bool isJumpTriggered = KeyConfInputManager::GetInstance().IsTriggerDown("JUMP");
 		
 		// ƒWƒƒƒ“ƒv
 		if (isJumpTriggered && !isJump_)
@@ -925,7 +925,7 @@ void Player::ProcessDodge(void)
 			return;
 		}
 
-		bool isDodgeTriggered = KeyConfInputManager::GetInstance().isTrigerDown("DODGE");
+		bool isDodgeTriggered = KeyConfInputManager::GetInstance().IsTriggerDown("DODGE");
 
 		if (isDodgeTriggered)
 		{
@@ -1022,13 +1022,13 @@ void Player::ProcessAttack(void)
 		if (shotTerm_ <= 0.0f)
 		{
 			// ‰Ÿ‚µ‚Á‚Ï‚È‚µ‚Å‚Ì˜AŽË”»’è
-			if (keyConfInputManager.isPressed("ATTACK_NORMAL"))
+			if (keyConfInputManager.IsPressed("ATTACK_NORMAL"))
 			{
 				ProcShotNormal();
 				shotTerm_ = SHOT_RAPID_TERM;
 			}
 
-			if (keyConfInputManager.isPressed("ATTACK_SPECIAL"))
+			if (keyConfInputManager.IsPressed("ATTACK_SPECIAL"))
 			{
 				// ’e‚ª¶‘¶’†‚ÍŠgŽU’e‚ð—LŒø‚É‚µ‚È‚¢
 				if (clusterBullets_.at(0) != nullptr)
@@ -1052,12 +1052,12 @@ void Player::ProcessAttack(void)
 	else
 	{
 		// ‰Ÿ‚µ‚½uŠÔ‚Ì’P”­”»’è
-		if (keyConfInputManager.isTrigerDown("ATTACK_NORMAL"))
+		if (keyConfInputManager.IsTriggerDown("ATTACK_NORMAL"))
 		{
 			ProcShotNormal();
 		}
 
-		if (keyConfInputManager.isTrigerDown("ATTACK_SPECIAL"))
+		if (keyConfInputManager.IsTriggerDown("ATTACK_SPECIAL"))
 		{
 			ProcShotSpecial();
 		}

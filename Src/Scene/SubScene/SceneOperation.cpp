@@ -31,7 +31,7 @@ void SceneOperation::Initialize(void)
 
 void SceneOperation::Update(void)
 {
-	if (KeyConfInputManager::GetInstance().isTrigerDown("CANCEL"))
+	if (KeyConfInputManager::GetInstance().IsTriggerDown("CANCEL"))
 	{
 		SceneManager::GetInstance().PopScene();
 	}
