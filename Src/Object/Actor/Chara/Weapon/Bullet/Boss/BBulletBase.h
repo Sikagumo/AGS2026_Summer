@@ -29,6 +29,9 @@ public:
 	/// @param _radius “–‚½‚è”»’è”¼Œa
 	virtual void CreateBullets(VECTOR _pos, VECTOR _dir, float _radius) = 0;
 
+	/// @brief Ä—˜—p’e‚ÌÄİ’è
+	virtual void ReSetBullets() = 0;
+
 	/// @brief ¶‘¶ó‘Ô‚ğæ“¾‚·‚é
 	/// @return true: ¶‚«‚Ä‚¢‚é / false: €–S
 	bool GetIsAlive(void) { return isAlive_; }

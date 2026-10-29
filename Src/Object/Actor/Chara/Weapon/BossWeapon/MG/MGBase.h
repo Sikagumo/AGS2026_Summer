@@ -15,7 +15,7 @@ public:
 	/// @brief コンストラクタ
 	MGBase(void);
 	/// @brief デストラクタ
-	~MGBase(void) override = default;
+	virtual ~MGBase(void) override = default;
 
 	/// @brief 現在攻撃中かどうかを取得する
 	/// @return true: 攻撃中 / false: 非攻撃中
@@ -30,7 +30,7 @@ protected:
 	static constexpr int MUZZLE_MAX_COUNT = 6;			// 銃口の最大数
 
 	static constexpr float CAPSULE_RADIUS = 20.0f;		// 当たり判定カプセルの半径
-	static constexpr float BULLET_HIT_SIZE = 6.0f;		// 発射する弾のヒットサイズ
+	static constexpr float BULLET_HIT_SIZE = 20.0f;		// 発射する弾のヒットサイズ
 
 	// エフェクト・発射ブレ調整用定数
 	static constexpr float RAND_DIR_MIN = -5.0f;					// 発射方向のランダムブレ最小幅

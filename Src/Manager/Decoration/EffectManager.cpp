@@ -29,6 +29,7 @@ void EffectManager::DestroyInstance(void)
     // インスタンスが存在する場合に破棄してヌルクリアする
     if (instance_ != nullptr)
     {
+        Release();
         delete instance_;
         instance_ = nullptr;
     }
@@ -42,39 +43,39 @@ void EffectManager::Initialize(void)
     // エフェクトデータのロードと登録
     EFFECT_DATA wave = EFFECT_DATA();
 
-    wave.Data = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::EFFECT_WAVE);
+    wave.data = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::EFFECT_WAVE);
     effect_[EFFECT::EFFECT_WAVE] = wave;
 
     EFFECT_DATA loading = EFFECT_DATA();
-    loading.Data = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::EFFECT_LANDING);
+    loading.data = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::EFFECT_LANDING);
     effect_[EFFECT::EFFECT_LANDING] = loading;
 
     EFFECT_DATA mg = EFFECT_DATA();
-    mg.Data = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::EFFECT_MG);
+    mg.data = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::EFFECT_MG);
     effect_[EFFECT::EFFECT_MG] = mg;
 
     EFFECT_DATA bossHit = EFFECT_DATA();
-    bossHit.Data = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::EFFECT_BOSS_HIT);
+    bossHit.data = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::EFFECT_BOSS_HIT);
     effect_[EFFECT::EFFECT_BOSS_HIT] = bossHit;
 
     EFFECT_DATA laser = EFFECT_DATA();
-    laser.Data = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::EFFECT_LASER);
+    laser.data = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::EFFECT_LASER);
     effect_[EFFECT::EFFECT_LASER] = laser;
 
     EFFECT_DATA missile = EFFECT_DATA();
-    missile.Data = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::EFFECT_MISSILE);
+    missile.data = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::EFFECT_MISSILE);
     effect_[EFFECT::EFFECT_MISSILE] = missile;
 
     EFFECT_DATA pBlast = EFFECT_DATA();
-    pBlast.Data = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::EFFECT_PLAYER_BLAST);
+    pBlast.data = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::EFFECT_PLAYER_BLAST);
     effect_[EFFECT::EFFECT_PLAYER_BLAST] = pBlast;
 
     EFFECT_DATA pRecovery = EFFECT_DATA();
-    pRecovery.Data = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::EFFECT_PLAYER_RECOVERY);
+    pRecovery.data = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::EFFECT_PLAYER_RECOVERY);
     effect_[EFFECT::EFFECT_PLAYER_RECOVERY] = pRecovery;
 
     EFFECT_DATA pPoison = EFFECT_DATA();
-    pPoison.Data = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::EFFECT_PLAYER_POISON);
+    pPoison.data = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::EFFECT_PLAYER_POISON);
     effect_[EFFECT::EFFECT_PLAYER_POISON] = pPoison;
 }
 
@@ -93,7 +94,7 @@ void EffectManager::Play(const EFFECT _effect, const VECTOR _pos, const VECTOR _
     it->second.scl = _scl;
     it->second.speed = _speed;
 
-    int playHandle = PlayEffekseer3DEffect(it->second.Data);
+    int playHandle = PlayEffekseer3DEffect(it->second.data);
 
     // エフェクトの再生開始に成功した場合、トランスフォームパラメータを反映して再生中リストに追加する
     if (playHandle != -1)
@@ -146,6 +147,16 @@ void EffectManager::Stop(EFFECT _effect, const void* _owner, int _tag)
                 StopEffekseer3DEffect(active.playHandle);
             }
         }
+    }
+}
+
+void EffectManager::StopAll(void)
+{
+    // 再生中のエフェクトリストから停止対象のエフェクトを検索する
+    for (const auto& active : playingList_)
+    {
+        //再生中であれば止める
+        StopEffekseer3DEffect(active.playHandle);
     }
 }
 
@@ -218,4 +229,12 @@ void EffectManager::Update(void)
 void EffectManager::Draw(void)
 {
     DrawEffekseer3D();
+}
+
+void EffectManager::Release(void)
+{
+    for (auto& pair : effect_)
+    {
+        DeleteEffekseerEffect(pair.second.data);
+    }
 }

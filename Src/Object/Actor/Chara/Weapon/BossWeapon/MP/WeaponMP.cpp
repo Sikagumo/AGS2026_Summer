@@ -171,7 +171,7 @@ void WeaponMP::CreateBullets(void)
 	VECTOR bulletPos = VAdd(transform_.pos, localRotPos);
 
 	bullet->CreateBullets(bulletPos, bulletDir_, ATTACK_RADIUS);
-	bullet->Init();
+	bullet->ReSetBullets();
 	bullet->SetTransform(transform_);
 	bullet->SetPlayerPos(bone_.playerPos);
 
@@ -196,6 +196,7 @@ std::shared_ptr<BBulletBase> WeaponMP::GetValidBullet(void)
 
 	std::shared_ptr<BBulletBase> bullet = std::make_shared<BBulletMissile>();
 	bullets_.emplace_back(bullet);
+	bullet->Init();
 	bullet->Load();
 	return bullet;
 }

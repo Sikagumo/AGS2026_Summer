@@ -680,10 +680,12 @@ void SceneGame::UpdateGameEnd(void)
 	{
 		if (boss_->GetHP() >= 0)
 		{
+			EffectManager::GetInstance().StopAll();
 			SceneManager::GetInstance().ChangeScene(std::make_shared<SceneResult>(true));
 		}
 		else
 		{
+			EffectManager::GetInstance().StopAll();
 			SceneManager::GetInstance().ChangeScene(std::make_shared<SceneResult>(false));
 		}
 	}

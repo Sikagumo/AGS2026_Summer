@@ -33,6 +33,9 @@ public:
 	/// @param _radius 当たり判定半径
 	void CreateBullets(VECTOR _pos, VECTOR _dir, float _radius) override { transform_.pos = _pos; dir_ = _dir; radius_ = _radius; }
 
+	/// @brief 再利用弾の再設定
+	void ReSetBullets()override;
+
 	/// @brief 発射元トランスフォームの設定
 	/// @param _trans 発射元のトランスフォーム
 	void SetTransform(const Transform& _trans) override { weaponTrans_ = _trans; }

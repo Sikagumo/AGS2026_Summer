@@ -35,23 +35,24 @@ void BBulletCannon::InitTransform(void)
 
 void BBulletCannon::InitCollider(void)
 {
-	ColliderSphere* colSphere = new ColliderSphere(
+	ColliderSphere* colSphere =new ColliderSphere(
 		ColliderBase::TAG::CANNON_BULLET, &transform_, COLLIDER_OFFSET, radius_);
-	ownColliders_[static_cast<int>(ColliderBase::TAG::MG_BULLET)].push_back(colSphere);
+	ownColliders_[static_cast<int>(ColliderBase::TAG::CANNON_BULLET)].push_back( colSphere);
 
 	CollisionController::GetInstance().RegisterActor(this);
 }
 
 void BBulletCannon::InitAnimation(void)
 {
-	aliveTime_ = 0;
-	speed_ = INIT_SPEED;
-	isAlive_ = true;
-	CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::MG_BULLET, true);
+	
 }
 
 void BBulletCannon::InitPost(void)
 {
+	aliveTime_ = 0;
+	speed_ = INIT_SPEED;
+	isAlive_ = true;
+	CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::CANNON_BULLET, true);
 }
 
 void BBulletCannon::CreateBullets(VECTOR _pos, VECTOR _dir, float _radius)
@@ -59,6 +60,12 @@ void BBulletCannon::CreateBullets(VECTOR _pos, VECTOR _dir, float _radius)
 	transform_.pos = _pos;
 	dir_ = _dir;
 	radius_ = _radius;
+}
+
+void BBulletCannon::ReSetBullets()
+{
+	InitTransform();
+	InitPost();
 }
 
 void BBulletCannon::UpdateProcess(void)
@@ -91,7 +98,6 @@ void BBulletCannon::UpdateProcess(void)
 	else
 	{
 		CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::MG_BULLET, false);
-		CollisionController::GetInstance().UnregisterActor(this);
 	}
 }
 

@@ -23,6 +23,11 @@ void BBulletLaser::ReleasePost(void)
 {
 }
 
+void BBulletLaser::ReSetBullets()
+{
+
+}
+
 void BBulletLaser::Shot(void)
 {
 }
@@ -46,6 +51,7 @@ void BBulletLaser::InitCollider(void)
 
 void BBulletLaser::InitAnimation(void)
 {
+	
 }
 
 void BBulletLaser::InitPost(void)

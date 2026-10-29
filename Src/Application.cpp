@@ -151,6 +151,7 @@ void Application::DestroyInstance(void)
 	// ƒV[ƒ“ŠÇ—‰ğ•ú
 	SceneManager::GetInstance().DestroyInstance();
 
+	EffectManager::GetInstance().StopAll();
 	EffectManager::GetInstance().DestroyInstance();
 
 	ImGuiWrapper::GetInstance().Destroy();

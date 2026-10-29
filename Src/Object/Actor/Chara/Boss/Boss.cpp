@@ -628,7 +628,7 @@ void Boss::UpdateAttack(void)
 	transformBody_.pos = MV1GetFramePosition(transform_.modelId, JOINT_FEET_BODY);
 
 	// 攻撃タイプをランダムで選択する
-// 前回と同じ攻撃タイプが選択されないようにするためのループ
+	// 前回と同じ攻撃タイプが選択されないようにするためのループ
 	do
 	{
 		int randomAttack = static_cast<int>(UtilityMath::RandRangeF(0.0f, static_cast<float>(ATTACK_TYPE::MAX)));
@@ -638,6 +638,8 @@ void Boss::UpdateAttack(void)
 
 	lastAttackType_ = attackSelect_;
 
+
+	//attackSelect_ = ATTACK_TYPE::MG;
 	// 攻撃タイプに応じてそれぞれのステートを変更する
 	switch (attackSelect_)
 	{
