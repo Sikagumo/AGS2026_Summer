@@ -1,62 +1,113 @@
 #include "SceneLobby.h"
 
-#include <algorithm> 
+#include <algorithm>
 
+#include "../../Camera/Camera.h"
+#include "../../Common/Loading.h"
+#include "../../Manager/Decoration/SoundManager.h"
 #include "../../Manager/Generic/KeyConfInputManager.h"
 #include "../../Manager/Generic/ResourceManager.h"
-#include "../../Manager/Decoration/SoundManager.h"
 #include "../../Manager/Generic/SceneManager.h"
 #include "../../Manager/System/NetManager.h"
 #include "../../Object/Collision/CollisionController.h"
-#include "../../Camera/Camera.h"
-#include "./SceneGame.h"
-#include "../../Common/Loading.h"
 #include "../SubScene/ScenePause.h"
+#include "./SceneGame.h"
+
+namespace
+{
+	// ファイル内複数箇所で共有する基本定数
+	constexpr int INVALID_HANDLE = -1;            // 無効なハンドル・インデックス値
+	constexpr int STICK_INTERVAL = 15;            // スティック入力の連続受付間隔
+	constexpr int ANIM_IDLE_INDEX = 0;            // 待機アニメーションの登録番号
+	constexpr float ANIM_IDLE_SPEED = 30.0f;      // 待機アニメーションの再生速度
+
+	// メイン選択インデックス定数
+	constexpr int MAIN_SELECT_WEAPON = 0;         // メイン選択：武器
+	constexpr int MAIN_SELECT_SKIN = 1;           // メイン選択：スキン
+	constexpr int MAIN_SELECT_READY = 2;          // メイン選択：準備完了・開始
+
+	// 退出確認インデックス定数
+	constexpr int LEAVE_SELECT_YES = 0;           // 退出確認：はい
+	constexpr int LEAVE_SELECT_NO = 1;            // 退出確認：いいえ
+	constexpr int LEAVE_SELECT_COUNT = 2;         // 退出確認の選択肢数
+
+	// 共通UIレイアウト・描画スケール定数
+	constexpr int START_BUTTON_OFFSET_X = 350;			 // 開始・編成ボタンのX座標オフセット
+	constexpr int START_BUTTON_OFFSET_Y = 100;			 // 開始・編成ボタンのY座標オフセット
+	constexpr float START_BTN_BACK_SCALE_X = 0.4f;		 // 開始ボタン背景のX拡大率
+	constexpr float START_BTN_BACK_SCALE_Y = 0.3f;		 // 開始ボタン背景のY拡大率
+	constexpr float COMMON_TEXT_SCALE = 0.6f;			 // UIテキストの標準描画スケール
+	constexpr int FILTER_BLEND_ALPHA = 180;			     // 背景暗転用フィルターのアルファ値
+	constexpr float WINDOW_ITEM_START_OFFSET_Y = 200.0f; // ミニウィンドウ内項目の開始Yオフセット
+	constexpr float WINDOW_ITEM_INTERVAL_Y = 150.0f;     // ミニウィンドウ内項目のY間隔
+	constexpr float WINDOW_BACK_SCALE_X = 1.0f;			 // ミニウィンドウ背景のX拡大率
+	constexpr float WINDOW_BACK_SCALE_Y = 1.2f;			 // ミニウィンドウ背景のY拡大率
+	constexpr int IP_BOX_WIDTH = 400;					 // パスコードボックスの基準幅
+	constexpr int PASSCODE_BOX_POS_Y = 280;				 // パスコードボックスのY座標
+	constexpr int LEAVE_BTN_OFFSET_X = 150;				 // 退出確認ボタンのXオフセット
+	constexpr int LEAVE_BTN_OFFSET_Y = 80;				 // 退出確認ボタンのYオフセット
+}
 
 SceneLobby::SceneLobby(bool _isMulti)
-	: SceneBase::SceneBase()
-	, IS_MULTI(_isMulti)
-	, isSelectMenu_(true)
-	, mainSelectIndex_(0)
+	: SceneBase()
+	, isMulti_(_isMulti)
+	, mainSelectIndex_(MAIN_SELECT_WEAPON)
 	, selectedJobIndex_(0)
 	, selectedSkinIndex_(0)
-	, cursorCollider_(nullptr)
 	, inputIntervalCounter_(0)
 	, prevMousePos_(0.0f, 0.0f)
 	, isMouseMode_(true)
+	, selectState_(SELECT_STATE::MAIN)
+	, uiHandles_()
+	, weaponInfoHandle_()
+	, backgroundHandle_(INVALID_HANDLE)
+	, roomBackHandle_(INVALID_HANDLE)
+	, selectUIBackHandle_(INVALID_HANDLE)
+	, selectedUIBackHandle_(INVALID_HANDLE)
+	, uiBackWidth_(0)
+	, uiBackHeight_(0)
+	, uiTexHandles_()
+	, uiReadyHandles_()
+	, selectConfTextHandles_()
+	, noSelectConfTextHandles_()
+	, passcodeTextHandles_()
+	, selectMultiHandle_(INVALID_HANDLE)
+	, selectedMultiHandle_(INVALID_HANDLE)
+	, multiTitleHandle_(INVALID_HANDLE)
+	, connectTexHandle_(INVALID_HANDLE)
+	, allReadyImageHandle_(INVALID_HANDLE)
+	, leaveRoomTextHandle_(INVALID_HANDLE)
+	, cursorCollider_(nullptr)
+	, mainUiCollisions_()
+	, readyButtonCollision_(nullptr)
+	, weaponUiCollisions_()
+	, skinUiCollisions_()
+	, multiUiCollisions_()
+	, leaveYesCollider_(nullptr)
+	, leaveNoCollider_(nullptr)
+	, previewModelHandle_(INVALID_HANDLE)
+	, currentModelIndex_(INVALID_HANDLE)
+	, previewModelRotY_(0.0f)
+	, animController_(nullptr)
+	, lobbySkinHandles_()
+	, lobbyAnimControllers_()
 	, multiState_(LOBBY_STATE::SELECT_MODE)
 	, buttonSelectIndex_(0)
 	, passcode_{ 0, 0, 0, 0 }
 	, selectOctet_(0)
 	, isEditing_(false)
 	, myReadyState_(false)
-	, previewModelHandle_(-1)
-	, currentModelIndex_(-1)
-	, selectState_(SELECT_STATE::MAIN)
-	, backgroundHandle_(-1)
-	, roomBackHandle_(-1)
-	, selectUIBackHandle_(-1)
-	, uiBackHeight_(0)
-	, uiBackWidth_(0)
-	, selectedUIBackHandle_(-1)
-	, selectMultiHandle_(-1)
-	, multiTitleHandle_(-1)
-	, connectTexHandle_(-1)
-	, allReadyImageHandle_(-1)
-	, leaveRoomTextHandle_(-1)
-	, animController_(nullptr)
 	, isLeaveWindow_(false)
-	, leaveSelectIndex_(1)
-	, weaponInfoHandle_{}
+	, leaveSelectIndex_(LEAVE_SELECT_NO)
 {
-	uiHandles_.fill(-1);
-	uiTexHandles_.fill(-1);
-	uiReadyHandles_.fill(-1);
-	selectConfTextHandles_.fill(-1);
-	noSelectConfTextHandles_.fill(-1);
-	passcodeTextHandles_.fill(-1);
-	lobbySkinHandles_.fill(-1);
-	weaponInfoHandle_.fill(-1);
+	uiHandles_.fill(INVALID_HANDLE);
+	weaponInfoHandle_.fill(INVALID_HANDLE);
+	uiTexHandles_.fill(INVALID_HANDLE);
+	uiReadyHandles_.fill(INVALID_HANDLE);
+	selectConfTextHandles_.fill(INVALID_HANDLE);
+	noSelectConfTextHandles_.fill(INVALID_HANDLE);
+	passcodeTextHandles_.fill(INVALID_HANDLE);
+	lobbySkinHandles_.fill(INVALID_HANDLE);
 }
 
 SceneLobby::~SceneLobby(void)
@@ -65,102 +116,71 @@ SceneLobby::~SceneLobby(void)
 
 void SceneLobby::Load(void)
 {
-	ResourceManager::GetInstance()
-		.LoadHandleIds(ResourceManager::SRC::IMGS_SELECT, uiHandles_.data());
+	auto& resourceManager = ResourceManager::GetInstance();
 
-	// 選択シーンの背景
-	backgroundHandle_ = ResourceManager::GetInstance()
-		.LoadHandleId(ResourceManager::SRC::IMG_BACKGROUND_SELCET);
+	resourceManager.LoadHandleIds(ResourceManager::SRC::IMGS_SELECT, uiHandles_.data());
 
-	// マルチマッチング背景
-	roomBackHandle_ = ResourceManager::GetInstance()
-		.LoadHandleId(ResourceManager::SRC::IMG_BACKGROUND_MALUTI);
+	// 背景・UI枠画像の読み込み
+	backgroundHandle_ = resourceManager.LoadHandleId(ResourceManager::SRC::IMG_BACKGROUND_SELCET);
+	roomBackHandle_ = resourceManager.LoadHandleId(ResourceManager::SRC::IMG_BACKGROUND_MALUTI);
+	selectUIBackHandle_ = resourceManager.LoadHandleId(ResourceManager::SRC::IMG_SELECT_UI_BACK);
+	selectedUIBackHandle_ = resourceManager.LoadHandleId(ResourceManager::SRC::IMG_SELECTED_UI_BACK);
+	selectMultiHandle_ = resourceManager.LoadHandleId(ResourceManager::SRC::IMG_SELECT_MULTI_BACK);
+	selectedMultiHandle_ = resourceManager.LoadHandleId(ResourceManager::SRC::IMG_SELECTED_MULTI_BACK);
+	leaveRoomTextHandle_ = resourceManager.LoadHandleId(ResourceManager::SRC::IMG_TEXT_LEAVE_ROOM);
 
-	// UIの背景
-	selectUIBackHandle_ = ResourceManager::GetInstance()
-		.LoadHandleId(ResourceManager::SRC::IMG_SELECT_UI_BACK);
+	// 確認用YES/NOテキストの読み込み
+	constexpr size_t PAUSE_TEX_COUNT = 4;
+	constexpr size_t PAUSE_YES_INDEX = 2;
+	constexpr size_t PAUSE_NO_INDEX = 3;
 
-	// 選択中UIの背景
-	selectedUIBackHandle_ = ResourceManager::GetInstance()
-		.LoadHandleId(ResourceManager::SRC::IMG_SELECTED_UI_BACK);
+	std::array<int, PAUSE_TEX_COUNT> tempSelectHandles{};
+	std::array<int, PAUSE_TEX_COUNT> tempNormalHandles{};
 
-	// マルチ選択中UIの背景
-	selectMultiHandle_ = ResourceManager::GetInstance()
-		.LoadHandleId(ResourceManager::SRC::IMG_SELECT_MULTI_BACK);
+	resourceManager.LoadHandleIds(ResourceManager::SRC::IMGS_SELECT_PUSE_TEX, tempSelectHandles.data());
+	resourceManager.LoadHandleIds(ResourceManager::SRC::IMGS_POUSE_TEX, tempNormalHandles.data());
 
-	// マルチ選択中UIの背景
-	selectedMultiHandle_ = ResourceManager::GetInstance()
-		.LoadHandleId(ResourceManager::SRC::IMG_SELECTED_MULTI_BACK);
+	selectConfTextHandles_.at(static_cast<size_t>(CONFIRM_TEXT::YES)) = tempSelectHandles.at(PAUSE_YES_INDEX);
+	selectConfTextHandles_.at(static_cast<size_t>(CONFIRM_TEXT::NO)) = tempSelectHandles.at(PAUSE_NO_INDEX);
+	noSelectConfTextHandles_.at(static_cast<size_t>(CONFIRM_TEXT::YES)) = tempNormalHandles.at(PAUSE_YES_INDEX);
+	noSelectConfTextHandles_.at(static_cast<size_t>(CONFIRM_TEXT::NO)) = tempNormalHandles.at(PAUSE_NO_INDEX);
 
-	leaveRoomTextHandle_ = ResourceManager::GetInstance()
-		.LoadHandleId(ResourceManager::SRC::IMG_TEXT_LEAVE_ROOM);
+	// 武器説明・マルチ関連画像の読み込み
+	resourceManager.LoadHandleIds(ResourceManager::SRC::IMGS_PLAYER_WEAPON_INFO, weaponInfoHandle_.data());
 
-	std::array<int, 4> TEMP_SELECT_HANDLES;
-	std::array<int, 4> TEMP_NORMAL_HANDLES;
+	constexpr int CONECT_TEX_CONNECTING_IDX = 0;
+	constexpr int CONECT_TEX_TITLE_IDX = 1;
+	constexpr int MULTI_TEX_ALL_READY_IDX = 4;
 
-	ResourceManager::GetInstance().LoadHandleIds(ResourceManager::SRC::IMGS_SELECT_PUSE_TEX, TEMP_SELECT_HANDLES.data());
-	ResourceManager::GetInstance().LoadHandleIds(ResourceManager::SRC::IMGS_POUSE_TEX, TEMP_NORMAL_HANDLES.data());
+	multiTitleHandle_ = resourceManager.LoadHandleIdsOnce(ResourceManager::SRC::IMGS_CONECT_TEX, CONECT_TEX_TITLE_IDX);
+	connectTexHandle_ = resourceManager.LoadHandleIdsOnce(ResourceManager::SRC::IMGS_CONECT_TEX, CONECT_TEX_CONNECTING_IDX);
+	allReadyImageHandle_ = resourceManager.LoadHandleIdsOnce(ResourceManager::SRC::IMGS_MULTI_TEX, MULTI_TEX_ALL_READY_IDX);
 
-	// 武器説明
-	ResourceManager::GetInstance().
-		LoadHandleIds(ResourceManager::SRC::IMGS_PLAYER_WEAPON_INFO, weaponInfoHandle_.data());
+	resourceManager.LoadHandleIds(ResourceManager::SRC::IMGS_LOBBY_UI_TEX, uiTexHandles_.data());
+	resourceManager.LoadHandleIds(ResourceManager::SRC::IMGS_TIMER, passcodeTextHandles_.data());
+	resourceManager.LoadHandleIds(ResourceManager::SRC::IMGS_MULTI_TEX, uiReadyHandles_.data());
 
-	selectConfTextHandles_.at(static_cast<size_t>(CONFIRM_TEXT::YES)) = TEMP_SELECT_HANDLES.at(2);
-	selectConfTextHandles_.at(static_cast<size_t>(CONFIRM_TEXT::NO)) = TEMP_SELECT_HANDLES.at(3);
+	// サウンドの読み込み
+	SoundManager::GetInstance().Add(SoundManager::TYPE::SE, SoundManager::SOUND::SE_LOBBY_SELECT,
+		resourceManager.LoadHandleId(ResourceManager::SRC::SE_LOBBY_SELCET));
+	SoundManager::GetInstance().Add(SoundManager::TYPE::BGM, SoundManager::SOUND::BGM_LOBBY,
+		resourceManager.LoadHandleId(ResourceManager::SRC::BGM_LOBBY));
 
-	noSelectConfTextHandles_.at(static_cast<size_t>(CONFIRM_TEXT::YES)) = TEMP_NORMAL_HANDLES.at(2);
-	noSelectConfTextHandles_.at(static_cast<size_t>(CONFIRM_TEXT::NO)) = TEMP_NORMAL_HANDLES.at(3);
+	// ロビー表示用スキンモデルの読み込み
+	lobbySkinHandles_.at(static_cast<size_t>(PlayerBase::SKIN_TYPE::HUMAN)) = resourceManager.LoadModelDuplicate(ResourceManager::SRC::MODEL_PLAYER_HUMAN);
+	lobbySkinHandles_.at(static_cast<size_t>(PlayerBase::SKIN_TYPE::DOG)) = resourceManager.LoadModelDuplicate(ResourceManager::SRC::MODEL_PLAYER_DOG);
+	lobbySkinHandles_.at(static_cast<size_t>(PlayerBase::SKIN_TYPE::MONKEY)) = resourceManager.LoadModelDuplicate(ResourceManager::SRC::MODEL_PLAYER_MONKEY);
+	lobbySkinHandles_.at(static_cast<size_t>(PlayerBase::SKIN_TYPE::BIRD)) = resourceManager.LoadModelDuplicate(ResourceManager::SRC::MODEL_PLAYER_BIRD);
 
-	multiTitleHandle_ = ResourceManager::GetInstance().
-		LoadHandleIdsOnce(ResourceManager::SRC::IMGS_CONECT_TEX, 1);
-
-	connectTexHandle_ = ResourceManager::GetInstance().
-		LoadHandleIdsOnce(ResourceManager::SRC::IMGS_CONECT_TEX, 0);
-
-	allReadyImageHandle_ = ResourceManager::GetInstance().
-		LoadHandleIdsOnce(ResourceManager::SRC::IMGS_MULTI_TEX, 4);
-
-	ResourceManager::GetInstance()
-		.LoadHandleIds(ResourceManager::SRC::IMGS_LOBBY_UI_TEX, uiTexHandles_.data());
-
-	ResourceManager::GetInstance().
-		LoadHandleIds(ResourceManager::SRC::IMGS_TIMER, passcodeTextHandles_.data());
-
-	ResourceManager::GetInstance().
-		LoadHandleIds(ResourceManager::SRC::IMGS_MULTI_TEX, uiReadyHandles_.data());
-
-	SoundManager::GetInstance().Add(SoundManager::TYPE::SE, SoundManager::SOUND::SE_LOBBY_SELECT
-		, ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::SE_LOBBY_SELCET));
-
-	SoundManager::GetInstance().Add(SoundManager::TYPE::BGM, SoundManager::SOUND::BGM_LOBBY
-		, ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::BGM_LOBBY));
-
-	lobbySkinHandles_.at(0) = ResourceManager::GetInstance().
-		LoadModelDuplicate(ResourceManager::SRC::MODEL_PLAYER_HUMAN);
-
-	lobbySkinHandles_.at(1) = ResourceManager::GetInstance().
-		LoadModelDuplicate(ResourceManager::SRC::MODEL_PLAYER_DOG);
-
-	lobbySkinHandles_.at(2) = ResourceManager::GetInstance().
-		LoadModelDuplicate(ResourceManager::SRC::MODEL_PLAYER_MONKEY);
-
-	lobbySkinHandles_.at(3) = ResourceManager::GetInstance().
-		LoadModelDuplicate(ResourceManager::SRC::MODEL_PLAYER_BIRD);
-
-	const int IDLE_ANIM_HANDLE = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::ANIM_IDLE);
-	constexpr int ANIM_IDLE = 0;
-	constexpr float SPEED_IDLE = 30.0f;
+	const int idleAnimHandle = resourceManager.LoadHandleId(ResourceManager::SRC::ANIM_IDLE);
 
 	for (size_t i = 0; i < lobbySkinHandles_.size(); ++i)
 	{
-		if (lobbySkinHandles_.at(i) != -1)
+		if (lobbySkinHandles_.at(i) != INVALID_HANDLE)
 		{
-			// コントローラーを生成
 			lobbyAnimControllers_.at(i) = std::make_unique<AnimationController>(lobbySkinHandles_.at(i));
-
-			// 待機アニメーションを追加してループ再生
-			lobbyAnimControllers_.at(i)->AddExternal(ANIM_IDLE, IDLE_ANIM_HANDLE, SPEED_IDLE);
-			lobbyAnimControllers_.at(i)->Play(ANIM_IDLE, true);
+			lobbyAnimControllers_.at(i)->AddExternal(ANIM_IDLE_INDEX, idleAnimHandle, ANIM_IDLE_SPEED);
+			lobbyAnimControllers_.at(i)->Play(ANIM_IDLE_INDEX, true);
 		}
 	}
 }
@@ -174,31 +194,29 @@ void SceneLobby::Initialize(void)
 	NetManager::GetInstance().Stop();
 
 	isLeaveWindow_ = false;
-	leaveSelectIndex_ = 1;
+	leaveSelectIndex_ = LEAVE_SELECT_NO;
 	myReadyState_ = false;
 
 	selectedJobIndex_ = 0;
 	selectedSkinIndex_ = 0;
+	previewModelRotY_ = 0.0f;
 
 	GetGraphSize(selectUIBackHandle_, &uiBackWidth_, &uiBackHeight_);
 
 	SetMouseDispFlag(true);
 
-	// カーソル用コライダー共通登録
-	cursorCollider_ = std::make_unique<Collider2DCircle>
-		(Vector2F(0.0f, 0.0f), 1.0f, Collider2DBase::TAG_2D::MOUSE_CURSOR);
+	// カーソル用コライダー登録
+	constexpr float CURSOR_RADIUS = 1.0f;
+	cursorCollider_ = std::make_unique<Collider2DCircle>(Vector2F(0.0f, 0.0f), CURSOR_RADIUS, Collider2DBase::TAG_2D::MOUSE_CURSOR);
 	CollisionController::GetInstance().RegisterCollider2D(cursorCollider_.get());
 
 	// シングル・マルチ共通で装備選択UIを初期化
 	InitUISingle();
 
-	if (IS_MULTI)
+	if (isMulti_)
 	{
 		multiState_ = LOBBY_STATE::SELECT_EQUIPMENT;
-		passcode_[0] = 0;
-		passcode_[1] = 0;
-		passcode_[2] = 0;
-		passcode_[3] = 0;
+		passcode_.fill(0);
 		buttonSelectIndex_ = static_cast<int>(MULTI_UI_TYPE::HOST_BUTTON);
 		isEditing_ = false;
 
@@ -206,7 +224,6 @@ void SceneLobby::Initialize(void)
 	}
 
 	SceneManager::GetInstance().GetCamera()->ChangeMode(Camera::MODE::NONE);
-
 	SoundManager::GetInstance().Play(SoundManager::SOUND::BGM_LOBBY);
 
 	// 初回のモデル読み込み
@@ -215,70 +232,68 @@ void SceneLobby::Initialize(void)
 
 void SceneLobby::InitUISingle(void)
 {
-	// メインUI位置関連
+	// メインUI位置・サイズ設定
 	constexpr float MAIN_PANEL_WIDTH = 300.0f;
 	constexpr float MAIN_PANEL_HEIGHT = 450.0f;
 	constexpr float MAIN_PANEL_OFFSET_X = 500.0f;
+	constexpr float READY_BUTTON_WIDTH = 500.0f;
+	constexpr float READY_BUTTON_HEIGHT = 150.0f;
 
-	// メインUI用コライダー生成
-	const Vector2F LEFT_PANEL_POSITION(
+	const Vector2F leftPanelPos(
 		static_cast<float>(Application::SCREEN_HALF_X) - MAIN_PANEL_OFFSET_X,
 		static_cast<float>(Application::SCREEN_HALF_Y)
 	);
 
-	const Vector2F RIGHT_PANEL_POSITION(
+	const Vector2F rightPanelPos(
 		static_cast<float>(Application::SCREEN_HALF_X) + MAIN_PANEL_OFFSET_X,
 		static_cast<float>(Application::SCREEN_HALF_Y)
 	);
 
-	const Vector2F READY_BUTTON_POS(
-		static_cast<float>(Application::SCREEN_HALF_X) + 350.0f,
-		static_cast<float>(Application::SCREEN_SIZE_Y) - 100.0f
+	const Vector2F readyButtonPos(
+		static_cast<float>(Application::SCREEN_HALF_X + START_BUTTON_OFFSET_X),
+		static_cast<float>(Application::SCREEN_SIZE_Y - START_BUTTON_OFFSET_Y)
 	);
 
-	// それぞれの役割に応じたタグを指定して生成
-	mainUiCollisions_.at(0) = std::make_unique<Collider2DBox>(
-		LEFT_PANEL_POSITION, MAIN_PANEL_WIDTH, MAIN_PANEL_HEIGHT, Collider2DBase::TAG_2D::UI_MAIN_WEAPON
+	mainUiCollisions_.at(MAIN_SELECT_WEAPON) = std::make_unique<Collider2DBox>(
+		leftPanelPos, MAIN_PANEL_WIDTH, MAIN_PANEL_HEIGHT, Collider2DBase::TAG_2D::UI_MAIN_WEAPON
 	);
 
-	mainUiCollisions_.at(1) = std::make_unique<Collider2DBox>(
-		RIGHT_PANEL_POSITION, MAIN_PANEL_WIDTH, MAIN_PANEL_HEIGHT, Collider2DBase::TAG_2D::UI_MAIN_SKIN
+	mainUiCollisions_.at(MAIN_SELECT_SKIN) = std::make_unique<Collider2DBox>(
+		rightPanelPos, MAIN_PANEL_WIDTH, MAIN_PANEL_HEIGHT, Collider2DBase::TAG_2D::UI_MAIN_SKIN
 	);
 
 	readyButtonCollision_ = std::make_unique<Collider2DBox>(
-		READY_BUTTON_POS, 500.0f, 150.0f, Collider2DBase::TAG_2D::UI_MAIN_READY
+		readyButtonPos, READY_BUTTON_WIDTH, READY_BUTTON_HEIGHT, Collider2DBase::TAG_2D::UI_MAIN_READY
 	);
 
-	// ウィンドウ位置関連
+	// ミニウィンドウ内コライダー設定
 	constexpr float WINDOW_WIDTH = 500.0f;
 	constexpr float ITEM_HEIGHT = 80.0f;
-	constexpr float ITEM_INTERVAL_Y = 150.0f;
+	constexpr float WINDOW_TOP_OFFSET_Y = 210.0f;
 
-	const float WINDOW_TOP_Y = static_cast<float>(Application::SCREEN_HALF_Y) - 210.0f;
+	const float windowTopY = static_cast<float>(Application::SCREEN_HALF_Y) - WINDOW_TOP_OFFSET_Y;
 
 	// 武器ミニウィンドウ内のコライダー生成
-	const int JOB_MAXIMUM = static_cast<int>(PlayerBase::JOB_TYPE::MAX);
-
-	for (int jobIndex = 0; jobIndex < JOB_MAXIMUM; ++jobIndex)
+	const int jobMax = static_cast<int>(PlayerBase::JOB_TYPE::MAX);
+	for (int jobIndex = 0; jobIndex < jobMax; ++jobIndex)
 	{
-		const float CURRENT_ITEM_POSITION_Y = WINDOW_TOP_Y + (jobIndex * ITEM_INTERVAL_Y);
-		const Vector2F ITEM_CENTER_POSITION(static_cast<float>(Application::SCREEN_HALF_X), CURRENT_ITEM_POSITION_Y);
+		const float currentItemPosY = windowTopY + (static_cast<float>(jobIndex) * WINDOW_ITEM_INTERVAL_Y);
+		const Vector2F itemCenterPos(static_cast<float>(Application::SCREEN_HALF_X), currentItemPosY);
 
 		weaponUiCollisions_.at(static_cast<size_t>(jobIndex)) = std::make_unique<Collider2DBox>(
-			ITEM_CENTER_POSITION, WINDOW_WIDTH, ITEM_HEIGHT, Collider2DBase::TAG_2D::UI_WINDOW_WEAPON
+			itemCenterPos, WINDOW_WIDTH, ITEM_HEIGHT, Collider2DBase::TAG_2D::UI_WINDOW_WEAPON
 		);
 	}
 
 	// スキンミニウィンドウ内のコライダー生成
-	const int SKIN_MAXIMUM = static_cast<int>(PlayerBase::SKIN_TYPE::MAX);
-
-	for (int skinIndex = 0; skinIndex < SKIN_MAXIMUM; ++skinIndex)
+	const int skinMax = static_cast<int>(PlayerBase::SKIN_TYPE::MAX);
+	for (int skinIndex = 0; skinIndex < skinMax; ++skinIndex)
 	{
-		const float CURRENT_ITEM_POSITION_Y = WINDOW_TOP_Y + (skinIndex * ITEM_INTERVAL_Y);
-		const Vector2F ITEM_CENTER_POSITION(static_cast<float>(Application::SCREEN_HALF_X), CURRENT_ITEM_POSITION_Y);
+		const float currentItemPosY = windowTopY + (static_cast<float>(skinIndex) * WINDOW_ITEM_INTERVAL_Y);
+		const Vector2F itemCenterPos(static_cast<float>(Application::SCREEN_HALF_X), currentItemPosY);
 
 		skinUiCollisions_.at(static_cast<size_t>(skinIndex)) = std::make_unique<Collider2DBox>(
-			ITEM_CENTER_POSITION, WINDOW_WIDTH, ITEM_HEIGHT, Collider2DBase::TAG_2D::UI_WINDOW_SKIN
+			itemCenterPos, WINDOW_WIDTH, ITEM_HEIGHT, Collider2DBase::TAG_2D::UI_WINDOW_SKIN
 		);
 	}
 
@@ -317,53 +332,65 @@ void SceneLobby::InitUISingle(void)
 
 void SceneLobby::InitUIMulti(void)
 {
-	const int IP_BOX_X = (Application::SCREEN_SIZE_X - 400) / 2;
+	constexpr float PASSCODE_BOX_HEIGHT = 60.0f;
+	constexpr float MODE_BTN_COLLIDER_SCALE = 0.2f;
+	constexpr float LEAVE_BTN_COLLIDER_SCALE = 0.4f;
+
+	const int ipBoxX = (Application::SCREEN_SIZE_X - IP_BOX_WIDTH) / 2;
 
 	// パスコード入力ボックスのコライダー
-	const Vector2F PASSCODE_POSITION(static_cast<float>(IP_BOX_X + 200), 280.0f);
-	multiUiCollisions_.at(static_cast<size_t>(MULTI_UI_TYPE::PASSCODE_BOX))
-		= std::make_unique<Collider2DBox>(PASSCODE_POSITION, 
-			400.0f, 60.0f, Collider2DBase::TAG_2D::NONE);
+	const Vector2F passcodePos(static_cast<float>(ipBoxX + (IP_BOX_WIDTH / 2)), static_cast<float>(PASSCODE_BOX_POS_Y));
+	multiUiCollisions_.at(static_cast<size_t>(MULTI_UI_TYPE::PASSCODE_BOX)) = std::make_unique<Collider2DBox>(
+		passcodePos, static_cast<float>(IP_BOX_WIDTH), PASSCODE_BOX_HEIGHT, Collider2DBase::TAG_2D::NONE
+	);
 
-	// 背景UI画像の当たり判定サイズ
-	const float COLLIDER_WIDTH = static_cast<float>(uiBackWidth_) * 0.2f;
-	const float COLLIDER_HEIGHT = static_cast<float>(uiBackHeight_) * 0.2f;
+	// モード選択ボタンの当たり判定サイズ
+	const float colliderWidth = static_cast<float>(uiBackWidth_) * MODE_BTN_COLLIDER_SCALE;
+	const float colliderHeight = static_cast<float>(uiBackHeight_) * MODE_BTN_COLLIDER_SCALE;
 
 	// HOSTボタンのコライダー
-	const Vector2F HOST_POSITION(Application::SCREEN_HALF_X, HOST_BUTTON_Y);
-	multiUiCollisions_.at(static_cast<size_t>(MULTI_UI_TYPE::HOST_BUTTON))
-		= std::make_unique<Collider2DBox>(HOST_POSITION, 
-			COLLIDER_WIDTH, COLLIDER_HEIGHT, Collider2DBase::TAG_2D::NONE);
+	const Vector2F hostPos(static_cast<float>(Application::SCREEN_HALF_X), static_cast<float>(HOST_BUTTON_Y));
+	multiUiCollisions_.at(static_cast<size_t>(MULTI_UI_TYPE::HOST_BUTTON)) = std::make_unique<Collider2DBox>(
+		hostPos, colliderWidth, colliderHeight, Collider2DBase::TAG_2D::NONE
+	);
 
 	// CLIENTボタンのコライダー
-	const Vector2F CLIENT_POSITION(Application::SCREEN_HALF_X, CLIENT_BUTTON_Y);
-	multiUiCollisions_.at(static_cast<size_t>(MULTI_UI_TYPE::CLIENT_BUTTON))
-		= std::make_unique<Collider2DBox>(CLIENT_POSITION, COLLIDER_WIDTH, 
-			COLLIDER_HEIGHT, Collider2DBase::TAG_2D::NONE);
+	const Vector2F clientPos(static_cast<float>(Application::SCREEN_HALF_X), static_cast<float>(CLIENT_BUTTON_Y));
+	multiUiCollisions_.at(static_cast<size_t>(MULTI_UI_TYPE::CLIENT_BUTTON)) = std::make_unique<Collider2DBox>(
+		clientPos, colliderWidth, colliderHeight, Collider2DBase::TAG_2D::NONE
+	);
 
+	auto& collisionController = CollisionController::GetInstance();
 	for (auto& collider : multiUiCollisions_)
 	{
 		if (collider != nullptr)
 		{
-			CollisionController::GetInstance().RegisterCollider2D(collider.get());
+			collisionController.RegisterCollider2D(collider.get());
 		}
 	}
 
-	const float BUTTON_COLLIDER_WIDTH = static_cast<float>(uiBackWidth_) * 0.4f;
-	const float BUTTON_COLLIDER_HEIGHT = static_cast<float>(uiBackHeight_) * 0.4f;
+	// 退出確認ボタンのコライダー
+	const float buttonColliderWidth = static_cast<float>(uiBackWidth_) * LEAVE_BTN_COLLIDER_SCALE;
+	const float buttonColliderHeight = static_cast<float>(uiBackHeight_) * LEAVE_BTN_COLLIDER_SCALE;
 
-	const Vector2F YES_POSITION(static_cast<float>(Application::SCREEN_HALF_X) - 150.0f,
-		static_cast<float>(Application::SCREEN_HALF_Y) + 80.0f);
-	leaveYesCollider_ = std::make_unique<Collider2DBox>(YES_POSITION, BUTTON_COLLIDER_WIDTH,
-		BUTTON_COLLIDER_HEIGHT, Collider2DBase::TAG_2D::NONE);
+	const Vector2F yesPos(
+		static_cast<float>(Application::SCREEN_HALF_X - LEAVE_BTN_OFFSET_X),
+		static_cast<float>(Application::SCREEN_HALF_Y + LEAVE_BTN_OFFSET_Y)
+	);
+	leaveYesCollider_ = std::make_unique<Collider2DBox>(
+		yesPos, buttonColliderWidth, buttonColliderHeight, Collider2DBase::TAG_2D::NONE
+	);
 
-	const Vector2F NO_POSITION(static_cast<float>(Application::SCREEN_HALF_X) + 150.0f,
-		static_cast<float>(Application::SCREEN_HALF_Y) + 80.0f);
-	leaveNoCollider_ = std::make_unique<Collider2DBox>(NO_POSITION, 
-		BUTTON_COLLIDER_WIDTH, BUTTON_COLLIDER_HEIGHT, Collider2DBase::TAG_2D::NONE);
+	const Vector2F noPos(
+		static_cast<float>(Application::SCREEN_HALF_X + LEAVE_BTN_OFFSET_X),
+		static_cast<float>(Application::SCREEN_HALF_Y + LEAVE_BTN_OFFSET_Y)
+	);
+	leaveNoCollider_ = std::make_unique<Collider2DBox>(
+		noPos, buttonColliderWidth, buttonColliderHeight, Collider2DBase::TAG_2D::NONE
+	);
 
-	CollisionController::GetInstance().RegisterCollider2D(leaveYesCollider_.get());
-	CollisionController::GetInstance().RegisterCollider2D(leaveNoCollider_.get());
+	collisionController.RegisterCollider2D(leaveYesCollider_.get());
+	collisionController.RegisterCollider2D(leaveNoCollider_.get());
 }
 
 void SceneLobby::Update(void)
@@ -373,46 +400,33 @@ void SceneLobby::Update(void)
 		return;
 	}
 
-	// マウス位置を常にコライダーへ追従させる
-	const Vector2 MOUSE_POSITION = KeyConfInputManager::GetInstance().GetMousePosition();
-	const Vector2F MOUSE_POSITION_F(static_cast<float>(MOUSE_POSITION.x), static_cast<float>(MOUSE_POSITION.y));
+	auto& inputMgr = KeyConfInputManager::GetInstance();
 
-	// マウスが動いた、またはクリックされたらマウスモードへ
-	if (MOUSE_POSITION_F.x != prevMousePos_.x || MOUSE_POSITION_F.y != prevMousePos_.y ||
+	// マウス位置を取得しモード判定を行う
+	const Vector2 mousePos = inputMgr.GetMousePosition();
+	const Vector2F mousePosF(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y));
+
+	if (mousePosF.x != prevMousePos_.x || mousePosF.y != prevMousePos_.y ||
 		(GetMouseInput() & (MOUSE_INPUT_LEFT | MOUSE_INPUT_RIGHT)) != 0)
 	{
 		isMouseMode_ = true;
 		SetMouseDispFlag(true);
 	}
 
-	// コントローラーやキーボードのUI操作入力があったらコントローラーモードへ
-	if (KeyConfInputManager::GetInstance().IsPressed("UP") || 
-		KeyConfInputManager::GetInstance().IsPressed("DOWN") ||
-		KeyConfInputManager::GetInstance().IsPressed("LEFT") || 
-		KeyConfInputManager::GetInstance().IsPressed("RIGHT") ||
-		KeyConfInputManager::GetInstance().IsTriggerDown("OK") || 
-		KeyConfInputManager::GetInstance().IsTriggerDown("CANCEL") ||
-		KeyConfInputManager::GetInstance().IsTriggerDown("PAUSE"))
+	if (inputMgr.IsPressed("UP") || inputMgr.IsPressed("DOWN") ||
+		inputMgr.IsPressed("LEFT") || inputMgr.IsPressed("RIGHT") ||
+		inputMgr.IsTriggerDown("OK") || inputMgr.IsTriggerDown("CANCEL") ||
+		inputMgr.IsTriggerDown("PAUSE"))
 	{
 		isMouseMode_ = false;
 		SetMouseDispFlag(false);
 	}
 
-	prevMousePos_ = MOUSE_POSITION_F;
+	prevMousePos_ = mousePosF;
 
-	// モードに応じてカーソルコライダーの位置を更新
-	if (cursorCollider_ != nullptr)
+	if (cursorCollider_ != nullptr && isMouseMode_)
 	{
-		if (isMouseMode_)
-		{
-			// マウスモード：実際のマウス位置に追従
-			cursorCollider_->SetCenterPos(MOUSE_POSITION_F);
-		}
-	}
-
-	if (cursorCollider_ != nullptr)
-	{
-		cursorCollider_->SetCenterPos(MOUSE_POSITION_F);
+		cursorCollider_->SetCenterPos(mousePosF);
 	}
 
 	for (auto& animController : lobbyAnimControllers_)
@@ -423,7 +437,7 @@ void SceneLobby::Update(void)
 		}
 	}
 
-	if (IS_MULTI)
+	if (isMulti_)
 	{
 		UpdateMulti();
 	}
@@ -435,20 +449,18 @@ void SceneLobby::Update(void)
 	// モデル選択の変更チェック
 	UpdatePreviewModel();
 
-	// 3Dモデルの位置・姿勢を設定
-	if (previewModelHandle_ != -1)
+	// プレビュー用3Dモデルの位置・姿勢を更新
+	if (previewModelHandle_ != INVALID_HANDLE)
 	{
-		// 配置位置
-		const VECTOR MODEL_POS = VGet(0.0f, -250.0f, 0.0f);
-		MV1SetPosition(previewModelHandle_, MODEL_POS);
+		constexpr VECTOR PREVIEW_MODEL_POS = { 0.0f, -250.0f, 0.0f };
+		constexpr VECTOR PREVIEW_MODEL_SCALE = { 5.0f, 5.0f, 5.0f };
+		constexpr float PREVIEW_ROT_SPEED_Y = 0.01f;
 
-		// スケール調整
-		MV1SetScale(previewModelHandle_, VGet(5.0f, 5.0f, 5.0f));
+		MV1SetPosition(previewModelHandle_, PREVIEW_MODEL_POS);
+		MV1SetScale(previewModelHandle_, PREVIEW_MODEL_SCALE);
 
-		// 自動Y軸回転
-		static float rotY = 0.0f;
-		rotY += 0.01f;
-		MV1SetRotationXYZ(previewModelHandle_, VGet(0.0f, rotY, 0.0f));
+		previewModelRotY_ += PREVIEW_ROT_SPEED_Y;
+		MV1SetRotationXYZ(previewModelHandle_, VGet(0.0f, previewModelRotY_, 0.0f));
 
 		if (animController_ != nullptr)
 		{
@@ -465,7 +477,7 @@ void SceneLobby::Draw(void)
 		backgroundHandle_, false
 	);
 
-	if (IS_MULTI)
+	if (isMulti_)
 	{
 		DrawMulti();
 	}
@@ -473,37 +485,53 @@ void SceneLobby::Draw(void)
 	{
 		DrawCenterModel();
 
-		const int START_BUTTON_HANDLE = (mainSelectIndex_ == 2)
-			? selectedUIBackHandle_ : selectUIBackHandle_;
+		const int startButtonHandle = (mainSelectIndex_ == MAIN_SELECT_READY)
+			? selectedUIBackHandle_
+			: selectUIBackHandle_;
 
-		const Vector2 START_BUTTON_POSITION =
+		const Vector2 startButtonPos =
 		{
-			Application::SCREEN_HALF_X + 350, Application::SCREEN_SIZE_Y - 100
+			Application::SCREEN_HALF_X + START_BUTTON_OFFSET_X,
+			Application::SCREEN_SIZE_Y - START_BUTTON_OFFSET_Y
 		};
 
-		const float WEAPON_IMAGE_SCALE = 0.5f;
-		const Vector2 WEAPON_IMAGE_POSITION
+		constexpr double WEAPON_IMAGE_SCALE = 0.5;
+		constexpr int WEAPON_IMAGE_OFFSET_Y = 250;
+		const Vector2 weaponImagePos =
 		{
-			Application::SCREEN_HALF_X, Application::SCREEN_SIZE_Y - 250
+			Application::SCREEN_HALF_X,
+			Application::SCREEN_SIZE_Y - WEAPON_IMAGE_OFFSET_Y
 		};
 
 		// 選択中の武器画像を描画
-		const int WEAPON_HANDLE = GetWeaponUIHandle(static_cast<PlayerBase::JOB_TYPE>(selectedJobIndex_), true);
-
-		if (WEAPON_HANDLE != -1)
+		const int weaponHandle = GetWeaponUIHandle(static_cast<PlayerBase::JOB_TYPE>(selectedJobIndex_), true);
+		if (weaponHandle != INVALID_HANDLE)
 		{
-			DrawRotaGraph(WEAPON_IMAGE_POSITION.x, WEAPON_IMAGE_POSITION.y,
-				static_cast<double>(WEAPON_IMAGE_SCALE), 0.0, WEAPON_HANDLE, true);
+			DrawRotaGraph(weaponImagePos.x, weaponImagePos.y, WEAPON_IMAGE_SCALE, 0.0, weaponHandle, true);
 		}
 
 		// ボタン背景描画
-		DrawRotaGraph3(static_cast<float>(START_BUTTON_POSITION.x),
-			static_cast<float>(START_BUTTON_POSITION.y), static_cast<float>(uiBackWidth_ / 2),
-			static_cast<float>(uiBackHeight_ / 2), 0.4f, 0.3f, 0.0f, START_BUTTON_HANDLE, true);
+		DrawRotaGraph3(
+			startButtonPos.x,
+			startButtonPos.y,
+			uiBackWidth_ / 2,
+			uiBackHeight_ / 2,
+			START_BTN_BACK_SCALE_X,
+			START_BTN_BACK_SCALE_Y,
+			0.0f,
+			startButtonHandle,
+			true
+		);
 
 		// ボタンテキスト描画
-		DrawRotaGraph(START_BUTTON_POSITION.x, START_BUTTON_POSITION.y, 0.6f, 0.0f,
-			uiHandles_.at(static_cast<int>(UI_SINGLE::GAME_START)), true);
+		DrawRotaGraph(
+			startButtonPos.x,
+			startButtonPos.y,
+			COMMON_TEXT_SCALE,
+			0.0,
+			uiHandles_.at(static_cast<size_t>(UI_SINGLE::GAME_START)),
+			true
+		);
 
 		DrawSelectionPanels();
 	}
@@ -515,7 +543,7 @@ void SceneLobby::Release(void)
 
 void SceneLobby::DrawCenterModel(void)
 {
-	if (previewModelHandle_ != -1)
+	if (previewModelHandle_ != INVALID_HANDLE)
 	{
 		MV1DrawModel(previewModelHandle_);
 	}
@@ -523,32 +551,59 @@ void SceneLobby::DrawCenterModel(void)
 
 void SceneLobby::DrawSelectionPanels(void)
 {
-	const int LEFT_PANEL_HANDLE = (mainSelectIndex_ == 0) ? selectedUIBackHandle_ : selectUIBackHandle_;
-	const int RIGHT_PANEL_HANDLE = (mainSelectIndex_ == 1) ? selectedUIBackHandle_ : selectUIBackHandle_;
-	const float PANEL_TEX_SCALE = 0.6f;
+	constexpr float PANEL_BACK_SCALE_Y = 0.8f;
 
-	// 左パネルを描画
-	DrawRotaGraph3(static_cast<float>(LEFT_PANEL_X), static_cast<float>(PANEL_START_Y),
-		static_cast<float>(uiBackWidth_ / 2), static_cast<float>(uiBackHeight_ / 2),
-		BUTTON_SCALE, 0.8f, 0.0, LEFT_PANEL_HANDLE, true);
+	const int leftPanelHandle = (mainSelectIndex_ == MAIN_SELECT_WEAPON) ? selectedUIBackHandle_ : selectUIBackHandle_;
+	const int rightPanelHandle = (mainSelectIndex_ == MAIN_SELECT_SKIN) ? selectedUIBackHandle_ : selectUIBackHandle_;
 
-	// 右パネルを描画
-	DrawRotaGraph3(static_cast<float>(RIGHT_PANEL_X), static_cast<float>(PANEL_START_Y),
-		static_cast<float>(uiBackWidth_ / 2), static_cast<float>(uiBackHeight_ / 2),
-		BUTTON_SCALE, 0.8f, 0.0, RIGHT_PANEL_HANDLE, true);
+	// 左右パネル背景を描画
+	DrawRotaGraph3(
+		LEFT_PANEL_X,
+		PANEL_START_Y,
+		uiBackWidth_ / 2,
+		uiBackHeight_ / 2,
+		BUTTON_SCALE,
+		PANEL_BACK_SCALE_Y,
+		0.0f,
+		leftPanelHandle,
+		true
+	);
 
-	// 左パネル文字を描画
-	DrawRotaGraph(LEFT_PANEL_X, PANEL_START_Y, PANEL_TEX_SCALE, 0.0f,
-		uiTexHandles_.at(static_cast<int>(UI_MAIN_TEXT::WEAPON)), true);
+	DrawRotaGraph3(
+		RIGHT_PANEL_X,
+		PANEL_START_Y,
+		uiBackWidth_ / 2,
+		uiBackHeight_ / 2,
+		BUTTON_SCALE,
+		PANEL_BACK_SCALE_Y,
+		0.0f,
+		rightPanelHandle,
+		true
+	);
 
-	// 右パネル文字を描画
-	DrawRotaGraph(RIGHT_PANEL_X, PANEL_START_Y, PANEL_TEX_SCALE, 0.0,
-		uiTexHandles_.at(static_cast<int>(UI_MAIN_TEXT::SKIN)), true);
+	// 左右パネル文字を描画
+	DrawRotaGraph(
+		LEFT_PANEL_X,
+		PANEL_START_Y,
+		COMMON_TEXT_SCALE,
+		0.0,
+		uiTexHandles_.at(static_cast<size_t>(UI_MAIN_TEXT::WEAPON)),
+		true
+	);
+
+	DrawRotaGraph(
+		RIGHT_PANEL_X,
+		PANEL_START_Y,
+		COMMON_TEXT_SCALE,
+		0.0,
+		uiTexHandles_.at(static_cast<size_t>(UI_MAIN_TEXT::SKIN)),
+		true
+	);
 
 	// ミニウィンドウが開いている場合は暗めの半透明フィルターを表示
 	if (selectState_ != SELECT_STATE::MAIN)
 	{
-		SetDrawBlendMode(DX_BLENDMODE_ALPHA, 180);
+		SetDrawBlendMode(DX_BLENDMODE_ALPHA, FILTER_BLEND_ALPHA);
 		DrawBox(
 			0, 0,
 			Application::SCREEN_SIZE_X, Application::SCREEN_SIZE_Y,
@@ -560,12 +615,10 @@ void SceneLobby::DrawSelectionPanels(void)
 	// 各ミニウィンドウの描画
 	if (selectState_ == SELECT_STATE::WEAPON_WINDOW)
 	{
-		// 画面中央に武器選択ウィンドウを描画
 		DrawWeaponWindow();
 	}
 	else if (selectState_ == SELECT_STATE::SKIN_WINDOW)
 	{
-		// 画面中央にスキン選択ウィンドウを描画
 		DrawSkinWindow();
 	}
 }
@@ -573,13 +626,8 @@ void SceneLobby::DrawSelectionPanels(void)
 void SceneLobby::UpdateSingle(void)
 {
 	auto& keyConfInputManager = KeyConfInputManager::GetInstance();
-	auto& collisionController = CollisionController::GetInstance();
 
-	const Vector2F STICK = keyConfInputManager.GetLeftStickRaw();
-	constexpr float THRESHOLD = 0.5f;
-	constexpr int STICK_INTERVAL = 15;
-
-	if (KeyConfInputManager::GetInstance().IsTriggerDown("PAUSE"))
+	if (keyConfInputManager.IsTriggerDown("PAUSE"))
 	{
 		SceneManager::GetInstance().PushScene(std::make_shared<ScenePause>());
 	}
@@ -599,350 +647,313 @@ void SceneLobby::UpdateSingle(void)
 	switch (selectState_)
 	{
 	case SELECT_STATE::MAIN:
-	{
-		// マウスカーソルと左右メインUIの当たり判定
-		bool isHoverWeapon = false;
-		bool isHoverSkin = false;
-		bool isHoverReady = false;
-
-		if (isMouseMode_)
-		{
-			if (cursorCollider_ != nullptr)
-			{
-				if (mainUiCollisions_.at(0) != nullptr)
-				{
-					isHoverWeapon = collisionController.CheckCollision2D(
-						cursorCollider_.get(),
-						mainUiCollisions_.at(0).get()
-					);
-				}
-
-				if (mainUiCollisions_.at(1) != nullptr)
-				{
-					isHoverSkin = collisionController.CheckCollision2D(
-						cursorCollider_.get(),
-						mainUiCollisions_.at(1).get()
-					);
-				}
-
-				if (readyButtonCollision_ != nullptr)
-				{
-					isHoverReady = collisionController.CheckCollision2D(
-						cursorCollider_.get(),
-						readyButtonCollision_.get()
-					);
-				}
-			}
-
-			// マウスホバー位置による選択インデックスの更新
-			if (isHoverWeapon)
-			{
-				// 武器
-				mainSelectIndex_ = 0;
-			}
-			else if (isHoverSkin)
-			{
-				// 見た目
-				mainSelectIndex_ = 1;
-			}
-			else if (isHoverReady)
-			{
-				// 準備完了
-				mainSelectIndex_ = 2;
-			}
-		}
-
-		// スティック/キーボード入力でのUI選択切り替え
-		if (inputIntervalCounter_ == 0)
-		{
-			// 左右の入力武器と見た目を切り替える
-			if (keyConfInputManager.IsPressed("RIGHT"))
-			{
-				if (mainSelectIndex_ == 0)
-				{
-					mainSelectIndex_ = 1;
-					inputIntervalCounter_ = STICK_INTERVAL;
-				}
-				else if (mainSelectIndex_ == 1)
-				{
-					mainSelectIndex_ = 0;
-					inputIntervalCounter_ = STICK_INTERVAL;
-				}
-			}
-			else if (keyConfInputManager.IsPressed("LEFT"))
-			{
-				if (mainSelectIndex_ == 1)
-				{
-					mainSelectIndex_ = 0;
-					inputIntervalCounter_ = STICK_INTERVAL;
-				}
-				else if (mainSelectIndex_ == 0)
-				{
-					mainSelectIndex_ = 1;
-					inputIntervalCounter_ = STICK_INTERVAL;
-				}
-			}
-			// 下の入力準備完了へ移動する
-			else if (keyConfInputManager.IsPressed("DOWN"))
-			{
-				if (mainSelectIndex_ == 0 || mainSelectIndex_ == 1)
-				{
-					mainSelectIndex_ = 2;
-					inputIntervalCounter_ = STICK_INTERVAL;
-				}
-			}
-			// 上の入力準備完了 から 武器へ戻る
-			else if (keyConfInputManager.IsPressed("UP"))
-			{
-				if (mainSelectIndex_ == 2)
-				{
-					mainSelectIndex_ = 0;
-					inputIntervalCounter_ = STICK_INTERVAL;
-				}
-			}
-		}
-
-		// 決定入力時の処理
-		if (keyConfInputManager.IsTriggerDown("OK"))
-		{
-			if (mainSelectIndex_ == 0)
-			{
-				selectState_ = SELECT_STATE::WEAPON_WINDOW;
-				SoundManager::GetInstance().Play(SoundManager::SOUND::SE_UI_SELECT);
-				return;
-			}
-			else if (mainSelectIndex_ == 1)
-			{
-				selectState_ = SELECT_STATE::SKIN_WINDOW;
-				SoundManager::GetInstance().Play(SoundManager::SOUND::SE_UI_SELECT);
-				return;
-			}
-			else if (mainSelectIndex_ == 2)
-			{
-				SoundManager::GetInstance().Play(SoundManager::SOUND::SE_UI_SELECT);
-
-				if (IS_MULTI)
-				{
-					// マルチプレイの場合：モード選択状態へ遷移
-					multiState_ = LOBBY_STATE::SELECT_MODE;
-					buttonSelectIndex_ = static_cast<int>(MULTI_UI_TYPE::HOST_BUTTON);
-				}
-				else
-				{
-					// シングルプレイの場合：そのままゲームシーンへ遷移
-					auto selectedJob = static_cast<PlayerBase::JOB_TYPE>(selectedJobIndex_);
-					auto selectedSkin = static_cast<PlayerBase::SKIN_TYPE>(selectedSkinIndex_);
-
-					auto jobs = { SceneGame::PlayerSelectType(selectedJob, selectedSkin) };
-					SceneManager::GetInstance().ChangeScene(std::make_shared<SceneGame>(jobs));
-				}
-				return;
-			}
-		}
+		UpdateSelectMain();
 		break;
-	}
 
 	case SELECT_STATE::WEAPON_WINDOW:
-	{
-		const int JOB_MAXIMUM = static_cast<int>(PlayerBase::JOB_TYPE::MAX);
-
-		// テーブルを使用した上下入力で武器選択移動
-		if (inputIntervalCounter_ == 0)
-		{
-			if (keyConfInputManager.IsPressed("DOWN"))
-			{
-				selectedJobIndex_ = (selectedJobIndex_ + 1) % JOB_MAXIMUM;
-				inputIntervalCounter_ = STICK_INTERVAL;
-			}
-			else if (keyConfInputManager.IsPressed("UP"))
-			{
-				selectedJobIndex_ = (selectedJobIndex_ - 1 + JOB_MAXIMUM) % JOB_MAXIMUM;
-				inputIntervalCounter_ = STICK_INTERVAL;
-			}
-		}
-
-		if (isMouseMode_)
-		{
-			// 画面中央武器ミニウィンドウ内のコライダー判定
-			for (int jobIndex = 0; jobIndex < JOB_MAXIMUM; ++jobIndex)
-			{
-				auto& weaponCollider = weaponUiCollisions_.at(static_cast<size_t>(jobIndex));
-
-				// ヌルチェック
-				if (cursorCollider_ != nullptr && weaponCollider != nullptr)
-				{
-					bool isHoverItem = collisionController.CheckCollision2D(
-						cursorCollider_.get(),
-						weaponCollider.get()
-					);
-
-					if (isHoverItem)
-					{
-						selectedJobIndex_ = jobIndex;
-
-						if (keyConfInputManager.IsTriggerDown("OK") || (GetMouseInput() & MOUSE_INPUT_LEFT) != 0) // クリック対応
-						{
-							selectState_ = SELECT_STATE::MAIN;
-							SoundManager::GetInstance().Play(SoundManager::SOUND::SE_LOBBY_SELECT);
-							SetJobToSKin();
-							return;
-						}
-					}
-				}
-			}
-		}
-
-		// パッド/キーボードでの「OK」決定
-		if (keyConfInputManager.IsTriggerDown("OK"))
-		{
-			selectState_ = SELECT_STATE::MAIN;
-			SoundManager::GetInstance().Play(SoundManager::SOUND::SE_LOBBY_SELECT);
-			SetJobToSKin();
-			return;
-		}
-
-		// キャンセル入力でウィンドウを閉じる
-		if (keyConfInputManager.IsTriggerDown("CANCEL"))
-		{
-			selectState_ = SELECT_STATE::MAIN;
-			return;
-		}
+		UpdateSelectWeaponWindow();
 		break;
-	}
 
 	case SELECT_STATE::SKIN_WINDOW:
-	{
-		const int SKIN_MAXIMUM = static_cast<int>(PlayerBase::SKIN_TYPE::MAX);
-
-		// テーブルを使用した上下入力でスキン選択移動
-		if (inputIntervalCounter_ == 0)
-		{
-			if (keyConfInputManager.IsPressed("DOWN"))
-			{
-				selectedSkinIndex_ = (selectedSkinIndex_ + 1) % SKIN_MAXIMUM;
-				inputIntervalCounter_ = STICK_INTERVAL;
-			}
-			else if (keyConfInputManager.IsPressed("UP"))
-			{
-				selectedSkinIndex_ = (selectedSkinIndex_ - 1 + SKIN_MAXIMUM) % SKIN_MAXIMUM;
-				inputIntervalCounter_ = STICK_INTERVAL;
-			}
-		}
-
-		if (isMouseMode_)
-		{
-			// 画面中央スキンミニウィンドウ内のコライダー判定
-			for (int skinIndex = 0; skinIndex < SKIN_MAXIMUM; ++skinIndex)
-			{
-				auto& skinCollider = skinUiCollisions_.at(static_cast<size_t>(skinIndex));
-
-				// ヌルチェック
-				if (cursorCollider_ != nullptr && skinCollider != nullptr)
-				{
-					bool isHoverItem = collisionController.CheckCollision2D(
-						cursorCollider_.get(),
-						skinCollider.get()
-					);
-
-					if (isHoverItem)
-					{
-						selectedSkinIndex_ = skinIndex;
-
-						if (keyConfInputManager.IsTriggerDown("OK") || (GetMouseInput() & MOUSE_INPUT_LEFT) != 0) // クリック対応
-						{
-							selectState_ = SELECT_STATE::MAIN;
-							SoundManager::GetInstance().Play(SoundManager::SOUND::SE_LOBBY_SELECT);
-							SetJobToSKin();
-							return;
-						}
-					}
-				}
-			}
-		}
-
-		// パッド/キーボードでのOK決定
-		if (keyConfInputManager.IsTriggerDown("OK"))
-		{
-			selectState_ = SELECT_STATE::MAIN;
-			SoundManager::GetInstance().Play(SoundManager::SOUND::SE_LOBBY_SELECT);
-			SetJobToSKin();
-			return;
-		}
-
-		// キャンセル入力でウィンドウを閉じる
-		if (keyConfInputManager.IsTriggerDown("CANCEL"))
-		{
-			selectState_ = SELECT_STATE::MAIN;
-			return;
-		}
+		UpdateSelectSkinWindow();
 		break;
-	}
 
 	default:
 		break;
 	}
 }
 
+void SceneLobby::UpdateSelectMain(void)
+{
+	auto& keyConfInputManager = KeyConfInputManager::GetInstance();
+	auto& collisionController = CollisionController::GetInstance();
+
+	if (isMouseMode_ && cursorCollider_ != nullptr)
+	{
+		bool isHoverWeapon = false;
+		bool isHoverSkin = false;
+		bool isHoverReady = false;
+
+		if (mainUiCollisions_.at(MAIN_SELECT_WEAPON) != nullptr)
+		{
+			isHoverWeapon = collisionController.CheckCollision2D(
+				cursorCollider_.get(),
+				mainUiCollisions_.at(MAIN_SELECT_WEAPON).get()
+			);
+		}
+
+		if (mainUiCollisions_.at(MAIN_SELECT_SKIN) != nullptr)
+		{
+			isHoverSkin = collisionController.CheckCollision2D(
+				cursorCollider_.get(),
+				mainUiCollisions_.at(MAIN_SELECT_SKIN).get()
+			);
+		}
+
+		if (readyButtonCollision_ != nullptr)
+		{
+			isHoverReady = collisionController.CheckCollision2D(
+				cursorCollider_.get(),
+				readyButtonCollision_.get()
+			);
+		}
+
+		if (isHoverWeapon)
+		{
+			mainSelectIndex_ = MAIN_SELECT_WEAPON;
+		}
+		else if (isHoverSkin)
+		{
+			mainSelectIndex_ = MAIN_SELECT_SKIN;
+		}
+		else if (isHoverReady)
+		{
+			mainSelectIndex_ = MAIN_SELECT_READY;
+		}
+	}
+
+	// スティック/キーボード入力でのUI選択切り替え
+	if (inputIntervalCounter_ == 0)
+	{
+		if (keyConfInputManager.IsPressed("RIGHT") || keyConfInputManager.IsPressed("LEFT"))
+		{
+			if (mainSelectIndex_ == MAIN_SELECT_WEAPON)
+			{
+				mainSelectIndex_ = MAIN_SELECT_SKIN;
+				inputIntervalCounter_ = STICK_INTERVAL;
+			}
+			else if (mainSelectIndex_ == MAIN_SELECT_SKIN)
+			{
+				mainSelectIndex_ = MAIN_SELECT_WEAPON;
+				inputIntervalCounter_ = STICK_INTERVAL;
+			}
+		}
+		else if (keyConfInputManager.IsPressed("DOWN"))
+		{
+			if (mainSelectIndex_ == MAIN_SELECT_WEAPON || mainSelectIndex_ == MAIN_SELECT_SKIN)
+			{
+				mainSelectIndex_ = MAIN_SELECT_READY;
+				inputIntervalCounter_ = STICK_INTERVAL;
+			}
+		}
+		else if (keyConfInputManager.IsPressed("UP"))
+		{
+			if (mainSelectIndex_ == MAIN_SELECT_READY)
+			{
+				mainSelectIndex_ = MAIN_SELECT_WEAPON;
+				inputIntervalCounter_ = STICK_INTERVAL;
+			}
+		}
+	}
+
+	// 決定入力時の処理
+	if (keyConfInputManager.IsTriggerDown("OK"))
+	{
+		if (mainSelectIndex_ == MAIN_SELECT_WEAPON)
+		{
+			selectState_ = SELECT_STATE::WEAPON_WINDOW;
+			SoundManager::GetInstance().Play(SoundManager::SOUND::SE_UI_SELECT);
+		}
+		else if (mainSelectIndex_ == MAIN_SELECT_SKIN)
+		{
+			selectState_ = SELECT_STATE::SKIN_WINDOW;
+			SoundManager::GetInstance().Play(SoundManager::SOUND::SE_UI_SELECT);
+		}
+		else if (mainSelectIndex_ == MAIN_SELECT_READY)
+		{
+			SoundManager::GetInstance().Play(SoundManager::SOUND::SE_UI_SELECT);
+
+			if (isMulti_)
+			{
+				multiState_ = LOBBY_STATE::SELECT_MODE;
+				buttonSelectIndex_ = static_cast<int>(MULTI_UI_TYPE::HOST_BUTTON);
+			}
+			else
+			{
+				const auto selectedJob = static_cast<PlayerBase::JOB_TYPE>(selectedJobIndex_);
+				const auto selectedSkin = static_cast<PlayerBase::SKIN_TYPE>(selectedSkinIndex_);
+				const std::vector<SceneGame::PlayerSelectType> jobs = { SceneGame::PlayerSelectType{ selectedJob, selectedSkin } };
+
+				SceneManager::GetInstance().ChangeScene(std::make_shared<SceneGame>(jobs));
+			}
+		}
+	}
+}
+
+void SceneLobby::UpdateSelectWeaponWindow(void)
+{
+	auto& keyConfInputManager = KeyConfInputManager::GetInstance();
+	auto& collisionController = CollisionController::GetInstance();
+	const int jobMax = static_cast<int>(PlayerBase::JOB_TYPE::MAX);
+
+	if (inputIntervalCounter_ == 0)
+	{
+		if (keyConfInputManager.IsPressed("DOWN"))
+		{
+			selectedJobIndex_ = (selectedJobIndex_ + 1) % jobMax;
+			inputIntervalCounter_ = STICK_INTERVAL;
+		}
+		else if (keyConfInputManager.IsPressed("UP"))
+		{
+			selectedJobIndex_ = (selectedJobIndex_ - 1 + jobMax) % jobMax;
+			inputIntervalCounter_ = STICK_INTERVAL;
+		}
+	}
+
+	if (isMouseMode_)
+	{
+		for (int jobIndex = 0; jobIndex < jobMax; ++jobIndex)
+		{
+			auto& weaponCollider = weaponUiCollisions_.at(static_cast<size_t>(jobIndex));
+			if (cursorCollider_ != nullptr && weaponCollider != nullptr)
+			{
+				const bool isHoverItem = collisionController.CheckCollision2D(
+					cursorCollider_.get(),
+					weaponCollider.get()
+				);
+
+				if (isHoverItem)
+				{
+					selectedJobIndex_ = jobIndex;
+
+					if (keyConfInputManager.IsTriggerDown("OK") || (GetMouseInput() & MOUSE_INPUT_LEFT) != 0)
+					{
+						selectState_ = SELECT_STATE::MAIN;
+						SoundManager::GetInstance().Play(SoundManager::SOUND::SE_LOBBY_SELECT);
+						SetJobToSKin();
+						return;
+					}
+				}
+			}
+		}
+	}
+
+	if (keyConfInputManager.IsTriggerDown("OK"))
+	{
+		selectState_ = SELECT_STATE::MAIN;
+		SoundManager::GetInstance().Play(SoundManager::SOUND::SE_LOBBY_SELECT);
+		SetJobToSKin();
+		return;
+	}
+
+	if (keyConfInputManager.IsTriggerDown("CANCEL"))
+	{
+		selectState_ = SELECT_STATE::MAIN;
+	}
+}
+
+void SceneLobby::UpdateSelectSkinWindow(void)
+{
+	auto& keyConfInputManager = KeyConfInputManager::GetInstance();
+	auto& collisionController = CollisionController::GetInstance();
+	const int skinMax = static_cast<int>(PlayerBase::SKIN_TYPE::MAX);
+
+	if (inputIntervalCounter_ == 0)
+	{
+		if (keyConfInputManager.IsPressed("DOWN"))
+		{
+			selectedSkinIndex_ = (selectedSkinIndex_ + 1) % skinMax;
+			inputIntervalCounter_ = STICK_INTERVAL;
+		}
+		else if (keyConfInputManager.IsPressed("UP"))
+		{
+			selectedSkinIndex_ = (selectedSkinIndex_ - 1 + skinMax) % skinMax;
+			inputIntervalCounter_ = STICK_INTERVAL;
+		}
+	}
+
+	if (isMouseMode_)
+	{
+		for (int skinIndex = 0; skinIndex < skinMax; ++skinIndex)
+		{
+			auto& skinCollider = skinUiCollisions_.at(static_cast<size_t>(skinIndex));
+			if (cursorCollider_ != nullptr && skinCollider != nullptr)
+			{
+				const bool isHoverItem = collisionController.CheckCollision2D(
+					cursorCollider_.get(),
+					skinCollider.get()
+				);
+
+				if (isHoverItem)
+				{
+					selectedSkinIndex_ = skinIndex;
+
+					if (keyConfInputManager.IsTriggerDown("OK") || (GetMouseInput() & MOUSE_INPUT_LEFT) != 0)
+					{
+						selectState_ = SELECT_STATE::MAIN;
+						SoundManager::GetInstance().Play(SoundManager::SOUND::SE_LOBBY_SELECT);
+						SetJobToSKin();
+						return;
+					}
+				}
+			}
+		}
+	}
+
+	if (keyConfInputManager.IsTriggerDown("OK"))
+	{
+		selectState_ = SELECT_STATE::MAIN;
+		SoundManager::GetInstance().Play(SoundManager::SOUND::SE_LOBBY_SELECT);
+		SetJobToSKin();
+		return;
+	}
+
+	if (keyConfInputManager.IsTriggerDown("CANCEL"))
+	{
+		selectState_ = SELECT_STATE::MAIN;
+	}
+}
+
 void SceneLobby::UpdatePreviewModel(void)
 {
-	// インデックスが変わっていなければ処理しない
 	if (currentModelIndex_ == selectedSkinIndex_)
 	{
 		return;
 	}
 
-	// 前のモデルがあればメモリ解放
-	if (previewModelHandle_ != -1)
+	if (previewModelHandle_ != INVALID_HANDLE)
 	{
 		MV1DeleteModel(previewModelHandle_);
-		previewModelHandle_ = -1;
+		previewModelHandle_ = INVALID_HANDLE;
 		animController_.reset();
 	}
 
 	currentModelIndex_ = selectedSkinIndex_;
 
-	// 選択されたモデルインデックスに応じてリソース識別子を選択
 	ResourceManager::SRC modelSrc = ResourceManager::SRC::NONE;
 
-	switch (currentModelIndex_)
+	switch (static_cast<PlayerBase::SKIN_TYPE>(currentModelIndex_))
 	{
-	case 0:
+	case PlayerBase::SKIN_TYPE::HUMAN:
 		modelSrc = ResourceManager::SRC::MODEL_PLAYER_HUMAN;
 		break;
-	case 1:
+
+	case PlayerBase::SKIN_TYPE::DOG:
 		modelSrc = ResourceManager::SRC::MODEL_PLAYER_DOG;
 		break;
-	case 2:
+
+	case PlayerBase::SKIN_TYPE::MONKEY:
 		modelSrc = ResourceManager::SRC::MODEL_PLAYER_MONKEY;
 		break;
-	case 3:
+
+	case PlayerBase::SKIN_TYPE::BIRD:
 		modelSrc = ResourceManager::SRC::MODEL_PLAYER_BIRD;
 		break;
+
 	default:
 		break;
 	}
 
-	// 該当するモデルがあれば複製して保持
 	if (modelSrc != ResourceManager::SRC::NONE)
 	{
 		previewModelHandle_ = ResourceManager::GetInstance().LoadModelDuplicate(modelSrc);
 
-		// 部アニメーションとして待機モーションを設定
-		if (previewModelHandle_ != -1)
+		if (previewModelHandle_ != INVALID_HANDLE)
 		{
 			animController_ = std::make_unique<AnimationController>(previewModelHandle_);
-
-			// IDLEアニメーションのハンドルを取得
-			const int IDLE_ANIM_HANDLE = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::ANIM_IDLE);
-
-			constexpr int ANIM_IDLE = 0;
-			constexpr float SPEED_IDLE = 30.0f;
-
-			// 外部ファイルから読み込んだアニメーションを追加
-			animController_->AddExternal(ANIM_IDLE, IDLE_ANIM_HANDLE, SPEED_IDLE);
-
-			// ループ再生
-			animController_->Play(ANIM_IDLE, true);
+			const int idleAnimHandle = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::ANIM_IDLE);
+			animController_->AddExternal(ANIM_IDLE_INDEX, idleAnimHandle, ANIM_IDLE_SPEED);
+			animController_->Play(ANIM_IDLE_INDEX, true);
 		}
 	}
 }
@@ -951,19 +962,19 @@ void SceneLobby::UpdateMulti(void)
 {
 	switch (multiState_)
 	{
-	case SceneLobby::LOBBY_STATE::SELECT_EQUIPMENT:
+	case LOBBY_STATE::SELECT_EQUIPMENT:
 		UpdateSingle();
 		break;
 
-	case SceneLobby::LOBBY_STATE::SELECT_MODE:
+	case LOBBY_STATE::SELECT_MODE:
 		UpdateSelectMode();
 		break;
 
-	case SceneLobby::LOBBY_STATE::CONNECTING:
+	case LOBBY_STATE::CONNECTING:
 		UpdateConnecting();
 		break;
 
-	case SceneLobby::LOBBY_STATE::IN_ROOM:
+	case LOBBY_STATE::IN_ROOM:
 		UpdateInRoom();
 		break;
 
@@ -977,74 +988,69 @@ void SceneLobby::UpdateSelectMode(void)
 	auto& keyConfInputManager = KeyConfInputManager::GetInstance();
 	auto& collisionController = CollisionController::GetInstance();
 
-	constexpr int STICK_INTERVAL = 15;
-
-	// スティック入力インターバルタイマーの更新
 	if (inputIntervalCounter_ > 0)
 	{
 		inputIntervalCounter_--;
 	}
 
-	// 操作が何もない場合はインターバルをリセット
 	if (!keyConfInputManager.IsPressed("UP") && !keyConfInputManager.IsPressed("DOWN") &&
 		!keyConfInputManager.IsPressed("LEFT") && !keyConfInputManager.IsPressed("RIGHT"))
 	{
 		inputIntervalCounter_ = 0;
 	}
 
+	const int digitsCount = static_cast<int>(PASSCODE_DIGITS);
+
 	// パスコード編集中の操作
 	if (isEditing_)
 	{
 		if (inputIntervalCounter_ == 0)
 		{
-			// 左右入力で編集桁の移動
 			if (keyConfInputManager.IsPressed("RIGHT"))
 			{
-				selectOctet_ = (selectOctet_ + 1) % 4;
+				selectOctet_ = (selectOctet_ + 1) % digitsCount;
 				inputIntervalCounter_ = STICK_INTERVAL;
 			}
 			else if (keyConfInputManager.IsPressed("LEFT"))
 			{
-				selectOctet_ = (selectOctet_ - 1 + 4) % 4;
+				selectOctet_ = (selectOctet_ - 1 + digitsCount) % digitsCount;
 				inputIntervalCounter_ = STICK_INTERVAL;
 			}
-			// 上下入力で数値の変更
 			else if (keyConfInputManager.IsPressed("UP"))
 			{
-				passcode_[selectOctet_] = (passcode_[selectOctet_] + 1) % 10;
+				passcode_.at(static_cast<size_t>(selectOctet_)) = (passcode_.at(static_cast<size_t>(selectOctet_)) + 1) % PASSCODE_NUM_MAX;
 				inputIntervalCounter_ = STICK_INTERVAL;
 			}
 			else if (keyConfInputManager.IsPressed("DOWN"))
 			{
-				passcode_[selectOctet_] = (passcode_[selectOctet_] - 1 + 10) % 10;
+				passcode_.at(static_cast<size_t>(selectOctet_)) = (passcode_.at(static_cast<size_t>(selectOctet_)) - 1 + PASSCODE_NUM_MAX) % PASSCODE_NUM_MAX;
 				inputIntervalCounter_ = STICK_INTERVAL;
 			}
 		}
 
-		// OK または CANCEL で編集終了
 		if (keyConfInputManager.IsTriggerDown("OK") || keyConfInputManager.IsTriggerDown("CANCEL"))
 		{
 			isEditing_ = false;
 			SoundManager::GetInstance().Play(SoundManager::SOUND::SE_UI_SELECT);
-			return;
 		}
-
 		return;
 	}
 
 	// パッド/キーボードでの上下選択移動
+	const int multiUiMax = static_cast<int>(MULTI_UI_TYPE::MAX);
 	bool isInputted = false;
+
 	if (inputIntervalCounter_ == 0)
 	{
 		if (keyConfInputManager.IsPressed("UP"))
 		{
-			buttonSelectIndex_ = (buttonSelectIndex_ - 1 + 3) % 3;
+			buttonSelectIndex_ = (buttonSelectIndex_ - 1 + multiUiMax) % multiUiMax;
 			inputIntervalCounter_ = STICK_INTERVAL;
 			isInputted = true;
 		}
 		else if (keyConfInputManager.IsPressed("DOWN"))
 		{
-			buttonSelectIndex_ = (buttonSelectIndex_ + 1) % 3;
+			buttonSelectIndex_ = (buttonSelectIndex_ + 1) % multiUiMax;
 			inputIntervalCounter_ = STICK_INTERVAL;
 			isInputted = true;
 		}
@@ -1057,7 +1063,7 @@ void SceneLobby::UpdateSelectMode(void)
 		{
 			if (multiUiCollisions_.at(index) != nullptr)
 			{
-				bool isHover = collisionController.CheckCollision2D(
+				const bool isHover = collisionController.CheckCollision2D(
 					cursorCollider_.get(),
 					multiUiCollisions_.at(index).get()
 				);
@@ -1074,9 +1080,13 @@ void SceneLobby::UpdateSelectMode(void)
 	// 決定入力時の処理
 	if (keyConfInputManager.IsTriggerDown("OK"))
 	{
+		constexpr int DIGIT_MULT_THOUSAND = 1000;
+		constexpr int DIGIT_MULT_HUNDRED = 100;
+		constexpr int DIGIT_MULT_TEN = 10;
+		constexpr float CONNECTION_TIMEOUT = 15.0f;
+
 		if (buttonSelectIndex_ == static_cast<int>(MULTI_UI_TYPE::PASSCODE_BOX))
 		{
-			// パスコード編集モード開始
 			isEditing_ = true;
 			selectOctet_ = 0;
 			SoundManager::GetInstance().Play(SoundManager::SOUND::SE_LOBBY_SELECT);
@@ -1084,47 +1094,49 @@ void SceneLobby::UpdateSelectMode(void)
 		}
 		else if (buttonSelectIndex_ == static_cast<int>(MULTI_UI_TYPE::HOST_BUTTON))
 		{
-			// HOST処理を開始
 			SoundManager::GetInstance().Play(SoundManager::SOUND::SE_LOBBY_SELECT);
 
-			// 4桁のパスコード配列を数値に変換
-			const int ROOM_WORD_ID = passcode_[0] * 1000 + passcode_[1] * 100 + passcode_[2] * 10 + passcode_[3];
+			const int roomWordId =
+				passcode_.at(0) * DIGIT_MULT_THOUSAND +
+				passcode_.at(1) * DIGIT_MULT_HUNDRED +
+				passcode_.at(2) * DIGIT_MULT_TEN +
+				passcode_.at(3);
 
-			// NetManagerの準備とHOSTモード起動
 			auto& netManager = NetManager::GetInstance();
-			netManager.SetRoomWordId(ROOM_WORD_ID);
+			netManager.SetRoomWordId(roomWordId);
 			netManager.Run(NET_MODE::HOST);
-			NetManager::GetInstance().SetConnectionTimeout(15.0f);
+			netManager.SetConnectionTimeout(CONNECTION_TIMEOUT);
 
 			multiState_ = LOBBY_STATE::CONNECTING;
 			return;
 		}
 		else if (buttonSelectIndex_ == static_cast<int>(MULTI_UI_TYPE::CLIENT_BUTTON))
 		{
-			// CLIENT処理を開始
 			SoundManager::GetInstance().Play(SoundManager::SOUND::SE_LOBBY_SELECT);
 
-			// 4桁のパスコード配列を数値に変換
-			const int ROOM_WORD_ID = passcode_[0] * 1000 + passcode_[1] * 100 + passcode_[2] * 10 + passcode_[3];
+			const int roomWordId =
+				passcode_.at(0) * DIGIT_MULT_THOUSAND +
+				passcode_.at(1) * DIGIT_MULT_HUNDRED +
+				passcode_.at(2) * DIGIT_MULT_TEN +
+				passcode_.at(3);
 
-			// NetManagerの準備とCLIENTモード起動
+			constexpr unsigned char BROADCAST_IP_OCTET = 255;
+			const IPDATA hostIp = { BROADCAST_IP_OCTET, BROADCAST_IP_OCTET, BROADCAST_IP_OCTET, BROADCAST_IP_OCTET };
+
 			auto& netManager = NetManager::GetInstance();
-			IPDATA hostIp = { 255, 255, 255, 255 };
-			NetManager::GetInstance().SetHostIp(hostIp);
-			netManager.SetRoomWordId(ROOM_WORD_ID);
+			netManager.SetHostIp(hostIp);
+			netManager.SetRoomWordId(roomWordId);
 			netManager.Run(NET_MODE::CLIENT);
-			NetManager::GetInstance().SetConnectionTimeout(15.0f);
+			netManager.SetConnectionTimeout(CONNECTION_TIMEOUT);
 
 			multiState_ = LOBBY_STATE::CONNECTING;
 			return;
 		}
 	}
 
-	// キャンセルボタンで前の画面に戻る
 	if (keyConfInputManager.IsTriggerDown("CANCEL"))
 	{
 		multiState_ = LOBBY_STATE::SELECT_EQUIPMENT;
-		return;
 	}
 }
 
@@ -1136,8 +1148,7 @@ void SceneLobby::UpdateConnecting(void)
 		return;
 	}
 
-	auto users = NetManager::GetInstance().GetNetUsers();
-
+	const auto users = NetManager::GetInstance().GetNetUsers();
 	if (!users.empty())
 	{
 		multiState_ = LOBBY_STATE::IN_ROOM;
@@ -1147,7 +1158,6 @@ void SceneLobby::UpdateConnecting(void)
 void SceneLobby::UpdateInRoom(void)
 {
 	auto& keyConfInputManager = KeyConfInputManager::GetInstance();
-	constexpr int STICK_INTERVAL = 15;
 
 	// 退出確認が表示されている場合の処理
 	if (isLeaveWindow_)
@@ -1163,21 +1173,19 @@ void SceneLobby::UpdateInRoom(void)
 			{
 				isHoverYes = collisionController.CheckCollision2D(cursorCollider_.get(), leaveYesCollider_.get());
 			}
-
 			if (leaveNoCollider_ != nullptr)
 			{
 				isHoverNo = collisionController.CheckCollision2D(cursorCollider_.get(), leaveNoCollider_.get());
 			}
 		}
 
-		// マウスホバーによるインデックスの更新
 		if (isHoverYes)
 		{
-			leaveSelectIndex_ = 0;
+			leaveSelectIndex_ = LEAVE_SELECT_YES;
 		}
 		else if (isHoverNo)
 		{
-			leaveSelectIndex_ = 1;
+			leaveSelectIndex_ = LEAVE_SELECT_NO;
 		}
 
 		if (inputIntervalCounter_ > 0)
@@ -1190,24 +1198,21 @@ void SceneLobby::UpdateInRoom(void)
 			inputIntervalCounter_ = 0;
 		}
 
-		// 左右入力での選択切り替え
 		if (inputIntervalCounter_ == 0)
 		{
 			if (keyConfInputManager.IsPressed("RIGHT") || keyConfInputManager.IsPressed("LEFT"))
 			{
-				leaveSelectIndex_ = (leaveSelectIndex_ + 1) % 2;
+				leaveSelectIndex_ = (leaveSelectIndex_ + 1) % LEAVE_SELECT_COUNT;
 				inputIntervalCounter_ = STICK_INTERVAL;
 			}
 		}
 
-		// 決定入力
 		if (keyConfInputManager.IsTriggerDown("OK"))
 		{
 			SoundManager::GetInstance().Play(SoundManager::SOUND::SE_UI_SELECT);
 
-			if (leaveSelectIndex_ == 0)
+			if (leaveSelectIndex_ == LEAVE_SELECT_YES)
 			{
-				// はいを選択した場合は部屋を抜ける
 				NetManager::GetInstance().Send(NET_DATA_TYPE::LEAVE_ROOM);
 				NetManager::GetInstance().Stop();
 				isLeaveWindow_ = false;
@@ -1216,19 +1221,15 @@ void SceneLobby::UpdateInRoom(void)
 			}
 			else
 			{
-				// いいえを選択した場合はウィンドウを閉じる
 				isLeaveWindow_ = false;
 				return;
 			}
 		}
 
-		// キャンセル入力でウィンドウを閉じる
 		if (keyConfInputManager.IsTriggerDown("CANCEL"))
 		{
 			isLeaveWindow_ = false;
-			return;
 		}
-
 		return;
 	}
 
@@ -1245,11 +1246,10 @@ void SceneLobby::UpdateInRoom(void)
 		return;
 	}
 
-	// キャンセルボタンで確認ウィンドウを開く
 	if (keyConfInputManager.IsTriggerDown("CANCEL"))
 	{
 		isLeaveWindow_ = true;
-		leaveSelectIndex_ = 1;
+		leaveSelectIndex_ = LEAVE_SELECT_NO;
 		return;
 	}
 
@@ -1266,14 +1266,12 @@ void SceneLobby::UpdateInRoom(void)
 		}
 	}
 
-	// ホストかつ全員準備完了時の出撃、または通常の準備完了切替をOKキーで行う
 	if (isAllReady && NetManager::GetInstance().IsHost() && !users.empty())
 	{
 		if (keyConfInputManager.IsTriggerDown("OK"))
 		{
 			self.gameState = GAME_STATE::GAME_PLAYING;
 			NetManager::GetInstance().SetSelfInfo(self);
-
 			NetManager::GetInstance().Send(NET_DATA_TYPE::GO_GAME_SCENE);
 
 			MoveToGameScene(users);
@@ -1295,39 +1293,42 @@ void SceneLobby::DrawMulti(void)
 {
 	switch (multiState_)
 	{
-	case SceneLobby::LOBBY_STATE::SELECT_EQUIPMENT:
-	{
+	case LOBBY_STATE::SELECT_EQUIPMENT:
 		DrawCenterModel();
 
-		const int START_BUTTON_HANDLE = (mainSelectIndex_ == 2)
-			? selectedUIBackHandle_ : selectUIBackHandle_;
+		DrawRotaGraph3(
+			Application::SCREEN_HALF_X + START_BUTTON_OFFSET_X,
+			Application::SCREEN_SIZE_Y - START_BUTTON_OFFSET_Y,
+			uiBackWidth_ / 2,
+			uiBackHeight_ / 2,
+			START_BTN_BACK_SCALE_X,
+			START_BTN_BACK_SCALE_Y,
+			0.0f,
+			(mainSelectIndex_ == MAIN_SELECT_READY) ? selectedUIBackHandle_ : selectUIBackHandle_,
+			true
+		);
 
-		const Vector2 START_BUTTON_POSITION =
-		{
-			Application::SCREEN_HALF_X + 350, Application::SCREEN_SIZE_Y - 100
-		};
-
-		// ボタン背景描画
-		DrawRotaGraph3(static_cast<float>(START_BUTTON_POSITION.x), static_cast<float>(START_BUTTON_POSITION.y), static_cast<float>(uiBackWidth_ / 2),
-			static_cast<float>(uiBackHeight_ / 2), 0.4f, 0.3f, 0.0f, START_BUTTON_HANDLE, true);
-
-		// ボタンテキスト描画
-		DrawRotaGraph(START_BUTTON_POSITION.x, START_BUTTON_POSITION.y, 0.6f, 0.0f,
-			uiHandles_.at(static_cast<int>(UI_SINGLE::FORMATION)), true);
+		DrawRotaGraph(
+			Application::SCREEN_HALF_X + START_BUTTON_OFFSET_X,
+			Application::SCREEN_SIZE_Y - START_BUTTON_OFFSET_Y,
+			COMMON_TEXT_SCALE,
+			0.0,
+			uiHandles_.at(static_cast<size_t>(UI_SINGLE::FORMATION)),
+			true
+		);
 
 		DrawSelectionPanels();
-
 		break;
-	}
-	case SceneLobby::LOBBY_STATE::SELECT_MODE:
+
+	case LOBBY_STATE::SELECT_MODE:
 		DrawSelectMode();
 		break;
 
-	case SceneLobby::LOBBY_STATE::CONNECTING:
+	case LOBBY_STATE::CONNECTING:
 		DrawConnecting();
 		break;
 
-	case SceneLobby::LOBBY_STATE::IN_ROOM:
+	case LOBBY_STATE::IN_ROOM:
 		DrawInRoom();
 		break;
 
@@ -1338,63 +1339,88 @@ void SceneLobby::DrawMulti(void)
 
 void SceneLobby::DrawSelectMode(void)
 {
-	const int IP_BOX_X = (Application::SCREEN_SIZE_X - 400) / 2;
+	constexpr double PASSCODE_BOX_SCALE = 0.4;
+	constexpr double NUMBER_SCALE = 0.5;
+	constexpr double EDIT_HIGHLIGHT_SCALE = 0.65;
+	constexpr int DIGIT_SPACING = 100;
+	constexpr float DIGIT_START_OFFSET_FACTOR = 1.5f;
 
-	// パスコード枠が選択中
-	const bool IS_PASSCODE_SELECTED = (buttonSelectIndex_ == static_cast<int>(MULTI_UI_TYPE::PASSCODE_BOX));
-	const bool IS_HIGHLIGHT = (isEditing_ || IS_PASSCODE_SELECTED);
+	const int ipBoxX = (Application::SCREEN_SIZE_X - IP_BOX_WIDTH) / 2;
 
-	const int BOX_X = static_cast<int>(IP_BOX_X + 200);
-	const int BOX_Y = 280;
+	const bool isPasscodeSelected = (buttonSelectIndex_ == static_cast<int>(MULTI_UI_TYPE::PASSCODE_BOX));
+	const bool isHighlight = (isEditing_ || isPasscodeSelected);
 
-	const int CURRENT_PASSCODE_BOX_HANDLE = IS_HIGHLIGHT ? selectedMultiHandle_ : selectMultiHandle_;
+	const int boxX = ipBoxX + (IP_BOX_WIDTH / 2);
+	const int boxY = PASSCODE_BOX_POS_Y;
+	const int currentPasscodeBoxHandle = isHighlight ? selectedMultiHandle_ : selectMultiHandle_;
 
 	// パスコード枠背景描画
-	DrawRotaGraph(BOX_X, BOX_Y, 0.4f, 0.0f, CURRENT_PASSCODE_BOX_HANDLE, true);
+	DrawRotaGraph(boxX, boxY, PASSCODE_BOX_SCALE, 0.0, currentPasscodeBoxHandle, true);
 
-	// パスコード数字画像の描画処理
-	constexpr float NUMBER_SCALE = 0.5f;              // 通常の数字サイズ
-	constexpr float EDIT_HIGHLIGHT_SCALE = 0.65f;     // 編集中桁のサイズ
-	constexpr int DIGIT_SPACING = 100;                // 桁間隔
+	// パスコード数字画像の描画
+	const int startDigitX = boxX - static_cast<int>(static_cast<float>(DIGIT_SPACING) * DIGIT_START_OFFSET_FACTOR);
+	const int digitY = boxY;
+	const int digitsCount = static_cast<int>(PASSCODE_DIGITS);
 
-	const int START_DIGIT_X = BOX_X - static_cast<int>(DIGIT_SPACING * 1.5f);
-	const int DIGIT_Y = BOX_Y;
-
-	for (int digitIndex = 0; digitIndex < 4; ++digitIndex)
+	for (int digitIndex = 0; digitIndex < digitsCount; ++digitIndex)
 	{
-		const int CURRENT_DIGIT_X = START_DIGIT_X + (digitIndex * DIGIT_SPACING);
-		const int NUMBER_VALUE = passcode_[digitIndex];
+		const int currentDigitX = startDigitX + (digitIndex * DIGIT_SPACING);
+		const int numberValue = passcode_.at(static_cast<size_t>(digitIndex));
+		const bool isEditingCurrentDigit = (isEditing_ && selectOctet_ == digitIndex);
+		const double currentScale = isEditingCurrentDigit ? EDIT_HIGHLIGHT_SCALE : NUMBER_SCALE;
 
-		const bool IS_EDITING_CURRENT_DIGIT = (isEditing_ && selectOctet_ == digitIndex);
-		const float CURRENT_SCALE = IS_EDITING_CURRENT_DIGIT ? EDIT_HIGHLIGHT_SCALE : NUMBER_SCALE;
-
-		// 画像での数字描画
-		DrawRotaGraph(CURRENT_DIGIT_X, DIGIT_Y, CURRENT_SCALE, 0.0, passcodeTextHandles_.at(NUMBER_VALUE), true);
+		DrawRotaGraph(currentDigitX, digitY, currentScale, 0.0, passcodeTextHandles_.at(static_cast<size_t>(numberValue)), true);
 	}
 
-	// ホストボタン判定
-	const bool IS_HOST_SELECTED = (!isEditing_ && buttonSelectIndex_ == static_cast<int>(MULTI_UI_TYPE::HOST_BUTTON));
-	const int HOST_BACKGROUND_HANDLE = IS_HOST_SELECTED ? selectedUIBackHandle_ : selectUIBackHandle_;
+	// ホストボタン描画
+	const bool isHostSelected = (!isEditing_ && buttonSelectIndex_ == static_cast<int>(MULTI_UI_TYPE::HOST_BUTTON));
+	const int hostBackgroundHandle = isHostSelected ? selectedUIBackHandle_ : selectUIBackHandle_;
 
-	// ボタン背景描画
-	DrawRotaGraph3(static_cast<float>(Application::SCREEN_HALF_X), static_cast<float>(HOST_BUTTON_Y),
-		static_cast<float>(uiBackWidth_ / 2), static_cast<float>(uiBackHeight_ / 2), 0.4f, 0.3f, 0.0f, HOST_BACKGROUND_HANDLE, true);
+	DrawRotaGraph3(
+		Application::SCREEN_HALF_X,
+		HOST_BUTTON_Y,
+		uiBackWidth_ / 2,
+		uiBackHeight_ / 2,
+		START_BTN_BACK_SCALE_X,
+		START_BTN_BACK_SCALE_Y,
+		0.0f,
+		hostBackgroundHandle,
+		true
+	);
 
-	// ボタンテキスト描画
-	DrawRotaGraph(Application::SCREEN_HALF_X, static_cast<int>(HOST_BUTTON_Y),
-		0.6f, 0.0f, uiTexHandles_.at(static_cast<size_t>(UI_MAIN_TEXT::ROOM)), true);
+	DrawRotaGraph(
+		Application::SCREEN_HALF_X,
+		HOST_BUTTON_Y,
+		COMMON_TEXT_SCALE,
+		0.0,
+		uiTexHandles_.at(static_cast<size_t>(UI_MAIN_TEXT::ROOM)),
+		true
+	);
 
-	// クライアントボタン判定
-	const bool IS_CLIENT_SELECTED = (!isEditing_ && buttonSelectIndex_ == static_cast<int>(MULTI_UI_TYPE::CLIENT_BUTTON));
-	const int CLIENT_BACKGROUND_HANDLE = IS_CLIENT_SELECTED ? selectedUIBackHandle_ : selectUIBackHandle_;
+	// クライアントボタン描画
+	const bool isClientSelected = (!isEditing_ && buttonSelectIndex_ == static_cast<int>(MULTI_UI_TYPE::CLIENT_BUTTON));
+	const int clientBackgroundHandle = isClientSelected ? selectedUIBackHandle_ : selectUIBackHandle_;
 
-	// ボタン背景描画
-	DrawRotaGraph3(static_cast<float>(Application::SCREEN_HALF_X), static_cast<float>(CLIENT_BUTTON_Y),
-		static_cast<float>(uiBackWidth_ / 2), static_cast<float>(uiBackHeight_ / 2), 0.4f, 0.3f, 0.0f, CLIENT_BACKGROUND_HANDLE, true);
+	DrawRotaGraph3(
+		Application::SCREEN_HALF_X,
+		CLIENT_BUTTON_Y,
+		uiBackWidth_ / 2,
+		uiBackHeight_ / 2,
+		START_BTN_BACK_SCALE_X,
+		START_BTN_BACK_SCALE_Y,
+		0.0f,
+		clientBackgroundHandle,
+		true
+	);
 
-	// ボタンテキスト描画
-	DrawRotaGraph(Application::SCREEN_HALF_X, static_cast<int>(CLIENT_BUTTON_Y),
-		0.6f, 0.0f, uiTexHandles_.at(static_cast<size_t>(UI_MAIN_TEXT::JOIN)), true);
+	DrawRotaGraph(
+		Application::SCREEN_HALF_X,
+		CLIENT_BUTTON_Y,
+		COMMON_TEXT_SCALE,
+		0.0,
+		uiTexHandles_.at(static_cast<size_t>(UI_MAIN_TEXT::JOIN)),
+		true
+	);
 
 #ifdef _DEBUG
 	CollisionController::GetInstance().DrawDebug2D();
@@ -1404,35 +1430,39 @@ void SceneLobby::DrawSelectMode(void)
 void SceneLobby::DrawConnecting(void)
 {
 	DrawBox(0, 0, Application::SCREEN_SIZE_X, Application::SCREEN_SIZE_Y, GetColor(0, 0, 0), true);
-
-	DrawRotaGraph(Application::SCREEN_HALF_X, Application::SCREEN_HALF_Y, 1.0f, 0.0f,
-		connectTexHandle_, true);
+	DrawRotaGraph(Application::SCREEN_HALF_X, Application::SCREEN_HALF_Y, 1.0, 0.0, connectTexHandle_, true);
 }
 
 void SceneLobby::DrawInRoom(void)
 {
-	/*DrawExtendGraph(0, 0, Application::SCREEN_SIZE_X, Application::SCREEN_SIZE_Y,
-		roomBackHandle_, true);*/
-
 	int width = 0;
 	int height = 0;
-
 	GetGraphSize(selectMultiHandle_, &width, &height);
 
-	const int TITLE_POSITION_X = 300;
-	const int TITLE_POSITION_Y = 100;
+	constexpr int TITLE_POS_X = 300;
+	constexpr int TITLE_POS_Y = 100;
+	constexpr float TITLE_BACK_SCALE = 0.3f;
 
-	DrawRotaGraph3(static_cast<float>(TITLE_POSITION_X), static_cast<float>(TITLE_POSITION_Y), static_cast<float>(width / 2),
-		static_cast<float>(height / 2), 0.3f, 0.3f, 0.0f, selectMultiHandle_, true);
+	DrawRotaGraph3(
+		TITLE_POS_X,
+		TITLE_POS_Y,
+		width / 2,
+		height / 2,
+		TITLE_BACK_SCALE,
+		TITLE_BACK_SCALE,
+		0.0f,
+		selectMultiHandle_,
+		true
+	);
 
-	DrawRotaGraph(TITLE_POSITION_X, TITLE_POSITION_Y, 0.6f, 0.0f, multiTitleHandle_, true);
+	DrawRotaGraph(TITLE_POS_X, TITLE_POS_Y, COMMON_TEXT_SCALE, 0.0, multiTitleHandle_, true);
 
 	// 参加者データの集約
 	std::vector<NET_JOIN_USER> allPlayers;
-	const NET_JOIN_USER SELF_USER = NetManager::GetInstance().GetSelfUser();
-	allPlayers.push_back(SELF_USER);
+	const NET_JOIN_USER selfUser = NetManager::GetInstance().GetSelfUser();
+	allPlayers.push_back(selfUser);
 
-	auto netUsers = NetManager::GetInstance().GetNetUsers();
+	const auto netUsers = NetManager::GetInstance().GetNetUsers();
 	for (const auto& pair : netUsers)
 	{
 		if (static_cast<int>(allPlayers.size()) >= MAX_PLAYERS)
@@ -1446,78 +1476,79 @@ void SceneLobby::DrawInRoom(void)
 	constexpr int MAX_SLOT_COUNT = 4;
 	constexpr float PANEL_WIDTH = 300.0f;
 	constexpr float PANEL_HEIGHT = 700.0f;
-	constexpr float PANEL_START_POSITION_Y = 120.0f;
+	constexpr float PANEL_START_POS_Y = 120.0f;
+	constexpr int MODEL_AREA_BOTTOM_MARGIN = 70;
+	constexpr int STATUS_IMG_OFFSET_Y = 35;
+	constexpr float STATUS_BACK_SCALE = 0.2f;
 
-	const float TOTAL_WIDTH = static_cast<float>(Application::SCREEN_SIZE_X);
-	const float TOTAL_PANELS_WIDTH = PANEL_WIDTH * static_cast<float>(MAX_SLOT_COUNT);
-	const float GAP_WIDTH = (TOTAL_WIDTH - TOTAL_PANELS_WIDTH) / static_cast<float>(MAX_SLOT_COUNT + 1);
+	constexpr float PANEL_MODEL_START_X = -380.0f;
+	constexpr float PANEL_MODEL_OFFSET_X = 253.0f;
+	constexpr float PANEL_MODEL_POS_Y = -250.0f;
+	constexpr float PANEL_MODEL_ROT_X = 0.1f;
+	constexpr VECTOR PANEL_MODEL_SCALE = { 4.0f, 4.0f, 4.0f };
+
+	const float totalWidth = static_cast<float>(Application::SCREEN_SIZE_X);
+	const float totalPanelsWidth = PANEL_WIDTH * static_cast<float>(MAX_SLOT_COUNT);
+	const float gapWidth = (totalWidth - totalPanelsWidth) / static_cast<float>(MAX_SLOT_COUNT + 1);
 
 	for (int i = 0; i < MAX_SLOT_COUNT; ++i)
 	{
-		const float PANEL_LEFT = GAP_WIDTH + static_cast<float>(i) * (PANEL_WIDTH + GAP_WIDTH);
-		const float PANEL_TOP = PANEL_START_POSITION_Y;
-		const float PANEL_RIGHT = PANEL_LEFT + PANEL_WIDTH;
-		const float PANEL_BOTTOM = PANEL_TOP + PANEL_HEIGHT;
+		const float panelLeft = gapWidth + static_cast<float>(i) * (PANEL_WIDTH + gapWidth);
+		const float panelTop = PANEL_START_POS_Y;
+		const float panelRight = panelLeft + PANEL_WIDTH;
+		const float panelBottom = panelTop + PANEL_HEIGHT;
 
-		const int PANEL_LEFT_INTEGER = static_cast<int>(PANEL_LEFT);
-		const int PANEL_TOP_INTEGER = static_cast<int>(PANEL_TOP);
-		const int PANEL_RIGHT_INTEGER = static_cast<int>(PANEL_RIGHT);
-		const int PANEL_BOTTOM_INTEGER = static_cast<int>(PANEL_BOTTOM);
+		const int panelLeftInt = static_cast<int>(panelLeft);
+		const int panelRightInt = static_cast<int>(panelRight);
+		const int panelBottomInt = static_cast<int>(panelBottom);
 
 		if (i < static_cast<int>(allPlayers.size()))
 		{
-			const NET_JOIN_USER& USER = allPlayers.at(i);
-			const bool IS_SELF = (i == 0);
-			const bool IS_READY = (USER.gameState >= GAME_STATE::GOTO_GAME);
+			const NET_JOIN_USER& user = allPlayers.at(static_cast<size_t>(i));
+			const bool isSelf = (i == 0);
+			const bool isReady = (user.gameState >= GAME_STATE::GOTO_GAME);
 
-			const unsigned int PANEL_BACKGROUND_COLOR = IS_SELF ? GetColor(35, 45, 70) : GetColor(25, 25, 35);
-			const unsigned int BORDER_COLOR = IS_READY ? COLOR_GREEN : (IS_SELF ? COLOR_YELLOW : COLOR_WHITE);
+			const int modelAreaBottom = panelBottomInt - MODEL_AREA_BOTTOM_MARGIN;
+			const int currentSkinIndex = isSelf ? selectedSkinIndex_ : user.selectedSkinType;
+			const int lobbyModelHandle = GetLobbySkinModelHandle(currentSkinIndex);
 
-			// モデル描画エリア
-			const int MODEL_AREA_LEFT = PANEL_LEFT_INTEGER + 15;
-			const int MODEL_AREA_TOP = PANEL_TOP_INTEGER + 45;
-			const int MODEL_AREA_RIGHT = PANEL_RIGHT_INTEGER - 15;
-			const int MODEL_AREA_BOTTOM = PANEL_BOTTOM_INTEGER - 70;
-
-			// 対象プレイヤーのスキンを取得
-			const int CURRENT_SKIN_INDEX = IS_SELF ? selectedSkinIndex_ : USER.selectedSkinType;
-
-			const int LOBBY_MODEL_HANDLE = GetLobbySkinModelHandle(CURRENT_SKIN_INDEX);
-
-			if (LOBBY_MODEL_HANDLE != -1)
+			if (lobbyModelHandle != INVALID_HANDLE)
 			{
-				// パネルごとにX位置をずらす
-				constexpr float PANEL_MODEL_OFFSET_X = 253.0f;
-				const float MODEL_POSITION_X = -380.0f + (static_cast<float>(i) * PANEL_MODEL_OFFSET_X);
-				const float MODEL_POSITION_Y = -250.0f;
-				const float MODEL_POSITION_Z = 0.0f;
+				const float modelPosX = PANEL_MODEL_START_X + (static_cast<float>(i) * PANEL_MODEL_OFFSET_X);
+				MV1SetPosition(lobbyModelHandle, VGet(modelPosX, PANEL_MODEL_POS_Y, 0.0f));
+				MV1SetRotationXYZ(lobbyModelHandle, VGet(PANEL_MODEL_ROT_X, 0.0f, 0.0f));
+				MV1SetScale(lobbyModelHandle, PANEL_MODEL_SCALE);
 
-				MV1SetPosition(LOBBY_MODEL_HANDLE, VGet(MODEL_POSITION_X, MODEL_POSITION_Y, MODEL_POSITION_Z));
-				MV1SetRotationXYZ(LOBBY_MODEL_HANDLE, VGet(0.1f, 0.0f, 0.0f));
-				MV1SetScale(LOBBY_MODEL_HANDLE, VGet(4.0f, 4.0f, 4.0f));
-
-				MV1DrawModel(LOBBY_MODEL_HANDLE);
+				MV1DrawModel(lobbyModelHandle);
 			}
 
-			const int STATUS_IMAGE_CENTER_X = (PANEL_LEFT_INTEGER + PANEL_RIGHT_INTEGER) / 2;
-			const int STATUS_IMAGE_CENTER_Y = MODEL_AREA_BOTTOM + 35;
+			const int statusImageCenterX = (panelLeftInt + panelRightInt) / 2;
+			const int statusImageCenterY = modelAreaBottom + STATUS_IMG_OFFSET_Y;
 
-			const int READY_IMAGE_HANDLE = IS_READY
-				? uiReadyHandles_.at(static_cast<int>(UI_READY_TEXT::READY))
-				: uiReadyHandles_.at(static_cast<int>(UI_READY_TEXT::WAITING));
+			const int readyImageHandle = isReady
+				? uiReadyHandles_.at(static_cast<size_t>(UI_READY_TEXT::READY))
+				: uiReadyHandles_.at(static_cast<size_t>(UI_READY_TEXT::WAITING));
 
-			if (READY_IMAGE_HANDLE != -1)
+			if (readyImageHandle != INVALID_HANDLE)
 			{
-				DrawRotaGraph3(static_cast<float>(STATUS_IMAGE_CENTER_X), static_cast<float>(STATUS_IMAGE_CENTER_Y), static_cast<float>(width / 2),
-					static_cast<float>(height / 2), 0.2f, 0.2f, 0.0f, selectMultiHandle_, true);
-				DrawRotaGraph(STATUS_IMAGE_CENTER_X, STATUS_IMAGE_CENTER_Y, 0.6, 0.0, READY_IMAGE_HANDLE, true);
+				DrawRotaGraph3(
+					statusImageCenterX,
+					statusImageCenterY,
+					width / 2,
+					height / 2,
+					STATUS_BACK_SCALE,
+					STATUS_BACK_SCALE,
+					0.0f,
+					selectMultiHandle_,
+					true
+				);
+				DrawRotaGraph(statusImageCenterX, statusImageCenterY, COMMON_TEXT_SCALE, 0.0, readyImageHandle, true);
 			}
 		}
 	}
 
 	// 全員準備完了判定
-	bool isAllReady = (SELF_USER.gameState == GAME_STATE::GOTO_GAME);
-
+	bool isAllReady = (selfUser.gameState == GAME_STATE::GOTO_GAME);
 	for (const auto& pair : netUsers)
 	{
 		if (pair.second.gameState != GAME_STATE::GOTO_GAME)
@@ -1527,13 +1558,11 @@ void SceneLobby::DrawInRoom(void)
 		}
 	}
 
-	// 全員準備完了時に画像を描画
 	if (isAllReady && !netUsers.empty())
 	{
-		DrawRotaGraph(Application::SCREEN_SIZE_X, Application::SCREEN_SIZE_Y, 1.0f, 0.0f, allReadyImageHandle_, true);
+		DrawRotaGraph(Application::SCREEN_SIZE_X, Application::SCREEN_SIZE_Y, 1.0, 0.0, allReadyImageHandle_, true);
 	}
 
-	// 退室確認ウィンドウを描画
 	if (isLeaveWindow_)
 	{
 		DrawLeaveConfirmWindow();
@@ -1544,24 +1573,23 @@ void SceneLobby::MoveToGameScene(std::map<int, NET_JOIN_USER>& _users)
 {
 	std::vector<SceneGame::PlayerSelectType> playerSelectTypes;
 
-	// 自分
-	SceneGame::PlayerSelectType myType;
+	// 自分自身の選択情報
+	SceneGame::PlayerSelectType myType{};
 	myType.job = static_cast<PlayerBase::JOB_TYPE>(selectedJobIndex_);
 	myType.skin = static_cast<PlayerBase::SKIN_TYPE>(selectedSkinIndex_);
 	playerSelectTypes.push_back(myType);
 
-	// 他人
-	for (auto iterator = _users.begin(); iterator != _users.end(); ++iterator)
+	// 他の参加プレイヤーの選択情報
+	for (const auto& pair : _users)
 	{
-		// 自分を含めてMAX_PLAYERSを超えないようにガード
 		if (static_cast<int>(playerSelectTypes.size()) >= MAX_PLAYERS)
 		{
 			break;
 		}
 
-		SceneGame::PlayerSelectType otherType;
-		otherType.job = static_cast<PlayerBase::JOB_TYPE>(iterator->second.selectedJobType);
-		otherType.skin = static_cast<PlayerBase::SKIN_TYPE>(iterator->second.selectedSkinType);
+		SceneGame::PlayerSelectType otherType{};
+		otherType.job = static_cast<PlayerBase::JOB_TYPE>(pair.second.selectedJobType);
+		otherType.skin = static_cast<PlayerBase::SKIN_TYPE>(pair.second.selectedSkinType);
 		playerSelectTypes.push_back(otherType);
 	}
 
@@ -1570,7 +1598,7 @@ void SceneLobby::MoveToGameScene(std::map<int, NET_JOIN_USER>& _users)
 
 void SceneLobby::SetJobToSKin(void)
 {
-	if (!IS_MULTI)
+	if (!isMulti_)
 	{
 		return;
 	}
@@ -1583,115 +1611,144 @@ void SceneLobby::SetJobToSKin(void)
 
 void SceneLobby::DrawLeaveConfirmWindow(void)
 {
+	constexpr float LEAVE_WINDOW_SCALE_X = 1.2f;
+	constexpr float LEAVE_WINDOW_SCALE_Y = 1.0f;
+	constexpr int LEAVE_TEXT_OFFSET_Y = 80;
+	constexpr double LEAVE_TEXT_SCALE = 0.8;
+
 	// 背景を暗くする
-	SetDrawBlendMode(DX_BLENDMODE_ALPHA, 180);
+	SetDrawBlendMode(DX_BLENDMODE_ALPHA, FILTER_BLEND_ALPHA);
 	DrawBox(0, 0, Application::SCREEN_SIZE_X, Application::SCREEN_SIZE_Y, GetColor(0, 0, 0), true);
 	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 
 	// メインウィンドウ背景の描画
-	DrawRotaGraph3(static_cast<float>(Application::SCREEN_HALF_X),
-		static_cast<float>(Application::SCREEN_HALF_Y), static_cast<float>(uiBackWidth_ / 2),
-		static_cast<float>(uiBackHeight_ / 2), 1.2f, 1.0f, 0.0f, selectUIBackHandle_, true);
+	DrawRotaGraph3(
+		Application::SCREEN_HALF_X,
+		Application::SCREEN_HALF_Y,
+		uiBackWidth_ / 2,
+		uiBackHeight_ / 2,
+		LEAVE_WINDOW_SCALE_X,
+		LEAVE_WINDOW_SCALE_Y,
+		0.0f,
+		selectUIBackHandle_,
+		true
+	);
 
-	// 部屋を出る画像の描画
-	if (leaveRoomTextHandle_ != -1)
+	// 部屋を出る確認テキスト画像の描画
+	if (leaveRoomTextHandle_ != INVALID_HANDLE)
 	{
-		DrawRotaGraph(Application::SCREEN_HALF_X, Application::SCREEN_HALF_Y - 80, 0.8f, 0.0f, leaveRoomTextHandle_, true);
+		DrawRotaGraph(
+			Application::SCREEN_HALF_X,
+			Application::SCREEN_HALF_Y - LEAVE_TEXT_OFFSET_Y,
+			LEAVE_TEXT_SCALE,
+			0.0,
+			leaveRoomTextHandle_,
+			true
+		);
 	}
 
-	// はいボタン
-	const int YES_BACKGROUND_HANDLE = (leaveSelectIndex_ == 0) ? selectedUIBackHandle_ : selectUIBackHandle_;
-	const int YES_POSITION_X = Application::SCREEN_HALF_X - 150;
-	const int BUTTON_POSITION_Y = Application::SCREEN_HALF_Y + 80;
+	const int yesPosX = Application::SCREEN_HALF_X - LEAVE_BTN_OFFSET_X;
+	const int noPosX = Application::SCREEN_HALF_X + LEAVE_BTN_OFFSET_X;
+	const int buttonPosY = Application::SCREEN_HALF_Y + LEAVE_BTN_OFFSET_Y;
 
-	// 文字画像
-	const int YES_HANDLE = (leaveSelectIndex_ == 0)
+	// 「はい」文字画像描画
+	const int yesHandle = (leaveSelectIndex_ == LEAVE_SELECT_YES)
 		? selectConfTextHandles_.at(static_cast<size_t>(CONFIRM_TEXT::YES))
 		: noSelectConfTextHandles_.at(static_cast<size_t>(CONFIRM_TEXT::YES));
 
-	if (YES_HANDLE != -1)
+	if (yesHandle != INVALID_HANDLE)
 	{
-		DrawRotaGraph(YES_POSITION_X, BUTTON_POSITION_Y, 0.6f, 0.0f, YES_HANDLE, true);
+		DrawRotaGraph(yesPosX, buttonPosY, COMMON_TEXT_SCALE, 0.0, yesHandle, true);
 	}
 
-	// いいえボタン
-	const int NO_BACKGROUND_HANDLE = (leaveSelectIndex_ == 1) ? selectedUIBackHandle_ : selectUIBackHandle_;
-	const int NO_POSITION_X = Application::SCREEN_HALF_X + 150;
-
-	// 文字画像
-	const int NO_HANDLE = (leaveSelectIndex_ == 1)
+	// 「いいえ」文字画像描画
+	const int noHandle = (leaveSelectIndex_ == LEAVE_SELECT_NO)
 		? selectConfTextHandles_.at(static_cast<size_t>(CONFIRM_TEXT::NO))
 		: noSelectConfTextHandles_.at(static_cast<size_t>(CONFIRM_TEXT::NO));
 
-	if (NO_HANDLE != -1)
+	if (noHandle != INVALID_HANDLE)
 	{
-		DrawRotaGraph(NO_POSITION_X, BUTTON_POSITION_Y, 0.6f, 0.0f, NO_HANDLE, true);
+		DrawRotaGraph(noPosX, buttonPosY, COMMON_TEXT_SCALE, 0.0, noHandle, true);
 	}
 }
 
 void SceneLobby::DrawWeaponWindow(void)
 {
 	// ウィンドウ背景画像描画
-	DrawRotaGraph3(static_cast<float>(Application::SCREEN_HALF_X), 
-		static_cast<float>(Application::SCREEN_HALF_Y), static_cast<float>(uiBackWidth_ / 2),
-		static_cast<float>(uiBackHeight_ / 2), 1.0f, 1.2f, 0.0f, selectUIBackHandle_, true);
+	DrawRotaGraph3(
+		Application::SCREEN_HALF_X,
+		Application::SCREEN_HALF_Y,
+		uiBackWidth_ / 2,
+		uiBackHeight_ / 2,
+		WINDOW_BACK_SCALE_X,
+		WINDOW_BACK_SCALE_Y,
+		0.0f,
+		selectUIBackHandle_,
+		true
+	);
 
-    // 選択肢描画用のレイアウト設定
-	const float ITEM_CENTER_X = static_cast<float>(Application::SCREEN_HALF_X) - 265.0f;
-	const float ITEM_START_Y = static_cast<float>(Application::SCREEN_HALF_Y) - 200.0f;
-	const float ITEM_INTERVAL_Y = 150.0f;
-	constexpr float JOB_SCALE = 0.565f;
+	constexpr float WEAPON_ITEM_OFFSET_X = 265.0f;
+	constexpr double WEAPON_INFO_SCALE = 0.435;
+	constexpr int WEAPON_INFO_OFFSET_X = 563;
 
-	const int JOB_MAXIMUM = static_cast<int>(PlayerBase::JOB_TYPE::MAX);
+	const float itemCenterX = static_cast<float>(Application::SCREEN_HALF_X) - WEAPON_ITEM_OFFSET_X;
+	const float itemStartY = static_cast<float>(Application::SCREEN_HALF_Y) - WINDOW_ITEM_START_OFFSET_Y;
+	const int jobMax = static_cast<int>(PlayerBase::JOB_TYPE::MAX);
 
-	for (int jobIndex = 0; jobIndex < JOB_MAXIMUM; ++jobIndex)
+	for (int jobIndex = 0; jobIndex < jobMax; ++jobIndex)
 	{
-		const float CURRENT_ITEM_Y = ITEM_START_Y + (jobIndex * ITEM_INTERVAL_Y);
-		const bool IS_SELECTED = (selectedJobIndex_ == jobIndex);
+		const float currentItemY = itemStartY + (static_cast<float>(jobIndex) * WINDOW_ITEM_INTERVAL_Y);
+		const bool isSelected = (selectedJobIndex_ == jobIndex);
+		const auto currentJobType = static_cast<PlayerBase::JOB_TYPE>(jobIndex);
+		const int optionHandle = GetWeaponUIHandle(currentJobType, isSelected);
 
-		const auto CURRENT_JOB_TYPE = static_cast<PlayerBase::JOB_TYPE>(jobIndex);
-		const int OPTION_HANDLE = GetWeaponUIHandle(CURRENT_JOB_TYPE, IS_SELECTED);
-
-		if (OPTION_HANDLE != -1)
+		if (optionHandle != INVALID_HANDLE)
 		{
-			DrawRotaGraph(static_cast<int>(ITEM_CENTER_X), static_cast<int>(CURRENT_ITEM_Y),
-				0.6f, 0.0f, OPTION_HANDLE, true);
+			DrawRotaGraph(static_cast<int>(itemCenterX), static_cast<int>(currentItemY), COMMON_TEXT_SCALE, 0.0, optionHandle, true);
 		}
 	}
 
-	// 武器説明
-	constexpr float INFO_SCALE = 0.435f;
-	const int INFO_CENTER_X = static_cast<int>(ITEM_CENTER_X) + 563;
-	DrawRotaGraph(INFO_CENTER_X, Application::SCREEN_HALF_Y,
-		INFO_SCALE, 0.0f, weaponInfoHandle_.at(selectedJobIndex_), true);
+	// 武器説明の描画
+	const int infoCenterX = static_cast<int>(itemCenterX) + WEAPON_INFO_OFFSET_X;
+	DrawRotaGraph(
+		infoCenterX,
+		Application::SCREEN_HALF_Y,
+		WEAPON_INFO_SCALE,
+		0.0,
+		weaponInfoHandle_.at(static_cast<size_t>(selectedJobIndex_)),
+		true
+	);
 }
 
 void SceneLobby::DrawSkinWindow(void)
 {
 	// ウィンドウ背景画像描画
-	DrawRotaGraph3(static_cast<float>(Application::SCREEN_HALF_X), 
-		static_cast<float>(Application::SCREEN_HALF_Y), static_cast<float>(uiBackWidth_ / 2),
-		static_cast<float>(uiBackHeight_ / 2), 1.0f, 1.2f, 0.0f, selectUIBackHandle_, true);
+	DrawRotaGraph3(
+		Application::SCREEN_HALF_X,
+		Application::SCREEN_HALF_Y,
+		uiBackWidth_ / 2,
+		uiBackHeight_ / 2,
+		WINDOW_BACK_SCALE_X,
+		WINDOW_BACK_SCALE_Y,
+		0.0f,
+		selectUIBackHandle_,
+		true
+	);
 
-	// 選択肢描画用のレイアウト設定
-	const float ITEM_CENTER_X = static_cast<float>(Application::SCREEN_HALF_X);
-	const float ITEM_START_Y = static_cast<float>(Application::SCREEN_HALF_Y) - 200.0f;
-	const float ITEM_INTERVAL_Y = 150.0f;
+	const float itemCenterX = static_cast<float>(Application::SCREEN_HALF_X);
+	const float itemStartY = static_cast<float>(Application::SCREEN_HALF_Y) - WINDOW_ITEM_START_OFFSET_Y;
+	const int skinMax = static_cast<int>(PlayerBase::SKIN_TYPE::MAX);
 
-	const int SKIN_MAXIMUM = static_cast<int>(PlayerBase::SKIN_TYPE::MAX);
-
-	for (int skinIndex = 0; skinIndex < SKIN_MAXIMUM; ++skinIndex)
+	for (int skinIndex = 0; skinIndex < skinMax; ++skinIndex)
 	{
-		const float CURRENT_ITEM_Y = ITEM_START_Y + (skinIndex * ITEM_INTERVAL_Y);
-		const bool IS_SELECTED = (selectedSkinIndex_ == skinIndex);
+		const float currentItemY = itemStartY + (static_cast<float>(skinIndex) * WINDOW_ITEM_INTERVAL_Y);
+		const bool isSelected = (selectedSkinIndex_ == skinIndex);
+		const auto currentSkinType = static_cast<PlayerBase::SKIN_TYPE>(skinIndex);
+		const int optionHandle = GetSkinUIHandle(currentSkinType, isSelected);
 
-		const auto CURRENT_SKIN_TYPE = static_cast<PlayerBase::SKIN_TYPE>(skinIndex);
-		const int OPTION_HANDLE = GetSkinUIHandle(CURRENT_SKIN_TYPE, IS_SELECTED);
-
-		if (OPTION_HANDLE != -1)
+		if (optionHandle != INVALID_HANDLE)
 		{
-			DrawRotaGraph(static_cast<int>(ITEM_CENTER_X), static_cast<int>(CURRENT_ITEM_Y),
-				0.6f, 0.0f, OPTION_HANDLE, true);
+			DrawRotaGraph(static_cast<int>(itemCenterX), static_cast<int>(currentItemY), COMMON_TEXT_SCALE, 0.0, optionHandle, true);
 		}
 	}
 }
@@ -1700,9 +1757,9 @@ int SceneLobby::GetLobbySkinModelHandle(int _skinIndex) const
 {
 	if (_skinIndex < 0 || _skinIndex >= static_cast<int>(lobbySkinHandles_.size()))
 	{
-		return -1;
+		return INVALID_HANDLE;
 	}
-	return lobbySkinHandles_.at(_skinIndex);
+	return lobbySkinHandles_.at(static_cast<size_t>(_skinIndex));
 }
 
 int SceneLobby::GetWeaponUIHandle(PlayerBase::JOB_TYPE _jobType, bool _isSelected) const
@@ -1730,7 +1787,7 @@ int SceneLobby::GetWeaponUIHandle(PlayerBase::JOB_TYPE _jobType, bool _isSelecte
 			: uiHandles_.at(static_cast<size_t>(UI_SINGLE::NOT_SELECT_RAPID_FIRE));
 
 	default:
-		return -1;
+		return INVALID_HANDLE;
 	}
 }
 
@@ -1759,6 +1816,6 @@ int SceneLobby::GetSkinUIHandle(PlayerBase::SKIN_TYPE _skinType, bool _isSelecte
 			: uiHandles_.at(static_cast<size_t>(UI_SINGLE::NOT_SELECT_SKIN_INU));
 
 	default:
-		return -1;
+		return INVALID_HANDLE;
 	}
 }

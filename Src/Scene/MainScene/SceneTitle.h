@@ -20,12 +20,6 @@ public:
 	/// @brief デストラクタ
 	~SceneTitle(void) override = default;
 
-	/// @brief コピー・ムーブ禁止
-	SceneTitle(const SceneTitle&) = delete;
-	SceneTitle& operator=(const SceneTitle&) = delete;
-	SceneTitle(SceneTitle&&) = delete;
-	SceneTitle& operator=(SceneTitle&&) = delete;
-
 	/// @brief リソースの読み込み開始
 	void Load(void) override;
 

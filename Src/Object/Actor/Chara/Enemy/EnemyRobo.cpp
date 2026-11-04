@@ -55,12 +55,12 @@ void EnemyRobo::InitCollider(void)
 	//地面に設置しているかの当たり判定
 	ColliderLine* colLine = new ColliderLine(ColliderBase::TAG::ENEMYROBO, &transform_, COL_LINE_START_POS, COL_LINE_END_POS);
 	ownColliders_[static_cast<int>(ColliderBase::TAG::ENEMYROBO)].push_back(colLine);
-	colLine->SetTriger(false);
+	colLine->SetTrigger(false);
 	//本体の当たり判定
 	ColliderCapsule* colCapsule = new ColliderCapsule(
 		ColliderBase::TAG::ENEMYROBO, &transform_, COL_CAPSULE_START_POS, COL_CAPSULE_END_POS, COL_CAPSULE_END_RADIUS);
 	ownColliders_[static_cast<int>(ColliderBase::TAG::ENEMYROBO)].push_back(colCapsule);
-	colCapsule->SetTriger(false);
+	colCapsule->SetTrigger(false);
 	//プレイヤーが攻撃可能位置にいるかの検知判定
 	ColliderSphere* colSphere = new ColliderSphere(ColliderBase::TAG::ENEMYROBO, &transform_, COL_SPHERE_POS, COL_SPHERE_RADIUS);
 	ownColliders_[static_cast<int>(ColliderBase::TAG::ENEMYROBO)].push_back(colSphere);
@@ -73,7 +73,7 @@ void EnemyRobo::InitCollider(void)
 	//攻撃用当たり判定
 	ColliderSphere* colAttackSphere = new ColliderSphere(ColliderBase::TAG::ENEMY_ATTACK, &transform_, handLocalPos, COL_ATTACK_SPHERE_RADIUS);
 	ownColliders_[static_cast<int>(ColliderBase::TAG::ENEMY_ATTACK)].push_back(colAttackSphere);
-	colAttackSphere->SetTriger(false);
+	colAttackSphere->SetTrigger(false);
 	auto& colCon = CollisionController::GetInstance();
 	colCon.RegisterActor(this);
 	colCon.SetCollisionActive(this, ColliderBase::TAG::ENEMY_ATTACK, false);

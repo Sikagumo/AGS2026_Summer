@@ -12,7 +12,6 @@
 class ShaderController
 {
 public:
-
 	/// @brief インスタンスの生成
 	static void CreateInstance(void);
 
@@ -65,8 +64,8 @@ public:
 		renderCommand.normalMapHandleId = _normalMapHandle;
 
 		// ピクセルシェーダ用パラメータとして格納
-		const unsigned char* BYTE_POINTER = reinterpret_cast<const unsigned char*>(&_parameters);
-		renderCommand.pixelParameterData.assign(BYTE_POINTER, BYTE_POINTER + sizeof(ParameterType));
+		const unsigned char* bytePointer = reinterpret_cast<const unsigned char*>(&_parameters);
+		renderCommand.pixelParameterData.assign(bytePointer, bytePointer + sizeof(ParameterType));
 		renderCommand.pixelParameterSize = sizeof(ParameterType);
 
 		renderCommand.vertexParameterSize = 0;
@@ -84,23 +83,24 @@ public:
 	/// @param _pixelParameters ピクセルシェーダ用定数バッファパラメータ構造体
 	/// @param _textureSlot バインドするレジスタのスロット番号
 	/// @param _textureHandle バインドするテクスチャのハンドル
+	/// @param _isClamp クランプフラグ
 	template <typename VertexParameterType, typename PixelParameterType>
 	void Draw3D(ResourceManager::SRC _vertexShaderSource, ResourceManager::SRC _pixelShaderSource,
 		int _modelHandle, const VertexParameterType& _vertexParameters, const PixelParameterType& _pixelParameters,
 		int _textureSlot = -1, int _textureHandle = -1, bool _isClamp = false)
 	{
-		const Resource& VERTEX_SHADER_RESOURCE = ResourceManager::GetInstance().Load(_vertexShaderSource);
-		const Resource& PIXEL_SHADER_RESOURCE = ResourceManager::GetInstance().Load(_pixelShaderSource);
+		const Resource& vertexShaderResource = ResourceManager::GetInstance().Load(_vertexShaderSource);
+		const Resource& pixelShaderResource = ResourceManager::GetInstance().Load(_pixelShaderSource);
 
-		if (PIXEL_SHADER_RESOURCE.GetHandleId() == -1)
+		if (pixelShaderResource.GetHandleId() == -1)
 		{
 			return;
 		}
 
 		RenderCommand renderCommand;
 		renderCommand.renderType = RENDER_TYPE::DRAW_3D;
-		renderCommand.vertexShaderHandleId = VERTEX_SHADER_RESOURCE.GetHandleId();
-		renderCommand.pixelShaderHandleId = PIXEL_SHADER_RESOURCE.GetHandleId();
+		renderCommand.vertexShaderHandleId = vertexShaderResource.GetHandleId();
+		renderCommand.pixelShaderHandleId = pixelShaderResource.GetHandleId();
 		renderCommand.modelHandleId = _modelHandle;
 
 		renderCommand.positionX = 0.0f;
@@ -111,29 +111,26 @@ public:
 		renderCommand.normalMapHandleId = -1;
 		renderCommand.isClamp = _isClamp;
 
-		// 頂点パラメータ関連
-		const unsigned char* VERTEX_BYTE_POINTER = reinterpret_cast<const unsigned char*>(&_vertexParameters);
-		renderCommand.vertexParameterData.assign(VERTEX_BYTE_POINTER, VERTEX_BYTE_POINTER + sizeof(VertexParameterType));
+		const unsigned char* vertexBytePointer = reinterpret_cast<const unsigned char*>(&_vertexParameters);
+		renderCommand.vertexParameterData.assign(vertexBytePointer, vertexBytePointer + sizeof(VertexParameterType));
 		renderCommand.vertexParameterSize = sizeof(VertexParameterType);
 
-		// ピクセルパラメータ関連
-		const unsigned char* PIXEL_BYTE_POINTER = reinterpret_cast<const unsigned char*>(&_pixelParameters);
-		renderCommand.pixelParameterData.assign(PIXEL_BYTE_POINTER, PIXEL_BYTE_POINTER + sizeof(PixelParameterType));
+		const unsigned char* pixelBytePointer = reinterpret_cast<const unsigned char*>(&_pixelParameters);
+		renderCommand.pixelParameterData.assign(pixelBytePointer, pixelBytePointer + sizeof(PixelParameterType));
 		renderCommand.pixelParameterSize = sizeof(PixelParameterType);
 
 		renderCommandQueue_.push_back(renderCommand);
 	}
 
 private:
-
 	// シングルトンのインスタンス
-	static ShaderController* instance_;                                   
+	static ShaderController* instance_;
 
 	// シェーダの描画クラス
-	std::unique_ptr<ShaderRenderer> shaderRenderer_;                      
+	std::unique_ptr<ShaderRenderer> shaderRenderer_;
 
 	// 描画命令のリスト
-	std::vector<RenderCommand> renderCommandQueue_;                        
+	std::vector<RenderCommand> renderCommandQueue_;
 
 	/// @brief コンストラクタ 
 	ShaderController(void);
@@ -141,9 +138,9 @@ private:
 	/// @brief デストラクタ
 	~ShaderController(void);
 
-	/// @brief コピーコンストラクタを禁止する
+	// コピー・ムーブ禁止
 	ShaderController(const ShaderController&) = delete;
-
-	/// @brief 代入演算子を禁止する
 	ShaderController& operator=(const ShaderController&) = delete;
+	ShaderController(ShaderController&&) = delete;
+	ShaderController& operator=(ShaderController&&) = delete;
 };

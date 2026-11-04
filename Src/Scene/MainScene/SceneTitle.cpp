@@ -358,8 +358,8 @@ void SceneTitle::Draw(void)
 
 	shaderCtrl.Draw2D(
 		ResourceManager::SRC::PS_NORMAL_MAP,
-		0.0f, 0.0f,
-		1.0f,
+		0, 0,
+		1,
 		backgroundParams,
 		backgroundHandle_,
 		backNormalHandle_

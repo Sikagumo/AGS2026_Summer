@@ -6,7 +6,6 @@
 class SceneOperation : public SceneBase
 {
 public:
-
 	/// @brief コンストラクタ
 	SceneOperation(void);
 
@@ -32,14 +31,11 @@ public:
 	void Release(void) override;
 
 protected:
-
-	/// @brief Gui用の更新処理
+	/// @brief GUI用の更新処理
 	void UpdateGui(void) override {}
 
 private:
-
 	// 画像ハンドル関連
-	int operationImageHandle_;                           // 操作説明画像ハンドル
-	int backGroundHandle_;                               // 背景UI背景画像ハンドル
-
+	int operationImageHandle_; // 操作説明画像ハンドル
+	int backGroundHandle_;     // 背景UI背景画像ハンドル
 };

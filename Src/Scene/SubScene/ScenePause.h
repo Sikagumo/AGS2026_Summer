@@ -4,6 +4,7 @@
 #include <string>
 #include <memory>
 #include <array>
+#include <DxLib.h>
 
 #include "../SceneBase.h"
 #include "../../Application.h"
@@ -16,12 +17,17 @@ class Collider2DBox;
 class ScenePause : public SceneBase
 {
 public:
-
 	/// @brief コンストラクタ
 	ScenePause(void);
 
 	/// @brief デストラクタ
 	~ScenePause(void) override;
+
+	// コピー・ムーブ禁止
+	ScenePause(const ScenePause&) = delete;
+	ScenePause& operator=(const ScenePause&) = delete;
+	ScenePause(ScenePause&&) = delete;
+	ScenePause& operator=(ScenePause&&) = delete;
 
 	/// @brief ロード処理
 	void Load(void) override;
@@ -42,21 +48,19 @@ public:
 	void Release(void) override;
 
 protected:
-
 	/// @brief GUIの更新処理
 	void UpdateGui(void) override {}
 
 private:
-
 	// 定数関連
-	static constexpr int EXPAND_INTERVAL = 30;                                        // 広がるまでにかかるフレーム数
-	static constexpr int MENU_TOP_OFFSET = Application::SCREEN_HALF_Y - 50;           // メニュー上部の余白
-	static constexpr int MENU_ITEM_HEIGHT = 100;                                      // メニュー項目の縦幅
-	static constexpr float BUTTON_WIDTH = 350.0f;                                     // ボタンの当たり判定の横幅
-	static constexpr float BUTTON_HEIGHT = 60.0f;                                     // ボタンの当たり判定の縦幅
-	static constexpr float YES_NO_BUTTON_WIDTH = 180.0f;                              // YES/NOボタンの当たり判定の横幅
-	static constexpr float YES_NO_BUTTON_HEIGHT = 35.0f;                              // YES/NOボタンの当たり判定の縦幅
-	static constexpr int STICK_INTERVAL = 15;                                         // スティック入力のインターバル
+	static constexpr int EXPAND_INTERVAL = 30;                                // 広がるまでにかかるフレーム数
+	static constexpr int MENU_TOP_OFFSET = Application::SCREEN_HALF_Y - 50;   // メニュー上部の余白
+	static constexpr int MENU_ITEM_HEIGHT = 100;                              // メニュー項目の縦幅
+	static constexpr float BUTTON_WIDTH = 350.0f;                             // ボタンの当たり判定の横幅
+	static constexpr float BUTTON_HEIGHT = 60.0f;                             // ボタンの当たり判定の縦幅
+	static constexpr float YES_NO_BUTTON_WIDTH = 180.0f;                      // YES/NOボタンの当たり判定の横幅
+	static constexpr float YES_NO_BUTTON_HEIGHT = 35.0f;                      // YES/NOボタンの当たり判定の縦幅
+	static constexpr int STICK_INTERVAL = 15;                                 // スティック入力のインターバル
 
 	// ポーズ画面の進行フェーズ関連
 	enum class PHASE
@@ -98,9 +102,9 @@ private:
 	bool isMouseMode_;         // マウス操作モードフラグ
 
 	// 画像ハンドル関連
-	std::array<int, static_cast<size_t>(PAUSE_TEXT_UI::MAX)> selectTextHandles_;     // 選択中文字画像配列
-	std::array<int, static_cast<size_t>(PAUSE_TEXT_UI::MAX)> noSelectTextHandles_;   // 非選択中文字画像配列 
-	int backGroundHandle_;                                                           // 背景画像ハンドル
+	std::array<int, static_cast<size_t>(PAUSE_TEXT_UI::MAX)> selectTextHandles_;   // 選択中文字画像配列
+	std::array<int, static_cast<size_t>(PAUSE_TEXT_UI::MAX)> noSelectTextHandles_; // 非選択中文字画像配列 
+	int backGroundHandle_;                                                         // 背景画像ハンドル
 
 	// 当たり判定関連
 	std::unique_ptr<Collider2DCircle> cursorCollider_;         // マウスカーソル用コライダー

@@ -9,7 +9,6 @@
 class ShaderRenderer
 {
 public:
-
 	// スロット関連定数
 	static constexpr int CONSTANT_BUFFER_SLOT_BEGIN_VERTEX_SHADER = 7; // 頂点シェーダ用定数バッファの開始スロット
 	static constexpr int CONSTANT_BUFFER_SLOT_BEGIN_PIXEL_SHADER = 4;  // ピクセルシェーダ用定数バッファの開始スロット
@@ -19,6 +18,12 @@ public:
 
 	/// @brief デストラクタ
 	~ShaderRenderer(void);
+
+	// コピー・ムーブ禁止
+	ShaderRenderer(const ShaderRenderer&) = delete;
+	ShaderRenderer& operator=(const ShaderRenderer&) = delete;
+	ShaderRenderer(ShaderRenderer&&) = delete;
+	ShaderRenderer& operator=(ShaderRenderer&&) = delete;
 
 	/// @brief 初期化処理
 	void Initialize(void);
@@ -37,7 +42,6 @@ public:
 	void Release(void);
 
 private:
-
 	/// @brief 定数バッファを更新してシェーダに設定
 	/// @param _parameterPointer パラメータデータへのポインタ
 	/// @param _parameterSize パラメータサイズ
@@ -53,11 +57,11 @@ private:
 	void ApplyVertices(std::array<VERTEX2DSHADER, 4>& _vertices, float _width, float _height) const;
 
 	// 定数バッファマップ
-	std::unordered_map<int, int> constantBufferMap_;                      
+	std::unordered_map<int, int> constantBufferMap_;
 
 	// キャッシュ・状態管理関連
-	int currentVertexShaderHandleId_;                                     // 現在設定されている頂点シェーダのハンドル
-	int currentPixelShaderHandleId_;                                      // 現在設定されているピクセルシェーダのハンドル
-	int currentTexture0HandleId_;                                         // 現在設定されているテクスチャ0のハンドル
-	int currentTexture1HandleId_;                                         // 現在設定されているテクスチャ1のハンドル
+	int currentVertexShaderHandleId_; // 現在設定されている頂点シェーダのハンドル
+	int currentPixelShaderHandleId_;  // 現在設定されているピクセルシェーダのハンドル
+	int currentTexture0HandleId_;     // 現在設定されているテクスチャ0のハンドル
+	int currentTexture1HandleId_;     // 現在設定されているテクスチャ1のハンドル
 };
