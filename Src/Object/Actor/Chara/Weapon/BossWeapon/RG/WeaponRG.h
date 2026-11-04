@@ -98,4 +98,5 @@ private:
 	float localUpRot_;															// 砲身のカレント仰角（度）
 	int chargeCount_;															// チャージ状態のフレームカウント
 	bool isAttack_;																// 攻撃中フラグ
+	float effectScale_;																// エフェクトスケール
 };

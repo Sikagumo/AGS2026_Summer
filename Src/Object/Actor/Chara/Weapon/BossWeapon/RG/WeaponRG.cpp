@@ -16,6 +16,7 @@ WeaponRG::WeaponRG(void)
 	, isAttack_(false)
 	, localUpRot_(0.0f)
 	, bulletLaser_(nullptr)
+	, effectScale_(0.0f)
 {
 }
 
@@ -121,6 +122,8 @@ void WeaponRG::ChangeStateIdle(void)
 void WeaponRG::ChangePreparation(void)
 {
 	stateUpdate_ = std::bind(&WeaponRG::UpdatePreparation, this);
+	effectScale_ = 0.0f;
+	EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_LASERPREPARATION, ZERO_VECTOR, ZERO_VECTOR, EFFECT_SCALE, 1.0f, this);
 }
 
 void WeaponRG::ChangeStateAttack(void)
@@ -147,10 +150,41 @@ void WeaponRG::ChangeStateEnd(void)
 void WeaponRG::UpdatePreparation(void)
 {
 	transform_.pos = MV1GetFramePosition(bone_.transform.modelId, bone_.id);
+	transform_.quaRot = Quaternion::Mult(bone_.transform.quaRot, Quaternion::AngleAxis(UtilityMath::Deg2RadF(localUpRot_), UtilityMath::AXIS_X));
+
+	// ローカル座標を回転させてワールド座標へ変換
+	VECTOR localRotPos = transform_.quaRot.PosAxis(LASER_EMIT_OFFSET);
+
+	// 位置を加算して最終的なワールド座標にする
+	VECTOR localPos = VAdd(transform_.pos, localRotPos);
+
+	EffectManager::GetInstance().UpdatePos(EffectManager::EFFECT::EFFECT_LASERPREPARATION, this, localPos);
+	Quaternion effectQuaRot = Quaternion::Mult(transform_.quaRot, Quaternion::AngleAxis(UtilityMath::Deg2RadF(PITCH_ANGLE_90), UtilityMath::AXIS_X));
+	VECTOR effectRot = effectQuaRot.ToEuler();
+	effectRot.x = UtilityMath::Rad2DegF(effectRot.x);
+	effectRot.y = UtilityMath::Rad2DegF(effectRot.y);
+	effectRot.z = UtilityMath::Rad2DegF(effectRot.z);
+
+	EffectManager::GetInstance().UpdateRot(EffectManager::EFFECT::EFFECT_LASERPREPARATION, this, effectRot);
+
+	
 
 	if (localUpRot_ < MAX_UP_ROT)
 	{
+		bool isPlay = EffectManager::GetInstance().IsPlaying(EffectManager::EFFECT::EFFECT_LASERPREPARATION, this);
+		if (!isPlay)
+		{
+			EffectManager::GetInstance().Play(EffectManager::EFFECT::EFFECT_LASERPREPARATION, localPos, effectRot, EFFECT_SCALE, 1.0f, this);
+		}
+		effectScale_++;
+		if (effectScale_ > EFFECT_SCALE.x)
+		{
+			effectScale_ = EFFECT_SCALE.x;
+		}
+		VECTOR effectScl = { effectScale_, effectScale_, effectScale_ };
+		EffectManager::GetInstance().UpdateScl(EffectManager::EFFECT::EFFECT_LASERPREPARATION, this, effectScl);
 		localUpRot_ += UP_ROT;
+
 		if (localUpRot_ > MAX_UP_ROT)
 		{
 			localUpRot_ = MAX_UP_ROT;
@@ -162,6 +196,7 @@ void WeaponRG::UpdatePreparation(void)
 		if (chargeCount_ >= MAX_CHARGE_COUNT)
 		{
 			isAttack_ = true;
+			EffectManager::GetInstance().Stop(EffectManager::EFFECT::EFFECT_LASERPREPARATION, this);
 			ChangeState(static_cast<int>(STATE::ATTACK));
 		}
 	}
