@@ -629,7 +629,7 @@ void SceneGame::UpdateGameEnd(void)
 
 	if (slowCount_ >= SLOW_COUNT_MAX * 100)
 	{
-		if (boss_->GetHP() >= 0)
+		if (boss_->GetHP() > 0)
 		{
 			EffectManager::GetInstance().StopAll();
 			SceneManager::GetInstance().ChangeScene(std::make_shared<SceneResult>(true));
