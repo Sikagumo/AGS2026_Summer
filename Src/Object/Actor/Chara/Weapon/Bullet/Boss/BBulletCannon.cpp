@@ -97,7 +97,7 @@ void BBulletCannon::UpdateProcess(void)
 	}
 	else
 	{
-		CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::MG_BULLET, false);
+		CollisionController::GetInstance().SetCollisionActive(this, ColliderBase::TAG::CANNON_BULLET, false);
 	}
 }
 

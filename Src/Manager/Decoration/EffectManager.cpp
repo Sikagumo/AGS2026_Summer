@@ -62,6 +62,10 @@ void EffectManager::Initialize(void)
     laser.data = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::EFFECT_LASER);
     effect_[EFFECT::EFFECT_LASER] = laser;
 
+    EFFECT_DATA laserPreparation = EFFECT_DATA();
+    laserPreparation.data = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::EFFECT_LASERPREPARATION);
+    effect_[EFFECT::EFFECT_LASERPREPARATION] = laserPreparation;
+
     EFFECT_DATA missile = EFFECT_DATA();
     missile.data = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::EFFECT_MISSILE);
     effect_[EFFECT::EFFECT_MISSILE] = missile;
