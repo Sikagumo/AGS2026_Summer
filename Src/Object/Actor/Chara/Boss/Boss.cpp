@@ -386,7 +386,6 @@ void Boss::ChangeState(int _state)
 	stateChanges_[stateBase_]();
 }
 
-// 各ステイトのチェンジ関数＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝－
 void Boss::ChangeStateIdle(void)
 {
 	stateUpdate_ = std::bind(&Boss::UpdateIdle, this);
@@ -485,7 +484,6 @@ void Boss::ChangeStateEnd(void)
 		weapon->SetHp(0);
 	}
 }
-// ===========================================================================================================================================================================================================================================================
 
 void Boss::UpdateBossTransform(void)
 {
@@ -589,7 +587,6 @@ void Boss::UpdateProcessPost(void)
 	UpdateEffect();
 }
 
-// 各ステイトのアップデート関数＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝－
 void Boss::UpdateIdle(void)
 {
 	transformBody_.pos = MV1GetFramePosition(transform_.modelId, JOINT_FEET_BODY);
